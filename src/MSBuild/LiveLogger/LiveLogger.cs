@@ -82,6 +82,11 @@ internal sealed class LiveLogger : INodeLogger
     private DateTime _buildStartTime;
 
     /// <summary>
+    /// The working directory when the build starts, to trim relative output paths.
+    /// </summary>
+    private readonly string _initialWorkingDirectory = Environment.CurrentDirectory;
+
+    /// <summary>
     /// True if the build has encountered at least one error.
     /// </summary>
     private bool _buildHasErrors;
@@ -468,6 +473,12 @@ internal sealed class LiveLogger : INodeLogger
                     _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
                 {
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
+
+                    if (outputPath.Span.Slice(0, _initialWorkingDirectory.Length).SequenceEqual(_initialWorkingDirectory.AsSpan()))
+                    {
+                        outputPath = outputPath.Slice(_initialWorkingDirectory.Length + 1);
+                    }
+
                     project.OutputPath = outputPath;
                 }
             }
