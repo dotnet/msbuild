@@ -43,14 +43,14 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>e7ed417c2bf4a24a0694a387f33ba843a2318fdc</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="17.7.0-preview-23207-02">
+    <Dependency Name="Microsoft.Build" Version="17.7.0-preview-23212-01">
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>e2fa2d70f5b1d9f1b8a595391ee3d7c457b0fe26</Sha>
       <SourceBuild RepoName="msbuild" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.7.0-preview-23207-02">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.7.0-preview-23212-01">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>e2fa2d70f5b1d9f1b8a595391ee3d7c457b0fe26</Sha>
+      <Sha>073c84ec2bb2de1e709eb1326402a8760d5651d3</Sha>
     </Dependency>
     <Dependency Name="Microsoft.SourceBuild.Intermediate.msbuild" Version="17.7.0-preview-23207-02">
       <Uri>https://github.com/dotnet/msbuild</Uri>
