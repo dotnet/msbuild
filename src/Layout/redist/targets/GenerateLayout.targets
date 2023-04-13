@@ -18,7 +18,7 @@
 		  then need the version file there as well. -->
     <Copy SourceFiles="$(OutputPath)/.version" DestinationFiles="$(BaseOutputPath)$(Configuration)/.version" SkipUnchangedFiles="true" />
 
-    
+
   </Target>
 
   <Target Name="PublishRoslyn"
@@ -27,7 +27,7 @@
       <RoslynDirectory>$(OutputPath)/Roslyn</RoslynDirectory>
     </PropertyGroup>
     <ItemGroup>
-      <RoslynBits Include="$(NuGetPackageRoot)/microsoft.net.compilers.toolset/$(MicrosoftNetCompilersToolsetPackageVersion)/tasks/net6.0/**/*" />
+      <RoslynBits Include="$(NuGetPackageRoot)/microsoft.net.compilers.toolset/$(MicrosoftNetCompilersToolsetPackageVersion)/tasks/netcore/**/*" />
     </ItemGroup>
     <Error Condition="'@(RoslynBits)' == ''" Text="Something moved around in Roslyn package, adjust code here accordingly. TFM change?" />
     <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
@@ -56,7 +56,7 @@
       <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/Microsoft.CodeAnalysis.NetAnalyzers.props" />
       <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/Microsoft.CodeAnalysis.NetAnalyzers.targets" />
       <AnalyzerConfig Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/config/**/*" />
-      
+
       <ILLinkAnalyzersTargets Include="$(PkgMicrosoft_NET_ILLink_Analyzers)/build/Microsoft.NET.ILLink.Analyzers.props" />
       <ILLinkAnalyzersAssemblies Include="$(PkgMicrosoft_NET_ILLink_Analyzers)/analyzers/dotnet/cs/**/*.dll" />
 
@@ -167,7 +167,7 @@
           <Namespace Prefix="dn" Uri="http://schemas.microsoft.com/developer/msbuild/2003" />
       </MSBuildNamespaces>
     </PropertyGroup>
-    
+
     <XmlPoke
       XmlInputPath="$(OutputPath)Sdks\Microsoft.NET.Sdk.Web\Sdk\Sdk.props"
       Value="$(Version)"
