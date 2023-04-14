@@ -153,7 +153,7 @@
       "OriginalItemSpec": "obj\\Debug\\${Tfm}\\blazor.publish.boot.json"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\blazor.webassembly.js.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\_framework\\blazor.webassembly.js.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -170,7 +170,7 @@
       "OriginalItemSpec": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\blazor.webassembly.js.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\blazorwasm-minimal.pdb.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\_framework\\blazorwasm-minimal.pdb.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -184,10 +184,10 @@
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\blazorwasm-minimal.pdb.gz"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\_framework\\blazorwasm-minimal.pdb.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\dotnet.js.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\_framework\\dotnet.js.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -201,10 +201,10 @@
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\dotnet.js.gz"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\_framework\\dotnet.js.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\dotnet.wasm.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\_framework\\dotnet.wasm.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -218,10 +218,10 @@
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\dotnet.wasm.gz"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\_framework\\dotnet.wasm.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.AspNetCore.Authorization.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.AspNetCore.Authorization.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -238,7 +238,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.AspNetCore.Authorization.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.AspNetCore.Authorization.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.AspNetCore.Authorization.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -255,7 +255,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.AspNetCore.Authorization.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.AspNetCore.Components.Forms.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.AspNetCore.Components.Forms.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -272,7 +272,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.AspNetCore.Components.Forms.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.AspNetCore.Components.Forms.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.AspNetCore.Components.Forms.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -289,7 +289,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.AspNetCore.Components.Forms.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.AspNetCore.Components.Web.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.AspNetCore.Components.Web.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -306,7 +306,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.AspNetCore.Components.Web.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.AspNetCore.Components.Web.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.AspNetCore.Components.Web.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -323,7 +323,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.AspNetCore.Components.Web.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.AspNetCore.Components.WebAssembly.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.AspNetCore.Components.WebAssembly.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -340,7 +340,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.AspNetCore.Components.WebAssembly.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.AspNetCore.Components.WebAssembly.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.AspNetCore.Components.WebAssembly.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -357,7 +357,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.AspNetCore.Components.WebAssembly.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.AspNetCore.Components.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.AspNetCore.Components.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -374,7 +374,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.AspNetCore.Components.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.AspNetCore.Components.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.AspNetCore.Components.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -391,7 +391,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.AspNetCore.Components.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.AspNetCore.Metadata.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.AspNetCore.Metadata.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -408,7 +408,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.AspNetCore.Metadata.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.AspNetCore.Metadata.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.AspNetCore.Metadata.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -425,7 +425,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.AspNetCore.Metadata.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Configuration.Abstractions.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Configuration.Abstractions.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -442,7 +442,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Configuration.Abstractions.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Configuration.Abstractions.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Configuration.Abstractions.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -459,7 +459,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Configuration.Abstractions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Configuration.Binder.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Configuration.Binder.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -476,7 +476,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Configuration.Binder.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Configuration.Binder.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Configuration.Binder.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -493,7 +493,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Configuration.Binder.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Configuration.FileExtensions.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Configuration.FileExtensions.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -510,7 +510,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Configuration.FileExtensions.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Configuration.FileExtensions.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Configuration.FileExtensions.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -527,7 +527,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Configuration.FileExtensions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Configuration.Json.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Configuration.Json.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -544,7 +544,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Configuration.Json.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Configuration.Json.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Configuration.Json.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -561,7 +561,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Configuration.Json.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Configuration.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Configuration.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -578,7 +578,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Configuration.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Configuration.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Configuration.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -595,7 +595,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Configuration.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.DependencyInjection.Abstractions.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.DependencyInjection.Abstractions.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -612,7 +612,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.DependencyInjection.Abstractions.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.DependencyInjection.Abstractions.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.DependencyInjection.Abstractions.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -629,7 +629,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.DependencyInjection.Abstractions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.DependencyInjection.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.DependencyInjection.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -646,7 +646,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.DependencyInjection.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.DependencyInjection.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.DependencyInjection.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -663,7 +663,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.DependencyInjection.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.FileProviders.Abstractions.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.FileProviders.Abstractions.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -680,7 +680,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.FileProviders.Abstractions.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.FileProviders.Abstractions.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.FileProviders.Abstractions.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -697,7 +697,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.FileProviders.Abstractions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.FileProviders.Physical.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.FileProviders.Physical.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -714,7 +714,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.FileProviders.Physical.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.FileProviders.Physical.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.FileProviders.Physical.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -731,7 +731,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.FileProviders.Physical.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.FileSystemGlobbing.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.FileSystemGlobbing.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -748,7 +748,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.FileSystemGlobbing.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.FileSystemGlobbing.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.FileSystemGlobbing.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -765,7 +765,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.FileSystemGlobbing.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Logging.Abstractions.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Logging.Abstractions.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -782,7 +782,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Logging.Abstractions.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Logging.Abstractions.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Logging.Abstractions.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -799,7 +799,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Logging.Abstractions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Logging.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Logging.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -816,7 +816,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Logging.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Logging.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Logging.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -833,7 +833,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Logging.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Options.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Options.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -850,7 +850,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Options.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Options.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Options.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -867,7 +867,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Options.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Primitives.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Primitives.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -884,7 +884,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Primitives.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.Extensions.Primitives.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.Extensions.Primitives.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -901,7 +901,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.Extensions.Primitives.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.JSInterop.WebAssembly.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.JSInterop.WebAssembly.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -918,7 +918,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.JSInterop.WebAssembly.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.JSInterop.WebAssembly.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.JSInterop.WebAssembly.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -935,7 +935,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.JSInterop.WebAssembly.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.JSInterop.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.JSInterop.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -952,7 +952,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.JSInterop.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\Microsoft.JSInterop.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\Microsoft.JSInterop.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -969,7 +969,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\Microsoft.JSInterop.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Buffers.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Buffers.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -986,7 +986,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Buffers.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Buffers.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Buffers.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1003,7 +1003,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Buffers.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Collections.Concurrent.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Collections.Concurrent.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1020,7 +1020,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Collections.Concurrent.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Collections.Concurrent.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Collections.Concurrent.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1037,7 +1037,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Collections.Concurrent.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Collections.NonGeneric.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Collections.NonGeneric.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1054,7 +1054,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Collections.NonGeneric.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Collections.NonGeneric.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Collections.NonGeneric.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1071,7 +1071,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Collections.NonGeneric.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Collections.Specialized.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Collections.Specialized.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1088,7 +1088,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Collections.Specialized.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Collections.Specialized.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Collections.Specialized.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1105,7 +1105,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Collections.Specialized.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Collections.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Collections.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1122,7 +1122,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Collections.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Collections.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Collections.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1139,7 +1139,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Collections.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.ComponentModel.Annotations.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.ComponentModel.Annotations.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1156,7 +1156,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.ComponentModel.Annotations.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.ComponentModel.Annotations.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.ComponentModel.Annotations.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1173,7 +1173,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.ComponentModel.Annotations.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.ComponentModel.Primitives.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.ComponentModel.Primitives.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1190,7 +1190,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.ComponentModel.Primitives.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.ComponentModel.Primitives.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.ComponentModel.Primitives.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1207,7 +1207,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.ComponentModel.Primitives.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.ComponentModel.TypeConverter.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.ComponentModel.TypeConverter.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1224,7 +1224,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.ComponentModel.TypeConverter.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.ComponentModel.TypeConverter.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.ComponentModel.TypeConverter.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1241,7 +1241,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.ComponentModel.TypeConverter.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.ComponentModel.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.ComponentModel.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1258,7 +1258,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.ComponentModel.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.ComponentModel.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.ComponentModel.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1275,7 +1275,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.ComponentModel.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Console.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Console.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1292,7 +1292,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Console.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Console.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Console.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1309,7 +1309,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Console.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Diagnostics.Debug.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Diagnostics.Debug.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1326,7 +1326,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Diagnostics.Debug.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Diagnostics.Debug.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Diagnostics.Debug.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1343,7 +1343,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Diagnostics.Debug.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Diagnostics.DiagnosticSource.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Diagnostics.DiagnosticSource.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1360,7 +1360,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Diagnostics.DiagnosticSource.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Diagnostics.DiagnosticSource.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Diagnostics.DiagnosticSource.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1377,7 +1377,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Diagnostics.DiagnosticSource.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Diagnostics.Tracing.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Diagnostics.Tracing.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1394,7 +1394,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Diagnostics.Tracing.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Diagnostics.Tracing.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Diagnostics.Tracing.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1411,7 +1411,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Diagnostics.Tracing.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.IO.FileSystem.Watcher.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.IO.FileSystem.Watcher.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1428,7 +1428,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.IO.FileSystem.Watcher.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.IO.FileSystem.Watcher.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.IO.FileSystem.Watcher.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1445,7 +1445,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.IO.FileSystem.Watcher.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.IO.Pipelines.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.IO.Pipelines.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1462,7 +1462,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.IO.Pipelines.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.IO.Pipelines.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.IO.Pipelines.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1479,7 +1479,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.IO.Pipelines.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Linq.Expressions.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Linq.Expressions.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1496,7 +1496,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Linq.Expressions.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Linq.Expressions.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Linq.Expressions.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1513,7 +1513,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Linq.Expressions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Linq.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Linq.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1530,7 +1530,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Linq.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Linq.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Linq.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1547,7 +1547,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Linq.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Memory.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Memory.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1564,7 +1564,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Memory.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Memory.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Memory.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1581,7 +1581,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Memory.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Net.Http.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Net.Http.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1598,7 +1598,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Net.Http.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Net.Http.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Net.Http.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1615,7 +1615,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Net.Http.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.ObjectModel.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.ObjectModel.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1632,7 +1632,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.ObjectModel.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.ObjectModel.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.ObjectModel.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1649,7 +1649,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.ObjectModel.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Private.CoreLib.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Private.CoreLib.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1666,7 +1666,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Private.CoreLib.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Private.CoreLib.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Private.CoreLib.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1683,7 +1683,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Private.CoreLib.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Private.Uri.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Private.Uri.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1700,7 +1700,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Private.Uri.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Private.Uri.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Private.Uri.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1717,7 +1717,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Private.Uri.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Reflection.Emit.ILGeneration.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Reflection.Emit.ILGeneration.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1734,7 +1734,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Reflection.Emit.ILGeneration.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Reflection.Emit.ILGeneration.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Reflection.Emit.ILGeneration.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1751,7 +1751,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Reflection.Emit.ILGeneration.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Reflection.Emit.Lightweight.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Reflection.Emit.Lightweight.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1768,7 +1768,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Reflection.Emit.Lightweight.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Reflection.Emit.Lightweight.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Reflection.Emit.Lightweight.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1785,7 +1785,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Reflection.Emit.Lightweight.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Reflection.Primitives.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Reflection.Primitives.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1802,7 +1802,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Reflection.Primitives.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Reflection.Primitives.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Reflection.Primitives.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1819,7 +1819,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Reflection.Primitives.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Resources.ResourceManager.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Resources.ResourceManager.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1836,7 +1836,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Resources.ResourceManager.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Resources.ResourceManager.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Resources.ResourceManager.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1853,7 +1853,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Resources.ResourceManager.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Runtime.CompilerServices.Unsafe.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.CompilerServices.Unsafe.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1870,7 +1870,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Runtime.CompilerServices.Unsafe.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Runtime.CompilerServices.Unsafe.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.CompilerServices.Unsafe.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1887,7 +1887,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Runtime.CompilerServices.Unsafe.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Runtime.Extensions.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.Extensions.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1904,7 +1904,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Runtime.Extensions.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Runtime.Extensions.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.Extensions.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1921,7 +1921,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Runtime.Extensions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Runtime.InteropServices.JavaScript.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.InteropServices.JavaScript.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1938,7 +1938,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Runtime.InteropServices.JavaScript.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Runtime.InteropServices.JavaScript.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.InteropServices.JavaScript.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1955,7 +1955,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Runtime.InteropServices.JavaScript.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Runtime.InteropServices.RuntimeInformation.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.InteropServices.RuntimeInformation.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1972,7 +1972,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Runtime.InteropServices.RuntimeInformation.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Runtime.InteropServices.RuntimeInformation.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.InteropServices.RuntimeInformation.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -1989,7 +1989,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Runtime.InteropServices.RuntimeInformation.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Runtime.Loader.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.Loader.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2006,7 +2006,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Runtime.Loader.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Runtime.Loader.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.Loader.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2023,7 +2023,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Runtime.Loader.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Runtime.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2040,7 +2040,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Runtime.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Runtime.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2057,7 +2057,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Runtime.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Security.Claims.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Security.Claims.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2074,7 +2074,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Security.Claims.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Security.Claims.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Security.Claims.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2091,7 +2091,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Security.Claims.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Security.Cryptography.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Security.Cryptography.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2108,7 +2108,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Security.Cryptography.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Security.Cryptography.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Security.Cryptography.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2125,7 +2125,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Security.Cryptography.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Text.Encodings.Web.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Text.Encodings.Web.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2142,7 +2142,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Text.Encodings.Web.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Text.Encodings.Web.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Text.Encodings.Web.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2159,7 +2159,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Text.Encodings.Web.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Text.Json.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Text.Json.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2176,7 +2176,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Text.Json.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Text.Json.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Text.Json.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2193,7 +2193,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Text.Json.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Threading.Tasks.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Threading.Tasks.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2210,7 +2210,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Threading.Tasks.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Threading.Tasks.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Threading.Tasks.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2227,7 +2227,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Threading.Tasks.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Threading.ThreadPool.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Threading.ThreadPool.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2244,7 +2244,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Threading.ThreadPool.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Threading.ThreadPool.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Threading.ThreadPool.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2261,7 +2261,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Threading.ThreadPool.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Threading.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Threading.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2278,7 +2278,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Threading.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.Threading.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Threading.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2295,7 +2295,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.Threading.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2312,7 +2312,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\System.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2329,7 +2329,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\System.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\blazor.boot.json.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\blazor.boot.json.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2346,7 +2346,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\_framework\\blazor.boot.json.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\blazor.boot.json.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\blazor.boot.json.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2363,7 +2363,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\_framework\\blazor.boot.json.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\blazor.webassembly.js.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\blazor.webassembly.js.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -2380,7 +2380,7 @@
       "OriginalItemSpec": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\blazor.webassembly.js.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\blazorwasm-minimal.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\blazorwasm-minimal.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2397,7 +2397,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\blazorwasm-minimal.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\blazorwasm-minimal.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\blazorwasm-minimal.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2414,7 +2414,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\blazorwasm-minimal.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\dotnet.js.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\dotnet.js.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2431,7 +2431,7 @@
       "OriginalItemSpec": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\dotnet.js.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\dotnet.wasm.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\dotnet.wasm.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2448,7 +2448,7 @@
       "OriginalItemSpec": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\dotnet.wasm.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\icudt.dat.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\icudt.dat.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2465,7 +2465,7 @@
       "OriginalItemSpec": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\icudt.dat.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\icudt.dat.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\icudt.dat.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2482,7 +2482,7 @@
       "OriginalItemSpec": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\icudt.dat.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\icudt_CJK.dat.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\icudt_CJK.dat.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2499,7 +2499,7 @@
       "OriginalItemSpec": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\icudt_CJK.dat.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\icudt_CJK.dat.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\icudt_CJK.dat.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2516,7 +2516,7 @@
       "OriginalItemSpec": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\icudt_CJK.dat.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\icudt_EFIGS.dat.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\icudt_EFIGS.dat.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2533,7 +2533,7 @@
       "OriginalItemSpec": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\icudt_EFIGS.dat.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\icudt_EFIGS.dat.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\icudt_EFIGS.dat.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2550,7 +2550,7 @@
       "OriginalItemSpec": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\icudt_EFIGS.dat.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\icudt_no_CJK.dat.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\icudt_no_CJK.dat.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2567,7 +2567,7 @@
       "OriginalItemSpec": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\icudt_no_CJK.dat.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\icudt_no_CJK.dat.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\icudt_no_CJK.dat.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2584,7 +2584,7 @@
       "OriginalItemSpec": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\icudt_no_CJK.dat.gz"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\netstandard.dll.br",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\netstandard.dll.br",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",
@@ -2601,7 +2601,7 @@
       "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\linked\\_framework\\netstandard.dll.br"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compress\\_framework\\netstandard.dll.gz",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\netstandard.dll.gz",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectPath}\\bin\\Debug\\${Tfm}\\publish\\wwwroot\\",

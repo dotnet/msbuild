@@ -63,6 +63,9 @@
     <Compile Include="..\..\RazorSdk\Tasks\DotnetToolTask.cs">
       <Link>Shared\DotnetToolTask.cs</Link>
     </Compile>
+    <Compile Include="..\..\WasmSdk\Tasks\FileHasher.cs">
+      <Link>Shared\FileHasher.cs</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

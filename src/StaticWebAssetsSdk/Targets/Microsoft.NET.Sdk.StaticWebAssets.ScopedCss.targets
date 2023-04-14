@@ -169,7 +169,7 @@ Integration with static web assets:
   <MakeDir Directories="$(_ScopedCssIntermediatePath)" />
   <RewriteCss
     FilesToTransform="@(_ScopedCss)"
-    ToolAssembly="$(_StaticWebAssetsSdkToolAssembly)"
+    ToolAssembly="$(_StaticWebAssetsSdkRazorToolAssembly)"
     ToolExe="$(_StaticWebAssetsSdkDotNetHostFileName)"
     ToolPath="$(_StaticWebAssetsSdkDotNetHostDirectory)">
   </RewriteCss>
