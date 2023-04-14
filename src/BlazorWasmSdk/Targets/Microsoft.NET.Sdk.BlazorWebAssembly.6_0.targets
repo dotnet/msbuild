@@ -76,11 +76,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     </AddWasmStaticWebAssetsDependsOn>
     <GenerateBuildWasmBootJsonDependsOn>
       $(GenerateBuildWasmBootJsonDependsOn);
-      GenerateBlazorBootExtensionJson;
+      GenerateBuildBlazorBootExtensionJson;
     </GenerateBuildWasmBootJsonDependsOn>
     <GeneratePublishWasmBootJsonDependsOn>
       $(GeneratePublishWasmBootJsonDependsOn);
-      GenerateBlazorBootExtensionJson;
+      GeneratePublishBlazorBootExtensionJson;
     </GeneratePublishWasmBootJsonDependsOn>
   </PropertyGroup>
 
@@ -255,9 +255,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <Target Name="GenerateBlazorBootExtensionJson">
+  <Target Name="GenerateBuildBlazorBootExtensionJson">
     <PropertyGroup>
-      <_BlazorBuildBootExtensionJsonPath>$(IntermediateOutputPath)blazor.boot-extension.json</_BlazorBuildBootExtensionJsonPath>
+      <_BlazorBuildBootExtensionJsonPath>$(IntermediateOutputPath)blazor.build.boot-extension.json</_BlazorBuildBootExtensionJsonPath>
     </PropertyGroup>
 
     <GenerateBlazorBootExtensionJson OutputPath="$(_BlazorBuildBootExtensionJsonPath)" />
@@ -265,6 +265,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <FileWrites Include="$(_BlazorBuildBootExtensionJsonPath)" />
       <WasmBootConfigExtension Include="$(_BlazorBuildBootExtensionJsonPath)" Key="blazor" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="GeneratePublishBlazorBootExtensionJson">
+    <PropertyGroup>
+      <_BlazorPublishBootExtensionJsonPath>$(IntermediateOutputPath)blazor.publish.boot-extension.json</_BlazorPublishBootExtensionJsonPath>
+    </PropertyGroup>
+
+    <GenerateBlazorBootExtensionJson OutputPath="$(_BlazorPublishBootExtensionJsonPath)" />
+
+    <ItemGroup>
+      <FileWrites Include="$(_BlazorPublishBootExtensionJsonPath)" />
+      <WasmBootConfigExtension Remove="@(WasmBootConfigExtension)" Condition="'%(Key)' == 'blazor'" />
+      <WasmBootConfigExtension Include="$(_BlazorPublishBootExtensionJsonPath)" Key="blazor" />
     </ItemGroup>
   </Target>
 
