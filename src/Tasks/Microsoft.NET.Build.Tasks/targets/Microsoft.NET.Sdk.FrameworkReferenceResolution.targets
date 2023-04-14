@@ -426,12 +426,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="FullFrameworkReferenceAssemblyPaths" PropertyName="_FullFrameworkReferenceAssemblyPaths"/>
     </GetReferenceAssemblyPaths>
 
-
     <ItemGroup>
       <_ExistingReferenceAssembliesPackageReference Include="@(PackageReference)" Condition="'%(PackageReference.Identity)' == 'Microsoft.NETFramework.ReferenceAssemblies'"/>
 
       <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="$(MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion)" IsImplicitlyDefined="true" PrivateAssets="All"
-                        Condition="'$(_FullFrameworkReferenceAssemblyPaths)' == '' and '@(_ExistingReferenceAssembliesPackageReference)' == ''"/>
+                        Condition="('$(_FullFrameworkReferenceAssemblyPaths)' == '' or $(_FullFrameworkReferenceAssemblyPaths.Contains('microsoft.netframework.referenceassemblies'))) and '@(_ExistingReferenceAssembliesPackageReference)' == ''"/>
     </ItemGroup>
   </Target>
 
