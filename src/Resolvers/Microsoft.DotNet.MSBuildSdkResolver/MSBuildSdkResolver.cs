@@ -35,6 +35,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
         private static CachingWorkloadResolver _staticWorkloadResolver = new CachingWorkloadResolver();
 
+        private bool _shouldLog = false;
+
         public DotNetMSBuildSdkResolver() 
             : this(Environment.GetEnvironmentVariable, VSSettings.Ambient)
         {
@@ -45,6 +47,13 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         {
             _getEnvironmentVariable = getEnvironmentVariable;
             _netCoreSdkResolver = new NETCoreSdkResolver(getEnvironmentVariable, vsSettings);
+
+            if (_getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_ENABLE_LOG") is string val &&
+                (string.Equals(val, "true", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(val, "1", StringComparison.Ordinal)))
+            {
+                _shouldLog = true;
+            }
         }
 
         private sealed class CachedState
@@ -66,14 +75,17 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             List<string> warnings = null;
             CachingWorkloadResolver workloadResolver = null;
 
-            var logger = new ResolverLogger();
+            ResolverLogger logger = null;
+            if (_shouldLog)
+            {
+                logger = new ResolverLogger();
+            }
 
-            logger.LogMessage($"Attempting to resolve MSBuild SDK {sdkReference.Name}");
+            logger?.LogMessage($"Attempting to resolve MSBuild SDK {sdkReference.Name}");
 
             if (context.State is CachedState priorResult)
             {
-                logger.LogString("Using previously cached state");
-                
+                logger?.LogString("Using previously cached state");
 
                 dotnetRoot = priorResult.DotnetRoot;
                 msbuildSdksDir = priorResult.MSBuildSdksDir;
@@ -81,14 +93,14 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 propertiesToAdd = priorResult.PropertiesToAdd;
                 workloadResolver = priorResult.WorkloadResolver;
 
-                logger.LogMessage($"\tDotnet root: {dotnetRoot}");
-                logger.LogMessage($"\tMSBuild SDKs Dir: {msbuildSdksDir}");
-                logger.LogMessage($"\t.NET Core SDK Version: {netcoreSdkVersion}");
+                logger?.LogMessage($"\tDotnet root: {dotnetRoot}");
+                logger?.LogMessage($"\tMSBuild SDKs Dir: {msbuildSdksDir}");
+                logger?.LogMessage($"\t.NET Core SDK Version: {netcoreSdkVersion}");
             }
 
             if (context.IsRunningInVisualStudio)
             {
-                logger.LogString("Running in Visual Studio, using static workload resolver");
+                logger?.LogString("Running in Visual Studio, using static workload resolver");
                 workloadResolver = _staticWorkloadResolver;
             }
 
@@ -99,17 +111,17 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
             if (msbuildSdksDir == null)
             {
-                dotnetRoot = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable, logger.LogMessage);
-                logger.LogMessage($"\tDotnet root: {dotnetRoot}");
+                dotnetRoot = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable, logger != null ? logger.LogMessage : null);
+                logger?.LogMessage($"\tDotnet root: {dotnetRoot}");
 
-                logger.LogString("Resolving .NET Core SDK directory");
+                logger?.LogString("Resolving .NET Core SDK directory");
                 string globalJsonStartDir = GetGlobalJsonStartDir(context);
-                logger.LogMessage($"\tglobal.json start directory: {globalJsonStartDir}");
+                logger?.LogMessage($"\tglobal.json start directory: {globalJsonStartDir}");
                 var resolverResult = _netCoreSdkResolver.ResolveNETCoreSdkDirectory(globalJsonStartDir, context.MSBuildVersion, context.IsRunningInVisualStudio, dotnetRoot);
 
                 if (resolverResult.ResolvedSdkDirectory == null)
                 {
-                    logger.LogMessage($"Failed to resolve .NET SDK.  Global.json path: {resolverResult.GlobalJsonPath}");
+                    logger?.LogMessage($"Failed to resolve .NET SDK.  Global.json path: {resolverResult.GlobalJsonPath}");
                     return Failure(
                         factory,
                         logger,
@@ -117,9 +129,9 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                         Strings.UnableToLocateNETCoreSdk);
                 }
 
-                logger.LogMessage($"\tResolved SDK directory: {resolverResult.ResolvedSdkDirectory}");
-                logger.LogMessage($"\tglobal.json path: {resolverResult.GlobalJsonPath}");
-                logger.LogMessage($"\tFailed to resolve SDK from global.json: {resolverResult.FailedToResolveSDKSpecifiedInGlobalJson}");
+                logger?.LogMessage($"\tResolved SDK directory: {resolverResult.ResolvedSdkDirectory}");
+                logger?.LogMessage($"\tglobal.json path: {resolverResult.GlobalJsonPath}");
+                logger?.LogMessage($"\tFailed to resolve SDK from global.json: {resolverResult.FailedToResolveSDKSpecifiedInGlobalJson}");
 
                 msbuildSdksDir = Path.Combine(resolverResult.ResolvedSdkDirectory, "Sdks");
                 netcoreSdkVersion = new DirectoryInfo(resolverResult.ResolvedSdkDirectory).Name;
@@ -131,12 +143,12 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 var netcoreSdkVersionFromEnv = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER");
                 if (!string.IsNullOrEmpty(msbuildSdksDirFromEnv))
                 {
-                    logger.LogMessage($"MSBuild SDKs dir overridden via DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR to {msbuildSdksDirFromEnv}");
+                    logger?.LogMessage($"MSBuild SDKs dir overridden via DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR to {msbuildSdksDirFromEnv}");
                     msbuildSdksDir = msbuildSdksDirFromEnv;
                 }
                 if (!string.IsNullOrEmpty(netcoreSdkVersionFromEnv))
                 {
-                    logger.LogMessage($".NET Core SDK version overridden via DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER to {netcoreSdkVersionFromEnv}");
+                    logger?.LogMessage($".NET Core SDK version overridden via DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER to {netcoreSdkVersionFromEnv}");
                     netcoreSdkVersion = netcoreSdkVersionFromEnv;
                 }
 
@@ -178,7 +190,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
                 if (resolverResult.FailedToResolveSDKSpecifiedInGlobalJson)
                 {
-                    logger.LogMessage($"Could not resolve SDK specified in '{resolverResult.GlobalJsonPath}'. Ignoring global.json for this resolution.");
+                    logger?.LogMessage($"Could not resolve SDK specified in '{resolverResult.GlobalJsonPath}'. Ignoring global.json for this resolution.");
 
                     if (warnings == null)
                     {
@@ -201,7 +213,10 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                     propertiesToAdd.Add("SdkResolverHonoredGlobalJson", "false");
                     propertiesToAdd.Add("SdkResolverGlobalJsonPath", resolverResult.GlobalJsonPath);
 
-                    CopyLogMessages(logger, context.Logger);
+                    if (logger != null)
+                    {
+                        CopyLogMessages(logger, context.Logger);
+                    }
                 }
             }
 
@@ -240,9 +255,12 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         private static SdkResult Failure(SdkResultFactory factory, ResolverLogger logger, SdkLogger sdkLogger, string format, params object[] args)
         {
             string error = string.Format(format, args);
-            logger.LogMessage($"Failed to resolve SDK: {error}");
 
-            CopyLogMessages(logger, sdkLogger);
+            if (logger != null)
+            {
+                logger.LogMessage($"Failed to resolve SDK: {error}");
+                CopyLogMessages(logger, sdkLogger);
+            }
 
             return factory.IndicateFailure(new[] { error });
         }
@@ -253,6 +271,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             {
                 destination.LogMessage(message.ToString(), MessageImportance.High);
             }
+            //  Avoid copying the same messages again if CopyLogMessages is called multiple times
+            source.Messages.Clear();
         }
 
         /// <summary>
