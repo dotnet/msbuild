@@ -558,14 +558,19 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Value="$(StartupHookSupport)"
                                     Trim="true" />
 
-    <RuntimeHostConfigurationOption Include="System.Threading.Thread.EnableAutoreleasePool"
-                                    Condition="'$(AutoreleasePoolSupport)' != ''"
-                                    Value="$(AutoreleasePoolSupport)"
-                                    Trim="true" />
-
     <RuntimeHostConfigurationOption Include="System.Text.Encoding.EnableUnsafeUTF7Encoding"
                                     Condition="'$(EnableUnsafeUTF7Encoding)' != ''"
                                     Value="$(EnableUnsafeUTF7Encoding)"
+                                    Trim="true" />
+
+    <RuntimeHostConfigurationOption Include="System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault"
+                                    Condition="'$(JsonSerializerIsReflectionEnabledByDefault)' != ''"
+                                    Value="$(JsonSerializerIsReflectionEnabledByDefault)"
+                                    Trim="true" />
+
+    <RuntimeHostConfigurationOption Include="System.Threading.Thread.EnableAutoreleasePool"
+                                    Condition="'$(AutoreleasePoolSupport)' != ''"
+                                    Value="$(AutoreleasePoolSupport)"
                                     Trim="true" />
 
     <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MinThreads"
