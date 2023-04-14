@@ -265,9 +265,9 @@
       <Sha>73657e276cf80bd35c75af318721da3ea477f402</Sha>
       <SourceBuild RepoName="source-build-externals" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23213.2">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23214.3">
       <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
-      <Sha>1325ba66a392ff99a6813e6577110fabc1dc075d</Sha>
+      <Sha>94178e62553730ae42f6e02bb2f0ca45d9c3e28d</Sha>
       <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.Deployment.DotNet.Releases" Version="1.0.0-preview.6.23206.1">
