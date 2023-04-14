@@ -174,6 +174,15 @@
     <!-- Dependencies from https://github.com/dotnet/xliff-tasks -->
     <MicrosoftDotNetXliffTasksVersion>1.0.0-beta.23206.1</MicrosoftDotNetXliffTasksVersion>
   </PropertyGroup>
+  <PropertyGroup>
+    <!-- Dependencies from https://github.com/dotnet/sourcelink -->
+    <MicrosoftBuildTasksGitVersion>8.0.0-beta.23210.3</MicrosoftBuildTasksGitVersion>
+    <MicrosoftSourceLinkCommonVersion>8.0.0-beta.23210.3</MicrosoftSourceLinkCommonVersion>
+    <MicrosoftSourceLinkAzureReposGitVersion>8.0.0-beta.23210.3</MicrosoftSourceLinkAzureReposGitVersion>
+    <MicrosoftSourceLinkGitHubVersion>8.0.0-beta.23210.3</MicrosoftSourceLinkGitHubVersion>
+    <MicrosoftSourceLinkGitLabVersion>8.0.0-beta.23210.3</MicrosoftSourceLinkGitLabVersion>
+    <MicrosoftSourceLinkBitBucketVersion>8.0.0-beta.23210.3</MicrosoftSourceLinkBitBucketVersion>
+  </PropertyGroup>
   <!-- Get .NET Framework reference assemblies from NuGet packages -->
   <PropertyGroup>
     <UsingToolNetFrameworkReferenceAssemblies>true</UsingToolNetFrameworkReferenceAssemblies>

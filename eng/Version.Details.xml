@@ -274,6 +274,31 @@
       <Uri>https://github.com/dotnet/deployment-tools</Uri>
       <Sha>9e870996b8bf0b91a791edd1039bfd23bdd01af8</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.Build.Tasks.Git" Version="8.0.0-beta.23210.3">
+      <Uri>https://github.com/dotnet/sourcelink</Uri>
+      <Sha>759f344923a0859f3fae83431d0ba1cc62108118</Sha>
+      <SourceBuild RepoName="sourcelink" ManagedOnly="true" />
+    </Dependency>
+    <Dependency Name="Microsoft.SourceLink.Common" Version="8.0.0-beta.23210.3">
+      <Uri>https://github.com/dotnet/sourcelink</Uri>
+      <Sha>759f344923a0859f3fae83431d0ba1cc62108118</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.SourceLink.AzureRepos.Git" Version="8.0.0-beta.23210.3">
+      <Uri>https://github.com/dotnet/sourcelink</Uri>
+      <Sha>759f344923a0859f3fae83431d0ba1cc62108118</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.SourceLink.GitHub" Version="8.0.0-beta.23210.3">
+      <Uri>https://github.com/dotnet/sourcelink</Uri>
+      <Sha>759f344923a0859f3fae83431d0ba1cc62108118</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.SourceLink.GitLab" Version="8.0.0-beta.23210.3">
+      <Uri>https://github.com/dotnet/sourcelink</Uri>
+      <Sha>759f344923a0859f3fae83431d0ba1cc62108118</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.SourceLink.BitBucket.Git" Version="8.0.0-beta.23210.3">
+      <Uri>https://github.com/dotnet/sourcelink</Uri>
+      <Sha>759f344923a0859f3fae83431d0ba1cc62108118</Sha>
+    </Dependency>
     <!-- Explicit dependency because Microsoft.Deployment.DotNet.Releases has different versioning
          than the SB intermediate -->
     <Dependency Name="Microsoft.SourceBuild.Intermediate.deployment-tools" Version="8.0.0-preview.6.23206.1">
@@ -287,11 +312,6 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>17d9eee32f20a6af0ebb620254a22f601d159578</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
-    </Dependency>
-    <Dependency Name="Microsoft.SourceLink.GitHub" Version="8.0.0-beta.23210.3" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
-      <Uri>https://github.com/dotnet/sourcelink</Uri>
-      <Sha>759f344923a0859f3fae83431d0ba1cc62108118</Sha>
-      <SourceBuild RepoName="sourcelink" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="8.0.0-beta.23211.8">
       <Uri>https://github.com/dotnet/arcade</Uri>

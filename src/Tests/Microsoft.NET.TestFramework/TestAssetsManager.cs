@@ -43,13 +43,13 @@ namespace Microsoft.NET.TestFramework
             [CallerFilePath] string callerFilePath = null,
             string identifier = "",
             string testAssetSubdirectory = "",
+            string testDestinationDirectory = null,
             bool allowCopyIfPresent = false)
         {
             var testProjectDirectory = GetAndValidateTestProjectDirectory(testProjectName, testAssetSubdirectory);
 
             var fileName = Path.GetFileNameWithoutExtension(callerFilePath);
-            var testDestinationDirectory =
-                GetTestDestinationDirectoryPath(testProjectName, callingMethod + "_" + fileName, identifier, allowCopyIfPresent);
+            testDestinationDirectory ??= GetTestDestinationDirectoryPath(testProjectName, callingMethod + "_" + fileName, identifier, allowCopyIfPresent);
             TestDestinationDirectories.Add(testDestinationDirectory);
 
             var testAsset = new TestAsset(testProjectDirectory, testDestinationDirectory, TestContext.Current.SdkVersion, Log);
