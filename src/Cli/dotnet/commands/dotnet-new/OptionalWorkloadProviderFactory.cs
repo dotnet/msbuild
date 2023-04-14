@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.New
 
         public Guid Id => FactoryId;
 
-        public string DisplayName => "OptionalWorkloads";
+        public string DisplayName => "Optional workloads";
 
         public ITemplatePackageProvider CreateProvider(IEngineEnvironmentSettings settings)
         {

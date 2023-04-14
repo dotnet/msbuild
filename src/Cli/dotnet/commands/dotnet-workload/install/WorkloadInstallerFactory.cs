@@ -8,6 +8,7 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.Configurer;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -18,15 +19,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             SdkFeatureBand sdkFeatureBand,
             IWorkloadResolver workloadResolver, 
             VerbosityOptions verbosity,
+            string userProfileDir,
+            bool verifySignatures,
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir = null, 
             string tempDirPath = null,
             PackageSourceLocation packageSourceLocation = null,
-            RestoreActionConfig restoreActionConfig = null)
+            RestoreActionConfig restoreActionConfig = null, 
+            bool elevationRequired = true)
         {
-            var installType = GetWorkloadInstallType(sdkFeatureBand, string.IsNullOrWhiteSpace(dotnetDir) 
-                ? Path.GetDirectoryName(Environment.ProcessPath)
-                : dotnetDir);
+            dotnetDir = string.IsNullOrWhiteSpace(dotnetDir) ? Path.GetDirectoryName(Environment.ProcessPath) : dotnetDir;
+            var installType = GetWorkloadInstallType(sdkFeatureBand, dotnetDir);
 
             if (installType == InstallType.Msi)
             {
@@ -35,17 +38,22 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     throw new InvalidOperationException(LocalizableStrings.OSDoesNotSupportMsi);
                 }
 
-                return new NetSdkMsiInstaller();
+                return NetSdkMsiInstallerClient.Create(verifySignatures, sdkFeatureBand, workloadResolver,
+                    nugetPackageDownloader, verbosity, packageSourceLocation, reporter, tempDirPath);
             }
 
-            if (!CanWriteToDotnetRoot(dotnetDir))
+            if (elevationRequired && !WorkloadFileBasedInstall.IsUserLocal(dotnetDir, sdkFeatureBand.ToString()) && !CanWriteToDotnetRoot(dotnetDir))
             {
-                throw new GracefulException(LocalizableStrings.InadequatePermissions);
+                throw new GracefulException(LocalizableStrings.InadequatePermissions, isUserError: false);
             }
 
-            return new NetSdkManagedInstaller(reporter,
+            userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
+
+            return new FileBasedInstaller(
+                reporter,
                 sdkFeatureBand,
                 workloadResolver,
+                userProfileDir,
                 nugetPackageDownloader,
                 dotnetDir: dotnetDir,
                 tempDirPath: tempDirPath,
@@ -62,7 +70,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public static InstallType GetWorkloadInstallType(SdkFeatureBand sdkFeatureBand, string dotnetDir)
         {
             string installerTypePath = Path.Combine(dotnetDir, "metadata",
-                "workloads", $"{sdkFeatureBand}", "installertype");
+                "workloads", $"{sdkFeatureBand.ToStringWithoutPrerelease()}", "installertype");
 
             if (File.Exists(Path.Combine(installerTypePath, "msi")))
             {

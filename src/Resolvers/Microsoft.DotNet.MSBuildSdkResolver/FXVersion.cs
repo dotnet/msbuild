@@ -1,9 +1,13 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// dotnet doesn't have nullable enabled
+#pragma warning disable IDE0240 // Remove redundant nullable directive
 #nullable disable
+#pragma warning restore IDE0240 // Remove redundant nullable directive
 
 using System.Text;
+using System;
 
 namespace Microsoft.DotNet.MSBuildSdkResolver
 {
@@ -225,7 +229,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 return false;
             }
 
-            int majorSeparator = fxVersionString.IndexOf(".");
+            int majorSeparator = fxVersionString.IndexOf(".", StringComparison.Ordinal);
             if (majorSeparator == -1)
             {
                 return false;
@@ -244,7 +248,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             }
 
             int minorStart = majorSeparator + 1;
-            int minorSeparator = fxVersionString.IndexOf(".", minorStart);
+            int minorSeparator = fxVersionString.IndexOf(".", minorStart, StringComparison.Ordinal);
             if (minorSeparator == -1)
             {
                 return false;
@@ -292,7 +296,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             }
 
             int preStart = patchSeparator;
-            int preSeparator = fxVersionString.IndexOf("+", preStart);
+            int preSeparator = fxVersionString.IndexOf("+", preStart, StringComparison.Ordinal);
 
             string pre = (preSeparator == -1) ? fxVersionString.Substring(preStart) : fxVersionString.Substring(preStart, preSeparator - preStart);
 

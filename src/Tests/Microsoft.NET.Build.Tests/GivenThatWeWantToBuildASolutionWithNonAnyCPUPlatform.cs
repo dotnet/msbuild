@@ -17,7 +17,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.1.0.60101")]
         public void It_builds_solution_successfully()
         {
             var testAsset = _testAssetsManager
@@ -26,18 +26,18 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(testAsset, "x64SolutionBuild.sln");
             buildCommand
-                .Execute()
+                .Execute("/p:ProduceReferenceAssembly=false", "/p:UseStandardOutputPaths=false")
                 .Should()
                 .Pass();
 
-            buildCommand.GetOutputDirectory("netcoreapp1.1", Path.Combine("x64", "Debug"))
+            new DirectoryInfo(Path.Combine(testAsset.TestRoot, "bin", "x64", "Debug", ToolsetInfo.CurrentTargetFramework))
                 .Should()
                 .OnlyHaveFiles(new[] {
-                    "x64SolutionBuild.runtimeconfig.dev.json",
                     "x64SolutionBuild.runtimeconfig.json",
                     "x64SolutionBuild.deps.json",
                     "x64SolutionBuild.dll",
-                    "x64SolutionBuild.pdb"
+                    "x64SolutionBuild.pdb",
+                    $"x64SolutionBuild{EnvironmentInfo.ExecutableExtension}"
                 });
         }
     }

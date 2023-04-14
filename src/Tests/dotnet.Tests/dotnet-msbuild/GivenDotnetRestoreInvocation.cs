@@ -1,15 +1,14 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Tools.Restore;
 using FluentAssertions;
+using Microsoft.DotNet.Tools.Restore;
+using Microsoft.NET.TestFramework;
 using Xunit;
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
+    [Collection(TestConstants.UsesStaticTelemetryState)]
     public class GivenDotnetRestoreInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         private const string ExpectedPrefix =
@@ -23,6 +22,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--source", "<source>" }, "-property:RestoreSources=<source>")]
         [InlineData(new string[] { "-s", "<source0>", "-s", "<source1>" }, "-property:RestoreSources=<source0>%3B<source1>")]
         [InlineData(new string[] { "-r", "<runtime>" }, "-property:RuntimeIdentifiers=<runtime>")]
+        [InlineData(new string[] { "-r", "linux-amd64" }, "-property:RuntimeIdentifiers=linux-x64")]
         [InlineData(new string[] { "--runtime", "<runtime>" }, "-property:RuntimeIdentifiers=<runtime>")]
         [InlineData(new string[] { "-r", "<runtime0>", "-r", "<runtime1>" }, "-property:RuntimeIdentifiers=<runtime0>%3B<runtime1>")]
         [InlineData(new string[] { "--packages", "<packages>" }, "-property:RestorePackagesPath=<cwd><packages>")]
@@ -37,11 +37,12 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--locked-mode" }, "-property:RestoreLockedMode=true")]
         [InlineData(new string[] { "--force-evaluate" }, "-property:RestoreForceEvaluate=true")]
         [InlineData(new string[] { "--lock-file-path", "<lockFilePath>" }, "-property:NuGetLockFilePath=<lockFilePath>")]
+        [InlineData(new string[] { "--disable-build-servers" }, "-p:UseRazorBuildServer=false -p:UseSharedCompilation=false /nodeReuse:false")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
             {
-                Telemetry.Telemetry.CurrentSessionId = null;
+                Telemetry.Telemetry.DisableForTests();
 
                 expectedAdditionalArgs =
                     (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}")

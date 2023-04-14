@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>$(SdkTargetFramework)</TargetFramework>
+        <IncludeBuildOutput>False</IncludeBuildOutput>
+        <IncludeSource>False</IncludeSource>
+        <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+        <OutputPath>$(ArtifactsTmpDir)</OutputPath>
+        <EnableDefaultItems>False</EnableDefaultItems>
+        <UsingToolTemplateLocalizer>true</UsingToolTemplateLocalizer>
+        <IsPackable>true</IsPackable>
+        <IsShipping>true</IsShipping>
+        <IsShippingPackage>true</IsShippingPackage>
+        <NoWarn>2008;NU5105</NoWarn>
+        <NoPackageAnalysis>true</NoPackageAnalysis>
+        <PackageId>Microsoft.DotNet.Common.ProjectTemplates.8.0</PackageId>
+        <Authors>Microsoft</Authors>
+        <Description>Common .NET Project Templates</Description>
+        <language>en-US</language>
+        <PackageProjectUrl>https://github.com/dotnet/sdk</PackageProjectUrl>
+        <PackageType>Template</PackageType>
+        <SuppressDependenciesWhenPacking>True</SuppressDependenciesWhenPacking>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Remove="Microsoft.NETCore.App" />
+        <Content Include="content\**">
+            <PackagePath>content</PackagePath>
+        </Content>
+    </ItemGroup>
+</Project>

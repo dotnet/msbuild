@@ -1,0 +1,10 @@
+[
+  {
+    "kind": "dir_exists",
+    "path": "Target/bar/"
+  },
+  {
+    "kind": "dir_does_not_exist",
+    "path": "Target/foo/"
+  }
+]

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Principal;
 using System.Threading;
@@ -39,16 +40,12 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         /// <summary>
-        /// Queries the Windows Update Agent API to determine if there is a pending reboot.
+        /// Returns the commandline of the currently executing process.
         /// </summary>
-        /// <returns><see langword="true"/> if there is a pending reboot; <see langword="false"> otherwise.</see></returns>
-        /// <remarks>
-        /// See <see href="https://docs.microsoft.com/en-us/windows/win32/api/wuapi/nf-wuapi-isysteminformation-get_rebootrequired">this</see>
-        /// for more information.
-        /// </remarks>
-        public static bool RebootRequired()
+        /// <returns>The commandline of the current process.</returns>
+        public static string GetProcessCommandLine()
         {
-            return new SystemInformationClass().RebootRequired;
+            return Marshal.PtrToStringAuto(NativeMethods.Windows.GetCommandLine());
         }
     }
 }

@@ -5,6 +5,7 @@ using System;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Xunit;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
 

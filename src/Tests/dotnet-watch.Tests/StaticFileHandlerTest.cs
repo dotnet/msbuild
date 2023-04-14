@@ -25,14 +25,11 @@ namespace Microsoft.DotNet.Watcher.Tools
                     writtenBytes = bytes;
                 });
             var fileContentHandler = new StaticFileHandler(NullReporter.Singleton);
-            var context = new DotNetWatchContext
-            {
-                BrowserRefreshServer = server.Object,
-            };
+
             var file = new FileItem { FilePath = "Test.css", IsStaticFile = true, StaticWebAssetPath = "content/Test.css" };
 
             // Act
-            var result = await fileContentHandler.TryHandleFileChange(context, file, default);
+            var result = await fileContentHandler.TryHandleFileChange(server.Object, file, default);
 
             // Assert
             Assert.True(result);
@@ -53,15 +50,12 @@ namespace Microsoft.DotNet.Watcher.Tools
                 {
                     writtenBytes = bytes;
                 });
+
             var fileContentHandler = new StaticFileHandler(NullReporter.Singleton);
-            var context = new DotNetWatchContext
-            {
-                BrowserRefreshServer = server.Object,
-            };
             var file = new FileItem { FilePath = "Test.js", IsStaticFile = true, StaticWebAssetPath = "Test.js" };
 
             // Act
-            var result = await fileContentHandler.TryHandleFileChange(context, file, default);
+            var result = await fileContentHandler.TryHandleFileChange(server.Object, file, default);
 
             // Assert
             Assert.True(result);

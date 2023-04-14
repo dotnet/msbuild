@@ -251,7 +251,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource();
 
             var getValuesCommand = new GetValuesCommand(Log, testAsset.TestRoot,
-                "netcoreapp2.1", "TargetDefinitions", GetValuesCommand.ValueType.Item)
+                ToolsetInfo.CurrentTargetFramework, "TargetDefinitions", GetValuesCommand.ValueType.Item)
             {
                 DependsOnTargets = "RunResolvePackageDependencies",
                 Properties = { { "EmitLegacyAssetsFileItems", "true" } }
@@ -266,13 +266,13 @@ namespace Microsoft.NET.Build.Tests
             // should only contain one target with no RIDs
             var targetDefs = getValuesCommand.GetValues();
             targetDefs.Count.Should().Be(1);
-            targetDefs.Should().Contain(".NETCoreApp,Version=v2.1");
+            targetDefs.Should().Contain(ToolsetInfo.CurrentTargetFramework);
         }
 
         [Theory]
         [InlineData("netcoreapp2.0")]
         [InlineData("netcoreapp2.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_runs_the_app_from_the_output_folder(string targetFramework)
         {
             RunAppFromOutputFolder("RunFromOutputFolder_" + targetFramework, false, false, targetFramework);
@@ -280,7 +280,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp2.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_runs_a_rid_specific_app_from_the_output_folder(string targetFramework)
         {
             RunAppFromOutputFolder("RunFromOutputFolderWithRID_" + targetFramework, true, false, targetFramework);
@@ -288,7 +288,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_runs_the_app_with_conflicts_from_the_output_folder(string targetFramework)
         {
             if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
@@ -301,7 +301,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_runs_a_rid_specific_app_with_conflicts_from_the_output_folder(string targetFramework)
         {
             if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
@@ -380,7 +380,7 @@ public static class Program
         [InlineData("netcoreapp2.0", true)]
         [InlineData("netcoreapp3.0", true)]
         [InlineData("net5.0", true)]
-        [InlineData("net6.0", false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, false)]
         public void It_stops_generating_runtimeconfig_dev_json_after_net6(string targetFramework, bool shouldGenerateRuntimeConfigDevJson)
         {
             TestProject proj = new TestProject()
@@ -405,11 +405,11 @@ public static class Program
             File.Exists(runtimeconfigFile).Should().Be(shouldGenerateRuntimeConfigDevJson);
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("netcoreapp2.0")]
         [InlineData("netcoreapp3.0")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_stops_generating_runtimeconfig_dev_json_after_net6_allow_property_override(string targetFramework)
         {
             TestProject proj = new TestProject()
@@ -440,7 +440,7 @@ public static class Program
 
         [Theory]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_trims_conflicts_from_the_deps_file(string targetFramework)
         {
             TestProject project = new TestProject()
@@ -506,7 +506,7 @@ public static class Program
         [InlineData(false)]
         public void It_generates_rid_fallback_graph(bool isSelfContained)
         {
-            var targetFramework = "netcoreapp3.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             TestProject project = new TestProject()
@@ -575,7 +575,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "AppUsingPackageWithSatellites",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -612,40 +612,53 @@ public static class Program
             outputDirectory.Should().HaveFile(Path.Combine("fr", "Humanizer.resources.dll"));
         }
 
-        [Fact]
-        public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path(bool useStandardOutputPaths)
         {
             var testProject = new TestProject()
             {
                 Name = "OutputPathCasing",
-                TargetFrameworks = "ignored",
+                //  Force the actual TargetFramework to be included in the artifact pivots
+                TargetFrameworks = "ignored;ignored2",
                 IsExe = true
             };
 
-            string[] extraArgs = new[] { "/p:TargetFramework=NETCOREAPP1.1" };
+            string[] extraArgs = new[] { $"/p:TargetFramework={ToolsetInfo.CurrentTargetFramework.ToUpper()}" };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: useStandardOutputPaths.ToString());
 
             var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
+                .WithEnvironmentVariable("UseStandardOutputPaths", useStandardOutputPaths.ToString())
                 .Execute(extraArgs)
                 .Should()
                 .Pass();
 
-            string outputFolderWithConfiguration = Path.Combine(buildCommand.ProjectRootPath, "bin", "Debug");
+            if (useStandardOutputPaths)
+            {
+                buildCommand.GetOutputDirectory().Should().Exist();
 
-            Directory.GetDirectories(outputFolderWithConfiguration)
-                .Select(Path.GetFileName)
-                .Should()
-                .BeEquivalentTo("netcoreapp1.1");
+                buildCommand.GetIntermediateDirectory().Should().Exist();
+            }
+            else
+            {
+                string outputFolderWithConfiguration = Path.Combine(buildCommand.ProjectRootPath, "bin", "Debug");
 
-            string intermediateFolderWithConfiguration = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "Debug");
+                Directory.GetDirectories(outputFolderWithConfiguration)
+                    .Select(Path.GetFileName)
+                    .Should()
+                    .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
 
-            Directory.GetDirectories(intermediateFolderWithConfiguration)
-                .Select(Path.GetFileName)
-                .Should()
-                .BeEquivalentTo("netcoreapp1.1");
+                string intermediateFolderWithConfiguration = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "Debug");
+
+                Directory.GetDirectories(intermediateFolderWithConfiguration)
+                    .Select(Path.GetFileName)
+                    .Should()
+                    .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
+            }
         }
 
         [Fact]
@@ -654,7 +667,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "NetCoreAppPackageReference",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -735,9 +748,9 @@ class Program
             var testProject = new TestProject()
             {
                 Name = "ReferencesLegacyContracts",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid("netcoreapp3.0")
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework)
             };
 
             //  Dependencies on contracts from different 1.x "bands" can cause downgrades when building
@@ -762,7 +775,7 @@ class Program
             var testProject = new TestProject()
             {
                 Name = "NoPackageReferences",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -792,7 +805,7 @@ class Program
             var testProject = new TestProject()
             {
                 Name = "Prj_すおヸょー",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
@@ -810,7 +823,7 @@ class Program
         [Fact]
         public void It_regenerates_files_if_self_contained_changes()
         {
-            const string TFM = "netcoreapp3.0";
+            const string TFM = ToolsetInfo.CurrentTargetFramework;
 
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(TFM);
 
@@ -876,7 +889,7 @@ class Program
             var testProject = new TestProject()
             {
                 Name = "MainProject",
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true,
                 IsExe = true
             };
@@ -891,7 +904,7 @@ class Program
                 .Should()
                 .Pass();
 
-            var outputPath = buildCommand.GetOutputDirectory(targetFramework: "net5.0").FullName;
+            var outputPath = buildCommand.GetOutputDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework).FullName;
             if (produceOnlyReferenceAssembly == true)
             {
                 var refPath = Path.Combine(outputPath, "ref");
@@ -901,7 +914,11 @@ class Program
             }
             else
             {
-                var refPath = Path.Combine(outputPath, "ref", "MainProject.dll");
+                // Reference assembly should be produced in obj
+                var refPath = Path.Combine(
+                    buildCommand.GetIntermediateDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework).FullName,
+                    "ref",
+                    "MainProject.dll");
                 File.Exists(refPath)
                     .Should()
                     .BeTrue();

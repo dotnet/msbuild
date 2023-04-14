@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using FluentAssertions;
@@ -176,7 +177,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 return _toReturn;
             }
 
-            public FilePath FindFirst()
+            public FilePath FindFirst(bool createManifestFileOption = false)
             {
                 throw new NotImplementedException();
             }

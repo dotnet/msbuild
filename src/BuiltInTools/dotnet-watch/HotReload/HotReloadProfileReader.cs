@@ -10,7 +10,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public static class HotReloadProfileReader
+    internal static class HotReloadProfileReader
     {
         public static HotReloadProfile InferHotReloadProfile(ProjectGraph projectGraph, IReporter reporter)
         {
@@ -35,11 +35,11 @@ namespace Microsoft.DotNet.Watcher.Tools
                         // We saw a previous project that was AspNetCore. This must he a blazor hosted app.
                         if (aspnetCoreProject is not null && aspnetCoreProject != currentNode.ProjectInstance)
                         {
-                            reporter.Verbose($"HotReloadProfile: BlazorHosted. {aspnetCoreProject.FullPath} references BlazorWebAssembly project {currentNode.ProjectInstance.FullPath}.");
+                            reporter.Verbose($"HotReloadProfile: BlazorHosted. {aspnetCoreProject.FullPath} references BlazorWebAssembly project {currentNode.ProjectInstance.FullPath}.", emoji: "🔥");
                             return HotReloadProfile.BlazorHosted;
                         }
 
-                        reporter.Verbose("HotReloadProfile: BlazorWebAssembly.");
+                        reporter.Verbose("HotReloadProfile: BlazorWebAssembly.", emoji: "🔥");
                         return HotReloadProfile.BlazorWebAssembly;
                     }
                 }
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 }
             }
 
-            reporter.Verbose("HotReloadProfile: Default.");
+            reporter.Verbose("HotReloadProfile: Default.", emoji: "🔥");
             return HotReloadProfile.Default;
         }
     }

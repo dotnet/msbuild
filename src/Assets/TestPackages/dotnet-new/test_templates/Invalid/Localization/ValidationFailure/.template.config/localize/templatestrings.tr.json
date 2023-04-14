@@ -1,0 +1,12 @@
+﻿{
+    "name": "name_tr-TR:çÇğĞıIİöÖşŞüÜ",
+    "description": "desc_tr-TR:çÇğĞıIİöÖşŞüÜ",
+    "symbols/someSymbol/displayName": "sym0_displayName_tr-TR:çÇğĞıIİöÖşŞüÜ",
+    "symbols/someSymbol/description": "sym0_desc_tr-TR:çÇğĞıIİöÖşŞüÜ",
+    "symbols/someChoice/description": "sym1_desc_tr-TR:çÇğĞıIİöÖşŞüÜ",
+    "symbols/someChoice/displayName": "sym1_displayName_tr-TR:çÇğĞıIİöÖşŞüÜ",
+    "symbols/someChoice/choices/choice0/description": "sym1_choice0_tr-TR:çÇğĞıIİöÖşŞüÜ",
+    "symbols/someChoice/choices/choice2/description": "sym1_choice2_tr-TR:çÇğĞıIİöÖşŞüÜ",
+    "postActions/pa6/description": "pa0_desc_tr-TR:çÇğĞıIİöÖşŞüÜ",
+    "postActions/pa6/manualInstructions/first_instruction/text": "pa0_manualInstructions_tr-TR:çÇğĞıIİöÖşŞüÜ"
+}

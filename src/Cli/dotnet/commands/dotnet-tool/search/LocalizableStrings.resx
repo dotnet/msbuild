@@ -124,7 +124,7 @@
     <value>Commands</value>
   </data>
   <data name="SearchTermArgumentName" xml:space="preserve">
-    <value>Search Term</value>
+    <value>SEARCH_TERM</value>
   </data>
   <data name="SearchTermDescription" xml:space="preserve">
     <value>Search term from package id or package description. Require at least one character.</value>
@@ -148,7 +148,7 @@
     <value>The number of results to return, for pagination.</value>
   </data>
   <data name="PrereleaseDescription" xml:space="preserve">
-    <value>determining whether to include pre-release packages.</value>
+    <value>Include pre-release packages.</value>
   </data>
   <data name="NoResult" xml:space="preserve">
     <value>Could not find any results.</value>

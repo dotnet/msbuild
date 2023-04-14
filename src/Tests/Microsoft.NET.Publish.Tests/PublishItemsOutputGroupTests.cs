@@ -128,7 +128,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "TestPublishOutputGroup",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = "net6.0",
                 IsExe = true
             };
 

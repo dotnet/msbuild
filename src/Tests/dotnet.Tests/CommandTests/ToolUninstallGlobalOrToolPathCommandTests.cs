@@ -19,6 +19,7 @@ using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Uninstall.LocalizableStri
 using InstallLocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
@@ -53,7 +54,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => command.Execute();
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And
                 .Message
                 .Should()
@@ -145,8 +146,9 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var toolUninstallGlobalOrToolPathCommand = new ToolUninstallGlobalOrToolPathCommand(
                 result,
                 CreateToolPackageStoreAndUninstaller,
-                (_) => new ShellShimRepository(
+                (_, _) => new ShellShimRepository(
                     new DirectoryPath(_shimsDirectory),
+                    string.Empty,
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
                 _reporter);
@@ -201,7 +203,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 uninstallCallback: () => throw new IOException("simulated error"))
                 .Execute();
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And
                 .Message
                 .Should()
@@ -223,7 +225,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => uninstallCommand.Execute();
 
-            a.ShouldThrow<GracefulException>()
+            a.Should().Throw<GracefulException>()
                 .And
                 .Message
                 .Should()
@@ -245,8 +247,9 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             return new ToolInstallGlobalOrToolPathCommand(
                 result,
                 (location, forwardArguments) => (store, store, packageInstallerMock),
-                (_) => new ShellShimRepository(
+                (_, _) => new ShellShimRepository(
                     new DirectoryPath(_shimsDirectory),
+                    string.Empty,
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
                 _environmentPathInstructionMock,
@@ -270,8 +273,9 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             return new ToolUninstallGlobalOrToolPathCommand(
                 result,
                 createToolPackageStoreAndUninstaller,
-                (_) => new ShellShimRepository(
+                (_, _) => new ShellShimRepository(
                     new DirectoryPath(_shimsDirectory),
+                    string.Empty,
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
                 _reporter);

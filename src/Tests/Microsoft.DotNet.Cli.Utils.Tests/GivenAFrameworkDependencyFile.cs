@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.DependencyModel;
+using Microsoft.NET.TestFramework;
 using Xunit;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
@@ -19,7 +20,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             {
                 new RuntimeFallbacks("win-x64", new [] { "win", "any", "base" }),
                 new RuntimeFallbacks("win8", new [] { "win7", "win", "any", "base" }),
-                new RuntimeFallbacks("win7", new [] { "win", "any", "base" }),
+                new RuntimeFallbacks($"{ToolsetInfo.LatestWinRuntimeIdentifier}", new [] { "win", "any", "base" }),
                 new RuntimeFallbacks("win", new [] { "any", "base" }),
             };
         }
@@ -28,7 +29,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void WhenPassSeveralCompatibleRuntimeIdentifiersItOutMostFitRid()
         {
             FrameworkDependencyFile.TryGetMostFitRuntimeIdentifier(
-                    currentRuntimeIdentifier: "win7",
+                    currentRuntimeIdentifier: ToolsetInfo.LatestWinRuntimeIdentifier,
                     alternativeCurrentRuntimeIdentifier : "win",
                     runtimeGraph : _testRuntimeGraph,
                     candidateRuntimeIdentifiers : new [] { "win", "any" },
@@ -68,7 +69,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void WhenPassSeveralCompatibleRuntimeIdentifiersItOutMostFitRidWithCasingPreserved()
         {
             FrameworkDependencyFile.TryGetMostFitRuntimeIdentifier(
-                    currentRuntimeIdentifier: "win7",
+                    currentRuntimeIdentifier: ToolsetInfo.LatestWinRuntimeIdentifier,
                     alternativeCurrentRuntimeIdentifier : null,
                     runtimeGraph : _testRuntimeGraph,
                     candidateRuntimeIdentifiers : new [] { "Win", "any" },
@@ -82,7 +83,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void WhenPassSeveralCompatibleRuntimeIdentifiersWithDuplicationItOutMostFitRid()
         {
             FrameworkDependencyFile.TryGetMostFitRuntimeIdentifier(
-                    currentRuntimeIdentifier: "win7",
+                    currentRuntimeIdentifier: ToolsetInfo.LatestWinRuntimeIdentifier,
                     alternativeCurrentRuntimeIdentifier : null,
                     runtimeGraph : _testRuntimeGraph,
                     candidateRuntimeIdentifiers : new [] { "win", "win", "any" },
@@ -96,7 +97,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void WhenPassSeveralCompatibleRuntimeIdentifiersAndDuplicationItOutMostFitRidWithCasingPreservedTheFirstIsFavorited()
         {
             FrameworkDependencyFile.TryGetMostFitRuntimeIdentifier(
-                    currentRuntimeIdentifier: "win7",
+                    currentRuntimeIdentifier: ToolsetInfo.LatestWinRuntimeIdentifier,
                     alternativeCurrentRuntimeIdentifier: null,
                     runtimeGraph: _testRuntimeGraph,
                     candidateRuntimeIdentifiers: new[] { "Win", "win", "win", "any" },
@@ -110,7 +111,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void WhenPassSeveralNonCompatibleRuntimeIdentifiersItReturnsFalse()
         {
             FrameworkDependencyFile.TryGetMostFitRuntimeIdentifier(
-                    currentRuntimeIdentifier: "win7",
+                    currentRuntimeIdentifier: ToolsetInfo.LatestWinRuntimeIdentifier,
                     alternativeCurrentRuntimeIdentifier : null,
                     runtimeGraph : _testRuntimeGraph,
                     candidateRuntimeIdentifiers : new [] { "centos", "debian" },
@@ -123,7 +124,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         {
             FrameworkDependencyFile.TryGetMostFitRuntimeIdentifier(
                     currentRuntimeIdentifier: "win-vnext",
-                    alternativeCurrentRuntimeIdentifier: "win8",
+                    alternativeCurrentRuntimeIdentifier: ToolsetInfo.LatestWinRuntimeIdentifier,
                     runtimeGraph: _testRuntimeGraph,
                     candidateRuntimeIdentifiers: new[] { "win", "any" },
                     mostFitRuntimeIdentifier: out string mostFitRid)
@@ -136,7 +137,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void WhenCurrentRuntimeIdentifierIsNotSupportedSoIsTheAlternativeItReturnsFalse()
         {
             FrameworkDependencyFile.TryGetMostFitRuntimeIdentifier(
-                    currentRuntimeIdentifier: "osx10.13-x64",
+                    currentRuntimeIdentifier: $"{ToolsetInfo.LatestMacRuntimeIdentifier}-x64",
                     alternativeCurrentRuntimeIdentifier: "osx-x64",
                     runtimeGraph: _testRuntimeGraph,
                     candidateRuntimeIdentifiers: new[] { "win", "any" },

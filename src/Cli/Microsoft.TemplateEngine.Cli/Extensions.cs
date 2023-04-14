@@ -1,0 +1,83 @@
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
+
+using System.Text;
+using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.Constraints;
+using Microsoft.TemplateEngine.Utils;
+
+namespace Microsoft.TemplateEngine.Cli
+{
+    internal static class Extensions
+    {
+        /// <summary>
+        /// Gets default language configured for the host.
+        /// </summary>
+        internal static string? GetDefaultLanguage(this IEngineEnvironmentSettings settings)
+        {
+            if (!settings.Host.TryGetHostParamDefault("prefs:language", out string? defaultLanguage))
+            {
+                return null;
+            }
+            return defaultLanguage;
+        }
+
+        /// <summary>
+        /// Checks if the template is hidden by host specific template settings.
+        /// </summary>
+        internal static bool IsHiddenByHostFile(this ITemplateInfo template, IHostSpecificDataLoader hostSpecificDataLoader)
+        {
+            HostSpecificTemplateData hostData = hostSpecificDataLoader.ReadHostSpecificTemplateData(template);
+            return hostData.IsHidden;
+        }
+
+        /// <summary>
+        /// Gets display name for the template:
+        /// Template Name (short-name)
+        /// Template Name (short-name) Language
+        /// Template Name (short-name) Language (identity: identity).
+        /// </summary>
+        internal static string GetDisplayName(this ITemplateInfo template, bool showIdentity = false)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            string? templateLanguage = template.GetLanguage();
+            string shortNames = string.Join(",", template.ShortNameList);
+            stringBuilder.Append(template.Name);
+            if (!string.IsNullOrWhiteSpace(shortNames))
+            {
+                stringBuilder.Append($" ({shortNames})");
+            }
+            if (!string.IsNullOrWhiteSpace(templateLanguage))
+            {
+                stringBuilder.Append($" {templateLanguage}");
+            }
+            if (showIdentity)
+            {
+                stringBuilder.Append($"(identity: {template.Identity})");
+            }
+            return stringBuilder.ToString();
+        }
+
+        /// <summary>
+        /// Gets display string for constraint evaluation result.
+        /// </summary>
+        internal static string ToDisplayString(this TemplateConstraintResult constraintResult)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            string? constraintDisplayName = constraintResult.Constraint?.DisplayName;
+            if (string.IsNullOrWhiteSpace(constraintDisplayName))
+            {
+                constraintDisplayName = constraintResult.ConstraintType;
+            }
+
+            stringBuilder.Append($"{constraintDisplayName}: {constraintResult.LocalizedErrorMessage}");
+            if (!string.IsNullOrWhiteSpace(constraintResult.CallToAction))
+            {
+                stringBuilder.Append($" {constraintResult.CallToAction}");
+            }
+            return stringBuilder.ToString();
+        }
+    }
+}

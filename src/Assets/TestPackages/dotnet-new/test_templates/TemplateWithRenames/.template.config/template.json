@@ -1,0 +1,59 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithRenames",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithRenames",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithRenames",
+  "shortName": "TestAssets.TemplateWithRenames",
+  "symbols": {
+    "foo": {
+      "type": "parameter",
+      "dataType": "string",
+      "fileRename": "bar"
+    },
+    "fooUC": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "foo",
+        "toLower": false
+      },
+      "fileRename": "bar_uc"
+    },
+    "testForms": {
+      "type": "parameter",
+      "dataType": "string",
+      "fileRename": "MyProject",
+      "forms": {
+        "global": [ "identity", "uc", "lc" ]
+      }
+    }
+  },
+  "forms": {
+    "uc": {
+      "identifier": "uppercase"
+    },
+    "lc": {
+      "identifier": "lowercase"
+    }
+  },
+  "primaryOutputs": [
+    {
+      "path": "MyProject1.cs"
+    },
+    {
+      "path": "myproject2.cs"
+    },
+    {
+      "path": "MYPROJECT3.cs"
+    },
+    {
+      "path": "bar.cs"
+    },
+    {
+      "path": "bar_uc.cs"
+    }
+  ]
+}

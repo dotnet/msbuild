@@ -41,7 +41,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testProject = new TestProject("WinMDClasslibrary")
             {
-                TargetFrameworks = "net5.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Windows.Sdk.Contracts", "10.0.18362.2005"));
 
@@ -63,7 +63,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testProject = new TestProject("WinMDClasslibrary")
             {
-                TargetFrameworks = "net5.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Toolkit.Uwp.Notifications", "6.1.1"));
 
@@ -105,7 +105,7 @@ namespace Microsoft.NET.Build.Tests
             var managedWinRTComponent = new TestProject()
             {
                 Name = "ManagedWinRTComponent",
-                TargetFrameworks = "net5.0-windows10.0.19041.0",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041.0",
             };
 
             managedWinRTComponent.AdditionalProperties.Add("CsWinRTWindowsMetadata", "10.0.19041.0");
@@ -241,7 +241,6 @@ class Program
             };
 
             consoleApp.ReferencedProjects.Add(projectionProject);
-            consoleApp.PackageReferences.Add(new TestPackageReference("Microsoft.VCRTForwarders.140", "1.0.6"));
 
             //  Workaround for PrivateAssets
             consoleApp.PackageReferences.Add(new TestPackageReference("Microsoft.Windows.CsWinRT", "1.2.3"));

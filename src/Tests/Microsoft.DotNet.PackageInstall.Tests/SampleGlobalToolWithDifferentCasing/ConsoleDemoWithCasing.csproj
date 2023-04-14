@@ -10,5 +10,6 @@
      <EnableSourceControlManagerQueries>false</EnableSourceControlManagerQueries>
      <EnableSourceLink>false</EnableSourceLink>
      <DeterministicSourcePaths>false</DeterministicSourcePaths>
+     <CheckEolTargetFramework>false</CheckEolTargetFramework>
   </PropertyGroup>
 </Project>

@@ -29,7 +29,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp2.0");
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
             outputDirectory.Should().HaveFile(@"XUnitTestProject.runtimeconfig.json");
         }
 

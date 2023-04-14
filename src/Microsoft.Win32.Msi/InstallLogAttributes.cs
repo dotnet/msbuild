@@ -8,6 +8,12 @@ namespace Microsoft.Win32.Msi
     public enum InstallLogAttributes
     {
         /// <summary>
+        /// Use the default logging attributes. Existing log file will be overwritten
+        /// and the buffer flushed after 20 lines.
+        /// </summary>
+        NONE = 0x0000,
+
+        /// <summary>
         /// Append to the existing log when set, otherwise the existing log is overwritten.
         /// </summary>
         APPEND = 0x0001,

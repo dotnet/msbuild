@@ -1,0 +1,78 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <OutputType>Exe</OutputType>
+    <IsUnitTestProject>true</IsUnitTestProject>
+    <Nullable>enable</Nullable>
+    <EnableStyleCopAnalyzer>true</EnableStyleCopAnalyzer>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Cli\dotnet\dotnet.csproj" />
+    <ProjectReference Include="..\..\Cli\dotnet-new3\dotnet-new3.csproj" />
+    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
+    <PackageReference Include="Verify.Xunit" />
+    <PackageReference Include="Verify.DiffPlex" />
+    <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
+    <PackageReference Include="Microsoft.TemplateEngine.TestHelper" Version="$(MicrosoftTemplateEngineTestHelperPackageVersion)" />
+    <PackageReference Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="$(MicrosoftTemplateEngineAuthoringTemplateVerifierVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.6.0" Version="6.0.*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.7.0" Version="7.0.*-*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.6.0" Version="6.0.*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.7.0" Version="7.0.*-*" GeneratePathProperty="true" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GeneratedText>
+      <![CDATA[
+namespace Microsoft.DotNet.Cli.New.IntegrationTests
+{
+  internal class TemplatePackagesPaths
+  {
+      public const string MicrosoftDotNetCommonProjectTemplates60Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_6_0)"%3B
+      public const string MicrosoftDotNetCommonProjectTemplates70Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_7_0)"%3B
+      public const string MicrosoftDotNetWebProjectTemplates60Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_6_0)"%3B
+      public const string MicrosoftDotNetWebProjectTemplates70Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_7_0)"%3B
+  }
+
+  internal class TemplatePackageVersion
+  {
+      public const string MicrosoftTemplateSearchTemplateDiscoveryPackageVersion = "$(MicrosoftTemplateEngineAbstractionsPackageVersion)"%3B
+  }
+}
+      ]]>
+    </GeneratedText>
+  </PropertyGroup>
+
+  <Target Name="AddGeneratedFile" BeforeTargets="BeforeCompile;CoreCompile" Inputs="$(MSBuildAllProjects)" Outputs="$(IntermediateOutputPath)GeneratedFile.cs">
+    <PropertyGroup>
+      <GeneratedFilePath>$(IntermediateOutputPath)TemplatePackagesPaths.cs</GeneratedFilePath>
+    </PropertyGroup>
+    <ItemGroup>
+      <Compile Include="$(GeneratedFilePath)" />
+      <FileWrites Include="$(GeneratedFilePath)" />
+    </ItemGroup>
+    <WriteLinesToFile Lines="$(GeneratedText)" File="$(GeneratedFilePath)" WriteOnlyWhenDifferent="true" Overwrite="true" />
+  </Target>
+
+  <ItemGroup>
+    <Compile Remove="TestTemplates\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TestTemplates\**\*" Exclude="TestTemplates\**\bin\**;TestTemplates\**\obj\**" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Approvals\**\*" />
+    <None Include="Approvals\**\*" CopyToOutputDirectory="Never" />
+  </ItemGroup>
+</Project>

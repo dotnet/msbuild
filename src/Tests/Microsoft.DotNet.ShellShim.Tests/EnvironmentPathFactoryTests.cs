@@ -6,6 +6,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.NET.TestFramework;
 using Moq;
+using Xunit;
 
 namespace Microsoft.DotNet.ShellShim.Tests
 {

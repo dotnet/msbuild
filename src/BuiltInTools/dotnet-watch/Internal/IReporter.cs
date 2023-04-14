@@ -7,11 +7,12 @@ namespace Microsoft.Extensions.Tools.Internal
     /// This API supports infrastructure and is not intended to be used
     /// directly from your code. This API may change or be removed in future releases.
     /// </summary>
-    public interface IReporter
+    internal interface IReporter
     {
-        void Verbose(string message);
-        void Output(string message);
-        void Warn(string message);
-        void Error(string message);
+        public bool IsVerbose => false;
+        void Verbose(string message, string emoji = "⌚");
+        void Output(string message, string emoji = "⌚");
+        void Warn(string message, string emoji = "⌚");
+        void Error(string message, string emoji = "❌");
     }
 }

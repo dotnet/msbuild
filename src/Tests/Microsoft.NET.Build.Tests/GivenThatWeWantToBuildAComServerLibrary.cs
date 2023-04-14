@@ -33,15 +33,14 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp3.1");
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "ComServer.dll",
                 "ComServer.pdb",
                 "ComServer.deps.json",
                 "ComServer.comhost.dll",
-                "ComServer.runtimeconfig.json",
-                "ComServer.runtimeconfig.dev.json"
+                "ComServer.runtimeconfig.json"
             });
 
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, "ComServer.runtimeconfig.json");
@@ -70,7 +69,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp3.1");
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "ComServer.dll",
@@ -78,14 +77,13 @@ namespace Microsoft.NET.Build.Tests
                 "ComServer.deps.json",
                 "ComServer.comhost.dll",
                 "ComServer.X.manifest",
-                "ComServer.runtimeconfig.json",
-                "ComServer.runtimeconfig.dev.json"
+                "ComServer.runtimeconfig.json"
             });
         }
 
         [WindowsOnlyTheory]
-        [InlineData("win-x64")]
-        [InlineData("win-x86")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86")]
         public void It_embeds_the_clsidmap_in_the_comhost_when_rid_specified(string rid)
         {
             var testAsset = _testAssetsManager
@@ -104,15 +102,14 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp3.1", runtimeIdentifier: rid);
+            var outputDirectory = buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, runtimeIdentifier: rid);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "ComServer.dll",
                 "ComServer.pdb",
                 "ComServer.deps.json",
                 "ComServer.comhost.dll",
-                "ComServer.runtimeconfig.json",
-                "ComServer.runtimeconfig.dev.json"
+                "ComServer.runtimeconfig.json"
             });
         }
 
@@ -160,8 +157,8 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [PlatformSpecificTheory(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
-        [InlineData("win-x64")]
-        [InlineData("win-x86")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86")]
         public void It_fails_to_embed_clsid_when_not_on_windows(string rid)
         {
             var testAsset = _testAssetsManager
@@ -315,6 +312,32 @@ namespace Microsoft.NET.Build.Tests
                 .Fail()
                 .And
                 .HaveStdOutContaining("NETSDK1173: ");
+        }
+
+        [WindowsOnlyFact]
+        public void It_copies_nuget_package_dependencies()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithDependencies")
+                .WithSource();
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory("netcoreapp3.1");
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                "ComServerWithDependencies.dll",
+                "ComServerWithDependencies.pdb",
+                "ComServerWithDependencies.deps.json",
+                "ComServerWithDependencies.comhost.dll",
+                "ComServerWithDependencies.runtimeconfig.json",
+                "ComServerWithDependencies.runtimeconfig.dev.json",
+                "Newtonsoft.Json.dll"
+            });
         }
     }
 }

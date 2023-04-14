@@ -29,7 +29,7 @@ namespace Microsoft.NET.Pack.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "PackImplicitReferences",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = false
             };
 
@@ -51,7 +51,7 @@ namespace Microsoft.NET.Pack.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "PackImplicitReferences",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = false
             };
 

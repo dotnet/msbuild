@@ -31,10 +31,10 @@ namespace Microsoft.NET.Restore.Tests
         [InlineData("netcoreapp1.1", "1.1", true)]
         [InlineData("netstandard2.0", "2.0", false)]
         [InlineData("netcoreapp2.0", "2.0app", false)]
-        [InlineData("net461", "461app", false)]
-        [InlineData("netcoreapp2.0;net461", "multiTFM20app", false)]
+        [InlineData("net462", "461app", false)]
+        [InlineData("netcoreapp2.0;net462", "multiTFM20app", false)]
         [InlineData("netcoreapp1.0;netcoreapp2.0", "multiTFM1020app", true)]
-        [InlineData("netcoreapp1.0;net461", "multiTFM1046app", true)]
+        [InlineData("netcoreapp1.0;net462", "multiTFM1046app", true)]
         public void I_can_restore_a_project_with_implicit_msbuild_nuget_config(
             string frameworks,
             string projectPrefix,
@@ -57,7 +57,7 @@ namespace Microsoft.NET.Restore.Tests
 
         [Theory]
         [InlineData("netstandard1.3", "1.3")]
-        [InlineData("netcoreapp1.0", "1.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, ToolsetInfo.CurrentTargetFrameworkVersion)]
         // base line of the following tests
         public void I_can_restore_with_implicit_msbuild_nuget_config(string frameworks, string projectPrefix)
         {
@@ -70,7 +70,7 @@ namespace Microsoft.NET.Restore.Tests
 
         [Theory]
         [InlineData("netstandard1.3", "1.3")]
-        [InlineData("netcoreapp1.0", "1.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, ToolsetInfo.CurrentTargetFrameworkVersion)]
         [InlineData("netcoreapp1.1", "1.1")]
         [InlineData("netstandard2.0", "2.0")]
         [InlineData("netcoreapp2.0", "2.0app")]

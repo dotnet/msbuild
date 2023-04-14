@@ -36,7 +36,11 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public Muxer()
         {
+#if NET6_0_OR_GREATER
+            _muxerPath = Environment.ProcessPath;
+#else
             _muxerPath = Process.GetCurrentProcess().MainModule.FileName;
+#endif
         }
 
         public static string GetDataFromAppDomain(string propertyName)

@@ -1,0 +1,20 @@
+﻿Description:
+  Searches for the templates on NuGet.org.
+
+Usage:
+  dotnet new search [<template-name>] [options]
+
+Arguments:
+  <template-name>  If specified, only the templates matching the name will be shown.
+
+Options:
+  --author <author>                      Filters the templates based on the template author.
+  -lang, --language <language>           Filters templates based on language.
+  --type <type>                          Filters templates based on available types. Predefined values are "project" and "item".
+  --tag <tag>                            Filters the templates based on the tag.
+  --package <package>                    Filters the templates based on NuGet package ID.
+  --columns-all                          Displays all columns in the output.
+  --columns <author|language|tags|type>  Specifies the columns to display in the output.
+  -v, --verbosity <LEVEL>                Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic]. [default: normal]
+  -d, --diagnostics                      Enables diagnostic output.
+  -?, -h, --help                         Show command line help.

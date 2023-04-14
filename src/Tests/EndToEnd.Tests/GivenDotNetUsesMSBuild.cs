@@ -21,13 +21,14 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         {
         }
 
-        [RequiresMSBuildVersionFact("16.8.0")]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void ItCanNewRestoreBuildRunCleanMSBuildProject()
         {
             string projectDirectory = _testAssetsManager.CreateTestDirectory().Path;
 
-            string [] newArgs = new[] { "console", "--debug:ephemeral-hive", "--no-restore" };
-            new DotnetCommand(Log, "new")
+            string [] newArgs = new[] { "console", "--no-restore" };
+            new DotnetNewCommand(Log)
+                .WithVirtualHive()
                 .WithWorkingDirectory(projectDirectory)
                 .Execute(newArgs)
                 .Should().Pass();
@@ -40,7 +41,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .WithWorkingDirectory(projectDirectory)
                 .Execute()
                 .Should().Pass()
-                        .And.HaveStdOutContaining("Hello World!");
+                        .And.HaveStdOutContaining("Hello, World!");
 
             var binDirectory = new DirectoryInfo(projectDirectory).Sub("bin");
             binDirectory.Should().HaveFilesMatching("*.dll", SearchOption.AllDirectories);

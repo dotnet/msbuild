@@ -5,6 +5,7 @@
     <TargetFrameworks Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' ">$(ToolsetTargetFramework)</TargetFrameworks>
     <OutputType Condition="'$(TargetFramework)' == '$(ToolsetTargetFramework)'">Exe</OutputType>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <Nullable>Enable</Nullable>
 
     <!-- By default test projects don't append TargetFramework to output path, but for multi-targeted tests
          we need to -->

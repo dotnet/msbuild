@@ -1,0 +1,295 @@
+{
+  "version": "1.0",
+  "tasks": [
+    {
+      "taskType": "trigger",
+      "capabilityId": "AutoMerge",
+      "subCapability": "AutoMerge",
+      "version": "1.0",
+      "config": {
+        "taskName": "Automatically merge pull requests",
+        "deleteBranches": true,
+        "removeLabelOnPush": true,
+        "mergeType": "squash",
+        "minMinutesOpen": "12",
+        "label": "Auto-Merge If Tests Pass",
+        "requireAllStatuses": true
+      }
+    },
+    {
+      "taskType": "scheduled",
+      "capabilityId": "ScheduledSearch",
+      "subCapability": "ScheduledSearch",
+      "version": "1.1",
+      "config": {
+        "frequency": [
+          {
+            "weekDay": 0,
+            "hours": [
+              16
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 1,
+            "hours": [
+              16
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 2,
+            "hours": [
+              16
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 3,
+            "hours": [
+              16
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 4,
+            "hours": [
+              16
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 5,
+            "hours": [
+              16
+            ],
+            "timezoneOffset": -7
+          },
+          {
+            "weekDay": 6,
+            "hours": [
+              16
+            ],
+            "timezoneOffset": -7
+          }
+        ],
+        "searchTerms": [
+          {
+            "name": "isIssue",
+            "parameters": {}
+          },
+          {
+            "name": "isOpen",
+            "parameters": {}
+          },
+          {
+            "name": "hasLabel",
+            "parameters": {
+              "label": "Area-NuGet"
+            }
+          }
+        ],
+        "taskName": "Auto close \"Area-NuGet\" issues and add a comment pointing to NuGet repo",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "Thanks for creating this issue! We believe this issue is related to NuGet tooling, which is maintained by the NuGet team. Thus, we closed this one and encourage you to raise this issue in the [NuGet repository](https://github.com/NuGet/Home) instead. Don’t forget to check out [NuGet’s contributing guide](https://github.com/NuGet/Home/blob/dev/CONTRIBUTING.md#before-submitting-an-issue) before submitting an issue!\n\nIf you believe this issue was closed out of error, please comment to let us know.\n\nHappy Coding!"
+            }
+          },
+          {
+            "name": "closeIssue",
+            "parameters": {}
+          }
+        ]
+      },
+      "disabled": false
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "labelAdded",
+              "parameters": {
+                "label": "Area-ApiCompat"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "Notify apicompat of new untriaged bugs",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "@dotnet/area-infrastructure-libraries a new issue has been filed in the ApiCompat area, please triage"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "labelAdded",
+              "parameters": {
+                "label": "Area-ILLink"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "Notify linker of new untriaged bugs",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "@dotnet/illink-contrib a new issue has been filed in the ILLink area, please triage"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "labelAdded",
+              "parameters": {
+                "label": "Area-AspNetCore"
+              }
+            },
+            {
+              "name": "isOpen",
+              "parameters": {}
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "Remind ASP.NET Core PR authors the process to follow",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "Thanks for your PR, @${issueAuthor}.\nTo learn about the PR process and branching schedule of this repo, please take a look at the [SDK PR Guide](https://github.com/dotnet/sdk/blob/main/documentation/project-docs/SDK-PR-guide.md)."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "labelAdded",
+              "parameters": {
+                "label": "breaking-change"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "needs-breaking-change-doc-created"
+            }
+          },
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "Added `needs-breaking-change-doc-created` label because this issue has the `breaking-change` label. \n\n1. [ ] Create and link to this issue a matching issue in the dotnet/docs repo using the [breaking change documentation template](https://aka.ms/dotnet/docs/new-breaking-change-issue), then remove this `needs-breaking-change-doc-created` label.\n\nTagging @dotnet/compat for awareness of the breaking change."
+            }
+          }
+        ],
+        "taskName": "Add breaking change doc label to issue"
+      },
+      "disabled": false
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "labelAdded",
+              "parameters": {
+                "label": "breaking-change"
+              }
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "needs-breaking-change-doc-created"
+            }
+          },
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "Added `needs-breaking-change-doc-created` label because this PR has the `breaking-change` label. \n\nWhen you commit this breaking change:\n\n1. [ ] Create and link to this PR and the issue a matching issue in the dotnet/docs repo using the [breaking change documentation template](https://aka.ms/dotnet/docs/new-breaking-change-issue), then remove this `needs-breaking-change-doc-created` label.\n2. [ ] Ask a committer to mail the `.NET Breaking Change Notification` DL.\n\nTagging @dotnet/compat for awareness of the breaking change."
+            }
+          }
+        ],
+        "taskName": "Add breaking change doc label to PR"
+      },
+      "disabled": false
+    }
+  ],
+  "userGroups": []
+}

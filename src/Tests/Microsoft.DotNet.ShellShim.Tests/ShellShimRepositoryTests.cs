@@ -22,6 +22,8 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using Xunit.Abstractions;
+using NuGet.Frameworks;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 
 namespace Microsoft.DotNet.ShellShim.Tests
 {
@@ -106,7 +108,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             Action a = () => shellShimRepository.CreateShim(outputDll, new ToolCommandName(shellCommandName));
 
-            a.ShouldNotThrow<DirectoryNotFoundException>();
+            a.Should().NotThrow<DirectoryNotFoundException>();
         }
 
         [Theory]
@@ -161,7 +163,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 }
             };
 
-            a.ShouldThrow<ShellShimException>().Where(
+            a.Should().Throw<ShellShimException>().Where(
                 ex => ex.Message ==
                     string.Format(
                         CommonLocalizableStrings.ShellShimConflict,
@@ -206,7 +208,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                     scope.Complete();
                 }
             };
-            a.ShouldThrow<ToolPackageException>().WithMessage("simulated error");
+            a.Should().Throw<ToolPackageException>().WithMessage("simulated error");
 
             Directory.EnumerateFileSystemEntries(pathToShim).Should().BeEmpty();
         }
@@ -395,12 +397,23 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 new ToolCommandName(shellCommandName),
                 new[] { new FilePath(dummyShimPath), new FilePath("path" + dummyShimPath) });
 
-            a.ShouldThrow<ShellShimException>()
+            a.Should().Throw<ShellShimException>()
                 .And.Message
                 .Should().Contain(
                     string.Format(
                            CommonLocalizableStrings.MoreThanOnePackagedShimAvailable,
                            string.Join(';', filePaths)));
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("net5.0")]
+        [InlineData("netcoreapp3.1")]
+        public void WhenRidNotSupportedOnWindowsItIsImplicit(string tfm)
+        {
+            var tempDir = _testAssetsManager.CreateTestDirectory(identifier: tfm).Path;
+            var templateFinder = new ShellShimTemplateFinder(new MockNuGetPackageDownloader(), new DirectoryPath(tempDir), null);
+            var path = templateFinder.ResolveAppHostSourceDirectoryAsync(null, NuGetFramework.Parse(tfm), Architecture.Arm64).Result;
+            path.Should().Contain(tfm.Equals("net5.0") ? "AppHostTemplate" : "win-x64");
         }
 
         private static void MakeNameConflictingCommand(string pathToPlaceShim, string shellCommandName)
@@ -482,9 +495,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputDirectory = new DirectoryInfo(Path.Combine(testInstance.Path, "bin", configuration))
-                .EnumerateDirectories()
-                .Single();
+            var outputDirectory = new DirectoryInfo(OutputPathCalculator.FromProject(testInstance.Path, testInstance).GetOutputDirectory(configuration: configuration));
 
             return new FilePath(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"));
         }
@@ -498,6 +509,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         {
             return new ShellShimRepository(
                     new DirectoryPath(pathToShim),
+                    string.Empty,
                     appHostShellShimMaker: new AppHostShellShimMakerMock());
         }
     }

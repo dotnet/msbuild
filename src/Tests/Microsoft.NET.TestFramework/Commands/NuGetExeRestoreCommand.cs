@@ -81,7 +81,7 @@ namespace Microsoft.NET.TestFramework.Commands
                 Arguments = newArgs
             };
 
-            TestContext.Current.AddTestEnvironmentVariables(ret);
+            TestContext.Current.AddTestEnvironmentVariables(ret.Environment);
 
             return ret;
         }

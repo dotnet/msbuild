@@ -129,14 +129,14 @@ namespace Microsoft.DotNet.Cli.Utils
         public ICommand ForwardStdOut(TextWriter to = null, bool onlyIfVerbose = false, bool ansiPassThrough = true)
         {
             ThrowIfRunning();
-            if (!onlyIfVerbose || CommandContext.IsVerbose())
+            if (!onlyIfVerbose || CommandLoggingContext.IsVerbose)
             {
                 EnsureStdOut();
 
                 if (to == null)
                 {
                     _stdOut.ForwardTo(writeLine: Reporter.Output.WriteLine);
-                    EnvironmentVariable(CommandContext.Variables.AnsiPassThru, ansiPassThrough.ToString());
+                    EnvironmentVariable(CommandLoggingContext.Variables.AnsiPassThru, ansiPassThrough.ToString());
                 }
                 else
                 {
@@ -149,14 +149,14 @@ namespace Microsoft.DotNet.Cli.Utils
         public ICommand ForwardStdErr(TextWriter to = null, bool onlyIfVerbose = false, bool ansiPassThrough = true)
         {
             ThrowIfRunning();
-            if (!onlyIfVerbose || CommandContext.IsVerbose())
+            if (!onlyIfVerbose || CommandLoggingContext.IsVerbose)
             {
                 EnsureStdErr();
 
                 if (to == null)
                 {
                     _stdErr.ForwardTo(writeLine: Reporter.Error.WriteLine);
-                    EnvironmentVariable(CommandContext.Variables.AnsiPassThru, ansiPassThrough.ToString());
+                    EnvironmentVariable(CommandLoggingContext.Variables.AnsiPassThru, ansiPassThrough.ToString());
                 }
                 else
                 {
@@ -188,6 +188,12 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public string CommandArgs => _process.StartInfo.Arguments;
 
+        public ICommand SetCommandArgs(string commandArgs)
+        {
+            _process.StartInfo.Arguments = commandArgs;
+            return this;
+        }
+
         private string FormatProcessInfo(ProcessStartInfo info)
         {
             if (string.IsNullOrWhiteSpace(info.Arguments))
@@ -200,13 +206,13 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private void EnsureStdOut()
         {
-            _stdOut = _stdOut ?? new StreamForwarder();
+            _stdOut ??= new StreamForwarder();
             _process.StartInfo.RedirectStandardOutput = true;
         }
 
         private void EnsureStdErr()
         {
-            _stdErr = _stdErr ?? new StreamForwarder();
+            _stdErr ??= new StreamForwarder();
             _process.StartInfo.RedirectStandardError = true;
         }
 

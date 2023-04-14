@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
 using Parser = Microsoft.DotNet.Cli.Parser;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System;
 
@@ -15,45 +16,40 @@ namespace Microsoft.DotNet.Tools.Run
         public static RunCommand FromArgs(string[] args)
         {
             var parseResult = Parser.Instance.ParseFrom("dotnet run", args);
+            return FromParseResult(parseResult);
+        }
 
-            if (parseResult.HasOption("--help"))
+        public static RunCommand FromParseResult(ParseResult parseResult)
+        {
+            var project = parseResult.GetValue(RunCommandParser.ProjectOption);
+            if (parseResult.UsingRunCommandShorthandProjectOption())
             {
-                parseResult.ShowHelp();
-                throw new HelpException(string.Empty);
-            }
-
-            string project = parseResult.ValueForOption<string>(RunCommandParser.ProjectOptionShort);
-            if (!string.IsNullOrEmpty(project))
-            {
-                Console.WriteLine(LocalizableStrings.RunCommandProjectAbbreviationDeprecated.Yellow());
-            }
-            else
-            {
-                project = parseResult.ValueForOption<string>(RunCommandParser.ProjectOption);
+                Reporter.Output.WriteLine(LocalizableStrings.RunCommandProjectAbbreviationDeprecated.Yellow());
+                project = parseResult.GetRunCommandShorthandProjectValues().FirstOrDefault();
             }
 
             var command = new RunCommand(
-                configuration: parseResult.ValueForOption<string>(RunCommandParser.ConfigurationOption),
-                framework: parseResult.ValueForOption<string>(RunCommandParser.FrameworkOption),
-                runtime: parseResult.ValueForOption<string>(RunCommandParser.RuntimeOption),
+                configuration: parseResult.GetValue(RunCommandParser.ConfigurationOption),
+                framework: parseResult.GetValue(RunCommandParser.FrameworkOption),
+                runtime: parseResult.GetCommandLineRuntimeIdentifier(),
                 noBuild: parseResult.HasOption(RunCommandParser.NoBuildOption),
                 project: project,
-                launchProfile: parseResult.ValueForOption<string>(RunCommandParser.LaunchProfileOption),
+                launchProfile: parseResult.GetValue(RunCommandParser.LaunchProfileOption),
                 noLaunchProfile: parseResult.HasOption(RunCommandParser.NoLaunchProfileOption),
                 noRestore: parseResult.HasOption(RunCommandParser.NoRestoreOption) || parseResult.HasOption(RunCommandParser.NoBuildOption),
                 interactive: parseResult.HasOption(RunCommandParser.InteractiveOption),
                 restoreArgs: parseResult.OptionValuesToBeForwarded(RunCommandParser.GetCommand()),
-                args: (parseResult.UnparsedTokens ?? Array.Empty<string>()).Concat(parseResult.UnmatchedTokens ?? Array.Empty<string>())
+                args: parseResult.GetValue(RunCommandParser.ApplicationArguments)
             );
 
             return command;
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            parseResult.HandleDebugSwitch();
 
-            return FromArgs(args).Execute();
+            return FromParseResult(parseResult).Execute();
         }
     }
 }

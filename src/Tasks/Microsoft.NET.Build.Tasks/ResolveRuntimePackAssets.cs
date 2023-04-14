@@ -22,6 +22,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool DesignTimeBuild { get; set; }
 
+        public bool DisableTransitiveFrameworkReferenceDownloads { get; set; }
+
         [Output]
         public ITaskItem[] RuntimePackAssets { get; set; }
 
@@ -66,8 +68,16 @@ namespace Microsoft.NET.Build.Tasks
                         //  Don't treat this as an error if we are doing a design-time build.  This is because the design-time
                         //  build needs to succeed in order to get the right information in order to run a restore to download
                         //  the runtime pack.
-                        Log.LogError(Strings.RuntimePackNotDownloaded, runtimePack.ItemSpec,
-                            runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier));
+
+                        if (DisableTransitiveFrameworkReferenceDownloads)
+                        {
+                            Log.LogError(Strings.RuntimePackNotRestored_TransitiveDisabled, runtimePack.ItemSpec);
+                        }
+                        else
+                        {
+                            Log.LogError(Strings.RuntimePackNotDownloaded, runtimePack.ItemSpec,
+                                runtimePack.GetMetadata(MetadataKeys.RuntimeIdentifier));
+                        }
                     }
                     continue;
                 }

@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.0")]
         [InlineData(".NETCoreApp")]
         [InlineData(".NETStandard")]
         public void TheMaximumVersionsAreSupported(string targetFrameworkIdentifier)
@@ -28,7 +28,7 @@ namespace Microsoft.NET.Build.Tests
             var project = new TestProject
             {
                 Name = "packagethatwillgomissing",
-                TargetFrameworks = targetFrameworkIdentifier ==  ".NETCoreApp" ? "netcoreapp3.0" : "netstandard2.1",
+                TargetFrameworks = targetFrameworkIdentifier ==  ".NETCoreApp" ? ToolsetInfo.CurrentTargetFramework : "netstandard2.1",
             };
 
             TestAsset asset = _testAssetsManager
@@ -71,7 +71,7 @@ namespace Microsoft.NET.Build.Tests
             var project = new TestProject
             {
                 Name = "SupportedTargetFrameworkLists",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             TestAsset asset = _testAssetsManager.CreateTestProject(project);

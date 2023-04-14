@@ -3,11 +3,21 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using Microsoft.Build.Execution;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Common;
+using Microsoft.VisualBasic.CompilerServices;
 using Parser = Microsoft.DotNet.Cli.Parser;
+
 
 namespace Microsoft.DotNet.Tools.Publish
 {
@@ -23,27 +33,39 @@ namespace Microsoft.DotNet.Tools.Publish
 
         public static PublishCommand FromArgs(string[] args, string msbuildPath = null)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
-
-            var msbuildArgs = new List<string>();
-
             var parser = Parser.Instance;
-
             var parseResult = parser.ParseFrom("dotnet publish", args);
+            return FromParseResult(parseResult);
+        }
 
+        public static PublishCommand FromParseResult(ParseResult parseResult, string msbuildPath = null)
+        {
+            parseResult.HandleDebugSwitch();
             parseResult.ShowHelpOrErrorIfAppropriate();
 
-            msbuildArgs.Add("-target:Publish");
-
-            if (parseResult.HasOption(PublishCommandParser.SelfContainedOption) &&
-                parseResult.HasOption(PublishCommandParser.NoSelfContainedOption))
+            var msbuildArgs = new List<string>()
             {
-                throw new GracefulException(LocalizableStrings.SelfContainAndNoSelfContainedConflict);
-            }
+                "-target:Publish",
+                "--property:_IsPublishing=true" // This property will not hold true for MSBuild /t:Publish or in VS.
+            };
+
+            IEnumerable<string> slnOrProjectArgs = parseResult.GetValue(PublishCommandParser.SlnOrProjectArgument);
+
+            CommonOptions.ValidateSelfContainedOptions(parseResult.HasOption(PublishCommandParser.SelfContainedOption),
+                parseResult.HasOption(PublishCommandParser.NoSelfContainedOption));
 
             msbuildArgs.AddRange(parseResult.OptionValuesToBeForwarded(PublishCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(parseResult.ValueForArgument<IEnumerable<string>>(PublishCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            ReleasePropertyProjectLocator projectLocator = new ReleasePropertyProjectLocator(parseResult, MSBuildPropertyNames.PUBLISH_RELEASE,
+                new ReleasePropertyProjectLocator.DependentCommandOptions(
+                        parseResult.GetValue(PublishCommandParser.SlnOrProjectArgument),
+                        parseResult.HasOption(PublishCommandParser.ConfigurationOption) ? parseResult.GetValue(PublishCommandParser.ConfigurationOption) : null,
+                        parseResult.HasOption(PublishCommandParser.FrameworkOption) ? parseResult.GetValue(PublishCommandParser.FrameworkOption) : null
+                    )
+             );
+            msbuildArgs.AddRange(projectLocator.GetCustomDefaultConfigurationValueIfSpecified());
+
+            msbuildArgs.AddRange(slnOrProjectArgs ?? Array.Empty<string>());
 
             bool noRestore = parseResult.HasOption(PublishCommandParser.NoRestoreOption)
                           || parseResult.HasOption(PublishCommandParser.NoBuildOption);
@@ -54,11 +76,11 @@ namespace Microsoft.DotNet.Tools.Publish
                 msbuildPath);
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
+            parseResult.HandleDebugSwitch();
 
-            return FromArgs(args).Execute();
+            return FromParseResult(parseResult).Execute();
         }
     }
 }

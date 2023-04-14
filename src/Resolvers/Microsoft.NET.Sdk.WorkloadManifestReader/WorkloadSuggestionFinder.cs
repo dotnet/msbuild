@@ -30,6 +30,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     return new WorkloadSuggestion(c.Workloads, extraPacks);
                 })
                 .ToList();
+
+            if (UnsortedSuggestions.Count == 0)
+            {
+                throw new ArgumentException("requestedPacks may only contain packs that exist in expandedWorkloads", "requestedPacks");
+            }
         }
 
         /// <summary>

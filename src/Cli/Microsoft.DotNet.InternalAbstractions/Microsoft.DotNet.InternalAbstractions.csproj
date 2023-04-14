@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Abstractions for making code that uses file system and environment testable.</Description>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <WarningsAsErrors>true</WarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
@@ -12,4 +12,7 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="$(RepoRoot)src\Common\PathUtilities.cs" LinkBase="Common" />
+  </ItemGroup>
 </Project>

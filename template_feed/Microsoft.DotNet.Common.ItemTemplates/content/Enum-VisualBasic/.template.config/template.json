@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Microsoft",
+  "classifications": [
+    "Common"
+  ],
+  "name": "Enum",
+  "generatorVersions": "[1.0.0.0-*)",
+  "description": "Creates a new Visual Basic enum",
+  "tags": {
+    "language": "VB",
+    "type": "item"
+  },
+  "groupIdentity": "DotNet.Common.Enum",
+  "precedence": "0",
+  "identity": "DotNet.Common.Enum.VisualBasic",
+  "shortName": "enum",
+  "sourceName": "Enum1",
+  "preferDefaultName": true,
+  "defaultName": "Enum1",
+  "primaryOutputs": [
+    {
+      "path": "Enum1.vb"
+    }
+  ],
+  "constraints": {
+    "visualbasic-only": {
+      "type": "project-capability",
+      "args": "VB"
+    }
+  }
+}

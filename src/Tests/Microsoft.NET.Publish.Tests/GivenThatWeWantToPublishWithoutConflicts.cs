@@ -26,7 +26,7 @@ namespace Microsoft.NET.Publish.Tests
             // This dll is included in both the explicit package reference and Microsoft.NET.Build.Extensions. We prevent a double write in 
             // _ComputeResolvedCopyLocalPublishAssets by removing dlls duplicated between package references and implicitly expanded .NET references.
             var reference = "System.Runtime.InteropServices.RuntimeInformation";
-            var targetFramework = "net461";
+            var targetFramework = "net462";
             var testProject = new TestProject()
             {
                 Name = "ConflictingFilePublish",
@@ -50,8 +50,9 @@ namespace Microsoft.NET.Publish.Tests
             var files = getValuesCommand.GetValues()
                 .Where(file => file.Contains(reference));
             files.Count().Should().Be(1);
-            // We should choose the file from system.runtime.interopservices.runtimeinformation package version
-            files.FirstOrDefault().Contains(@"system.runtime.interopservices.runtimeinformation\4.3.0").Should().BeTrue();
+
+            // We should choose the system.runtime.interopservices.runtimeinformation file from Microsoft.NET.Build.Extensions as it has a higher AssemblyVersion (4.0.2.0 compared to 4.0.1.0)
+            files.FirstOrDefault().Contains(@"Microsoft.NET.Build.Extensions\net462\lib\System.Runtime.InteropServices.RuntimeInformation.dll").Should().BeTrue();
         }
 
         [Theory]
@@ -59,7 +60,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(false)]
         public void It_has_consistent_behavior_when_publishing_single_file(bool shouldPublishSingleFile)
         {
-            var targetFramework = "netcoreapp3.1";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var testProject = new TestProject()
             {
                 Name = "DuplicateFiles",

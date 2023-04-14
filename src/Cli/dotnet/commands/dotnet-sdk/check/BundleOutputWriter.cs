@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.NativeWrapper;
@@ -26,18 +27,18 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
             _reporter = reporter;
         }
 
-        protected bool BundleIsMaintenance(INetBundleInfo bundle)
+        protected bool? BundleIsMaintenance(INetBundleInfo bundle)
         {
             return _productCollection
-                .First(product => product.ProductVersion.Equals($"{bundle.Version.Major}.{bundle.Version.Minor}"))
-                .SupportPhase.Equals(SupportPhase.Maintenance);
+                .FirstOrDefault(product => product.ProductVersion.Equals($"{bundle.Version.Major}.{bundle.Version.Minor}"))
+                ?.SupportPhase.Equals(SupportPhase.Maintenance);
         }
 
-        protected bool BundleIsEndOfLife(INetBundleInfo bundle)
+        protected bool? BundleIsEndOfLife(INetBundleInfo bundle)
         {
             return _productCollection
-                .First(product => product.ProductVersion.Equals($"{bundle.Version.Major}.{bundle.Version.Minor}"))
-                .IsOutOfSupport();
+                .FirstOrDefault(product => product.ProductVersion.Equals($"{bundle.Version.Major}.{bundle.Version.Minor}"))
+                ?.IsOutOfSupport();
         }
     }
 }

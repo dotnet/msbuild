@@ -26,7 +26,7 @@ namespace dotnet.Tests
         [InlineData("clean -h")]
         [InlineData("list -h")]
         [InlineData("msbuild -h")]
-        [InlineData("new -h")]
+        [InlineData("new -h --debug:ephemeral-hive")]
         [InlineData("nuget -h")]
         [InlineData("pack -h")]
         [InlineData("publish -h")]

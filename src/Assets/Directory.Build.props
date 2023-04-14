@@ -6,5 +6,6 @@ get the build customization from the rest of the repo.
 <Project>
   <PropertyGroup>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**/*.tmp</DefaultItemExcludes>
   </PropertyGroup>
 </Project>

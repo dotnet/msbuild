@@ -7,13 +7,14 @@ using Xunit.Abstractions;
 using System.Diagnostics;
 using System.Linq;
 using System;
-using static Microsoft.NET.TestFramework.ExponentialRetry;
+using static Microsoft.DotNet.Cli.Utils.ExponentialRetry;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
     public abstract class TestCommand
     {
         private Dictionary<string, string> _environment = new Dictionary<string, string>();
+        private bool _doNotEscapeArguments;
 
         public ITestOutputHelper Log { get; }
 
@@ -43,6 +44,24 @@ namespace Microsoft.NET.TestFramework.Commands
         public TestCommand WithWorkingDirectory(string workingDirectory)
         {
             WorkingDirectory = workingDirectory;
+            return this;
+        }
+
+        /// <summary>
+        /// Instructs not to escape the arguments when launching command.
+        /// This may be used to pass ready arguments line as single string argument.
+        /// </summary>
+        public TestCommand WithRawArguments()
+        {
+            _doNotEscapeArguments = true;
+            return this;
+        }
+
+        public TestCommand WithCulture(string locale) => WithEnvironmentVariable(UILanguageOverride.DOTNET_CLI_UI_LANGUAGE, locale);
+
+        public TestCommand WithTraceOutput()
+        {
+            WithEnvironmentVariable("DOTNET_CLI_VSTEST_TRACE", "1");
             return this;
         }
 
@@ -106,7 +125,7 @@ namespace Microsoft.NET.TestFramework.Commands
         public virtual CommandResult Execute(IEnumerable<string> args)
         { 
             var command = CreateCommandSpec(args)
-                .ToCommand()
+                .ToCommand(_doNotEscapeArguments)
                 .CaptureStdOut()
                 .CaptureStdErr();
 

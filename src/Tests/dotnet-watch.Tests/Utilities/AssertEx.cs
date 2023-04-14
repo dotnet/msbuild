@@ -8,7 +8,7 @@ using Xunit.Sdk;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public static class AssertEx
+    internal static class AssertEx
     {
         public static void EqualFileList(string root, IEnumerable<string> expectedFiles, FileSet actualFiles)
             => EqualFileList(root, expectedFiles, actualFiles.Select(f => f.FilePath));
@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public static void EqualFileList(IEnumerable<string> expectedFiles, IEnumerable<string> actualFiles)
         {
-            string normalize(string p) => p.Replace('\\', '/');
+            static string normalize(string p) => p.Replace('\\', '/');
             var expected = new HashSet<string>(expectedFiles.Select(normalize));
             var actual = new HashSet<string>(actualFiles.Where(p => !string.IsNullOrEmpty(p)).Select(normalize));
             if (!expected.SetEquals(actual))

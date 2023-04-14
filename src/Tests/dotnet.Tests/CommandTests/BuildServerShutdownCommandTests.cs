@@ -20,6 +20,7 @@ using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.DotNet.BuildServer;
 using Xunit.Abstractions;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
 

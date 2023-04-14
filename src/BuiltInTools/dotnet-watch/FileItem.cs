@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Watcher
 {
-    public readonly struct FileItem
+    internal readonly struct FileItem
     {
         public string FilePath { get; init; }
 

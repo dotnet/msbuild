@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="CreateManifestIfNeededOptionDescription">
+        <source>Create a tool manifest if one isn't found during tool installation. For information on how manifests are located, see https://aka.ms/dotnet/tools/create-manifest-if-needed</source>
+        <target state="new">Create a tool manifest if one isn't found during tool installation. For information on how manifests are located, see https://aka.ms/dotnet/tools/create-manifest-if-needed</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
         <target state="translated">L'option locale (--local), l'option globale (--global) et l'option de chemin d'outil (--tool-path) ne peuvent pas être utilisées simultanément. Spécifiez une seule des options : {0}.</target>
@@ -12,6 +17,11 @@
 Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="translated">Vous pouvez appeler l'outil à l'aide de la commande suivante : {0}
 L'outil '{1}' (version '{2}') a été installé correctement.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidRuntimeIdentifier">
+        <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
+        <target state="translated">L’identificateur d’exécution {0} n’est pas valide. Les identificateurs d’exécution valides sont : {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
@@ -66,6 +76,11 @@ Si vous souhaitez créer un manifeste, utilisez 'dotnet new tool-manifest', gén
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the tool for.</source>
         <target state="translated">Framework cible pour lequel l'outil doit être installé.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
+        <source>The --prerelease and --version options are not supported in the same command</source>
+        <target state="translated">Les options --prerelease et --version ne sont pas prises en charge dans la même commande.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">

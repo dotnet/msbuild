@@ -17,9 +17,10 @@ namespace Microsoft.DotNet.TemplateLocator
         private IWorkloadResolver? _workloadResolver;
         private readonly Lazy<NETCoreSdkResolver> _netCoreSdkResolver;
         private readonly Func<string, string> _getEnvironmentVariable;
+        private readonly Func<string>? _getCurrentProcessPath;
 #nullable disable
         public TemplateLocator()
-            : this(Environment.GetEnvironmentVariable, VSSettings.Ambient, null, null)
+            : this(Environment.GetEnvironmentVariable, null, VSSettings.Ambient, null, null)
         {
         }
 #nullable restore
@@ -27,7 +28,7 @@ namespace Microsoft.DotNet.TemplateLocator
         /// <summary>
         /// Test constructor
         /// </summary>
-        public TemplateLocator(Func<string, string> getEnvironmentVariable, VSSettings vsSettings,
+        public TemplateLocator(Func<string, string> getEnvironmentVariable, Func<string>? getCurrentProcessPath, VSSettings vsSettings,
             IWorkloadManifestProvider? workloadManifestProvider, IWorkloadResolver? workloadResolver)
         {
             _netCoreSdkResolver =
@@ -36,11 +37,13 @@ namespace Microsoft.DotNet.TemplateLocator
             _workloadManifestProvider = workloadManifestProvider;
             _workloadResolver = workloadResolver;
             _getEnvironmentVariable = getEnvironmentVariable;
+            _getCurrentProcessPath = getCurrentProcessPath;
         }
 
         public IReadOnlyCollection<IOptionalSdkTemplatePackageInfo> GetDotnetSdkTemplatePackages(
             string sdkVersion,
-            string dotnetRootPath)
+            string dotnetRootPath,
+            string? userProfileDir)
         {
             if (string.IsNullOrWhiteSpace(sdkVersion))
             {
@@ -53,8 +56,8 @@ namespace Microsoft.DotNet.TemplateLocator
                     nameof(dotnetRootPath));
             }
 
-            _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion);
-            _workloadResolver ??= WorkloadResolver.Create(_workloadManifestProvider, dotnetRootPath, sdkVersion);
+            _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion, userProfileDir);
+            _workloadResolver ??= WorkloadResolver.Create(_workloadManifestProvider, dotnetRootPath, sdkVersion, userProfileDir);
 
             return _workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template)
                 .Select(pack => new OptionalSdkTemplatePackageInfo(pack.Id, pack.Version, pack.Path)).ToList();
@@ -62,7 +65,7 @@ namespace Microsoft.DotNet.TemplateLocator
 
         public bool TryGetDotnetSdkVersionUsedInVs(string vsVersion, out string? sdkVersion)
         {
-            string dotnetExeDir = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable);
+            string dotnetExeDir = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable, _getCurrentProcessPath);
 
             if (!Version.TryParse(vsVersion, out var parsedVsVersion))
             {

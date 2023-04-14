@@ -1,27 +1,41 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Restore;
+using Microsoft.TemplateEngine.Cli.Commands;
 using LocalizableStrings = Microsoft.DotNet.Tools.Restore.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class RestoreCommandParser
     {
-        public static readonly Argument SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
+        public static readonly string DocsLink = "https://aka.ms/dotnet-restore";
+
+        public static readonly Argument<IEnumerable<string>> SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
             Arity = ArgumentArity.ZeroOrMore
         };
 
+        public static readonly Option<IEnumerable<string>> SourceOption = new ForwardedOption<IEnumerable<string>>(
+            new string[] { "-s", "--source" },
+            LocalizableStrings.CmdSourceOptionDescription)
+        {
+            ArgumentHelpName = LocalizableStrings.CmdSourceOption
+        }.ForwardAsSingle(o => $"-property:RestoreSources={string.Join("%3B", o)}")
+        .AllowSingleArgPerToken();
+
         private static Option[] FullRestoreOptions() => 
             ImplicitRestoreOptions(true, true, true, true).Concat(
                 new Option[] {
-                    CommonOptions.VerbosityOption(),
-                    CommonOptions.InteractiveMsBuildForwardOption(),
+                    CommonOptions.VerbosityOption,
+                    CommonOptions.InteractiveMsBuildForwardOption,
                     new ForwardedOption<bool>(
                         "--use-lock-file",
                         LocalizableStrings.CmdUseLockFileOptionDescription)
@@ -42,16 +56,26 @@ namespace Microsoft.DotNet.Cli
                             .ForwardAs("-property:RestoreForceEvaluate=true") })
                 .ToArray();
 
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
         {
-            var command = new Command("restore", LocalizableStrings.AppFullName);
+            return Command;
+        }
+
+        private static Command ConstructCommand()
+        {
+            var command = new DocumentedCommand("restore", DocsLink, LocalizableStrings.AppFullName);
 
             command.AddArgument(SlnOrProjectArgument);
+            command.AddOption(CommonOptions.DisableBuildServersOption);
 
             foreach (var option in FullRestoreOptions())
             {
                 command.AddOption(option);
             }
+            command.AddOption(CommonOptions.ArchitectureOption);
+            command.SetHandler(RestoreCommand.Run);
 
             return command;
         }
@@ -63,17 +87,35 @@ namespace Microsoft.DotNet.Cli
                 command.AddOption(option);
             }
         }
+        private static string GetOsFromRid(string rid) => rid.Substring(0, rid.LastIndexOf("-"));
+        private static string GetArchFromRid(string rid) => rid.Substring(rid.LastIndexOf("-") + 1, rid.Length - rid.LastIndexOf("-") - 1);
+        public static string RestoreRuntimeArgFunc(IEnumerable<string> rids) 
+        {
+            List<string> convertedRids = new();
+            foreach (string rid in rids)
+            {
+                if (GetArchFromRid(rid.ToString()) == "amd64")
+                {
+                    convertedRids.Add($"{GetOsFromRid(rid.ToString())}-x64");
+                }
+                else
+                {
+                    convertedRids.Add($"{rid}");
+                }
+            }
+            return $"-property:RuntimeIdentifiers={string.Join("%3B", convertedRids)}";
+        }
 
         private static Option[] ImplicitRestoreOptions(bool showHelp, bool useShortOptions, bool includeRuntimeOption, bool includeNoDependenciesOption)
         {
             var options = new Option[] {
-                new ForwardedOption<IEnumerable<string>>(
+                showHelp && useShortOptions ? SourceOption : new ForwardedOption<IEnumerable<string>>(
                     useShortOptions ? new string[] {"-s", "--source" }  : new string[] { "--source" },
                     showHelp ? LocalizableStrings.CmdSourceOptionDescription : string.Empty)
                 {
                     ArgumentHelpName = LocalizableStrings.CmdSourceOption,
                     IsHidden = !showHelp
-                }.ForwardAsSingle(o => $"-property:RestoreSources={string.Join("%3B", o)}")
+                }.ForwardAsSingle(o => $"-property:RestoreSources={string.Join("%3B", o)}") // '%3B' corresponds to ';'
                 .AllowSingleArgPerToken(),
                 new ForwardedOption<string>(
                     "--packages",
@@ -114,7 +156,7 @@ namespace Microsoft.DotNet.Cli
                 {
                     IsHidden = !showHelp
                 }.ForwardAs("-property:RestoreForce=true"),
-                CommonOptions.PropertiesOption()
+                CommonOptions.PropertiesOption
             };
 
             if (includeRuntimeOption)
@@ -126,9 +168,9 @@ namespace Microsoft.DotNet.Cli
                     {
                         ArgumentHelpName = LocalizableStrings.CmdRuntimeOption,
                         IsHidden = !showHelp
-                    }.ForwardAsSingle(o => $"-property:RuntimeIdentifiers={string.Join("%3B", o)}")
+                    }.ForwardAsSingle(RestoreRuntimeArgFunc)
                     .AllowSingleArgPerToken()
-                    .AddSuggestions(Suggest.RunTimesFromProjectFile())
+                    .AddCompletions(Complete.RunTimesFromProjectFile)
                 ).ToArray();
             }
 

@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Resources.resx">
+    <body>
+      <trans-unit id="ApiCompatRunnerExecutingWorkItems">
+        <source>Executing {0} work item(s)...</source>
+        <target state="translated">正在執行 {0} 工作項目...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ApiCompatibilityHeader">
+        <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
+        <target state="translated">'{0}' ({2}) 與 '{1}' ({3}) 之間的 API 相容性錯誤:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyCultureDoesNotMatch">
+        <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
+        <target state="translated">{2} 組件文化特性 '{0}' 與 {3} 組件文化特性 '{1}' 不相符。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyLoadError">
+        <source>Could not load assembly symbols for '{0}'. Skipping the assembly.</source>
+        <target state="translated">無法載入 '{0}' 的組件符號。正在略過組件。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyNameDoesNotExist">
+        <source>Assembly with name '{0}' does not exist at {1}.</source>
+        <target state="translated">名為 '{0}' 的組件不存在於 {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyNameDoesNotMatch">
+        <source>{2} assembly name '{0}' does not match with {3} assembly name '{1}'.</source>
+        <target state="translated">{2} 組件名稱 '{0}' 與 {3} 組件名稱 '{1}' 不相符。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyPublicKeyTokenDoesNotMatch">
+        <source>{2} assembly public key token '{0}' does not match with {3} '{1}'.</source>
+        <target state="translated">{2} 組件公開金鑰權杖 '{0}' 與 {3} '{1}' 不相符。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblySearchDirectoryDoesNotExist">
+        <source>Provided assembly search directory '{0}' does not exist.</source>
+        <target state="translated">提供的元件搜尋目錄 '{0}' 不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyVersionDoesNotMatch">
+        <source>{3} assembly version '{1}' should be equal to {2} version '{0}'.</source>
+        <target state="translated">{3} 組件版本 '{1}' 應等於 {2} 版本 '{0}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyVersionIsNotCompatible">
+        <source>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</source>
+        <target state="new">{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotAddAbstractMember">
+        <source>Cannot add abstract member '{0}' to {1} because it does not exist on {2}</source>
+        <target state="translated">無法將摘要成員 '{0}' 新增至 {1}，因為其不存在於 {2} 上</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotAddAttribute">
+        <source>Cannot add attribute '{0}' to '{1}'.</source>
+        <target state="translated">無法將屬性 '{0}' 新增到 '{1}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotAddMemberToInterface">
+        <source>Cannot add interface member '{0}' to {1} because it does not exist on {2}</source>
+        <target state="translated">無法將介面成員 '{0}' 新增至 {1}，因為其不存在於 {2} 上</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotAddSealedToInterfaceMember">
+        <source>Cannot add sealed keyword to default interface member '{0}'.</source>
+        <target state="translated">無法將密封的關鍵字新增至預設介面成員 '{0}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotAddVirtualToMember">
+        <source>Cannot add virtual keyword to member '{0}'.</source>
+        <target state="translated">無法將虛擬關鍵字新增至成員 '{0}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotChangeAttribute">
+        <source>Cannot change arguments of attribute '{0}' on '{1}'.</source>
+        <target state="translated">無法變更 '{1}' 的屬性 '{0}' 引數。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotChangeParameterName">
+        <source>Parameter name on member '{0}' changed from '{1}' to '{2}'.</source>
+        <target state="translated">成員 '{0}' 上的參數名稱從 '{1}' 變更為 '{2}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotExpandVisibility">
+        <source>Visibility of '{0}' expanded from '{1}' to '{2}'.</source>
+        <target state="translated">'{0}' 的可見度已從 '{1}' 擴充為 '{2}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotReduceVisibility">
+        <source>Visibility of '{0}' reduced from '{1}' to '{2}'.</source>
+        <target state="translated">'{0}' 的可見度已從 '{1}' 縮小為 '{2}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveAttribute">
+        <source>Cannot remove attribute '{0}' from '{1}'.</source>
+        <target state="translated">無法從 '{1}' 移除屬性 '{0}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveBaseInterface">
+        <source>Type '{0}' does not implement interface '{1}' on {2} but it does on {3}</source>
+        <target state="translated">類型 '{0}' 沒有在 {2} 上實作介面 '{1}'，但在 {3} 上有</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveBaseType">
+        <source>Type '{0}' does not inherit from base type '{1}' on {2} but it does on {3}</source>
+        <target state="translated">類型 '{0}' 在 {2} 並未繼承來自 '{1}' 的基底類型，但在 {3} 上有</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveVirtualFromMember">
+        <source>Cannot remove virtual keyword from member '{0}'.</source>
+        <target state="translated">無法從成員 '{0}' 移除虛擬關鍵字。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ElementShouldNotBeNullAtIndex">
+        <source>Element should not be null. Found null at index: {0}.</source>
+        <target state="translated">元素不應為 Null。在索引找到 Null: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnumTypesMustMatch">
+        <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
+        <target state="translated">列舉 '{0}' 的基礎類型已從 '{1}' 變更為 '{2}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnumValuesMustMatch">
+        <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
+        <target state="translated">列舉 '{1}' 中的欄位 '{0}' 值已從 '{2}' 變更為 '{3}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IndexShouldBeWithinSetSizeRange">
+        <source>The index should be within the right set size range.</source>
+        <target state="translated">索引應該在正確的集大小範圍內。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MatchingAssemblyNotFound">
+        <source>Could not find matching assembly: '{0}' in any of the search directories.</source>
+        <target state="translated">在任何搜尋目錄中都找不到符合的元件: '{0}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MemberExistsOnLeft">
+        <source>Member '{0}' exists on {1} but not on {2}</source>
+        <target state="translated">成員 '{0}' 存在於 {1}，但不在 {2} 上</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MemberExistsOnRight">
+        <source>Member '{0}' exists on {2} but not on {1}</source>
+        <target state="translated">成員 '{0}' 存在於 {2} 上，但不在 {1} 上</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RightNamesAtLeastOne">
+        <source>Should at least contain one right name.</source>
+        <target state="translated">至少應包含一個正確名稱。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShouldBeGreaterThanZero">
+        <source>Value should be greater than 0.</source>
+        <target state="translated">值應大於 0。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TypeIsActuallySealed">
+        <source>Type '{0}' has the sealed modifier on {1} but not on {2}</source>
+        <target state="translated">類型 '{0}' 在 {1} 上有密封的修飾元，但在 {2} 上沒有</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TypeIsEffectivelySealed">
+        <source>Type '{0}' is sealed because it has no visible constructor on {1} but it does on {2}</source>
+        <target state="translated">類型 '{0}' 已密封，因為它在 {1} 上沒有可見的建構函式，但在 {2} 上有</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TypeMissingOnSide">
+        <source>Type '{0}' exists on {1} but not on {2}</source>
+        <target state="translated">類型 '{0}' 存在於 {1}，但不在 {2} 上</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">
+        <source>The provided right count when creating the visitor should match the right set size specified for the mappers.</source>
+        <target state="translated">建立訪客時所提供的正確計數應該與對應程式指定的正確集大小相符。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

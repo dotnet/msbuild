@@ -18,29 +18,29 @@ namespace Microsoft.DotNet.Cli.List.Reference.Tests
 {
     public class GivenDotnetListReference : SdkTest
     {
-        private Func<string, string> ListProjectReferenceCommandHelpText = (defaultVal) => $@"reference:
+        private Func<string, string> ListProjectReferenceCommandHelpText = (defaultVal) => $@"Description:
   List all project-to-project references of the project.
 
 Usage:
-  dotnet [options] list [<PROJECT>] reference
+  dotnet list [<PROJECT>] reference [options]
 
 Arguments:
   <PROJECT>    The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
-  -?, -h, --help    Show help and usage information";
+  -?, -h, --help    Show command line help.";
 
-        private Func<string, string> ListCommandHelpText = (defaultVal) => $@"list:
+        private Func<string, string> ListCommandHelpText = (defaultVal) => $@"Description:
   List references or packages of a .NET project.
 
 Usage:
-  dotnet [options] list [<PROJECT | SOLUTION>] [command]
+  dotnet list [<PROJECT | SOLUTION>] [command] [options]
 
 Arguments:
   <PROJECT | SOLUTION>    The project or solution file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
-  -?, -h, --help    Show help and usage information
+  -?, -h, --help    Show command line help.
 
 Commands:
   package      List all package references of the project or solution.
@@ -48,8 +48,6 @@ Commands:
 
         const string FrameworkNet451Arg = "-f net451";
         const string ConditionFrameworkNet451 = "== 'net451'";
-        const string FrameworkNetCoreApp10Arg = "-f netcoreapp1.0";
-        const string ConditionFrameworkNetCoreApp10 = "== 'netcoreapp1.0'";
 
         public GivenDotnetListReference(ITestOutputHelper log) : base(log)
         {
@@ -89,7 +87,7 @@ Commands:
         [Theory]
         [InlineData("idontexist.csproj")]
         [InlineData("ihave?inv@lid/char\\acters")]
-        public void WhenNonExistingProjectIsPassedItPrintsErrorAndUsage(string projName)
+        public void WhenNonExistingProjectIsPassedItPrintsError(string projName)
         {
             var setup = Setup(identifier: projName);
 
@@ -99,26 +97,40 @@ Commands:
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, projName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListProjectReferenceCommandHelpText(setup.TestRoot));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
-        public void WhenBrokenProjectIsPassedItPrintsErrorAndUsage()
+        public void WhenBrokenProjectIsPassedItPrintsError()
         {
             string projName = "Broken/Broken.csproj";
             var setup = Setup();
+
+            string brokenFolder = Path.Combine(setup.TestRoot, "Broken");
+            Directory.CreateDirectory(brokenFolder);
+            string brokenProjectPath = Path.Combine(brokenFolder, "Broken.csproj");
+            File.WriteAllText(brokenProjectPath, $@"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFrameworks>net451;{ToolsetInfo.CurrentTargetFramework}</TargetFrameworks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include=""**\*.cs""/>
+        <EmbeddedResource Include=""**\*.resx""/>
+    <!--intentonally broken-->");
 
             var cmd = new ListReferenceCommand(Log)
                     .WithProject(projName)
                     .WithWorkingDirectory(setup.TestRoot)                    
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, "Broken/Broken.csproj"));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListProjectReferenceCommandHelpText(setup.TestRoot));
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, projName));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
-        public void WhenMoreThanOneProjectExistsInTheDirectoryItPrintsErrorAndUsage()
+        public void WhenMoreThanOneProjectExistsInTheDirectoryItPrintsError()
         {
             var setup = Setup();
 
@@ -128,11 +140,11 @@ Commands:
                     .Execute(setup.ValidRefCsprojRelToOtherProjPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, workingDir + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListProjectReferenceCommandHelpText(workingDir));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
-        public void WhenNoProjectsExistsInTheDirectoryItPrintsErrorAndUsage()
+        public void WhenNoProjectsExistsInTheDirectoryItPrintsError()
         {
             var setup = Setup();
 
@@ -141,7 +153,7 @@ Commands:
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, setup.TestRoot + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListProjectReferenceCommandHelpText(setup.TestRoot));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -221,7 +233,8 @@ Commands:
 
             try
             {
-                new DotnetCommand(Log, "new", "classlib", "-o", dir.Path, "--debug:ephemeral-hive", "--no-restore")
+                new DotnetNewCommand(Log, "classlib", "-o", dir.Path, "--no-restore")
+                    .WithVirtualHive()
                     .WithWorkingDirectory(dir.Path)
                     .Execute()
                 .Should().Pass();

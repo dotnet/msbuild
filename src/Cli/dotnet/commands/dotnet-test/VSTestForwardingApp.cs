@@ -2,9 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Test;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -16,9 +18,13 @@ namespace Microsoft.DotNet.Cli
             : base(GetVSTestExePath(), argsToForward)
         {
             (bool hasRootVariable, string rootVariableName, string rootValue) = GetRootVariable();
-            if (!hasRootVariable) {
+            if (!hasRootVariable)
+            {
                 WithEnvironmentVariable(rootVariableName, rootValue);
+                VSTestTrace.SafeWriteTrace(() => $"Root variable set {rootVariableName}:{rootValue}");
             }
+
+            VSTestTrace.SafeWriteTrace(() => $"Forwarding to '{GetVSTestExePath()}' with args \"{argsToForward?.Aggregate((a, b) => $"{a} | {b}")}\"");
         }
 
         private static string GetVSTestExePath()
@@ -41,7 +47,9 @@ namespace Microsoft.DotNet.Cli
             bool hasRootVariable = Environment.GetEnvironmentVariable(rootVariableName) != null;
             string rootValue = hasRootVariable ? null : Path.GetDirectoryName(new Muxer().MuxerPath);
 
-            return (hasRootVariable, rootVariableName, rootValue);
+            // We rename env variable to support --arch switch that relies on DOTNET_ROOT/DOTNET_ROOT(x86)
+            // We provide VSTEST_WINAPPHOST_ only in case of testhost*.exe removing VSTEST_WINAPPHOST_ prefix and passing as env vars.
+            return (hasRootVariable, $"VSTEST_WINAPPHOST_{rootVariableName}", rootValue);
         }
     }
 }

@@ -7,7 +7,7 @@ using Microsoft.DotNet.InternalAbstractions;
 
 namespace Microsoft.Extensions.EnvironmentAbstractions
 {
-    internal class DirectoryWrapper: IDirectory
+    internal class DirectoryWrapper : IDirectory
     {
         public bool Exists(string path)
         {
@@ -17,6 +17,11 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
         public ITemporaryDirectory CreateTemporaryDirectory()
         {
             return new TemporaryDirectory();
+        }
+
+        public string CreateTemporarySubdirectory()
+        {
+            return CreateTemporaryDirectory().DirectoryPath;
         }
 
         public IEnumerable<string> EnumerateDirectories(string path)

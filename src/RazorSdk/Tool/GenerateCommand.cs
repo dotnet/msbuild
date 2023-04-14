@@ -1,5 +1,6 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System;
 using System.Collections.Generic;
@@ -36,6 +37,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
             RootNamespace = Option("--root-namespace", "root namespace for generated code", CommandOptionType.SingleValue);
             CSharpLanguageVersion = Option("--csharp-language-version", "csharp language version generated code", CommandOptionType.SingleValue);
             GenerateDeclaration = Option("--generate-declaration", "Generate declaration", CommandOptionType.NoValue);
+            SupportLocalizedComponentNames = Option("--support-localized-component-names", "support localized component names", CommandOptionType.NoValue);
         }
 
         public CommandOption Sources { get; }
@@ -67,6 +69,8 @@ namespace Microsoft.NET.Sdk.Razor.Tool
         public CommandOption CSharpLanguageVersion { get; }
 
         public CommandOption GenerateDeclaration { get; }
+
+        public CommandOption SupportLocalizedComponentNames { get; }
 
         protected override Task<int> ExecuteCoreAsync()
         {
@@ -201,6 +205,11 @@ namespace Microsoft.NET.Sdk.Razor.Tool
                 {
                     b.Features.Add(new SetSuppressPrimaryMethodBodyOptionFeature());
                     b.Features.Add(new SuppressChecksumOptionsFeature());
+                }
+
+                if (SupportLocalizedComponentNames.HasValue())
+                {
+                    b.Features.Add(new SetSupportLocalizedComponentNamesFeature());
                 }
 
                 if (RootNamespace.HasValue())
@@ -419,6 +428,21 @@ namespace Microsoft.NET.Sdk.Razor.Tool
                 }
 
                 options.SuppressPrimaryMethodBody = true;
+            }
+        }
+
+        private class SetSupportLocalizedComponentNamesFeature : RazorEngineFeatureBase, IConfigureRazorCodeGenerationOptionsFeature
+        {
+            public int Order { get; set; }
+
+            public void Configure(RazorCodeGenerationOptionsBuilder options)
+            {
+                if (options == null)
+                {
+                    throw new ArgumentNullException(nameof(options));
+                }
+
+                options.SupportLocalizedComponentNames = true;
             }
         }
     }

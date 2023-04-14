@@ -9,7 +9,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
-<Project ToolsVersion="14.0" TreatAsLocalProperty="RuntimeIdentifier">
+<Project ToolsVersion="14.0">
   <PropertyGroup>
     <UsingMicrosoftNETSdkBlazorWebAssembly>true</UsingMicrosoftNETSdkBlazorWebAssembly>
   </PropertyGroup>
@@ -19,4 +19,10 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <Import Project="$(_BlazorWebAssemblyPropsFile)" />
+
+  <ItemGroup Condition="'$(Language)' == 'C#' AND ('$(ImplicitUsings)' == 'true' or '$(ImplicitUsings)' == 'enable')">
+    <Using Include="Microsoft.Extensions.Configuration" />
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
+    <Using Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
 </Project>

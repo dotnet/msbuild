@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Packaging;
 
 namespace Microsoft.DotNet.ToolManifest
 {
@@ -153,7 +155,7 @@ namespace Microsoft.DotNet.ToolManifest
             }
         }
 
-        public FilePath FindFirst()
+        public FilePath FindFirst(bool createIfNotFound = false)
         {
             foreach ((FilePath possibleManifest, DirectoryPath _) in EnumerateDefaultAllPossibleManifests())
             {
@@ -162,12 +164,66 @@ namespace Microsoft.DotNet.ToolManifest
                     return possibleManifest;
                 }
             }
-
+            if (createIfNotFound)
+            {
+                DirectoryPath manifestInsertFolder = GetDirectoryToCreateToolManifest();
+                if (manifestInsertFolder.Value != null)
+                {
+                    return new FilePath(WriteManifestFile(manifestInsertFolder));
+                }
+            }
             throw new ToolManifestCannotBeFoundException(
-                LocalizableStrings.CannotFindAManifestFile,
-                string.Format(LocalizableStrings.ListOfSearched,
-                    string.Join(Environment.NewLine,
-                        EnumerateDefaultAllPossibleManifests().Select(f => "\t" + f.manifestfile.Value))));
+                    LocalizableStrings.CannotFindAManifestFile,
+                    string.Format(LocalizableStrings.ListOfSearched,
+                        string.Join(Environment.NewLine,
+                            EnumerateDefaultAllPossibleManifests().Select(f => "\t" + f.manifestfile.Value))));
+        }
+
+        /*
+        The --create-manifest-if-needed will use the following priority to choose the folder where the tool manifest goes:
+            1. Walk up the directory tree searching for one that has a.git subfolder
+            2. Walk up the directory tree searching for one that has a .sln/git file in it
+            3. Use the current working directory
+        */
+        private DirectoryPath GetDirectoryToCreateToolManifest()
+        {
+            DirectoryPath? currentSearchDirectory = _probeStart;
+            while (currentSearchDirectory.HasValue && currentSearchDirectory.Value.GetParentPathNullable()!=null)
+            {
+                var currentSearchGitDirectory = currentSearchDirectory.Value.WithSubDirectories(Constants.GitDirectoryName);
+                if (_fileSystem.Directory.Exists(currentSearchGitDirectory.Value))
+                {
+                    return currentSearchDirectory.Value;
+                }
+                if (currentSearchDirectory.Value.Value != null)
+                {
+                    if (_fileSystem.Directory.EnumerateFiles(currentSearchDirectory.Value.Value)
+                        .Any(filename => Path.GetExtension(filename).Equals(".sln", StringComparison.OrdinalIgnoreCase))
+                        || _fileSystem.File.Exists(currentSearchDirectory.Value.WithFile(".git").Value))
+
+                    {
+                        return currentSearchDirectory.Value;
+                    }
+                }
+                currentSearchDirectory = currentSearchDirectory.Value.GetParentPathNullable();
+            }
+            return _probeStart;
+        }
+
+        private string WriteManifestFile(DirectoryPath folderPath)
+        {
+            var manifestFileContent = """
+                {
+                  "version": 1,
+                  "isRoot": true,
+                  "tools": {}
+                }
+                """;
+            _fileSystem.Directory.CreateDirectory(Path.Combine(folderPath.Value, Constants.DotConfigDirectoryName));
+            string manifestFileLocation = Path.Combine(folderPath.Value, Constants.DotConfigDirectoryName, Constants.ToolManifestFileName);
+            _fileSystem.File.WriteAllText(manifestFileLocation, manifestFileContent);
+
+            return manifestFileLocation;
         }
 
         /// <summary>

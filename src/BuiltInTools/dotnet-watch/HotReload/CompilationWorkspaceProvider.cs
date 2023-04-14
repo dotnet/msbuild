@@ -24,15 +24,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             CancellationToken cancellationToken)
         {
             var taskCompletionSource = new TaskCompletionSource<(Solution, WatchHotReloadService)>(TaskCreationOptions.RunContinuationsAsynchronously);
-            try
-            {
-                CreateProject(taskCompletionSource, hotReloadCapabilitiesTask, projectPath, reporter, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                taskCompletionSource.TrySetException(ex);
-            }
-
+            CreateProject(taskCompletionSource, hotReloadCapabilitiesTask, projectPath, reporter, cancellationToken);
             return taskCompletionSource.Task;
         }
 
@@ -43,56 +35,57 @@ namespace Microsoft.DotNet.Watcher.Tools
             IReporter reporter,
             CancellationToken cancellationToken)
         {
-            var workspace = MSBuildWorkspace.Create();
-
-            workspace.WorkspaceFailed += (_sender, diag) =>
-            {
-                if (diag.Diagnostic.Kind == WorkspaceDiagnosticKind.Warning)
-                {
-                    reporter.Verbose($"MSBuildWorkspace warning: {diag.Diagnostic}");
-                }
-                else
-                {
-                    taskCompletionSource.TrySetException(new InvalidOperationException($"Failed to create MSBuildWorkspace: {diag.Diagnostic}"));
-                }
-            };
-
-            await workspace.OpenProjectAsync(projectPath, cancellationToken: cancellationToken);
-            var currentSolution = workspace.CurrentSolution;
-
-            var hotReloadCapabilities = await GetHotReloadCapabilitiesAsync(hotReloadCapabilitiesTask, reporter);
-            var hotReloadService = new WatchHotReloadService(workspace.Services, await hotReloadCapabilitiesTask);
-
-            await hotReloadService.StartSessionAsync(currentSolution, cancellationToken);
-
-            // Read the documents to memory
-            await Task.WhenAll(
-                currentSolution.Projects.SelectMany(p => p.Documents.Concat(p.AdditionalDocuments)).Select(d => d.GetTextAsync(cancellationToken)));
-
-            // Warm up the compilation. This would help make the deltas for first edit appear much more quickly
-            foreach (var project in currentSolution.Projects)
-            {
-                await project.GetCompilationAsync(cancellationToken);
-            }
-
-            taskCompletionSource.TrySetResult((currentSolution, hotReloadService));
-        }
-
-        private static async Task<ImmutableArray<string>> GetHotReloadCapabilitiesAsync(Task<ImmutableArray<string>> hotReloadCapabilitiesTask, IReporter reporter)
-        {
             try
             {
-                var capabilities = await hotReloadCapabilitiesTask;
-                reporter.Verbose($"Hot reload capabilities: {string.Join(" ", capabilities)}.");
+                var workspace = MSBuildWorkspace.Create();
 
-                return capabilities;
+                workspace.WorkspaceFailed += (_sender, diag) =>
+                {
+                    if (diag.Diagnostic.Kind == WorkspaceDiagnosticKind.Warning)
+                    {
+                        reporter.Verbose($"MSBuildWorkspace warning: {diag.Diagnostic}");
+                    }
+                    else
+                    {
+                        taskCompletionSource.TrySetException(new ApplicationException($"Failed to create MSBuildWorkspace: {diag.Diagnostic}"));
+                    }
+                };
+
+                await workspace.OpenProjectAsync(projectPath, cancellationToken: cancellationToken);
+                var currentSolution = workspace.CurrentSolution;
+
+                ImmutableArray<string> hotReloadCapabilities;
+                try
+                {
+                    hotReloadCapabilities = await hotReloadCapabilitiesTask;
+                }
+                catch (Exception ex)
+                {
+                    taskCompletionSource.TrySetException(new ApplicationException("Failed to read Hot Reload capabilities: " + ex.Message, ex));
+                    return;
+                }
+
+                reporter.Verbose($"Hot reload capabilities: {string.Join(" ", hotReloadCapabilities)}.", emoji: "🔥");
+
+                var hotReloadService = new WatchHotReloadService(workspace.Services, hotReloadCapabilities);
+
+                await hotReloadService.StartSessionAsync(currentSolution, cancellationToken);
+
+                // Read the documents to memory
+                await Task.WhenAll(
+                    currentSolution.Projects.SelectMany(p => p.Documents.Concat(p.AdditionalDocuments)).Select(d => d.GetTextAsync(cancellationToken)));
+
+                // Warm up the compilation. This would help make the deltas for first edit appear much more quickly
+                foreach (var project in currentSolution.Projects)
+                {
+                    await project.GetCompilationAsync(cancellationToken);
+                }
+
+                taskCompletionSource.TrySetResult((currentSolution, hotReloadService));
             }
             catch (Exception ex)
             {
-                reporter.Verbose("Reading hot reload capabilities failed. Using default capabilities.");
-                reporter.Verbose(ex.ToString());
-
-                return ImmutableArray.Create("Baseline", "AddDefinitionToExistingType", "NewTypeDefinition");
+                taskCompletionSource.TrySetException(ex);
             }
         }
     }

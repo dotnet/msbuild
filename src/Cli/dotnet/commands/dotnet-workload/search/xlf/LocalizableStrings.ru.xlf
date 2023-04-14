@@ -3,33 +3,33 @@
   <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>Search for avaliable workloads.</source>
-        <target state="needs-review-translation">Перечисление средств, установленных глобально или локально.</target>
+        <source>Search for available workloads.</source>
+        <target state="translated">Поиск доступных рабочих нагрузок.</target>
         <note />
       </trans-unit>
       <trans-unit id="DescriptionColumnName">
         <source>Description</source>
-        <target state="new">Description</target>
+        <target state="translated">Описание</target>
         <note />
       </trans-unit>
       <trans-unit id="PlatformColumnName">
         <source>Platforms</source>
-        <target state="new">Platforms</target>
+        <target state="translated">Платформы</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdColumnName">
         <source>Workload ID</source>
-        <target state="new">Workload ID</target>
+        <target state="translated">ИД рабочей нагрузки</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdStubArgumentDescription">
-        <source>Workload id to search for.</source>
-        <target state="new">Workload id to search for.</target>
+        <source>The text to search for in the IDs and descriptions of available workloads.</source>
+        <target state="translated">Текст для поиска в идентификаторах и описаниях доступных рабочих нагрузок.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdStubArgumentName">
-        <source>WORKLOAD_ID</source>
-        <target state="new">WORKLOAD_ID</target>
+        <source>SEARCH_STRING</source>
+        <target state="translated">SEARCH_STRING</target>
         <note />
       </trans-unit>
     </body>

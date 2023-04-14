@@ -14,6 +14,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using NuGet.Versioning;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -31,7 +32,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-workloadtestplatform"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-workloadtestplatform"
             };
 
             var testAsset = _testAssetsManager
@@ -49,7 +50,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-missingworkloadtestplatform"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-missingworkloadtestplatform"
             };
 
             var testAsset = _testAssetsManager
@@ -69,7 +70,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-missingworkloadtestplatform"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-missingworkloadtestplatform"
             };
 
             var testAsset = _testAssetsManager
@@ -78,6 +79,7 @@ namespace Microsoft.NET.Build.Tests
             var getValuesCommand = new GetValuesCommand(testAsset, "SuggestedWorkload", GetValuesCommand.ValueType.Item);
             getValuesCommand.DependsOnTargets = "GetSuggestedWorkloads";
             getValuesCommand.MetadataNames.Add("VisualStudioComponentId");
+            getValuesCommand.MetadataNames.Add("VisualStudioComponentIds");
             getValuesCommand.ShouldRestore = false;
 
             getValuesCommand.Execute()
@@ -86,7 +88,11 @@ namespace Microsoft.NET.Build.Tests
 
             getValuesCommand.GetValuesWithMetadata().Select(valueAndMetadata => (valueAndMetadata.value, valueAndMetadata.metadata["VisualStudioComponentId"]))
                 .Should()
-                .BeEquivalentTo(("microsoft-net-sdk-missingtestworkload", "microsoft.net.sdk.missingtestworkload"));
+                .BeEquivalentTo(new[] { ("microsoft-net-sdk-missingtestworkload", "microsoft.net.sdk.missingtestworkload") });
+
+            getValuesCommand.GetValuesWithMetadata().Select(valueAndMetadata => (valueAndMetadata.value, valueAndMetadata.metadata["VisualStudioComponentIds"]))
+                .Should()
+                .BeEquivalentTo(new[] { ("microsoft-net-sdk-missingtestworkload", "microsoft.net.sdk.missingtestworkload") });
         }
 
         [Fact]
@@ -95,7 +101,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-android;net5.0-ios"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-android;{ToolsetInfo.CurrentTargetFramework}-ios"
             };
 
             var testAsset = _testAssetsManager
@@ -116,13 +122,13 @@ namespace Microsoft.NET.Build.Tests
             //  .HaveStdOutContaining("android");
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/19866")]
         public void It_should_fail_to_build_without_workload_when_multitargeted()
         {
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-android;net5.0-ios"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-android;{ToolsetInfo.CurrentTargetFramework}-ios"
             };
 
             var testAsset = _testAssetsManager
@@ -135,8 +141,6 @@ namespace Microsoft.NET.Build.Tests
                 .And
                 .HaveStdOutContaining("NETSDK1147")
                 .And
-                .HaveStdOutContaining("ios")
-                .And
                 .HaveStdOutContaining("android");
         }
 
@@ -146,7 +150,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-foo;net5.0-bar"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-foo;{ToolsetInfo.CurrentTargetFramework}-bar"
             };
 
             var testAsset = _testAssetsManager
@@ -167,7 +171,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-workloadtestplatform"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-workloadtestplatform"
             };
 
             var testAsset = _testAssetsManager
@@ -189,7 +193,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -215,7 +219,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-workloadtestplatform"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-workloadtestplatform"
             };
 
             var testAsset = _testAssetsManager
@@ -236,6 +240,91 @@ namespace Microsoft.NET.Build.Tests
                 .GetValues()
                 .Should()
                 .BeEquivalentTo("true");
+        }
+
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/19866")]
+        public void It_should_get_suggested_workload_by_GetRequiredWorkloads_target()
+        {
+            var mainProject = new TestProject()
+            {
+                Name = "MainProject",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-android",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager
+                .CreateTestProject(mainProject);
+
+            var getValuesCommand =
+                new GetValuesCommand(testAsset, "_ResolvedSuggestedWorkload", GetValuesCommand.ValueType.Item);
+            getValuesCommand.DependsOnTargets = "_GetRequiredWorkloads";
+            getValuesCommand.ShouldRestore = false;
+
+            getValuesCommand.Execute("/p:SkipResolvePackageAssets=true")
+                .Should()
+                .Pass();
+
+            getValuesCommand.GetValues()
+                .Should()
+                .BeEquivalentTo("android");
+        }
+
+        [Theory(Skip = "https://github.com/dotnet/installer/issues/13361")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}-android;{ToolsetInfo.CurrentTargetFramework}-ios", $"{ToolsetInfo.CurrentTargetFramework}-android;{ToolsetInfo.CurrentTargetFramework}-ios", "android;android-aot")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, $"{ToolsetInfo.CurrentTargetFramework};{ToolsetInfo.CurrentTargetFramework}-android;{ToolsetInfo.CurrentTargetFramework}-ios", "macos;android-aot")]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework};{ToolsetInfo.CurrentTargetFramework}-ios", $"{ToolsetInfo.CurrentTargetFramework};{ToolsetInfo.CurrentTargetFramework}-android", "macos;android-aot")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, ToolsetInfo.CurrentTargetFramework, "macos")]
+        public void Given_multi_target_It_should_get_suggested_workload_by_GetRequiredWorkloads_target(string mainTfm, string referencingTfm, string expected)
+        {
+            // Skip Test if SDK is < 6.0.400
+            var sdkVersion = SemanticVersion.Parse(TestContext.Current.ToolsetUnderTest.SdkVersion);
+            if (new SemanticVersion(sdkVersion.Major, sdkVersion.Minor, sdkVersion.Patch) < new SemanticVersion(6, 0, 400))
+                return; // MAUI was removed from earlier versions of the SDK
+
+            var mainProject = new TestProject()
+            {
+                Name = "MainProject",
+                TargetFrameworks = mainTfm,
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var referencedProject = new TestProject()
+            {
+                Name = "ReferencedProject",
+                TargetFrameworks = referencingTfm,
+                IsSdkProject = true,
+            };
+            referencedProject.AdditionalProperties["RunAOTCompilation"] = "true";
+
+            mainProject.ReferencedProjects.Add(referencedProject);
+
+
+            var testAsset = _testAssetsManager
+                .CreateTestProject(mainProject, identifier: mainTfm + "_" + referencingTfm);
+
+            var getValuesCommand =
+                new GetValuesCommand(testAsset, "_ResolvedSuggestedWorkload", GetValuesCommand.ValueType.Item);
+            getValuesCommand.DependsOnTargets = "_GetRequiredWorkloads";
+            getValuesCommand.ShouldRestore = false;
+
+            getValuesCommand.Execute("/p:SkipResolvePackageAssets=true")
+                .Should()
+                .Pass();
+
+            if (expected == null)
+            {
+                getValuesCommand.GetValues()
+                    .Should()
+                    .BeEmpty();
+            }
+            else
+            {
+                getValuesCommand.GetValues()
+                    .Should()
+                    .Contain(expected.Split(";")); // there are extra workloads in certain platform, only assert contains
+            }
         }
     }
 }

@@ -16,26 +16,33 @@ namespace Microsoft.NET.Pack.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.1.0.60101")]
         public void It_packs_successfully()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
                 .WithSource();
 
-            new PackCommand(Log, testAsset.TestRoot)
+            var packCommand = new PackCommand(testAsset);
+
+            packCommand
                 .Execute()
                 .Should()
                 .Pass();
 
-            var outputDirectory = new DirectoryInfo(Path.Combine(testAsset.TestRoot, "bin", "Debug"));
-            outputDirectory.Should().OnlyHaveFiles(new[] {
+            var packageDirectory = packCommand.GetPackageDirectory();
+            packageDirectory.Should().OnlyHaveFiles(new[]
+            {
                 "HelloWorld.1.0.0.nupkg",
-                "netcoreapp2.1/HelloWorld.dll",
-                "netcoreapp2.1/HelloWorld.pdb",
-                "netcoreapp2.1/HelloWorld.deps.json",
-                "netcoreapp2.1/HelloWorld.runtimeconfig.json",
-                "netcoreapp2.1/HelloWorld.runtimeconfig.dev.json",
+            }, SearchOption.TopDirectoryOnly);
+
+            var outputDirectory = packCommand.GetOutputDirectory();
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                $"HelloWorld.dll",
+                $"HelloWorld.pdb",
+                $"HelloWorld.deps.json",
+                $"HelloWorld.runtimeconfig.json",
+                $"HelloWorld{EnvironmentInfo.ExecutableExtension}",
             });
         }
     }

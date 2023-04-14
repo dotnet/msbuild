@@ -1,0 +1,32 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithDerivedSymbolFileRename",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithDerivedSymbolFileRename",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithDerivedSymbolFileRename",
+  "shortName": "TestAssets.TemplateWithDerivedSymbolFileRename",
+  "sourceName": "Company.Web.Application1",
+  "symbols": {
+    "DerivedRename": {
+      "description": "The final part of a multi-dotted name",
+      "FileRename": "Application1",
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "AfterLastDot"
+    }
+  },
+  "Forms": {
+    "AfterLastDot": {
+      "identifier": "replace",
+      "pattern": "^.*\\.(?=[^\\.]+$)", // match everything up to and including the final "."
+      "replacement": ""
+    }
+  },
+  "primaryOutputs": [
+    {
+      "path": "Application1.cs"
+    }
+  ]
+}

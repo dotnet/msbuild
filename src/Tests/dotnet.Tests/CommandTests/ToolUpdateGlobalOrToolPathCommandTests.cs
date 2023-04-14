@@ -17,7 +17,9 @@ using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Update.LocalizableStrings
 using Microsoft.DotNet.ShellShim;
 using System.IO;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Runtime.InteropServices;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
@@ -83,7 +85,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => command.Execute();
 
-            a.ShouldThrow<GracefulException>().And.Message
+            a.Should().Throw<GracefulException>().And.Message
                 .Should().Contain(
                    Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
         }
@@ -131,7 +133,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         _mockFeeds
                     )),
                     new ToolPackageUninstallerMock(_fileSystem, _store)),
-                (_) => GetMockedShellShimRepository(),
+                (_, _) => GetMockedShellShimRepository(),
                 _reporter);
 
             var toolUpdateCommand = new ToolUpdateCommand(
@@ -173,7 +175,22 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             _reporter.Lines.First().Should().Contain(string.Format(
                 LocalizableStrings.UpdateSucceeded,
-                _packageId, LowerPackageVersion, HigherPreviewPackageVersion));
+                _packageId, LowerPackageVersion, HigherPackageVersion));
+        }
+
+        [Fact]
+        public void GivenAnExistedLowerversionInstallationWhenCallWithPrereleaseVersionItCanPrintSuccessMessage()
+        {
+            CreateInstallCommand($"-g {_packageId} --version {LowerPackageVersion}").Execute();
+            _reporter.Lines.Clear();
+
+            var command = CreateUpdateCommand($"-g {_packageId} --prerelease");
+
+            command.Execute();
+
+            _reporter.Lines.First().Should().Contain(string.Format(
+                LocalizableStrings.UpdateSucceeded,
+                _packageId, LowerPackageVersion, HigherPackageVersion));
         }
 
         [Fact]
@@ -186,7 +203,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => command.Execute();
 
-            a.ShouldThrow<GracefulException>().And.Message
+            a.Should().Throw<GracefulException>().And.Message
                 .Should().Contain(
                     string.Format(LocalizableStrings.UpdateToLowerVersion,
                         LowerPackageVersion,
@@ -205,10 +222,25 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var command = CreateUpdateCommand($"-g {_packageId}");
 
             command.Execute();
+            
+            _reporter.Lines.First().Should().Contain(string.Format(
+                LocalizableStrings.UpdateSucceededStableVersionNoChange,
+                _packageId, HigherPackageVersion));
+        }
+
+        [Fact]
+        public void GivenAnExistedSameVersionInstallationWhenCallWithPrereleaseItUsesAPrereleaseSuccessMessage()
+        {
+            CreateInstallCommand($"-g {_packageId} --version {HigherPreviewPackageVersion}").Execute();
+            _reporter.Lines.Clear();
+
+            var command = CreateUpdateCommand($"-g {_packageId} --version {HigherPreviewPackageVersion}");
+
+            command.Execute();
 
             _reporter.Lines.First().Should().Contain(string.Format(
-                LocalizableStrings.UpdateSucceededVersionNoChange,
-                _packageId, HigherPackageVersion));
+                LocalizableStrings.UpdateSucceededPreVersionNoChange,
+                _packageId, HigherPreviewPackageVersion));
         }
 
         [Fact]
@@ -231,11 +263,11 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         ),
                         installCallback: () => throw new ToolConfigurationException("Simulated error")),
                     new ToolPackageUninstallerMock(_fileSystem, _store)),
-                _ => GetMockedShellShimRepository(),
+                (_, _) => GetMockedShellShimRepository(),
                 _reporter);
 
             Action a = () => command.Execute();
-            a.ShouldThrow<GracefulException>().And.Message.Should().Contain(
+            a.Should().Throw<GracefulException>().And.Message.Should().Contain(
                 string.Format(LocalizableStrings.UpdateToolFailed, _packageId) + Environment.NewLine +
                 string.Format(Tools.Tool.Install.LocalizableStrings.InvalidToolConfiguration, "Simulated error"));
         }
@@ -260,13 +292,59 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         ),
                         installCallback: () => throw new ToolConfigurationException("Simulated error")),
                     new ToolPackageUninstallerMock(_fileSystem, _store)),
-                _ => GetMockedShellShimRepository(),
+                (_, _) => GetMockedShellShimRepository(),
                 _reporter);
 
             Action a = () => command.Execute();
 
             _store.EnumeratePackageVersions(_packageId).Single().Version.ToFullString().Should()
                 .Be(LowerPackageVersion);
+        }
+
+        [Fact]
+        public void GivenPackagedShimIsProvidedWhenRunWithPackageIdItCreatesShimUsingPackagedShim()
+        {
+            CreateInstallCommand($"-g {_packageId} --version {LowerPackageVersion}").Execute();
+            _reporter.Lines.Clear();
+
+            var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
+            var prepackagedShimPath = Path.Combine(Path.GetTempPath(), "SimulatorCommand" + extension);
+            var tokenToIdentifyPackagedShim = "packagedShim";
+            _fileSystem.File.WriteAllText(prepackagedShimPath, tokenToIdentifyPackagedShim);
+
+            var packagedShimsMap = new Dictionary<PackageId, IReadOnlyList<FilePath>>
+            {
+                [_packageId] = new[] {new FilePath(prepackagedShimPath)}
+            };
+
+            string options = $"-g {_packageId}";
+            ParseResult result = Parser.Instance.Parse("dotnet tool update " + options);
+            var command = new ToolUpdateGlobalOrToolPathCommand(
+                result,
+                (_, _) => (_store, _store, new ToolPackageInstallerMock(
+                        _fileSystem,
+                        _store,
+                        new ProjectRestorerMock(
+                            _fileSystem,
+                            _reporter,
+                            _mockFeeds
+                        ),
+                        packagedShimsMap: packagedShimsMap),
+                    new ToolPackageUninstallerMock(_fileSystem, _store)),
+                (_, _) => GetMockedShellShimRepository(),
+                _reporter);
+
+            command.Execute();
+
+            _fileSystem.File.ReadAllText(ExpectedCommandPath()).Should().Be(tokenToIdentifyPackagedShim);
+
+            string ExpectedCommandPath()
+            {
+                var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
+                return Path.Combine(
+                    _shimsDirectory,
+                    "SimulatorCommand" + extension);
+            }
         }
 
         private ToolInstallGlobalOrToolPathCommand CreateInstallCommand(string options)
@@ -283,7 +361,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         _reporter,
                         _mockFeeds
                     ))),
-                (_) => GetMockedShellShimRepository(),
+                (_, _) => GetMockedShellShimRepository(),
                 _environmentPathInstructionMock,
                 _reporter);
         }
@@ -303,7 +381,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         _mockFeeds
                     )),
                     new ToolPackageUninstallerMock(_fileSystem, _store)),
-                (_) => GetMockedShellShimRepository(),
+                (_, _) => GetMockedShellShimRepository(),
                 _reporter);
         }
 
@@ -311,8 +389,10 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         {
             return new ShellShimRepository(
                     new DirectoryPath(_shimsDirectory),
+                    string.Empty,
                     fileSystem: _fileSystem,
-                    appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem));
+                    appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem),
+                    filePermissionSetter: new ToolInstallGlobalOrToolPathCommandTests.NoOpFilePermissionSetter());
         }
     }
 }

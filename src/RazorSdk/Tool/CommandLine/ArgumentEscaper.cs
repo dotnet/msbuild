@@ -1,5 +1,6 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool.CommandLineUtils
         /// receive the same string[] args.
         /// </summary>
         /// <remarks>
-        /// See https://blogs.msdn.microsoft.com/twistylittlepassagesallalike/2011/04/23/everyone-quotes-command-line-arguments-the-wrong-way/
+        /// See https://docs.microsoft.com/archive/blogs/twistylittlepassagesallalike/everyone-quotes-command-line-arguments-the-wrong-way
         /// </remarks>
         /// <param name="args">The arguments to concatenate.</param>
         /// <returns>The escaped arguments, concatenated.</returns>

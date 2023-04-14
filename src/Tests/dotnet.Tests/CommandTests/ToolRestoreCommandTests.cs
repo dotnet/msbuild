@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using FluentAssertions;
@@ -230,7 +231,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             };
 
             Action a = () => toolRestoreCommand.Execute();
-            a.ShouldThrow<ToolPackageException>()
+            a.Should().Throw<ToolPackageException>()
                 .And.Message
                 .Should().BeOneOf(allPossibleErrorMessage, "Run in parallel, no order guarantee");
         }
@@ -415,7 +416,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 return _toReturn;
             }
 
-            public FilePath FindFirst()
+            public FilePath FindFirst(bool createManifestFileOption = false)
             {
                 throw new NotImplementedException();
             }
@@ -433,7 +434,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 throw new ToolManifestCannotBeFoundException("In test cannot find manifest");
             }
 
-            public FilePath FindFirst()
+            public FilePath FindFirst(bool createManifestFileOption = false)
             {
                 throw new NotImplementedException();
             }

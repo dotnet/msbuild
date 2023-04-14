@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Microsoft",
+  "classifications": [
+    "Config"
+  ],
+  "name": "NuGet Config",
+  "generatorVersions": "[1.0.0.0-*)",
+  "description": "A file for configuring the locations NuGet will search for packages",
+  "tags": {
+    "type": "item"
+  },
+  "groupIdentity": "ItemNugetConfig",
+  "precedence": "100",
+  "identity": "Microsoft.Standard.QuickStarts.Nuget.Config",
+  "shortName": [ "nugetconfig", "nuget.config" ],
+  "primaryOutputs": [
+    {
+      "path": "nuget.config"
+    }
+  ],
+  "defaultName": "nuget.config",
+  "symbols": {
+    "HostIdentifier": {
+      "type": "bind",
+      "binding": "HostIdentifier"
+    }
+  },
+  "postActions": [
+    {
+      "id": "chmod",
+      "condition": "(OS != \"Windows_NT\") && (HostIdentifier == \"dotnetcli\" || HostIdentifier == \"dotnetcli-preview\")",
+      "description": "Apply permissions",
+      "manualInstructions": [
+        {
+          "text": "Run 'chmod 600 nuget.config'"
+        }
+      ],
+      "actionId": "cb9a6cf3-4f5c-4860-b9d2-03a574959774",
+      "args": {
+        "600": "nuget.config"
+      },
+      "continueOnError": false
+    },
+    {
+      "id": "open-file",
+      "condition": "(HostIdentifier != \"dotnetcli\" && HostIdentifier != \"dotnetcli-preview\")",
+      "description": "Opens nuget.config in the editor",
+      "manualInstructions": [],
+      "actionId": "84C0DA21-51C8-4541-9940-6CA19AF04EE6",
+      "args": {
+        "files": "0"
+      },
+      "continueOnError": true
+    }
+  ]
+}

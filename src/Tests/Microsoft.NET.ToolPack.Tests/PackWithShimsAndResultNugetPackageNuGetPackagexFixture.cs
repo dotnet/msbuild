@@ -60,7 +60,7 @@ namespace Microsoft.NET.ToolPack.Tests
                 nameof(NupkgOfPackWithShimsFixture) + multiTarget + targetFramework,
                 targetFramework);
 
-            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+            var packCommand = new PackCommand(helloWorldAsset);
             packCommand.Execute().Should().Pass();
 
             return packCommand.GetNuGetPackage(packageVersion: _packageVersion);
@@ -78,7 +78,7 @@ namespace Microsoft.NET.ToolPack.Tests
                 {
                     XNamespace ns = project.Root.Name.Namespace;
                     XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64"));
+                    propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", $"win-x64;{ToolsetInfo.LatestMacRuntimeIdentifier}-x64"));
                     propertyGroup.Add(new XElement(ns + "ToolCommandName", _customToolCommandName));
                 })
                 .WithTargetFrameworkOrFrameworks(targetFramework, multiTarget);

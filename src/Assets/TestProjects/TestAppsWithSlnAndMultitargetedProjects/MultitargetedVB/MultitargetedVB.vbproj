@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>MultitargetedVB</RootNamespace>
-    <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks>$(CurrentTargetFramework)</TargetFrameworks>
   </PropertyGroup>
 
 </Project>

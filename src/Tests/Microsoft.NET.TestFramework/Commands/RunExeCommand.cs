@@ -15,7 +15,7 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public RunExeCommand(ITestOutputHelper log, string commandPath, params string[] args) : base(log)
         {
-            if (!File.Exists(commandPath))
+            if (!File.Exists(commandPath) && !ToolsetInfo.TryResolveCommand(commandPath, out _))
             {
                 throw new ArgumentException($"Cannot find command {commandPath}");
             }
@@ -32,7 +32,7 @@ namespace Microsoft.NET.TestFramework.Commands
                 Arguments = args.ToList(),
                 WorkingDirectory = WorkingDirectory,
             };
-            TestContext.Current.AddTestEnvironmentVariables(sdkCommandSpec);
+            TestContext.Current.AddTestEnvironmentVariables(sdkCommandSpec.Environment);
             return sdkCommandSpec;
         }
     }

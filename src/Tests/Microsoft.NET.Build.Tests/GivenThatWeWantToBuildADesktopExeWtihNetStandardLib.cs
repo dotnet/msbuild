@@ -125,7 +125,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
 
             var outputDirectory = isSdk ? 
-                buildCommand.GetOutputDirectory("net461") :
+                buildCommand.GetOutputDirectory("net462") :
                 buildCommand.GetNonSDKOutputDirectory();
 
             outputDirectory.Should().HaveFiles(new[] {
@@ -253,12 +253,12 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And
-                .NotHaveStdOutContaining("warning")
+                .NotHaveStdOutContaining("duplicate")
                 .And
                 .HaveStdOutContainingIgnoreCase(successMessage);
 
             var outputDirectory = isSdk ?
-                buildCommand.GetOutputDirectory("net461") :
+                buildCommand.GetOutputDirectory("net462") :
                 buildCommand.GetNonSDKOutputDirectory();
 
             outputDirectory.Should().HaveFiles(new[] {
@@ -365,7 +365,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
             
             var outputDirectory = isSdk ?
-                buildCommand.GetOutputDirectory("net461") :
+                buildCommand.GetOutputDirectory("net462") :
                 buildCommand.GetNonSDKOutputDirectory();
 
             outputDirectory.Should().NotHaveFile("netstandard.dll");
@@ -403,10 +403,10 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
 
             var outputDirectory = isSdk ?
-                buildCommand.GetOutputDirectory("net461") :
+                buildCommand.GetOutputDirectory("net462") :
                 buildCommand.GetNonSDKOutputDirectory();
 
-            // NET461 didn't originally support netstandard2.0, (nor netstandard1.5 or netstandard1.6)
+            // net462 didn't originally support netstandard2.0, (nor netstandard1.5 or netstandard1.6)
             // Since support was added after we need to ensure we apply the shims for netstandard1.5 projects as well.
 
             outputDirectory.Should().HaveFiles(new[] {

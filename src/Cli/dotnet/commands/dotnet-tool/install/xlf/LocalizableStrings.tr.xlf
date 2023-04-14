@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="CreateManifestIfNeededOptionDescription">
+        <source>Create a tool manifest if one isn't found during tool installation. For information on how manifests are located, see https://aka.ms/dotnet/tools/create-manifest-if-needed</source>
+        <target state="new">Create a tool manifest if one isn't found during tool installation. For information on how manifests are located, see https://aka.ms/dotnet/tools/create-manifest-if-needed</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
         <target state="translated">Yerel seçeneği (--local), genel seçeneği (--global), araç yolu seçeneği (--tool-path) arasından yalnızca biri seçilebilir. Seçeneklerden yalnızca birini belirtin: {0}.</target>
@@ -12,6 +17,11 @@
 Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="translated">Şu komutu kullanarak aracı çağırabilirsiniz: {0}
 '{1}' aracı (sürüm '{2}') başarıyla yüklendi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidRuntimeIdentifier">
+        <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
+        <target state="translated">{0} çalışma zamanı tanımlayıcısı geçersiz. Geçerli çalışma zamanı tanımlayıcıları: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
@@ -66,6 +76,11 @@ Bir bildirim oluşturmak istiyorsanız 'dotnet new tool-manifest' ifadesini kull
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the tool for.</source>
         <target state="translated">Aracın yükleneceği hedef çerçeve.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
+        <source>The --prerelease and --version options are not supported in the same command</source>
+        <target state="translated">--prerelease ve --version seçenekleri aynı komutta desteklenmiyor</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">

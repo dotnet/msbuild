@@ -94,8 +94,6 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("AppWithLibraryAndRid", $"PublishAppWithLibraryAndRid{selfContained}")
                 .WithSource();
 
-            var projectPath = Path.Combine(testAsset.TestRoot, "App");
-
             var msbuildArgs = new List<string>()
             {
                 $"/p:RuntimeIdentifier={runtimeIdentifier}",
@@ -116,13 +114,13 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var publishCommand = new PublishCommand(Log, projectPath);
+            var publishCommand = new PublishCommand(testAsset, "App");
 
             publishCommand
                 .Execute(msbuildArgs.ToArray())
                 .Should().Pass();
 
-            publishDirectory = publishCommand.GetOutputDirectory("netcoreapp2.1", runtimeIdentifier: runtimeIdentifier);
+            publishDirectory = publishCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, runtimeIdentifier: runtimeIdentifier);
         }
     }
 }

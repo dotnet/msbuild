@@ -17,23 +17,45 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public partial class WorkloadManifestReader
     {
+        public static WorkloadManifest ReadWorkloadManifest(string manifestId, System.IO.Stream manifestStream, string manifestPath)
+            => ReadWorkloadManifest(manifestId, manifestStream, null, manifestPath);
+
         private static void ConsumeToken(ref Utf8JsonStreamReader reader, JsonTokenType expected)
         {
             if (reader.Read() && expected == reader.TokenType)
             {
                 return;
             }
-            throw new WorkloadManifestFormatException(Strings.ExpectedTokenAtOffset, expected, reader.TokenStartIndex);
+            ThrowUnexpectedTokenException(ref reader, expected);
+        }
+
+        private static void ThrowUnexpectedTokenException(ref Utf8JsonStreamReader reader, JsonTokenType expected)
+        {
+            string key;
+            if (expected.IsBool())
+            {
+                key = Strings.ExpectedBoolAtOffset;
+            }
+            else if (expected.IsInt())
+            {
+                key = Strings.ExpectedIntegerAtOffset;
+            }
+            else if (expected == JsonTokenType.String)
+            {
+                key = Strings.ExpectedStringAtOffset;
+            }
+            else
+            {
+                throw new WorkloadManifestFormatException(Strings.ExpectedTokenAtOffset, expected, reader.TokenStartIndex);
+            }
+
+            throw new WorkloadManifestFormatException(key, reader.TokenStartIndex);
         }
 
         private static string ReadString(ref Utf8JsonStreamReader reader)
         {
-            if (reader.Read() && reader.TokenType == JsonTokenType.String)
-            {
-                return reader.GetString();
-            }
-
-            throw new WorkloadManifestFormatException(Strings.ExpectedStringAtOffset, reader.TokenStartIndex);
+            ConsumeToken(ref reader, JsonTokenType.String);
+            return reader.GetString();
         }
 
         private static long ReadInt64(ref Utf8JsonStreamReader reader)
@@ -62,13 +84,16 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private static void ThrowDuplicateKeyException<T> (ref Utf8JsonStreamReader reader, T key)
             => throw new WorkloadManifestFormatException(Strings.DuplicateKeyAtOffset, key?.ToString() ?? throw new ArgumentNullException (nameof(key)), reader.TokenStartIndex);
 
-        private static WorkloadManifest ReadWorkloadManifest(string id, ref Utf8JsonStreamReader reader)
+        private static WorkloadManifest ReadWorkloadManifest(
+            string id, string manifestPath,
+            LocalizationCatalog? localizationCatalog,
+            ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
             FXVersion? version = null;
             string? description = null;
-            Dictionary<WorkloadId, WorkloadDefinition>? workloads = null;
+            Dictionary<WorkloadId, BaseWorkloadDefinition>? workloads = null;
             Dictionary<WorkloadPackId, WorkloadPack>? packs = null;
             Dictionary<string, FXVersion>? dependsOn = null;
 
@@ -100,7 +125,6 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                                         continue;
                                     }
                                 }
-                                
                             }
                             throw new WorkloadManifestFormatException(Strings.MissingOrInvalidManifestVersion);
                         }
@@ -122,7 +146,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         if (string.Equals("workloads", propName, StringComparison.OrdinalIgnoreCase))
                         {
                             if (workloads != null) ThrowDuplicateKeyException(ref reader, propName);
-                            workloads = ReadWorkloadDefinitions(ref reader);
+                            workloads = ReadWorkloadDefinitions(ref reader, localizationCatalog);
                             continue;
                         }
 
@@ -156,7 +180,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                             id,
                             version,
                             description,
-                            workloads ?? new Dictionary<WorkloadId, WorkloadDefinition> (),
+                            manifestPath,
+                            workloads ?? new Dictionary<WorkloadId, BaseWorkloadDefinition> (),
                             packs ?? new Dictionary<WorkloadPackId, WorkloadPack> (),
                             dependsOn
                         );
@@ -183,7 +208,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             {
                 return true;
             }
-            
+
             var depth = reader.CurrentDepth;
             do
             {
@@ -228,11 +253,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
-        private static Dictionary<WorkloadId, WorkloadDefinition> ReadWorkloadDefinitions(ref Utf8JsonStreamReader reader)
+        private static Dictionary<WorkloadId, BaseWorkloadDefinition> ReadWorkloadDefinitions(ref Utf8JsonStreamReader reader, LocalizationCatalog? localizationCatalog)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
-            var workloads = new Dictionary<WorkloadId, WorkloadDefinition>();
+            var workloads = new Dictionary<WorkloadId, BaseWorkloadDefinition>();
 
             while (reader.Read())
             {
@@ -240,7 +265,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 {
                     case JsonTokenType.PropertyName:
                         var workloadId = new WorkloadId(reader.GetString());
-                        var workload = ReadWorkloadDefinition(workloadId, ref reader);
+                        var workload = ReadWorkloadDefinition(workloadId, ref reader, localizationCatalog);
                         if (workloads.ContainsKey(workloadId)) ThrowDuplicateKeyException(ref reader, workloadId);
                         workloads.Add(workloadId, workload);
                         continue;
@@ -378,7 +403,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
-        private static WorkloadDefinition ReadWorkloadDefinition(WorkloadId id, ref Utf8JsonStreamReader reader)
+        private static BaseWorkloadDefinition ReadWorkloadDefinition(WorkloadId id, ref Utf8JsonStreamReader reader, LocalizationCatalog? localizationCatalog)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
@@ -388,6 +413,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             List<WorkloadPackId>? packs = null;
             List<WorkloadId>? extends = null;
             List<string>? platforms = null;
+            WorkloadId? replaceWith = null;
 
             while (reader.Read())
             {
@@ -399,7 +425,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         if (string.Equals("description", propName, StringComparison.OrdinalIgnoreCase))
                         {
                             if (description != null) ThrowDuplicateKeyException(ref reader, propName);
-                            description = ReadString(ref reader);
+                            description = ReadStringLocalized(ref reader, localizationCatalog, $"workloads/{id}/description");
                             continue;
                         }
 
@@ -447,8 +473,24 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                             continue;
                         }
 
+                        if (string.Equals("replace-with", propName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (replaceWith != null) ThrowDuplicateKeyException(ref reader, propName);
+                            replaceWith = new WorkloadId (ReadString(ref reader));
+                            continue;
+                        }
+
                         throw new WorkloadManifestFormatException(Strings.UnknownKeyAtOffset, propName, reader.TokenStartIndex);
                     case JsonTokenType.EndObject:
+                        if (replaceWith is WorkloadId replacementId)
+                        {
+                            if (isAbstractOrNull != null || description != null || kind != null || extends != null || packs != null || platforms != null)
+                            {
+                                throw new WorkloadManifestFormatException(Strings.RedirectWorkloadHasOtherKeys, id);
+                            }
+                            throw new NotImplementedException("Workload redirects are not yet fully implemented");
+                            //return new WorkloadRedirect (id, replacementId);
+                        }
                         var isAbstract = isAbstractOrNull ?? false;
                         if (!isAbstract && kind == WorkloadDefinitionKind.Dev && string.IsNullOrEmpty (description))
                         {

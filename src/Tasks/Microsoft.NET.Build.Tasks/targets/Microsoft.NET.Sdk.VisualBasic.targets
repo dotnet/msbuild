@@ -120,6 +120,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     <FinalDefineConstants Condition="'$(MyType)' == ''">$(FinalDefineConstants),_MyType=&quot;Empty&quot;</FinalDefineConstants>
   </PropertyGroup>
 
+  <!-- Enable hot reload in 6.0 and newer VB projects -->
+  <ItemGroup Condition="'$(SupportsHotReload)' != 'false' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))">
+    <ProjectCapability Include="SupportsHotReload" />
+  </ItemGroup>
+
+  <!--
+    BinaryFormatter infrastructure is obsolete as error in 7.0+.
+    When https://github.com/Microsoft/visualfsharp/issues/3207 is fixed,
+    remove the block below and move it into the shared .targets file.
+  -->
+  <PropertyGroup>
+    <WarningsAsErrors Condition="'$(_BinaryFormatterObsoleteAsError)' == 'true'">$(WarningsAsErrors);SYSLIB0011</WarningsAsErrors>
+  </PropertyGroup>
+
   <!--
     NOTE: We must hook directly to CoreCompile for compatibility with two phase XAML
           build. We also must not pull in a dependency on ResolveAssemblyReferences

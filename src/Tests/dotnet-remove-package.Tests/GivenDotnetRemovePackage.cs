@@ -16,11 +16,11 @@ namespace Microsoft.DotNet.Cli.Remove.Package.Tests
 {
     public class GivenDotnetRemovePackage : SdkTest
     {
-        private Func<string, string> HelpText = (defaultVal) => $@"package:
+        private Func<string, string> HelpText = (defaultVal) => $@"Description:
   Remove a NuGet package reference from the project.
 
 Usage:
-  dotnet [options] remove <PROJECT> package <PACKAGE_NAME>
+  dotnet remove <PROJECT> package <PACKAGE_NAME> [options]
 
 Arguments:
   <PROJECT>         The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
@@ -28,19 +28,19 @@ Arguments:
 
 Options:
   --interactive     Allows the command to stop and wait for user input or action (for example to complete authentication).
-  -?, -h, --help    Show help and usage information";
+  -?, -h, --help    Show command line help.";
 
-        private Func<string, string> RemoveCommandHelpText = (defaultVal) => $@"remove:
+        private Func<string, string> RemoveCommandHelpText = (defaultVal) => $@"Description:
   .NET Remove Command
 
 Usage:
-  dotnet [options] remove <PROJECT> [command]
+  dotnet remove <PROJECT> [command] [options]
 
 Arguments:
   <PROJECT>    The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
-  -?, -h, --help    Show help and usage information
+  -?, -h, --help    Show command line help.
 
 Commands:
   package <PACKAGE_NAME>      Remove a NuGet package reference from the project.
