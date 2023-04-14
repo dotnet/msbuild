@@ -87,7 +87,7 @@ If implementing a project with an “outer” (determine what properties to pass
   * It is not called during a normal build, only during "Clean" and "Rebuild".
 
 ### Targets Marked With `SkipNonexistentTargets='true'` Metadatum
-`GetTargetFrameworks` and `GetTargetFrameworksWithPlatformForSingleTargetFramework` are skippable if nonexistent since some project types (for example, `wixproj` projects) may not define them. See [this comment](https://github.com/dotnet/msbuild/blob/main/src/Tasks/Microsoft.Managed.After.targets#L67-L70) for more details.
+`GetTargetFrameworks` and `GetTargetFrameworksWithPlatformForSingleTargetFramework` are skippable if nonexistent since some project types (for example, `wixproj` projects) may not define them. See [this comment](https://github.com/dotnet/msbuild/blob/cc55017f88688cbe3f9aa810cdf44273adea76ea/src/Tasks/Microsoft.Managed.After.targets#L74-L77) for more details.
 
 ## Other protocol requirements
 
