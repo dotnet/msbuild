@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver;
+using Microsoft.DotNet.Cli;
 
 #nullable disable
 
@@ -48,7 +49,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             _getEnvironmentVariable = getEnvironmentVariable;
             _netCoreSdkResolver = new NETCoreSdkResolver(getEnvironmentVariable, vsSettings);
 
-            if (_getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_ENABLE_LOG") is string val &&
+            if (_getEnvironmentVariable(EnvironmentVariableNames.DOTNET_MSBUILD_SDK_RESOLVER_ENABLE_LOG) is string val &&
                 (string.Equals(val, "true", StringComparison.OrdinalIgnoreCase) ||
                  string.Equals(val, "1", StringComparison.Ordinal)))
             {
@@ -139,8 +140,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 // These are overrides that are used to force the resolved SDK tasks and targets to come from a given
                 // base directory and report a given version to msbuild (which may be null if unknown. One key use case
                 // for this is to test SDK tasks and targets without deploying them inside the .NET Core SDK.
-                var msbuildSdksDirFromEnv = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR");
-                var netcoreSdkVersionFromEnv = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER");
+                var msbuildSdksDirFromEnv = _getEnvironmentVariable(EnvironmentVariableNames.DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR);
+                var netcoreSdkVersionFromEnv = _getEnvironmentVariable(EnvironmentVariableNames.DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER);
                 if (!string.IsNullOrEmpty(msbuildSdksDirFromEnv))
                 {
                     logger?.LogMessage($"MSBuild SDKs dir overridden via DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR to {msbuildSdksDirFromEnv}");
