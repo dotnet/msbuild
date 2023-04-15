@@ -91,7 +91,6 @@ This version of MSBuild shipped with Visual Studio 2022 version 17.0.0 and .NET 
 * Enable analyzers for the MSBuild repo with rules similar to `dotnet/runtime` (#5656). Thanks, @elachlan!
 * Improved internal OptProf training scenarios (#6758).
 * Delete Unreachable code (#6805). Thanks, @KirillOsenkov!
-* Upgrade System.Net.Http package version used in tests (#6879).
 
 #### Documentation
 

@@ -27,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="System.Net.Http" />
     <PackageReference Include="System.Security.Principal.Windows" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
