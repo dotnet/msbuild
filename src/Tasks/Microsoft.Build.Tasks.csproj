@@ -102,6 +102,9 @@
     <Compile Include="..\Shared\StrongNameHelpers.cs">
       <Link>StrongNameHelpers.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\SolutionConfiguration.cs">
+      <Link>SolutionConfiguration.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>TaskLoggingHelperExtension.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
@@ -145,9 +148,6 @@
       <Link>VisualStudioConstants.cs</Link>
     </Compile>
     <Compile Include="..\Shared\AssemblyNameExtension.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\EncodingUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs">

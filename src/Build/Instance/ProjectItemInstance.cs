@@ -33,7 +33,8 @@ namespace Microsoft.Build.Execution
         ITaskItem2,
         IMetadataTable,
         ITranslatable,
-        IMetadataContainer
+        IMetadataContainer,
+        IItemTypeDefinition
     {
         /// <summary>
         /// The project instance to which this item belongs.
@@ -628,11 +629,11 @@ namespace Microsoft.Build.Execution
         /// which legally have built-in metadata. If necessary we can calculate it on the new items we're making if requested.
         /// We don't copy them too because tasks shouldn't set them (they might become inconsistent)
         /// </summary>
-        internal void SetMetadataOnTaskOutput(string name, string evaluatedValueEscaped)
+        internal void SetMetadataOnTaskOutput(IEnumerable<KeyValuePair<string, string>> items)
         {
             _project.VerifyThrowNotImmutable();
 
-            _taskItem.SetMetadataOnTaskOutput(name, evaluatedValueEscaped);
+            _taskItem.SetMetadataOnTaskOutput(items);
         }
 
         /// <summary>
@@ -1489,8 +1490,8 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public override int GetHashCode()
             {
-                // This is ignore case to ensure that task items whose item specs differ only by 
-                // casing still have the same hash code, since this is used to determine if we have duplicates when 
+                // This is ignore case to ensure that task items whose item specs differ only by
+                // casing still have the same hash code, since this is used to determine if we have duplicates when
                 // we do duplicate removal.
                 return StringComparer.OrdinalIgnoreCase.GetHashCode(ItemSpec);
             }
@@ -1783,6 +1784,18 @@ namespace Microsoft.Build.Execution
                     ProjectMetadataInstance metadatum = new ProjectMetadataInstance(name, evaluatedValueEscaped, true /* may be built-in metadata name */);
                     _directMetadata.Set(metadatum);
                 }
+            }
+
+            internal void SetMetadataOnTaskOutput(IEnumerable<KeyValuePair<string, string>> items)
+            {
+                ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
+                _directMetadata ??= new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+
+                var metadata = items
+                    .Where(item => !FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(item.Key))
+                    .Select(item => new ProjectMetadataInstance(item.Key, item.Value, true /* may be built-in metadata name */));
+
+                _directMetadata.ImportProperties(metadata);
             }
 
             /// <summary>
@@ -2125,7 +2138,7 @@ namespace Microsoft.Build.Execution
             /// Also, more importantly, because typically the same regular metadata values can be shared by many items,
             /// and keeping item-specific metadata out of it could allow it to be implemented as a copy-on-write table.
             /// </summary>
-            private class BuiltInMetadataTable : IMetadataTable
+            private class BuiltInMetadataTable : IMetadataTable, IItemTypeDefinition
             {
                 /// <summary>
                 /// Item type
@@ -2183,6 +2196,8 @@ namespace Microsoft.Build.Execution
 
                     return value;
                 }
+
+                string IItemTypeDefinition.ItemType => _itemType;
             }
         }
 

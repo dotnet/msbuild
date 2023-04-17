@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+using Microsoft.Build.Framework;
+
 #nullable disable
 
 namespace Microsoft.Build.Shared
@@ -48,17 +50,17 @@ namespace Microsoft.Build.Shared
 
                 try
                 {
-                    if (NativeMethodsShared.IsWindows)
+                    if (NativeMethods.IsWindows)
                     {
 #if RUNTIME_TYPE_NETCORE
                         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 #endif
                         // get the current OEM code page
-                        s_currentOemEncoding = Encoding.GetEncoding(NativeMethodsShared.GetOEMCP());
+                        s_currentOemEncoding = Encoding.GetEncoding(NativeMethods.GetOEMCP());
                     }
                 }
                 // theoretically, GetEncoding may throw an ArgumentException or a NotSupportedException. This should never
-                // really happen, since the code page we pass in has just been returned from the "underlying platform", 
+                // really happen, since the code page we pass in has just been returned from the "underlying platform",
                 // so it really should support it. If it ever happens, we'll just fall back to the default encoding.
                 // No point in showing any errors to the users, since they most likely wouldn't be actionable.
                 catch (ArgumentException ex)
@@ -214,7 +216,7 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static Encoding BatchFileEncoding(string contents, string encodingSpecification)
         {
-            if (!NativeMethodsShared.IsWindows)
+            if (!NativeMethods.IsWindows)
             {
                 return EncodingUtilities.Utf8WithoutBom;
             }

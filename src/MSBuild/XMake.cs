@@ -34,12 +34,11 @@ using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
+using LiveLogger = Microsoft.Build.Logging.LiveLogger.LiveLogger;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Logging.LiveLogger;
-using System.Runtime.InteropServices;
 
 #nullable disable
 
@@ -706,6 +705,7 @@ namespace Microsoft.Build.CommandLine
                 bool lowPriority = false;
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
+                bool question = false;
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
@@ -741,6 +741,7 @@ namespace Microsoft.Build.CommandLine
                                             ref inputResultsCaches,
                                             ref outputResultsCache,
                                             ref lowPriority,
+                                            ref question,
                                             recursing: false,
 #if FEATURE_GET_COMMANDLINE
                                             commandLine);
@@ -758,10 +759,13 @@ namespace Microsoft.Build.CommandLine
                     // Only display the message if /m isn't provided
                     if (cpuCount == 1 && FileUtilities.IsSolutionFilename(projectFile) && verbosity > LoggerVerbosity.Minimal
                         && switchesNotFromAutoResponseFile[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount].Length == 0
-                        && switchesFromAutoResponseFile[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount].Length == 0)
+                        && switchesFromAutoResponseFile[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount].Length == 0
+                        && preprocessWriter != null
+                        && targetsWriter != null)
                     {
                         Console.WriteLine(ResourceUtilities.GetResourceString("PossiblyOmittedMaxCPUSwitch"));
                     }
+
                     if (preprocessWriter != null && !BuildEnvironmentHelper.Instance.RunningTests)
                     {
                         // Indicate to the engine that it can NOT toss extraneous file content: we want to
@@ -808,6 +812,7 @@ namespace Microsoft.Build.CommandLine
                                     isolateProjects,
                                     graphBuildOptions,
                                     lowPriority,
+                                    question,
                                     inputResultsCaches,
                                     outputResultsCache,
                                     commandLine))
@@ -961,6 +966,8 @@ namespace Microsoft.Build.CommandLine
                 // Wait for any pending cancel, so that we get any remaining messages
                 s_cancelComplete.WaitOne();
 
+                NativeMethodsShared.RestoreConsoleMode(s_originalConsoleMode);
+
 #if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStop(commandLine);
 #else
@@ -1086,7 +1093,12 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// List of messages to be sent to the logger when it is attached
         /// </summary>
-        private static List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = new();
+        private static readonly List<BuildManager.DeferredBuildMessage> s_globalMessagesToLogInBuildLoggers = new();
+
+        /// <summary>
+        /// The original console output mode if we changed it as part of initialization.
+        /// </summary>
+        private static uint? s_originalConsoleMode = null;
 
         /// <summary>
         /// Initializes the build engine, and starts the project building.
@@ -1121,6 +1133,7 @@ namespace Microsoft.Build.CommandLine
             ProjectIsolationMode isolateProjects,
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
+            bool question,
             string[] inputResultsCaches,
             string outputResultsCache,
 #if FEATURE_GET_COMMANDLINE
@@ -1207,8 +1220,8 @@ namespace Microsoft.Build.CommandLine
 
                 ToolsetDefinitionLocations toolsetDefinitionLocations = ToolsetDefinitionLocations.Default;
 
-                bool preprocessOnly = preprocessWriter != null && !FileUtilities.IsSolutionFilename(projectFile);
-                bool targetsOnly = targetsWriter != null && !FileUtilities.IsSolutionFilename(projectFile);
+                bool isPreprocess = preprocessWriter != null;
+                bool isTargets = targetsWriter != null;
 
                 projectCollection = new ProjectCollection(
                     globalProperties,
@@ -1217,7 +1230,7 @@ namespace Microsoft.Build.CommandLine
                     toolsetDefinitionLocations,
                     cpuCount,
                     onlyLogCriticalEvents,
-                    loadProjectsReadOnly: !preprocessOnly,
+                    loadProjectsReadOnly: !isPreprocess,
                     useAsynchronousLogging: true,
                     reuseProjectRootElementCache: s_isServerNode);
 
@@ -1226,9 +1239,11 @@ namespace Microsoft.Build.CommandLine
                     ThrowInvalidToolsVersionInitializationException(projectCollection.Toolsets, toolsVersion);
                 }
 
+                bool isSolution = FileUtilities.IsSolutionFilename(projectFile);
+
 #if FEATURE_XML_SCHEMA_VALIDATION
                 // If the user has requested that the schema be validated, do that here.
-                if (needToValidateProject && !FileUtilities.IsSolutionFilename(projectFile))
+                if (needToValidateProject && !isSolution)
                 {
                     Microsoft.Build.Evaluation.Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
                     Microsoft.Build.Evaluation.Toolset toolset = projectCollection.GetToolset(toolsVersion ?? project.ToolsVersion);
@@ -1246,22 +1261,41 @@ namespace Microsoft.Build.CommandLine
                 }
 #endif
 
-                if (preprocessOnly)
+                if (isPreprocess)
                 {
-                    Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+                    // TODO: Support /preprocess for solution files. https://github.com/dotnet/msbuild/issues/7697
+                    if (isSolution)
+                    {
+                        Console.WriteLine(ResourceUtilities.GetResourceString("UnsupportedSwitchForSolutionFiles"), CommandLineSwitches.ParameterizedSwitch.Preprocess);
+                        success = false;
+                    }
+                    else
+                    {
+                        Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
 
-                    project.SaveLogicalProject(preprocessWriter);
+                        project.SaveLogicalProject(preprocessWriter);
 
-                    projectCollection.UnloadProject(project);
-                    success = true;
+                        projectCollection.UnloadProject(project);
+
+                        success = true;
+                    }
                 }
 
-                if (targetsOnly)
+                if (isTargets)
                 {
-                    success = PrintTargets(projectFile, toolsVersion, globalProperties, targetsWriter, projectCollection);
+                    // TODO: Support /targets for solution files. https://github.com/dotnet/msbuild/issues/7697
+                    if (isSolution)
+                    {
+                        Console.WriteLine(ResourceUtilities.GetResourceString("UnsupportedSwitchForSolutionFiles"), CommandLineSwitches.ParameterizedSwitch.Targets);
+                        success = false;
+                    }
+                    else
+                    {
+                        success = PrintTargets(projectFile, toolsVersion, globalProperties, targetsWriter, projectCollection);
+                    }
                 }
 
-                if (!preprocessOnly && !targetsOnly)
+                if (!isPreprocess && !isTargets)
                 {
                     BuildParameters parameters = new BuildParameters(projectCollection);
 
@@ -1292,6 +1326,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.ProjectIsolationMode = isolateProjects;
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
+                    parameters.Question = question;
 
                     // Propagate the profiler flag into the project load settings so the evaluator
                     // can pick it up
@@ -1319,7 +1354,7 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
-                    // List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = null;
+                    List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = new();
 
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
 
@@ -1340,8 +1375,10 @@ namespace Microsoft.Build.CommandLine
                         {
                             messagesToLogInBuildLoggers.Add(
                                 new BuildManager.DeferredBuildMessage(
-                                    String.Format("Included response file: {0}", responseFilePath),
-                                    MessageImportance.Normal,
+                                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                        "PickedUpSwitchesFromAutoResponse",
+                                        responseFilePath),
+                                    MessageImportance.Low,
                                     responseFilePath));
                         }
                     }
@@ -1500,7 +1537,7 @@ namespace Microsoft.Build.CommandLine
 
         private static List<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
         {
-            List<BuildManager.DeferredBuildMessage> messages = new()
+            List<BuildManager.DeferredBuildMessage> messages = new(s_globalMessagesToLogInBuildLoggers)
             {
                 new BuildManager.DeferredBuildMessage(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
@@ -2215,6 +2252,7 @@ namespace Microsoft.Build.CommandLine
             ref string[] inputResultsCaches,
             ref string outputResultsCache,
             ref bool lowPriority,
+            ref bool question,
             bool recursing,
             string commandLine)
         {
@@ -2330,6 +2368,7 @@ namespace Microsoft.Build.CommandLine
                                                            ref inputResultsCaches,
                                                            ref outputResultsCache,
                                                            ref lowPriority,
+                                                           ref question,
                                                            recursing: true,
                                                            commandLine);
                     }
@@ -2393,9 +2432,13 @@ namespace Microsoft.Build.CommandLine
                         graphBuild = ProcessGraphBuildSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild]);
                     }
 
+                    question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
+
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
 
                     outputResultsCache = ProcessOutputResultsCache(commandLineSwitches);
+
+                    bool liveLogger = ProcessLiveLoggerConfiguration(commandLineSwitches);
 
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
@@ -2406,7 +2449,7 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
-                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.LiveLogger],
+                        liveLogger,
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
@@ -2432,16 +2475,6 @@ namespace Microsoft.Build.CommandLine
                     else if (verbosity == LoggerVerbosity.Diagnostic)
                     {
                         detailedSummary = true;
-                    }
-
-                    // If we picked up switches from the autoresponse file, let the user know. This could be a useful
-                    // hint to a user that does not know that we are picking up the file automatically.
-                    // Since this is going to happen often in normal use, only log it in high verbosity mode.
-                    // Also, only log it to the console; logging to loggers would involve increasing the public API of
-                    // the Engine, and we don't want to do that.
-                    if (usingSwitchesFromAutoResponseFile && LoggerVerbosity.Diagnostic == verbosity)
-                    {
-                        Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PickedUpSwitchesFromAutoResponse", autoResponseFileName));
                     }
 
                     if (originalVerbosity == LoggerVerbosity.Diagnostic)
@@ -2471,6 +2504,75 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(!invokeBuild || !string.IsNullOrEmpty(projectFile), "We should have a project file if we're going to build.");
 
             return invokeBuild;
+        }
+
+        private static bool ProcessLiveLoggerConfiguration(CommandLineSwitches commandLineSwitches)
+        {
+            string liveLoggerArg;
+
+            // Command line wins, so check it first
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.LiveLogger))
+            {
+                // There's a switch set, but there might be more than one
+                string[] switches = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LiveLogger];
+
+                liveLoggerArg = switches[switches.Length - 1];
+
+                // if the switch was set but not to an explicit value, the value is "auto"
+                if (string.IsNullOrEmpty(liveLoggerArg))
+                {
+                    liveLoggerArg = "auto";
+                }
+            }
+            else
+            {
+                liveLoggerArg = Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER");
+
+                if (string.IsNullOrWhiteSpace(liveLoggerArg))
+                {
+                    return false;
+                }
+                else
+                {
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDLIVELOGGER was set to {liveLoggerArg}.", MessageImportance.Low));
+                }
+            }
+
+            // We now have a string. It can be "true" or "false" which means just that:
+            if (bool.TryParse(liveLoggerArg, out bool result))
+            {
+                return result;
+            }
+
+            // or it can be "auto", meaning "enable if we can"
+            if (!liveLoggerArg.Equals("auto", StringComparison.OrdinalIgnoreCase))
+            {
+                CommandLineSwitchException.Throw("InvalidLiveLoggerValue", liveLoggerArg);
+            }
+
+            return DoesEnvironmentSupportLiveLogger();
+
+            static bool DoesEnvironmentSupportLiveLogger()
+            {
+                (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+
+                if (!outputIsScreen)
+                {
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is being redirected to a file.", MessageImportance.Low));
+                    return false;
+                }
+
+                // LiveLogger is not used if the terminal does not support ANSI/VT100 escape sequences.
+                if (!acceptAnsiColorCodes)
+                {
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is not supported.", MessageImportance.Low));
+                    return false;
+                }
+                return true;
+            }
         }
 
         private static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)
@@ -3220,7 +3322,7 @@ namespace Microsoft.Build.CommandLine
             string[] verbositySwitchParameters,
             bool noConsoleLogger,
             bool distributedFileLogger,
-            bool liveLoggerCommandLineOptIn,
+            bool liveLoggerOptIn,
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
             string[] binaryLoggerParameters,
@@ -3254,9 +3356,7 @@ namespace Microsoft.Build.CommandLine
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
             // Choose default console logger
-            if (
-                (liveLoggerCommandLineOptIn || Environment.GetEnvironmentVariable("MSBUILDFANCYLOGGER") == "true" || Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER") == "true")
-                && DoesEnvironmentSupportLiveLogger())
+            if (liveLoggerOptIn)
             {
                 ProcessLiveLogger(noConsoleLogger, distributedLoggerRecords, cpuCount, loggers);
             }
@@ -3268,9 +3368,6 @@ namespace Microsoft.Build.CommandLine
             ProcessDistributedFileLogger(distributedFileLogger, fileLoggerParameters, distributedLoggerRecords, loggers, cpuCount);
 
             ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
-
-            // TOOD: Review
-            // ProcessLiveLogger(noConsoleLogger, loggers);
 
             verbosity = outVerbosity;
 
@@ -3435,27 +3532,6 @@ namespace Microsoft.Build.CommandLine
                     distributedLoggerRecords.Add(forwardingLoggerRecord);
                 }
             }
-        }
-
-        private static bool DoesEnvironmentSupportLiveLogger()
-        {
-            // If output is redirected
-            if (Console.IsOutputRedirected)
-            {
-                messagesToLogInBuildLoggers.Add(
-                    new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is being redirected to a file.", MessageImportance.Low));
-                return false;
-            }
-            // If terminal is dumb
-            if (
-                (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WT_SESSION")))
-                || Environment.GetEnvironmentVariable("TERM") == "dumb")
-            {
-                messagesToLogInBuildLoggers.Add(
-                    new BuildManager.DeferredBuildMessage("LiveLogger was not used because the output is not supported.", MessageImportance.Low));
-                return false;
-            }
-            return true;
         }
 
         private static void ProcessLiveLogger(
@@ -4045,6 +4121,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_OutputCacheFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_36_GraphBuildSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_39_LowPrioritySwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_41_QuestionSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));

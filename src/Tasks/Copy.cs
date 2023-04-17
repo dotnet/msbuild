@@ -21,7 +21,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A task that copies files.
     /// </summary>
-    public class Copy : TaskExtension, ICancelableTask
+    public class Copy : TaskExtension, IIncrementalTask, ICancelableTask
     {
         internal const string AlwaysRetryEnvVar = "MSBUILDALWAYSRETRY";
         internal const string AlwaysOverwriteReadOnlyFilesEnvVar = "MSBUILDALWAYSOVERWRITEREADONLYFILES";
@@ -153,6 +153,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool OverwriteReadOnlyFiles { get; set; }
 
+        public bool FailIfNotIncremental { get; set; }
+
         #endregion
 
         /// <summary>
@@ -254,14 +256,30 @@ namespace Microsoft.Build.Tasks
             {
                 if (!FileSystems.Default.DirectoryExists(destinationFolder))
                 {
-                    Log.LogMessage(MessageImportance.Normal, CreatesDirectory, destinationFolder);
-                    Directory.CreateDirectory(destinationFolder);
+                    if (FailIfNotIncremental)
+                    {
+                        Log.LogError(CreatesDirectory, destinationFolder);
+                        return false;
+                    }
+                    else
+                    {
+                        Log.LogMessage(MessageImportance.Normal, CreatesDirectory, destinationFolder);
+                        Directory.CreateDirectory(destinationFolder);
+                    }
                 }
 
                 // It's very common for a lot of files to be copied to the same folder. 
                 // Eg., "c:\foo\a"->"c:\bar\a", "c:\foo\b"->"c:\bar\b" and so forth.
                 // We don't want to check whether this folder exists for every single file we copy. So store which we've checked.
                 _directoriesKnownToExist.TryAdd(destinationFolder, true);
+            }
+
+            if (FailIfNotIncremental)
+            {
+                string sourceFilePath = FileUtilities.GetFullPathNoThrow(sourceFileState.Name);
+                string destinationFilePath = FileUtilities.GetFullPathNoThrow(destinationFileState.Name);
+                Log.LogError(FileComment, sourceFilePath, destinationFilePath);
+                return false;
             }
 
             if (OverwriteReadOnlyFiles)
@@ -733,6 +751,7 @@ namespace Microsoft.Build.Tasks
                         "true");
                     MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, true);
                 }
+
                 // We only do the cheap check for identicalness here, we try the more expensive check
                 // of comparing the fullpaths of source and destination to see if they are identical,
                 // in the exception handler lower down.
@@ -742,7 +761,16 @@ namespace Microsoft.Build.Tasks
                              StringComparison.OrdinalIgnoreCase))
                 {
                     MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, false);
-                    success = DoCopyWithRetries(sourceFileState, destinationFileState, copyFile);
+
+                    if (FailIfNotIncremental)
+                    {
+                        Log.LogError(FileComment, sourceFileState.Name, destinationFileState.Name);
+                        success = false;
+                    }
+                    else
+                    {
+                        success = DoCopyWithRetries(sourceFileState, destinationFileState, copyFile);
+                    }
                 }
                 else
                 {

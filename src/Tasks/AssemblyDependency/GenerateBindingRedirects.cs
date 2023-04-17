@@ -9,6 +9,7 @@ using System.Xml.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using System.IO;
 
 #nullable disable
 
@@ -103,8 +104,9 @@ namespace Microsoft.Build.Tasks
             runtimeNode.Add(redirectNodes);
 
             var writeOutput = true;
+            var outputExists = FileSystems.Default.FileExists(OutputAppConfigFile.ItemSpec);
 
-            if (FileSystems.Default.FileExists(OutputAppConfigFile.ItemSpec))
+            if (outputExists)
             {
                 try
                 {
@@ -131,10 +133,18 @@ namespace Microsoft.Build.Tasks
 
             if (writeOutput)
             {
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateBindingRedirects.CreatingBindingRedirectionFile", OutputAppConfigFile.ItemSpec);
                 using (var stream = FileUtilities.OpenWrite(OutputAppConfigFile.ItemSpec, false))
                 {
                     doc.Save(stream);
                 }
+            }
+            else if (outputExists)
+            {
+                // if the file exists and the content is up to date, then touch the output file.
+                var now = DateTime.Now;
+                File.SetLastAccessTime(OutputAppConfigFile.ItemSpec, now);
+                File.SetLastWriteTime(OutputAppConfigFile.ItemSpec, now);
             }
 
             return !Log.HasLoggedErrors;
