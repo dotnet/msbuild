@@ -188,6 +188,15 @@ namespace Microsoft.Build.Construction
             }
         }
 
+        /// <summary>
+        /// Called during parse, to add an element.
+        /// </summary>
+        /// <remarks>
+        /// We create our own kind of element, that we can give location information to.
+        /// In order to pass the location through the callchain, that contains XmlDocument function
+        ///  that then calls back to our XmlDocumentWithLocation (so we cannot use call stack via passing via parameters),
+        ///  we use async local field, that simulates variable on call stack.
+        /// </remarks>
         internal XmlElement CreateElement(string localName, string namespaceURI, ElementLocation location)
         {
             if (location != null)
