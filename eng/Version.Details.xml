@@ -45,7 +45,7 @@
     </Dependency>
     <Dependency Name="Microsoft.Build" Version="17.7.0-preview-23217-02">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>e2fa2d70f5b1d9f1b8a595391ee3d7c457b0fe26</Sha>
+      <Sha>cc55017f88688cbe3f9aa810cdf44273adea76ea</Sha>
       <SourceBuild RepoName="msbuild" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.Build.Localization" Version="17.7.0-preview-23217-02">
