@@ -137,7 +137,7 @@ namespace Microsoft.Build.Graph
                     if (solutionConfiguration.TryGetProjectByGuid(projectGuid, out XmlElement projectElement)
                         || solutionConfiguration.TryGetProjectByAbsolutePath(projectReferenceFullPath, out projectElement))
                     {
-                        // Note: AssignProjectConfiguration sets FullConfiguration, SetConfiguration, and SetPlatform on the item, but these do not translate to global properties.
+                        // Note: AssignProjectConfiguration sets various metadata on the ProjectReference item, but ultimately it just translates to the Configuration and Platform global properties on the MSBuild task.
                         string projectConfiguration = projectElement.InnerText;
                         string[] configurationPlatformParts = projectConfiguration.Split(SolutionConfiguration.ConfigPlatformSeparator[0]);
                         SetProperty(referenceGlobalProperties, ConfigurationMetadataName, configurationPlatformParts[0]);
