@@ -26,20 +26,13 @@ namespace Microsoft.DotNet.Tools.Sln.Add
             _fileOrDirectory = parseResult.GetValue(SlnCommandParser.SlnArgument);
 
             _arguments = parseResult.GetValue(SlnAddParser.ProjectPathArgument)?.ToArray() ?? (IReadOnlyCollection<string>)Array.Empty<string>();
-            if (_arguments.Count == 0)
-            {
-                throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd);
-            }
 
             _inRoot = parseResult.GetValue(SlnAddParser.InRootOption);
             string relativeRoot = parseResult.GetValue(SlnAddParser.SolutionFolderOption);
+
+            SlnArgumentValidator.ParseAndValidateArguments(_fileOrDirectory, _arguments, SlnArgumentValidator.CommandType.Add, _inRoot, relativeRoot);
+
             bool hasRelativeRoot = !string.IsNullOrEmpty(relativeRoot);
-            
-            if (_inRoot && hasRelativeRoot)
-            {
-                // These two options are mutually exclusive
-                throw new GracefulException(LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
-            }
 
             if (hasRelativeRoot)
             {
@@ -49,24 +42,6 @@ namespace Microsoft.DotNet.Tools.Sln.Add
             else
             {
                 _relativeRootSolutionFolders = null;
-            }
-
-            var slnFile = _arguments.FirstOrDefault(path => path.EndsWith(".sln"));
-            if (slnFile != null)
-            {
-                string args;
-                if (_inRoot) args = $"--{SlnAddParser.InRootOption.Name} ";
-                else if (hasRelativeRoot) args = $"--{SlnAddParser.SolutionFolderOption.Name} {string.Join(" ", relativeRoot)} ";
-                else args = "";
-
-                var projectArgs = string.Join(" ", _arguments.Where(path => !path.EndsWith(".sln")));
-
-                throw new GracefulException(new string[]
-                {
-                    string.Format(CommonLocalizableStrings.SolutionArgumentMisplaced, slnFile),
-                    CommonLocalizableStrings.DidYouMean,
-                    $"  dotnet sln {slnFile} add {args}{projectArgs}"
-                });
             }
         }
 

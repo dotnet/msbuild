@@ -1244,7 +1244,7 @@ EndGlobal
                 + CommonLocalizableStrings.DidYouMean + Environment.NewLine
                 + $"  dotnet sln App.sln add {projectArg}"
             );
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -1265,7 +1265,7 @@ EndGlobal
                 + CommonLocalizableStrings.DidYouMean + Environment.NewLine
                 + $"  dotnet sln App.sln add --in-root {projectArg}"
             );
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -1286,7 +1286,7 @@ EndGlobal
                 + CommonLocalizableStrings.DidYouMean + Environment.NewLine
                 + $"  dotnet sln App.sln add --solution-folder Lib {projectArg}"
             );
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
     }
 }

@@ -678,7 +678,7 @@ setx PATH "%PATH%;{0}"
     <value>Solution argument '{0}' is misplaced.</value>
   </data>
   <data name="DidYouMean" xml:space="preserve">
-    <value>Did you mean?</value>
+    <value>Did you mean the following command?</value>
   </data>
   <data name="ArchitectureOptionDescription" xml:space="preserve">
     <value>The target architecture.</value>

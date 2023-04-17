@@ -58,8 +58,8 @@
         <note />
       </trans-unit>
       <trans-unit id="DidYouMean">
-        <source>Did you mean?</source>
-        <target state="new">Did you mean?</target>
+        <source>Did you mean the following command?</source>
+        <target state="new">Did you mean the following command?</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">

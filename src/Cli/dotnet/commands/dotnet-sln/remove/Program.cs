@@ -24,22 +24,8 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
             _fileOrDirectory = parseResult.GetValue(SlnCommandParser.SlnArgument);
 
             _arguments = (parseResult.GetValue(SlnRemoveParser.ProjectPathArgument) ?? Array.Empty<string>()).ToList().AsReadOnly();
-            if (_arguments.Count == 0)
-            {
-                throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove);
-            }
 
-            var slnFile = _arguments.FirstOrDefault(path => path.EndsWith(".sln"));
-            if (slnFile != null)
-            {
-                var projectArgs = string.Join(" ", _arguments.Where(path => !path.EndsWith(".sln")));
-                throw new GracefulException(new string[]
-                {
-                    string.Format(CommonLocalizableStrings.SolutionArgumentMisplaced, slnFile),
-                    CommonLocalizableStrings.DidYouMean,
-                    $"  dotnet sln {slnFile} remove {projectArgs}"
-                });
-            }
+            SlnArgumentValidator.ParseAndValidateArguments(_fileOrDirectory, _arguments, SlnArgumentValidator.CommandType.Remove);
         }
 
         public override int Execute()
