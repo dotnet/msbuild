@@ -1807,10 +1807,10 @@ namespace Microsoft.Build.Construction
         /// Creates a XmlElement with the specified name in the document
         /// containing this project.
         /// </summary>
-        internal XmlElementWithLocation CreateElement(string name)
+        internal XmlElementWithLocation CreateElement(string name, ElementLocation location = null)
         {
             ErrorUtilities.VerifyThrow(Link == null, "External project");
-            return (XmlElementWithLocation)XmlDocument.CreateElement(name, XmlNamespace);
+            return (XmlElementWithLocation)XmlDocument.CreateElement(name, XmlNamespace, location);
         }
 
         /// <summary>

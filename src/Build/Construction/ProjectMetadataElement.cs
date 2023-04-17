@@ -106,11 +106,7 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
             ErrorUtilities.VerifyThrowInvalidOperation(!XMakeElements.ReservedItemNames.Contains(name), "CannotModifyReservedItemMetadata", name);
 
-            XmlElementWithLocation element = containingProject.CreateElement(name);
-            if (location != null)
-            {
-                element.Location = location;
-            }
+            XmlElementWithLocation element = containingProject.CreateElement(name, location);
 
             return new ProjectMetadataElement(element, containingProject);
         }

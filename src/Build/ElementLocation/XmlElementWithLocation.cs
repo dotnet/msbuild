@@ -101,11 +101,6 @@ namespace Microsoft.Build.Construction
 
                 return _elementLocation;
             }
-
-            set
-            {
-                _elementLocation = value;
-            }
         }
 
         /// <summary>
