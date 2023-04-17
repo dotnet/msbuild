@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.ToolManifest
             return false;
         }
 
-        public IEnumerable<(FilePath manifestfile, DirectoryPath manifestFileFirstEffectDirectory)>
+        private IEnumerable<(FilePath manifestfile, DirectoryPath manifestFileFirstEffectDirectory)>
             EnumerateDefaultAllPossibleManifests()
         {
             DirectoryPath? currentSearchDirectory = _probeStart;
@@ -161,7 +161,7 @@ namespace Microsoft.DotNet.ToolManifest
         private bool AllowManifestInRoot()
         {
             string environmentVariableValue = _getEnvironmentVariable(EnvironmentVariableNames.DOTNET_TOOLS_ALLOW_MANIFEST_IN_ROOT);
-            if (!string.IsNullOrEmpty(environmentVariableValue))
+            if (!string.IsNullOrWhiteSpace(environmentVariableValue))
             {
                 if (environmentVariableValue.Equals("true", StringComparison.OrdinalIgnoreCase) || environmentVariableValue.Equals("1", StringComparison.OrdinalIgnoreCase))
                 {
