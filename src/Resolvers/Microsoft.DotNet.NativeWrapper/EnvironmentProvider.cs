@@ -56,11 +56,12 @@ namespace Microsoft.DotNet.NativeWrapper
             return commandPath;
         }
 
-        public string GetDotnetExeDirectory()
+        public string GetDotnetExeDirectory(Action<FormattableString> log = null)
         {
             string environmentOverride = _getEnvironmentVariable(Constants.DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR);
             if (!string.IsNullOrEmpty(environmentOverride))
             {
+                log?.Invoke($"GetDotnetExeDirectory: {Constants.DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR} set to {environmentOverride}");
                 return environmentOverride;
             }
 
@@ -75,6 +76,9 @@ namespace Microsoft.DotNet.NativeWrapper
 
             if (string.IsNullOrWhiteSpace(dotnetExe))
             {
+                log?.Invoke($"GetDotnetExeDirectory: dotnet command path not found.  Using current process");
+                log?.Invoke($"GetDotnetExeDirectory: Path variable: {_getEnvironmentVariable(Constants.PATH)}");
+
 #if NET6_0_OR_GREATER
                 dotnetExe = Environment.ProcessPath;
 #else
@@ -82,17 +86,21 @@ namespace Microsoft.DotNet.NativeWrapper
 #endif
             }
 
-            return Path.GetDirectoryName(dotnetExe);
+            var dotnetDirectory = Path.GetDirectoryName(dotnetExe);
+
+            log?.Invoke($"GetDotnetExeDirectory: Returning {dotnetDirectory}");
+
+            return dotnetDirectory;
         }
 
-        public static string GetDotnetExeDirectory(Func<string, string> getEnvironmentVariable = null)
+        public static string GetDotnetExeDirectory(Func<string, string> getEnvironmentVariable = null, Action<FormattableString> log = null)
         {
             if (getEnvironmentVariable == null)
             {
                 getEnvironmentVariable = Environment.GetEnvironmentVariable;
             }
             var environmentProvider = new EnvironmentProvider(getEnvironmentVariable);
-            return environmentProvider.GetDotnetExeDirectory();
+            return environmentProvider.GetDotnetExeDirectory(log);
         }
     }
 }
