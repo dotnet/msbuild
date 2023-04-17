@@ -94,6 +94,7 @@ namespace Microsoft.NET.Publish.Tests
             ""System.Runtime.TieredPGO"": true,
             ""System.StartupHookProvider.IsSupported"": false,
             ""System.Text.Encoding.EnableUnsafeUTF7Encoding"": false,
+            ""System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault"": false,
             ""System.Threading.Thread.EnableAutoreleasePool"": false,
             ""System.Threading.ThreadPool.MinThreads"": 2,
             ""System.Threading.ThreadPool.MaxThreads"": 9,

@@ -49,6 +49,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(PublishTrimmed)' == 'true' Or '$(PublishAot)' == 'true'">
     <!-- Runtime feature defaults to trim unnecessary code -->
     <EnsureAspNetCoreJsonTrimmability Condition="'$(EnsureAspNetCoreJsonTrimmability)' == ''">true</EnsureAspNetCoreJsonTrimmability>
+    <JsonSerializerIsReflectionEnabledByDefault Condition="'$(JsonSerializerIsReflectionEnabledByDefault)' == ''">false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
 
   <!--

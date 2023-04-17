@@ -309,6 +309,29 @@
       SkipUnchangedFiles="true" />
   </Target>
 
+  <Target Name="PublishStaticWebAssetsTools"
+          BeforeTargets="PublishNetSdks">
+    <MSBuild
+      Targets="Publish"
+      Projects="$(RepoRoot)/src/StaticWebAssetsSdk/Tool/Microsoft.NET.Sdk.StaticWebAssets.Tool.csproj"
+      Properties="Configuration=$(Configuration)" />
+  </Target>
+
+  <Target Name="MoveStaticWebAssetsTools" AfterTargets="PublishStaticWebAssetsTools">
+    <ItemGroup>
+      <_StaticWebAssetsToolsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.StaticWebAssets.Tool\$(Configuration)\$(SdkTargetFramework)\publish\*.*" />
+    </ItemGroup>
+
+    <Error
+      Text="StaticWebAssets SDK tools outputs were not found in $(ArtifactsBinDir)Microsoft.NET.Sdk.StaticWebAssets.Tool\$(Configuration)\$(SdkTargetFramework)\publish"
+      Condition="'@(_StaticWebAssetsToolsOutput->Count())' == '0'" />
+
+    <Copy
+      SourceFiles="@(_StaticWebAssetsToolsOutput)"
+      DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.StaticWebAssets\tools\$(SdkTargetFramework)\"
+      SkipUnchangedFiles="true" />
+  </Target>
+
   <Target Name="PublishRazorSdkTools"
           BeforeTargets="PublishNetSdks">
     <MSBuild
@@ -451,6 +474,7 @@
                             PublishMSBuildExtensions;
                             PublishFSharp;
                             PublishBlazorWasmTools;
+                            PublishStaticWebAssetsTools;
                             GenerateCliRuntimeConfigurationFiles;
                             MakeFscRunnableAndMoveToPublishDir;
                             RemoveFscFilesAfterPublish;

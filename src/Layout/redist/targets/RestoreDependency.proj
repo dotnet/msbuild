@@ -1,4 +1,4 @@
-<Project ToolsVersion="15.0" DefaultTargets="EnsureDependencyRestored;CopySdkToOutput">
+﻿<Project ToolsVersion="15.0" DefaultTargets="PrepareBundledDependencyProps;EnsureDependencyRestored;CopySdkToOutput">
 <!--
 
   Note that the CopySdkToOutput target explicitly does NOT have Inputs and Outputs declared.
@@ -10,8 +10,7 @@
  -->
 
   <Target Name="CopySdkToOutput"
-          DependsOnTargets="PrepareBundledDependencyProps;
-                            EnsureDependencyRestored;
+          DependsOnTargets="EnsureDependencyRestored;
                             GetSdkItemsToCopy"
           Condition="'$(SdkLayoutDirectory)' != ''"
 >
@@ -24,24 +23,28 @@
 
   <Target Name="GetSdkItemsToCopy">
     <ItemGroup>
-      <SdkContent Include="$(DependencyNuPkgPath)/**/*"
-                  Exclude="$(DependencyNuPkgPath)/$(DependencyPackageName).nuspec;
-                           $(DependencyNuPkgPath)/$(DependencyPackageName).$(DependencyPackageVersion).nupkg;
-                           $(DependencyNuPkgPath)/$(DependencyPackageName).$(DependencyPackageVersion).nupkg.sha512" />
+      <SdkContent Include="$(DependencyNuPkgPath)**\*"
+                  Exclude="$(DependencyNuPkgPath)Icon.png;
+                           $(DependencyNuPkgPath)$(DependencyPackageName).nuspec;
+                           $(DependencyNuPkgPath)$(DependencyPackageName).$(DependencyPackageVersion).nupkg;
+                           $(DependencyNuPkgPath)$(DependencyPackageName).$(DependencyPackageVersion).nupkg.sha512" />
     </ItemGroup>
   </Target>
 
   <Target Name="EnsureDependencyRestored"
-          Condition="!Exists('$(DependencyNuPkgPath)/$(DependencyPackageName.ToLower()).nuspec')">
+          Condition="!Exists('$(DependencyNuPkgPath)$(DependencyPackageName.ToLower()).nuspec')">
+
+    <Message Text="Dependency has not been restored yet: '$(DependencyNuPkgPath)$(DependencyPackageName.ToLower()).nuspec'"/>
+
     <MSbuild
-      Projects="$(MSBuildThisFileDirectory)/sdks/sdks.csproj"
+      Projects="$(MSBuildThisFileDirectory)sdks\sdks.csproj"
       Properties="DependencyPackageName=$(DependencyPackageName);DependencyPackageVersion=$(DependencyPackageVersion)"
       Targets="Restore" />
   </Target>
 
   <Target Name="PrepareBundledDependencyProps">
     <PropertyGroup>
-      <DependencyNuPkgPath>$(NuGetPackageRoot)/$(DependencyPackageName.ToLower())/$(DependencyPackageVersion.ToLower())</DependencyNuPkgPath>
+      <DependencyNuPkgPath>$(NuGetPackageRoot)$(DependencyPackageName.ToLower())\$(DependencyPackageVersion.ToLower())\</DependencyNuPkgPath>
     </PropertyGroup>
   </Target>
 </Project>

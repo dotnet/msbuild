@@ -26,7 +26,7 @@ namespace Microsoft.NET.Publish.Tests
                 Name = "CrossPublish",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                RuntimeIdentifier = "centos.7-x64"
+                RuntimeIdentifier = "centos.8-x64"
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Threading", "4.3.0"));

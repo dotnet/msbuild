@@ -33,10 +33,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_BlazorWebAssemblySdkToolAssembly>$(BlazorWebAssemblySdkDirectoryRoot)tools\net8.0\Microsoft.NET.Sdk.BlazorWebAssembly.Tool.dll</_BlazorWebAssemblySdkToolAssembly>
   </PropertyGroup>
 
-  <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.BrotliCompress" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
-  <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.GzipCompress" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.CreateBlazorTrimmerRootDescriptorFile" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
-  <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.ComputeBlazorFilesToCompress" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.GenerateBlazorBootExtensionJson" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
 
   <PropertyGroup>
@@ -60,27 +57,24 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <DisableAutoWasmBuildApp>true</DisableAutoWasmBuildApp>
     <DisableAutoWasmPublishApp>true</DisableAutoWasmPublishApp>
-    <BlazorEnableCompression Condition="'$(WasmBuildingForNestedPublish)' == 'true'">false</BlazorEnableCompression>
+    <WasmNestedPublishAppDependsOn>_GatherBlazorFilesToPublish;$(WasmNestedPublishAppDependsOn)</WasmNestedPublishAppDependsOn>
   </PropertyGroup>
 
   <!-- Wire-up static web assets -->
   <PropertyGroup>
-    <GenerateStaticWebAssetsPublishManifestDependsOn Condition="'$(WasmBuildingForNestedPublish)' != 'true'">
-      $(GenerateStaticWebAssetsPublishManifestDependsOn);
-      _BlazorCompressPublishFiles;
-    </GenerateStaticWebAssetsPublishManifestDependsOn>
-
-    <AddWasmStaticWebAssetsDependsOn>
-      $(AddWasmStaticWebAssetsDependsOn);
+    <ResolveStaticWebAssetsInputsDependsOn>
+      $(ResolveStaticWebAssetsInputsDependsOn);
       _ResolveBlazorWasmOutputs;
-    </AddWasmStaticWebAssetsDependsOn>
+    </ResolveStaticWebAssetsInputsDependsOn>
+
     <GenerateBuildWasmBootJsonDependsOn>
       $(GenerateBuildWasmBootJsonDependsOn);
-      GenerateBlazorBootExtensionJson;
+      GenerateBuildBlazorBootExtensionJson;
     </GenerateBuildWasmBootJsonDependsOn>
+
     <GeneratePublishWasmBootJsonDependsOn>
       $(GeneratePublishWasmBootJsonDependsOn);
-      GenerateBlazorBootExtensionJson;
+      GeneratePublishBlazorBootExtensionJson;
     </GeneratePublishWasmBootJsonDependsOn>
   </PropertyGroup>
 
@@ -125,44 +119,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="Assets" ItemName="_BlazorJSStaticWebAsset" />
     </DefineStaticWebAssets>
 
-    <PropertyGroup>
-      <_BlazorBuildGZipCompressDirectory>$(IntermediateOutputPath)build-gz\</_BlazorBuildGZipCompressDirectory>
-    </PropertyGroup>
-
-    <!--
-      Compress referenced binaries using GZip during build. This skips files such as the project's assemblies
-      that change from build to build. Runtime assets contribute to the bulk of the download size. Compressing it
-      has the most benefit while avoiding any ongoing costs to the dev inner loop.
-    -->
-
-    <ItemGroup>
-      <_BlazorStaticWebAsset Include="@(_BlazorJSStaticWebAsset)" />
-      <_BlazorStaticWebAsset Include="@(WasmStaticWebAsset)" />
-    </ItemGroup>
-
-    <ComputeBlazorFilesToCompress Assets="@(_BlazorStaticWebAsset)">
-      <Output TaskParameter="AssetsToCompress" ItemName="_GzipFileToCompressForBuild" />
-    </ComputeBlazorFilesToCompress>
-
-    <GZipCompress
-      FilesToCompress="@(_GzipFileToCompressForBuild)"
-      OutputDirectory="$(_BlazorBuildGZipCompressDirectory)">
-
-      <Output TaskParameter="CompressedFiles" ItemName="_BlazorBuildGZipCompressedFile" />
-      <Output TaskParameter="CompressedFiles" ItemName="FileWrites" />
-    </GZipCompress>
-
-    <ItemGroup>
-      <_BlazorBuildGZipCompressedFile>
-        <OriginalItemSpec>%(RelatedAsset)</OriginalItemSpec>
-      </_BlazorBuildGZipCompressedFile>
-
-      <_BlazorGzipStaticWebAsset Include="@(_BlazorBuildGZipCompressedFile->'%(FullPath)')" />
-    </ItemGroup>
-
     <ItemGroup>
       <StaticWebAsset Include="@(_BlazorJSStaticWebAsset)" />
-      <StaticWebAsset Include="@(_BlazorGzipStaticWebAsset)" />
     </ItemGroup>
   </Target>
 
@@ -170,8 +128,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_BlazorCopyFilesToOutputDirectory" AfterTargets="CopyFilesToOutputDirectory">
     <Message Importance="High" Text="$(MSBuildProjectName) (Blazor output) -&gt; $(TargetDir)wwwroot" Condition="'$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)'!='true'" />
   </Target>
-
-  <!-- Publish starts here -->
 
   <!-- Make sure that ResolveAssemblyReferences runs early enough to ensure satellite assemblies are populated in the ResolvedFilesToPublish -->
   <Target Name="_BlazorPrepareForPublish"
@@ -184,80 +140,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <Target Name="_BlazorCompressPublishFiles" AfterTargets="GeneratePublishWasmBootJson" Condition="'$(BlazorEnableCompression)' != 'false'">
+  <Target Name="GenerateBuildBlazorBootExtensionJson">
     <PropertyGroup>
-      <_CompressedFileOutputPath>$(IntermediateOutputPath)compress\</_CompressedFileOutputPath>
-      <_BlazorWebAssemblyBrotliIncremental>true</_BlazorWebAssemblyBrotliIncremental>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(DOTNET_HOST_PATH)' == ''">
-      <_DotNetHostDirectory>$(NetCoreRoot)</_DotNetHostDirectory>
-      <_DotNetHostFileName>dotnet</_DotNetHostFileName>
-      <_DotNetHostFileName Condition="'$(OS)' == 'Windows_NT'">dotnet.exe</_DotNetHostFileName>
-    </PropertyGroup>
-
-    <Message Text="Compressing Blazor WebAssembly publish artifacts. This may take a while..." Importance="High" />
-
-    <MakeDir Directories="$(_CompressedFileOutputPath)" Condition="!Exists('$(_CompressedFileOutputPath)')" />
-
-    <ItemGroup>
-      <_GzipFileToCompressForPublish Include="@(StaticWebAsset)"
-        Condition="'%(AssetKind)' != 'Build' and ('%(StaticWebAsset.AssetTraitName)' == 'WasmResource' or '%(StaticWebAsset.AssetTraitName)' == 'Culture')" >
-        <RelatedAsset>%(Identity)</RelatedAsset>
-        <AssetRole>Alternative</AssetRole>
-        <AssetTraitName>Content-Encoding</AssetTraitName>
-        <AssetTraitValue>gzip</AssetTraitValue>
-      </_GzipFileToCompressForPublish>
-
-      <_BrotliFileToCompressForPublish Include="@(_GzipFileToCompressForPublish)" Condition="'%(AssetKind)' != 'Build'">
-        <AssetTraitValue>br</AssetTraitValue>
-      </_BrotliFileToCompressForPublish>
-
-      <!-- We compressed a bunch of assets that were not modified since the build process. We can reuse those and avoid the extra compression we just
-           need to check that they are still relevant (we have updated existing assets to account for linking) -->
-      <_AlreadyGzipCompressedAssets
-        Include="@(StaticWebAsset)"
-        Condition="'%(AssetKind)' != 'Build' and ('%(StaticWebAsset.AssetTraitName)' == 'Content-Encoding' and '%(StaticWebAsset.AssetTraitValue)' == 'gzip')" />
-      <_GzipFileToCompressForPublish Remove="@(_AlreadyGzipCompressedAssets->'%(RelatedAsset)')" />
-    </ItemGroup>
-
-    <GZipCompress
-      FilesToCompress="@(_GzipFileToCompressForPublish)"
-      OutputDirectory="$(_CompressedFileOutputPath)">
-
-      <Output TaskParameter="CompressedFiles" ItemName="_BlazorPublishGZipCompressedFile" />
-      <Output TaskParameter="CompressedFiles" ItemName="FileWrites" />
-    </GZipCompress>
-
-    <BrotliCompress
-      OutputDirectory="$(_CompressedFileOutputPath)"
-      FilesToCompress="@(_BrotliFileToCompressForPublish)"
-      CompressionLevel="$(_BlazorBrotliCompressionLevel)"
-      SkipIfOutputIsNewer="$(_BlazorWebAssemblyBrotliIncremental)"
-      ToolAssembly="$(_BlazorWebAssemblySdkToolAssembly)"
-      ToolExe="$(_DotNetHostFileName)"
-      ToolPath="$(_DotNetHostDirectory)">
-
-      <Output TaskParameter="CompressedFiles" ItemName="_BlazorPublishBrotliCompressedFile" />
-      <Output TaskParameter="CompressedFiles" ItemName="FileWrites" />
-    </BrotliCompress>
-
-    <ItemGroup>
-      <_BlazorPublishGZipCompressedFile>
-        <OriginalItemSpec>%(RelatedAsset)</OriginalItemSpec>
-      </_BlazorPublishGZipCompressedFile>
-      <_BlazorPublishBrotliCompressedFile>
-        <OriginalItemSpec>%(RelatedAsset)</OriginalItemSpec>
-      </_BlazorPublishBrotliCompressedFile>
-
-      <StaticWebAsset Include="@(_BlazorPublishGZipCompressedFile->'%(FullPath)')" />
-      <StaticWebAsset Include="@(_BlazorPublishBrotliCompressedFile->'%(FullPath)')" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="GenerateBlazorBootExtensionJson">
-    <PropertyGroup>
-      <_BlazorBuildBootExtensionJsonPath>$(IntermediateOutputPath)blazor.boot-extension.json</_BlazorBuildBootExtensionJsonPath>
+      <_BlazorBuildBootExtensionJsonPath>$(IntermediateOutputPath)blazor.build.boot-extension.json</_BlazorBuildBootExtensionJsonPath>
     </PropertyGroup>
 
     <GenerateBlazorBootExtensionJson OutputPath="$(_BlazorBuildBootExtensionJsonPath)" />
@@ -265,6 +150,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <FileWrites Include="$(_BlazorBuildBootExtensionJsonPath)" />
       <WasmBootConfigExtension Include="$(_BlazorBuildBootExtensionJsonPath)" Key="blazor" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="GeneratePublishBlazorBootExtensionJson">
+    <PropertyGroup>
+      <_BlazorPublishBootExtensionJsonPath>$(IntermediateOutputPath)blazor.publish.boot-extension.json</_BlazorPublishBootExtensionJsonPath>
+    </PropertyGroup>
+
+    <GenerateBlazorBootExtensionJson OutputPath="$(_BlazorPublishBootExtensionJsonPath)" />
+
+    <ItemGroup>
+      <FileWrites Include="$(_BlazorPublishBootExtensionJsonPath)" />
+      <WasmBootConfigExtension Remove="@(WasmBootConfigExtension)" Condition="'%(Key)' == 'blazor'" />
+      <WasmBootConfigExtension Include="$(_BlazorPublishBootExtensionJsonPath)" Key="blazor" />
     </ItemGroup>
   </Target>
 

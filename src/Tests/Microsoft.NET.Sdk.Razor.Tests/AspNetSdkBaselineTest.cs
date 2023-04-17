@@ -249,7 +249,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                     DefaultTfm,
                     DefaultPackageVersion);
 
-                _comparer.AssertManifest(manifest, expected);
+                _comparer.AssertManifest(expected, manifest);
             }
             else
             {

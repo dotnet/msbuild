@@ -19,6 +19,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <SuppressTrimAnalysisWarnings Condition="'$(SuppressTrimAnalysisWarnings)' == '' And '$(TrimmerDefaultAction)' != 'link'">true</SuppressTrimAnalysisWarnings>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <CompressionIncludePatterns>$(CompressionIncludePatterns);_framework\**</CompressionIncludePatterns>
+  </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk.StaticWebAssets" Project="Sdk.targets" Condition="'$(_WasmSdkImportsMicrosoftNETSdkStaticWebAssets)' == 'true'" />
   <Import Sdk="Microsoft.NET.Sdk.Publish" Project="Sdk.targets" Condition="'$(_WasmSdkImportsMicrosoftNETSdkPublish)' == 'true'" />
@@ -71,6 +74,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableDefaultWasmAssembliesToBundle>false</EnableDefaultWasmAssembliesToBundle>
     <WasmNestedPublishAppDependsOn>_GatherWasmFilesToPublish;$(WasmNestedPublishAppDependsOn)</WasmNestedPublishAppDependsOn>
     <_WasmNestedPublishAppPreTarget>ComputeFilesToPublish</_WasmNestedPublishAppPreTarget>
+    <DisableBuildCompression Condition="'$(WasmBuildingForNestedPublish)' == 'true'">true</DisableBuildCompression>
   </PropertyGroup>
 
   <ItemGroup>
@@ -103,6 +107,29 @@ Copyright (c) .NET Foundation. All rights reserved.
       GeneratePublishWasmBootJson;
     </GenerateStaticWebAssetsPublishManifestDependsOn>
 
+    <ResolveCompressedFilesDependsOn>
+      $(ResolveCompressedFilesDependsOn);
+      ResolveWasmOutputs;
+      _AddWasmStaticWebAssets;
+    </ResolveCompressedFilesDependsOn>
+
+    <ResolveCompressedFilesForPublishDependsOn>
+      $(ResolveCompressedFilesForPublishDependsOn);
+      ProcessPublishFilesForWasm;
+      ComputeWasmExtensions;
+      _AddPublishWasmBootJsonToStaticWebAssets;
+    </ResolveCompressedFilesForPublishDependsOn>
+
+    <CompressFilesDependsOn>
+      $(CompressFilesDependsOn)
+      _GenerateBuildWasmBootJson;
+    </CompressFilesDependsOn>
+
+    <CompressFilesForPublishDependsOn>
+      $(CompressFilesForPublishDependsOn);
+      GeneratePublishWasmBootJson;
+    </CompressFilesForPublishDependsOn>
+
     <AddWasmStaticWebAssetsDependsOn>
       $(AddWasmStaticWebAssetsDependsOn);
       ResolveWasmOutputs;
@@ -125,7 +152,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <WasmAssembliesToBundle Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.Extension)' == '.dll'" />
     </ItemGroup>
   </Target>
-  
+
   <Target Name="_ResolveGlobalizationConfiguration">
     <Error Condition="'$(BlazorIcuDataFileName)' != '' AND !$([System.IO.Path]::GetFileName('$(BlazorIcuDataFileName)').StartsWith('icudt'))" Text="File name in %24(BlazorIcuDataFileName) has to start with 'icudt'." />
     <Warning Condition="'$(InvariantGlobalization)' == 'true' AND '$(BlazorWebAssemblyLoadAllGlobalizationData)' == 'true'" Text="%24(BlazorWebAssemblyLoadAllGlobalizationData) has no effect when %24(InvariantGlobalization) is set to true." />
@@ -352,15 +379,15 @@ Copyright (c) .NET Foundation. All rights reserved.
       <StaticWebAsset Include="@(_NewWasmPublishStaticWebAssets)" />
 
       <!-- TODO: Probably doesn't do anything as of now, original https://github.com/dotnet/aspnetcore/pull/34798 -->
-      <PublishBlazorBootStaticWebAsset 
+      <PublishBlazorBootStaticWebAsset
         Include="@(StaticWebAsset)"
-        Condition="'%(AssetKind)' != 'Build' and 
+        Condition="'%(AssetKind)' != 'Build' and
                     (('%(StaticWebAsset.AssetTraitName)' == 'WasmResource' and '%(StaticWebAsset.AssetTraitValue)' != 'manifest' and '%(StaticWebAsset.AssetTraitValue)' != 'boot') or
                     '%(StaticWebAsset.AssetTraitName)' == 'Culture')" />
     </ItemGroup>
   </Target>
 
-  <Target 
+  <Target
     Name="ComputeWasmExtensions"
     AfterTargets="ProcessPublishFilesForWasm"
     DependsOnTargets="$(ComputeBlazorExtensionsDependsOn)" >
@@ -385,6 +412,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefineStaticWebAssets CandidateAssets="@(_BlazorExtensionsCandidate)">
       <Output TaskParameter="Assets" ItemName="StaticWebAsset" />
       <Output TaskParameter="Assets" ItemName="_BlazorExtensionsCandidatesForPublish" />
+      <Output TaskParameter="Assets" ItemName="AssetToCompress" />
     </DefineStaticWebAssets>
   </Target>
 
