@@ -755,7 +755,7 @@ EndGlobal
                 + CommonLocalizableStrings.DidYouMean + Environment.NewLine
                  + $"  dotnet sln App.sln remove {projectArg}"
             );
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
     }
 }
