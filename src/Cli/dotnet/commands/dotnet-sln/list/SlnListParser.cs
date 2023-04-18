@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli
 {
     public static class SlnListParser
     {
-        public static readonly Option<bool> SolutionFolderOption = new Option<bool>(new string[] { "-s", "--solution-folders" }, LocalizableStrings.ListSolutionFoldersArgumentDescription);
+        public static readonly Option<bool> SolutionFolderOption = new Option<bool>(new string[] { "--solution-folders" }, LocalizableStrings.ListSolutionFoldersArgumentDescription);
 
         private static readonly Command Command = ConstructCommand();
 
