@@ -100,8 +100,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 
             string[] expectedErrors = new[]
             {
-@$"Warning: [{testTemplateLocation + Path.DirectorySeparatorChar}.template.config/template.json]: id of the post action 'pa2' at index '3' is not unique. Only the first post action that uses this id will be localized.",
+"""
+Warning: The template 'name' (TestAssets.Invalid.Localiation.ValidationFailure) has the following validation warnings:
+   [Warning][CONFIG0201] Id of the post action 'pa2' at index '3' is not unique. Only the first post action that uses this id will be localized.
 
+""",
 """
 Error: The template 'name' (TestAssets.Invalid.Localiation.ValidationFailure) has the following validation errors in 'de-DE' localization:
    [Error][LOC001] In localization file under the post action with id 'pa1', there are localized strings for manual instruction(s) with ids 'do-not-exist'. These manual instructions do not exist in the template.json file and should be removed from localization file.
