@@ -149,7 +149,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             Action a = () => toolManifest.Find();
 
-            a.Should().Throw<ToolManifestCannotBeFoundException>().And.Message.Should()
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.Message.Should()
                 .Contain(LocalizableStrings.CannotFindAManifestFile);
         }
 
