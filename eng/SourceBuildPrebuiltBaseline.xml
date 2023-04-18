@@ -6,10 +6,6 @@
     <UsagePattern IdentityGlob="Nuget.*/*" />
     <UsagePattern IdentityGlob="Microsoft.Build.NuGetSdkResolver/*" />
     
-    <!-- TODO: Ignore needed until vstest gets a source build leg that publishes outputs
-         https://github.com/microsoft/vstest/pull/4332. -->
-    <UsagePattern IdentityGlob="Microsoft.TestPlatform.*/*" />
-    
     <!-- TODO: Figure out what to do about the netcoreapp ref packages (these are probably being pulled
          in via implicit versions and net6 targeting projects (e.g. tests)
          https://github.com/dotnet/source-build/issues/3356 -->
@@ -19,12 +15,6 @@
          https://github.com/dotnet/source-build/issues/3357 -->
     <UsagePattern IdentityGlob="Microsoft.Build.Locator/*1.5.3*" />
     <UsagePattern IdentityGlob="Microsoft.CodeAnalysis.AnalyzerUtilities/*3.3.0*" />
-    <UsagePattern IdentityGlob="Microsoft.Css.Parser/*1.0.0-20200708.1*" />
-    <UsagePattern IdentityGlob="System.Configuration.ConfigurationManager/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.IO.Pipelines/*6.0.3*" />
-    <UsagePattern IdentityGlob="System.Security.Cryptography.Xml/*7.0.1*" />
-    <UsagePattern IdentityGlob="System.Security.Permissions/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Threading.Channels/*6.0.0*" />
     
     <!-- This may be coming in transitively from aspnetcore. Needs evaluation.
          https://github.com/dotnet/source-build/issues/3358. -->

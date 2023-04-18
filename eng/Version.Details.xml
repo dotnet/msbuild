@@ -114,6 +114,7 @@
     <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.7.0-preview.23214.2">
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>1541fc31ead99a358c649e7e9fa203e0dd4d20a5</Sha>
+      <SourceBuild RepoName="vstest" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="8.0.0-preview.4.23218.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -265,9 +266,9 @@
       <Sha>de4dda48d0cf31e13182bc24107b2246c61ed483</Sha>
       <SourceBuild RepoName="source-build-externals" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23214.3">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23217.1">
       <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
-      <Sha>94178e62553730ae42f6e02bb2f0ca45d9c3e28d</Sha>
+      <Sha>8a91992a869b6e4dccd49b1c3246486e963595af</Sha>
       <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.Deployment.DotNet.Releases" Version="1.0.0-preview.6.23206.1">
