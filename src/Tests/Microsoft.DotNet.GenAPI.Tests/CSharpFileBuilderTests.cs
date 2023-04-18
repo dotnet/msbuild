@@ -1215,6 +1215,132 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
+        public void TestInternalParameterlessConstructors()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class B
+                        {
+                            internal B() {}
+                        }
+
+                        public class C : B
+                        {
+                            internal C() : base() {}
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class B
+                        {
+                            internal B() {}
+                        }
+
+                        public partial class C : B
+                        {
+                            internal C() {}
+                        }
+                    }
+                    """,
+                    includeInternalSymbols: false);
+        }
+
+        [Fact]
+        public void TestInternalParameterizedConstructors()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class B
+                        {
+                            public B(int i) {}
+                        }
+                    
+                        public class C : B
+                        {
+                            internal C() : base(0) {}
+                        }
+                    
+                        public class D : B
+                        {
+                            internal D(int i) : base(i) {}
+                        }
+
+                        public class E
+                        {
+                            internal E(int i) {}
+                            internal E(string s) {}
+                            internal E(P p) {}
+                        }
+
+                        internal class P { }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class B
+                        {
+                            public B(int i) {}
+                        }
+                    
+                        public partial class C : B
+                        {
+                            internal C() : base(default) {}
+                        }
+
+                        public partial class D : B
+                        {
+                            internal D() : base(default) {}
+                        }
+
+                        public partial class E
+                        {
+                            internal E() {}
+                        }
+                    }
+                    """,
+                    includeInternalSymbols: false);
+        }
+
+        [Fact]
+        public void TestInternalConstructorCallingProtected()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class B
+                        {
+                            protected B() {}
+                        }
+
+                        public class C : B
+                        {
+                            internal C() {}
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class B
+                        {
+                            protected B() {}
+                        }                    
+                    
+                        public partial class C : B
+                        {
+                            internal C() {}
+                        }
+                    }
+                    """,
+                    includeInternalSymbols: false);
+        }
+
+        [Fact]
         public void TestBaseTypeWithoutDefaultConstructor()
         {
             RunTest(original: """
