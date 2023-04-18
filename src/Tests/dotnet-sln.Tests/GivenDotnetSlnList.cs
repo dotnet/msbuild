@@ -30,7 +30,7 @@ Arguments:
   <SLN_FILE>    The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
-  -s, --solution-folders  Display solution folder paths.
+  --solution-folders  Display solution folder paths.
   -?, -h, --help    Show command line help.";
 
 
