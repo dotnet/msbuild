@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.ToolManifest
             return false;
         }
 
-        private IEnumerable<(FilePath manifestfile, DirectoryPath manifestFileFirstEffectDirectory)>
+        public IEnumerable<(FilePath manifestfile, DirectoryPath manifestFileFirstEffectDirectory)>
             EnumerateDefaultAllPossibleManifests()
         {
             DirectoryPath? currentSearchDirectory = _probeStart;
