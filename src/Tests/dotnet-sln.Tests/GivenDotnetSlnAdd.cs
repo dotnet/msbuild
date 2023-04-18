@@ -588,6 +588,7 @@ EndGlobal
                 .Path;
             string projectToAdd;
             CommandResult cmd;
+
             if (fooFirst)
             {
                 projectToAdd = "foo";
