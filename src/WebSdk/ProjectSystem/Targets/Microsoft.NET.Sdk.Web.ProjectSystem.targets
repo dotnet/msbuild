@@ -58,6 +58,7 @@ Copyright (c) .NET Foundation. All rights reserved.
    -->
   <PropertyGroup Condition="'$(PublishAot)' == 'true'">
     <EnableRequestDelegateGenerator Condition="'$(EnableRequestDelegateGenerator)' == ''">true</EnableRequestDelegateGenerator>
+    <EnableConfigurationBindingGenerator Condition="'$(EnableConfigurationBindingGenerator)' == ''">true</EnableConfigurationBindingGenerator>
   </PropertyGroup>
 
   <!--
