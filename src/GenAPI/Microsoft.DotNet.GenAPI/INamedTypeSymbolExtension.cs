@@ -234,14 +234,13 @@ namespace Microsoft.DotNet.GenAPI
 
             foreach (IParameterSymbol parameter in baseTypeConstructor.Parameters)
             {
-                IdentifierNameSyntax identifier;
-                // If the parameter's type is known to be a value type or has top-level nullability annotation
-                if (parameter.Type.IsValueType || parameter.NullableAnnotation == NullableAnnotation.Annotated)
-                    identifier = SyntaxFactory.IdentifierName("default");
-                else
-                    identifier = SyntaxFactory.IdentifierName("default!");
+                ExpressionSyntax expression = SyntaxFactory.DefaultExpression(SyntaxFactory.ParseTypeName(parameter.Type.ToDisplayString()));
 
-                constructorInitializer = constructorInitializer.AddArgumentListArguments(SyntaxFactory.Argument(identifier));
+                // If the parameter is not value type and isn't annotated to accept null, suppress the nullable warning with !
+                if (!parameter.Type.IsValueType && parameter.NullableAnnotation != NullableAnnotation.Annotated)
+                    expression = SyntaxFactory.PostfixUnaryExpression(SyntaxKind.SuppressNullableWarningExpression, expression);
+
+                constructorInitializer = constructorInitializer.AddArgumentListArguments(SyntaxFactory.Argument(expression));
             }
 
             return constructorInitializer;
