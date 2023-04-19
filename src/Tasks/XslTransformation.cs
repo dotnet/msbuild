@@ -121,7 +121,7 @@ namespace Microsoft.Build.Tasks
             // Check if OutputPath has 1 parameter if xmlString is specified.
             if (XmlContent != null && _outputPaths.Length != 1)
             {
-                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, 1, "XmlContent", "OutputPaths");
+                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, 1, "OutputPaths", "XmlContent");
                 return false;
             }
 
