@@ -72,6 +72,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="sdkName">The name of the sdk to resolve.</param>
         /// <param name="rawFileNameCandidate">The reference's 'include' treated as a raw file name.</param>
         /// <param name="isPrimaryProjectReference">Whether or not this reference was directly from the project file (and therefore not a dependency)</param>
+        /// <param name="isImmutableFrameworkReference">True if <paramref name="rawFileNameCandidate"/> is guaranteed to exist on disk and never change.</param>
         /// <param name="wantSpecificVersion">Whether an exact version match is requested.</param>
         /// <param name="executableExtensions">Allowed executable extensions.</param>
         /// <param name="hintPath">The item's hintpath value.</param>
@@ -85,6 +86,7 @@ namespace Microsoft.Build.Tasks
             string sdkName,
             string rawFileNameCandidate,
             bool isPrimaryProjectReference,
+            bool isImmutableFrameworkReference,
             bool wantSpecificVersion,
             string[] executableExtensions,
             string hintPath,
