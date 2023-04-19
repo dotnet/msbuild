@@ -114,7 +114,7 @@ namespace Microsoft.Build.Tasks
             // Check if OutputPath has same number of parameters as xmlInputPaths.
             if (XmlInputPaths != null && XmlInputPaths.Length != _outputPaths.Length)
             {
-                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, XmlInputPaths.Length, "XmlContent", "XmlInputPaths");
+                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, XmlInputPaths.Length, "OutputPaths", "XmlInputPaths");
                 return false;
             }
 
