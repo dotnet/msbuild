@@ -736,9 +736,12 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 set => ProjectFilePath = Path.Combine(value.FullName, "test.csproj");
             }
 
+            public override SdkLogger Logger { get; protected set; }
+
             public MockContext()
             {
                 MSBuildVersion = new Version(15, 3, 0);
+                Logger = new MockLogger();
             }
         }
 
@@ -802,6 +805,14 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             public override IDictionary<string, SdkResultItem> ItemsToAdd { get; protected set; }
             public IEnumerable<string> Errors { get; }
             public IEnumerable<string> Warnings { get; }
+        }
+
+        private sealed class MockLogger : SdkLogger
+        {
+            public override void LogMessage(string message, MessageImportance messageImportance = MessageImportance.Low)
+            {
+
+            }
         }
     }
 }
