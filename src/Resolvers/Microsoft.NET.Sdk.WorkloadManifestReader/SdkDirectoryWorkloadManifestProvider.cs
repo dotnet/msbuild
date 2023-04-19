@@ -42,7 +42,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _sdkRootPath = sdkRootPath;
             _sdkVersionBand = new SdkFeatureBand(sdkVersion);
 
-            var knownManifestIdsFilePath = Path.Combine(_sdkRootPath, "sdk", sdkVersion, "IncludedWorkloadManifests.txt");
+            var knownManifestIdsFilePath = Path.Combine(_sdkRootPath, "sdk", sdkVersion, "KnownWorkloadManifests.txt");
             if (File.Exists(knownManifestIdsFilePath))
             {
                 _knownManifestIdsAndOrder = new Dictionary<string, int>();
@@ -145,7 +145,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 }
             }
 
-            //  Return manifests in a stable order.  Manifests in the IncludedWorkloadManifests.txt file will be first, and in the same order they appear in that file.
+            //  Return manifests in a stable order.  Manifests in the KnownWorkloadManifests.txt file will be first, and in the same order they appear in that file.
             //  Then the rest of the manifests (if any) will be returned in (ordinal case-insensitive) alphabetical order.
             return manifestIdsToDirectories
                 .OrderBy(kvp =>
