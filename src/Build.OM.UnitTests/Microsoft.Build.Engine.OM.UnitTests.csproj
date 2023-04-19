@@ -22,7 +22,6 @@
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
 
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="System.Net.Http" />
     <PackageDownload Include="NuGet.CommandLine" Version="[$(NuGetCommandLinePackageVersion)]" />
   </ItemGroup>
 
