@@ -144,7 +144,8 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 {
                     if (BuildEngine != null)
                     {
-                        Log.LogErrorWithCodeFromResources(nameof(Strings.RegistryOutputPushFailed), e);
+                        Log.LogErrorWithCodeFromResources(nameof(Strings.RegistryOutputPushFailed), e.Message);
+                        Log.LogMessage(MessageImportance.Low, "Details: {0}", e);
                     }
                 }
             }
