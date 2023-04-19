@@ -49,7 +49,7 @@
     <PackageReference Include="System.Memory" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <PackageReference Include="System.Reflection.Metadata" />
     <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Text.Encoding.CodePages" />

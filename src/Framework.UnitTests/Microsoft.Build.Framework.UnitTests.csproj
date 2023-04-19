@@ -14,6 +14,7 @@
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>
