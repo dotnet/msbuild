@@ -28,11 +28,6 @@
         <target state="translated">MSBUILD : error MSB1027: -noAutoResponse 參數不能在 MSBuild.rsp 自動回應檔中指定，也不能在自動回應檔所參考的任何回應檔中指定。</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="DeferredResponseFile">
-        <source>Included response file: {0}</source>
-        <target state="new">Included response file: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
                      (Experimental) Question whether there is any build work.

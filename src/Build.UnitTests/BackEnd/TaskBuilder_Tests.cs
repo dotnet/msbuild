@@ -597,6 +597,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// If an item returned from a task has bare-minimum metadata implementation, we shouldn't crash.
+        /// </summary>
+        [Fact]
+        public void MinimalLegacyOutputItems()
+        {
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+
+            string projectContents = $"""
+                                     <Project>
+                                       <UsingTask TaskName="TaskThatReturnsMinimalItem" AssemblyFile="{customTaskPath}" />
+
+                                       <Target Name="Build">
+                                         <TaskThatReturnsMinimalItem>
+                                           <Output TaskParameter="MinimalTaskItemOutput" ItemName="Outputs"/>
+                                         </TaskThatReturnsMinimalItem>
+
+                                         <Message Text="[%(Outputs.Identity): %(Outputs.a)]" Importance="High" />
+                                       </Target>
+                                     </Project>
+                                     """;
+
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
+        }
+
+        /// <summary>
         /// Regression test for https://github.com/dotnet/msbuild/issues/5080
         /// </summary>
         [Fact]
