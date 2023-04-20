@@ -82,6 +82,17 @@ Default: false
     Detail: Location to place the generated output.
   },
   {
+    Label: --publish-native-aot,
+    Kind: Keyword,
+    SortText: --publish-native-aot,
+    InsertText: --publish-native-aot,
+    Detail:
+Whether to enable the project for publishing as native AOT.
+Type: bool
+Default: false
+
+  },
+  {
     Label: --type,
     Kind: Keyword,
     SortText: --type,
@@ -105,6 +116,17 @@ Default: false
     SortText: -?,
     InsertText: -?,
     Detail: Show help and usage information
+  },
+  {
+    Label: -aot,
+    Kind: Keyword,
+    SortText: -aot,
+    InsertText: -aot,
+    Detail:
+Whether to enable the project for publishing as native AOT.
+Type: bool
+Default: false
+
   },
   {
     Label: -f,

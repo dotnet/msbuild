@@ -12,6 +12,8 @@
   "symbols/langVersion/displayName": "Versión de lenguaje",
   "symbols/skipRestore/description": "Si se especifica, se omite la restauración automática del proyecto durante la creación.",
   "symbols/skipRestore/displayName": "Omitir restauración",
+  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
+  "symbols/NativeAot/displayName": "Enable _native AOT publish",
   "postActions/restore/description": "Restaure los paquetes NuGet necesarios para este proyecto.",
   "postActions/restore/manualInstructions/default/text": "Ejecutar \"dotnet restore\"",
   "postActions/open-file/description": "Abre Program.vb en el editor"

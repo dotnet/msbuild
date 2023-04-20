@@ -14,6 +14,8 @@
   "symbols/skipRestore/displayName": "Přeskočit obnovení",
   "symbols/UseProgramMain/description": "Určuje, jestli se má místo příkazů nejvyšší úrovně generovat explicitní třída Program a metoda Main.",
   "symbols/UseProgramMain/displayName": "Nepoužívat _příkazy nejvyšší úrovně",
+  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
+  "symbols/NativeAot/displayName": "Enable _native AOT publish",
   "postActions/restore/description": "Obnoví balíčky NuGet vyžadované tímto projektem.",
   "postActions/restore/manualInstructions/default/text": "Spustit dotnet restore",
   "postActions/open-file/description": "Otevře Program.cs v editoru."

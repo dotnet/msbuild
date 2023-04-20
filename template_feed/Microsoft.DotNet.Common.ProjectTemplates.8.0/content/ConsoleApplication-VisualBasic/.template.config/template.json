@@ -60,6 +60,13 @@
       "description": "If specified, skips the automatic restore of the project on create.",
       "defaultValue": "false",
       "displayName": "Skip restore"
+    },
+    "NativeAot" : {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "displayName": "Enable _native AOT publish",
+      "description": "Whether to enable the project for publishing as native AOT."
     }
   },
   "primaryOutputs": [
