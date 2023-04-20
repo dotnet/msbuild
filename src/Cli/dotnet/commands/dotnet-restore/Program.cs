@@ -17,6 +17,7 @@ namespace Microsoft.DotNet.Tools.Restore
         public RestoreCommand(IEnumerable<string> msbuildArgs, string msbuildPath = null)
             : base(msbuildArgs, msbuildPath)
         {
+            NuGetSignatureVerificationEnabler.ConditionallyEnable(this);
         }
 
         public static RestoreCommand FromArgs(string[] args, string msbuildPath = null, bool noLogo = true)
