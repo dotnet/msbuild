@@ -131,8 +131,8 @@ public class TargetsTests
     [InlineData("7.0.100-rc.1", "v7.0", "7.0")]
     [InlineData("8.0.100", "v8.0", "8.0")]
     [InlineData("8.0.100", "v7.0", "7.0")]
-    [InlineData("8.0.100-preview.7", "v8.0", "8.0-preview.7")]
-    [InlineData("8.0.100-rc.1", "v8.0", "8.0-rc.1")]
+    [InlineData("8.0.100-preview.7", "v8.0", "8.0.0-preview.7")]
+    [InlineData("8.0.100-rc.1", "v8.0", "8.0.0-rc.1")]
     [InlineData("8.0.100-rc.1", "v7.0", "7.0")]
     [InlineData("8.0.200", "v8.0", "8.0")]
     [InlineData("8.0.200", "v7.0", "7.0")]
@@ -142,8 +142,8 @@ public class TargetsTests
     [InlineData("6.0.100-preview.1", "v6.0", "6.0")]
     [InlineData("8.0.100-dev", "v8.0", "8.0-preview")]
     [InlineData("8.0.100-ci", "v8.0", "8.0-preview")]
-    [InlineData("8.0.100-alpha.12345", "v8.0", "8.0-preview.1")]
-    [InlineData("9.0.100-alpha.12345", "v9.0", "9.0-preview.1")]
+    [InlineData("8.0.100-alpha.12345", "v8.0", "8.0-preview")]
+    [InlineData("9.0.100-alpha.12345", "v9.0", "9.0-preview")]
     [Theory]
     public void CanComputeTagsForSupportedSDKVersions(string sdkVersion, string tfm, string expectedTag)
     {
