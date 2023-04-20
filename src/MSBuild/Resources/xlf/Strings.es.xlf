@@ -10,6 +10,50 @@
       fire this error.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="BuildFinished">
+        <source>Build {0} in {1}s</source>
+        <target state="new">Build {0} in {1}s</target>
+        <note>
+      Overall build summary
+      {0}: BuildResult_X bellow is
+      {1}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_Failed">
+        <source>failed</source>
+        <target state="new">failed</target>
+        <note>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithError">
+        <source>failed with errors</source>
+        <target state="new">failed with errors</target>
+        <note>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithWarn">
+        <source>failed with warnings</source>
+        <target state="new">failed with warnings</target>
+        <note>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_Succeeded">
+        <source>succeeded</source>
+        <target state="new">succeeded</target>
+        <note>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_SucceededWithWarn">
+        <source>succeeded with warnings</source>
+        <target state="new">succeeded with warnings</target>
+        <note>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">Argumentos de la línea de comandos: "{0}"</target>
@@ -1333,6 +1377,60 @@
         <target state="translated">Proceso: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectBuilding_NoTF">
+        <source>{0}{1} {2} ({3}s)</source>
+        <target state="new">{0}{1} {2} ({3}s)</target>
+        <note>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target
+      {3}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectBuilding_WithTF">
+        <source>{0}{1} [2] {3} ({4}s)</source>
+        <target state="new">{0}{1} [2] {3} ({4}s)</target>
+        <note>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: target
+      {4}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectFinished_NoTF">
+        <source>{0}{1} {2} ({3}s)</source>
+        <target state="new">{0}{1} {2} ({3}s)</target>
+        <note>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectFinished_OutputPath">
+        <source> → {0}</source>
+        <target state="new"> → {0}</target>
+        <note>
+      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
+      {0}: VT100 coded hyperlink to project output directory
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectFinished_WithTF">
+        <source>{0}{1} [2] {3} ({4}s)</source>
+        <target state="new">{0}{1} [2] {3} ({4}s)</target>
+        <note>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectNotFoundError">
         <source>MSBUILD : error MSB1009: Project file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1009: El archivo de proyecto no existe.</target>
@@ -1378,6 +1476,13 @@
         <target state="translated">'{0}' procedía de '{1}'</target>
         <note>
       These are response file switches with the location of the response file on disk.
+    </note>
+      </trans-unit>
+      <trans-unit id="RestoreComplete">
+        <source>Restore complete ({0}s)</source>
+        <target state="new">Restore complete ({0}s)</target>
+        <note>
+      Duration in seconds with 1 decimal point is: {0}"
     </note>
       </trans-unit>
       <trans-unit id="SchemaFileLocation">
