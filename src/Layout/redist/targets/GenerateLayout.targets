@@ -101,9 +101,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <DotnetFormatDllFiles Include="$(Pkgdotnet-format)/tools/net7.0/any/**/*.dll" />
-      <DotnetFormatConfigFiles Include="$(Pkgdotnet-format)/tools/net7.0/any/**/*.json" />
-      <DotnetFormatConfigFiles Include="$(Pkgdotnet-format)/tools/net7.0/any/**/*.config" />
+      <DotnetFormatDllFiles Include="$(Pkgdotnet-format)/tools/net8.0/any/**/*.dll" />
+      <DotnetFormatConfigFiles Include="$(Pkgdotnet-format)/tools/net8.0/any/**/*.json" />
+      <DotnetFormatConfigFiles Include="$(Pkgdotnet-format)/tools/net8.0/any/**/*.config" />
     </ItemGroup>
 
     <Error Condition="'@(DotnetFormatDllFiles)' == ''" Text="Something moved around in dotnet-format package, adjust code here accordingly. TFM change?" />
