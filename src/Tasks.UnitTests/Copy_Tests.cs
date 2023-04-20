@@ -1156,7 +1156,7 @@ namespace Microsoft.Build.UnitTests
             *
             * Don't really copy the file, just count how many times this was called.
             */
-            internal bool? CopyFile(FileState source, FileState destination)
+            internal bool? CopyFile(FileState source, FileState destination, string sourceFileFullPath, string destinationFileFullPath)
             {
                 Interlocked.Increment(ref copyCount);
                 return true;
@@ -1602,7 +1602,7 @@ namespace Microsoft.Build.UnitTests
                 UseSymboliclinksIfPossible = UseSymbolicLinks,
             };
 
-            bool success = t.Execute(delegate (FileState source, FileState dest)
+            bool success = t.Execute(delegate (FileState source, FileState dest, string sourceFileFullPath, string destinationFileFullPath)
             {
                 lock (filesActuallyCopied)
                 {
@@ -1668,7 +1668,7 @@ namespace Microsoft.Build.UnitTests
                 UseSymboliclinksIfPossible = UseSymbolicLinks,
             };
 
-            bool success = t.Execute(delegate (FileState source, FileState dest)
+            bool success = t.Execute(delegate (FileState source, FileState dest, string sourceFileFullPath, string destinationFileFullPath)
             {
                 lock (filesActuallyCopied)
                 {
@@ -2148,7 +2148,7 @@ namespace Microsoft.Build.UnitTests
             /// <summary>
             /// Pretend to be File.Copy.
             /// </summary>
-            internal bool? Copy(FileState source, FileState destination)
+            internal bool? Copy(FileState source, FileState destination, string sourceFileFullPath, string destinationFileFullPath)
             {
                 lock (_lockObj)
                 {

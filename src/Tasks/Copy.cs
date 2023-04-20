@@ -226,7 +226,9 @@ namespace Microsoft.Build.Tasks
         /// <returns>Return true to indicate success, return false to indicate failure and NO retry, return NULL to indicate retry.</returns>
         private bool? CopyFileWithLogging(
             FileState sourceFileState,      // The source file
-            FileState destinationFileState)  // The destination file
+            FileState destinationFileState,
+            string sourceFileFullPath,
+            string destinationFileFullPath)  // The destination file
         {
             if (destinationFileState.DirectoryExists)
             {
@@ -276,9 +278,7 @@ namespace Microsoft.Build.Tasks
 
             if (FailIfNotIncremental)
             {
-                string sourceFilePath = FileUtilities.GetFullPathNoThrow(sourceFileState.Name);
-                string destinationFilePath = FileUtilities.GetFullPathNoThrow(destinationFileState.Name);
-                Log.LogError(FileComment, sourceFilePath, destinationFilePath);
+                Log.LogError(FileComment, sourceFileFullPath, destinationFileFullPath);
                 return false;
             }
 
@@ -343,9 +343,7 @@ namespace Microsoft.Build.Tasks
             if (!hardLinkCreated && !symbolicLinkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                string sourceFilePath = FileUtilities.GetFullPathNoThrow(sourceFileState.Name);
-                string destinationFilePath = FileUtilities.GetFullPathNoThrow(destinationFileState.Name);
-                Log.LogMessage(MessageImportance.Normal, FileComment, sourceFilePath, destinationFilePath);
+                Log.LogMessage(MessageImportance.Normal, FileComment, sourceFileFullPath, destinationFileFullPath);
 
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
 
@@ -751,14 +749,11 @@ namespace Microsoft.Build.Tasks
                         "true");
                     MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, true);
                 }
-
-                // We only do the cheap check for identicalness here, we try the more expensive check
-                // of comparing the fullpaths of source and destination to see if they are identical,
-                // in the exception handler lower down.
-                else if (!String.Equals(
+                else if (!PathsAreIdentical(
                              sourceFileState.Name,
                              destinationFileState.Name,
-                             StringComparison.OrdinalIgnoreCase))
+                             out string sourceFileFullPath,
+                             out string destinationFileFullPath))
                 {
                     MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, false);
 
@@ -769,7 +764,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        success = DoCopyWithRetries(sourceFileState, destinationFileState, copyFile);
+                        success = DoCopyWithRetries(sourceFileState, destinationFileState, sourceFileFullPath, destinationFileFullPath, copyFile);
                     }
                 }
                 else
@@ -798,7 +793,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Copy one file with the appropriate number of retries if it fails.
         /// </summary>
-        private bool DoCopyWithRetries(FileState sourceFileState, FileState destinationFileState, CopyFileWithState copyFile)
+        private bool DoCopyWithRetries(FileState sourceFileState, FileState destinationFileState, string sourceFileFullPath, string destinationFileFullPath, CopyFileWithState copyFile)
         {
             int retries = 0;
 
@@ -806,7 +801,7 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    bool? result = copyFile(sourceFileState, destinationFileState);
+                    bool? result = copyFile(sourceFileState, destinationFileState, sourceFileFullPath, destinationFileFullPath);
                     if (result.HasValue)
                     {
                         return result.Value;
@@ -865,13 +860,6 @@ namespace Microsoft.Build.Tasks
                                 throw;
                             }
 
-                            // if this was just because the source and destination files are the
-                            // same file, that's not a failure.
-                            // Note -- we check this exceptional case here, not before the copy, for perf.
-                            if (PathsAreIdentical(sourceFileState.Name, destinationFileState.Name))
-                            {
-                                return true;
-                            }
                             break;
                     }
 
@@ -969,12 +957,12 @@ namespace Microsoft.Build.Tasks
         /// Compares two paths to see if they refer to the same file. We can't solve the general
         /// canonicalization problem, so we just compare strings on the full paths.
         /// </summary>
-        private static bool PathsAreIdentical(string source, string destination)
+        private static bool PathsAreIdentical(string source, string destination, out string sourceFileFullPath, out string destinationFileFullPath)
         {
-            string fullSourcePath = Path.GetFullPath(source);
-            string fullDestinationPath = Path.GetFullPath(destination);
+            sourceFileFullPath = Path.GetFullPath(source);
+            destinationFileFullPath = Path.GetFullPath(destination);
             StringComparison filenameComparison = NativeMethodsShared.IsWindows ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-            return String.Equals(fullSourcePath, fullDestinationPath, filenameComparison);
+            return String.Equals(sourceFileFullPath, destinationFileFullPath, filenameComparison);
         }
 
         private static int GetParallelismFromEnvironment()

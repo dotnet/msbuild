@@ -17,7 +17,9 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     /// <param name="source">Source file</param>
     /// <param name="destination">Destination file</param>
-    internal delegate bool? CopyFileWithState(FileState source, FileState destination);
+    /// <param name="sourceFileFullPath">Source file's full path</param>
+    /// <param name="destinationFileFullPath">Destination file's full path</param>
+    internal delegate bool? CopyFileWithState(FileState source, FileState destination, string sourceFileFullPath, string destinationFileFullPath);
 
     /// <summary>
     /// Short-term cache saves the result of IO operations on a filename. Should only be
