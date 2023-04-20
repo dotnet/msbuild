@@ -26,7 +26,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
     <ItemGroup>
-      <EditorConfigFiles Include="$(RazorEncConfigFile)" Condition="'$(DesignTimeBuild)' == 'true' AND '$(BuildingInsideVisualStudio)' == 'true'"/>
+      <EditorConfigFiles Include="$(RazorEncConfigFile)" Condition="'$(DesignTimeBuild)' == 'true'"/>
     </ItemGroup>
 
     <ItemGroup>
