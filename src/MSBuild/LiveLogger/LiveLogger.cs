@@ -732,15 +732,15 @@ internal sealed class LiveLogger : INodeLogger
             // If the build failed, we print one of three red strings.
             string text = (hasError, hasWarning) switch
             {
-                (true, _) => ResourceUtilities.GetResourceString("BuildResult_FailedWithError"),
-                (false, true) => ResourceUtilities.GetResourceString("BuildResult_FailedWithWarn"),
+                (true, _) => ResourceUtilities.GetResourceString("BuildResult_FailedWithErrors"),
+                (false, true) => ResourceUtilities.GetResourceString("BuildResult_FailedWithWarnings"),
                 _ => ResourceUtilities.GetResourceString("BuildResult_Failed"),
             };
             return Terminal.RenderColor(TerminalColor.Red, text);
         }
         else if (hasWarning)
         {
-            return Terminal.RenderColor(TerminalColor.Yellow, ResourceUtilities.GetResourceString("BuildResult_SucceededWithWarn"));
+            return Terminal.RenderColor(TerminalColor.Yellow, ResourceUtilities.GetResourceString("BuildResult_SucceededWithWarnings"));
         }
         else
         {

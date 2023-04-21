@@ -1370,24 +1370,24 @@
   <data name="RestoreComplete" xml:space="preserve">
     <value>Restore complete ({0}s)</value>
     <comment>
-      Duration in seconds with 1 decimal point is: {0}"
+      {0}: duration in seconds with 1 decimal point
     </comment>
   </data>
   <data name="BuildFinished" xml:space="preserve">
     <value>Build {0} in {1}s</value>
     <comment>
       Overall build summary
-      {0}: BuildResult_X bellow is
+      {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
     </comment>
   </data>
-  <data name="BuildResult_FailedWithError" xml:space="preserve">
+  <data name="BuildResult_FailedWithErrors" xml:space="preserve">
     <value>failed with errors</value>
     <comment>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </comment>
   </data>
-  <data name="BuildResult_FailedWithWarn" xml:space="preserve">
+  <data name="BuildResult_FailedWithWarnings" xml:space="preserve">
     <value>failed with warnings</value>
     <comment>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
@@ -1405,7 +1405,7 @@
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </comment>
   </data>
-  <data name="BuildResult_SucceededWithWarn" xml:space="preserve">
+  <data name="BuildResult_SucceededWithWarnings" xml:space="preserve">
     <value>succeeded with warnings</value>
     <comment>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"

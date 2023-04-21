@@ -15,7 +15,7 @@
         <target state="new">Build {0} in {1}s</target>
         <note>
       Overall build summary
-      {0}: BuildResult_X bellow is
+      {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
@@ -26,14 +26,14 @@
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
-      <trans-unit id="BuildResult_FailedWithError">
+      <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with errors</source>
         <target state="new">failed with errors</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
-      <trans-unit id="BuildResult_FailedWithWarn">
+      <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with warnings</source>
         <target state="new">failed with warnings</target>
         <note>
@@ -47,7 +47,7 @@
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
-      <trans-unit id="BuildResult_SucceededWithWarn">
+      <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
         <target state="new">succeeded with warnings</target>
         <note>
@@ -1486,7 +1486,7 @@
         <source>Restore complete ({0}s)</source>
         <target state="new">Restore complete ({0}s)</target>
         <note>
-      Duration in seconds with 1 decimal point is: {0}"
+      {0}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
       <trans-unit id="SchemaFileLocation">
