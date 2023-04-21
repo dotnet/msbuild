@@ -8,7 +8,6 @@ using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.FileSystemGlobbing;
-using Microsoft.NET.Sdk.WebAssembly;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks;
 
