@@ -14,6 +14,8 @@
   "symbols/skipRestore/displayName": "Omitir restauración",
   "symbols/UseProgramMain/description": "Indica si se debe generar una clase Program explícita y un método Main en lugar de instrucciones de nivel superior.",
   "symbols/UseProgramMain/displayName": "No usar instrucciones de _nivel superior",
+  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
+  "symbols/NativeAot/displayName": "Enable _native AOT publish",
   "postActions/restore/description": "Restaure los paquetes NuGet necesarios para este proyecto.",
   "postActions/restore/manualInstructions/default/text": "Ejecutar \"dotnet restore\"",
   "postActions/open-file/description": "Abre Program.cs en el editor"

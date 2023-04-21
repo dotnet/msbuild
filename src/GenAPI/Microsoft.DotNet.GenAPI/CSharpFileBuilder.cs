@@ -185,6 +185,11 @@ namespace Microsoft.DotNet.GenAPI
 
             if (member is IMethodSymbol method)
             {
+                if (method.MethodKind == MethodKind.ExplicitInterfaceImplementation)
+                {
+                    return false;
+                }
+
                 // If they're methods, compare their names and signatures.
                 return baseType.GetMembers(member.Name)
                     .Any(baseMember => _symbolFilter.Include(baseMember) &&

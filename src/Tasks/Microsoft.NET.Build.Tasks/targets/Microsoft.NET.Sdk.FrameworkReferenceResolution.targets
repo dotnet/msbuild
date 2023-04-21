@@ -113,6 +113,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 KnownCrossgen2Packs="@(KnownCrossgen2Pack)"
                                 KnownILCompilerPacks="@(KnownILCompilerPack)"
                                 KnownILLinkPacks="@(KnownILLinkPack)"
+                                KnownWebAssemblySdkPacks="@(KnownWebAssemblySdkPack)"
+                                UsingMicrosoftNETSdkWebAssembly="$(UsingMicrosoftNETSdkWebAssembly)"
                                 NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
                                 NetCoreRoot="$(NetCoreRoot)"
                                 NETCoreSdkVersion="$(NETCoreSdkVersion)">
@@ -421,18 +423,16 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="ResolveOffByDefaultAnalyzers" AfterTargets="ResolveTargetingPackAssets"
           Condition="'@(FrameworkReference)' != ''">
     <ItemGroup>
-      <OffByDefaultAnalyzer Include="Microsoft.AspNetCore.Http.RequestDelegateGenerator"
+      <OffByDefaultAnalyzer Include="Microsoft.AspNetCore.Http.RequestDelegateGenerator.dll"
                             IsEnabled="$(EnableRequestDelegateGenerator)"/>
+      <OffByDefaultAnalyzer Include="Microsoft.Extensions.Configuration.Binder.SourceGeneration.dll"
+                            IsEnabled="$(EnableConfigurationBindingGenerator)"/>
     </ItemGroup>
 
     <ItemGroup>
-      <AnalyzerToRemove Include="@(OffByDefaultAnalyzer)"
-                        Path="%(Analyzer.Identity)"
-                        Condition="'%(Analyzer.Filename)' == '@(OffByDefaultAnalyzer)'" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Analyzer Remove="%(AnalyzerToRemove.Path)" Condition="'%(AnalyzerToRemove.IsEnabled)' != 'true'"/>
+      <Analyzer Remove="@(OffByDefaultAnalyzer)"
+                Condition="'%(OffByDefaultAnalyzer.IsEnabled)' != 'true'"
+                MatchOnMetadata="FileName" />
     </ItemGroup>
   </Target>
 

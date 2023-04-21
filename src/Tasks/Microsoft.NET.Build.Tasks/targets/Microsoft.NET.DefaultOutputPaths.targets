@@ -54,7 +54,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ArtifactsPivots>$(Configuration.ToLowerInvariant())</ArtifactsPivots>
 
     <!-- Include the TargetFramework in the pivots if the project is multi-targeted (ie TargetFrameworks) is defined -->
-    <ArtifactsPivots Condition="'$(TargetFrameworks)' != ''"
+    <ArtifactsPivots Condition="'$(TargetFrameworks)' != '' And '$(TargetFramework)' != ''"
                      >$(ArtifactsPivots)_$(TargetFramework.ToLowerInvariant())</ArtifactsPivots>
 
     <!-- This targets file is evaluated before RuntimeIdentifierInference.targets, so this will only include the

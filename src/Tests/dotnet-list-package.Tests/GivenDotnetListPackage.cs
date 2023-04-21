@@ -336,5 +336,27 @@ class Program
                 checkRules(); // Test for no throw
             }
         }
+
+        [UnixOnlyFact]
+        public void ItRunsInCurrentDirectoryWithPoundInPath()
+        {
+            // Regression test for https://github.com/dotnet/sdk/issues/19654
+            var testAssetName = "TestAppSimple";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(testAssetName, "C#")
+                .WithSource();
+            var projectDirectory = testAsset.Path;
+
+            new RestoreCommand(testAsset)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new ListPackageCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+        }
     }
 }

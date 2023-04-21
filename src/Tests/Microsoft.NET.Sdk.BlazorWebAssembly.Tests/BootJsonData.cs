@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using ResourceHashesByNameDictionary = System.Collections.Generic.Dictionary<string, string>;
 
+// For test purposes only. Actual build time implementation lives in runtime repository with WasmSDK
+
 namespace Microsoft.NET.Sdk.WebAssembly
 {
 #pragma warning disable IDE1006 // Naming Styles

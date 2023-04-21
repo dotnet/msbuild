@@ -483,6 +483,37 @@ namespace Microsoft.NET.Build.Tests
                     .Exist();
             }
         }
+
+        [Fact]
+        public void PackageValidationSucceeds()
+        {
+            var testProject = new TestProject()
+            {
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};net7.0"
+            };
+
+            testProject.AdditionalProperties["EnablePackageValidation"] = "True";
+
+            testProject.UseArtifactsOutput = true;
+            testProject.UseDirectoryBuildPropsForArtifactsOutput = true;
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            File.WriteAllText(Path.Combine(testAsset.Path, "Directory.Build.props"),
+                    $"""
+                    <Project>
+                        <PropertyGroup>
+                            <UseArtifactsOutput>true</UseArtifactsOutput>
+                        </PropertyGroup>
+                    </Project>
+                    """);
+
+            new DotnetPackCommand(Log)
+                .WithWorkingDirectory(Path.Combine(testAsset.TestRoot, testProject.Name))
+                .Execute()
+                .Should()
+                .Pass();
+        }
     }
 
     namespace ArtifactsTestExtensions

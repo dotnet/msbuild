@@ -14,6 +14,8 @@
   "symbols/skipRestore/displayName": "Geri yüklemeyi atla",
   "symbols/UseProgramMain/description": "Üst düzey deyimler yerine açık bir Program sınıfı ve Ana yöntem oluşturup oluşturulmayacağını belirtir.",
   "symbols/UseProgramMain/displayName": "_Üst düzey deyimler kullanmayın",
+  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
+  "symbols/NativeAot/displayName": "Enable _native AOT publish",
   "postActions/restore/description": "Bu projenin gerektirdiği NuGet paketlerini geri yükleyin.",
   "postActions/restore/manualInstructions/default/text": "'dotnet restore' çalıştır",
   "postActions/open-file/description": "Düzenleyicide Program.cs’yi açar"

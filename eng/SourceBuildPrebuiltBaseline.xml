@@ -6,14 +6,6 @@
     <UsagePattern IdentityGlob="Nuget.*/*" />
     <UsagePattern IdentityGlob="Microsoft.Build.NuGetSdkResolver/*" />
     
-    <!-- TODO: Ignore needed until vstest gets a source build leg that publishes outputs
-         https://github.com/microsoft/vstest/pull/4332. -->
-    <UsagePattern IdentityGlob="Microsoft.TestPlatform.*/*" />
-    
-    <!-- TODO: Ignore needed until razor merges main into the 17.6 branch.
-               https://github.com/dotnet/sdk/pull/31508. -->
-    <UsagePattern IdentityGlob="Microsoft*Razor.*/*" />
-    
     <!-- TODO: Figure out what to do about the netcoreapp ref packages (these are probably being pulled
          in via implicit versions and net6 targeting projects (e.g. tests)
          https://github.com/dotnet/source-build/issues/3356 -->
@@ -21,49 +13,8 @@
     
     <!-- TODO: SBRPs or updates
          https://github.com/dotnet/source-build/issues/3357 -->
-    <UsagePattern IdentityGlob="Microsoft.ApplicationInsights/*2.19.0*" />
-    <UsagePattern IdentityGlob="Microsoft.Bcl.AsyncInterfaces/*6.0.0*" />
-    <UsagePattern IdentityGlob="Microsoft.Build*/*16.11.0*" />
     <UsagePattern IdentityGlob="Microsoft.Build.Locator/*1.5.3*" />
-    <UsagePattern IdentityGlob="Microsoft.CodeAnalysis.AnalyzerUtilities/*3.3.0*" />\
-    <UsagePattern IdentityGlob="Microsoft.Css.Parser/*1.0.0-20200708.1*" />
-    <UsagePattern IdentityGlob="Microsoft.DiaSymReader/*1.4.0*" />
-    <UsagePattern IdentityGlob="Microsoft.Extensions.*/*6.0.0*" />
-    <UsagePattern IdentityGlob="Microsoft.NET.StringTools/*1.0.0*" />
-    <UsagePattern IdentityGlob="Microsoft.Win32.SystemEvents/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.CodeDom/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Collections.Immutable/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Composition*/*6.0.0*" />
-    <UsagePattern IdentityGlob="System.Collections.Immutable.*/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Configuration.ConfigurationManager/*4.7.0*" />
-    <UsagePattern IdentityGlob="System.Configuration.ConfigurationManager/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Diagnostics.DiagnosticSource/*6.0.0*" />
-    <UsagePattern IdentityGlob="System.Diagnostics.EventLog/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Drawing.Common/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Formats.Asn1/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.IO.Pipelines/*6.0.3*" />
-    <UsagePattern IdentityGlob="System.Reflection.Metadata*/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Resources.Extensions/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Security.Cryptography.Pkcs/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Security.Cryptography.ProtectedData/*4.7.0*" />
-    <UsagePattern IdentityGlob="System.Security.Cryptography.ProtectedData/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Security.Cryptography.Xml/*4.7.0*" />
-    <UsagePattern IdentityGlob="System.Security.Cryptography.Xml/*7.0.1*" />
-    <UsagePattern IdentityGlob="System.Security.Permissions/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.ServiceProcess.ServiceController/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Encoding.CodePages/*6.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Encoding.CodePages/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Encodings.Web/*6.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Encodings.Web/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Json/*4.7.0*" />
-    <UsagePattern IdentityGlob="System.Text.Json/*6.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Json/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Json/*7.0.1*" />
-    <UsagePattern IdentityGlob="System.Text.Json/*7.0.2*" />
-    <UsagePattern IdentityGlob="System.Security.Permissions/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Threading.Channels/*6.0.0*" />
-    <UsagePattern IdentityGlob="System.Threading.Tasks.Dataflow/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Windows.Extensions/*7.0.0*" />
+    <UsagePattern IdentityGlob="Microsoft.CodeAnalysis.AnalyzerUtilities/*3.3.0*" />
     
     <!-- This may be coming in transitively from aspnetcore. Needs evaluation.
          https://github.com/dotnet/source-build/issues/3358. -->

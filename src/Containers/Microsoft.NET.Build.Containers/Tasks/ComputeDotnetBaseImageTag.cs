@@ -55,9 +55,9 @@ public sealed class ComputeDotnetBaseImageTag : Microsoft.Build.Utilities.Task
     }
 
 
-    private string? ComputeVersionInternal(SemanticVersion version, SemanticVersion tfm)
+    private string? ComputeVersionInternal(SemanticVersion version, SemanticVersion? tfm)
     {
-        if (tfm.Major < version.Major || tfm.Minor < version.Minor)
+        if (tfm != null && (tfm.Major < version.Major || tfm.Minor < version.Minor))
         {
             // in this case the TFM is earlier, so we are assumed to be in a stable scenario
             return $"{tfm.Major}.{tfm.Minor}";
@@ -77,7 +77,7 @@ public sealed class ComputeDotnetBaseImageTag : Microsoft.Build.Utilities.Task
     }
 
      private string? DetermineLabelBasedOnChannel(int major, int minor, string[] releaseLabels) {
-      // this would be a switch, but we have to support net47s where Range and Index aren't available
+      // this would be a switch, but we have to support net47x where Range and Index aren't available
         if (releaseLabels.Length == 0)
         {
             return $"{major}.{minor}";
@@ -89,7 +89,9 @@ public sealed class ComputeDotnetBaseImageTag : Microsoft.Build.Utilities.Task
             {
                 if (releaseLabels.Length > 1)
                 {
-                    return $"{major}.{minor}-{channel}.{releaseLabels[1]}";
+                    // Per the dotnet-docker team, the major.minor preview tag format is a fluke and the major.minor.0 form
+                    // should be used for all previews going forward.
+                    return $"{major}.{minor}.0-{channel}.{releaseLabels[1]}";
                 }
                 else
                 {
@@ -97,11 +99,7 @@ public sealed class ComputeDotnetBaseImageTag : Microsoft.Build.Utilities.Task
                     return null;
                 }
             }
-            else if (channel == "alpha")
-            {
-                return $"{major}.{minor}-preview.1";
-            }
-            else if (channel == "dev" || channel == "ci")
+            else if (channel == "alpha" || channel == "dev" || channel == "ci")
             {
                 return $"{major}.{minor}-preview";
             }

@@ -382,6 +382,7 @@
   "${OutputPath}\\wwwroot\\_framework\\WindowsBase.dll",
   "${OutputPath}\\wwwroot\\_framework\\WindowsBase.dll.gz",
   "${OutputPath}\\wwwroot\\_framework\\blazor.boot.json",
+  "${OutputPath}\\wwwroot\\_framework\\blazor.boot.json.gz",
   "${OutputPath}\\wwwroot\\_framework\\blazor.webassembly.js",
   "${OutputPath}\\wwwroot\\_framework\\blazor.webassembly.js.gz",
   "${OutputPath}\\wwwroot\\_framework\\blazorwasm.dll",

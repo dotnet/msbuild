@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
         private Dictionary<string, double> _commonMeasurements = null;
         private Task _trackEventTask = null;
 
-        private const string InstrumentationKey = "74cc1c9e-3e6e-4d05-b3fc-dde9101d0254";
+        private const string ConnectionString = "InstrumentationKey=74cc1c9e-3e6e-4d05-b3fc-dde9101d0254";
 
         public bool Enabled { get; }
 
@@ -143,8 +143,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
                 var config = TelemetryConfiguration.CreateDefault();
                 config.TelemetryChannel = persistenceChannel;
+                config.ConnectionString = ConnectionString;
                 _client = new TelemetryClient(config);
-                _client.InstrumentationKey = InstrumentationKey;
                 _client.Context.Session.Id = CurrentSessionId;
                 _client.Context.Device.OperatingSystem = RuntimeEnvironment.OperatingSystem;
 

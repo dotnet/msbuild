@@ -39,6 +39,7 @@
       "src\\Resolvers\\Microsoft.NET.Sdk.WorkloadManifestReader\\Microsoft.NET.Sdk.WorkloadManifestReader.csproj",
       "src\\Resolvers\\WorkloadManifestValidator\\WorkloadManifestValidator.csproj",
       "src\\StaticWebAssetsSdk\\Tasks\\Microsoft.NET.Sdk.StaticWebAssets.Tasks.csproj",
+      "src\\StaticWebAssetsSdk\\Tool\\Microsoft.NET.Sdk.StaticWebAssets.Tool.csproj",
       "src\\Tasks\\Microsoft.NET.Build.Extensions.Tasks\\Microsoft.NET.Build.Extensions.Tasks.csproj",
       "src\\Tasks\\Microsoft.NET.Build.Tasks\\Microsoft.NET.Build.Tasks.csproj",
       "src\\WebSdk\\ProjectSystem\\Tasks\\Microsoft.NET.Sdk.Web.ProjectSystem.Tasks.csproj",
