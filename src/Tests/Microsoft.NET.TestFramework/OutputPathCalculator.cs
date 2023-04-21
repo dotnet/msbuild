@@ -88,11 +88,11 @@ namespace Microsoft.NET.TestFramework
                     {
                         throw new InvalidOperationException("Couldn't find Directory.Build.props for test project " + projectPath);
                     }
-                    calculator.ArtifactsPath = Path.Combine(Path.GetDirectoryName(directoryBuildPropsFile), ".artifacts");
+                    calculator.ArtifactsPath = Path.Combine(Path.GetDirectoryName(directoryBuildPropsFile), "artifacts");
                 }
                 else
                 {
-                    calculator.ArtifactsPath = Path.Combine(Path.GetDirectoryName(projectPath), ".artifacts");
+                    calculator.ArtifactsPath = Path.Combine(Path.GetDirectoryName(projectPath), "artifacts");
                 }
             }
             else
@@ -107,7 +107,7 @@ namespace Microsoft.NET.TestFramework
                     if (calculator.UseArtifactsOutput)
                     {
                         calculator.IncludeProjectNameInArtifactsPaths = false;
-                        calculator.ArtifactsPath = Path.Combine(Path.GetDirectoryName(projectPath), ".artifacts");
+                        calculator.ArtifactsPath = Path.Combine(Path.GetDirectoryName(projectPath), "artifacts");
                     }
                 }
 
@@ -143,7 +143,7 @@ namespace Microsoft.NET.TestFramework
                         if (calculator.UseArtifactsOutput)
                         {
                             calculator.IncludeProjectNameInArtifactsPaths = true;
-                            calculator.ArtifactsPath = Path.Combine(Path.GetDirectoryName(directoryBuildPropsFile), ".artifacts");
+                            calculator.ArtifactsPath = Path.Combine(Path.GetDirectoryName(directoryBuildPropsFile), "artifacts");
                         }
                     }
                 }

@@ -52,6 +52,11 @@
         <target state="translated">NETSDK1177: apphost에 서명하지 못했습니다(오류 코드 {1}: {0})</target>
         <note>{StrBegin="NETSDK1177: "}</note>
       </trans-unit>
+      <trans-unit id="ArtifactsPathCannotBeSetInProject">
+        <source>NETSDK1199: The ArtifactsPath and UseArtifactsOutput properties cannot be set in a project file, due to MSBuild ordering constraints. They must be set in a Directory.Build.props file or from the command line. See https://aka.ms/netsdk1199 for more information.</source>
+        <target state="new">NETSDK1199: The ArtifactsPath and UseArtifactsOutput properties cannot be set in a project file, due to MSBuild ordering constraints. They must be set in a Directory.Build.props file or from the command line. See https://aka.ms/netsdk1199 for more information.</target>
+        <note>{StrBegin="NETSDK1199: "}</note>
+      </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
         <target state="translated">NETSDK1079: .NET Core 3.0 이상을 대상으로 할 경우 Microsoft.AspNetCore.All 패키지가 지원되지 않습니다. Microsoft.AspNetCore.App에 대한 FrameworkReference가 대신 사용되어야 하며, Microsoft.NET.Sdk.Web에 의해 암시적으로 포함됩니다.</target>

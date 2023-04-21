@@ -52,6 +52,11 @@
         <target state="translated">NETSDK1177: apphost şu hata koduyla imzalanamadı: {1}: {0}</target>
         <note>{StrBegin="NETSDK1177: "}</note>
       </trans-unit>
+      <trans-unit id="ArtifactsPathCannotBeSetInProject">
+        <source>NETSDK1199: The ArtifactsPath and UseArtifactsOutput properties cannot be set in a project file, due to MSBuild ordering constraints. They must be set in a Directory.Build.props file or from the command line. See https://aka.ms/netsdk1199 for more information.</source>
+        <target state="new">NETSDK1199: The ArtifactsPath and UseArtifactsOutput properties cannot be set in a project file, due to MSBuild ordering constraints. They must be set in a Directory.Build.props file or from the command line. See https://aka.ms/netsdk1199 for more information.</target>
+        <note>{StrBegin="NETSDK1199: "}</note>
+      </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
         <target state="translated">NETSDK1079: Microsoft.AspNetCore.All paketi .NET Core 3.0 veya üzeri hedeflenirken desteklenmez. Bunun yerine Microsoft.AspNetCore.App için bir FrameworkReference kullanılmalıdır. Bu, Microsoft.NET.Sdk.Web tarafından örtük olarak eklenecektir.</target>

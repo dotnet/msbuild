@@ -52,6 +52,11 @@
         <target state="translated">NETSDK1177: Nie można podpisać hosta aplikacji z kodem błędu {1}: {0}</target>
         <note>{StrBegin="NETSDK1177: "}</note>
       </trans-unit>
+      <trans-unit id="ArtifactsPathCannotBeSetInProject">
+        <source>NETSDK1199: The ArtifactsPath and UseArtifactsOutput properties cannot be set in a project file, due to MSBuild ordering constraints. They must be set in a Directory.Build.props file or from the command line. See https://aka.ms/netsdk1199 for more information.</source>
+        <target state="new">NETSDK1199: The ArtifactsPath and UseArtifactsOutput properties cannot be set in a project file, due to MSBuild ordering constraints. They must be set in a Directory.Build.props file or from the command line. See https://aka.ms/netsdk1199 for more information.</target>
+        <note>{StrBegin="NETSDK1199: "}</note>
+      </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
         <target state="translated">NETSDK1079: Pakiet Microsoft.AspNetCore.All nie jest obsługiwany w przypadku ukierunkowania na program .NET Core w wersji 3.0 lub wyższej. Zamiast tego powinien zostać użyty element FrameworkReference dla pakietu Microsoft.AspNetCore.App, który zostanie niejawnie uwzględniony przez pakiet Microsoft.NET.Sdk.Web.</target>
