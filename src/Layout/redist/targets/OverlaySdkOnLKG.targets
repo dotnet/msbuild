@@ -15,11 +15,6 @@
       <Stage0KnownWorkloadManifestsFile>$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/KnownWorkloadManifests.txt</Stage0KnownWorkloadManifestsFile>
     </PropertyGroup>
 
-    <!-- Remove this once stage 0 has the knownworkloadmanifests.txt file -->
-    <Copy SourceFiles="$(Stage0IncludedWorkloadManifestsFile)"
-          DestinationFiles="$(Stage0KnownWorkloadManifestsFile)"
-          Condition="Exists('$(Stage0IncludedWorkloadManifestsFile)') and !Exists('$(Stage0KnownWorkloadManifestsFile)')"/>
-
     <!-- Prepare the templates -->
     <!-- 1. Pack the template packages in the repo -->
     <!-- the templates packages are located in <sdk root>\templates\<runtime version> folder. Get the runtime version of SDK Stage 0. -->
@@ -41,6 +36,7 @@
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/Microsoft.NETCoreSdk.BundledCliTools.props" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/RuntimeIdentifierGraph.json" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/NETCoreSdkRuntimeIdentifierChain.txt" />
+      <OverlaySdkFilesFromStage0 Include="$(Stage0IncludedWorkloadManifestsFile)" Condition="Exists('$(Stage0IncludedWorkloadManifestsFile)')"/>
       <OverlaySdkFilesFromStage0 Include="$(Stage0KnownWorkloadManifestsFile)" Condition="Exists('$(Stage0KnownWorkloadManifestsFile)')"/>
       <!-- Ignore dotnet-watch files from the SDK since we're building a newer version of it in this repo. -->
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/**/*" RelativeDestination="DotnetTools"

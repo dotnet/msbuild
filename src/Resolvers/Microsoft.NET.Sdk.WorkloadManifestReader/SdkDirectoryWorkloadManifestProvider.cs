@@ -43,16 +43,28 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _sdkVersionBand = new SdkFeatureBand(sdkVersion);
 
             var knownManifestIdsFilePath = Path.Combine(_sdkRootPath, "sdk", sdkVersion, "KnownWorkloadManifests.txt");
+            int lineNumber = 0;
+
             if (File.Exists(knownManifestIdsFilePath))
             {
                 _knownManifestIdsAndOrder = new Dictionary<string, int>();
-                int lineNumber = 0;
                 foreach (var manifestId in File.ReadAllLines(knownManifestIdsFilePath).Where(l => !string.IsNullOrEmpty(l)))
                 {
                     _knownManifestIdsAndOrder[manifestId] = lineNumber++;
                 }
             }
-
+            var includedManifestIdsFilePath = Path.Combine(_sdkRootPath, "sdk", sdkVersion, "IncludedWorkloadManifests.txt");
+            if (File.Exists(includedManifestIdsFilePath))
+            {
+                _knownManifestIdsAndOrder = _knownManifestIdsAndOrder ?? new Dictionary<string, int>();
+                foreach (var manifestId in File.ReadAllLines(includedManifestIdsFilePath).Where(l => !string.IsNullOrEmpty(l)))
+                {
+                    if (!_knownManifestIdsAndOrder.ContainsKey(manifestId))
+                    {
+                        _knownManifestIdsAndOrder[manifestId] = lineNumber++;
+                    }
+                }
+            }
             string? userManifestsDir = userProfileDir is null ? null : Path.Combine(userProfileDir, "sdk-manifests", _sdkVersionBand.ToString());
             string dotnetManifestDir = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand.ToString());
             if (userManifestsDir != null && WorkloadFileBasedInstall.IsUserLocal(_sdkRootPath, _sdkVersionBand.ToString()) && Directory.Exists(userManifestsDir))
