@@ -172,6 +172,8 @@ The opt-out mechanism is analogous to [Assembly Reference copy opt-out](#not-cop
 </ItemGroup>
 ```
 
+Same metadata and logic applies here as it is being inherited from the `Reference` Item definition and the logic treats it identicaly. 
+
 ## ProjectReference without accessibility and copying to output
 
 In a specific scenarios we might want to indicate that specific project should be built prior our project but said project should not be reference accessible nor its output copied to current project output. This can be helpful for build time only dependencies - projects defining behavior that is going to be used as build step of a current project.
@@ -245,7 +247,7 @@ net7
  |---- Newtonsoft.Json.dll 
 ```
 
-Would we want to reference the netstandard version of the Repository Layer in our Service Layer - we can force the reference chain via `SetTargetFramework` metadata on `ProjectReference` item:
+Should we want to reference the netstandard version of the Repository Layer in our Service Layer - we can force the reference chain via `SetTargetFramework` metadata on `ProjectReference` item:
 
 ```xml
   <ItemGroup>
