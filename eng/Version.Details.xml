@@ -8,9 +8,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.23220.3">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.23221.7">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>585743ebf7353857a3379e429711c1c32685397e</Sha>
+      <Sha>3d9c9a4d3d893e903bb3295fd5b55b8e40699888</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-21480-02" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
@@ -32,9 +32,9 @@
       <Sha>48b13597fee9df5ecfbd0b8c0758b3f46bc1d440</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="6.0.0-beta.23220.3">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="6.0.0-beta.23221.7">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>585743ebf7353857a3379e429711c1c32685397e</Sha>
+      <Sha>3d9c9a4d3d893e903bb3295fd5b55b8e40699888</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
