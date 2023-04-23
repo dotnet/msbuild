@@ -1328,12 +1328,21 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectMetadataElement CreateMetadataElement(string name, string unevaluatedValue)
         {
+            return this.CreateMetadataElement(name, unevaluatedValue, null);
+        }
+
+        /// <summary>
+        /// Creates a metadata node.
+        /// Caller must add it to the location of choice in the project.
+        /// </summary>
+        public ProjectMetadataElement CreateMetadataElement(string name, string unevaluatedValue, ElementLocation location)
+        {
             if (Link != null)
             {
                 return RootLink.CreateMetadataElement(name, unevaluatedValue);
             }
 
-            ProjectMetadataElement metadatum = ProjectMetadataElement.CreateDisconnected(name, this);
+            ProjectMetadataElement metadatum = ProjectMetadataElement.CreateDisconnected(name, this, location);
 
             metadatum.Value = unevaluatedValue;
 
@@ -1786,13 +1795,22 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Creates a metadata node.
+        /// Caller must add it to the location of choice in the project.
+        /// </summary>
+        internal ProjectMetadataElement CreateMetadataElement(XmlAttributeWithLocation attribute)
+        {
+            return CreateMetadataElement(attribute.Name, attribute.Value, attribute.Location);
+        }
+
+        /// <summary>
         /// Creates a XmlElement with the specified name in the document
         /// containing this project.
         /// </summary>
-        internal XmlElementWithLocation CreateElement(string name)
+        internal XmlElementWithLocation CreateElement(string name, ElementLocation location = null)
         {
             ErrorUtilities.VerifyThrow(Link == null, "External project");
-            return (XmlElementWithLocation)XmlDocument.CreateElement(name, XmlNamespace);
+            return (XmlElementWithLocation)XmlDocument.CreateElement(name, XmlNamespace, location);
         }
 
         /// <summary>

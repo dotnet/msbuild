@@ -185,7 +185,6 @@ namespace Microsoft.Build.BackEnd
                 if (condition)
                 {
                     ExpanderOptions expanderOptions = ExpanderOptions.ExpandAll;
-                    ElementLocation location = metadataInstance.Location;
                     if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) &&
                         // If multiple buckets were expanded - we do not want to repeat same error for same metadatum on a same line
                         bucket.BucketSequenceNumber == 0 &&
@@ -193,11 +192,9 @@ namespace Microsoft.Build.BackEnd
                         child.Include.IndexOf("@(", StringComparison.Ordinal) == -1)
                     {
                         expanderOptions |= ExpanderOptions.LogOnItemMetadataSelfReference;
-                        // Temporary workaround of unavailability of full Location info on metadata: https://github.com/dotnet/msbuild/issues/8579
-                        location = child.Location;
                     }
 
-                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, expanderOptions, location, loggingContext);
+                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, expanderOptions, metadataInstance.Location, loggingContext);
 
                     // This both stores the metadata so we can add it to all the items we just created later, and 
                     // exposes this metadata to further metadata evaluations in subsequent loop iterations.
