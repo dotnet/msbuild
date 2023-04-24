@@ -314,8 +314,10 @@ class Program
         [InlineData(false, "--outdated", "--highest-minor")]
         [InlineData(false, "--outdated", "--highest-patch")]
         [InlineData(false, "--config")]
+        [InlineData(false, "--configfile")]
         [InlineData(false, "--source")]
         [InlineData(false, "--config", "--deprecated")]
+        [InlineData(false, "--configfile", "--deprecated")]
         [InlineData(false, "--source", "--vulnerable")]
         [InlineData(true, "--vulnerable", "--deprecated")]
         [InlineData(true, "--vulnerable", "--outdated")]
@@ -333,6 +335,28 @@ class Program
             {
                 checkRules(); // Test for no throw
             }
+        }
+
+        [UnixOnlyFact]
+        public void ItRunsInCurrentDirectoryWithPoundInPath()
+        {
+            // Regression test for https://github.com/dotnet/sdk/issues/19654
+            var testAssetName = "TestAppSimple";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(testAssetName, "C#")
+                .WithSource();
+            var projectDirectory = testAsset.Path;
+
+            new RestoreCommand(testAsset)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new ListPackageCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
         }
     }
 }

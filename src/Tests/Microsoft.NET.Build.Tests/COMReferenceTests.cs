@@ -119,7 +119,7 @@ namespace Microsoft.NET.Build.Tests
                 .CreateTestProject(testProject)
                 .WithProjectChanges(doc => doc.Root.Add(new[] { reference1, reference2 }));
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
             var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);

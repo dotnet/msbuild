@@ -12,6 +12,8 @@
   "symbols/langVersion/displayName": "Dil sürümü",
   "symbols/skipRestore/description": "Belirtilirse, oluşturma sırasında projenin otomatik geri yüklenmesini atlar.",
   "symbols/skipRestore/displayName": "Geri yüklemeyi atla",
+  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
+  "symbols/NativeAot/displayName": "Enable _native AOT publish",
   "postActions/restore/description": "Bu projenin gerektirdiği NuGet paketlerini geri yükleyin.",
   "postActions/restore/manualInstructions/default/text": "'dotnet restore' çalıştır",
   "postActions/open-file/description": "Düzenleyicide Program.vb’yi açar"

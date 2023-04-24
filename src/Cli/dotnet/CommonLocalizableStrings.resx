@@ -708,4 +708,19 @@ The default is 'true' if a runtime identifier is specified.</value>
   <data name="CorruptSolutionProjectFolderStructure" xml:space="preserve">
     <value>The solution file '{0}' is missing EndProject tags or has invalid child-parent project folder mappings around project GUID: '{1}'. Manually repair the solution or try to open and save it in Visual Studio."</value>
   </data>
+  <data name="MSBuildAdditionalOptionTitle" xml:space="preserve">
+    <value>.NET Cli Options:</value>
+  </data>
+  <data name="ArchArgumentName" xml:space="preserve">
+    <value>ARCH</value>
+  </data>
+  <data name="OSArgumentName" xml:space="preserve">
+    <value>OS</value>
+  </data>
+  <data name="ArtifactsPathOptionDescription" xml:space="preserve">
+    <value>The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</value>
+  </data>
+  <data name="ArtifactsPathArgumentName" xml:space="preserve">
+    <value>ARTIFACTS_DIR</value>
+  </data>
 </root>

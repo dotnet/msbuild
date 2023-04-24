@@ -3,8 +3,6 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Pack;
 using LocalizableStrings = Microsoft.DotNet.Tools.Pack.LocalizableStrings;
@@ -58,6 +56,7 @@ namespace Microsoft.DotNet.Cli
 
             command.AddArgument(SlnOrProjectArgument);
             command.AddOption(OutputOption);
+            command.AddOption(CommonOptions.ArtifactsPathOption);
             command.AddOption(NoBuildOption);
             command.AddOption(IncludeSymbolsOption);
             command.AddOption(IncludeSourceOption);
@@ -68,6 +67,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(CommonOptions.VersionSuffixOption);
             command.AddOption(ConfigurationOption);
+            command.AddOption(CommonOptions.DisableBuildServersOption);
             RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: true, includeNoDependenciesOption: true);
 
             command.SetHandler(PackCommand.Run);

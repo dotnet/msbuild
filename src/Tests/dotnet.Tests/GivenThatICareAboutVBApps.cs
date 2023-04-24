@@ -49,17 +49,15 @@ namespace Microsoft.DotNet.Tests
             var testInstance = _testAssetsManager.CopyTestAsset("VBTestApp")
                 .WithSource();
 
-            new PublishCommand(Log, testInstance.Path)
+            var publishCommand = new PublishCommand(testInstance);
+
+            publishCommand
                 .Execute()
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             var outputDll = Path.Combine(
-                testInstance.Path,
-                "bin",
-                configuration,
-                ToolsetInfo.CurrentTargetFramework,
-                "publish",
+                publishCommand.GetOutputDirectory(configuration: configuration).FullName,
                 "VBTestApp.dll");
 
             new DotnetCommand(Log)

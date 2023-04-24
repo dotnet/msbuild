@@ -4,12 +4,10 @@
     <TargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net8.0;net472</TargetFrameworks>
     <Nullable>enable</Nullable>
     <StrongNameKeyId>Open</StrongNameKeyId>
-    <_MicrosoftCodeAnalysisVersion>$(MicrosoftCodeAnalysisWorkspacesGenAPIPackageVersion)</_MicrosoftCodeAnalysisVersion>
-    <_MicrosoftCodeAnalysisVersion Condition="'$(DotNetBuildFromSource)' == 'true'">$(MicrosoftCodeAnalysisPackageVersion)</_MicrosoftCodeAnalysisVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(_MicrosoftCodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion)" />
     <ProjectReference Include="..\..\Microsoft.DotNet.ApiSymbolExtensions\Microsoft.DotNet.ApiSymbolExtensions.csproj" />
   </ItemGroup>
 

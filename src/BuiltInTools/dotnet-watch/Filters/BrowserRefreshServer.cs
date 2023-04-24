@@ -24,6 +24,9 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
+    /// <summary>
+    /// Communicates with aspnetcore-browser-refresh.js loaded in the browser.
+    /// </summary>
     internal sealed class BrowserRefreshServer : IAsyncDisposable
     {
         private readonly byte[] ReloadMessage = Encoding.UTF8.GetBytes("Reload");
@@ -31,15 +34,17 @@ namespace Microsoft.DotNet.Watcher.Tools
         private readonly JsonSerializerOptions _jsonSerializerOptions = new(JsonSerializerDefaults.Web);
         private readonly List<(WebSocket clientSocket, string sharedSecret)> _clientSockets = new();
         private readonly RSA _rsa;
+        private readonly DotNetWatchOptions _options;
         private readonly IReporter _reporter;
         private readonly string _muxerPath;
         private readonly TaskCompletionSource _terminateWebSocket;
         private readonly TaskCompletionSource _clientConnected;
         private IHost _refreshServer;
 
-        public BrowserRefreshServer(IReporter reporter, string muxerPath)
+        public BrowserRefreshServer(DotNetWatchOptions options, IReporter reporter, string muxerPath)
         {
             _rsa = RSA.Create(2048);
+            _options = options;
             _reporter = reporter;
             _muxerPath = muxerPath;
             _terminateWebSocket = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -125,7 +130,25 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public async Task WaitForClientConnectionAsync(CancellationToken cancellationToken)
         {
-            await _clientConnected.Task.WaitAsync(cancellationToken);
+            using var progressCancellationSource = new CancellationTokenSource();
+
+            var progressReportingTask = Task.Run(async () =>
+            {
+                while (!progressCancellationSource.Token.IsCancellationRequested)
+                {
+                    await Task.Delay(_options.TestFlags != TestFlags.None ? TimeSpan.MaxValue : TimeSpan.FromSeconds(5), progressCancellationSource.Token);
+                    _reporter.Warn("Connecting to the browser is taking longer than expected ...");
+                }
+            }, progressCancellationSource.Token);
+
+            try
+            {
+                await _clientConnected.Task.WaitAsync(cancellationToken);
+            }
+            finally
+            {
+                progressCancellationSource.Cancel();
+            }
         }
 
         public ValueTask SendJsonSerlialized<TValue>(TValue value, CancellationToken cancellationToken = default)
@@ -211,7 +234,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             {
                 var (clientSocket, _) = _clientSockets[i];
 
-                if (clientSocket.State is not WebSocketState.Open)
+                if (clientSocket.State != WebSocketState.Open)
                 {
                     continue;
                 }
@@ -219,6 +242,12 @@ namespace Microsoft.DotNet.Watcher.Tools
                 try
                 {
                     var result = await clientSocket.ReceiveAsync(buffer, cancellationToken);
+
+                    if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        continue;
+                    }
+
                     return result;
                 }
                 catch (Exception ex)

@@ -65,7 +65,7 @@ setTimeout(async function () {
     if (path && path.endsWith('.css')) {
       updateCssByPath(path);
     } else {
-      console.debug(`File change detected to css file ${path}. Reloading page...`);
+      console.debug(`File change detected to file ${path}. Reloading page...`);
       location.reload();
       return;
     }

@@ -21,6 +21,12 @@
       "datatype": "bool",
       "displayName": "Inherit",
       "description": "If true, adds an Import for the closest Directory.Build.props in the file system directory hierarchy. Directory.Build.props don't inherit by default, so doing this allows you to build up a set of customizations folder-by-folder."
+    },
+    "useArtifacts": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Use Artifacts Output Layout",
+      "description": "If true, adds a property to enable the artifacts output layout. This is a common pattern for projects that produce build artifacts, such as NuGet packages, that are placed in a common folder."
     }
   }
 }

@@ -30,7 +30,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <KnownFrameworkReference Remove="Microsoft.Windows.SDK.NET.Ref" />
     </ItemGroup>
-    
+
     <!-- Generate KnownFrameworkReference items for the Windows SDK pack -->
     <CreateWindowsSdkKnownFrameworkReferences
       UseWindowsSDKPreview="$(UseWindowsSDKPreview)"
@@ -42,7 +42,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       WindowsSdkSupportedTargetPlatformVersions="@(WindowsSdkSupportedTargetPlatformVersion)">
 
       <Output TaskParameter="KnownFrameworkReferences" ItemName="KnownFrameworkReference" />
-      
+
     </CreateWindowsSdkKnownFrameworkReferences>
   </Target>
 
@@ -113,6 +113,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 KnownCrossgen2Packs="@(KnownCrossgen2Pack)"
                                 KnownILCompilerPacks="@(KnownILCompilerPack)"
                                 KnownILLinkPacks="@(KnownILLinkPack)"
+                                KnownWebAssemblySdkPacks="@(KnownWebAssemblySdkPack)"
+                                UsingMicrosoftNETSdkWebAssembly="$(UsingMicrosoftNETSdkWebAssembly)"
                                 NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
                                 NetCoreRoot="$(NetCoreRoot)"
                                 NETCoreSdkVersion="$(NETCoreSdkVersion)">
@@ -415,6 +417,22 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <RuntimeFramework Remove="@(RuntimeFramework)" />
       <RuntimeFramework Include="@(_UsedRuntimeFramework)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ResolveOffByDefaultAnalyzers" AfterTargets="ResolveTargetingPackAssets"
+          Condition="'@(FrameworkReference)' != ''">
+    <ItemGroup>
+      <OffByDefaultAnalyzer Include="Microsoft.AspNetCore.Http.RequestDelegateGenerator.dll"
+                            IsEnabled="$(EnableRequestDelegateGenerator)"/>
+      <OffByDefaultAnalyzer Include="Microsoft.Extensions.Configuration.Binder.SourceGeneration.dll"
+                            IsEnabled="$(EnableConfigurationBindingGenerator)"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Analyzer Remove="@(OffByDefaultAnalyzer)"
+                Condition="'%(OffByDefaultAnalyzer.IsEnabled)' != 'true'"
+                MatchOnMetadata="FileName" />
     </ItemGroup>
   </Target>
 

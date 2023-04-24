@@ -352,7 +352,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.4.0.51802")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_can_publish_runtime_specific_apps_with_library_dependencies_self_contained(string targetFramework)
         {
 
@@ -509,7 +509,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("net7.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_builds_a_runnable_output_with_Prefer32Bit(string targetFramework)
         {
             if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))

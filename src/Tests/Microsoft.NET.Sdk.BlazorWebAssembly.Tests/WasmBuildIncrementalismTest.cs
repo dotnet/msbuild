@@ -1,10 +1,13 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Xml.Linq;
 using FluentAssertions;
+using Microsoft.NET.Sdk.WebAssembly;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -55,7 +58,19 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAsset = "BlazorWasmWithLibrary";
-            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset).WithProjectChanges((path, document) =>
+            {
+                if (Path.GetFileNameWithoutExtension(path) == "blazorwasm")
+                {
+                    // Since blazor.boot.json gets modified on each build, we explicitly exclude it from compression so
+                    // its compressed asset doesn't fail the thumb print check.
+                    document.Root.Add(XElement.Parse("""
+                        <PropertyGroup>
+                          <CompressionExcludePatterns>$(CompressionExcludePatterns);_framework\blazor.boot.json</CompressionExcludePatterns>
+                        </PropertyGroup>
+                        """));
+                }
+            });
 
             var build = new BuildCommand(projectDirectory, "blazorwasm");
             build.WithWorkingDirectory(projectDirectory.TestRoot);
@@ -63,7 +78,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 .Should()
                 .Pass();
 
-            var gzipCompressionDirectory = Path.Combine(projectDirectory.TestRoot, "blazorwasm", "obj", "Debug", DefaultTfm, "build-gz");
+            var gzipCompressionDirectory = Path.Combine(projectDirectory.TestRoot, "blazorwasm", "obj", "Debug", DefaultTfm, "compressed");
             new DirectoryInfo(gzipCompressionDirectory).Should().Exist();
 
             // Act

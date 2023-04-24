@@ -125,12 +125,11 @@ namespace Microsoft.DotNet.Watcher
 
                 try
                 {
-                    using var hotReload = new HotReload(_processRunner, _reporter);
+                    using var hotReload = new HotReload(_reporter);
                     await hotReload.InitializeAsync(context, cancellationToken);
 
+                    _reporter.Verbose($"Running {processSpec.ShortDisplayName()} with the following arguments: '{string.Join(" ", processSpec.Arguments)}'");
                     var processTask = _processRunner.RunAsync(processSpec, combinedCancellationSource.Token);
-                    var args = string.Join(" ", processSpec.Arguments);
-                    _reporter.Verbose($"Running {processSpec.ShortDisplayName()} with the following arguments: {args}");
 
                     _reporter.Output("Started", emoji: "🚀");
 
@@ -231,7 +230,11 @@ namespace Microsoft.DotNet.Watcher
                 }
                 catch (Exception e)
                 {
-                    _reporter.Verbose($"Caught top-level exception from hot reload: {e}");
+                    if (e is not OperationCanceledException)
+                    {
+                        _reporter.Verbose($"Caught top-level exception from hot reload: {e}");
+                    }
+
                     if (!currentRunCancellationSource.IsCancellationRequested)
                     {
                         currentRunCancellationSource.Cancel();
@@ -318,7 +321,7 @@ namespace Microsoft.DotNet.Watcher
                 processSpec.EnvironmentVariables[rootVariableName] = Path.GetDirectoryName(_muxerPath);
             }
 
-            if (context.LaunchSettingsProfile.EnvironmentVariables is IDictionary<string, string> envVariables)
+            if (context.LaunchSettingsProfile.EnvironmentVariables is { } envVariables)
             {
                 foreach (var entry in envVariables)
                 {

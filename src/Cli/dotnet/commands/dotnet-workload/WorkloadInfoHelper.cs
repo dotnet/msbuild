@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Workloads.Workload.Install;
@@ -21,6 +22,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         private readonly string _targetSdkVersion;
 
         public WorkloadInfoHelper(
+            bool isInteractive,
             VerbosityOptions verbosity = VerbosityOptions.normal,
             string targetSdkVersion = null,
             bool? verifySignatures = null,
@@ -29,8 +31,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             string currentSdkVersion = null,
             string dotnetDir = null,
             string userProfileDir = null,
-            IWorkloadResolver workloadResolver = null
-        )
+            IWorkloadResolver workloadResolver = null)
         {
             string dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             ReleaseVersion currentSdkReleaseVersion = new(currentSdkVersion ?? Product.Version);
@@ -38,20 +39,27 @@ namespace Microsoft.DotNet.Workloads.Workload.List
 
             _targetSdkVersion = targetSdkVersion;
             userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            var workloadManifestProvider =
-                new SdkDirectoryWorkloadManifestProvider(dotnetPath,
-                    string.IsNullOrWhiteSpace(_targetSdkVersion)
-                        ? currentSdkReleaseVersion.ToString()
-                        : _targetSdkVersion,
-                    userProfileDir);
+            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(
+                dotnetPath,
+                string.IsNullOrWhiteSpace(_targetSdkVersion)
+                    ? currentSdkReleaseVersion.ToString()
+                    : _targetSdkVersion,
+                userProfileDir);
             WorkloadResolver = workloadResolver ?? NET.Sdk.WorkloadManifestReader.WorkloadResolver.Create(
                 workloadManifestProvider, dotnetPath,
                 currentSdkReleaseVersion.ToString(), userProfileDir);
 
-            Installer = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, _currentSdkFeatureBand,
-                                     WorkloadResolver, verbosity, userProfileDir,
-                                     verifySignatures ?? !SignCheck.IsDotNetSigned(),
-                                     elevationRequired: false);
+            var restoreConfig = new RestoreActionConfig(Interactive: isInteractive);
+
+            Installer = WorkloadInstallerFactory.GetWorkloadInstaller(
+                reporter,
+                _currentSdkFeatureBand,
+                WorkloadResolver,
+                verbosity,
+                userProfileDir,
+                verifySignatures ?? !SignCheck.IsDotNetSigned(),
+                restoreActionConfig: restoreConfig,
+                elevationRequired: false);
 
             WorkloadRecordRepo = workloadRecordRepo ?? Installer.GetWorkloadInstallationRecordRepository();
         }
@@ -69,8 +77,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
 #if !DOT_NET_BUILD_FROM_SOURCE
             if (OperatingSystem.IsWindows())
             {
-                VisualStudioWorkloads.GetInstalledWorkloads(WorkloadResolver, _currentSdkFeatureBand,
-                    installedWorkloads);
+                VisualStudioWorkloads.GetInstalledWorkloads(WorkloadResolver, installedWorkloads);
             }
 #endif
             return installedWorkloads;

@@ -111,7 +111,7 @@ namespace Microsoft.NET.Publish.Tests
             // NativeAOT compilation requires PublishTrimmed and will be set to true if not set by the user
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
             var testProject = CreateTestProject(targetFramework, "AotProject", aot: true);
-            testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+            testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
             var publishCommand = new PublishCommand(testProjectInstance);

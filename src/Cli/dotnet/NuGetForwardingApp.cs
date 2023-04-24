@@ -19,6 +19,8 @@ namespace Microsoft.DotNet.Tools
             _forwardingApp = new ForwardingApp(
                 GetNuGetExePath(),
                 argsToForward);
+
+            NuGetSignatureVerificationEnabler.ConditionallyEnable(_forwardingApp);
         }
 
         public int Execute()

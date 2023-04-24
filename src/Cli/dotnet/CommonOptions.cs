@@ -51,8 +51,24 @@ namespace Microsoft.DotNet.Cli
             }.ForwardAsSingle(o => $"-property:TargetFramework={o}")
             .AddCompletions(Complete.TargetFrameworksFromProjectFile);
 
+        public static Option<string> ArtifactsPathOption =
+            new ForwardedOption<string>(
+                //  --artifacts-path is pretty verbose, should we use --artifacts instead (or possibly support both)?
+                new string[] { "--artifacts-path" },
+                description: CommonLocalizableStrings.ArtifactsPathOptionDescription)
+            {
+                ArgumentHelpName = CommonLocalizableStrings.ArtifactsPathArgumentName
+            }.ForwardAsSingle(o => $"-property:ArtifactsPath={CommandDirectoryContext.GetFullPath(o)}");            
+
         private static string RuntimeArgName = CommonLocalizableStrings.RuntimeIdentifierArgumentName;
-        private static Func<string, IEnumerable<string>> RuntimeArgFunc = o => new string[] { $"-property:RuntimeIdentifier={o}", "-property:_CommandLineDefinedRuntimeIdentifier=true" };
+        public static IEnumerable<string> RuntimeArgFunc(string rid)
+        {
+            if (GetArchFromRid(rid) == "amd64")
+            {
+                rid = GetOsFromRid(rid) + "-x64";
+            }
+            return new string[] { $"-property:RuntimeIdentifier={rid}", "-property:_CommandLineDefinedRuntimeIdentifier=true" };
+        }
         private static Func<CompletionContext, IEnumerable<CompletionItem>> RuntimeCompletions = Complete.RunTimesFromProjectFile;
 
         public static Option<string> RuntimeOption =
@@ -130,13 +146,17 @@ namespace Microsoft.DotNet.Cli
             new ForwardedOption<string>(
                 new string[] { "--arch", "-a" },
                 CommonLocalizableStrings.ArchitectureOptionDescription)
-            .SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
+            {
+                ArgumentHelpName = CommonLocalizableStrings.ArchArgumentName
+            }.SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
 
         public static Option<string> LongFormArchitectureOption =
             new ForwardedOption<string>(
                 new string[] { "--arch" },
                 CommonLocalizableStrings.ArchitectureOptionDescription)
-            .SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
+            {
+                ArgumentHelpName = CommonLocalizableStrings.ArchArgumentName
+            }.SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
 
         internal static string ArchOptionValue(ParseResult parseResult) =>
             string.IsNullOrEmpty(parseResult.GetValue(CommonOptions.ArchitectureOption)) ?
@@ -147,7 +167,9 @@ namespace Microsoft.DotNet.Cli
             new ForwardedOption<string>(
                 "--os",
                 CommonLocalizableStrings.OperatingSystemOptionDescription)
-            .SetForwardingFunction(ResolveOsOptionToRuntimeIdentifier);
+            {
+                ArgumentHelpName = CommonLocalizableStrings.OSArgumentName
+            }.SetForwardingFunction(ResolveOsOptionToRuntimeIdentifier);
 
         public static Option<bool> DebugOption = new Option<bool>("--debug");
 
@@ -168,7 +190,7 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> TestFrameworkOption = new Option<string>("--Framework");
 
-        public static readonly Option<string> TestLoggerOption = new Option<string>("--logger");
+        public static readonly Option<string[]> TestLoggerOption = new Option<string[]>("--logger");
 
         public static void ValidateSelfContainedOptions(bool hasSelfContainedOption, bool hasNoSelfContainedOption)
         {
@@ -224,6 +246,7 @@ namespace Microsoft.DotNet.Cli
         internal static string ResolveRidShorthandOptionsToRuntimeIdentifier(string os, string arch)
         {
             var currentRid = GetCurrentRuntimeId();
+            arch = arch == "amd64" ? "x64" : arch;
             os = string.IsNullOrEmpty(os) ? GetOsFromRid(currentRid) : os;
             arch = string.IsNullOrEmpty(arch) ? GetArchFromRid(currentRid) : arch;
             return $"{os}-{arch}";

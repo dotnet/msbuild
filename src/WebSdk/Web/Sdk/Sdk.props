@@ -61,19 +61,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       IsImplicitlyDefined="true" />
   </ItemGroup>
 
-  <!--  The RequestDelegateGenerator is bundled into the Microsoft.AspNetCore.App ref pack.-->
-  <!--  We want this generator to be disabled by default so we remove it from the list of-->
-  <!--  analyzers here. Since this depends on the analyzer having already been added to the-->
-  <!--  `Analyzer` item group by previous tasks in the build, we must wrap this work in a-->
-  <!--  target that executes right before the compilation loop.-->
-  <Target Name="RemoveRequestDelegateGenerator" BeforeTargets="CoreCompile">
-    <ItemGroup>
-      <Analyzer
-        Remove="@(Analyzer->HasMetadata('FileName')->WithMetadataValue('FileName', 'Microsoft.AspNetCore.Http.Generators'))"
-        Condition="'$(Language)'=='C#' AND '$(EnableRequestDelegateGenerator)' != 'true'"/>
-    </ItemGroup>
-  </Target>
-
   <ItemGroup Condition="'$(Language)' == 'C#' AND ('$(ImplicitUsings)' == 'true' or '$(ImplicitUsings)' == 'enable')">
     <Using Include="System.Net.Http.Json" />
     <Using Include="Microsoft.AspNetCore.Builder" />
@@ -87,10 +74,18 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <PropertyGroup>
-    <SdkContainerSupportPackageVersion>0.3.2</SdkContainerSupportPackageVersion>
+    <!-- this property will be updated when generating layout with valid built-in version of the package-->
+    <_BuiltInMicrosoftNETBuildContainersVersion></_BuiltInMicrosoftNETBuildContainersVersion>
+    <SdkContainerSupportPackageVersion Condition="'$(SdkContainerSupportPackageVersion)' == ''">$(_BuiltInMicrosoftNETBuildContainersVersion)</SdkContainerSupportPackageVersion>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(EnableSdkContainerSupport)' == 'true'">
+  <!--Implicit package references don't work well with central package management, so disable it. -->
+  <!--In this case the package reference should be added explicitly. -->
+  <PropertyGroup Condition=" '$(ManagePackageVersionsCentrally)' == 'true' ">
+    <DisableImplicitMicrosoftNETBuildContainersReference Condition="'$(DisableImplicitMicrosoftNETBuildContainersReference)' == ''">true</DisableImplicitMicrosoftNETBuildContainersReference>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(EnableSdkContainerSupport)' == 'true' AND '$(DisableImplicitMicrosoftNETBuildContainersReference)' != 'true'">
     <PackageReference Include="Microsoft.NET.Build.Containers" Version="$(SdkContainerSupportPackageVersion)" IsImplicitlyDefined="true" />
   </ItemGroup>
 

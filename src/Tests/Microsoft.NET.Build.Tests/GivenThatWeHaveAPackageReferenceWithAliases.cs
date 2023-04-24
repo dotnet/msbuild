@@ -13,6 +13,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Xunit;
 using Xunit.Abstractions;
+using static System.Net.WebRequestMethods;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -153,7 +154,7 @@ namespace Microsoft.NET.Build.Tests
         private TestPackageReference GetPackageReference(string targetFramework, string packageName, string projectFileContent, [CallerMemberName] string callingMethod = "", string identifier = null)
         {
             var project = GetProject(targetFramework, packageName, projectFileContent);
-            var packCommand = new PackCommand(Log, _testAssetsManager.CreateTestProject(project, callingMethod: callingMethod, identifier: identifier).TestRoot, packageName);
+            var packCommand = new PackCommand(_testAssetsManager.CreateTestProject(project, callingMethod: callingMethod, identifier: identifier));
 
             packCommand
                 .Execute()

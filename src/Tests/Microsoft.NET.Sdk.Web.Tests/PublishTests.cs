@@ -35,8 +35,8 @@ namespace Microsoft.NET.Sdk.Web.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: projectName + targetFramework);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            publishCommand.Execute().Should().Pass();
+            var publishCommand = new PublishCommand(testAsset);
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}").Should().Pass();
 
             var buildProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework);
             buildProperties["TrimMode"].Should().Be("partial");
@@ -50,6 +50,8 @@ namespace Microsoft.NET.Sdk.Web.Tests
 
             configProperties["Microsoft.AspNetCore.EnsureJsonTrimmability"].GetValue<bool>()
                     .Should().BeTrue();
+            configProperties["System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault"].GetValue<bool>()
+                    .Should().BeFalse();
         }
 
         [Theory]
@@ -60,8 +62,9 @@ namespace Microsoft.NET.Sdk.Web.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            testProject.RecordProperties("NETCoreSdkPortableRuntimeIdentifier");
             testProject.AdditionalProperties["PublishAOT"] = "true";
-            testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+            testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
             testProject.PropertiesToRecord.Add("PublishTrimmed");
             testProject.PropertiesToRecord.Add("TrimMode");
             testProject.PropertiesToRecord.Add("PublishIISAssets");
@@ -74,12 +77,14 @@ namespace Microsoft.NET.Sdk.Web.Tests
             buildProperties["PublishTrimmed"].Should().Be("true");
             buildProperties["TrimMode"].Should().Be("");
             buildProperties["PublishIISAssets"].Should().Be("false");
+            var ucrRid = buildProperties["NETCoreSdkPortableRuntimeIdentifier"];
 
-            string outputDirectory = publishCommand.GetIntermediateDirectory(targetFramework, runtimeIdentifier: rid).FullName;
+            string outputDirectory = publishCommand.GetIntermediateDirectory(targetFramework, runtimeIdentifier: ucrRid).FullName;
             string responseFile = Path.Combine(outputDirectory, "native", $"{projectName}.ilc.rsp");
             var responseFileContents = File.ReadLines(responseFile);
 
             responseFileContents.Should().Contain("--feature:Microsoft.AspNetCore.EnsureJsonTrimmability=true");
+            responseFileContents.Should().Contain("--feature:System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault=false");
             File.Exists(Path.Combine(outputDirectory, "web.config")).Should().BeFalse();
         }
 

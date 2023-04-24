@@ -832,21 +832,15 @@ EndGlobal
 
             var reasonString = "should be built in release mode, otherwise it means build configurations are missing from the sln file";
 
-            var appReleaseDirectory = Directory.EnumerateDirectories(
-                Path.Combine(projectDirectory, "App", "bin"),
-                "Release",
-                SearchOption.AllDirectories);
-            appReleaseDirectory.Count().Should().Be(1, $"App {reasonString}");
-            Directory.EnumerateFiles(appReleaseDirectory.Single(), "App.dll", SearchOption.AllDirectories)
-                .Count().Should().Be(1, $"App {reasonString}");
+            var appPathCalculator = OutputPathCalculator.FromProject(Path.Combine(projectDirectory, "App", "App.csproj"));
+            new DirectoryInfo(appPathCalculator.GetOutputDirectory(configuration: "Debug")).Should().NotExist(reasonString);
+            new DirectoryInfo(appPathCalculator.GetOutputDirectory(configuration: "Release")).Should().Exist()
+                .And.HaveFile("App.dll");
 
-            var libReleaseDirectory = Directory.EnumerateDirectories(
-                Path.Combine(projectDirectory, "Lib", "bin"),
-                "Release",
-                SearchOption.AllDirectories);
-            libReleaseDirectory.Count().Should().Be(1, $"Lib {reasonString}");
-            Directory.EnumerateFiles(libReleaseDirectory.Single(), "Lib.dll", SearchOption.AllDirectories)
-                .Count().Should().Be(1, $"Lib {reasonString}");
+            var libPathCalculator = OutputPathCalculator.FromProject(Path.Combine(projectDirectory, "Lib", "Lib.csproj"));
+            new DirectoryInfo(libPathCalculator.GetOutputDirectory(configuration: "Debug")).Should().NotExist(reasonString);
+            new DirectoryInfo(libPathCalculator.GetOutputDirectory(configuration: "Release")).Should().Exist()
+                .And.HaveFile("Lib.dll");
         }
 
         [Theory]

@@ -119,11 +119,17 @@ namespace Microsoft.DotNet.Cli
                     verbosity = userSetVerbosity;
                 }
                 Reporter.Reset();
-                return CreateHost(disableSdkTemplates, disableProjectContext, projectPath, outputPath, verbosity.ToLogLevel());
+                return CreateHost(disableSdkTemplates, disableProjectContext, projectPath, outputPath, parseResult, verbosity.ToLogLevel());
             }
         }
 
-        private static CliTemplateEngineHost CreateHost(bool disableSdkTemplates, bool disableProjectContext, FileInfo? projectPath, FileInfo? outputPath, LogLevel logLevel)
+        private static CliTemplateEngineHost CreateHost(
+            bool disableSdkTemplates,
+            bool disableProjectContext,
+            FileInfo? projectPath,
+            FileInfo? outputPath,
+            ParseResult parseResult,
+            LogLevel logLevel)
         {
             var builtIns = new List<(Type InterfaceType, IIdentifiedComponent Instance)>();
             builtIns.AddRange(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Components.AllComponents);
@@ -151,7 +157,7 @@ namespace Microsoft.DotNet.Cli
             }
 
             builtIns.Add((typeof(IWorkloadsInfoProvider), new WorkloadsInfoProvider(
-                    new Lazy<IWorkloadsRepositoryEnumerator>(() => new WorkloadInfoHelper())))
+                    new Lazy<IWorkloadsRepositoryEnumerator>(() => new WorkloadInfoHelper(parseResult.HasOption(SharedOptions.InteractiveOption)))))
             );
             builtIns.Add((typeof(ISdkInfoProvider), new SdkInfoProvider()));
 

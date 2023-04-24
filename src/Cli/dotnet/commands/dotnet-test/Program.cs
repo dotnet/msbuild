@@ -108,6 +108,21 @@ namespace Microsoft.DotNet.Tools.Test
             return exitCode;
         }
 
+        public static TestCommand FromArgs(string[] args, string testSessionCorrelationId = null, string msbuildPath = null)
+        {
+            var parser = Microsoft.DotNet.Cli.Parser.Instance;
+            var parseResult = parser.ParseFrom("dotnet test", args);
+
+            // settings parameters are after -- (including --), these should not be considered by the parser
+            string[] settings = args.SkipWhile(a => a != "--").ToArray();
+            if (string.IsNullOrEmpty(testSessionCorrelationId))
+            {
+                testSessionCorrelationId = $"{Environment.ProcessId}_{Guid.NewGuid()}";
+            }
+            
+            return FromParseResult(parseResult, settings, testSessionCorrelationId, msbuildPath);
+        }
+
         private static TestCommand FromParseResult(ParseResult result, string[] settings, string testSessionCorrelationId, string msbuildPath = null)
         {
             result.ShowHelpOrErrorIfAppropriate();

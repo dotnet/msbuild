@@ -31,7 +31,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
-            var outputDirectory = publishDirectory.Parent;
+            var outputDirectory = new BuildCommand(testAsset).GetOutputDirectory();
 
             var filesPublished = new[] {
                 "ComServer.dll",

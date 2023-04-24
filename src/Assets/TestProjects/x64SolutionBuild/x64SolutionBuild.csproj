@@ -1,12 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>$(CurrentTargetFramework)</TargetFramework>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
 
   <Target Name="CheckPlatform" BeforeTargets="Build">
     <Error Condition="'$(Platform)' != 'x64'" Text="This test project expects to be built via solution and have Platform=x64" />

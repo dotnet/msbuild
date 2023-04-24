@@ -7,11 +7,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
-using Microsoft.AspNetCore.Razor.Tasks;
+using Microsoft.AspNetCore.StaticWebAssets.Tasks;
 using Microsoft.Build.Framework;
 using Moq;
 using Xunit;
-using static Microsoft.AspNetCore.Razor.Tasks.GenerateStaticWebAssetsDevelopmentManifest;
+using static Microsoft.AspNetCore.StaticWebAssets.Tasks.GenerateStaticWebAssetsDevelopmentManifest;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {

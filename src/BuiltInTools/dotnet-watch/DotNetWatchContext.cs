@@ -3,6 +3,8 @@
 
 #nullable enable
 
+using System.Collections.Generic;
+
 using Microsoft.Build.Graph;
 using Microsoft.Extensions.Tools.Internal;
 
@@ -10,6 +12,8 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     internal sealed class DotNetWatchContext
     {
+        public required bool HotReloadEnabled { get; init; }
+
         public IReporter Reporter { get; init; } = NullReporter.Singleton;
 
         public ProcessSpec ProcessSpec { get; init; } = default!;
@@ -29,5 +33,9 @@ namespace Microsoft.DotNet.Watcher.Tools
         public LaunchSettingsProfile LaunchSettingsProfile { get; init; } = default!;
 
         public ProjectGraph? ProjectGraph { get; set; }
+
+        public string? TargetFramework { get; init; }
+
+        public IReadOnlyList<(string name, string value)>? BuildProperties { get; init; }
     }
 }

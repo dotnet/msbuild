@@ -1,5 +1,6 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.IO;
 using System.Threading.Tasks;
@@ -23,13 +24,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var testAppName = "BlazorHosted";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
             
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
+            var publishCommand = new PublishCommand(testInstance, "blazorhosted");
             publishCommand.Execute().Should().Pass();
 
             // Act
-            var mainAppDll = Path.Combine(testInstance.TestRoot, "blazorhosted", "bin", "Debug", DefaultTfm, "publish", "wwwroot", "_framework", "blazorwasm.dll");
+            var blazorHostedPublishDirectory = publishCommand.GetOutputDirectory().FullName;
+            var mainAppDll = Path.Combine(blazorHostedPublishDirectory, "wwwroot", "_framework", "blazorwasm.dll");
             var mainAppDllThumbPrint = FileThumbPrint.Create(mainAppDll);
-            var mainAppCompressedDll = Path.Combine(testInstance.TestRoot, "blazorhosted", "bin", "Debug", DefaultTfm, "publish", "wwwroot", "_framework", "blazorwasm.dll.br");
+            var mainAppCompressedDll = Path.Combine(blazorHostedPublishDirectory, "wwwroot", "_framework", "blazorwasm.dll.br");
             var mainAppCompressedDllThumbPrint = FileThumbPrint.Create(mainAppCompressedDll);
 
             var blazorBootJson = Path.Combine(testInstance.TestRoot, publishCommand.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "blazor.boot.json");
@@ -64,15 +66,15 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var testAppName = "BlazorHosted";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
             
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
+            var publishCommand = new PublishCommand(testInstance, "blazorhosted");
             publishCommand.Execute("/p:BlazorWebAssemblyEnableLinking=false").Should().Pass();
 
             // Act
-            var buildOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
-            var mainAppDll = Path.Combine(testInstance.TestRoot, "blazorhosted", "bin", "Debug", DefaultTfm, "publish", "wwwroot", "_framework", "blazorwasm.dll");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm).FullName;
+            var mainAppDll = Path.Combine(publishDirectory, "wwwroot", "_framework", "blazorwasm.dll");
             var mainAppDllThumbPrint = FileThumbPrint.Create(mainAppDll);
 
-            var mainAppCompressedDll = Path.Combine(testInstance.TestRoot, "blazorhosted", "bin", "Debug", DefaultTfm, "publish", "wwwroot", "_framework", "blazorwasm.dll.br");
+            var mainAppCompressedDll = Path.Combine(publishDirectory, "wwwroot", "_framework", "blazorwasm.dll.br");
             var mainAppCompressedDllThumbPrint = FileThumbPrint.Create(mainAppCompressedDll);
 
             var programFile = Path.Combine(testInstance.TestRoot, "blazorwasm", "Program.cs");
@@ -104,7 +106,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var buildOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
             // Act
-            var compressedFilesFolder = Path.Combine(testInstance.TestRoot, "blazorwasm", "obj", "Debug", DefaultTfm, "compress");
+            var compressedFilesFolder = Path.Combine(testInstance.TestRoot, "blazorwasm", "obj", "Debug", DefaultTfm, "compressed", "publish");
             var thumbPrint = FileThumbPrint.CreateFolderThumbprint(testInstance, compressedFilesFolder);
 
             // Assert
@@ -136,7 +138,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var buildOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
             // Act
-            var compressedFilesFolder = Path.Combine(testInstance.TestRoot, "blazorwasm", "obj", "Debug", DefaultTfm, "compress");
+            var compressedFilesFolder = Path.Combine(testInstance.TestRoot, "blazorwasm", "obj", "Debug", DefaultTfm, "compressed", "publish");
             var thumbPrint = FileThumbPrint.CreateFolderThumbprint(testInstance, compressedFilesFolder);
 
             // Assert
@@ -161,7 +163,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var testAppName = "BlazorWasmWithLibrary";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
             
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.WithWorkingDirectory(testInstance.TestRoot);
             publishCommand.Execute("/bl").Should().Pass();
 
@@ -169,7 +171,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             // Act
             var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
-            var frameworkFilesPath = Path.Combine(Path.Combine(testInstance.TestRoot, "blazorwasm"), publishOutputDirectory, "wwwroot", "_framework");
+            var frameworkFilesPath = Path.Combine(publishOutputDirectory, "wwwroot", "_framework");
 
             // Assert
             foreach (var file in Directory.EnumerateFiles(frameworkFilesPath, "*", new EnumerationOptions {  RecurseSubdirectories = true, }))

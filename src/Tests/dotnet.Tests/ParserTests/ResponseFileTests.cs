@@ -56,7 +56,8 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var lines = new[] {
                 "build",
                 "",
-                "run# but skip this",
+                "  #skip this",
+                "run #but don't skip this",
                 "# and this"
             };
             File.WriteAllLines(tempFilePath, lines);
@@ -66,7 +67,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var tokens = parseResult.Tokens.Select(t => t.Value);
             var tokenized = new [] {
                 "build",
-                "run"
+                "run #but don't skip this"
             };
 
             tokens.Skip(1).Should().BeEquivalentTo(tokenized);

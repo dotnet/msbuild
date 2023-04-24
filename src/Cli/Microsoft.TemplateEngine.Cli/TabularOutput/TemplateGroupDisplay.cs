@@ -161,8 +161,8 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
                     .DefineColumn(t => t.ShortNames, LocalizableStrings.ColumnNameShortName, showAlways: true)
                     .DefineColumn(t => t.Languages, out object? languageColumn, LocalizableStrings.ColumnNameLanguage, TabularOutputSettings.ColumnNames.Language, defaultColumn: true)
                     .DefineColumn(t => t.Type, LocalizableStrings.ColumnNameType, TabularOutputSettings.ColumnNames.Type, defaultColumn: false)
-                    .DefineColumn(t => t.Author, LocalizableStrings.ColumnNameAuthor, TabularOutputSettings.ColumnNames.Tags, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
-                    .DefineColumn(t => t.Classifications, out object? tagsColumn, LocalizableStrings.ColumnNameTags, TabularOutputSettings.ColumnNames.Author, defaultColumn: true)
+                    .DefineColumn(t => t.Author, LocalizableStrings.ColumnNameAuthor, TabularOutputSettings.ColumnNames.Author, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
+                    .DefineColumn(t => t.Classifications, out object? tagsColumn, LocalizableStrings.ColumnNameTags, TabularOutputSettings.ColumnNames.Tags, defaultColumn: true)
                     .OrderBy(nameColumn, StringComparer.OrdinalIgnoreCase);
             reporter.WriteLine(formatter.Layout());
         }

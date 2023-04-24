@@ -58,8 +58,16 @@ namespace Microsoft.DotNet.GenAPI
 
                             if (baseTypeConstructors.Any())
                             {
+                                IMethodSymbol constructor = baseTypeConstructors.First();
+
                                 ConstructorDeclarationSyntax declaration = (ConstructorDeclarationSyntax)syntaxGenerator.Declaration(method);
-                                return declaration.WithInitializer(GenerateBaseConstructorInitializer(baseTypeConstructors.First()));
+                                if (!declaration.Modifiers.Any(m => m.RawKind == (int)SyntaxKind.UnsafeKeyword) &&
+                                    // if at least one parameter of a base constructor is raw pointer type
+                                    constructor.Parameters.Any(p => p.Type.TypeKind == TypeKind.Pointer))
+                                {
+                                    declaration = declaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.UnsafeKeyword));
+                                }
+                                return declaration.WithInitializer(constructor.GenerateBaseConstructorInitializer());
                             }
                         }
                     }
@@ -95,26 +103,7 @@ namespace Microsoft.DotNet.GenAPI
             }
         }
 
-        private static ConstructorInitializerSyntax GenerateBaseConstructorInitializer(IMethodSymbol baseTypeConstructor)
-        {
-            ConstructorInitializerSyntax constructorInitializer = SyntaxFactory.ConstructorInitializer(SyntaxKind.BaseConstructorInitializer);
-
-            foreach (IParameterSymbol parameter in baseTypeConstructor.Parameters)
-            {
-                IdentifierNameSyntax identifier;
-                // If the parameter's type is known to be a value type or has top-level nullability annotation
-                if (parameter.Type.IsValueType || parameter.NullableAnnotation == NullableAnnotation.Annotated)
-                    identifier = SyntaxFactory.IdentifierName("default");
-                else
-                    identifier = SyntaxFactory.IdentifierName("default!");
-
-                constructorInitializer = constructorInitializer.AddArgumentListArguments(SyntaxFactory.Argument(identifier));
-            }
-
-            return constructorInitializer;
-        }
-
-        // Gets the list of base class and interfaces for a given symbol <see cref="INamedTypeSymbol"/>.
+        // Gets the list of base class and interfaces for a given symbol INamedTypeSymbol.
         private static BaseListSyntax? GetBaseTypeList(this SyntaxGenerator syntaxGenerator,
             INamedTypeSymbol type,
             ISymbolFilter symbolFilter)
@@ -126,8 +115,10 @@ namespace Microsoft.DotNet.GenAPI
                 baseTypes.Add(SyntaxFactory.SimpleBaseType((TypeSyntax)syntaxGenerator.TypeExpression(type.BaseType)));
             }
 
-            // includes only interfaces that were not filtered out by the given <see cref="ISymbolFilter"/>.
-            baseTypes.AddRange(type.Interfaces.Where(symbolFilter.Include).Select(i => SyntaxFactory.SimpleBaseType((TypeSyntax)syntaxGenerator.TypeExpression(i))));
+            // includes only interfaces that were not filtered out by the given ISymbolFilter or none of TypeParameters were filtered out.
+            baseTypes.AddRange(type.Interfaces
+                .Where(i => symbolFilter.Include(i) && !i.HasInaccessibleTypeArgument(symbolFilter))
+                .Select(i => SyntaxFactory.SimpleBaseType((TypeSyntax)syntaxGenerator.TypeExpression(i))));
             return baseTypes.Count > 0 ?
                 SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(baseTypes)) :
                 null;

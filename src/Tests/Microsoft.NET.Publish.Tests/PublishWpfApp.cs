@@ -57,13 +57,13 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory(
+            var publishDirectory = OutputPathCalculator.FromProject(Path.Combine(testDir.Path, Path.GetFileName(testDir.Path) + ".csproj")).GetPublishDirectory(
                 targetFramework: targetFramework,
                 runtimeIdentifier: rid);
 
             var runAppCommand = new SdkCommandSpec()
             {
-                FileName = Path.Combine(publishDirectory.FullName, Path.GetFileName(testDir.Path) + ".exe")
+                FileName = Path.Combine(publishDirectory, Path.GetFileName(testDir.Path) + ".exe")
             };
 
             runAppCommand.Environment["DOTNET_ROOT"] = Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath);

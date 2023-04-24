@@ -200,7 +200,8 @@ dotnet_diagnostic.CA1836.severity = warning
 # Use 'Environment.ProcessPath'
 dotnet_diagnostic.CA1839.severity = warning
 # Do not call ToImmutableCollection on an ImmutableCollection value
-dotnet_diagnostic.CA2009.severity = warning
+# Temporarily disable to avoid regression in preview 1, revert back to warning when start using preview 2
+dotnet_diagnostic.CA2009.severity = none 
 # Avoid infinite recursion
 dotnet_diagnostic.CA2011.severity = warning
 # Initialize value type static fields inline

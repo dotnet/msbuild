@@ -1,5 +1,16 @@
 ﻿[
   {
+    Label: --aot,
+    Kind: Keyword,
+    SortText: --aot,
+    InsertText: --aot,
+    Detail:
+Whether to enable the project for publishing as native AOT.
+Type: bool
+Default: false
+
+  },
+  {
     Label: --dry-run,
     Kind: Keyword,
     SortText: --dry-run,

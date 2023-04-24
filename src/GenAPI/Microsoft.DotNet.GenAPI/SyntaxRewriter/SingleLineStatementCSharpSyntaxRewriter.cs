@@ -20,45 +20,31 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
     {
         /// <inheritdoc />
         public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
-        {
-            return VisitBaseMethodDeclarationSyntax(node);
-        }
+            => VisitBaseMethodDeclarationSyntax(node);
 
         /// <inheritdoc />
         public override SyntaxNode? VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
-        {
-            return VisitBaseMethodDeclarationSyntax(node);
-        }
+            => VisitBaseMethodDeclarationSyntax(node);
 
         /// <inheritdoc />
         public override SyntaxNode? VisitOperatorDeclaration(OperatorDeclarationSyntax node)
-        {
-            return VisitBaseMethodDeclarationSyntax(node);
-        }
+            => VisitBaseMethodDeclarationSyntax(node);
 
         /// <inheritdoc />
-        public override SyntaxNode? VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node)
-        {
-            return VisitBaseMethodDeclarationSyntax(node);
-        }
+        public override SyntaxNode? VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node) =>
+            VisitBaseMethodDeclarationSyntax(node);
 
         /// <inheritdoc />
         public override SyntaxNode? VisitIndexerDeclaration(IndexerDeclarationSyntax node)
-        {
-            return VisitBasePropertyDeclarationSyntax(node);
-        }
+            => VisitBasePropertyDeclarationSyntax(node);
 
         /// <inheritdoc />
-        public override SyntaxNode? VisitPropertyDeclaration(PropertyDeclarationSyntax node)
-        {
-            return VisitBasePropertyDeclarationSyntax(node);
-        }
+        public override SyntaxNode? VisitPropertyDeclaration(PropertyDeclarationSyntax node) =>
+            VisitBasePropertyDeclarationSyntax(node);
 
         /// <inheritdoc />
-        public override SyntaxNode? VisitEventDeclaration(EventDeclarationSyntax node)
-        {
-            return VisitBasePropertyDeclarationSyntax(node);
-        }
+        public override SyntaxNode? VisitEventDeclaration(EventDeclarationSyntax node) =>
+            VisitBasePropertyDeclarationSyntax(node);
 
         private static SyntaxNode? VisitBaseMethodDeclarationSyntax(BaseMethodDeclarationSyntax node)
         {

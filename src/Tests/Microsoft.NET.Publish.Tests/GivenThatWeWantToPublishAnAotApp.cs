@@ -41,9 +41,9 @@ namespace Microsoft.NET.Publish.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "HellowWorldNativeAotApp";
-                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
                 var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
+                testProject.RecordProperties("NETCoreSdkPortableRuntimeIdentifier");
                 testProject.AdditionalProperties["PublishAot"] = "true";
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
                 // assumes /bin (or /usr/bin) are in the PATH
@@ -53,14 +53,16 @@ namespace Microsoft.NET.Publish.Tests
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
-                    .Execute($"/p:RuntimeIdentifier={rid}")
+                    .Execute($"/p:UseCurrentRuntimeIdentifier=true")
                     .Should().Pass()
                     .And.NotHaveStdOutContaining("IL2026")
                     .And.NotHaveStdErrContaining("NETSDK1179")
                     .And.NotHaveStdErrContaining("warning");
 
+                var buildProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework);
+                var rid = buildProperties["NETCoreSdkPortableRuntimeIdentifier"];
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
                 var sharedLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" : ".so";
                 var publishedDll = Path.Combine(publishDirectory, $"{projectName}{sharedLibSuffix}");
@@ -94,7 +96,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["PublishAot"] = "false";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass()
@@ -124,10 +126,10 @@ namespace Microsoft.NET.Publish.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "NativeAotAppForConfigTestDbg";
-                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
                 var projectConfiguration = "Debug";
 
                 var testProject = CreateAppForConfigCheck(targetFramework, projectName, true);
+                testProject.RecordProperties("NETCoreSdkPortableRuntimeIdentifier");
                 testProject.AdditionalProperties["PublishAot"] = "true";
                 testProject.AdditionalProperties["Configuration"] = projectConfiguration;
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
@@ -142,11 +144,13 @@ namespace Microsoft.NET.Publish.Tests
                     // <RuntimeHostConfigurationOption Include="key1" Value="value1" />
                     .WithProjectChanges(project => AddRuntimeConfigOption(project));
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
-                    .Execute($"/p:RuntimeIdentifier={rid}")
+                    .Execute($"/p:UseCurrentRuntimeIdentifier=true")
                     .Should().Pass();
 
+                var buildProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework, projectConfiguration);
+                var rid = buildProperties["NETCoreSdkPortableRuntimeIdentifier"];
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, configuration: projectConfiguration, runtimeIdentifier: rid).FullName;
                 var sharedLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" : ".so";
                 var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
@@ -180,10 +184,10 @@ namespace Microsoft.NET.Publish.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "NativeAotAppForConfigTestRel";
-                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
                 var projectConfiguration = "Release";
 
                 var testProject = CreateAppForConfigCheck(targetFramework, projectName, true);
+                testProject.RecordProperties("NETCoreSdkPortableRuntimeIdentifier");
                 testProject.AdditionalProperties["PublishAot"] = "true";
                 testProject.AdditionalProperties["Configuration"] = projectConfiguration;
                 // Linux symbol files are embedded and require additional steps to be stripped to a separate file
@@ -198,10 +202,13 @@ namespace Microsoft.NET.Publish.Tests
                     // <RuntimeHostConfigurationOption Include="key1" Value="value1" />
                     .WithProjectChanges(project => AddRuntimeConfigOption(project));
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
-                    .Execute($"/p:RuntimeIdentifier={rid}")
+                    .Execute($"/p:UseCurrentRuntimeIdentifier=true")
                     .Should().Pass();
+
+                var buildProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework, projectConfiguration);
+                var rid = buildProperties["NETCoreSdkPortableRuntimeIdentifier"];
 
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, configuration: projectConfiguration, runtimeIdentifier: rid).FullName;
                 var sharedLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" : ".so";
@@ -236,9 +243,9 @@ namespace Microsoft.NET.Publish.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "NativeAotAppForConfigTest";
-                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
                 var testProject = CreateAppForConfigCheck(targetFramework, projectName, true);
+                testProject.RecordProperties("NETCoreSdkPortableRuntimeIdentifier");
                 testProject.AdditionalProperties["PublishAot"] = "true";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject)
                     // populate a runtime config file with a key value pair
@@ -246,9 +253,11 @@ namespace Microsoft.NET.Publish.Tests
                     .WithProjectChanges(project => AddRuntimeConfigOption(project));
 
                 var buildCommand = new BuildCommand(testAsset);
-                buildCommand.Execute($"/p:RuntimeIdentifier={rid}")
+                buildCommand.Execute($"/p:UseCurrentRuntimeIdentifier=true")
                     .Should().Pass();
 
+                var buildProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework);
+                var rid = buildProperties["NETCoreSdkPortableRuntimeIdentifier"];
                 var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: rid).FullName;
                 var assemblyPath = Path.Combine(outputDirectory, $"{projectName}{Constants.ExeSuffix}");
                 var runtimeConfigPath = Path.Combine(outputDirectory, $"{projectName}.runtimeconfig.json");
@@ -269,9 +278,9 @@ namespace Microsoft.NET.Publish.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "HellowWorldNativeAotApp";
-                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
                 var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
+                testProject.RecordProperties("NETCoreSdkPortableRuntimeIdentifier");
                 testProject.AdditionalProperties["PublishAot"] = "true";
 
                 // This will add a reference to a package that will also be automatically imported by the SDK
@@ -285,14 +294,16 @@ namespace Microsoft.NET.Publish.Tests
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand= new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
-                    .Execute($"/p:RuntimeIdentifier={rid}")
+                    .Execute($"/p:UseCurrentRuntimeIdentifier=true")
                     .Should().Pass()
                 // Having an explicit package reference will generate a warning
                 .And.HaveStdOutContaining("warning")
                 .And.HaveStdOutContaining("Microsoft.DotNet.ILCompiler");
 
+                var buildProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework);
+                var rid = buildProperties["NETCoreSdkPortableRuntimeIdentifier"];
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
                 var sharedLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" : ".so";
                 var publishedDll = Path.Combine(publishDirectory, $"{projectName}{sharedLibSuffix}");
@@ -337,7 +348,7 @@ namespace Microsoft.NET.Publish.Tests
                 }
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
@@ -369,7 +380,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
@@ -400,7 +411,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass()
@@ -435,7 +446,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute($"/p:RuntimeIdentifier={rid}")
                     .Should().Pass();
@@ -447,14 +458,12 @@ namespace Microsoft.NET.Publish.Tests
             }
         }
 
-        [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [InlineData(ToolsetInfo.CurrentTargetFramework)]
-        public void NativeAot_hw_fails_with_sdk6_PublishAot_is_enabled(string targetFramework)
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
+        public void NativeAot_hw_fails_with_sdk6_PublishAot_is_enabled()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var projectName = "HellowWorldNativeAotApp";
-                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
                 var testProject = CreateHelloWorldTestProject("net6.0", projectName, true);
                 testProject.AdditionalProperties["PublishAot"] = "true";
@@ -463,7 +472,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
-                    .Execute($"/p:RuntimeIdentifier={rid}")
+                    .Execute($"/p:UseCurrentRuntimeIdentifier=true")
                     .Should().Fail()
                     .And.HaveStdOutContaining("error NETSDK1183:");
             }
@@ -487,7 +496,7 @@ namespace Microsoft.NET.Publish.Tests
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
                 publishCommand
-                    .Execute($"/p:RuntimeIdentifier={rid}")
+                    .Execute($"/p:UseCurrentRuntimeIdentifier=true")
                     .Should().Fail()
                     .And.HaveStdOutContaining("error NETSDK1183:");
             }
@@ -522,7 +531,6 @@ namespace Microsoft.NET.Publish.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "WarningAppWithRequiresAnalyzers";
-                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
                 // Enable the different requires analyzers (EnableAotAnalyzer, EnableTrimAnalyzer
                 // and EnableSingleFileAnalyzer) without setting PublishAot
@@ -531,7 +539,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["EnableTrimAnalyzer"] = "true";
                 testProject.AdditionalProperties["EnableSingleFileAnalyzer"] = "true";
                 testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
-                testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+                testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -552,16 +560,16 @@ namespace Microsoft.NET.Publish.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "WarningAppWithPublishAot";
-                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
                 // PublishAot should enable the EnableAotAnalyzer, EnableTrimAnalyzer and EnableSingleFileAnalyzer
                 var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName, true);
+                testProject.RecordProperties("NETCoreSdkPortableRuntimeIdentifier");
                 testProject.AdditionalProperties["PublishAot"] = "true";
                 testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
-                testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+                testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute()
                     .Should().Pass()
@@ -570,6 +578,8 @@ namespace Microsoft.NET.Publish.Tests
                     .And.HaveStdOutContaining("warning IL2026")
                     .And.HaveStdOutContaining("warning IL3002");
 
+                var buildProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework);
+                var rid = buildProperties["NETCoreSdkPortableRuntimeIdentifier"];
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid);
 
                 var publishedExe = Path.Combine(publishDirectory.FullName, $"{testProject.Name}{Constants.ExeSuffix}");
@@ -591,26 +601,28 @@ namespace Microsoft.NET.Publish.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "WarningAppWithPublishAotAnalyzersDisabled";
-                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
                 // PublishAot enables the EnableAotAnalyzer, EnableTrimAnalyzer and EnableSingleFileAnalyzer
                 // only if they don't have a predefined value
                 var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName, true);
+                testProject.RecordProperties("NETCoreSdkPortableRuntimeIdentifier");
                 testProject.AdditionalProperties["PublishAot"] = "true";
                 testProject.AdditionalProperties["EnableAotAnalyzer"] = "false";
                 testProject.AdditionalProperties["EnableTrimAnalyzer"] = "false";
                 testProject.AdditionalProperties["EnableSingleFileAnalyzer"] = "false";
                 testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
-                testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+                testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute()
                     .Should().Pass()
                     .And.HaveStdOutContaining("warning IL3050")
                     .And.HaveStdOutContaining("warning IL2026");
 
+                var buildProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework);
+                var rid = buildProperties["NETCoreSdkPortableRuntimeIdentifier"];
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid);
 
                 var publishedExe = Path.Combine(publishDirectory.FullName, $"{testProject.Name}{Constants.ExeSuffix}");
@@ -632,20 +644,22 @@ namespace Microsoft.NET.Publish.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "AotStaticLibraryPublish";
-                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
                 var testProject = CreateTestProjectWithAotLibrary(targetFramework, projectName);
+                testProject.RecordProperties("NETCoreSdkPortableRuntimeIdentifier");
                 testProject.AdditionalProperties["PublishAot"] = "true";
-                testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+                testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
                 testProject.AdditionalProperties["NativeLib"] = "Static";
                 testProject.AdditionalProperties["SelfContained"] = "true";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute()
                     .Should().Pass();
 
+                var buildProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework);
+                var rid = buildProperties["NETCoreSdkPortableRuntimeIdentifier"];
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
                 var staticLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".lib" : ".a";
                 var publishedDll = Path.Combine(publishDirectory, $"{projectName}{staticLibSuffix}");
@@ -663,20 +677,22 @@ namespace Microsoft.NET.Publish.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 var projectName = "AotSharedLibraryPublish";
-                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
                 var testProject = CreateTestProjectWithAotLibrary(targetFramework, projectName);
+                testProject.RecordProperties("NETCoreSdkPortableRuntimeIdentifier");
                 testProject.AdditionalProperties["PublishAot"] = "true";
-                testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+                testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
                 testProject.AdditionalProperties["NativeLib"] = "Shared";
                 testProject.AdditionalProperties["SelfContained"] = "true";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute()
                     .Should().Pass();
 
+                var buildProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework);
+                var rid = buildProperties["NETCoreSdkPortableRuntimeIdentifier"];
                 var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
                 var sharedLibSuffix = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".dll" : ".so";
                 var publishedDll = Path.Combine(publishDirectory, $"{projectName}{sharedLibSuffix}");

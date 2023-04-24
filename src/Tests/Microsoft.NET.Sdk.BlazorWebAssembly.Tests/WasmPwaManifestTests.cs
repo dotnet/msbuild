@@ -1,5 +1,6 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System.IO;
 using System.Linq;
@@ -71,7 +72,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             buildCommand.Execute()
                 .Should().Pass();
 
-            var buildOutputDirectory = Path.Combine(testInstance.TestRoot, "blazorwasm", "bin", "Debug", DefaultTfm);
+            var buildOutputDirectory = OutputPathCalculator.FromProject(Path.Combine(testInstance.TestRoot, "blazorwasm")).GetOutputDirectory();
 
             var serviceWorkerAssetsManifest = Path.Combine(buildOutputDirectory, "wwwroot", "custom-service-worker-assets.js");
             // Trim prefix 'self.assetsManifest = ' and suffix ';'
@@ -93,7 +94,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var testAppName = "BlazorWasmWithLibrary";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.Execute().Should().Pass();
 
             var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
@@ -121,7 +122,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var testAppName = "BlazorHosted";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
+            var publishCommand = new PublishCommand(testInstance, "blazorhosted");
             publishCommand.Execute().Should().Pass();
 
             var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
@@ -148,7 +149,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var testAppName = "BlazorWasmWithLibrary";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.Execute("/p:ServiceWorkerAssetsManifest=service-worker-assets.js").Should().Pass();
 
             var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
@@ -167,7 +168,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             File.WriteAllText(cssFile, ".updated { }");
 
             // Assert
-            publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.Execute("/p:ServiceWorkerAssetsManifest=service-worker-assets.js").Should().Pass();
 
             var updatedVersion = File.ReadAllLines(serviceWorkerFile).Last();
@@ -188,7 +189,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var testAppName = "BlazorWasmWithLibrary";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.Execute("/p:ServiceWorkerAssetsManifest=service-worker-assets.js").Should().Pass();
 
             var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();

@@ -11,11 +11,11 @@
       "Version": 2,
       "Source": "blazorwasm",
       "GetPublishAssetsTargets": "ComputeFilesToPublish;GetCurrentProjectPublishStaticWebAssetItems",
-      "AdditionalPublishProperties": "BuildProjectReferences=false;ResolveAssemblyReferencesFindRelatedSatellites=true;_PublishingBlazorWasmProject=true",
+      "AdditionalPublishProperties": "_PublishingBlazorWasmProject=true;BuildProjectReferences=false;ResolveAssemblyReferencesFindRelatedSatellites=true",
       "AdditionalPublishPropertiesToRemove": "NoBuild;RuntimeIdentifier;WebPublishProfileFile;TargetFramework",
       "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
       "AdditionalBuildProperties": "",
-      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework"
+      "AdditionalBuildPropertiesToRemove": "RuntimeIdentifier;SelfContained;WebPublishProfileFile;TargetFramework"
     },
     {
       "Identity": "${ProjectPath}\\razorclasslibrary\\RazorClassLibrary.csproj",
@@ -74,7 +74,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -91,7 +91,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -108,7 +108,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -125,7 +125,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -142,7 +142,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -159,7 +159,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -176,7 +176,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -193,7 +193,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -210,7 +210,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -227,7 +227,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -244,7 +244,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -261,7 +261,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -278,7 +278,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -295,7 +295,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -312,7 +312,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -329,7 +329,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -346,7 +346,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -363,7 +363,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -380,7 +380,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -397,7 +397,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -414,7 +414,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -431,7 +431,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -448,7 +448,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -465,7 +465,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -482,7 +482,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -499,7 +499,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -516,7 +516,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -533,7 +533,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -550,7 +550,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "symbol",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -567,7 +567,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -584,7 +584,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -601,7 +601,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -618,7 +618,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -635,7 +635,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -652,7 +652,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -669,7 +669,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -686,7 +686,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -703,7 +703,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -720,7 +720,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -737,7 +737,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -754,7 +754,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -771,7 +771,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -788,7 +788,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -805,7 +805,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -822,7 +822,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -839,7 +839,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -856,7 +856,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -873,7 +873,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -890,7 +890,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -907,7 +907,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -924,7 +924,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -941,7 +941,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -958,7 +958,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -975,7 +975,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -992,7 +992,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1009,7 +1009,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1026,7 +1026,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1043,7 +1043,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1060,7 +1060,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1077,7 +1077,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1094,7 +1094,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1111,7 +1111,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1128,7 +1128,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1145,7 +1145,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1162,7 +1162,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1179,7 +1179,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1196,7 +1196,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1213,7 +1213,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1230,7 +1230,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1247,7 +1247,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1264,7 +1264,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1281,7 +1281,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1298,7 +1298,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1315,7 +1315,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1332,7 +1332,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1349,7 +1349,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1366,7 +1366,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1383,7 +1383,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1400,7 +1400,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1417,7 +1417,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1434,7 +1434,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1451,7 +1451,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1468,7 +1468,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1485,7 +1485,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1502,7 +1502,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1519,7 +1519,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1536,7 +1536,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1553,7 +1553,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1570,7 +1570,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1587,7 +1587,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1604,7 +1604,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1621,7 +1621,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1638,7 +1638,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1655,7 +1655,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1672,7 +1672,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1689,7 +1689,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1706,7 +1706,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1723,7 +1723,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1740,7 +1740,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1757,7 +1757,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1774,7 +1774,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1791,7 +1791,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1808,7 +1808,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1825,7 +1825,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1842,7 +1842,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1859,7 +1859,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1876,7 +1876,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1893,7 +1893,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1910,7 +1910,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1927,7 +1927,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1944,7 +1944,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1961,7 +1961,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1978,7 +1978,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -1995,7 +1995,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2012,7 +2012,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2029,7 +2029,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2046,7 +2046,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2063,7 +2063,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2080,7 +2080,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2097,7 +2097,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2114,7 +2114,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2131,7 +2131,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2148,7 +2148,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2165,7 +2165,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2182,7 +2182,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2199,7 +2199,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2216,7 +2216,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2233,7 +2233,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2250,7 +2250,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2267,7 +2267,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2284,7 +2284,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2301,7 +2301,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2318,7 +2318,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2335,7 +2335,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2352,7 +2352,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2369,7 +2369,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2386,7 +2386,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2403,7 +2403,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2420,7 +2420,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2437,7 +2437,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2454,7 +2454,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2471,7 +2471,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2488,7 +2488,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2505,7 +2505,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2522,7 +2522,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2539,7 +2539,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2556,7 +2556,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2573,7 +2573,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2590,7 +2590,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2607,7 +2607,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2624,7 +2624,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2641,7 +2641,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2658,7 +2658,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2675,7 +2675,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2692,7 +2692,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2709,7 +2709,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2726,7 +2726,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2743,7 +2743,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2760,7 +2760,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2777,7 +2777,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2794,7 +2794,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2811,7 +2811,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2828,7 +2828,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2845,7 +2845,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2862,7 +2862,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2879,7 +2879,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2896,7 +2896,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2913,7 +2913,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2930,7 +2930,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2947,7 +2947,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2964,7 +2964,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2981,7 +2981,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -2998,7 +2998,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3015,7 +3015,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3032,7 +3032,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3049,7 +3049,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3066,7 +3066,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3083,7 +3083,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3100,7 +3100,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3117,7 +3117,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3134,7 +3134,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3151,7 +3151,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3168,7 +3168,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3185,7 +3185,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3202,7 +3202,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3219,7 +3219,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3236,7 +3236,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3253,7 +3253,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3270,7 +3270,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3287,7 +3287,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3304,7 +3304,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3321,7 +3321,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "manifest",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3338,7 +3338,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "boot",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "PreserveNewest",
@@ -3355,7 +3355,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3372,7 +3372,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "symbol",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3389,28 +3389,11 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "native",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
       "OriginalItemSpec": "${RestorePath}\\microsoft.netcore.app.runtime.mono.browser-wasm\\${RuntimeVersion}\\runtimes\\browser-wasm\\native\\dotnet.js"
-    },
-    {
-      "Identity": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\dotnet.timezones.blat",
-      "SourceId": "blazorwasm",
-      "SourceType": "Project",
-      "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
-      "BasePath": "/",
-      "RelativePath": "_framework/dotnet.timezones.blat",
-      "AssetKind": "Build",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
-      "AssetTraitValue": "native",
-      "CopyToOutputDirectory": "PreserveNewest",
-      "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.netcore.app.runtime.mono.browser-wasm\\${RuntimeVersion}\\runtimes\\browser-wasm\\native\\dotnet.timezones.blat"
     },
     {
       "Identity": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\dotnet.wasm",
@@ -3423,7 +3406,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "native",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3440,7 +3423,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "native",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3457,7 +3440,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "native",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3474,7 +3457,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "native",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3491,7 +3474,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "native",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3508,7 +3491,7 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
@@ -3525,14 +3508,14 @@
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
-      "AssetTraitName": "BlazorWebAssemblyResource",
+      "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
       "OriginalItemSpec": "${RestorePath}\\microsoft.netcore.app.runtime.mono.browser-wasm\\${RuntimeVersion}\\runtimes\\browser-wasm\\lib\\${PackageTfm}\\netstandard.dll"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.AspNetCore.Authorization.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.AspNetCore.Authorization.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3549,7 +3532,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.AspNetCore.Authorization.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.AspNetCore.Components.Forms.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.AspNetCore.Components.Forms.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3566,7 +3549,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.AspNetCore.Components.Forms.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.AspNetCore.Components.Web.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.AspNetCore.Components.Web.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3583,7 +3566,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.AspNetCore.Components.Web.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.AspNetCore.Components.WebAssembly.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.AspNetCore.Components.WebAssembly.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3600,7 +3583,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.AspNetCore.Components.WebAssembly.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.AspNetCore.Components.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.AspNetCore.Components.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3617,7 +3600,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.AspNetCore.Components.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.AspNetCore.Metadata.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.AspNetCore.Metadata.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3634,7 +3617,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.AspNetCore.Metadata.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.CSharp.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.CSharp.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3651,7 +3634,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.CSharp.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Extensions.Configuration.Abstractions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Extensions.Configuration.Abstractions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3668,7 +3651,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Extensions.Configuration.Abstractions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Extensions.Configuration.Binder.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Extensions.Configuration.Binder.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3685,7 +3668,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Extensions.Configuration.Binder.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Extensions.Configuration.FileExtensions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Extensions.Configuration.FileExtensions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3702,7 +3685,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Extensions.Configuration.FileExtensions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Extensions.Configuration.Json.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Extensions.Configuration.Json.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3719,7 +3702,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Extensions.Configuration.Json.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Extensions.Configuration.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Extensions.Configuration.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3736,7 +3719,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Extensions.Configuration.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Extensions.DependencyInjection.Abstractions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Extensions.DependencyInjection.Abstractions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3753,7 +3736,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Extensions.DependencyInjection.Abstractions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Extensions.DependencyInjection.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Extensions.DependencyInjection.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3770,7 +3753,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Extensions.DependencyInjection.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Extensions.FileProviders.Abstractions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Extensions.FileProviders.Abstractions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3787,7 +3770,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Extensions.FileProviders.Abstractions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Extensions.FileProviders.Physical.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Extensions.FileProviders.Physical.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3804,7 +3787,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Extensions.FileProviders.Physical.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Extensions.FileSystemGlobbing.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Extensions.FileSystemGlobbing.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3821,7 +3804,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Extensions.FileSystemGlobbing.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Extensions.Logging.Abstractions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Extensions.Logging.Abstractions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3838,7 +3821,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Extensions.Logging.Abstractions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Extensions.Logging.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Extensions.Logging.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3855,7 +3838,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Extensions.Logging.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Extensions.Options.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Extensions.Options.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3872,7 +3855,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Extensions.Options.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Extensions.Primitives.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Extensions.Primitives.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3889,7 +3872,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Extensions.Primitives.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.JSInterop.WebAssembly.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.JSInterop.WebAssembly.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3906,7 +3889,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.JSInterop.WebAssembly.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.JSInterop.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.JSInterop.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3923,7 +3906,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.JSInterop.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.VisualBasic.Core.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.VisualBasic.Core.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3940,7 +3923,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.VisualBasic.Core.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.VisualBasic.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.VisualBasic.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3957,7 +3940,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.VisualBasic.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Win32.Primitives.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Win32.Primitives.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3974,7 +3957,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Win32.Primitives.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\Microsoft.Win32.Registry.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.Win32.Registry.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -3991,7 +3974,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\Microsoft.Win32.Registry.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\RazorClassLibrary.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\RazorClassLibrary.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4008,7 +3991,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\RazorClassLibrary.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\RazorClassLibrary.pdb.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\RazorClassLibrary.pdb.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4025,7 +4008,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\RazorClassLibrary.pdb.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.AppContext.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.AppContext.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4042,7 +4025,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.AppContext.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Buffers.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Buffers.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4059,7 +4042,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Buffers.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Collections.Concurrent.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Collections.Concurrent.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4076,7 +4059,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Collections.Concurrent.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Collections.Immutable.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Collections.Immutable.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4093,7 +4076,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Collections.Immutable.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Collections.NonGeneric.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Collections.NonGeneric.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4110,7 +4093,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Collections.NonGeneric.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Collections.Specialized.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Collections.Specialized.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4127,7 +4110,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Collections.Specialized.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Collections.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Collections.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4144,7 +4127,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Collections.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.ComponentModel.Annotations.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.ComponentModel.Annotations.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4161,7 +4144,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.ComponentModel.Annotations.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.ComponentModel.DataAnnotations.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.ComponentModel.DataAnnotations.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4178,7 +4161,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.ComponentModel.DataAnnotations.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.ComponentModel.EventBasedAsync.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.ComponentModel.EventBasedAsync.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4195,7 +4178,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.ComponentModel.EventBasedAsync.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.ComponentModel.Primitives.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.ComponentModel.Primitives.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4212,7 +4195,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.ComponentModel.Primitives.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.ComponentModel.TypeConverter.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.ComponentModel.TypeConverter.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4229,7 +4212,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.ComponentModel.TypeConverter.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.ComponentModel.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.ComponentModel.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4246,7 +4229,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.ComponentModel.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Configuration.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Configuration.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4263,7 +4246,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Configuration.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Console.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Console.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4280,7 +4263,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Console.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Core.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Core.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4297,7 +4280,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Core.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Data.Common.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Data.Common.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4314,7 +4297,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Data.Common.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Data.DataSetExtensions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Data.DataSetExtensions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4331,7 +4314,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Data.DataSetExtensions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Data.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Data.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4348,7 +4331,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Data.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Diagnostics.Contracts.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Diagnostics.Contracts.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4365,7 +4348,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Diagnostics.Contracts.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Diagnostics.Debug.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Diagnostics.Debug.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4382,7 +4365,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Diagnostics.Debug.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Diagnostics.DiagnosticSource.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Diagnostics.DiagnosticSource.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4399,7 +4382,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Diagnostics.DiagnosticSource.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Diagnostics.FileVersionInfo.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Diagnostics.FileVersionInfo.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4416,7 +4399,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Diagnostics.FileVersionInfo.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Diagnostics.Process.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Diagnostics.Process.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4433,7 +4416,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Diagnostics.Process.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Diagnostics.StackTrace.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Diagnostics.StackTrace.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4450,7 +4433,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Diagnostics.StackTrace.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Diagnostics.TextWriterTraceListener.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Diagnostics.TextWriterTraceListener.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4467,7 +4450,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Diagnostics.TextWriterTraceListener.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Diagnostics.Tools.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Diagnostics.Tools.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4484,7 +4467,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Diagnostics.Tools.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Diagnostics.TraceSource.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Diagnostics.TraceSource.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4501,7 +4484,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Diagnostics.TraceSource.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Diagnostics.Tracing.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Diagnostics.Tracing.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4518,7 +4501,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Diagnostics.Tracing.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Drawing.Primitives.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Drawing.Primitives.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4535,7 +4518,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Drawing.Primitives.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Drawing.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Drawing.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4552,7 +4535,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Drawing.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Dynamic.Runtime.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Dynamic.Runtime.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4569,7 +4552,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Dynamic.Runtime.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Formats.Asn1.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Formats.Asn1.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4586,7 +4569,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Formats.Asn1.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Formats.Tar.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Formats.Tar.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4603,7 +4586,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Formats.Tar.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Globalization.Calendars.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Globalization.Calendars.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4620,7 +4603,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Globalization.Calendars.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Globalization.Extensions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Globalization.Extensions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4637,7 +4620,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Globalization.Extensions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Globalization.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Globalization.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4654,7 +4637,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Globalization.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.Compression.Brotli.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.Compression.Brotli.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4671,7 +4654,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.Compression.Brotli.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.Compression.FileSystem.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.Compression.FileSystem.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4688,7 +4671,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.Compression.FileSystem.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.Compression.ZipFile.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.Compression.ZipFile.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4705,7 +4688,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.Compression.ZipFile.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.Compression.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.Compression.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4722,7 +4705,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.Compression.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.FileSystem.AccessControl.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.FileSystem.AccessControl.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4739,7 +4722,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.FileSystem.AccessControl.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.FileSystem.DriveInfo.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.FileSystem.DriveInfo.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4756,7 +4739,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.FileSystem.DriveInfo.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.FileSystem.Primitives.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.FileSystem.Primitives.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4773,7 +4756,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.FileSystem.Primitives.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.FileSystem.Watcher.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.FileSystem.Watcher.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4790,7 +4773,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.FileSystem.Watcher.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.FileSystem.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.FileSystem.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4807,7 +4790,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.FileSystem.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.IsolatedStorage.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.IsolatedStorage.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4824,7 +4807,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.IsolatedStorage.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.MemoryMappedFiles.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.MemoryMappedFiles.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4841,7 +4824,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.MemoryMappedFiles.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.Pipelines.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.Pipelines.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4858,7 +4841,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.Pipelines.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.Pipes.AccessControl.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.Pipes.AccessControl.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4875,7 +4858,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.Pipes.AccessControl.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.Pipes.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.Pipes.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4892,7 +4875,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.Pipes.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.UnmanagedMemoryStream.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.UnmanagedMemoryStream.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4909,7 +4892,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.UnmanagedMemoryStream.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.IO.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.IO.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4926,7 +4909,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.IO.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Linq.Expressions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Linq.Expressions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4943,7 +4926,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Linq.Expressions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Linq.Parallel.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Linq.Parallel.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4960,7 +4943,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Linq.Parallel.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Linq.Queryable.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Linq.Queryable.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4977,7 +4960,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Linq.Queryable.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Linq.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Linq.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -4994,7 +4977,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Linq.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Memory.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Memory.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5011,7 +4994,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Memory.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.Http.Json.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.Http.Json.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5028,7 +5011,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.Http.Json.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.Http.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.Http.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5045,7 +5028,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.Http.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.HttpListener.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.HttpListener.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5062,7 +5045,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.HttpListener.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.Mail.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.Mail.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5079,7 +5062,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.Mail.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.NameResolution.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.NameResolution.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5096,7 +5079,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.NameResolution.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.NetworkInformation.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.NetworkInformation.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5113,7 +5096,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.NetworkInformation.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.Ping.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.Ping.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5130,7 +5113,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.Ping.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.Primitives.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.Primitives.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5147,7 +5130,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.Primitives.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.Quic.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.Quic.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5164,7 +5147,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.Quic.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.Requests.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.Requests.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5181,7 +5164,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.Requests.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.Security.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.Security.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5198,7 +5181,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.Security.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.ServicePoint.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.ServicePoint.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5215,7 +5198,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.ServicePoint.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.Sockets.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.Sockets.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5232,7 +5215,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.Sockets.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.WebClient.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.WebClient.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5249,7 +5232,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.WebClient.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.WebHeaderCollection.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.WebHeaderCollection.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5266,7 +5249,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.WebHeaderCollection.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.WebProxy.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.WebProxy.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5283,7 +5266,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.WebProxy.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.WebSockets.Client.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.WebSockets.Client.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5300,7 +5283,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.WebSockets.Client.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.WebSockets.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.WebSockets.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5317,7 +5300,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.WebSockets.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Net.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Net.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5334,7 +5317,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Net.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Numerics.Vectors.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Numerics.Vectors.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5351,7 +5334,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Numerics.Vectors.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Numerics.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Numerics.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5368,7 +5351,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Numerics.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.ObjectModel.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.ObjectModel.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5385,7 +5368,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.ObjectModel.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Private.CoreLib.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Private.CoreLib.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5402,7 +5385,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Private.CoreLib.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Private.DataContractSerialization.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Private.DataContractSerialization.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5419,7 +5402,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Private.DataContractSerialization.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Private.Uri.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Private.Uri.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5436,7 +5419,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Private.Uri.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Private.Xml.Linq.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Private.Xml.Linq.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5453,7 +5436,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Private.Xml.Linq.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Private.Xml.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Private.Xml.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5470,7 +5453,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Private.Xml.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Reflection.DispatchProxy.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Reflection.DispatchProxy.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5487,7 +5470,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Reflection.DispatchProxy.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Reflection.Emit.ILGeneration.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Reflection.Emit.ILGeneration.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5504,7 +5487,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Reflection.Emit.ILGeneration.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Reflection.Emit.Lightweight.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Reflection.Emit.Lightweight.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5521,7 +5504,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Reflection.Emit.Lightweight.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Reflection.Emit.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Reflection.Emit.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5538,7 +5521,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Reflection.Emit.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Reflection.Extensions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Reflection.Extensions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5555,7 +5538,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Reflection.Extensions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Reflection.Metadata.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Reflection.Metadata.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5572,7 +5555,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Reflection.Metadata.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Reflection.Primitives.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Reflection.Primitives.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5589,7 +5572,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Reflection.Primitives.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Reflection.TypeExtensions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Reflection.TypeExtensions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5606,7 +5589,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Reflection.TypeExtensions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Reflection.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Reflection.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5623,7 +5606,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Reflection.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Resources.Reader.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Resources.Reader.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5640,7 +5623,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Resources.Reader.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Resources.ResourceManager.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Resources.ResourceManager.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5657,7 +5640,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Resources.ResourceManager.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Resources.Writer.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Resources.Writer.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5674,7 +5657,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Resources.Writer.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.CompilerServices.Unsafe.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.CompilerServices.Unsafe.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5691,7 +5674,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.CompilerServices.Unsafe.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.CompilerServices.VisualC.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.CompilerServices.VisualC.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5708,7 +5691,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.CompilerServices.VisualC.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.Extensions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.Extensions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5725,7 +5708,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.Extensions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.Handles.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.Handles.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5742,7 +5725,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.Handles.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.InteropServices.JavaScript.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.InteropServices.JavaScript.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5759,7 +5742,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.InteropServices.JavaScript.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.InteropServices.RuntimeInformation.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.InteropServices.RuntimeInformation.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5776,7 +5759,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.InteropServices.RuntimeInformation.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.InteropServices.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.InteropServices.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5793,7 +5776,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.InteropServices.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.Intrinsics.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.Intrinsics.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5810,7 +5793,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.Intrinsics.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.Loader.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.Loader.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5827,7 +5810,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.Loader.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.Numerics.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.Numerics.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5844,7 +5827,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.Numerics.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.Serialization.Formatters.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.Serialization.Formatters.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5861,7 +5844,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.Serialization.Formatters.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.Serialization.Json.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.Serialization.Json.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5878,7 +5861,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.Serialization.Json.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.Serialization.Primitives.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.Serialization.Primitives.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5895,7 +5878,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.Serialization.Primitives.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.Serialization.Xml.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.Serialization.Xml.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5912,7 +5895,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.Serialization.Xml.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.Serialization.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.Serialization.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5929,7 +5912,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.Serialization.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Runtime.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Runtime.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5946,7 +5929,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Runtime.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Security.AccessControl.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Security.AccessControl.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5963,7 +5946,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Security.AccessControl.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Security.Claims.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Security.Claims.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5980,7 +5963,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Security.Claims.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Security.Cryptography.Algorithms.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Security.Cryptography.Algorithms.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -5997,7 +5980,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Security.Cryptography.Algorithms.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Security.Cryptography.Cng.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Security.Cryptography.Cng.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6014,7 +5997,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Security.Cryptography.Cng.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Security.Cryptography.Csp.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Security.Cryptography.Csp.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6031,7 +6014,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Security.Cryptography.Csp.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Security.Cryptography.Encoding.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Security.Cryptography.Encoding.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6048,7 +6031,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Security.Cryptography.Encoding.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Security.Cryptography.OpenSsl.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Security.Cryptography.OpenSsl.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6065,7 +6048,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Security.Cryptography.OpenSsl.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Security.Cryptography.Primitives.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Security.Cryptography.Primitives.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6082,7 +6065,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Security.Cryptography.Primitives.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Security.Cryptography.X509Certificates.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Security.Cryptography.X509Certificates.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6099,7 +6082,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Security.Cryptography.X509Certificates.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Security.Cryptography.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Security.Cryptography.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6116,7 +6099,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Security.Cryptography.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Security.Principal.Windows.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Security.Principal.Windows.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6133,7 +6116,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Security.Principal.Windows.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Security.Principal.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Security.Principal.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6150,7 +6133,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Security.Principal.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Security.SecureString.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Security.SecureString.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6167,7 +6150,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Security.SecureString.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Security.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Security.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6184,7 +6167,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Security.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.ServiceModel.Web.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.ServiceModel.Web.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6201,7 +6184,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.ServiceModel.Web.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.ServiceProcess.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.ServiceProcess.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6218,7 +6201,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.ServiceProcess.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Text.Encoding.CodePages.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Text.Encoding.CodePages.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6235,7 +6218,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Text.Encoding.CodePages.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Text.Encoding.Extensions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Text.Encoding.Extensions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6252,7 +6235,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Text.Encoding.Extensions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Text.Encoding.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Text.Encoding.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6269,7 +6252,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Text.Encoding.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Text.Encodings.Web.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Text.Encodings.Web.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6286,7 +6269,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Text.Encodings.Web.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Text.Json.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Text.Json.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6303,7 +6286,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Text.Json.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Text.RegularExpressions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Text.RegularExpressions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6320,7 +6303,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Text.RegularExpressions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Threading.Channels.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Threading.Channels.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6337,7 +6320,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Threading.Channels.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Threading.Overlapped.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Threading.Overlapped.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6354,7 +6337,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Threading.Overlapped.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Threading.Tasks.Dataflow.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Threading.Tasks.Dataflow.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6371,7 +6354,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Threading.Tasks.Dataflow.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Threading.Tasks.Extensions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Threading.Tasks.Extensions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6388,7 +6371,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Threading.Tasks.Extensions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Threading.Tasks.Parallel.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Threading.Tasks.Parallel.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6405,7 +6388,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Threading.Tasks.Parallel.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Threading.Tasks.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Threading.Tasks.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6422,7 +6405,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Threading.Tasks.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Threading.Thread.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Threading.Thread.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6439,7 +6422,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Threading.Thread.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Threading.ThreadPool.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Threading.ThreadPool.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6456,7 +6439,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Threading.ThreadPool.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Threading.Timer.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Threading.Timer.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6473,7 +6456,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Threading.Timer.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Threading.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Threading.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6490,7 +6473,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Threading.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Transactions.Local.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Transactions.Local.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6507,7 +6490,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Transactions.Local.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Transactions.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Transactions.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6524,7 +6507,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Transactions.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.ValueTuple.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.ValueTuple.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6541,7 +6524,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.ValueTuple.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Web.HttpUtility.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Web.HttpUtility.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6558,7 +6541,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Web.HttpUtility.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Web.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Web.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6575,7 +6558,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Web.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Windows.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Windows.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6592,7 +6575,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Windows.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Xml.Linq.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Xml.Linq.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6609,7 +6592,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Xml.Linq.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Xml.ReaderWriter.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Xml.ReaderWriter.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6626,7 +6609,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Xml.ReaderWriter.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Xml.Serialization.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Xml.Serialization.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6643,7 +6626,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Xml.Serialization.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Xml.XDocument.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Xml.XDocument.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6660,7 +6643,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Xml.XDocument.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Xml.XPath.XDocument.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Xml.XPath.XDocument.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6677,7 +6660,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Xml.XPath.XDocument.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Xml.XPath.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Xml.XPath.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6694,7 +6677,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Xml.XPath.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Xml.XmlDocument.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Xml.XmlDocument.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6711,7 +6694,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Xml.XmlDocument.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Xml.XmlSerializer.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Xml.XmlSerializer.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6728,7 +6711,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Xml.XmlSerializer.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.Xml.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.Xml.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6745,7 +6728,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.Xml.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\System.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\System.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6762,7 +6745,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\System.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\WindowsBase.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\WindowsBase.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6779,7 +6762,24 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\WindowsBase.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\blazor.webassembly.js.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\blazor.boot.json.gz",
+      "SourceId": "blazorwasm",
+      "SourceType": "Project",
+      "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
+      "BasePath": "/",
+      "RelativePath": "_framework/blazor.boot.json.gz",
+      "AssetKind": "Build",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "RelatedAsset": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\blazor.boot.json",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "CopyToOutputDirectory": "PreserveNewest",
+      "CopyToPublishDirectory": "Never",
+      "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\blazor.boot.json.gz"
+    },
+    {
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\blazor.webassembly.js.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6796,7 +6796,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\blazor.webassembly.js.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\blazorwasm.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\blazorwasm.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6813,7 +6813,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\blazorwasm.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\blazorwasm.pdb.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\blazorwasm.pdb.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6830,7 +6830,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\blazorwasm.pdb.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\dotnet.js.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\dotnet.js.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6847,24 +6847,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\dotnet.js.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\dotnet.timezones.blat.gz",
-      "SourceId": "blazorwasm",
-      "SourceType": "Project",
-      "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
-      "BasePath": "/",
-      "RelativePath": "_framework/dotnet.timezones.blat.gz",
-      "AssetKind": "Build",
-      "AssetMode": "All",
-      "AssetRole": "Alternative",
-      "RelatedAsset": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\dotnet.timezones.blat",
-      "AssetTraitName": "Content-Encoding",
-      "AssetTraitValue": "gzip",
-      "CopyToOutputDirectory": "PreserveNewest",
-      "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\dotnet.timezones.blat.gz"
-    },
-    {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\dotnet.wasm.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\dotnet.wasm.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6881,7 +6864,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\dotnet.wasm.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\icudt.dat.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\icudt.dat.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6898,7 +6881,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\icudt.dat.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\icudt_CJK.dat.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\icudt_CJK.dat.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6915,7 +6898,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\icudt_CJK.dat.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\icudt_EFIGS.dat.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\icudt_EFIGS.dat.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6932,7 +6915,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\icudt_EFIGS.dat.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\icudt_no_CJK.dat.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\icudt_no_CJK.dat.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6949,7 +6932,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\icudt_no_CJK.dat.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\mscorlib.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\mscorlib.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",
@@ -6966,7 +6949,7 @@
       "OriginalItemSpec": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\_framework\\mscorlib.dll.gz"
     },
     {
-      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\build-gz\\_framework\\netstandard.dll.gz",
+      "Identity": "${ProjectPath}\\blazorwasm\\obj\\Debug\\${Tfm}\\compressed\\_framework\\netstandard.dll.gz",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectPath}\\blazorwasm\\bin\\Debug\\${Tfm}\\wwwroot\\",

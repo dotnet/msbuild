@@ -1,5 +1,6 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//
 
 using System;
 using System.Collections.Generic;
@@ -62,24 +63,24 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         // Internal for tests
         public void WriteBootJson(Stream output, string entryAssemblyName)
         {
-            var icuDataMode = ICUDataMode.Sharded;
+            var icuDataMode = ICUDataMode50.Sharded;
 
             if (string.Equals(InvariantGlobalization, "true", StringComparison.OrdinalIgnoreCase))
             {
-                icuDataMode = ICUDataMode.Invariant;
+                icuDataMode = ICUDataMode50.Invariant;
             }
             else if (LoadAllICUData)
             {
-                icuDataMode = ICUDataMode.All;
+                icuDataMode = ICUDataMode50.All;
             }
 
-            var result = new BootJsonData
+            var result = new BootJsonData50
             {
                 entryAssembly = entryAssemblyName,
                 cacheBootResources = CacheBootResources,
                 debugBuild = DebugBuild,
                 linkerEnabled = LinkerEnabled,
-                resources = new ResourcesData(),
+                resources = new ResourcesData50(),
                 config = new List<string>(),
                 icuDataMode = icuDataMode,
             };
@@ -159,7 +160,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 }
             }
 
-            var serializer = new DataContractJsonSerializer(typeof(BootJsonData), new DataContractJsonSerializerSettings
+            var serializer = new DataContractJsonSerializer(typeof(BootJsonData50), new DataContractJsonSerializerSettings
             {
                 UseSimpleDictionaryFormat = true
             });

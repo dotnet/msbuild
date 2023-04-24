@@ -25,7 +25,7 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_handles_content_files_correctly()
         {
-            const string targetFramework = "net6.0";
+            const string targetFramework = ToolsetInfo.CurrentTargetFramework;
 
             var project = new TestProject
             {

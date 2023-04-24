@@ -78,7 +78,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+            var outputDirectory = buildCommand.GetOutputDirectory();
             var hostExecutable = $"HelloWorld{Constants.ExeSuffix}";
             outputDirectory.Should().OnlyHaveFiles(GetExpectedFilesFromBuild(testAsset, targetFramework));
             new RunExeCommand(Log, Path.Combine(outputDirectory.FullName, hostExecutable))
@@ -270,19 +270,19 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: target)
+                .WithTargetFramework(targetFramework)
                 .WithSource();
 
             var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute(new string[] {
-                    $"/p:TargetFramework={targetFramework}",
                     $"/p:PlatformTarget={target}",
                     $"/p:NETCoreSdkRuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(targetFramework)}"
                 })
                 .Should()
                 .Pass();
 
-            var apphostPath = Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, "HelloWorld.exe");
+            var apphostPath = Path.Combine(buildCommand.GetOutputDirectory().FullName, "HelloWorld.exe");
             if (target == "x86")
             {
                 IsPE32(apphostPath).Should().BeTrue();
@@ -321,7 +321,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
+            var outputDirectory = buildCommand.GetOutputDirectory(runtimeIdentifier: runtimeIdentifier);
             outputDirectory.Should().HaveFiles(new[] { testProject.Name + ".exe" });
 
             string apphostPath = Path.Combine(outputDirectory.FullName, testProject.Name + ".exe");
@@ -367,7 +367,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "NoAppHost",
-                TargetFrameworks = "netcoreapp3.1",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 //  Use "any" as RID so that it will fail to find AppHost
                 RuntimeIdentifier = "any",
                 IsExe = true,
@@ -406,7 +406,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var intermediateDirectory = buildCommand.GetIntermediateDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework).FullName;
+            var intermediateDirectory = buildCommand.GetIntermediateDirectory().FullName;
 
             File.SetLastWriteTimeUtc(
                 Path.Combine(

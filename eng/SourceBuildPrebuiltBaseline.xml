@@ -1,5 +1,24 @@
 <UsageData>
   <IgnorePatterns>
-    <UsagePattern IdentityGlob="*/*" />
+    <UsagePattern IdentityGlob="Microsoft.SourceBuild.Intermediate.*/*" />
+    
+    <!-- TODO: Ignore needed until https://github.com/NuGet/Home/issues/11059 is addressed. -->
+    <UsagePattern IdentityGlob="Nuget.*/*" />
+    <UsagePattern IdentityGlob="Microsoft.Build.NuGetSdkResolver/*" />
+    
+    <!-- TODO: Figure out what to do about the netcoreapp ref packages (these are probably being pulled
+         in via implicit versions and net6 targeting projects (e.g. tests)
+         https://github.com/dotnet/source-build/issues/3356 -->
+    <UsagePattern IdentityGlob="Microsoft.*.App.Ref/*6.0*" />
+    
+    <!-- TODO: SBRPs or updates
+         https://github.com/dotnet/source-build/issues/3357 -->
+    <UsagePattern IdentityGlob="Microsoft.Build.Locator/*1.5.3*" />
+    <UsagePattern IdentityGlob="Microsoft.CodeAnalysis.AnalyzerUtilities/*3.3.0*" />
+    
+    <!-- This may be coming in transitively from aspnetcore. Needs evaluation.
+         https://github.com/dotnet/source-build/issues/3358. -->
+    <UsagePattern IdentityGlob="System.Text.Json/*8.0.0*" />
+    <UsagePattern IdentityGlob="System.Text.Encodings.Web/*8.0.0*" />
   </IgnorePatterns>
 </UsageData>

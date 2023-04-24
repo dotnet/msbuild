@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.ToolManifest
     internal interface IToolManifestFinder
     {
         IReadOnlyCollection<ToolManifestPackage> Find(FilePath? filePath = null);
-        FilePath FindFirst();
+        FilePath FindFirst(bool createManifestFileOption = false);
         IReadOnlyList<FilePath> FindByPackageId(PackageId packageId);
     }
 }

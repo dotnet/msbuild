@@ -3,8 +3,6 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Build;
 using LocalizableStrings = Microsoft.DotNet.Tools.Build.LocalizableStrings;
@@ -68,6 +66,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(CommonOptions.DebugOption);
             command.AddOption(OutputOption);
+            command.AddOption(CommonOptions.ArtifactsPathOption);
             command.AddOption(NoIncrementalOption);
             command.AddOption(NoDependenciesOption);
             command.AddOption(NoLogoOption);

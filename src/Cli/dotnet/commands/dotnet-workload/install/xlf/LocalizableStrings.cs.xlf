@@ -198,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">Počítač čeká na restartování. Instalace bude pokračovat, ale bude pravděpodobně nutné restartovat počítač.</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">Počítač čeká na restartování. Instalace bude pokračovat, ale bude pravděpodobně nutné restartovat počítač.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">

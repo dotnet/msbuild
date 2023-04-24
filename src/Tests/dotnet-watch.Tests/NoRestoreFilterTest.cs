@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 ProcessSpec = new ProcessSpec
                 {
                     Arguments = _arguments,
@@ -40,6 +41,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
@@ -67,6 +69,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
@@ -94,6 +97,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
@@ -120,6 +124,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
@@ -146,6 +151,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
@@ -173,6 +179,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {

@@ -26,11 +26,11 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(testAsset, "x64SolutionBuild.sln");
             buildCommand
-                .Execute("/p:ProduceReferenceAssembly=false")
+                .Execute("/p:ProduceReferenceAssembly=false", "/p:UseStandardOutputPaths=false")
                 .Should()
                 .Pass();
 
-            buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, Path.Combine("x64", "Debug"))
+            new DirectoryInfo(Path.Combine(testAsset.TestRoot, "bin", "x64", "Debug", ToolsetInfo.CurrentTargetFramework))
                 .Should()
                 .OnlyHaveFiles(new[] {
                     "x64SolutionBuild.runtimeconfig.json",

@@ -1,0 +1,32 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.SourceLink.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <_SourceLinkSdkSubDir>build</_SourceLinkSdkSubDir>
+    <_SourceLinkSdkSubDir Condition="'$(IsCrossTargetingBuild)' == 'true'">buildMultiTargeting</_SourceLinkSdkSubDir>
+
+    <!-- Suppress implicit SourceLink inclusion if any Microsoft.SourceLink package is referenced. -->
+    <SuppressImplicitGitSourceLink Condition="'$(PkgMicrosoft_SourceLink_Common)' != ''">true</SuppressImplicitGitSourceLink>
+  </PropertyGroup>
+
+  <ImportGroup Condition="'$(SuppressImplicitGitSourceLink)' != 'true'">
+    <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.Build.Tasks.Git\$(_SourceLinkSdkSubDir)\Microsoft.Build.Tasks.Git.props"/>
+    <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.SourceLink.Common\$(_SourceLinkSdkSubDir)\Microsoft.SourceLink.Common.props"/>
+    <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.SourceLink.GitHub\$(_SourceLinkSdkSubDir)\Microsoft.SourceLink.GitHub.props"/>
+    <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.SourceLink.GitLab\$(_SourceLinkSdkSubDir)\Microsoft.SourceLink.GitLab.props"/>
+    <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.SourceLink.AzureRepos.Git\$(_SourceLinkSdkSubDir)\Microsoft.SourceLink.AzureRepos.Git.props"/>
+    <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.SourceLink.Bitbucket.Git\$(_SourceLinkSdkSubDir)\Microsoft.SourceLink.Bitbucket.Git.props"/>
+  </ImportGroup>
+
+</Project>

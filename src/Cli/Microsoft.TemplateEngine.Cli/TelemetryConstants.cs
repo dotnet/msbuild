@@ -19,6 +19,9 @@ namespace Microsoft.TemplateEngine.Cli
         internal const string ArgError = "argument-error";
         internal const string Framework = "framework";
         internal const string TemplateName = "template-name";
+        internal const string TemplateShortName = "template-short-name";
+        internal const string PackageName = "package-name";
+        internal const string PackageVersion = "package-version";
         internal const string IsTemplateThirdParty = "is-template-3rd-party";
         internal const string Auth = "auth";
         internal const string CreationResult = "create-success";

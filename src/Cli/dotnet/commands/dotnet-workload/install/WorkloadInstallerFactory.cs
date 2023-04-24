@@ -49,7 +49,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
 
-            return new FileBasedInstaller(reporter,
+            return new FileBasedInstaller(
+                reporter,
                 sdkFeatureBand,
                 workloadResolver,
                 userProfileDir,

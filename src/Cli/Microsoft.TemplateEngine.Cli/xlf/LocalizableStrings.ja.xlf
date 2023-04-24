@@ -258,6 +258,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">パッケージ</target>
         <note />
       </trans-unit>
+      <trans-unit id="ColumnNamePackageNameAndOwners">
+        <source>Package Name / Owners</source>
+        <target state="new">Package Name / Owners</target>
+        <note>information about NuGet package: its name and owner</note>
+      </trans-unit>
       <trans-unit id="ColumnNamePrecedence">
         <source>Precedence</source>
         <target state="translated">優先順位</target>
@@ -282,6 +287,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <source>Downloads</source>
         <target state="translated">ダウンロード</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameTrusted">
+        <source>Trusted</source>
+        <target state="new">Trusted</target>
+        <note>information about NuGet package origin; if a package has PrefixReserved indicator </note>
       </trans-unit>
       <trans-unit id="ColumnNameType">
         <source>Type</source>
@@ -1049,7 +1059,7 @@ The header is followed by the list of parameters and their errors (might be seve
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="translated">このテンプレートには、Microsoft 以外のパーティのテクノロジが含まれています。詳しくは、{0} をご覧ください。</target>
+        <target state="translated">このテンプレートには、Microsoft 以外のパーティのテクノロジーが含まれています。詳しくは、{0} をご覧ください。</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">

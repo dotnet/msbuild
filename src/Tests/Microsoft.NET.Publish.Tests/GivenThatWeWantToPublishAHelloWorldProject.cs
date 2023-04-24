@@ -58,7 +58,7 @@ namespace Microsoft.NET.Publish.Tests
             publishResult.Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
-            var outputDirectory = publishDirectory.Parent;
+            var outputDirectory = new BuildCommand(helloWorldAsset).GetOutputDirectory(targetFramework);
 
             var filesPublished = new[] {
                 "HelloWorld.dll",
@@ -104,7 +104,7 @@ namespace Microsoft.NET.Publish.Tests
             var publishDirectory = publishCommand.GetOutputDirectory(
                 targetFramework: targetFramework,
                 runtimeIdentifier: rid);
-            var outputDirectory = publishDirectory.Parent;
+            var outputDirectory = new BuildCommand(helloWorldAsset).GetOutputDirectory(targetFramework, runtimeIdentifier: rid);
             var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
 
             var filesPublished = new[] {

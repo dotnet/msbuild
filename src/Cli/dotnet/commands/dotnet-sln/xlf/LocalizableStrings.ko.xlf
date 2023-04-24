@@ -32,6 +32,11 @@
         <target state="translated">솔루션 폴더를 만드는 대신, 솔루션의 루트에 프로젝트를 배치하세요.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ListSolutionFoldersArgumentDescription">
+        <source>Display solution folder paths.</source>
+        <target state="new">Display solution folder paths.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>Remove one or more projects from a solution file.</source>
         <target state="translated">솔루션 파일에서 하나 이상의 프로젝트를 제거합니다.</target>
@@ -90,6 +95,11 @@
       <trans-unit id="SolutionFolderAndInRootMutuallyExclusive">
         <source>The --solution-folder and --in-root options cannot be used together; use only one of the options.</source>
         <target state="translated">--solution-folder와 --in-root 옵션을 함께 사용할 수 없습니다. 옵션을 하나만 사용하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFolderHeader">
+        <source>Solution Folder(s)</source>
+        <target state="new">Solution Folder(s)</target>
         <note />
       </trans-unit>
     </body>

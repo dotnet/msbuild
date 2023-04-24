@@ -147,9 +147,9 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(false, false)]
         public void TestGlobalPropertyFlowToMultitargetedProject(bool passSelfContained, bool passRuntimeIdentifier)
         {
-            _testProject.TargetFrameworks = "net6.0;net7.0";
+            _testProject.TargetFrameworks = $"net6.0;{ToolsetInfo.CurrentTargetFramework}";
 
-            _referencedProject.TargetFrameworks = "net6.0;net7.0";
+            _referencedProject.TargetFrameworks = $"net6.0;{ToolsetInfo.CurrentTargetFramework}";
             _referencedProject.IsExe = true;
             _referencedProject.ProjectChanges.Add(project =>
             {
@@ -240,14 +240,6 @@ namespace Microsoft.NET.Build.Tests
         {
             targetFramework = targetFramework ?? testProject.TargetFrameworks;
 
-
-            if (string.IsNullOrEmpty(expectedRuntimeIdentifier) && (expectSelfContained || expectRuntimeIdentifier))
-            {
-                //  RuntimeIdentifier might be inferred, so look at the output path to figure out what the actual value used was
-                string dir = (Path.Combine(testAsset.TestRoot, testProject.Name, "bin", "Debug", targetFramework));
-                expectedRuntimeIdentifier = Path.GetFileName(Directory.GetDirectories(dir).Single());
-            }
-
             var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
             if (expectSelfContained)
             {
@@ -258,7 +250,23 @@ namespace Microsoft.NET.Build.Tests
                 properties["SelfContained"].ToLowerInvariant().Should().BeOneOf("false", "");
             }
 
-            properties["RuntimeIdentifier"].Should().Be(expectedRuntimeIdentifier);
+
+            if (expectRuntimeIdentifier)
+            {
+                if (!string.IsNullOrEmpty(expectedRuntimeIdentifier))
+                {
+                    properties["RuntimeIdentifier"].Should().Be(expectedRuntimeIdentifier);
+                }
+                else
+                {
+                    properties["RuntimeIdentifier"].Should().NotBeEmpty();
+                }
+            }
+            else
+            {
+                properties["RuntimeIdentifier"].Should().BeEmpty();
+            }
+
         }
 
     }

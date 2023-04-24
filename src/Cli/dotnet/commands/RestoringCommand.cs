@@ -30,6 +30,11 @@ namespace Microsoft.DotNet.Tools
             Task.Run(() => WorkloadManifestUpdater.BackgroundUpdateAdvertisingManifestsAsync(userProfileDir));
             SeparateRestoreCommand = GetSeparateRestoreCommand(msbuildArgs, noRestore, msbuildPath);
             AdvertiseWorkloadUpdates = advertiseWorkloadUpdates;
+
+            if (!noRestore)
+            {
+                NuGetSignatureVerificationEnabler.ConditionallyEnable(this);
+            }
         }
 
         private static IEnumerable<string> GetCommandArguments(

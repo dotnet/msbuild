@@ -51,7 +51,9 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.InteractiveMsBuildForwardOption);
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(OutputOption);
+            command.AddOption(CommonOptions.ArtifactsPathOption);
             command.AddOption(NoLogoOption);
+            command.AddOption(CommonOptions.DisableBuildServersOption);
 
             command.SetHandler(CleanCommand.Run);
 

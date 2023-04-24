@@ -21,6 +21,7 @@ namespace Microsoft.DotNet.Watcher
         private readonly DotNetWatchOptions _dotnetWatchOptions;
         private readonly StaticFileHandler _staticFileHandler;
         private readonly IWatchFilter[] _filters;
+        private readonly string _muxerPath;
 
         public DotNetWatcher(IReporter reporter, IFileSetFactory fileSetFactory, DotNetWatchOptions dotNetWatchOptions, string muxerPath)
         {
@@ -30,6 +31,7 @@ namespace Microsoft.DotNet.Watcher
             _processRunner = new ProcessRunner(reporter);
             _dotnetWatchOptions = dotNetWatchOptions;
             _staticFileHandler = new StaticFileHandler(reporter);
+            _muxerPath = muxerPath;
 
             _filters = new IWatchFilter[]
             {
@@ -47,6 +49,7 @@ namespace Microsoft.DotNet.Watcher
                 cancelledTaskSource);
 
             var processSpec = context.ProcessSpec;
+            processSpec.Executable = _muxerPath;
             var initialArguments = processSpec.Arguments.ToArray();
 
             if (context.SuppressMSBuildIncrementalism)
@@ -89,9 +92,8 @@ namespace Microsoft.DotNet.Watcher
                     currentRunCancellationSource.Token))
                 using (var fileSetWatcher = new FileSetWatcher(fileSet, _reporter))
                 {
+                    _reporter.Verbose($"Running {processSpec.ShortDisplayName()} with the following arguments: '{string.Join(" ", processSpec.Arguments)}'");
                     var processTask = _processRunner.RunAsync(processSpec, combinedCancellationSource.Token);
-                    var args = string.Join(" ", processSpec.Arguments);
-                    _reporter.Verbose($"Running {processSpec.ShortDisplayName()} with the following arguments: {args}");
 
                     _reporter.Output("Started", emoji: "🚀");
 
@@ -104,7 +106,7 @@ namespace Microsoft.DotNet.Watcher
                         finishedTask = await Task.WhenAny(processTask, fileSetTask, cancelledTaskSource.Task);
                         if (finishedTask == fileSetTask
                             && fileSetTask.Result is FileItem fileItem &&
-                            await _staticFileHandler.TryHandleFileChange(context, fileItem, combinedCancellationSource.Token))
+                            await _staticFileHandler.TryHandleFileChange(context.BrowserRefreshServer, fileItem, combinedCancellationSource.Token))
                         {
                             // We're able to handle the file change event without doing a full-rebuild.
                         }

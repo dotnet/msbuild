@@ -42,14 +42,14 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
         /// Removes the specified base type from a Class/struct/interface node.
         private static TypeDeclarationSyntax RemoveBaseType(TypeDeclarationSyntax node, string typeName)
         {
-            var baseType = node.BaseList?.Types.FirstOrDefault(x => string.Equals(x.ToString(), typeName, StringComparison.OrdinalIgnoreCase));
+            BaseTypeSyntax? baseType = node.BaseList?.Types.FirstOrDefault(x => string.Equals(x.ToString(), typeName, StringComparison.OrdinalIgnoreCase));
             if (baseType == null)
             {
                 // Base type not found
                 return node;
             }
 
-            var baseTypes = node.BaseList!.Types.Remove(baseType);
+            SeparatedSyntaxList<BaseTypeSyntax> baseTypes = node.BaseList!.Types.Remove(baseType);
             if (baseTypes.Count == 0)
             {
                 // No more base implementations, remove the base list entirely
@@ -72,13 +72,9 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
             return AddPartialModifier(node);
         }
 
-        private static T AddPartialModifier<T>(T node) where T : TypeDeclarationSyntax
-        {
-            if (!node.Modifiers.Any(m => m.RawKind == (int)SyntaxKind.PartialKeyword))
-            {
-                return (T)node.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingTrivia(SyntaxFactory.Space));
-            }
-            return node;
-        }
+        private static T AddPartialModifier<T>(T node) where T : TypeDeclarationSyntax =>
+            !node.Modifiers.Any(m => m.RawKind == (int)SyntaxKind.PartialKeyword) ?
+                (T)node.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingTrivia(SyntaxFactory.Space)) :
+                node;
     }
 }

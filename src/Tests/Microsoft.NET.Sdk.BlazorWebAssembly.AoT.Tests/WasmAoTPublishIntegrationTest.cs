@@ -22,15 +22,15 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests
     {
         public WasmAoTPublishIntegrationTest(ITestOutputHelper log) : base(log) { }
 
-        [RequiresMSBuildVersionFact("17.0.0")]
+        [Fact]
         public void AoT_Publish_InRelease_Works()
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateAspNetSdkTestAssetWithAot(testAppName, new [] { "blazorwasm" });
+            var testInstance = CreateAspNetSdkTestAssetWithAot(testAppName, new[] { "blazorwasm" });
             File.WriteAllText(Path.Combine(testInstance.TestRoot, "blazorwasm", "App.razor.css"), "h1 { font-size: 16px; }");
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.Execute("/p:Configuration=Release").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm, "Release");
@@ -54,36 +54,38 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests
             };
 
             publishDirectory.Should().HaveFiles(expectedFiles);
-            
+
             new FileInfo(Path.Combine(blazorPublishDirectory, "css", "app.css")).Should().Contain(".publish");
         }
 
-        [RequiresMSBuildVersionFact("17.0.0")]
+        [Fact]
         public void AoT_Publish_WithExistingWebConfig_Works()
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateAspNetSdkTestAssetWithAot(testAppName, new [] { "blazorwasm" });
+            var testInstance = CreateAspNetSdkTestAssetWithAot(testAppName, new[] { "blazorwasm" });
 
             var webConfigContents = "test webconfig contents";
             File.WriteAllText(Path.Combine(testInstance.TestRoot, "blazorwasm", "web.config"), webConfigContents);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.Execute("/p:Configuration=Release").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm, "Release");
 
+            var webConfig = new BuildCommand(testInstance, "blazorwasm").GetOutputDirectory(configuration: "Release").File("web.config");
+
             // Verify web.config
-            new FileInfo(Path.Combine(publishDirectory.ToString(), "..", "web.config")).Should().Exist();
-            new FileInfo(Path.Combine(publishDirectory.ToString(), "..", "web.config")).Should().Contain(webConfigContents);
+            webConfig.Should().Exist();
+            webConfig.Should().Contain(webConfigContents);
         }
 
-        [RequiresMSBuildVersionFact("17.0.0")]
+        [Fact]
         public void AoT_Publish_HostedAppWithScopedCss_VisualStudio()
         {
             // Simulates publishing the same way VS does by setting BuildProjectReferences=false.
             var testAppName = "BlazorHosted";
-            var testInstance = CreateAspNetSdkTestAssetWithAot(testAppName, new [] { "blazorwasm", "blazorhosted" });
+            var testInstance = CreateAspNetSdkTestAssetWithAot(testAppName, new[] { "blazorwasm", "blazorhosted" });
             File.WriteAllText(Path.Combine(testInstance.TestRoot, "blazorwasm", "App.razor.css"), "h1 { font-size: 16px; }");
 
             // VS builds projects individually and then a publish with BuildDependencies=false, but building the main project is a close enough approximation for this test.
@@ -91,7 +93,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests
             buildCommand.Execute("/p:BuildInsideVisualStudio=true /p:Configuration=Release").Should().Pass();
 
             // Publish
-            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
+            var publishCommand = new PublishCommand(testInstance, "blazorhosted");
             publishCommand.Execute("/p:BuildProjectReferences=false /p:BuildInsideVisualStudio=true /p:Configuration=Release").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);

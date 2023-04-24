@@ -41,14 +41,14 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager
                 .CopyTestAsset(TestProjectName, $"It_publishes_with_or_without_apphost_{(useAppHost ?? "null")}_{targetFramework}")
-                .WithSource();
+                .WithSource()
+                .WithTargetFramework(targetFramework);
 
             var msbuildArgs = new List<string>()
             {
                 $"/p:RuntimeIdentifier={runtimeIdentifier}",
                 $"/p:TestRuntimeIdentifier={runtimeIdentifier}",
                 "/p:SelfContained=false",
-                $"/p:TargetFramework={targetFramework}"
             };
 
             if (useAppHost != null)

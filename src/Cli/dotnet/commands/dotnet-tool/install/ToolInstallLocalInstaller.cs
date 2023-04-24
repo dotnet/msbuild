@@ -78,7 +78,8 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                         new PackageLocation(
                             nugetConfig: configFile,
                             additionalFeeds: _sources,
-                            rootConfigDirectory: manifestFile.GetDirectoryPath()),
+                            // Fix https://github.com/dotnet/sdk/issues/23135
+                            rootConfigDirectory: manifestFile.GetDirectoryPath().GetParentPath()),
                         _packageId,
                         versionRange,
                         TargetFrameworkToInstall,

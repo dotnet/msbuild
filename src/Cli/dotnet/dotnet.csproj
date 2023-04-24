@@ -70,6 +70,7 @@
     <EmbeddedResource Update="**\dotnet-workload\restore\*.resx" Namespace="Microsoft.DotNet.Workloads.Workload.Restore" />
     <EmbeddedResource Update="**\dotnet-workload\repair\*.resx" Namespace="Microsoft.DotNet.Workloads.Workload.Repair" />
     <EmbeddedResource Update="**\dotnet-workload\elevate\*.resx" Namespace="Microsoft.DotNet.Workloads.Workload.Elevate" />
+    <EmbeddedResource Update="**\dotnet-workload\clean\*.resx" Namespace="Microsoft.DotNet.Workloads.Workload.Clean" />
     <EmbeddedResource Update="Installer\Windows\*.resx" Namespace="Microsoft.DotNet.Installer.Windows" />
     <EmbeddedResource Update="ToolManifest\*.resx" Namespace="Microsoft.DotNet.ToolManifest" />
     <EmbeddedResource Update="NugetSearch\*.resx" Namespace="Microsoft.DotNet.NugetSearch" />

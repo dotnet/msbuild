@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
         /// </summary>
         /// <param name="name">The name to use to resolve the assembly.</param>
         /// <param name="stream">The stream to read the metadata from.</param>
-        /// <returns><see cref="IAssemblySymbol"/> respresenting the given <paramref name="stream"/>. If an 
+        /// <returns><see cref="IAssemblySymbol"/> representing the given <paramref name="stream"/>. If an 
         /// assembly with the same <paramref name="name"/> was already loaded, the previously loaded assembly is returned.</returns>
         IAssemblySymbol? LoadAssembly(string name, Stream stream);
 
