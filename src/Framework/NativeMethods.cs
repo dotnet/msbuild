@@ -345,7 +345,7 @@ internal static class NativeMethods
         public UIntPtr UniqueProcessId;
         public UIntPtr InheritedFromUniqueProcessId;
 
-        public uint Size
+        public readonly uint Size
         {
             get
             {

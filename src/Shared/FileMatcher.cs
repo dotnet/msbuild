@@ -796,7 +796,7 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// True if a SearchData.DirectoryPattern is specified but we have not descended into a matching directory.
             /// </summary>
-            public bool IsLookingForMatchingDirectory => (SearchData.DirectoryPattern != null && !IsInsideMatchingDirectory);
+            public readonly bool IsLookingForMatchingDirectory => (SearchData.DirectoryPattern != null && !IsInsideMatchingDirectory);
         }
 
         /// <summary>
