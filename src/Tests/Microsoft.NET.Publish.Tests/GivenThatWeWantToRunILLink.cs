@@ -1564,7 +1564,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var buildCommand = new BuildCommand(testAsset);
             // IsTrimmable enables analysis warnings during build
-            buildCommand.Execute("/bl")
+            buildCommand.Execute()
                 .Should().Pass()
                 .And.HaveStdOutMatching("warning IL2026.*Program.IL_2026.*Testing analysis warning IL2026");
 
