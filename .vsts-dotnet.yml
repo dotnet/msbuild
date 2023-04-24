@@ -8,7 +8,7 @@ trigger:
 # https://github.com/Microsoft/azure-pipelines-yaml/pull/129
 # variables:
 #   SignType: real
-#   SkipApplyOptimizationData: false
+#   SkipApplyOptimizationData: false 
 
 parameters:
 - name: OptProfDropName
