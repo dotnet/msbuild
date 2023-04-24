@@ -23,13 +23,6 @@
       "path": "Enum1.vb"
     }
   ],
-  "symbols": {
-    "DefaultNamespace": {
-      "type": "bind",
-      "binding": "msbuild:RootNamespace",
-      "replaces": "CompanyClassLibrary1"
-    }
-  },
   "constraints": {
     "visualbasic-only": {
       "type": "project-capability",

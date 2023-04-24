@@ -9,6 +9,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.HostModel.AppHost;
 using Microsoft.NET.TestFramework;
 using Xunit.Abstractions;
+using Xunit;
 
 namespace Microsoft.DotNet.ShellShim.Tests
 {

@@ -55,8 +55,8 @@ Standardmäßig wird eine Framework-abhängige Anwendung veröffentlicht.</targe
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to publish for. The default is 'Debug'. Use the `PublishRelease` property to make 'Release' the default for this command.</source>
-        <target state="translated">Die Konfiguration, für die veröffentlicht werden soll. Der Standardwert ist „Debuggen“. Verwenden Sie die „PublishRelease“-Eigenschaft, um „Release“ als Standard für diesen Befehl zu verwenden.</target>
+        <source>The configuration to publish for. The default is 'Release' for NET 8.0 projects and above, but 'Debug' for older projects.</source>
+        <target state="needs-review-translation">Die Konfiguration, für die veröffentlicht werden soll. Der Standardwert ist „Debuggen“. Verwenden Sie die „PublishRelease“-Eigenschaft, um „Release“ als Standard für diesen Befehl zu verwenden.</target>
         <note />
       </trans-unit>
     </body>

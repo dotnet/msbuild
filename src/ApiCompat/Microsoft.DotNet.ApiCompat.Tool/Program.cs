@@ -33,6 +33,8 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 "The path to a suppression file to write to when --generate-suppression-file is true.");
             Option<string?> noWarnOption = new("--noWarn",
                 "A NoWarn string that allows to disable specific rules.");
+            Option<bool> respectInternalsOption = new("--respect-internals",
+                "If true, includes both internal and public API.");
             Option<string?> roslynAssembliesPathOption = new("--roslyn-assemblies-path",
                 "The path to the directory that contains the Microsoft.CodeAnalysis assemblies.")
             {
@@ -108,6 +110,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             rootCommand.AddGlobalOption(suppressionFilesOption);
             rootCommand.AddGlobalOption(suppressionOutputFileOption);
             rootCommand.AddGlobalOption(noWarnOption);
+            rootCommand.AddGlobalOption(respectInternalsOption);
             rootCommand.AddGlobalOption(roslynAssembliesPathOption);
             rootCommand.AddGlobalOption(verbosityOption);
             rootCommand.AddGlobalOption(enableRuleAttributesMustMatchOption);
@@ -135,6 +138,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 string[]? suppressionFiles = context.ParseResult.GetValue(suppressionFilesOption);
                 string? suppressionOutputFile = context.ParseResult.GetValue(suppressionOutputFileOption);
                 string? noWarn = context.ParseResult.GetValue(noWarnOption);
+                bool respectInternals = context.ParseResult.GetValue(respectInternalsOption);
                 bool enableRuleAttributesMustMatch = context.ParseResult.GetValue(enableRuleAttributesMustMatchOption);
                 string[]? excludeAttributesFiles = context.ParseResult.GetValue(excludeAttributesFilesOption);
                 bool enableRuleCannotChangeParameterName = context.ParseResult.GetValue(enableRuleCannotChangeParameterNameOption);
@@ -154,6 +158,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                     suppressionFiles,
                     suppressionOutputFile,
                     noWarn,
+                    respectInternals,
                     enableRuleAttributesMustMatch,
                     excludeAttributesFiles,
                     enableRuleCannotChangeParameterName,
@@ -233,6 +238,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 string[]? suppressionFiles = context.ParseResult.GetValue(suppressionFilesOption);
                 string? suppressionOutputFile = context.ParseResult.GetValue(suppressionOutputFileOption);
                 string? noWarn = context.ParseResult.GetValue(noWarnOption);
+                bool respectInternals = context.ParseResult.GetValue(respectInternalsOption);
                 bool enableRuleAttributesMustMatch = context.ParseResult.GetValue(enableRuleAttributesMustMatchOption);
                 string[]? excludeAttributesFiles = context.ParseResult.GetValue(excludeAttributesFilesOption);
                 bool enableRuleCannotChangeParameterName = context.ParseResult.GetValue(enableRuleCannotChangeParameterNameOption);
@@ -253,6 +259,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                     suppressionFiles,
                     suppressionOutputFile,
                     noWarn,
+                    respectInternals,
                     enableRuleAttributesMustMatch,
                     excludeAttributesFiles,
                     enableRuleCannotChangeParameterName,

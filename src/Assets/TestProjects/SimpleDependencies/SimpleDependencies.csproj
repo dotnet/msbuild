@@ -9,8 +9,4 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == '$(CurrentTargetFramework)'">
-    <PackageReference Include="System.Collections.NonGeneric" Version="4.0.1" />
-  </ItemGroup>
-
 </Project>

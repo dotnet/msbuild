@@ -117,7 +117,14 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="AllowEmptyTelemetry" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="_CollectTargetFrameworkForTelemetry" AfterTargets="_CheckForUnsupportedTargetFramework">
-    <AllowEmptyTelemetry EventName="targetframeworkeval" EventData="TargetFrameworkVersion=$([MSBuild]::Escape('$(TargetFrameworkMoniker)'));RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained);UseApphost=$(UseApphost);OutputType=$(OutputType)" />
+    <ItemGroup>
+      <TFTelemetry Include="TargetFrameworkVersion" Value="$([MSBuild]::Escape('$(TargetFrameworkMoniker)'))" />
+      <TFTelemetry Include="RuntimeIdentifier" Value="$(RuntimeIdentifier)" />
+      <TFTelemetry Include="SelfContained" Value="$(SelfContained)" />
+      <TFTelemetry Include="UseApphost" Value="$(UseApphost)" />
+      <TFTelemetry Include="OutputType" Value="$(OutputType)" />
+    </ItemGroup>
+    <AllowEmptyTelemetry EventName="targetframeworkeval" EventData="@(TFTelemetry)" />
   </Target>
 
   <!--

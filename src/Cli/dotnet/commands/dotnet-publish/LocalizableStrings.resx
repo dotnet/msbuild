@@ -146,7 +146,7 @@
 The default is to publish a framework-dependent application.</value>
   </data>
   <data name="ConfigurationOptionDescription" xml:space="preserve">
-    <value>The configuration to publish for. The default is 'Debug'. Use the `PublishRelease` property to make 'Release' the default for this command.</value>
+    <value>The configuration to publish for. The default is 'Release' for NET 8.0 projects and above, but 'Debug' for older projects.</value>
   </data>
   <data name="CmdNoLogo" xml:space="preserve">
     <value>Do not display the startup banner or the copyright message.</value>

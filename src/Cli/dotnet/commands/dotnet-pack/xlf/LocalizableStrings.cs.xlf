@@ -58,8 +58,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to use for building the package. The default is 'Debug'. Use the `PackRelease` property to make 'Release' the default for this command.</source>
-        <target state="translated">Konfigurace, která se má použít k sestavení balíčku. Výchozí hodnota je Debug. Pomocí vlastnosti PackRelease nastavte release jako výchozí pro tento příkaz.</target>
+        <source>The configuration to use for building the package. The default is 'Release'.</source>
+        <target state="needs-review-translation">Konfigurace, která se má použít k sestavení balíčku. Výchozí hodnota je Debug. Pomocí vlastnosti PackRelease nastavte release jako výchozí pro tento příkaz.</target>
         <note />
       </trans-unit>
     </body>

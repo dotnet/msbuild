@@ -3,16 +3,15 @@
 
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiSymbolExtensions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
     public class CannotRemoveBaseTypeOrInterface : IRule
     {
-        private readonly RuleSettings _settings;
+        private readonly IRuleSettings _settings;
 
-        public CannotRemoveBaseTypeOrInterface(RuleSettings settings, IRuleRegistrationContext context)
+        public CannotRemoveBaseTypeOrInterface(IRuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
@@ -56,7 +55,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 // If we found the immediate left base type on right we can assume
                 // that any removal of a base type up on the hierarchy will be handled
                 // when validating the type which it's base type was actually removed.
-                if (_settings.SymbolComparer.Equals(leftBaseType, rightBaseType))
+                if (_settings.SymbolEqualityComparer.Equals(leftBaseType, rightBaseType))
                     return;
 
                 if (rightBaseType.TypeKind == TypeKind.Error && _settings.WithReferences)
@@ -78,7 +77,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
         private void ValidateInterfaceNotRemoved(ITypeSymbol left, ITypeSymbol right, string leftName, string rightName, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
-            HashSet<ITypeSymbol> rightInterfaces = new(right.GetAllBaseInterfaces(), _settings.SymbolComparer);
+            HashSet<ITypeSymbol> rightInterfaces = new(right.GetAllBaseInterfaces(), _settings.SymbolEqualityComparer);
 
             foreach (ITypeSymbol leftInterface in left.GetAllBaseInterfaces())
             {

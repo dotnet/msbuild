@@ -3,13 +3,12 @@
 
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
     public class CannotAddMemberToInterface : IRule
     {
-        public CannotAddMemberToInterface(RuleSettings settings, IRuleRegistrationContext context)
+        public CannotAddMemberToInterface(IRuleSettings settings, IRuleRegistrationContext context)
         {
             // StrictMode scenario are handled by the MembersMustExist rule.
             if (!settings.StrictMode)

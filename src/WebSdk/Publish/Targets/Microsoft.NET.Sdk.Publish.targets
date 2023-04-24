@@ -55,6 +55,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(_PublishProfilesDir)$(PublishProfileName).pubxml" Condition="Exists('$(_PublishProfilesDir)$(PublishProfileName).pubxml') And '$(PublishProfileImported)' != 'true'" />
 
+  <!-- Mark the PublishProfile as imported if the default profile shipped with WebSDK is imported -->
+  <PropertyGroup Condition="'$(PublishProfileImported)' != 'true'">
+    <PublishProfileImported Condition="Exists('$(_PublishProfilesDir)$(PublishProfileName).pubxml')">true</PublishProfileImported>
+  </PropertyGroup>
+
+
   <!--
   ***********************************************************************************************
   Set the properties based on PublishProfile properties

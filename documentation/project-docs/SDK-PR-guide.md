@@ -51,6 +51,14 @@ Triage and PR review meetings are Wednesdays each week. If your PR is passing ch
 Codeflow is handled by [darc](https://github.com/dotnet/arcade/blob/main/Documentation/Darc.md). Codeflow comes from three runtime branches and a dozen tools branches.
 `@dotnet/domestic-cat` will monitor codeflow and approve passing PRs (as all PRs require 1 approver) and ping the owning team for any failures.
 
+## Internal Builds
+
+The .NET SDK [Installer](github.com/dotnet/installer) is what allows the .NET SDK to be installed on a machine for usage in a proper developer environment, rather than for developing the .NET SDK itself. The installer has nightly builds that align with the .NET SDK which you can find [here](https://github.com/dotnet/installer#installers-and-binaries).
+The number of the build may be of particular interest. The build numbers match the internal build numbers with some caveats. YYYY MM DD are squashed to 5 digits. The first 2 digits represent the final 2 digits of the year. The next 3 digits represent the month and year: 50*The_Month_Number + the day of the month. The final suffix after the decimal value is the number of the build for that given day. 
+
+Example:
+`23080.2` is 2023, January 30th (1*50) + 30, and the second internal build of the SDK for that day. 
+
 ## Internal Branching
 All monthly servicing releases are done of our internal branches in case there are security changes that have to go out. That means all flows from runtime branches into the SDK and from SDK to installer are done internally.
 That is why we have removed all servicing builds from the installer main page as those builds do not include any changes from any repo other than the installer repo so are very limited.

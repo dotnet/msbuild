@@ -55,6 +55,11 @@ namespace Microsoft.DotNet.ApiCompat.Task
         public string? NoWarn { get; set; }
 
         /// <summary>
+        /// If true, includes both internal and public API.
+        /// </summary>
+        public bool RespectInternals { get; set; }
+
+        /// <summary>
         /// Enables rule to check that attributes match.
         /// </summary>
         public bool EnableRuleAttributesMustMatch { get; set; }
@@ -125,6 +130,7 @@ namespace Microsoft.DotNet.ApiCompat.Task
                 SuppressionFiles,
                 SuppressionOutputFile,
                 NoWarn,
+                RespectInternals,
                 EnableRuleAttributesMustMatch,
                 ExcludeAttributesFiles,
                 EnableRuleCannotChangeParameterName,

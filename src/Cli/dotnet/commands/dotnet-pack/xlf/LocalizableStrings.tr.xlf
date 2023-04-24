@@ -58,8 +58,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to use for building the package. The default is 'Debug'. Use the `PackRelease` property to make 'Release' the default for this command.</source>
-        <target state="translated">Paket derlemede kullanmak için yapılandırma. Varsayılan değer: 'Debug'. Bu komutta, 'Release' komutunu varsayılan yapmak için 'PackRelease' özelliğini kullanın.</target>
+        <source>The configuration to use for building the package. The default is 'Release'.</source>
+        <target state="needs-review-translation">Paket derlemede kullanmak için yapılandırma. Varsayılan değer: 'Debug'. Bu komutta, 'Release' komutunu varsayılan yapmak için 'PackRelease' özelliğini kullanın.</target>
         <note />
       </trans-unit>
     </body>

@@ -17,6 +17,7 @@ namespace Microsoft.DotNet.ApiCompat
             string[]? suppressionFiles,
             string? suppressionOutputFile,
             string? noWarn,
+            bool respectInternals,
             bool enableRuleAttributesMustMatch,
             string[]? excludeAttributesFiles,
             bool enableRuleCannotChangeParameterName,
@@ -35,8 +36,9 @@ namespace Microsoft.DotNet.ApiCompat
                 () => new SuppressionEngine(suppressionFiles, noWarn, generateSuppressionFile),
                 (log) => new RuleFactory(log,
                     enableRuleAttributesMustMatch,
-                    excludeAttributesFiles,
-                    enableRuleCannotChangeParameterName));
+                    enableRuleCannotChangeParameterName),
+                respectInternals,
+                excludeAttributesFiles);
 
             // If a runtime graph is provided, parse and use it for asset selection during the in-memory package construction.
             if (runtimeGraph != null)

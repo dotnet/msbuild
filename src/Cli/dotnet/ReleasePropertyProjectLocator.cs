@@ -280,10 +280,13 @@ namespace Microsoft.DotNet.Cli
 
             string[] globalPropEnumerable = _parseResult.GetValue(CommonOptions.PropertiesOption);
 
-            foreach (var keyEqVal in globalPropEnumerable)
+            foreach (var keyEqValString in globalPropEnumerable)
             {
-                string[] keyValuePair = keyEqVal.Split("=", 2);
-                globalProperties[keyValuePair[0]] = keyValuePair[1];
+                var propertyPairs = MSBuildPropertyParser.ParseProperties(keyEqValString);
+                foreach (var propertyKeyValue in propertyPairs)
+                {
+                    globalProperties[propertyKeyValue.key] = propertyKeyValue.value;
+                }
             }
             return globalProperties;
         }

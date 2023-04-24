@@ -4,7 +4,6 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Runner
 {
@@ -29,7 +28,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
         public IList<IReadOnlyList<MetadataInformation>> Right { get; }
 
         /// <summary>
-        /// Creates a workitem with a single left set, options and multiple right sets.
+        /// Creates a work item with a single left set, options and multiple right sets.
         /// </summary>
         public ApiCompatRunnerWorkItem(IReadOnlyList<MetadataInformation> left,
             ApiCompatRunnerOptions options,
@@ -41,7 +40,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
         }
 
         /// <summary>
-        /// Creates a workitem with a single left set, options and a single right set.
+        /// Creates a work item with a single left set, options and a single right set.
         /// </summary>
         public ApiCompatRunnerWorkItem(IReadOnlyList<MetadataInformation> left,
             ApiCompatRunnerOptions options,
@@ -53,7 +52,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
         }
 
         /// <summary>
-        /// Creates a workitem with a single left, options and a single right.
+        /// Creates a work item with a single left, options and a single right.
         /// </summary>
         public ApiCompatRunnerWorkItem(MetadataInformation left,
             ApiCompatRunnerOptions options,

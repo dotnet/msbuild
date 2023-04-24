@@ -10,6 +10,10 @@ using System.Text;
 
 namespace Microsoft.DotNet.Cli.Utils;
 
+/// <summary>
+/// Parses property key value pairs that have already been forwarded through the PropertiesOption class.
+/// Does not parse -p and etc. formats, (this is done by PropertiesOption) but does parse property values separated by =, ;, and using quotes.
+/// </summary>
 public static class MSBuildPropertyParser {
     public static IEnumerable<(string key, string value)> ParseProperties(string input) {
         var currentPos = 0;

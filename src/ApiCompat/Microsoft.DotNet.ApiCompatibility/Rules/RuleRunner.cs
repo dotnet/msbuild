@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Mapping;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -23,14 +23,14 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         }
 
         /// <inheritdoc />
-        public void InitializeRules(RuleSettings settings)
+        public void InitializeRules(IRuleSettings settings)
         {
             // Instantiate the rules but don't invoke anything on them as they register themselves on "events" inside their constructor.
             _ = _ruleFactory.CreateRules(settings, _context);
         }
 
         /// <inheritdoc />
-        public IEnumerable<CompatDifference> Run<T>(ElementMapper<T> mapper)
+        public IEnumerable<CompatDifference> Run<T>(IElementMapper<T> mapper)
         {
             List<CompatDifference> differences = new();
 
@@ -39,6 +39,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             {
                 if (mapper is AssemblyMapper am)
                 {
+                    // Ignore assembly mappings which are null on both sides, i.e. when different assembly identities are marked as compatible.
+                    if (am.Left == null && am.Right[rightIndex] == null)
+                        continue;
+
                     /* Some assembly symbol actions need to know if the passed in assembly is the only one being visited.
                        This is true if the assembly set only contains a single assembly or if there is no assembly set and
                        the assembly mapper is directly visited. */

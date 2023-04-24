@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("api_cs-70", "webapi", "-f", "net7.0")]
         public void AllWebProjectsRestoreAndBuild(string testName, params string[] args)
         {
-            string workingDir = Path.Combine(Path.GetRandomFileName(), testName);
+            string workingDir = Path.Combine(_fixture.BaseWorkingDirectory, testName);
             Directory.CreateDirectory(workingDir);
 
             new DotnetNewCommand(_log, args)

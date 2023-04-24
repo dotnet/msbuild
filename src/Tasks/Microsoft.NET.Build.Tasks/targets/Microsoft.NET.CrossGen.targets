@@ -347,8 +347,13 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_PrepareForReadyToRunCompilation;
                             _CreateR2RImages;
                             _CreateR2RSymbols">
-
-    <AllowEmptyTelemetry EventName="ReadyToRun" EventData="PublishReadyToRunUseCrossgen2=$(PublishReadyToRunUseCrossgen2);Crossgen2PackVersion=%(ResolvedCrossgen2Pack.NuGetPackageVersion);CompileListCount=@(_ReadyToRunCompileList->Count());FailedCount=@(_ReadyToRunCompilationFailures->Count())" />
+    <ItemGroup>
+      <R2RTelemetry Include="PublishReadyToRunUseCrossgen2" Value="$(PublishReadyToRunUseCrossgen2)" />
+      <R2RTelemetry Include="Crossgen2PackVersion" Value="%(ResolvedCrossgen2Pack.NuGetPackageVersion)" />
+      <R2RTelemetry Include="CompileListCount" Value="@(_ReadyToRunCompileList->Count())" />
+      <R2RTelemetry Include="FailedCount" Value="@(_ReadyToRunCompilationFailures->Count())" />
+    </ItemGroup>
+    <AllowEmptyTelemetry EventName="ReadyToRun" EventData="@(R2RTelemetry)" />
 
     <NETSdkError Condition="'@(_ReadyToRunCompilationFailures)' != ''" ResourceName="ReadyToRunCompilationFailed" />
 

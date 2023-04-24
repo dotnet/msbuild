@@ -39,6 +39,10 @@ From that shell your SDK is available in:
 - `dotnet build`
 - `msbuild`
 
+## How do I determine the timeline I must follow to get my changes in for a specific version of .NET?
+
+Please see the [Pull Request Timeline Guide](documentation/project-docs/SDK-PR-guide.md).
+
 ## How we triage and review PRs
 
 With the SDK repository being the home for many different areas, we've started trying to label incoming issues for the area they are related to using `Area-` labels.  Then we rely on the [codeowners](https://github.com/dotnet/sdk/blob/main/CODEOWNERS) to manage and triages issues in their areas. Feel free to contact the owners listed in that file if you're not getting a response on a particular issue or PR. Please try to label new issues as that'll help us route them faster.

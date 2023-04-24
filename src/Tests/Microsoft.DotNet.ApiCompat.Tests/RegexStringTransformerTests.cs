@@ -74,15 +74,5 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
 
             Assert.Equal("runtimes/android/lib/net7.0/System.Linq.dll", output);
         }
-
-        [Fact]
-        public void Transform_SinglePatternWithBacktracking_ThrowsRegexMatchTimeoutException()
-        {
-            const string TransformInput = "An input string that takes a very very very very very very very very very very very long time!";
-
-            RegexStringTransformer regexStringTransformer = new(@"^(\w+\s?)*$", "lib");
-
-            Assert.Throws<RegexMatchTimeoutException>(() => regexStringTransformer.Transform(TransformInput));
-        }
     }
 }
