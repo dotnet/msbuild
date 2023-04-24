@@ -271,6 +271,47 @@ namespace Microsoft.NET.Publish.Tests
             Assert.True(ucrRid != finalRid);
         }
 
+        [Theory]
+        [InlineData("PublishReadyToRun", true)]
+        [InlineData("PublishSingleFile", true)]
+        [InlineData("PublishTrimmed", true)]
+        [InlineData("PublishAot", true)]
+        [InlineData("PublishReadyToRun", false)]
+        [InlineData("PublishSingleFile", false)]
+        [InlineData("PublishTrimmed", false)]
+        public void DesiredPublishPropertiesImplySelfContainedForFrameworkDepedentDefaultFrameworks(string property, bool useFrameworkDependentDefaultTargetFramework)
+        {
+            var tfm = useFrameworkDependentDefaultTargetFramework ? ToolsetInfo.CurrentTargetFramework : "net7.0"; // net 7 is the last non FDD default TFM at the time of this PR.
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = tfm,
+            };
+            testProject.AdditionalProperties[property] = "true";
+
+            testProject.RecordProperties("SelfContained");
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"{property}-{useFrameworkDependentDefaultTargetFramework}");
+
+            var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand
+               .Execute()
+               .Should()
+               .Pass();
+
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm);
+
+            var expectedSelfContainedValue = "true";
+            if (
+                (property == "PublishReadyToRun" && useFrameworkDependentDefaultTargetFramework) || // This property should no longer infer SelfContained in net 8
+                (property == "PublishTrimmed" && !useFrameworkDependentDefaultTargetFramework) // This property did not infer SelfContained until net 8
+               )
+            {
+                expectedSelfContainedValue = "";
+            }
+
+            properties["SelfContained"].Should().Be(expectedSelfContainedValue);
+        }
+
         [Fact]
         public void ImplicitRuntimeIdentifierOptOutCorrectlyOptsOut()
         {
