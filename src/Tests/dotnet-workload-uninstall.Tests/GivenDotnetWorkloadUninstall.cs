@@ -2,26 +2,23 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
 using ManifestReaderTests;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Cli.Workload.Install.Tests;
 using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.DotNet.Workloads.Workload.Install;
+using Microsoft.DotNet.Workloads.Workload.Uninstall;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Utilities;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.DotNet.Workloads.Workload.Uninstall;
-using Microsoft.DotNet.Cli.Workload.Install.Tests;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.TestFramework.Commands;
-using System.CommandLine;
-using NuGet.Packaging;
-using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Cli.Workload.Uninstall.Tests
 {
