@@ -11,9 +11,12 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
 {
     internal static class HttpClientHelpers
     {
-        public static async Task<IHttpResponse> PostWithBasicAuthAsync(this IHttpClient client, Uri uri, string username, string password, string contentType, string userAgent, Encoding encoding, Stream messageBody)
+        internal static readonly string AzureADUserName = Guid.Empty.ToString();
+        internal static readonly string BearerAuthenticationScheme = "Bearer";
+        internal static readonly string BasicAuthenticationScheme = "Basic";
+        public static async Task<IHttpResponse> PostRequestAsync(this IHttpClient client, Uri uri, string username, string password, string contentType, string userAgent, Encoding encoding, Stream messageBody)
         {
-            AddBasicAuthToClient(username, password, client);
+            AddAuthenticationHeader(username, password, client);
             client.DefaultRequestHeaders.Add("User-Agent", userAgent);
 
             StreamContent content = new StreamContent(messageBody ?? new MemoryStream())
@@ -42,9 +45,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
             }
         }
 
-        public static async Task<IHttpResponse> GetWithBasicAuthAsync(this IHttpClient client, Uri uri, string username, string password, string userAgent, CancellationToken cancellationToken)
+        public static async Task<IHttpResponse> GetRequestAsync(this IHttpClient client, Uri uri, string username, string password, string userAgent, CancellationToken cancellationToken)
         {
-            AddBasicAuthToClient(username, password, client);
+            AddAuthenticationHeader(username, password, client);
             client.DefaultRequestHeaders.Add("User-Agent", userAgent);
 
             try
@@ -58,14 +61,21 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
             }
         }
 
-        private static void AddBasicAuthToClient(string username, string password, IHttpClient client)
+        private static void AddAuthenticationHeader(string username, string password, IHttpClient client)
         {
             client.DefaultRequestHeaders.Remove("Connection");
 
-            string plainAuth = string.Format("{0}:{1}", username, password);
-            byte[] plainAuthBytes = Encoding.ASCII.GetBytes(plainAuth);
-            string base64 = Convert.ToBase64String(plainAuthBytes);
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64);
+            if (!string.Equals(username, AzureADUserName, StringComparison.Ordinal))
+            {
+                string plainAuth = string.Format("{0}:{1}", username, password);
+                byte[] plainAuthBytes = Encoding.ASCII.GetBytes(plainAuth);
+                string base64 = Convert.ToBase64String(plainAuthBytes);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(BasicAuthenticationScheme, base64);
+            }
+            else
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(BearerAuthenticationScheme, password);
+            }
         }
     }
 }
