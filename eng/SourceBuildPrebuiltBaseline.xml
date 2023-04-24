@@ -30,12 +30,5 @@
     <UsagePattern IdentityGlob="System.Threading.Tasks.Dataflow/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Windows.Extensions/*7.0.0*" />
 
-    <!-- Baseline sourcelink packages until https://github.com/dotnet/arcade/pull/13204 is merged and
-         flowed to this repo -->
-    <UsagePattern IdentityGlob="Microsoft.Build.Tasks.Git/*1.1.0-beta-20206-02*" />
-    <UsagePattern IdentityGlob="Microsoft.SourceLink.AzureRepos.Git/*1.1.0-beta-20206-02*" />
-    <UsagePattern IdentityGlob="Microsoft.SourceLink.Common/*1.1.0-beta-20206-02*" />
-    <UsagePattern IdentityGlob="Microsoft.SourceLink.GitHub/*1.1.0-beta-20206-02*" />
-
   </IgnorePatterns>
 </UsageData>
