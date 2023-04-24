@@ -184,7 +184,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 args.Add("-n");
                 args.Add(projName);
             }
-            args.Add("-aot");
+            args.Add("--aot");
 
             // Do not bother restoring. This would need to restore the AOT compiler.
             // We would need a nuget.config for that and it's a waste of time anyway.

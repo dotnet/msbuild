@@ -30,7 +30,7 @@ Template options:
   --use-program-main                      Whether to generate an explicit Program class and Main method instead of top-level statements.
                                           Type: bool
                                           Default: false
-  -aot, --publish-native-aot              Whether to enable the project for publishing as native AOT.
+  --aot                                   Whether to enable the project for publishing as native AOT.
                                           Type: bool
                                           Default: false
 

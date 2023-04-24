@@ -11,9 +11,6 @@
     <!--#if (NativeAot) -->
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
-
-    <!-- Uncomment below line to make native publish outputs a lot smaller on Linux and macOS -->
-    <!-- <StripSymbols>true</StripSymbols> -->
     <!--#endif -->
   </PropertyGroup>
 
