@@ -1531,6 +1531,8 @@ internal static class NativeMethods
         {
             // On posix OSes we expect console always supports VT100 coloring unless it is explicitly marked as "dumb".
             acceptAnsiColorCodes = Environment.GetEnvironmentVariable("TERM") != "dumb";
+            // It wasn't redirected as tested above so we assume output is screen/console
+            outputIsScreen = true; 
         }
         return (acceptAnsiColorCodes, outputIsScreen, originalConsoleMode);
     }
