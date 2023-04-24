@@ -3,5 +3,7 @@
   "name": "MSBuild Directory.Build.props file",
   "description": "An empty Directory.Build.props file which can be used to specify MSBuild properties for an entire folder",
   "symbols/inherit/displayName": "Inherit",
-  "symbols/inherit/description": "If true, adds an Import for the closest Directory.Build.props in the file system directory hierarchy. Directory.Build.props don't inherit by default, so doing this allows you to build up a set of customizations folder-by-folder."
+  "symbols/inherit/description": "If true, adds an Import for the closest Directory.Build.props in the file system directory hierarchy. Directory.Build.props don't inherit by default, so doing this allows you to build up a set of customizations folder-by-folder.",
+  "symbols/useArtifacts/displayName": "Use Artifacts Output Layout",
+  "symbols/useArtifacts/description": "If true, adds a property to enable the artifacts output layout. This is a common pattern for projects that produce build artifacts, such as NuGet packages, that are placed in a common folder."
 }
