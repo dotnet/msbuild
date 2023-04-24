@@ -355,7 +355,8 @@ internal sealed class LiveLogger : INodeLogger
                     // Print the output path as a link if we have it.
                     if (outputPath is not null)
                     {
-                        ReadOnlySpan<char> url = outputPath.Value.Span;
+                        ReadOnlySpan<char> outputPathSpan = outputPath.Value.Span;
+                        ReadOnlySpan<char> url = outputPathSpan;
                         try
                         {
                             // If possible, make the link point to the containing directory of the output.
@@ -365,10 +366,20 @@ internal sealed class LiveLogger : INodeLogger
                         {
                             // Ignore any GetDirectoryName exceptions.
                         }
+
+                        // If the output path is under the initial working directory, make the console output relative to that to save space.
+                        if (outputPathSpan.StartsWith(_initialWorkingDirectory.AsSpan(), FileUtilities.PathComparison)
+                            && (outputPathSpan[_initialWorkingDirectory.Length] == Path.DirectorySeparatorChar
+                                || outputPathSpan[_initialWorkingDirectory.Length] == Path.AltDirectorySeparatorChar))
+                        {
+                            outputPathSpan = outputPathSpan.Slice(_initialWorkingDirectory.Length + 1);
+                        }
+
+
 #if NETCOREAPP
-                        Terminal.WriteLine($" ({duration:F1}s) → {AnsiCodes.LinkPrefix}{url}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}");
+                        Terminal.WriteLine($" ({duration:F1}s) → {AnsiCodes.LinkPrefix}{url}{AnsiCodes.LinkInfix}{outputPathSpan}{AnsiCodes.LinkSuffix}");
 #else
-                        Terminal.WriteLine($" ({duration:F1}s) → {AnsiCodes.LinkPrefix}{url.ToString()}{AnsiCodes.LinkInfix}{outputPath.ToString()}{AnsiCodes.LinkSuffix}");
+                        Terminal.WriteLine($" ({duration:F1}s) → {AnsiCodes.LinkPrefix}{url.ToString()}{AnsiCodes.LinkInfix}{outputPathSpan.ToString()}{AnsiCodes.LinkSuffix}");
 #endif
                     }
                     else
@@ -473,12 +484,6 @@ internal sealed class LiveLogger : INodeLogger
                     _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
                 {
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
-
-                    if (outputPath.Span.Slice(0, _initialWorkingDirectory.Length).SequenceEqual(_initialWorkingDirectory.AsSpan()))
-                    {
-                        outputPath = outputPath.Slice(_initialWorkingDirectory.Length + 1);
-                    }
-
                     project.OutputPath = outputPath;
                 }
             }
