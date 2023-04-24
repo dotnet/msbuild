@@ -234,4 +234,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Hook for processing after target framework parsing (for example to customize output paths) -->
   <Import Project="$(AfterTargetFrameworkInferenceTargets)" Condition="$(AfterTargetFrameworkInferenceTargets) != ''" />
 
+  <PropertyGroup>
+    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and ('$(ProduceOnlyReferenceAssembly)' != 'true') and '$(MSBuildProjectExtension)' != '.fsproj'" >true</ProduceReferenceAssembly>
+    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 7.0)) and ('$(ProduceOnlyReferenceAssembly)' != 'true') and '$(MSBuildProjectExtension)' == '.fsproj'" >true</ProduceReferenceAssembly>
+  </PropertyGroup>
+
 </Project>

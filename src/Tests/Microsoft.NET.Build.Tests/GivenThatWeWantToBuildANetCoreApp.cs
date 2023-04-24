@@ -881,7 +881,7 @@ class Program
                 .Pass();
         }
 
-        [RequiresMSBuildVersionTheory("17.7.0")]
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public void It_builds_the_project_successfully_with_only_reference_assembly_set(bool produceOnlyReferenceAssembly)
