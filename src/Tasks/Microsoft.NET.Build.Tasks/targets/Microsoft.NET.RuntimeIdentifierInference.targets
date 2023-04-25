@@ -165,7 +165,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
     <!-- Breaking change in .NET 8: Projects with 8.0+ TFMS will no longer have RuntimeIdentifier imply SelfContained. Note that PublishReadyToRun will imply SelfContained in these versions. -->
     <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != '' and
-                              '$(_TargetFrameworkVersionWithoutV)' &lt; '8.0'">true</SelfContained>
+                              '$(_TargetFrameworkVersionWithoutV)' != '' and '$(_TargetFrameworkVersionWithoutV)' &lt; '8.0'">true</SelfContained>
     <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
     <_RuntimeIdentifierUsesAppHost Condition="$(RuntimeIdentifier.StartsWith('ios')) or $(RuntimeIdentifier.StartsWith('tvos')) or $(RuntimeIdentifier.StartsWith('maccatalyst')) or $(RuntimeIdentifier.StartsWith('android')) or $(RuntimeIdentifier.StartsWith('browser'))">false</_RuntimeIdentifierUsesAppHost>
     <_RuntimeIdentifierUsesAppHost Condition="'$(_RuntimeIdentifierUsesAppHost)' == ''">true</_RuntimeIdentifierUsesAppHost>
