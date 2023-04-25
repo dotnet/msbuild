@@ -1422,7 +1422,7 @@
     </comment>
   </data>
   <data name="ProjectFinished_WithTF" xml:space="preserve">
-    <value>{0}{1} [2] {3} ({4}s)</value>
+    <value>{0}{1} [{2}] {3} ({4}s)</value>
     <comment>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row

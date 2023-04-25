@@ -383,6 +383,13 @@ internal sealed class LiveLogger : INodeLogger
                             // Ignore any GetDirectoryName exceptions.
                         }
 
+                        // Generates file:// schema url string which is better handled by various Terminal clients than raw folder name.
+                        string urlString = url.ToString();
+                        if (Uri.TryCreate(urlString, UriKind.Absolute, out Uri? uri))
+                        {
+                            urlString = uri.AbsoluteUri;
+                        }
+
                         // If the output path is under the initial working directory, make the console output relative to that to save space.
                         if (outputPathSpan.StartsWith(_initialWorkingDirectory.AsSpan(), FileUtilities.PathComparison))
                         {
@@ -395,7 +402,7 @@ internal sealed class LiveLogger : INodeLogger
                         }
 
                         Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
-                            $"{AnsiCodes.LinkPrefix}{url.ToString()}{AnsiCodes.LinkInfix}{outputPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
+                            $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{outputPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
                     }
                     else
                     {
