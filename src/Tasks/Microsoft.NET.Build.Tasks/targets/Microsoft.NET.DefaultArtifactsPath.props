@@ -30,14 +30,14 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true' And '$(ArtifactsPath)' == '' And '$(_DirectoryBuildPropsBasePath)' != ''">
     <!-- Default ArtifactsPath to be in the directory where Directory.Build.props is found
          Note that we do not append a backslash to the ArtifactsPath as we do with most paths, because it may be a global property passed in on the command-line which we can't easily change -->
-    <ArtifactsPath>$(_DirectoryBuildPropsBasePath)\.artifacts</ArtifactsPath>
+    <ArtifactsPath>$(_DirectoryBuildPropsBasePath)\artifacts</ArtifactsPath>
     <IncludeProjectNameInArtifactsPaths Condition="'$(IncludeProjectNameInArtifactsPaths)' == ''">true</IncludeProjectNameInArtifactsPaths>
     <_ArtifactsPathLocationType>DirectoryBuildPropsFolder</_ArtifactsPathLocationType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true' And '$(ArtifactsPath)' == ''">
     <!-- If there was no Directory.Build.props file, then put the artifacts path in the project folder -->
-    <ArtifactsPath>$(MSBuildProjectDirectory)\.artifacts</ArtifactsPath>
+    <ArtifactsPath>$(MSBuildProjectDirectory)\artifacts</ArtifactsPath>
     <_ArtifactsPathLocationType>ProjectFolder</_ArtifactsPathLocationType>
   </PropertyGroup>
 </Project>

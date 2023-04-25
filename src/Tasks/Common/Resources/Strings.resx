@@ -896,4 +896,13 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1198: A publish profile with the name '{0}' was not found in the project. Set the PublishProfile property to a valid file name.</value>
     <comment>{StrBegin="NETSDK1198: "}</comment>
   </data>
+  <data name="ArtifactsPathCannotBeSetInProject" xml:space="preserve">
+    <value>NETSDK1199: The ArtifactsPath and UseArtifactsOutput properties cannot be set in a project file, due to MSBuild ordering constraints. They must be set in a Directory.Build.props file or from the command line. See https://aka.ms/netsdk1199 for more information.</value>
+    <comment>{StrBegin="NETSDK1199: "}</comment>
+  </data>
+  <data name="UseArtifactsOutputRequiresDirectoryBuildProps" xml:space="preserve">
+    <value>NETSDK1200: If UseArtifactsPath is set to true and ArtifactsPath is not set, there must be a Directory.Build.props file in order to determine where the artifacts folder should be located.</value>
+    <comment>{StrBegin="NETSDK1200: "}</comment>
+  </data>
+  
 </root>

@@ -74,6 +74,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$(ArtifactsPath)\obj\</BaseIntermediateOutputPath>
   </PropertyGroup>
 
+  <!-- Record whether ArtifactsPath / UseArtifactsOutput was set at this point in evaluation.  We will generate an error if these properties are set
+       after this point (ie in the project file). -->
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' == 'true'">
+    <_ArtifactsPathSetEarly>true</_ArtifactsPathSetEarly>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(MSBuildProjectFullPath)' == '$(ProjectToOverrideProjectExtensionsPath)'">
     <MSBuildProjectExtensionsPath>$(ProjectExtensionsPathForSpecifiedProject)</MSBuildProjectExtensionsPath>
   </PropertyGroup>
