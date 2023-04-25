@@ -47,8 +47,6 @@ namespace Microsoft.NET.Sdk.Web.Tests
             JsonNode runtimeConfig = JsonNode.Parse(runtimeConfigContents);
             JsonNode configProperties = runtimeConfig["runtimeOptions"]["configProperties"];
 
-            configProperties["Microsoft.AspNetCore.EnsureJsonTrimmability"].GetValue<bool>()
-                    .Should().BeTrue();
             configProperties["System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault"].GetValue<bool>()
                     .Should().BeFalse();
         }
@@ -82,7 +80,6 @@ namespace Microsoft.NET.Sdk.Web.Tests
             string responseFile = Path.Combine(outputDirectory, "native", $"{projectName}.ilc.rsp");
             var responseFileContents = File.ReadLines(responseFile);
 
-            responseFileContents.Should().Contain("--feature:Microsoft.AspNetCore.EnsureJsonTrimmability=true");
             responseFileContents.Should().Contain("--feature:System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault=false");
             File.Exists(Path.Combine(outputDirectory, "web.config")).Should().BeFalse();
         }
