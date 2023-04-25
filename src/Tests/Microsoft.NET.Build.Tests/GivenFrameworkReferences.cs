@@ -830,6 +830,8 @@ namespace FrameworkReferenceTest
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
             };
 
+            testProject.AdditionalProperties["SelfContained"] = "true";
+
             testProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
             testProject.FrameworkReferences.Add("Microsoft.WindowsDesktop.App");
 
