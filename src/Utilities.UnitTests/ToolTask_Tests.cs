@@ -846,10 +846,12 @@ namespace Microsoft.Build.UnitTests
         {
             using var env = TestEnvironment.Create(_output);
 
+            MockEngine engine = new();
+
             // Task under test:
             var task = new ToolTaskThatSleeps
             {
-                BuildEngine = new MockEngine(),
+                BuildEngine = engine,
                 InitialDelay = initialDelay,
                 FollowupDelay = followupDelay,
                 Timeout = timeout
@@ -861,6 +863,9 @@ namespace Microsoft.Build.UnitTests
             {
                 // Execute the task:
                 result = task.Execute();
+
+                _output.WriteLine(engine.Log);
+
                 task.RepeatCount.ShouldBe(i);
 
                 // The first execution may fail (timeout), but all following ones should succeed:
@@ -882,7 +887,7 @@ namespace Microsoft.Build.UnitTests
         private sealed class ToolTaskThatSleeps : ToolTask
         {
             // PowerShell command to sleep:
-            private readonly string _powerShellSleep = "-ExecutionPolicy RemoteSigned -Command \"Start-Sleep -Milliseconds {0}\"";
+            private readonly string _powerShellSleep = "-NoProfile -ExecutionPolicy RemoteSigned -Command \"Start-Sleep -Milliseconds {0}\"";
 
             // UNIX command to sleep:
             private readonly string _unixSleep = "-c \"sleep {0}\"";

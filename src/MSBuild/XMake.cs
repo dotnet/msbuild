@@ -1376,7 +1376,7 @@ namespace Microsoft.Build.CommandLine
                             messagesToLogInBuildLoggers.Add(
                                 new BuildManager.DeferredBuildMessage(
                                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                                        "DeferredResponseFile",
+                                        "PickedUpSwitchesFromAutoResponse",
                                         responseFilePath),
                                     MessageImportance.Low,
                                     responseFilePath));
@@ -2475,16 +2475,6 @@ namespace Microsoft.Build.CommandLine
                     else if (verbosity == LoggerVerbosity.Diagnostic)
                     {
                         detailedSummary = true;
-                    }
-
-                    // If we picked up switches from the autoresponse file, let the user know. This could be a useful
-                    // hint to a user that does not know that we are picking up the file automatically.
-                    // Since this is going to happen often in normal use, only log it in high verbosity mode.
-                    // Also, only log it to the console; logging to loggers would involve increasing the public API of
-                    // the Engine, and we don't want to do that.
-                    if (usingSwitchesFromAutoResponseFile && LoggerVerbosity.Diagnostic == verbosity)
-                    {
-                        Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PickedUpSwitchesFromAutoResponse", autoResponseFileName));
                     }
 
                     if (originalVerbosity == LoggerVerbosity.Diagnostic)
