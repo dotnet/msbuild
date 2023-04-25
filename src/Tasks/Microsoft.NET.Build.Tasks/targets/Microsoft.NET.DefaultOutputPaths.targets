@@ -140,4 +140,24 @@ Copyright (c) .NET Foundation. All rights reserved.
                             '$(AppendTargetFrameworkToOutputPath)' == 'true' and '$(TargetFramework)' != '' and '$(_UnsupportedTargetFrameworkError)' != 'true'">
     <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework.ToLowerInvariant())\</IntermediateOutputPath>
   </PropertyGroup>
+
+
+  <Target Name="_CheckForUnsupportedArtifactsPath"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
+
+    <!-- Generate an error if ArtifactsPath or UseArtifactsOutput are set in the project file.
+
+         We generate an error because if they are set in the project file, it is too late to change the intermediate output path,
+         and because it would be confusing to set the property in the project file and have the artifacts path depend on whether
+         there happened to be a Directory.Build.props file defined.
+    -->
+
+    <NetSdkError Condition="'$(UseArtifactsOutput)' == 'true' and '$(_ArtifactsPathSetEarly)' != 'true'"
+                 ResourceName="ArtifactsPathCannotBeSetInProject" />
+    
+    <NetSdkError Condition="'$(_ArtifactsPathLocationType)' == 'ProjectFolder'"
+                 ResourceName="UseArtifactsOutputRequiresDirectoryBuildProps" />
+
+  </Target>
+
 </Project>

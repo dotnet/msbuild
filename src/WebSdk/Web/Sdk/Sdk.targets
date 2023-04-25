@@ -30,20 +30,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Sdk="Microsoft.NET.Sdk.Publish" Project="Sdk.targets" />
 
-  <!--
-  ============================================================
-    DefaultRuntimeHostConfigurationOptions
-  Defaults @(RuntimeHostConfigurationOption) items based on MSBuild properties.
-  ============================================================
-  -->
-
-  <ItemGroup>
-    <RuntimeHostConfigurationOption Include="Microsoft.AspNetCore.EnsureJsonTrimmability"
-                                    Condition="'$(EnsureAspNetCoreJsonTrimmability)' != ''"
-                                    Value="$(EnsureAspNetCoreJsonTrimmability)"
-                                    Trim="true" />
-  </ItemGroup>
-
   <!-- include library-packs folder as additional source for the restore -->
   <PropertyGroup Condition=" '$(DisableImplicitMicrosoftNETBuildContainersReference)' != 'true' ">
     <_WebLibraryPacksFolder Condition="'$(WebLibraryPacksFolder)' == ''">$([MSBuild]::EnsureTrailingSlash('$(MSBuildThisFileDirectory)'))../library-packs</_WebLibraryPacksFolder>
