@@ -377,16 +377,11 @@ internal sealed class LiveLogger : INodeLogger
                             // Ignore any GetDirectoryName exceptions.
                         }
 
-                        string urlString;
-                        try
+                        // Generates file:// schema url string which is better handled by various Terminal clients than raw folder name.
+                        string urlString = url.ToString();
+                        if (Uri.TryCreate(urlString, UriKind.Absolute, out Uri? uri))
                         {
-                            // This should generate file:// schema url string which is better handled by various Terminal clients than raw folder name.
-                            urlString = new Uri(url.ToString()).AbsoluteUri;
-                        }
-                        catch
-                        {
-                            // If Uri constructor throws use raw folder name instead.
-                            urlString = url.ToString();
+                            urlString = uri.AbsoluteUri;
                         }
 
                         Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
