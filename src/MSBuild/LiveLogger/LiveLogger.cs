@@ -368,13 +368,15 @@ internal sealed class LiveLogger : INodeLogger
                         }
 
                         // If the output path is under the initial working directory, make the console output relative to that to save space.
-                        if (outputPathSpan.StartsWith(_initialWorkingDirectory.AsSpan(), FileUtilities.PathComparison)
-                            && (outputPathSpan[_initialWorkingDirectory.Length] == Path.DirectorySeparatorChar
-                                || outputPathSpan[_initialWorkingDirectory.Length] == Path.AltDirectorySeparatorChar))
+                        if (outputPathSpan.StartsWith(_initialWorkingDirectory.AsSpan(), FileUtilities.PathComparison))
                         {
-                            outputPathSpan = outputPathSpan.Slice(_initialWorkingDirectory.Length + 1);
+                            if (outputPathSpan.Length > _initialWorkingDirectory.Length
+                                && (outputPathSpan[_initialWorkingDirectory.Length] == Path.DirectorySeparatorChar
+                                    || outputPathSpan[_initialWorkingDirectory.Length] == Path.AltDirectorySeparatorChar))
+                            {
+                                outputPathSpan = outputPathSpan.Slice(_initialWorkingDirectory.Length + 1);
+                            }
                         }
-
 
 #if NETCOREAPP
                         Terminal.WriteLine($" ({duration:F1}s) → {AnsiCodes.LinkPrefix}{url}{AnsiCodes.LinkInfix}{outputPathSpan}{AnsiCodes.LinkSuffix}");
