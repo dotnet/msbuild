@@ -89,6 +89,13 @@ namespace Microsoft.Build.Evaluation
         Truncate = 0x40,
 
         /// <summary>
+        /// Issues build message if item references unqualified or qualified metadata odf self - as this can lead to unintended expansion and
+        ///  cross-combination of other items.
+        /// More info: https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-batching#item-batching-on-self-referencing-metadata
+        /// </summary>
+        LogOnItemMetadataSelfReference = 0x80,
+
+        /// <summary>
         /// Expand only properties and then item lists
         /// </summary>
         ExpandPropertiesAndItems = ExpandProperties | ExpandItems,
@@ -203,7 +210,7 @@ namespace Microsoft.Build.Evaluation
             /// concatenation of the string representation of the values, each additionally subjected
             /// to file path adjustment.
             /// </returns>
-            public object GetResult()
+            public readonly object GetResult()
             {
                 CheckDisposed();
                 if (_firstObject != null)
@@ -228,7 +235,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Throws <see cref="ObjectDisposedException"/> if this concatenator is already disposed.
             /// </summary>
-            private void CheckDisposed() =>
+            private readonly void CheckDisposed() =>
                 ErrorUtilities.VerifyThrowObjectDisposed(!_disposed, nameof(SpanBasedConcatenator));
 
             /// <summary>
@@ -441,7 +448,7 @@ namespace Microsoft.Build.Evaluation
 
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 
-            string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
+            string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation, loggingContext);
             result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem, loggingContext);
             result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
             result = FileUtilities.MaybeAdjustFilePath(result);
@@ -871,8 +878,9 @@ namespace Microsoft.Build.Evaluation
             /// <param name="metadata">The metadata to be expanded.</param>
             /// <param name="options">Used to specify what to expand.</param>
             /// <param name="elementLocation">The location information for error reporting purposes.</param>
+            /// <param name="loggingContext">The logging context for this operation.</param>
             /// <returns>The string with item metadata expanded in-place, escaped.</returns>
-            internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation)
+            internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
             {
                 try
                 {
@@ -896,7 +904,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // if there are no item vectors in the string
                         // run a simpler Regex to find item metadata references
-                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options);
+                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
                         result = RegularExpressions.ItemMetadataPattern.Value.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
                     }
                     else
@@ -915,7 +923,7 @@ namespace Microsoft.Build.Evaluation
                         using SpanBasedStringBuilder finalResultBuilder = Strings.GetSpanBasedStringBuilder();
 
                         int start = 0;
-                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options);
+                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
 
                         if (itemVectorExpressions != null)
                         {
@@ -993,13 +1001,23 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 private ExpanderOptions _options;
 
+                private IElementLocation _elementLocation;
+
+                private LoggingContext _loggingContext;
+
                 /// <summary>
                 /// Constructor taking a source of metadata.
                 /// </summary>
-                internal MetadataMatchEvaluator(IMetadataTable metadata, ExpanderOptions options)
+                internal MetadataMatchEvaluator(
+                    IMetadataTable metadata,
+                    ExpanderOptions options,
+                    IElementLocation elementLocation,
+                    LoggingContext loggingContext)
                 {
                     _metadata = metadata;
-                    _options = options & (ExpanderOptions.ExpandMetadata | ExpanderOptions.Truncate);
+                    _options = options & (ExpanderOptions.ExpandMetadata | ExpanderOptions.Truncate | ExpanderOptions.LogOnItemMetadataSelfReference);
+                    _elementLocation = elementLocation;
+                    _loggingContext = loggingContext;
 
                     ErrorUtilities.VerifyThrow(options != ExpanderOptions.Invalid, "Must be expanding metadata of some kind");
                 }
@@ -1030,6 +1048,17 @@ namespace Microsoft.Build.Evaluation
                        (!isBuiltInMetadata && ((_options & ExpanderOptions.ExpandCustomMetadata) != 0)))
                     {
                         metadataValue = _metadata.GetEscapedValue(itemType, metadataName);
+
+                        if ((_options & ExpanderOptions.LogOnItemMetadataSelfReference) != 0 &&
+                            _loggingContext != null &&
+                            !string.IsNullOrEmpty(metadataName) &&
+                            _metadata is IItemTypeDefinition itemMetadata &&
+                            (string.IsNullOrEmpty(itemType) || string.Equals(itemType, itemMetadata.ItemType, StringComparison.Ordinal)))
+                        {
+                            _loggingContext.LogComment(MessageImportance.High, new BuildEventFileInfo(_elementLocation),
+                                "ItemReferencingSelfInTarget", itemMetadata.ItemType, metadataName);
+                        }
+
                         if (IsTruncationEnabled(_options) && metadataValue.Length > CharacterLimitPerExpansion)
                         {
                             metadataValue = metadataValue.Substring(0, CharacterLimitPerExpansion - 3) + "...";
@@ -3113,7 +3142,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public UsedUninitializedProperties UsedUninitializedProperties { get; set; }
 
-            internal Function<T> Build()
+            internal readonly Function<T> Build()
             {
                 return new Function<T>(
                     ReceiverType,

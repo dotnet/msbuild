@@ -1396,8 +1396,8 @@ namespace Microsoft.Build.BackEnd
                                     newItem = new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output.ItemSpec), parameterLocationEscaped);
 
                                     newItem.SetMetadataOnTaskOutput(output.CloneCustomMetadata()
-                                        .Cast<KeyValuePair<string, string>>()
-                                        .Select(x => new KeyValuePair<string, string>(x.Key, EscapingUtilities.Escape(x.Value))));
+                                        .Cast<DictionaryEntry>()
+                                        .Select(x => new KeyValuePair<string, string>((string)x.Key, EscapingUtilities.Escape((string)x.Value))));
                                 }
                             }
 
