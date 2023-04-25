@@ -796,9 +796,9 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1028: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeIdentifierWillNoLongerImplySelfContained">
-        <source>NETSDK1199: For projects with TargetFramework(s) &gt;= 8.0, specifying a RuntimeIdentifier no longer produces a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use --self-contained argument.</source>
-        <target state="new">NETSDK1199: For projects with TargetFramework(s) &gt;= 8.0, specifying a RuntimeIdentifier no longer produces a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use --self-contained argument.</target>
-        <note>{StrBegin="NETSDK1199: "}</note>
+        <source>NETSDK1201: For projects with TargetFramework(s) &gt;= 8.0, specifying a RuntimeIdentifier no longer produces a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use --self-contained argument.</source>
+        <target state="new">NETSDK1201: For projects with TargetFramework(s) &gt;= 8.0, specifying a RuntimeIdentifier no longer produces a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use --self-contained argument.</target>
+        <note>{StrBegin="NETSDK1201: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeListNotFound">
         <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
