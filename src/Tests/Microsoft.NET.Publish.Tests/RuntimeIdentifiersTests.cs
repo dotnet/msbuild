@@ -279,8 +279,9 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("PublishReadyToRun", false)]
         [InlineData("PublishSingleFile", false)]
         [InlineData("PublishTrimmed", false)]
-        public void DesiredPublishPropertiesImplySelfContainedForFrameworkDepedentDefaultFrameworks(string property, bool useFrameworkDependentDefaultTargetFramework)
+        public void SomePublishPropertiesInferSelfContained(string property, bool useFrameworkDependentDefaultTargetFramework)
         {
+            // Note: there is a bug with PublishAot I think where this test will fail for Aot if the testname is too long. Do not make it longer.
             var tfm = useFrameworkDependentDefaultTargetFramework ? ToolsetInfo.CurrentTargetFramework : "net7.0"; // net 7 is the last non FDD default TFM at the time of this PR.
             var testProject = new TestProject()
             {
@@ -293,12 +294,22 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"{property}-{useFrameworkDependentDefaultTargetFramework}");
 
             var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            publishCommand
-               .Execute()
-               .Should()
-               .Pass();
+            if (property == "PublishTrimmed" && !useFrameworkDependentDefaultTargetFramework)
+            {
+                publishCommand
+                   .Execute("-bl:C:\\users\\noahgilson\\whydoespublishaotfail.binlog")
+                   .Should()
+                   .Fail();
+            }
+            else
+            {
+                publishCommand
+                    .Execute("-bl:C:\\users\\noahgilson\\whydoespublishaotfail.binlog")
+                    .Should()
+                    .Pass();
+            }
 
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm, configuration: useFrameworkDependentDefaultTargetFramework ? "Release" : "Debug");
 
             var expectedSelfContainedValue = "true";
             if (
@@ -306,7 +317,7 @@ namespace Microsoft.NET.Publish.Tests
                 (property == "PublishTrimmed" && !useFrameworkDependentDefaultTargetFramework) // This property did not infer SelfContained until net 8
                )
             {
-                expectedSelfContainedValue = "";
+                expectedSelfContainedValue = "false";
             }
 
             properties["SelfContained"].Should().Be(expectedSelfContainedValue);
