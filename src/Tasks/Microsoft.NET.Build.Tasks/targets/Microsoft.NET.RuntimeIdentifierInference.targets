@@ -62,14 +62,17 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <!-- Breaking change in .NET 8: Some publish properties used to imply SelfContained or require it at the time of this PR to work. We decided to infer SelfContained still in these situations. -->
-  <PublishSelfContained Condition="'$(SelfContained)' == '' and
-                                    '$(PublishSelfContained)' == '' and
-                                    '$(_TargetFrameworkVersionWithoutV)' &gt; '7.0' and
-                                    (
-                                        '$(PublishTrimmed)' == 'true' or
-                                        '$(PublishSingleFile)' == 'true' or
-                                        '$(PublishAot)' == 'true'
-                                    )">true</PublishSelfContained>
+  <PropertyGroup Condition="'$(SelfContained)' == '' and
+                             '$(PublishSelfContained)' == '' and
+                              '$(_TargetFrameworkVersionWithoutV)' &gt; '7.0' and
+                              (
+                                  '$(PublishTrimmed)' == 'true' or
+                                  '$(PublishSingleFile)' == 'true' or
+                                  '$(PublishAot)' == 'true'
+                              )">
+    <PublishSelfContained>true</PublishSelfContained>
+  </PropertyGroup>
+
 
   <!-- Edit SelfContained to match the value of PublishSelfContained if we are publishing.
        This Won't affect t:/Publish (because of _IsPublishing), and also won't override a global SelfContained property.-->
@@ -343,5 +346,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </GetDefaultPlatformTargetForNetFramework>
   </Target>
+
 
 </Project>
