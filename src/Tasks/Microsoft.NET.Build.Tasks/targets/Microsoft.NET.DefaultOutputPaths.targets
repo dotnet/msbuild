@@ -154,6 +154,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NetSdkError Condition="'$(UseArtifactsOutput)' == 'true' and '$(_ArtifactsPathSetEarly)' != 'true'"
                  ResourceName="ArtifactsPathCannotBeSetInProject" />
+    
+    <NetSdkError Condition="'$(_ArtifactsPathLocationType)' == 'ProjectFolder'"
+                 ResourceName="UseArtifactsOutputRequiresDirectoryBuildProps" />
+
   </Target>
 
 </Project>

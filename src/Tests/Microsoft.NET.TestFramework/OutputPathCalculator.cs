@@ -68,7 +68,7 @@ namespace Microsoft.NET.TestFramework
             {
                 calculator.UseArtifactsOutput = testProject.UseArtifactsOutput;
                 calculator.IsSdkProject = testProject.IsSdkProject;
-                calculator.IncludeProjectNameInArtifactsPaths = testProject.UseDirectoryBuildPropsForArtifactsOutput;
+                calculator.IncludeProjectNameInArtifactsPaths = true;
 
                 if (testProject.TargetFrameworks.Contains(';'))
                 {
@@ -258,8 +258,7 @@ namespace Microsoft.NET.TestFramework
 
         public string GetIntermediateDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "")
         {
-            //  IncludeProjectNameInArtifactsPath is likely to be true if UseArtifactsOutput was set in Directory.Build.props, and hence the intermediate folder should be in the artifacts path
-            if (UseArtifactsOutput && IncludeProjectNameInArtifactsPaths)
+            if (UseArtifactsOutput)
             {
                 string pivot = configuration.ToLowerInvariant();
                 if (IsMultiTargeted())
@@ -274,7 +273,16 @@ namespace Microsoft.NET.TestFramework
                 {
                     pivot += "_" + runtimeIdentifier;
                 }
-                return Path.Combine(ArtifactsPath, "obj", Path.GetFileNameWithoutExtension(ProjectPath), pivot);
+
+                if (IncludeProjectNameInArtifactsPaths)
+                {
+                    return Path.Combine(ArtifactsPath, "obj", Path.GetFileNameWithoutExtension(ProjectPath), pivot);
+                }
+                else
+                {
+                    return Path.Combine(ArtifactsPath, "obj", pivot);
+                }
+                
             }
 
             targetFramework = targetFramework ?? TargetFramework ?? string.Empty;

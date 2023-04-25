@@ -54,8 +54,6 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public bool UseArtifactsOutput { get; set; }
 
-        public bool UseDirectoryBuildPropsForArtifactsOutput { get; set; }
-
         public List<TestProject> ReferencedProjects { get; } = new List<TestProject>();
 
         public List<string> References { get; } = new List<string>();
@@ -249,11 +247,6 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             foreach (var additionalProperty in AdditionalProperties)
             {
                 propertyGroup.Add(new XElement(ns + additionalProperty.Key, additionalProperty.Value));
-            }
-
-            if (UseArtifactsOutput && !UseDirectoryBuildPropsForArtifactsOutput)
-            {
-                propertyGroup.Add(new XElement(ns + "UseArtifactsOutput", "true"));
             }
 
             if (AdditionalItems.Any())
