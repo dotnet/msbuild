@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
+using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -174,7 +175,15 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                Log.LogErrorWithCodeFromResources("XslTransform.TransformError", e.Message);
+                StringBuilder flattenedMessage = new StringBuilder(e.Message);
+                Exception excep = e;
+                while (excep.InnerException != null)
+                {
+                    excep = excep.InnerException;
+                    flattenedMessage.Append(" ---> ").Append(excep.Message);
+                }
+                Log.LogErrorWithCodeFromResources("XslTransform.TransformError", flattenedMessage.ToString());
+                Log.LogMessage(MessageImportance.Low, e.ToString());
                 return false;
             }
 
