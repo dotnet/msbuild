@@ -93,6 +93,11 @@ internal sealed class LiveLogger : INodeLogger
     private DateTime _buildStartTime;
 
     /// <summary>
+    /// The working directory when the build starts, to trim relative output paths.
+    /// </summary>
+    private readonly string _initialWorkingDirectory = Environment.CurrentDirectory;
+
+    /// <summary>
     /// True if the build has encountered at least one error.
     /// </summary>
     private bool _buildHasErrors;
@@ -366,7 +371,8 @@ internal sealed class LiveLogger : INodeLogger
                     // Print the output path as a link if we have it.
                     if (outputPath is not null)
                     {
-                        ReadOnlySpan<char> url = outputPath.Value.Span;
+                        ReadOnlySpan<char> outputPathSpan = outputPath.Value.Span;
+                        ReadOnlySpan<char> url = outputPathSpan;
                         try
                         {
                             // If possible, make the link point to the containing directory of the output.
@@ -384,8 +390,19 @@ internal sealed class LiveLogger : INodeLogger
                             urlString = uri.AbsoluteUri;
                         }
 
+                        // If the output path is under the initial working directory, make the console output relative to that to save space.
+                        if (outputPathSpan.StartsWith(_initialWorkingDirectory.AsSpan(), FileUtilities.PathComparison))
+                        {
+                            if (outputPathSpan.Length > _initialWorkingDirectory.Length
+                                && (outputPathSpan[_initialWorkingDirectory.Length] == Path.DirectorySeparatorChar
+                                    || outputPathSpan[_initialWorkingDirectory.Length] == Path.AltDirectorySeparatorChar))
+                            {
+                                outputPathSpan = outputPathSpan.Slice(_initialWorkingDirectory.Length + 1);
+                            }
+                        }
+
                         Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
-                            $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}"));
+                            $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{outputPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
                     }
                     else
                     {
