@@ -377,8 +377,15 @@ internal sealed class LiveLogger : INodeLogger
                             // Ignore any GetDirectoryName exceptions.
                         }
 
+                        // Generates file:// schema url string which is better handled by various Terminal clients than raw folder name.
+                        string urlString = url.ToString();
+                        if (Uri.TryCreate(urlString, UriKind.Absolute, out Uri? uri))
+                        {
+                            urlString = uri.AbsoluteUri;
+                        }
+
                         Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
-                            $"{AnsiCodes.LinkPrefix}{url.ToString()}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}"));
+                            $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}"));
                     }
                     else
                     {
