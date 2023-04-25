@@ -98,9 +98,9 @@ namespace Microsoft.NET.Build.Tests
             _referencedProject.IsExe = true;
 
             var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: passSelfContained.ToString() + "_" + passRuntimeIdentifier);
-
-            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
-            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
+            bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
+            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: buildingSelfContained);
+            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: buildingSelfContained);
         }
 
 
@@ -118,8 +118,10 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: identifier);
 
-            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
-            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
+            bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
+
+            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: buildingSelfContained);
+            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: buildingSelfContained);
         }
 
 
@@ -135,8 +137,10 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: passSelfContained.ToString() + "_" + passRuntimeIdentifier);
 
-            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier);
-            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier,
+            bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
+
+            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: buildingSelfContained);
+            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: buildingSelfContained,
                 expectedRuntimeIdentifier: passRuntimeIdentifier ? "" : _referencedProject.RuntimeIdentifier);
         }
 
@@ -173,13 +177,15 @@ namespace Microsoft.NET.Build.Tests
             {
                 var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: identifier);
 
-                ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier,
+                bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
+
+                ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: buildingSelfContained,
                     targetFramework: "net6.0");
-                ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier,
+                ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: buildingSelfContained,
                     targetFramework: "net7.0");
                 ValidateProperties(testAsset, _referencedProject, expectSelfContained: false, expectRuntimeIdentifier: false,
                     targetFramework: "net6.0");
-                ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: passRuntimeIdentifier,
+                ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: buildingSelfContained,
                     targetFramework: "net7.0");
             }
         }

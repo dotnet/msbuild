@@ -297,14 +297,14 @@ namespace Microsoft.NET.Publish.Tests
             if (property == "PublishTrimmed" && !useFrameworkDependentDefaultTargetFramework)
             {
                 publishCommand
-                   .Execute("-bl:C:\\users\\noahgilson\\whydoespublishaotfail.binlog")
+                   .Execute()
                    .Should()
                    .Fail();
             }
             else
             {
                 publishCommand
-                    .Execute("-bl:C:\\users\\noahgilson\\whydoespublishaotfail.binlog")
+                    .Execute()
                     .Should()
                     .Pass();
             }
