@@ -1478,6 +1478,15 @@
       {0}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
+      <trans-unit id="RestoreCompleteWithMessage">
+        <source>Restore {0} in {1}s</source>
+        <target state="new">Restore {0} in {1}s</target>
+        <note>
+      Restore summary when finished with warning or error
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
       <trans-unit id="SchemaFileLocation">
         <source>Validating project using schema file "{0}".</source>
         <target state="translated">"{0}" 스키마 파일을 사용하여 프로젝트의 유효성을 검사하고 있습니다.</target>
