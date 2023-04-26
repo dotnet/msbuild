@@ -4180,8 +4180,14 @@ $(
         {
             TestPropertyFunction("$([MSBuild]::Add($(X), 5))", "X", "7", "12");
             TestPropertyFunction("$([MSBuild]::Add($(X), 0.5))", "X", "7", "7.5");
+
             // Overflow wrapping
             TestPropertyFunction("$([MSBuild]::Add($(X), 1))", "X", long.MaxValue.ToString(), "-9223372036854775808");
+
+            // Argument exceeds size of long
+            double value = long.MaxValue + 1.0;
+            double expected = value + 1.0;
+            TestPropertyFunction("$([MSBuild]::Add($(X), 1))", "X", value.ToString(), expected.ToString());
         }
 
         [Fact]
@@ -4195,7 +4201,6 @@ $(
         {
             TestPropertyFunction("$([MSBuild]::Subtract($(X), 20100000))", "X", "20100042", "42");
             TestPropertyFunction("$([MSBuild]::Subtract($(X), 20100000.0))", "X", "20100042", "42");
-            // Overflow wrapping
             TestPropertyFunction("$([MSBuild]::Subtract($(X), 9223372036854775806))", "X", long.MaxValue.ToString(), "1");
         }
 
