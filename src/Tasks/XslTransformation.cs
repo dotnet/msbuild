@@ -174,7 +174,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                string flattenedMessage = Log.GetInnerExceptionMessageString(e);
+                string flattenedMessage = TaskLoggingHelper.GetInnerExceptionMessageString(e);
                 Log.LogErrorWithCodeFromResources("XslTransform.TransformError", flattenedMessage);
                 Log.LogMessage(MessageImportance.Low, e.ToString());
                 return false;

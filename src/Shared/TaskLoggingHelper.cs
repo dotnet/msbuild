@@ -508,7 +508,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="e">Exception to flatten.</param>
         /// <returns></returns>
-        public string GetInnerExceptionMessageString(Exception e)
+        public static string GetInnerExceptionMessageString(Exception e)
         {
             StringBuilder flattenedMessage = new StringBuilder(e.Message);
             Exception excep = e;

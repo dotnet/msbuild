@@ -127,7 +127,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        string flattenedMessage = Log.GetInnerExceptionMessageString(e);
+                        string flattenedMessage = TaskLoggingHelper.GetInnerExceptionMessageString(e);
                         Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, flattenedMessage);
                         Log.LogMessage(MessageImportance.Low, actualException.ToString());
                         break;
