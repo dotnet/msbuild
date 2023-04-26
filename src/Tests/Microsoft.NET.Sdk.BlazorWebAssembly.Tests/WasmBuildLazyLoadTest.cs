@@ -42,7 +42,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Act
             var buildCommand = new BuildCommand(testInstance, "blazorwasm");
             buildCommand.WithWorkingDirectory(testInstance.TestRoot);
-            buildCommand.Execute("/bl")
+            buildCommand.Execute()
                 .Should().Pass();
 
             var outputDirectory = buildCommand.GetOutputDirectory(DefaultTfm);
@@ -139,7 +139,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Act
             var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.WithWorkingDirectory(testInstance.TestRoot);
-            publishCommand.Execute("/bl")
+            publishCommand.Execute()
                 .Should().Pass();
 
             var outputDirectory = publishCommand.GetOutputDirectory(DefaultTfm);

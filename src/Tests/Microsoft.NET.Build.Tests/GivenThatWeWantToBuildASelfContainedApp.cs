@@ -434,7 +434,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new DotnetBuildCommand(Log);
             var commandResult = buildCommand
                 .WithWorkingDirectory(testAsset.Path)
-                .Execute("/bl");
+                .Execute();
 
             if (targetFramework == "net7.0" && !defineSelfContained)
             {

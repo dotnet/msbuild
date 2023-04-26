@@ -51,7 +51,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(projectDirectory);
             build.WithWorkingDirectory(projectDirectory.TestRoot);
-            build.Execute("/bl").Should().Pass();
+            build.Execute().Should().Pass();
 
             var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
 
@@ -75,7 +75,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(ProjectDirectory);
             build.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            build.Execute("/bl").Should().Pass();
+            build.Execute().Should().Pass();
 
             var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
@@ -105,7 +105,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var publish = new PublishCommand(ProjectDirectory);
             publish.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            var publishResult = publish.Execute("/bl");
+            var publishResult = publish.Execute();
             publishResult.Should().Pass();
 
             var outputPath = publish.GetOutputDirectory(DefaultTfm).ToString();
@@ -145,7 +145,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(projectDirectory);
             build.WithWorkingDirectory(projectDirectory.TestRoot);
-            build.Execute("/bl").Should().Pass();
+            build.Execute().Should().Pass();
 
             var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
 
@@ -207,7 +207,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(Log, Path.Combine(ProjectDirectory.TestRoot, "AppWithPackageAndP2PReference"));
             build.WithWorkingDirectory(ProjectDirectory.Path);
-            build.Execute("/bl").Should().Pass();
+            build.Execute().Should().Pass();
 
             var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
@@ -245,7 +245,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var publish = new PublishCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
             publish.WithWorkingDirectory(ProjectDirectory.Path);
-            publish.Execute("/bl").Should().Pass();
+            publish.Execute().Should().Pass();
 
             var intermediateOutputPath = publish.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var outputPath = publish.GetOutputDirectory(DefaultTfm, "Debug").ToString();
@@ -297,7 +297,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             });
             var publish = new PublishCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
             publish.WithWorkingDirectory(ProjectDirectory.Path);
-            publish.Execute("/bl").Should().Pass();
+            publish.Execute().Should().Pass();
 
             var intermediateOutputPath = publish.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var outputPath = publish.GetOutputDirectory(DefaultTfm, "Debug").ToString();

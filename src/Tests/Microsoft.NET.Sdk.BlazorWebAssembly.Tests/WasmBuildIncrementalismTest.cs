@@ -74,7 +74,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var build = new BuildCommand(projectDirectory, "blazorwasm");
             build.WithWorkingDirectory(projectDirectory.TestRoot);
-            build.Execute("/bl")
+            build.Execute()
                 .Should()
                 .Pass();
 

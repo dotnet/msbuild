@@ -127,12 +127,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var buildLibraryCommand = new BuildCommand(testInstance, "razorclasslibrary");
             buildLibraryCommand.WithWorkingDirectory(testInstance.TestRoot);
-            buildLibraryCommand.Execute("/bl")
+            buildLibraryCommand.Execute()
                 .Should().Pass();
 
             var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.WithWorkingDirectory(testInstance.TestRoot);
-            publishCommand.Execute("/bl").Should().Pass();
+            publishCommand.Execute().Should().Pass();
 
             var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
 
@@ -260,7 +260,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.WithWorkingDirectory(testInstance.TestRoot);
-            publishCommand.Execute("/p:NoBuild=true", "/bl").Should().Pass();
+            publishCommand.Execute("/p:NoBuild=true").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
             var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
@@ -540,7 +540,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var publishCommand = new PublishCommand(testInstance, "blazorhosted");
             publishCommand.WithWorkingDirectory(testInstance.TestRoot);
-            publishCommand.Execute("/bl").Should().Pass();
+            publishCommand.Execute().Should().Pass();
 
             var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
@@ -678,7 +678,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var publishCommand = new PublishCommand(testInstance, "blazorhosted");
             publishCommand.WithWorkingDirectory(testInstance.TestRoot);
-            publishCommand.Execute("/bl").Should().Pass();
+            publishCommand.Execute().Should().Pass();
 
             var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
@@ -809,7 +809,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var publishCommand = new PublishCommand(testInstance, "blazorhosted");
             publishCommand.WithWorkingDirectory(testInstance.TestRoot);
-            publishCommand.Execute("/p:NoBuild=true", "/bl").Should().Pass();
+            publishCommand.Execute("/p:NoBuild=true").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
             // Make sure the main project exists
@@ -1084,7 +1084,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var publishCommand = new PublishCommand(testInstance, "blazorhosted");
             publishCommand.WithWorkingDirectory(testInstance.TestRoot);
-            publishCommand.Execute("/p:RuntimeIdentifier=linux-x64", "/bl").Should().Pass();
+            publishCommand.Execute("/p:RuntimeIdentifier=linux-x64").Should().Pass();
 
             AssertRIDPublishOuput(publishCommand, testInstance, hosted: true);
         }
@@ -1112,7 +1112,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.WithRuntime("linux-x64");
             publishCommand.WithWorkingDirectory(Path.Combine(testInstance.TestRoot, "blazorhosted"));
-            var result = publishCommand.Execute("--no-self-contained", "/bl");
+            var result = publishCommand.Execute("--no-self-contained");
             result.Should().Pass();
             AssertRIDPublishOuput(publishCommand, testInstance, hosted: true, selfContained: false);
         }
@@ -1127,7 +1127,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.WithWorkingDirectory(Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.WithRuntime("linux-x64");
-            var result = publishCommand.Execute("--self-contained", "/bl");
+            var result = publishCommand.Execute("--self-contained");
 
             result.Should().Pass();
             AssertRIDPublishOuput(publishCommand, testInstance, hosted: true);
@@ -1142,7 +1142,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var publishCommand = new PublishCommand(testInstance, "blazorhosted");
             publishCommand.WithWorkingDirectory(testInstance.TestRoot);
-            publishCommand.Execute("/bl").Should().Pass();
+            publishCommand.Execute().Should().Pass();
 
             AssertRIDPublishOuput(publishCommand, testInstance, hosted: true);
         }

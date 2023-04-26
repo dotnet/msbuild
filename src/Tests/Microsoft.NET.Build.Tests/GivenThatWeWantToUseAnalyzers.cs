@@ -109,7 +109,7 @@ namespace Microsoft.NET.Build.Tests
 
             command
                 .WithWorkingDirectory(asset.Path)
-                .Execute("/bl")
+                .Execute()
                 .Should().Pass();
 
             var analyzers = command.GetValues();
