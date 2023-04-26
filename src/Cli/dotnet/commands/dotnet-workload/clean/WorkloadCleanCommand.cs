@@ -100,7 +100,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
 
                         if (!Path.Exists(bandedDotnetPath))
                         {
-                            Reporter.WriteLine(AnsiColorExtensions.Yellow(string.Format(LocalizableStrings.CannotAnalyzeVSWorkloadBand, sdkVersion, _dotnetPath, defaultDotnetWinPath)));
+                            Reporter.WriteLine(AnsiExtensions.Yellow(string.Format(LocalizableStrings.CannotAnalyzeVSWorkloadBand, sdkVersion, _dotnetPath, defaultDotnetWinPath)));
                             continue;
                         }
 
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Clean
                         // Limitation: We don't know the dotnetPath of the other feature bands when making the manifestProvider and resolvers.
                         // This can cause the manifest resolver to fail as it may look for manifests in an invalid path.
                         // It can theoretically be customized, but that is not currently supported for workloads with VS.
-                        Reporter.WriteLine(AnsiColorExtensions.Yellow(string.Format(LocalizableStrings.CannotAnalyzeVSWorkloadBand, sdkVersion, _dotnetPath, defaultDotnetWinPath)));
+                        Reporter.WriteLine(AnsiExtensions.Yellow(string.Format(LocalizableStrings.CannotAnalyzeVSWorkloadBand, sdkVersion, _dotnetPath, defaultDotnetWinPath)));
                         Cli.Utils.Reporter.Verbose.WriteLine(ex.Message);
                     }
                 }

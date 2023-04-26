@@ -151,6 +151,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             TemplateInvoker invoker = new TemplateInvoker(_environmentSettings, () => Console.ReadLine() ?? string.Empty);
             TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(_environmentSettings, _templatePackageManager);
             TemplateConstraintManager constraintManager = new TemplateConstraintManager(_environmentSettings);
+            TemplatePackageDisplay templatePackageDisplay = new TemplatePackageDisplay(Reporter.Output, Reporter.Error);
 
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             cancellationTokenSource.CancelAfter(ConstraintEvaluationTimeout);
@@ -183,13 +184,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (checkForUpdateTask.Result != null)
             {
                 // print if there is update for the template package containing the template
-                packageCoordinator.DisplayUpdateCheckResult(checkForUpdateTask.Result, args);
+                templatePackageDisplay.DisplayUpdateCheckResult(checkForUpdateTask.Result, args);
             }
 
             if (builtInPackageCheck.Result != default)
             {
                 // print if there is same or newer built-in package
-                packageCoordinator.DisplayBuiltInPackagesCheckResult(
+                templatePackageDisplay.DisplayBuiltInPackagesCheckResult(
                     builtInPackageCheck.Result.Id,
                     builtInPackageCheck.Result.Version,
                     builtInPackageCheck.Result.Provider,

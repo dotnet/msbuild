@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.Utils
         }
     
         private int _boldRecursion;
-    
+
         public static AnsiConsole GetOutput()
         {
             return new AnsiConsole(Console.Out);
