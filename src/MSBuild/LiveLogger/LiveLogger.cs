@@ -238,7 +238,7 @@ internal sealed class LiveLogger : INodeLogger
         Terminal.BeginUpdate();
         try
         {
-            double duration = (e.Timestamp - _buildStartTime).TotalSeconds;
+            string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
             string buildResult = RenderBuildResult(e.Succeeded, _buildHasErrors, _buildHasWarnings);
 
             Terminal.WriteLine("");
@@ -252,7 +252,7 @@ internal sealed class LiveLogger : INodeLogger
             {
                 Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildFinished",
                     buildResult,
-                    duration.ToString("F1")));
+                    duration));
             }
         }
         finally
