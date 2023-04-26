@@ -3394,12 +3394,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::Modulo(2345.5, 43))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
             Assert.Equal((2345.5 % 43).ToString(), result);
-
-            // test for overflow wrapping
-            result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::Add(9223372036854775807, 20))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-
-            double expectedResult = 9223372036854775807D + 20D;
-            Assert.Equal(expectedResult.ToString(), result);
         }
 
         /// <summary>
@@ -3692,14 +3686,16 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 new string[] {@"$([System.Text.RegularExpressions.Regex]::Match($(Input), `EXPORT\s+(.+)`).Groups[1].Value)","a"},
                 new string[] {"$([MSBuild]::Add(1,2).CompareTo(3))", "0"},
                 new string[] {"$([MSBuild]::Add(1,2).CompareTo(3))", "0"},
-                new string[] {"$([MSBuild]::Add(1,2).CompareTo(3.0))", "0"},
+                new string[] {"$([MSBuild]::Add(1,2.0).CompareTo(3.0))", "0"},
+                new string[] {"$([System.Convert]::ToDouble($([MSBuild]::Add(1,2))).CompareTo(3.0))", "0"},
                 new string[] {"$([MSBuild]::Add(1,2).CompareTo('3'))", "0"},
-                new string[] {"$([MSBuild]::Add(1,2).CompareTo(3.1))", "-1"},
+                new string[] {"$([System.Convert]::ToDouble($([MSBuild]::Add(1,2))).CompareTo(3.1))", "-1"},
                 new string[] {"$([MSBuild]::Add(1,2).CompareTo(2))", "1"},
                 new string[] {"$([MSBuild]::Add(1,2).Equals(3))", "True"},
-                new string[] {"$([MSBuild]::Add(1,2).Equals(3.0))", "True"},
+                new string[] {"$([MSBuild]::Add(1,2.0).Equals(3.0))", "True"},
+                new string[] {"$([System.Convert]::ToDouble($([MSBuild]::Add(1,2))).Equals(3.0))", "True"},
                 new string[] {"$([MSBuild]::Add(1,2).Equals('3'))", "True"},
-                new string[] {"$([MSBuild]::Add(1,2).Equals(3.1))", "False"},
+                new string[] {"$([System.Convert]::ToDouble($([MSBuild]::Add(1,2))).Equals(3.1))", "False"},
                 new string[] {"$(a.Insert(0,'%28'))", "%28no"},
                 new string[] {"$(a.Insert(0,'\"'))", "\"no"},
                 new string[] {"$(a.Insert(0,'(('))", "%28%28no"},
@@ -3858,7 +3854,11 @@ $(
                 "$((((",
                 "$($())",
                 "$",
-                "()"
+                "()",
+                "$([MSBuild]::Add(1,2).CompareTo(3.0))", // Add() returns a long
+                "$([MSBuild]::Add(1,2).CompareTo(3.1))",
+                "$([MSBuild]::Add(1,2).Equals(3.0))",
+                "$([MSBuild]::Add(1,2).Equals(3.1))"
             };
 
 #if !RUNTIME_TYPE_NETCORE
@@ -4179,6 +4179,9 @@ $(
         public void PropertyFunctionMSBuildAdd()
         {
             TestPropertyFunction("$([MSBuild]::Add($(X), 5))", "X", "7", "12");
+            TestPropertyFunction("$([MSBuild]::Add($(X), 0.5))", "X", "7", "7.5");
+            // Overflow wrapping
+            TestPropertyFunction("$([MSBuild]::Add($(X), 1))", "X", long.MaxValue.ToString(), "-9223372036854775808");
         }
 
         [Fact]
@@ -4191,12 +4194,16 @@ $(
         public void PropertyFunctionMSBuildSubtract()
         {
             TestPropertyFunction("$([MSBuild]::Subtract($(X), 20100000))", "X", "20100042", "42");
+            TestPropertyFunction("$([MSBuild]::Subtract($(X), 20100000.0))", "X", "20100042", "42");
+            // Overflow wrapping
+            TestPropertyFunction("$([MSBuild]::Subtract($(X), 9223372036854775806))", "X", long.MaxValue.ToString(), "1");
         }
 
         [Fact]
         public void PropertyFunctionMSBuildMultiply()
         {
             TestPropertyFunction("$([MSBuild]::Multiply($(X), 8800))", "X", "2", "17600");
+            TestPropertyFunction("$([MSBuild]::Multiply($(X), .5))", "X", "2", "1");
         }
 
         [Fact]
@@ -4208,7 +4215,15 @@ $(
         [Fact]
         public void PropertyFunctionMSBuildDivide()
         {
-            TestPropertyFunction("$([MSBuild]::Divide($(X), 10000))", "X", "65536", (6.5536).ToString());
+            TestPropertyFunction("$([MSBuild]::Divide($(X), 10000))", "X", "65536", "6");
+            TestPropertyFunction("$([MSBuild]::Divide($(X), 10000.0))", "X", "65536", "6.5536");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildModulo()
+        {
+            TestPropertyFunction("$([MSBuild]::Modulo($(X), 3))", "X", "10", "1");
+            TestPropertyFunction("$([MSBuild]::Modulo($(X), 3.0))", "X", "10", "1");
         }
 
         [Fact]

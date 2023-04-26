@@ -78,7 +78,7 @@ namespace Microsoft.Build.Evaluation
         /// When an error occurs expanding a property, just leave it unexpanded.
         /// </summary>
         /// <remarks>
-        /// This should only be used in cases where property evaluation isn't critcal, such as when attempting to log a
+        /// This should only be used in cases where property evaluation isn't critical, such as when attempting to log a
         /// message with a best effort expansion of a string, or when discovering partial information during lazy evaluation.
         /// </remarks>
         LeavePropertiesUnexpandedOnError = 0x20,
@@ -285,7 +285,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// The CultureInfo from the invariant culture. Used to avoid allocations for
-        /// perfoming IndexOf etc.
+        /// performing IndexOf etc.
         /// </summary>
         private static CompareInfo s_invariantCompareInfo = CultureInfo.InvariantCulture.CompareInfo;
 
@@ -3530,7 +3530,7 @@ namespace Microsoft.Build.Evaluation
                                 functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
                             }
                             // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
-                            // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coersion is possible, so throw.
+                            // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coercion is possible, so throw.
                             catch (MissingMethodException ex) when ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
                             {
                                 // The standard binder failed, so do our best to coerce types into the arguments for the function
@@ -3934,41 +3934,36 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Add), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out double arg1))
+                            if (TryExecuteAdd(args, out returnVal))
                             {
-                                returnVal = IntrinsicFunctions.Add(arg0, arg1);
                                 return true;
                             }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Subtract), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out double arg1))
+                            if (TryExecuteSubtract(args, out returnVal))
                             {
-                                returnVal = IntrinsicFunctions.Subtract(arg0, arg1);
                                 return true;
                             }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Multiply), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out double arg1))
+                            if (TryExecuteMultiply(args, out returnVal))
                             {
-                                returnVal = IntrinsicFunctions.Multiply(arg0, arg1);
                                 return true;
                             }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Divide), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out double arg1))
+                            if (TryExecuteDivide(args, out returnVal))
                             {
-                                returnVal = IntrinsicFunctions.Divide(arg0, arg1);
                                 return true;
                             }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Modulo), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArgs(args, out double arg0, out double arg1))
+                            if (TryExecuteModulo(args, out returnVal))
                             {
-                                returnVal = IntrinsicFunctions.Modulo(arg0, arg1);
                                 return true;
                             }
                         }
@@ -4534,6 +4529,24 @@ namespace Microsoft.Build.Evaluation
                 return false;
             }
 
+            private static bool TryConvertToLong(object value, out long arg0)
+            {
+                switch (value)
+                {
+                    case double d:
+                        arg0 = Convert.ToInt64(d);
+                        return arg0 == d;
+                    case long i:
+                        arg0 = i;
+                        return true;
+                    case string s when long.TryParse(s, out arg0):
+                        return true;
+                }
+
+                arg0 = 0;
+                return false;
+            }
+
             private static bool TryConvertToDouble(object value, out double arg)
             {
                 if (value is double unboxed)
@@ -4671,6 +4684,142 @@ namespace Microsoft.Build.Evaluation
                     arg0 != null &&
                     int.TryParse(value1, out arg1))
                 {
+                    return true;
+                }
+
+                return false;
+            }
+
+            private static bool IsFloatingPointRepresentation(object value)
+            {
+                return value is double ||
+                       (value is string str && str.Contains(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator));
+            }
+
+            private static bool TryExecuteAdd(object[] args, out object resultValue)
+            {
+                resultValue = null;
+
+                if (args.Length != 2)
+                {
+                    return false;
+                }
+
+                if (IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
+                {
+                    if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
+                    {
+                        resultValue = IntrinsicFunctions.Add(arg0, arg1);
+                        return true;
+                    }
+                }
+                else if (TryConvertToLong(args[0], out long arg0) && TryConvertToLong(args[1], out long arg1))
+                {
+                    resultValue = IntrinsicFunctions.Add(arg0, arg1);
+                    return true;
+                }
+
+                return false;
+            }
+
+            private static bool TryExecuteSubtract(object[] args, out object resultValue)
+            {
+                resultValue = null;
+
+                if (args.Length != 2)
+                {
+                    return false;
+                }
+
+                if (IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
+                {
+                    if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
+                    {
+                        resultValue = IntrinsicFunctions.Subtract(arg0, arg1);
+                        return true;
+                    }
+                }
+                else if (TryConvertToLong(args[0], out long arg0) && TryConvertToLong(args[1], out long arg1))
+                {
+                    resultValue = IntrinsicFunctions.Subtract(arg0, arg1);
+                    return true;
+                }
+
+                return false;
+            }
+
+            private static bool TryExecuteMultiply(object[] args, out object resultValue)
+            {
+                resultValue = null;
+
+                if (args.Length != 2)
+                {
+                    return false;
+                }
+
+                if (IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
+                {
+                    if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
+                    {
+                        resultValue = IntrinsicFunctions.Multiply(arg0, arg1);
+                        return true;
+                    }
+                }
+                else if (TryConvertToLong(args[0], out long arg0) && TryConvertToLong(args[1], out long arg1))
+                {
+                    resultValue = IntrinsicFunctions.Multiply(arg0, arg1);
+                    return true;
+                }
+
+                return false;
+            }
+
+            private static bool TryExecuteDivide(object[] args, out object resultValue)
+            {
+                resultValue = null;
+
+                if (args.Length != 2)
+                {
+                    return false;
+                }
+
+                if (IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
+                {
+                    if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
+                    {
+                        resultValue = IntrinsicFunctions.Divide(arg0, arg1);
+                        return true;
+                    }
+                }
+                else if (TryConvertToLong(args[0], out long arg0) && TryConvertToLong(args[1], out long arg1))
+                {
+                    resultValue = IntrinsicFunctions.Divide(arg0, arg1);
+                    return true;
+                }
+
+                return false;
+            }
+
+            private static bool TryExecuteModulo(object[] args, out object resultValue)
+            {
+                resultValue = null;
+
+                if (args.Length != 2)
+                {
+                    return false;
+                }
+
+                if (IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
+                {
+                    if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
+                    {
+                        resultValue = IntrinsicFunctions.Modulo(arg0, arg1);
+                        return true;
+                    }
+                }
+                else if (TryConvertToLong(args[0], out long arg0) && TryConvertToLong(args[1], out long arg1))
+                {
+                    resultValue = IntrinsicFunctions.Modulo(arg0, arg1);
                     return true;
                 }
 
