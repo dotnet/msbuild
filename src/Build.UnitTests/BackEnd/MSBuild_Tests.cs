@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -770,6 +769,121 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(projectFile);
             }
+        }
+
+        /// <summary>
+        /// Referring to an item outside of target leads to 'naturally expected' reference to the item being processed.
+        ///  No expansion occurs.
+        /// </summary>
+        [Fact]
+        public void ItemsRecursionOutsideTarget()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectContent = """
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                     <ItemGroup>
+                        <iout1 Include='a/b.foo' TargetPath='%(Filename)%(Extension)' />
+                        <iout1 Include='c/d.foo' TargetPath='%(Filename)%(Extension)' />
+                        <iout1 Include='g/h.foo' TargetPath='%(Filename)%(Extension)' />
+                      </ItemGroup>
+                      <Target Name='a'>
+                        <Message Text="iout1=[@(iout1)]" Importance='High' />
+                        <Message Text="iout1-target-paths=[@(iout1->'%(TargetPath)')]" Importance='High' />
+                      </Target>
+                    </Project>
+                """;
+            var projectFile = env.CreateFile("test.proj", ObjectModelHelpers.CleanupFileContents(projectContent));
+
+            MockLogger logger = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile.Path, logger);
+
+            _testOutput.WriteLine(logger.FullLog);
+
+            logger.AssertLogContains("iout1=[a/b.foo;c/d.foo;g/h.foo]");
+            logger.AssertLogContains("iout1-target-paths=[b.foo;d.foo;h.foo]");
+        }
+
+        /// <summary>
+        /// Referring to an item within target leads to item expansion which might be unintended behavior - hence warning.
+        /// </summary>
+        [Fact]
+        public void ItemsRecursionWithinTarget()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectContent = """
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <Target Name='a'>
+                        <ItemGroup>
+                          <iin1 Include='a/b.foo' TargetPath='%(Filename)%(Extension)' />
+                          <iin1 Include='c/d.foo' TargetPath='%(Filename)%(Extension)' />
+                          <iin1 Include='g/h.foo' TargetPath='%(Filename)%(Extension)' />
+                        </ItemGroup>
+                        <Message Text="iin1=[@(iin1)]" Importance='High' />
+                        <Message Text="iin1-target-paths=[@(iin1->'%(TargetPath)')]" Importance='High' />
+                      </Target>
+                    </Project>
+                """;
+            string projFileName = "test.proj";
+            var projectFile = env.CreateFile(projFileName, ObjectModelHelpers.CleanupFileContents(projectContent));
+
+            MockLogger logger = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile.Path, logger);
+
+            _testOutput.WriteLine(logger.FullLog);
+
+            logger.AssertLogDoesntContain("iin1=[a/b.foo;c/d.foo;g/h.foo]");
+            logger.AssertLogDoesntContain("iin1-target-paths=[b.foo;d.foo;h.foo]");
+            logger.AssertLogContains("iin1=[a/b.foo;c/d.foo;g/h.foo;g/h.foo]");
+            logger.AssertLogContains("iin1-target-paths=[;b.foo;b.foo;d.foo]");
+
+            logger.AssertLogContains(string.Format(ResourceUtilities.GetResourceString("ItemReferencingSelfInTarget"), "iin1", "Filename"));
+            logger.AssertLogContains(string.Format(ResourceUtilities.GetResourceString("ItemReferencingSelfInTarget"), "iin1", "Extension"));
+            logger.AssertMessageCount("MSB4120", 6);
+            // The location of the offending attribute (TargetPath) is transferred - for both metadatums (%(Filename) and %(Extension)) on correct locations in xml
+            logger.AssertMessageCount($"{projFileName}(4,34):", 2, false);
+            logger.AssertMessageCount($"{projFileName}(5,34):", 2, false);
+            logger.AssertMessageCount($"{projFileName}(6,34):", 2, false);
+            Assert.Equal(0, logger.WarningCount);
+            Assert.Equal(0, logger.ErrorCount);
+        }
+
+        /// <summary>
+        /// Referring to an unrelated item within target leads to expected expansion.
+        /// </summary>
+        [Fact]
+        public void UnrelatedItemsRecursionWithinTarget()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectContent = """
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <ItemGroup>
+                        <iout1 Include='a/b.foo'/>
+                        <iout1 Include='c/d.foo'/>
+                        <iout1 Include='g/h.foo'/>
+                      </ItemGroup>
+
+                      <Target Name='a'>
+                        <ItemGroup>
+                          <iin1 Include='@(iout1)' TargetPath='%(Filename)%(Extension)' />
+                        </ItemGroup>
+                        <Message Text="iin1=[@(iin1)]" Importance='High' />
+                        <Message Text="iin1-target-paths=[@(iin1->'%(TargetPath)')]" Importance='High' />
+                      </Target>
+                    </Project>
+                """;
+            var projectFile = env.CreateFile("test.proj", ObjectModelHelpers.CleanupFileContents(projectContent));
+
+            MockLogger logger = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile.Path, logger);
+
+            _testOutput.WriteLine(logger.FullLog);
+
+            logger.AssertLogContains("iin1=[a/b.foo;c/d.foo;g/h.foo]");
+            logger.AssertLogContains("iin1-target-paths=[b.foo;d.foo;h.foo]");
+
+            logger.AssertLogDoesntContain("MSB4120");
+            Assert.Equal(0, logger.WarningCount);
+            Assert.Equal(0, logger.ErrorCount);
         }
 
         /// <summary>

@@ -63,7 +63,7 @@ namespace Microsoft.Build.Internal
                 return this;
             }
 
-            public XmlElementWithLocation Current
+            public readonly XmlElementWithLocation Current
             {
                 get
                 {
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Internal
                 }
             }
 
-            private XmlElementWithLocation GetNextNode(XmlNode child)
+            private readonly XmlElementWithLocation GetNextNode(XmlNode child)
             {
                 while (child != null)
                 {

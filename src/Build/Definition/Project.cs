@@ -2558,7 +2558,7 @@ namespace Microsoft.Build.Evaluation
                     };
                 }
 
-                public void AccumulateInformationFromRemoveItemSpec(EvaluationItemSpec removeSpec)
+                public readonly void AccumulateInformationFromRemoveItemSpec(EvaluationItemSpec removeSpec)
                 {
                     IEnumerable<string> removeSpecFragmentStrings = removeSpec.FlattenFragmentsAsStrings();
                     var removeGlob = removeSpec.ToMSBuildGlob();

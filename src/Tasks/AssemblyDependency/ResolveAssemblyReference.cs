@@ -29,7 +29,7 @@ namespace Microsoft.Build.Tasks
     /// Given a list of assemblyFiles, determine the closure of all assemblyFiles that
     /// depend on those assemblyFiles including second and nth-order dependencies too.
     /// </summary>
-    public class ResolveAssemblyReference : TaskExtension
+    public class ResolveAssemblyReference : TaskExtension, IIncrementalTask
     {
         /// <summary>
         /// key assembly used to trigger inclusion of facade references.
@@ -887,6 +887,8 @@ namespace Microsoft.Build.Tasks
                 _fullFrameworkFolders = value;
             }
         }
+
+        public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
         /// This is a list of all primary references resolved to full paths.
@@ -2054,6 +2056,12 @@ namespace Microsoft.Build.Tasks
             }
             else if (!String.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
+                if (FailIfNotIncremental)
+                {
+                    Log.LogErrorFromResources("ResolveAssemblyReference.WritingCacheFile", _stateFile);
+                    return;
+                }
+
                 _cache.SerializeCache(_stateFile, Log);
             }
         }

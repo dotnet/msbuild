@@ -24,7 +24,7 @@ Set `MSBUILDDEBUGENGINE` environment variable to `'1'` and (optionally) set `MSB
 `PowerShell:`
 ```
 > $env:MSBUILDDEBUGENGINE = 1
-> $env:MSBUILDDEBUGPATH= C:\MSBuildReproLogs
+> $env:MSBUILDDEBUGPATH="C:\MSBuildReproLogs"
 > & "devenv.exe" MySolution.sln
 ```
 

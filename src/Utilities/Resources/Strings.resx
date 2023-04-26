@@ -176,6 +176,9 @@
     <value>MSB6011: Invalid parameters passed to the {0} task.</value>
     <comment>{StrBegin="MSB6011: "}</comment>
   </data>
+  <data name="ToolTask.NotUpToDate">
+    <value>Unable to skip task because it is not up-to-date.</value>
+  </data>
   <!-- FileTracker strings -->
   <data name="Tracking_LogFilesNotAvailable">
     <value xml:space="preserve">Tracking logs are not available, minimal rebuild will be disabled.</value>

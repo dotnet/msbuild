@@ -345,7 +345,7 @@ internal static class NativeMethods
         public UIntPtr UniqueProcessId;
         public UIntPtr InheritedFromUniqueProcessId;
 
-        public uint Size
+        public readonly uint Size
         {
             get
             {
@@ -1479,6 +1479,73 @@ internal static class NativeMethods
             ThrowExceptionForErrorCode(code);
         }
     }
+
+#if !CLR2COMPATIBILITY
+    internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes()
+    {
+        if (Console.IsOutputRedirected)
+        {
+            // There's no ANSI terminal support is console output is redirected.
+            return (acceptAnsiColorCodes: false, outputIsScreen: false, originalConsoleMode: null);
+        }
+
+        bool acceptAnsiColorCodes = false;
+        bool outputIsScreen = false;
+        uint? originalConsoleMode = null;
+        if (IsWindows)
+        {
+            try
+            {
+                IntPtr stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+                if (GetConsoleMode(stdOut, out uint consoleMode))
+                {
+                    if ((consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+                    {
+                        // Console is already in required state.
+                        acceptAnsiColorCodes = true;
+                    }
+                    else
+                    {
+                        originalConsoleMode = consoleMode;
+                        consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+                        if (SetConsoleMode(stdOut, consoleMode) && GetConsoleMode(stdOut, out consoleMode))
+                        {
+                            // We only know if vt100 is supported if the previous call actually set the new flag, older
+                            // systems ignore the setting.
+                            acceptAnsiColorCodes = (consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+                        }
+                    }
+
+                    uint fileType = GetFileType(stdOut);
+                    // The std out is a char type (LPT or Console).
+                    outputIsScreen = fileType == FILE_TYPE_CHAR;
+                    acceptAnsiColorCodes &= outputIsScreen;
+                }
+            }
+            catch
+            {
+                // In the unlikely case that the above fails we just ignore and continue.
+            }
+        }
+        else
+        {
+            // On posix OSes we expect console always supports VT100 coloring unless it is explicitly marked as "dumb".
+            acceptAnsiColorCodes = Environment.GetEnvironmentVariable("TERM") != "dumb";
+            // It wasn't redirected as tested above so we assume output is screen/console
+            outputIsScreen = true; 
+        }
+        return (acceptAnsiColorCodes, outputIsScreen, originalConsoleMode);
+    }
+
+    internal static void RestoreConsoleMode(uint? originalConsoleMode)
+    {
+        if (IsWindows && originalConsoleMode is not null)
+        {
+            IntPtr stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+            _ = SetConsoleMode(stdOut, originalConsoleMode.Value);
+        }
+    }
+#endif // !CLR2COMPATIBILITY
 
     #endregion
 

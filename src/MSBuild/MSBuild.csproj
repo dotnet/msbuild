@@ -156,6 +156,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\ThreadPoolExtensions.cs" />
+    <Compile Include="..\Shared\StringExtensions.cs" />
     <Compile Include="AssemblyInfo.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

@@ -33,7 +33,8 @@ namespace Microsoft.Build.Execution
         ITaskItem2,
         IMetadataTable,
         ITranslatable,
-        IMetadataContainer
+        IMetadataContainer,
+        IItemTypeDefinition
     {
         /// <summary>
         /// The project instance to which this item belongs.
@@ -2137,7 +2138,7 @@ namespace Microsoft.Build.Execution
             /// Also, more importantly, because typically the same regular metadata values can be shared by many items,
             /// and keeping item-specific metadata out of it could allow it to be implemented as a copy-on-write table.
             /// </summary>
-            private class BuiltInMetadataTable : IMetadataTable
+            private class BuiltInMetadataTable : IMetadataTable, IItemTypeDefinition
             {
                 /// <summary>
                 /// Item type
@@ -2195,6 +2196,8 @@ namespace Microsoft.Build.Execution
 
                     return value;
                 }
+
+                string IItemTypeDefinition.ItemType => _itemType;
             }
         }
 
