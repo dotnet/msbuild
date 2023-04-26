@@ -64,8 +64,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Breaking change in .NET 8: Some publish properties used to imply SelfContained or require it at the time of this PR to work. We decided to infer SelfContained still in these situations. -->
   <PropertyGroup Condition="'$(SelfContained)' == '' and
                              '$(PublishSelfContained)' == '' and
-                             '$(_TargetFrameworkVersionWithoutV)' != '' and
-                             '$(_TargetFrameworkVersionWithoutV)' &gt; '7.0' and
+                             $([MSBuild]::VersionGreaterThan($(_TargetFrameworkVersionWithoutV), '7.0')) and
                               (
                                   '$(PublishTrimmed)' == 'true' or
                                   '$(PublishSingleFile)' == 'true' or
@@ -165,7 +164,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
     <!-- Breaking change in .NET 8: Projects with 8.0+ TFMS will no longer have RuntimeIdentifier imply SelfContained. Note that PublishReadyToRun will imply SelfContained in these versions. -->
     <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != '' and
-                              '$(_TargetFrameworkVersionWithoutV)' != '' and '$(_TargetFrameworkVersionWithoutV)' &lt; '8.0'">true</SelfContained>
+                              $([MSBuild]::VersionLessThan($(_TargetFrameworkVersionWithoutV), '8.0'))">true</SelfContained>
     <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
     <_RuntimeIdentifierUsesAppHost Condition="$(RuntimeIdentifier.StartsWith('ios')) or $(RuntimeIdentifier.StartsWith('tvos')) or $(RuntimeIdentifier.StartsWith('maccatalyst')) or $(RuntimeIdentifier.StartsWith('android')) or $(RuntimeIdentifier.StartsWith('browser'))">false</_RuntimeIdentifierUsesAppHost>
     <_RuntimeIdentifierUsesAppHost Condition="'$(_RuntimeIdentifierUsesAppHost)' == ''">true</_RuntimeIdentifierUsesAppHost>
@@ -245,7 +244,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Previously, RuntimeIdentifier (RID) implied SelfContained (SC). A breaking change in 8.0 made it so RID did not activate SC by default.
          So we warn older TFM users before they upgrade to TFM 8.0 or above that they need to add <SelfContained>true</SelfContained> now to keep the same behavior.-->
-    <NETSdkWarning Condition="'$(RuntimeIdentifier)' != '' and '$(_TargetFrameworkVersionWithoutV)' != '' and '$(_TargetFrameworkVersionWithoutV)' &lt; '8.0' and '$(_SelfContainedWasSpecified)' != 'true'"
+    <NETSdkWarning Condition="'$(RuntimeIdentifier)' != '' and $([MSBuild]::VersionLessThan($(_TargetFrameworkVersionWithoutV), '8.0')) and '$(_SelfContainedWasSpecified)' != 'true'"
                  ResourceName="RuntimeIdentifierWillNoLongerImplySelfContained" />
 
     <!-- Generate Trimming warnings for WinForms and Wpf applications-->
