@@ -171,6 +171,15 @@ namespace Microsoft.DotNet.GenAPI
         }
 
         /// <summary>
+        /// If the named type is a generic and not already unbound construct an unbound generic type.
+        /// Unbound types are required for typeof expressions.
+        /// </summary>
+        /// <param name="namedType">type to consider</param>
+        /// <returns>Unbound generic type if necessary, otherwise the original named type.</returns>
+        public static INamedTypeSymbol MakeUnboundIfGeneric(this INamedTypeSymbol namedType) =>
+            namedType.IsGenericType && !namedType.IsUnboundGenericType ? namedType.ConstructUnboundGenericType() : namedType;
+
+        /// <summary>
         /// Detects if a generic type contains inaccessible type arguments.
         /// </summary>
         /// <param name="namedType">A loaded named type symbol <see cref="INamedTypeSymbol"/>.</param>
