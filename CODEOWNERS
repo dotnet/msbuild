@@ -30,7 +30,7 @@
 /src/WasmSdk @lewing @radical @pavelsavara @maraf
 
 # Area-Format
-/src/Cli/dotnet/commands/dotnet-format @arkalyanms
+/src/Cli/dotnet/commands/dotnet-format @sharwell @arkalyanms
 /src/Tests/dotnet-format.Tests @arkalyanms
 
 # Area-NuGet
