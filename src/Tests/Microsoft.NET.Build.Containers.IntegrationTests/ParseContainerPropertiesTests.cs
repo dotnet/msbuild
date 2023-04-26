@@ -19,7 +19,7 @@ public class ParseContainerPropertiesTests
         var (project, _, d) = ProjectInitializer.InitProject(new () {
             [ContainerBaseImage] = "mcr.microsoft.com/dotnet/runtime:7.0",
             [ContainerRegistry] = "localhost:5010",
-            [ContainerImageName] = "dotnet/testimage",
+            [ContainerRepository] = "dotnet/testimage",
             [ContainerImageTags] = "7.0;latest"
         });
         using var _ = d;
@@ -30,7 +30,7 @@ public class ParseContainerPropertiesTests
         Assert.Equal("dotnet/runtime", instance.GetPropertyValue(ContainerBaseName));
         Assert.Equal("7.0", instance.GetPropertyValue(ContainerBaseTag));
 
-        Assert.Equal("dotnet/testimage", instance.GetPropertyValue(ContainerImageName));
+        Assert.Equal("dotnet/testimage", instance.GetPropertyValue(ContainerRepository));
         instance.GetItems(ContainerImageTags).Select(i => i.EvaluatedInclude).ToArray().Should().BeEquivalentTo(new[] { "7.0", "latest" });
         instance.GetItems("ProjectCapability").Select(i => i.EvaluatedInclude).ToArray().Should().BeEquivalentTo(new[] { "NetSdkOCIImageBuild" });
     }
@@ -57,13 +57,13 @@ public class ParseContainerPropertiesTests
          var (project, logs, d) = ProjectInitializer.InitProject(new () {
             [ContainerBaseImage] = "mcr.microsoft.com/dotnet/runtime:7.0",
             [ContainerRegistry] = "localhost:5010",
-            [ContainerImageName] = "dotnet testimage",
+            [ContainerRepository] = "dotnet testimage",
             [ContainerImageTag] = "5.0"
         });
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
         Assert.True(instance.Build(new[]{ComputeContainerConfig}, new [] { logs }, null, out var outputs));
-        Assert.Contains(logs.Messages, m => m.Message?.Contains("'ContainerImageName' was not a valid container image name, it was normalized to 'dotnet-testimage'") == true);
+        Assert.Contains(logs.Messages, m => m.Message?.Contains("'ContainerRepository' was not a valid container image name, it was normalized to 'dotnet-testimage'") == true);
     }
 
     [DockerDaemonAvailableFact]
@@ -72,7 +72,7 @@ public class ParseContainerPropertiesTests
         var (project, logs, d) = ProjectInitializer.InitProject(new () {
             [ContainerBaseImage] = "mcr.microsoft.com/dotnet/runtime:7.0",
             [ContainerRegistry] = "localhost:5010",
-            [ContainerImageName] = "dotnet/testimage",
+            [ContainerRepository] = "dotnet/testimage",
             [ContainerImageTag] = "5 0"
         });
         using var _ = d;
@@ -89,7 +89,7 @@ public class ParseContainerPropertiesTests
         var (project, logs, d) = ProjectInitializer.InitProject(new () {
             [ContainerBaseImage] = "mcr.microsoft.com/dotnet/runtime:7.0",
             [ContainerRegistry] = "localhost:5010",
-            [ContainerImageName] = "dotnet/testimage",
+            [ContainerRepository] = "dotnet/testimage",
             [ContainerImageTag] = "5.0",
             [ContainerImageTags] = "latest;oldest"
         });

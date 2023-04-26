@@ -46,7 +46,7 @@ public class TargetsTests
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
         instance.Build(new[] { ComputeContainerConfig }, null, null, out var outputs).Should().Be(shouldPass, "Build should have succeeded");
-        Assert.Equal(expectedContainerImageName, instance.GetPropertyValue(ContainerImageName));
+        Assert.Equal(expectedContainerImageName, instance.GetPropertyValue(ContainerRepository));
     }
 
     [InlineData("7.0.100", true)]
@@ -176,7 +176,7 @@ public class TargetsTests
             ["TargetFrameworkVersion"] = tfm,
             ["TargetFramework"] = "net" + tfm.TrimStart('v'),
             ["ContainerRuntimeIdentifier"] = rid
-        }, projectName: $"{nameof(CanComputeTagsForSupportedSDKVersions)}_{tfm}_{rid}_{expectedUser}");
+        }, projectName: $"{nameof(CanComputeContainerUser)}_{tfm}_{rid}_{expectedUser}");
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
         instance.Build(new[]{ComputeContainerConfig}, null, null, out var outputs).Should().BeTrue(String.Join(Environment.NewLine, logger.Errors));

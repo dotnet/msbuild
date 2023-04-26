@@ -9,7 +9,7 @@ internal static class KnownStrings
     {
         public static readonly string ContainerBaseImage = nameof(ContainerBaseImage);
         public static readonly string ContainerRegistry = nameof(ContainerRegistry);
-        public static readonly string ContainerImageName = nameof(ContainerImageName);
+        public static readonly string ContainerRepository = nameof(ContainerRepository);
         public static readonly string ContainerImageTag = nameof(ContainerImageTag);
         public static readonly string ContainerImageTags = nameof(ContainerImageTags);
         public static readonly string ContainerWorkingDirectory = nameof(ContainerWorkingDirectory);
