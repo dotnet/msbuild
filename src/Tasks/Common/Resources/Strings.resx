@@ -905,7 +905,7 @@ You may need to build the project on another operating system or architecture, o
     <comment>{StrBegin="NETSDK1200: "}</comment>
   </data>
   <data name="RuntimeIdentifierWillNoLongerImplySelfContained" xml:space="preserve">
-    <value>NETSDK1201: For projects with TargetFramework(s) >= 8.0, specifying a RuntimeIdentifier no longer produces a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use --self-contained argument.</value>
+    <value>NETSDK1201: For projects targeting .NET 8.0 and higher, specifying a RuntimeIdentifier will no longer produce a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use the --self-contained argument.</value>
     <comment>{StrBegin="NETSDK1201: "}</comment>
   </data>
 </root>
