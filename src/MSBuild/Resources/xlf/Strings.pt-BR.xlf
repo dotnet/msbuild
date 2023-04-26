@@ -1375,7 +1375,7 @@ arquivo de resposta.
         <source>{0}{1} {2} ({3}s)</source>
         <target state="new">{0}{1} {2} ({3}s)</target>
         <note>
-      Project finished summary.
+      Project building.
       {0}: indentation - few spaces to visually indent row
       {1}: project name
       {2}: target
@@ -1383,10 +1383,10 @@ arquivo de resposta.
     </note>
       </trans-unit>
       <trans-unit id="ProjectBuilding_WithTF">
-        <source>{0}{1} [2] {3} ({4}s)</source>
-        <target state="new">{0}{1} [2] {3} ({4}s)</target>
+        <source>{0}{1} [{2}] {3} ({4}s)</source>
+        <target state="new">{0}{1} [{2}] {3} ({4}s)</target>
         <note>
-      Project finished summary including target framework information.
+      Project building including target framework information.
       {0}: indentation - few spaces to visually indent row
       {1}: project name
       {2}: target framework
