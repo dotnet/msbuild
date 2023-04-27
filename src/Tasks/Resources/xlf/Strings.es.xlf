@@ -323,7 +323,7 @@
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
         <source>File "{0}" doesn't exist. Skipping.</source>
-        <target state="translated">El archivo"{0}" no existe. Se omitirá.</target>
+        <target state="translated">El archivo "{0}" no existe. Se omitirá.</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadFile.DidNotDownloadBecauseOfFileMatch">
@@ -1285,12 +1285,12 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CannotWriteAssembly">
         <source>MSB3575: GenerateResource cannot write assemblies, only read from them. Cannot create assembly "{0}".</source>
-        <target state="translated">MSB3575: GenerateResource no puede escribir ensamblados, solo leerlos. No se puede crear el ensamblado"{0}".</target>
+        <target state="translated">MSB3575: GenerateResource no puede escribir ensamblados, solo leerlos. No se puede crear el ensamblado "{0}".</target>
         <note>{StrBegin="MSB3575: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CreatingCultureInfoFailed">
         <source>MSB3576: Creating the CultureInfo failed for assembly "{2}". Note the set of cultures supported is Operating System-dependent, and the Operating System has removed some cultures from time to time (ie, some Serbian cultures are split up in Windows 7).  The culture may be a user-defined custom culture that we can't currently load on this machine.  Exception info: {0}: {1}</source>
-        <target state="translated">MSB3576: Error al crear CultureInfo para el ensamblado"{2}". Tenga en cuenta que el conjunto de referencias culturales admitido depende del sistema operativo y este ha quitado algunas referencias culturales de vez en cuando (por ejemplo, en Windows 7, algunas referencias culturales de serbio están divididas).  La referencia cultural puede ser una referencia cultural personalizada definida por el usuario que no se pueda cargar actualmente en este equipo.  Información de la excepción: {0}: {1}</target>
+        <target state="translated">MSB3576: Error al crear CultureInfo para el ensamblado "{2}". Tenga en cuenta que el conjunto de referencias culturales admitido depende del sistema operativo y este ha quitado algunas referencias culturales de vez en cuando (por ejemplo, en Windows 7, algunas referencias culturales de serbio están divididas).  La referencia cultural puede ser una referencia cultural personalizada definida por el usuario que no se pueda cargar actualmente en este equipo.  Información de la excepción: {0}: {1}</target>
         <note>{StrBegin="MSB3576: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.DuplicateOutputFilenames">
@@ -1340,7 +1340,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CannotLoadAssemblyLoadFromFailed">
         <source>MSB3816: Loading assembly "{0}" failed. {1}</source>
-        <target state="translated">MSB3816: Error al cargar el ensamblado"{0}". {1}</target>
+        <target state="translated">MSB3816: Error al cargar el ensamblado "{0}". {1}</target>
         <note>{StrBegin="MSB3816: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MainAssemblyMissingNeutralResourcesLanguage">

@@ -2641,7 +2641,7 @@
       </trans-unit>
       <trans-unit id="Unzip.FileComment">
         <source>Unzipping file "{0}" to "{1}".</source>
-        <target state="translated">Распаковка файла "{0}" в"{1}".</target>
+        <target state="translated">Распаковка файла "{0}" в "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="Unzip.ZipSlipExploit">
@@ -3406,7 +3406,7 @@
       </trans-unit>
       <trans-unit id="ZipDirectory.Comment">
         <source>Zipping directory "{0}" to "{1}".</source>
-        <target state="translated">Упаковка каталога "{0}" в"{1}".</target>
+        <target state="translated">Упаковка каталога "{0}" в "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorDirectoryDoesNotExist">

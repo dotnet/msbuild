@@ -3141,7 +3141,7 @@
       </trans-unit>
       <trans-unit id="ResolveSDKReference.CannotReferenceTwoSDKsSameName">
         <source>MSB3780: The SDK "{0}" cannot be referenced alongside SDK(s) {1}, because only one version of the SDK can be referenced from a project. Please consider removing references to the other SDKs.</source>
-        <target state="translated">MSB3780: Projeden SDK’nın yalnızca bir sürümüne başvurulabileceğinden"{0}" SDK’sına {1} SDK’larıyla birlikte başvurulamıyor. Lütfen diğer SDK’lara yapılan başvuruları kaldırın.</target>
+        <target state="translated">MSB3780: Projeden SDK’nın yalnızca bir sürümüne başvurulabileceğinden "{0}" SDK’sına {1} SDK’larıyla birlikte başvurulamıyor. Lütfen diğer SDK’lara yapılan başvuruları kaldırın.</target>
         <note>{StrBegin="MSB3780: "}</note>
       </trans-unit>
       <trans-unit id="ResolveSDKReference.SDKMissingDependency">

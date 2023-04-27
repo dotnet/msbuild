@@ -1556,7 +1556,7 @@
       </trans-unit>
       <trans-unit id="RegisterAssembly.CantRegisterTypeLib">
         <source>MSB3213: Cannot register type library "{0}". {1}</source>
-        <target state="translated">MSB3213: Impossible d'inscrire la bibliothèque de types"{0}". {1}</target>
+        <target state="translated">MSB3213: Impossible d'inscrire la bibliothèque de types "{0}". {1}</target>
         <note>{StrBegin="MSB3213: "}</note>
       </trans-unit>
       <trans-unit id="RegisterAssembly.NoValidTypes">

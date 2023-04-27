@@ -2037,7 +2037,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.PrimarySourceItemsForReference">
         <source>Project file item includes which caused reference "{0}".</source>
-        <target state="translated">Inclusões de itens do arquivo de projeto que geraram a referência"{0}".</target>
+        <target state="translated">Inclusões de itens do arquivo de projeto que geraram a referência "{0}".</target>
         <note> This will look like, Project file item includes which caused reference "a.dll".</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.Resolved">
