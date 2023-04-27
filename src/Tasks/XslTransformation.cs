@@ -167,7 +167,7 @@ namespace Microsoft.Build.Tasks
                         {
                             if (UseTrustedSettings)
                             {
-                                Log.LogMessageFromResources("XslTransform.SecuritySettingsViaUseTrustedSettings");
+                                Log.LogMessageFromResources(MessageImportance.High, "XslTransform.SecuritySettingsViaUseTrustedSettings");
                             }
                             xslct.Transform(xr, arguments, xmlWriter, new XmlUrlResolver());
                         }
