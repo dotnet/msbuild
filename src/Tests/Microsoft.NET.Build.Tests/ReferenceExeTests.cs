@@ -80,7 +80,7 @@ if (string.Empty.Length > 0)
 
             if (MainRuntimeIdentifier)
             {
-                MainProject.AdditionalProperties["RuntimeIdentifier"] = EnvironmentInfo.GetCompatibleRid();
+                MainProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid();
             }
 
             if (MainSelfContained)

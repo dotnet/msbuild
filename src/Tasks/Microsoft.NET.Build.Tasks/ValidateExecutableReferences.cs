@@ -56,6 +56,10 @@ namespace Microsoft.NET.Build.Tasks
                 bool referencedProjectIsSelfContained = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["SelfContained"]);
                 bool referencedProjectHadSelfContainedSpecified = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["_SelfContainedWasSpecified"]);
 
+                string referencedProjectTargetFrameworkVersion = projectAdditionalProperties["TargetFrameworkVersion"];
+                string referencedProjectTargetFrameworkIdentifier = projectAdditionalProperties["TargetFrameworkIdentifier"];
+                Version? referencedProjectTargetFramework = referencedProjectTargetFrameworkIdentifier != "" ? new Version(referencedProjectTargetFrameworkVersion) : null;
+
                 var globalProperties = BuildEngine6.GetGlobalProperties();
 
                 bool selfContainedIsGlobalProperty = globalProperties.ContainsKey("SelfContained");
@@ -78,7 +82,10 @@ namespace Microsoft.NET.Build.Tasks
                         referencedProjectIsSelfContained = true;
                     }
 
-                    //  If the project is of a TFM where RuntimeIdentifier still makes an app SelfContained by default:
+                    //  We need to check if referenced project will become SelfContained because of its RuntimeIdentifier. This only happens on TargetFrameworks less than net8.0.
+                    Version sdkVersionWhereRuntimeIdentifierNoLongerInfersSelfContained = new Version("net8.0");
+                    bool runtimeIdentifierInfersSelfContained = referencedProjectTargetFrameworkIdentifier == ".NETCoreApp" && referencedProjectTargetFramework.CompareTo(sdkVersionWhereRuntimeIdentifierNoLongerInfersSelfContained) < 0;
+
                     //  If the project is NOT RID agnostic, then a global RuntimeIdentifier will flow to it.
                     //  If the project didn't explicitly specify a value for SelfContained, then this will
                     //  set SelfContained to true
