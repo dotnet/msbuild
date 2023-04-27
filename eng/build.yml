@@ -256,6 +256,15 @@ jobs:
             BuildConfig: $(_BuildConfig)
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
             HelixAccessToken: ${{ parameters.HelixAccessToken }}
+        - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet --info
+          displayName: Print Info
+          continueOnError: false
+        - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload update --print-rollback
+          displayName: Print Rollback
+          continueOnError: false
+        - script: dir $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/*
+          displayName: Dir info
+          continueOnError: false
         - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload update --from-rollback-file TestRollback.json
           displayName: Update wasm-tools Workload from rollback
           continueOnError: false
