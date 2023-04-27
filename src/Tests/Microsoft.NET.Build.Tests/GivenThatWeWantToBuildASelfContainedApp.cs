@@ -428,10 +428,13 @@ namespace Microsoft.NET.Build.Tests
                     var ns = project.Root.Name.Namespace;
                     var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                     propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", runtimeIdentifier));
-                    propertyGroup.Add(new XElement(ns + "SelfContained", defineSelfContained ? "true" : ""));
+                    if (defineSelfContained)
+                    {
+                        propertyGroup.Add(new XElement(ns + "SelfContained", "true"));
+                    }
                 });
 
-            var buildCommand = new DotnetBuildCommand(Log);
+            var buildCommand = new DotnetBuildCommand(Log, "/bl");
             var commandResult = buildCommand
                 .WithWorkingDirectory(testAsset.Path)
                 .Execute();
