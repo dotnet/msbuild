@@ -329,6 +329,7 @@ namespace Microsoft.NET.ToolPack.Tests
             runtimeConfig["runtimeOptions"]["rollForward"].Value<string>()
                 .Should().Be("Major");
         }
+
         private JObject ReadRuntimeConfig(string runtimeConfigPath)
         {
             string runtimeConfigContents = File.ReadAllText(runtimeConfigPath);
