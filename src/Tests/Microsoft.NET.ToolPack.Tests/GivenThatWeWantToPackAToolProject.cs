@@ -304,7 +304,7 @@ namespace Microsoft.NET.ToolPack.Tests
         }
 
         [Fact]
-        public void WhenPackAToolItRollForwardDefaultToMajor()
+        public void WhenPackingAToolItDefaultsRollsForwardToMajor()
         {
             var testProject = new TestProject()
             {
