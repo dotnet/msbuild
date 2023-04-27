@@ -165,6 +165,10 @@ namespace Microsoft.Build.Tasks
                     {
                         using (XmlReader xr = xmlinput.CreateReader(i))
                         {
+                            if (UseTrustedSettings)
+                            {
+                                Log.LogMessageFromResources("XslTransform.SecuritySettingsViaUseTrustedSettings");
+                            }
                             xslct.Transform(xr, arguments, xmlWriter, new XmlUrlResolver());
                         }
 
