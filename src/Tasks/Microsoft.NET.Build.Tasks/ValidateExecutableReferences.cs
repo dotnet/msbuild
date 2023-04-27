@@ -20,6 +20,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool UseAttributeForTargetFrameworkInfoPropertyNames { get; set; }
 
+        public bool RuntimeIdentifierInfersSelfContained { get; set; }
+
         protected override void ExecuteCore()
         {
             if (!IsExecutable)
@@ -72,6 +74,15 @@ namespace Microsoft.NET.Build.Tasks
                     //  then SelfContained will flow across the project reference when we go to build it,
                     //  despite the fact that we ignored it when doing the GetTargetFrameworks negotiation
                     if (selfContainedIsGlobalProperty && SelfContained)
+                    {
+                        referencedProjectIsSelfContained = true;
+                    }
+
+                    //  If the project is of a TFM where RuntimeIdentifier still makes an app SelfContained by default:
+                    //  If the project is NOT RID agnostic, then a global RuntimeIdentifier will flow to it.
+                    //  If the project didn't explicitly specify a value for SelfContained, then this will
+                    //  set SelfContained to true
+                    if (RuntimeIdentifierInfersSelfContained && runtimeIdentifierIsGlobalProperty && !referencedProjectHadSelfContainedSpecified)
                     {
                         referencedProjectIsSelfContained = true;
                     }

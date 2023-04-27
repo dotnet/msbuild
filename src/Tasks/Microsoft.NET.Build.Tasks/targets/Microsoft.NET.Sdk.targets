@@ -1165,6 +1165,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_UseAttributeForTargetFrameworkInfoPropertyNames Condition="$([MSBuild]::VersionGreaterThanOrEquals($(MSBuildVersion), '17.0'))">true</_UseAttributeForTargetFrameworkInfoPropertyNames>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <_RuntimeIdentifierInfersSelfContained>false</_RuntimeIdentifierInfersSelfContained>
+    <_RuntimeIdentifierInfersSelfContained Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
+                                                      '$(_TargetFrameworkVersionWithoutV)' != '' and
+                                                      $([MSBuild]::VersionLessThan($(_TargetFrameworkVersionWithoutV), '8.0'))">
+    true</_RuntimeIdentifierInfersSelfContained>
+  </PropertyGroup>
+  
   <Target Name="ValidateExecutableReferences"
           AfterTargets="_GetProjectReferenceTargetFrameworkProperties"
           Condition="'$(ValidateExecutableReferencesMatchSelfContained)' != 'false'">
@@ -1174,7 +1182,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       IsExecutable="$(_IsExecutable)"
       ReferencedProjects="@(_MSBuildProjectReferenceExistent)"
       UseAttributeForTargetFrameworkInfoPropertyNames="$(_UseAttributeForTargetFrameworkInfoPropertyNames)"
-      />
+      RuntimeIdentifierInfersSelfContained="$(_RuntimeIdentifierInfersSelfContained)"/>
 
   </Target>
 

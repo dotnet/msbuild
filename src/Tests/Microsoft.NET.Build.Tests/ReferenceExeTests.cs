@@ -23,6 +23,10 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
+        private string ProjectTargetFrameworks = "";
+
+        private bool MainRuntimeIdentifier { get; set; }
+
         private bool MainSelfContained { get; set; }
 
         private bool ReferencedSelfContained { get; set; }
@@ -42,7 +46,7 @@ namespace Microsoft.NET.Build.Tests
             MainProject = new TestProject()
             {
                 Name = "MainProject",
-                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                TargetFrameworks = ProjectTargetFrameworks != "" ? ProjectTargetFrameworks : ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true,
                 IsExe = true
             };
@@ -74,6 +78,11 @@ if (string.Empty.Length > 0)
 
             MainProject.SourceFiles["Program.cs"] = mainProjectSrc;
 
+            if (MainRuntimeIdentifier)
+            {
+                MainProject.AdditionalProperties["RuntimeIdentifier"] = EnvironmentInfo.GetCompatibleRid();
+            }
+
             if (MainSelfContained)
             {
                 MainProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid();
@@ -83,7 +92,7 @@ if (string.Empty.Length > 0)
             ReferencedProject = new TestProject()
             {
                 Name = "ReferencedProject",
-                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                TargetFrameworks = ProjectTargetFrameworks != "" ? ProjectTargetFrameworks : ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true,
                 IsExe = true,
             };
@@ -136,7 +145,7 @@ public class ReferencedExeProgram
 
             if (buildFailureCode == null)
             {
-                buildOrPublishCommand.Execute()
+                buildOrPublishCommand.Execute("-bl:C:\\users\\noahgilson\\abpublish.binlog")
                     .Should()
                     .Pass();
 
@@ -216,14 +225,25 @@ public class ReferencedExeProgram
         [Theory]
         [InlineData(true, false, "NETSDK1150")]
         [InlineData(false, true, "NETSDK1151")]
-        public void ReferencedExeFailsToBuild(bool mainSelfContained, bool referencedSelfContained, string expectedFailureCode)
+        public void ReferencedExeFailsToBuildOnOlderTargetFrameworks(bool mainSelfContained, bool referencedSelfContained, string expectedFailureCode)
         {
             MainSelfContained = mainSelfContained;
             ReferencedSelfContained = referencedSelfContained;
+            ProjectTargetFrameworks = "net7.0";
 
             CreateProjects();
 
             RunTest(expectedFailureCode);
+        }
+
+        [Fact]
+        public void ReferencedExeDoesNotFailToBuildWith8PlusTargetFrameworks()
+        {
+            MainSelfContained = false;
+            MainRuntimeIdentifier = true;
+            CreateProjects();
+
+            RunTest();
         }
 
         [Fact]
