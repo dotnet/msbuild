@@ -57,6 +57,11 @@
         <target state="translated">No se encuentra ningún proyecto en "{0}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="DidYouMean">
+        <source>Did you mean the following command?</source>
+        <target state="new">Did you mean the following command?</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
         <source>Force the command to ignore any persistent build servers.</source>
         <target state="translated">Fuerce el comando para omitir los servidores de compilación persistentes.</target>
@@ -220,6 +225,11 @@ El valor predeterminado es "true" si se especifica un identificador de entorno d
       <trans-unit id="Solution">
         <source>Solution</source>
         <target state="translated">Solución</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionArgumentMisplaced">
+        <source>Solution argument '{0}' is misplaced.</source>
+        <target state="new">Solution argument '{0}' is misplaced.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">

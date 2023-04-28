@@ -57,6 +57,11 @@
         <target state="translated">In "{0}" wurde kein Projekt gefunden.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DidYouMean">
+        <source>Did you mean the following command?</source>
+        <target state="new">Did you mean the following command?</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
         <source>Force the command to ignore any persistent build servers.</source>
         <target state="translated">Erzwingen Sie, dass der Befehl alle persistenten Buildserver ignoriert.</target>
@@ -220,6 +225,11 @@ Der Standardwert lautet TRUE, wenn eine Runtime-ID angegeben wird.</target>
       <trans-unit id="Solution">
         <source>Solution</source>
         <target state="translated">Projektmappe</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionArgumentMisplaced">
+        <source>Solution argument '{0}' is misplaced.</source>
+        <target state="new">Solution argument '{0}' is misplaced.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">

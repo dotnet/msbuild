@@ -19,21 +19,20 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         private readonly string _fileOrDirectory;
         private readonly bool _inRoot;
         private readonly IList<string> _relativeRootSolutionFolders;
+        private readonly IReadOnlyCollection<string> _arguments;
 
-        public AddProjectToSolutionCommand(
-            ParseResult parseResult) : base(parseResult)
+        public AddProjectToSolutionCommand(ParseResult parseResult) : base(parseResult)
         {
             _fileOrDirectory = parseResult.GetValue(SlnCommandParser.SlnArgument);
 
+            _arguments = parseResult.GetValue(SlnAddParser.ProjectPathArgument)?.ToArray() ?? (IReadOnlyCollection<string>)Array.Empty<string>();
+
             _inRoot = parseResult.GetValue(SlnAddParser.InRootOption);
             string relativeRoot = parseResult.GetValue(SlnAddParser.SolutionFolderOption);
+
+            SlnArgumentValidator.ParseAndValidateArguments(_fileOrDirectory, _arguments, SlnArgumentValidator.CommandType.Add, _inRoot, relativeRoot);
+
             bool hasRelativeRoot = !string.IsNullOrEmpty(relativeRoot);
-            
-            if (_inRoot && hasRelativeRoot)
-            {
-                // These two options are mutually exclusive
-                throw new GracefulException(LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
-            }
 
             if (hasRelativeRoot)
             {
@@ -58,7 +57,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
 
             PathUtility.EnsureAllPathsExist(arguments, CommonLocalizableStrings.CouldNotFindProjectOrDirectory, true);
 
-            var fullProjectPaths = arguments.Select(p =>
+            var fullProjectPaths = _arguments.Select(p =>
             {
                 var fullPath = Path.GetFullPath(p);
                 return Directory.Exists(fullPath) ?

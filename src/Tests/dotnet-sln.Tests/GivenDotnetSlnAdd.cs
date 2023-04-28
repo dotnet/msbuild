@@ -1225,5 +1225,42 @@ EndGlobal
 
             return slnContents;
         }
+
+        [Fact]
+        public void WhenSolutionIsPassedAsProjectItPrintsSuggestionAndUsage()
+        {
+            VerifySuggestionAndUsage("");
+        }
+
+        [Fact]
+        public void WhenSolutionIsPassedAsProjectWithInRootItPrintsSuggestionAndUsage()
+        {
+            VerifySuggestionAndUsage("--in-root");
+        }
+
+        [Fact]
+        public void WhenSolutionIsPassedAsProjectWithSolutionFolderItPrintsSuggestionAndUsage()
+        {
+            VerifySuggestionAndUsage("--solution-folder");
+        }
+        private void VerifySuggestionAndUsage(string arguments)
+        {
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles")
+                .WithSource()
+                .Path;
+
+            var projectArg = Path.Combine("Lib", "Lib.csproj");
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("sln", "add", arguments, "Lib", "App.sln", projectArg);
+            cmd.Should().Fail();
+            cmd.StdErr.Should().BeVisuallyEquivalentTo(
+                string.Format(CommonLocalizableStrings.SolutionArgumentMisplaced, "App.sln") + Environment.NewLine
+                + CommonLocalizableStrings.DidYouMean + Environment.NewLine
+                + $"  dotnet sln App.sln add {arguments} Lib {projectArg}"
+            );
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
+        }
     }
 }

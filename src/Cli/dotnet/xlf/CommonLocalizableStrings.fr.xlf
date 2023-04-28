@@ -57,6 +57,11 @@
         <target state="translated">Projet introuvable dans '{0}'.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DidYouMean">
+        <source>Did you mean the following command?</source>
+        <target state="new">Did you mean the following command?</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
         <source>Force the command to ignore any persistent build servers.</source>
         <target state="translated">Forcez la commande à ignorer tous les serveurs de build persistants.</target>
@@ -220,6 +225,11 @@ La valeur par défaut est 'true' si un identificateur de runtime est spécifié.
       <trans-unit id="Solution">
         <source>Solution</source>
         <target state="translated">Solution</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionArgumentMisplaced">
+        <source>Solution argument '{0}' is misplaced.</source>
+        <target state="new">Solution argument '{0}' is misplaced.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">
