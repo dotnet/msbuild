@@ -72,21 +72,4 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Using Include="Microsoft.Extensions.Hosting" />
     <Using Include="Microsoft.Extensions.Logging" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <!-- this property will be updated when generating layout with valid built-in version of the package-->
-    <_BuiltInMicrosoftNETBuildContainersVersion></_BuiltInMicrosoftNETBuildContainersVersion>
-    <SdkContainerSupportPackageVersion Condition="'$(SdkContainerSupportPackageVersion)' == ''">$(_BuiltInMicrosoftNETBuildContainersVersion)</SdkContainerSupportPackageVersion>
-  </PropertyGroup>
-
-  <!--Implicit package references don't work well with central package management, so disable it. -->
-  <!--In this case the package reference should be added explicitly. -->
-  <PropertyGroup Condition=" '$(ManagePackageVersionsCentrally)' == 'true' ">
-    <DisableImplicitMicrosoftNETBuildContainersReference Condition="'$(DisableImplicitMicrosoftNETBuildContainersReference)' == ''">true</DisableImplicitMicrosoftNETBuildContainersReference>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(EnableSdkContainerSupport)' == 'true' AND '$(DisableImplicitMicrosoftNETBuildContainersReference)' != 'true'">
-    <PackageReference Include="Microsoft.NET.Build.Containers" Version="$(SdkContainerSupportPackageVersion)" IsImplicitlyDefined="true" />
-  </ItemGroup>
-
 </Project>
