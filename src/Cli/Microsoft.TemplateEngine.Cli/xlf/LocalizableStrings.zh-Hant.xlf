@@ -837,6 +837,16 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">若要使用內建範本套件，請使用下列方法來手動解除安裝的範本套件:</target>
         <note>followed by command to uninstall package</note>
       </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Download_Error_VulnerablePackage">
+        <source>Failed to install {0}, due to detected vulnerabilities:</source>
+        <target state="new">Failed to install {0}, due to detected vulnerabilities:</target>
+        <note>{0} - template package name.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Download_VulnerablePackage">
+        <source>Installed package has the following vulnerabilities:</source>
+        <target state="new">Installed package has the following vulnerabilities:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
         <target state="translated">找不到包含範本 '{0}' 的範本套件</target>
@@ -870,6 +880,11 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="TemplatePackageCoordinator_Install_Error_SameInstallRequests">
         <source>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</source>
         <target state="translated">命令正在嘗試安裝範本套件 '{0}' 兩次，請檢查引數並重試。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Error_VulnerablePackageTip">
+        <source>In order to install this package, run:</source>
+        <target state="new">In order to install this package, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
@@ -927,6 +942,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">解除安裝命令:</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage">
+        <source>The package {0} contains vulnerabilities:</source>
+        <target state="new">The package {0} contains vulnerabilities:</target>
+        <note>{0} - template package name.</note>
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_GenericError">
         <source>Failed to check update for {0}: {1}.</source>
         <target state="translated">無法檢查 {0} 的更新: {1}。</target>
@@ -945,6 +965,16 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="TemplatePackageCoordinator_Update_Error_PackageNotSupported">
         <source>Failed to check update for {0}: the package is not supported.</source>
         <target state="translated">無法檢查 {0} 的更新: 不支援套件。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackage">
+        <source>The package {0} was not updated due to detected vulnerabilities:</source>
+        <target state="new">The package {0} was not updated due to detected vulnerabilities:</target>
+        <note>{0} - template package name.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackageTip">
+        <source>In order to update this package, run:</source>
+        <target state="new">In order to update this package, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate">
@@ -981,6 +1011,26 @@ The header is followed by the list of parameters and their errors (might be seve
         <source>Failed to initialize NuGet credential service, details: {0}.</source>
         <target state="translated">無法初始化 NuGet 認證服務，詳細資料: {0}。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Critical">
+        <source>Critical</source>
+        <target state="new">Critical</target>
+        <note>represents nuget api severity of level 3.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_High">
+        <source>High</source>
+        <target state="new">High</target>
+        <note>represents nuget api severity of level 2.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Low">
+        <source>Low</source>
+        <target state="new">Low</target>
+        <note>represents nuget api severity of level 0.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Moderate">
+        <source>Moderate</source>
+        <target state="new">Moderate</target>
+        <note>represents nuget api severity of level 1.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled">
         <source>{0} is already installed.</source>

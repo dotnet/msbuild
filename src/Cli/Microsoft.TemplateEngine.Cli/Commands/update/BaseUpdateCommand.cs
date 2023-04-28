@@ -35,9 +35,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             TemplatePackageManager templatePackageManager,
             InvocationContext context)
         {
-            TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(
-                environmentSettings,
-                templatePackageManager);
+            TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(environmentSettings, templatePackageManager);
 
             return templatePackageCoordinator.EnterUpdateFlowAsync(args, context.GetCancellationToken());
         }

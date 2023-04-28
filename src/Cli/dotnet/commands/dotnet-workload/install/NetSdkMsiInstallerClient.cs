@@ -1053,7 +1053,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             if (RebootPending)
             {
-                ReportOnce(AnsiColorExtensions.Yellow(LocalizableStrings.PendingReboot));
+                ReportOnce(AnsiExtensions.Yellow(LocalizableStrings.PendingReboot));
             }
         }
 

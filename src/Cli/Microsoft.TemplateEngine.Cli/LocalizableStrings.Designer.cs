@@ -1514,6 +1514,24 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to install {0}, due to detected vulnerabilities:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Download_Error_VulnerablePackage {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Download_Error_VulnerablePackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Installed package has the following vulnerabilities:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Download_VulnerablePackage {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Download_VulnerablePackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not find the template package containing template &apos;{0}&apos;.
         /// </summary>
         internal static string TemplatePackageCoordinator_Error_PackageForTemplateNotFound {
@@ -1811,6 +1829,35 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The package {0} was not updated due to detected vulnerabilities:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Update_Error_VulnerablePackage {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Update_Error_VulnerablePackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In order to update this package, run:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Update_Error_VulnerablePackageTip {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Update_Error_VulnerablePackageTip", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to In order to install this package, run:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Install_Error_VulnerablePackageTip
+        {
+            get
+            {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Install_Error_VulnerablePackageTip", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to All template packages are up-to-date..
         /// </summary>
         internal static string TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate {
@@ -1865,11 +1912,56 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The package {0} contains vulnerabilities:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to initialize NuGet credential service, details: {0}..
         /// </summary>
         internal static string TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError {
             get {
                 return ResourceManager.GetString("TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Critical.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_VulnerabilitySeverity_Critical {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_VulnerabilitySeverity_Critical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to High.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_VulnerabilitySeverity_High {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_VulnerabilitySeverity_High", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Low.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_VulnerabilitySeverity_Low {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_VulnerabilitySeverity_Low", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Moderate.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_VulnerabilitySeverity_Moderate {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_VulnerabilitySeverity_Moderate", resourceCulture);
             }
         }
         
