@@ -163,9 +163,9 @@ stages:
         pool:
           vmImage: 'macOS-latest'
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: OSX.1200.Amd64.Open
+          helixTargetQueue: OSX.13.Amd64.Open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: OSX.1200.Amd64
+          helixTargetQueue: OSX.13.Amd64
         strategy:
           matrix:
             Build_Release:
