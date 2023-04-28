@@ -2331,5 +2331,51 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     """,
                 includeInternalSymbols: false);
         }
+
+        [Fact]
+        public void TestTypeForwardsToGenericTypesRegression31250()
+        {
+            RunTest(original: """
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,,,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,,,,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,,,,,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,,,,,>))]
+                    """,
+                expected: """
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,,,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,,,,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Action<,,,,,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,,,,>))]
+                    [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,,,,,>))]
+                    """,
+                includeInternalSymbols: false);
+        }
     }
 }

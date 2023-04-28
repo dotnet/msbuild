@@ -399,7 +399,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             toolRestoreCommand.Execute().Should().Be(0);
 
             _reporter.Lines.Should().Contain(l =>
-                l.Contains(Cli.Utils.AnsiColorExtensions.Yellow(LocalizableStrings.NoToolsWereRestored)));
+                l.Contains(Cli.Utils.AnsiExtensions.Yellow(LocalizableStrings.NoToolsWereRestored)));
         }
 
         private class MockManifestFinder : IToolManifestFinder
