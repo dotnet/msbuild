@@ -4692,8 +4692,9 @@ namespace Microsoft.Build.Evaluation
 
             private static bool IsFloatingPointRepresentation(object value)
             {
-                return value is double ||
-                       (value is string str && str.Contains(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator));
+                const char numberDecimalSeparator = '.';
+
+                return value is double || (value is string str && str.Contains(numberDecimalSeparator));
             }
 
             private static bool TryExecuteAdd(object[] args, out object resultValue)
