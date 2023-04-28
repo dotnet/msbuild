@@ -48,6 +48,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool AotEnabled { get; set; }
 
+        public bool AotUseKnownRuntimePackForTarget { get; set; }
+
         public string RuntimeIdentifier { get; set; }
 
         public string[] RuntimeIdentifiers { get; set; }
@@ -678,9 +680,10 @@ namespace Microsoft.NET.Build.Tasks
                     case ToolPackType.ILCompiler:
                         HostILCompilerPacks = new[] { runtimePackItem };
 
-                        // ILCompiler supports cross target compilation. If there is a cross-target request, we need to download that package as well
+                        // ILCompiler supports cross target compilation. If there is a cross-target request,
+                        // we need to download that package as well unless we use KnownRuntimePack entries for the target.
                         // We expect RuntimeIdentifier to be defined during publish but can allow during build
-                        if (RuntimeIdentifier != null)
+                        if (RuntimeIdentifier != null && !AotUseKnownRuntimePackForTarget)
                         {
                             var targetRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(runtimeGraph, RuntimeIdentifier, packSupportedRuntimeIdentifiers, out bool wasInGraph2);
                             if (targetRuntimeIdentifier == null)
