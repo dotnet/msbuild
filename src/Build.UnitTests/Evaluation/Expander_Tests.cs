@@ -3686,15 +3686,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 new string[] {@"$([System.Text.RegularExpressions.Regex]::Match($(Input), `EXPORT\s+(.+)`).Groups[1].Value)","a"},
                 new string[] {"$([MSBuild]::Add(1,2).CompareTo(3))", "0"},
                 new string[] {"$([MSBuild]::Add(1,2).CompareTo(3))", "0"},
+                new string[] {"$([MSBuild]::Add(1,2).CompareTo(3.0))", "0"},
                 new string[] {"$([MSBuild]::Add(1,2.0).CompareTo(3.0))", "0"},
                 new string[] {"$([System.Convert]::ToDouble($([MSBuild]::Add(1,2))).CompareTo(3.0))", "0"},
                 new string[] {"$([MSBuild]::Add(1,2).CompareTo('3'))", "0"},
+                new string[] {"$([MSBuild]::Add(1,2).CompareTo(3.1))", "-1"},
+                new string[] {"$([MSBuild]::Add(1,2.0).CompareTo(3.1))", "-1"},
                 new string[] {"$([System.Convert]::ToDouble($([MSBuild]::Add(1,2))).CompareTo(3.1))", "-1"},
                 new string[] {"$([MSBuild]::Add(1,2).CompareTo(2))", "1"},
                 new string[] {"$([MSBuild]::Add(1,2).Equals(3))", "True"},
+                new string[] {"$([MSBuild]::Add(1,2).Equals(3.0))", "True"},
                 new string[] {"$([MSBuild]::Add(1,2.0).Equals(3.0))", "True"},
                 new string[] {"$([System.Convert]::ToDouble($([MSBuild]::Add(1,2))).Equals(3.0))", "True"},
                 new string[] {"$([MSBuild]::Add(1,2).Equals('3'))", "True"},
+                new string[] {"$([MSBuild]::Add(1,2).Equals(3.1))", "False"},
+                new string[] {"$([MSBuild]::Add(1,2.0).Equals(3.1))", "False"},
                 new string[] {"$([System.Convert]::ToDouble($([MSBuild]::Add(1,2))).Equals(3.1))", "False"},
                 new string[] {"$(a.Insert(0,'%28'))", "%28no"},
                 new string[] {"$(a.Insert(0,'\"'))", "\"no"},
@@ -3854,11 +3860,7 @@ $(
                 "$((((",
                 "$($())",
                 "$",
-                "()",
-                "$([MSBuild]::Add(1,2).CompareTo(3.0))", // Add() returns a long
-                "$([MSBuild]::Add(1,2).CompareTo(3.1))",
-                "$([MSBuild]::Add(1,2).Equals(3.0))",
-                "$([MSBuild]::Add(1,2).Equals(3.1))"
+                "()"
             };
 
 #if !RUNTIME_TYPE_NETCORE

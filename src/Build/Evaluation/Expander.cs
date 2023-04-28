@@ -1338,7 +1338,7 @@ namespace Microsoft.Build.Evaluation
                         if (function != null)
                         {
                             // We will have either extracted the actual property name
-                            // or realised that there is none (static function), and have recorded a null
+                            // or realized that there is none (static function), and have recorded a null
                             propertyName = function.Receiver;
                         }
                         else
@@ -3463,6 +3463,13 @@ namespace Microsoft.Build.Evaluation
                     // that it matches the left hand side ready for the default binder’s method invoke.
                     if (objectInstance != null && args.Length == 1 && (String.Equals("Equals", _methodMethodName, StringComparison.OrdinalIgnoreCase) || String.Equals("CompareTo", _methodMethodName, StringComparison.OrdinalIgnoreCase)))
                     {
+                        // Support comparison when the lhs is an integer
+                        if (IsFloatingPointRepresentation(args[0]) && !IsFloatingPointRepresentation(objectInstance))
+                        {
+                            objectInstance = Convert.ChangeType(objectInstance, typeof(double), CultureInfo.InvariantCulture);
+                            _receiverType = objectInstance.GetType();
+                        }
+
                         // change the type of the final unescaped string into the destination
                         args[0] = Convert.ChangeType(args[0], objectInstance.GetType(), CultureInfo.InvariantCulture);
                     }
@@ -3470,14 +3477,11 @@ namespace Microsoft.Build.Evaluation
                     if (_receiverType == typeof(IntrinsicFunctions))
                     {
                         // Special case a few methods that take extra parameters that can't be passed in by the user
-                        //
-
                         if (_methodMethodName.Equals("GetPathOfFileAbove") && args.Length == 1)
                         {
                             // Append the IElementLocation as a parameter to GetPathOfFileAbove if the user only
                             // specified the file name.  This is syntactic sugar so they don't have to always
                             // include $(MSBuildThisFileDirectory) as a parameter.
-                            //
                             string startingDirectory = String.IsNullOrWhiteSpace(elementLocation.File) ? String.Empty : Path.GetDirectoryName(elementLocation.File);
 
                             args = new[]
