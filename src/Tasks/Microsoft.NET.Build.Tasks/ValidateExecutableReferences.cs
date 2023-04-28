@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.Build.Framework;
+using NuGet.Frameworks;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -56,9 +57,10 @@ namespace Microsoft.NET.Build.Tasks
                 bool referencedProjectIsSelfContained = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["SelfContained"]);
                 bool referencedProjectHadSelfContainedSpecified = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["_SelfContainedWasSpecified"]);
 
-                string referencedProjectTargetFrameworkVersion = projectAdditionalProperties["TargetFrameworkVersion"];
-                string referencedProjectTargetFrameworkIdentifier = projectAdditionalProperties["TargetFrameworkIdentifier"];
-                Version? referencedProjectTargetFramework = referencedProjectTargetFrameworkIdentifier != "" ? new Version(referencedProjectTargetFrameworkVersion) : null;
+                // We can only access TargetFrameworks and NearestTargetFramework to find the referenced project "TargetFramework".
+                // We rely on the nearest one because it will pick the lowest 'most-compatible' tfm for the two projects.
+                // Since 'younger' TFMs are the ones that would error and are generally also what gets picked as 'most-copmaptible' we can use it.
+                var referencedProjectTargetFramework = NuGetFramework.Parse(nearestTargetFramework);
 
                 var globalProperties = BuildEngine6.GetGlobalProperties();
 
@@ -83,8 +85,8 @@ namespace Microsoft.NET.Build.Tasks
                     }
 
                     //  We need to check if referenced project will become SelfContained because of its RuntimeIdentifier. This only happens on TargetFrameworks less than net8.0.
-                    Version sdkVersionWhereRuntimeIdentifierNoLongerInfersSelfContained = new Version("net8.0");
-                    bool runtimeIdentifierInfersSelfContained = referencedProjectTargetFrameworkIdentifier == ".NETCoreApp" && referencedProjectTargetFramework.CompareTo(sdkVersionWhereRuntimeIdentifierNoLongerInfersSelfContained) < 0;
+                    var sdkVersionWhereRuntimeIdentifierNoLongerInfersSelfContained = NuGetFramework.Parse("net8.0");
+                    bool runtimeIdentifierInfersSelfContained = referencedProjectTargetFramework.Platform == ".NETCoreApp" && referencedProjectTargetFramework.Version < sdkVersionWhereRuntimeIdentifierNoLongerInfersSelfContained.Version;
 
                     //  If the project is NOT RID agnostic, then a global RuntimeIdentifier will flow to it.
                     //  If the project didn't explicitly specify a value for SelfContained, then this will

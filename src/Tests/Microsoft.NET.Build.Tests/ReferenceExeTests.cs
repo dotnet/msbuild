@@ -23,7 +23,9 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        private string ProjectTargetFrameworks = "";
+        private string MainProjectTargetFrameworks = "";
+
+        private string ReferenceProjectTargetFrameworks = "";
 
         private bool MainRuntimeIdentifier { get; set; }
 
@@ -46,7 +48,7 @@ namespace Microsoft.NET.Build.Tests
             MainProject = new TestProject()
             {
                 Name = "MainProject",
-                TargetFrameworks = ProjectTargetFrameworks != "" ? ProjectTargetFrameworks : ToolsetInfo.CurrentTargetFramework,
+                TargetFrameworks = MainProjectTargetFrameworks != "" ? MainProjectTargetFrameworks : ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true,
                 IsExe = true
             };
@@ -92,7 +94,7 @@ if (string.Empty.Length > 0)
             ReferencedProject = new TestProject()
             {
                 Name = "ReferencedProject",
-                TargetFrameworks = ProjectTargetFrameworks != "" ? ProjectTargetFrameworks : ToolsetInfo.CurrentTargetFramework,
+                TargetFrameworks = ReferenceProjectTargetFrameworks != "" ? ReferenceProjectTargetFrameworks : ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true,
                 IsExe = true,
             };
@@ -229,7 +231,8 @@ public class ReferencedExeProgram
         {
             MainSelfContained = mainSelfContained;
             ReferencedSelfContained = referencedSelfContained;
-            ProjectTargetFrameworks = "net7.0";
+            ReferenceProjectTargetFrameworks = "net7.0";
+            // the main project tfm will be 8.0 or higher to make sure the error uses the tfm of the referenced project and not the main project.
 
             CreateProjects();
 
