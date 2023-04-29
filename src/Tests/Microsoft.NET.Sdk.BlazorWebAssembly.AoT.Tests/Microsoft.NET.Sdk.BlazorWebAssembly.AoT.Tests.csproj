@@ -14,6 +14,11 @@
     <BuildHelixPayload Condition="'$(RunAoTTests)' != 'true'">false</BuildHelixPayload>
   </PropertyGroup>
 
+  <!-- Based on .NET 8 breaking change: Add SC like old behavior if RID is defined. -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != '' and '$(SelfContained)' == ''">
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
   </ItemGroup>
@@ -38,7 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Microsoft.NET.Sdk.BlazorWebAssembly.Tests\BootJsonData.cs" Link="BootJsonData.cs" />
     <Compile Include="..\Microsoft.NET.Sdk.BlazorWebAssembly.Tests\WasmPublishIntegrationTestBase.cs" Link="WasmPublishIntegrationTestBase.cs" />
     <Compile Include="..\Microsoft.NET.Sdk.BlazorWebAssembly.Tests\ServiceWorkerAssert.cs" Link="ServiceWorkerAssert.cs" />
   </ItemGroup>
