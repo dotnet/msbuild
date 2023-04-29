@@ -116,7 +116,7 @@ namespace Microsoft.NET.Build.Tests
         public void TestGlobalPropertyFlowToExeWithSelfContainedFalse(bool passSelfContained, bool passRuntimeIdentifier)
         {
             _referencedProject.IsExe = true;
-            _referencedProject.AdditionalProperties["SelfContained"] = "false";
+            _referencedProject.SelfContained = "false";
 
             string identifier = passSelfContained.ToString() + "_" + passRuntimeIdentifier;
 

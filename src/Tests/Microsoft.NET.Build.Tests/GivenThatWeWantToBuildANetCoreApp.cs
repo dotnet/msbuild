@@ -832,10 +832,10 @@ class Program
                 Name = "GenerateFilesTest",
                 TargetFrameworks = TFM,
                 RuntimeIdentifier = runtimeIdentifier,
-                IsExe = true
+                IsExe = true,
+                SelfContained = "true"
             };
 
-            testProject.AdditionalProperties["SelfContained"] = "true";
             var testAsset = _testAssetsManager
                 .CreateTestProject(testProject);
 

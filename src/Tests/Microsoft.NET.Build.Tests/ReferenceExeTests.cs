@@ -88,7 +88,7 @@ if (string.Empty.Length > 0)
             if (MainSelfContained)
             {
                 MainProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid();
-                MainProject.AdditionalProperties["SelfContained"] = "true";
+                MainProject.SelfContained = "true";
             }
 
             ReferencedProject = new TestProject()
@@ -102,7 +102,7 @@ if (string.Empty.Length > 0)
             if (ReferencedSelfContained)
             {
                 ReferencedProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid();
-                ReferencedProject.AdditionalProperties["SelfContained"] = "true";
+                ReferencedProject.SelfContained = "true";
             }
 
             //  Use a lower version of a library in the referenced project

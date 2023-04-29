@@ -326,11 +326,11 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = ProjectName,
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
-                IsExe = true
+                IsExe = true,
+                SelfContained = "true"
             };
 
             testProject.AdditionalProperties.Add("RuntimeIdentifier", rid);
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 

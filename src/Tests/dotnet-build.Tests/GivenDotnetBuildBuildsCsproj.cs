@@ -204,8 +204,8 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             {
                 IsExe = true,
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                SelfContained = "true"
             };
-            testProject.AdditionalProperties["SelfContained"] = "true";
 
             var testInstance = _testAssetsManager.CreateTestProject(testProject);
 

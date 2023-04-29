@@ -331,9 +331,10 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 IsExe = true,
-                TargetFrameworks = targetFramework
+                TargetFrameworks = targetFramework,
+                SelfContained = "true"
             };
-            testProject.AdditionalProperties["SelfContained"] = "true";
+
             testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "false";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);

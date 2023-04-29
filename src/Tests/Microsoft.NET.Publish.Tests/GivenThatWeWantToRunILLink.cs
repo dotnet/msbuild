@@ -1797,10 +1797,10 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = projectName,
                 TargetFrameworks = targetFramework,
-                IsExe = isExe
+                IsExe = isExe,
+                SelfContained = "true"
             };
 
-            testProject.AdditionalProperties["SelfContained"] = "true";
             // Don't error when generators/analyzers can't be loaded.
             // This can occur when running tests against FullFramework MSBuild
             // if the build machine has an MSBuild install with an older version of Roslyn
@@ -1873,10 +1873,11 @@ public class Program
             {
                 Name = projectName,
                 TargetFrameworks = targetFramework,
-                IsExe = true
+                IsExe = true,
+                SelfContained = "true"
             };
+
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.SourceFiles[$"{projectName}.cs"] = @"
 using System;
 public class Program
@@ -1989,7 +1990,7 @@ public static class UnusedNonTrimmableAssembly
 
             if (setSelfContained)
             {
-                testProject.AdditionalProperties["SelfContained"] = "true";
+                testProject.SelfContained = "true";
             }
 
             testProject.SourceFiles[$"{mainProjectName}.cs"] = @"

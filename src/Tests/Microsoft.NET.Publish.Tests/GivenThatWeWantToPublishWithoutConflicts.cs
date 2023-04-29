@@ -67,9 +67,10 @@ namespace Microsoft.NET.Publish.Tests
                 TargetFrameworks = targetFramework,
                 IsSdkProject = true,
                 IsExe = true,
-                RuntimeIdentifier = "win-x64"
+                RuntimeIdentifier = "win-x64",
+                SelfContained = "true"
             };
-            testProject.AdditionalProperties["SelfContained"] = "true";
+
             // The Microsoft.TestPlatform.CLI package contains System.Runtime.CompilerServices.Unsafe.dll as content, which could cause a double write with the same dll originating from the 
             // runtime package. Without _HandleFileConflictsForPublish this would be caught when by the bundler when publishing single file, but a normal publish would succeed with double writes.
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.TestPlatform.CLI", "16.5.0"));

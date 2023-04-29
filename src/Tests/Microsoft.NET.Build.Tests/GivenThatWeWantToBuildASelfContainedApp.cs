@@ -260,10 +260,9 @@ namespace Microsoft.NET.Build.Tests
             {
                 IsExe = true,
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(),
+                SelfContained = "true"
             };
-
-            testProject.AdditionalProperties["SelfContained"] = "true";
 
             //  Set up test FrameworkReference that will use workload manifest to resolve versions
             testProject.ProjectChanges.Add(project =>

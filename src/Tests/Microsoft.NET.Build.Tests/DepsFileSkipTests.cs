@@ -49,10 +49,10 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "SkipRuntimeAssemblyFromRuntimePack",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
-                IsExe = true
+                IsExe = true,
+                SelfContained = "true"
             };
 
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 
             string filenameToSkip = "Microsoft.CSharp.dll";
@@ -103,10 +103,10 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "SkipNativeAssetFromRuntimePack",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
-                IsExe = true
+                IsExe = true,
+                SelfContained = "true"
             };
 
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 
             string filenameToSkip = FileConstants.DynamicLibPrefix + "coreclr" + FileConstants.DynamicLibSuffix;

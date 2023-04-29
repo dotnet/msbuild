@@ -67,7 +67,7 @@ namespace Microsoft.NET.Publish.Tests
                 "ClassLib");
 
             testProject.AdditionalProperties["PublishReadyToRun"] = "True";
-            testProject.AdditionalProperties["SelfContained"] = "True";
+            testProject.SelfContained = "True";
             testProject.AddItem("PublishReadyToRunExclude", "Include", "Classlib.dll");
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
@@ -258,7 +258,7 @@ namespace Microsoft.NET.Publish.Tests
 
             testProject.AdditionalProperties["PublishReadyToRun"] = "True";
             testProject.AdditionalProperties["PublishReadyToRunUseCrossgen2"] = "True";
-            testProject.AdditionalProperties["SelfContained"] = "False";
+            testProject.SelfContained = "False";
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, targetFramework);
 
@@ -385,7 +385,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties["PublishReadyToRunEmitSymbols"] = emitNativeSymbols ? "True" : "False";
             testProject.AdditionalProperties["PublishReadyToRunUseCrossgen2"] = useCrossgen2 ? "True" : "False";
             testProject.AdditionalProperties["PublishReadyToRunComposite"] = composite ? "True" : "False";
-            testProject.AdditionalProperties["SelfContained"] = isSelfContained ? "True" : "False";
+            testProject.SelfContained = isSelfContained ? "True" : "False";
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier);
 
@@ -459,9 +459,8 @@ public class Classlib
                 IsExe = isExeProject,
                 RuntimeIdentifier = runtimeIdentifier ?? EnvironmentInfo.GetCompatibleRid(targetFramework),
                 ReferencedProjects = { referenceProject },
+                SelfContained = "true"
             };
-
-            testProject.AdditionalProperties["SelfContained"] = "true";
 
             testProject.SourceFiles[$"{mainProjectName}.cs"] = @"
 using System;

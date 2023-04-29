@@ -145,10 +145,11 @@ namespace Microsoft.NET.Publish.Tests
                 Name = "RegularPublishToTrimmedSingleExe",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                RuntimeIdentifier = "win-x86"
+                RuntimeIdentifier = "win-x86",
+                SelfContained = "true"
             };
+
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
-            testProject.AdditionalProperties["SelfContained"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
             // Publish trimmed
