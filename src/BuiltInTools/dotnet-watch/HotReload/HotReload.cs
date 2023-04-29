@@ -23,9 +23,9 @@ namespace Microsoft.DotNet.Watcher.Tools
             _compilationHandler = new CompilationHandler(reporter);
         }
 
-        public async ValueTask InitializeAsync(DotNetWatchContext dotNetWatchContext, CancellationToken cancellationToken)
+        public void Initialize(DotNetWatchContext dotNetWatchContext, CancellationToken cancellationToken)
         {
-            await _compilationHandler.InitializeAsync(dotNetWatchContext, cancellationToken);
+            _compilationHandler.Initialize(dotNetWatchContext, cancellationToken);
         }
 
         public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem[] files, CancellationToken cancellationToken)

@@ -13,6 +13,8 @@ namespace Microsoft.Extensions.HotReload
 {
     internal readonly struct UpdatePayload
     {
+        public const byte ApplySuccessValue = 0;
+
         private static readonly byte Version = 1;
 
         public IReadOnlyList<UpdateDelta> Deltas { get; }
@@ -139,12 +141,6 @@ namespace Microsoft.Extensions.HotReload
             ILDelta = ilDelta;
             UpdatedTypes = updatedTypes;
         }
-    }
-
-    internal enum ApplyResult
-    {
-        Failed = -1,
-        Success = 0,
     }
 
     internal readonly struct ClientInitializationPayload

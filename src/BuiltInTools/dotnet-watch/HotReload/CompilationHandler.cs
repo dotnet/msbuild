@@ -4,6 +4,7 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
@@ -25,14 +26,14 @@ namespace Microsoft.DotNet.Watcher.Tools
         private Task<(Solution, WatchHotReloadService)>? _initializeTask;
         private Solution? _currentSolution;
         private WatchHotReloadService? _hotReloadService;
-        private IDeltaApplier? _deltaApplier;
+        private DeltaApplier? _deltaApplier;
 
         public CompilationHandler(IReporter reporter)
         {
             _reporter = reporter;
         }
 
-        public async ValueTask InitializeAsync(DotNetWatchContext context, CancellationToken cancellationToken)
+        public void Initialize(DotNetWatchContext context, CancellationToken cancellationToken)
         {
             Debug.Assert(context.ProjectGraph is not null);
 
@@ -47,7 +48,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 };
             }
 
-            await _deltaApplier.InitializeAsync(context, cancellationToken);
+            _deltaApplier.Initialize(context, cancellationToken);
 
             if (_currentSolution is not null)
             {
@@ -127,31 +128,36 @@ namespace Microsoft.DotNet.Watcher.Tools
             // of unrecoverable errors that a user cannot fix and requires an app rebuild.
             var rudeEdits = hotReloadDiagnostics.RemoveAll(d => d.Severity == DiagnosticSeverity.Warning || !d.Descriptor.Id.StartsWith("ENC", StringComparison.Ordinal));
 
-            if (rudeEdits.IsDefaultOrEmpty && updates.IsDefaultOrEmpty)
+            if (rudeEdits.IsEmpty && updates.IsEmpty)
             {
-                // It's possible that there are compilation errors which prevented the solution update
-                // from being updated. Let's look to see if there are compilation errors.
-                var diagnostics = GetDiagnostics(updatedSolution, cancellationToken);
-                if (diagnostics.IsDefaultOrEmpty)
+                var compilationErrors = GetCompilationErrors(updatedSolution, cancellationToken);
+                if (compilationErrors.IsEmpty)
                 {
-                    _reporter.Verbose("No deltas modified. Applying changes to clear diagnostics.");
-                    await _deltaApplier.Apply(context, updates, cancellationToken);
-                    // Even if there were diagnostics, continue treating this as a success
                     _reporter.Output("No hot reload changes to apply.");
                 }
-                else
+
+                // report or clear diagnostics in the browser UI
+                if (context.BrowserRefreshServer != null)
                 {
-                    _reporter.Verbose("Found compilation errors during hot reload. Reporting it in application UI.");
-                    await _deltaApplier.ReportDiagnosticsAsync(context, diagnostics, cancellationToken);
+                    _reporter.Verbose($"Updating diagnostics in the browser.");
+                    if (compilationErrors.IsEmpty)
+                    {
+                        await context.BrowserRefreshServer.SendJsonSerlialized(new AspNetCoreHotReloadApplied(), cancellationToken);
+                    }
+                    else
+                    {
+                        await context.BrowserRefreshServer.SendJsonSerlialized(new HotReloadDiagnostics { Diagnostics = compilationErrors }, cancellationToken);
+                    }
                 }
 
                 HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
-                // Return true so that the watcher continues to keep the current hot reload session alive. If there were errors, this allows the user to fix errors and continue
-                // working on the running app.
+
+                // Return true so that the watcher continues to keep the current hot reload session alive.
+                // If there were errors, this allows the user to fix errors and continue working on the running app.
                 return true;
             }
 
-            if (!rudeEdits.IsDefaultOrEmpty)
+            if (!rudeEdits.IsEmpty)
             {
                 // Rude edit.
                 _reporter.Output("Unable to apply hot reload because of a rude edit.");
@@ -166,18 +172,37 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             _currentSolution = updatedSolution;
 
-            var applyState = await _deltaApplier.Apply(context, updates, cancellationToken);
-            _reporter.Verbose($"Received {(applyState ? "successful" : "failed")} apply from delta applier.");
+            var applyStatus = await _deltaApplier.Apply(context, updates, cancellationToken) != ApplyStatus.Failed;
+            _reporter.Verbose($"Received {(applyStatus ? "successful" : "failed")} apply from delta applier.");
             HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
-            if (applyState)
+            if (applyStatus)
             {
                 _reporter.Output($"Hot reload of changes succeeded.", emoji: "🔥");
+
+                // BrowserRefreshServer will be null in non web projects or if we failed to establish a websocket connection
+                if (context.BrowserRefreshServer != null)
+                {
+                    _reporter.Verbose($"Refreshing browser.");
+                    await context.BrowserRefreshServer.SendJsonSerlialized(new AspNetCoreHotReloadApplied(), cancellationToken);
+                }
             }
 
-            return applyState;
+            return applyStatus;
         }
 
-        private ImmutableArray<string> GetDiagnostics(Solution solution, CancellationToken cancellationToken)
+        private readonly struct HotReloadDiagnostics
+        {
+            public string Type => "HotReloadDiagnosticsv1";
+
+            public IEnumerable<string> Diagnostics { get; init; }
+        }
+
+        private readonly struct AspNetCoreHotReloadApplied
+        {
+            public string Type => "AspNetCoreHotReloadApplied";
+        }
+
+        private ImmutableArray<string> GetCompilationErrors(Solution solution, CancellationToken cancellationToken)
         {
             var @lock = new object();
             var builder = ImmutableArray<string>.Empty;
@@ -189,7 +214,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 }
 
                 var compilationDiagnostics = compilation.GetDiagnostics(cancellationToken);
-                if (compilationDiagnostics.IsDefaultOrEmpty)
+                if (compilationDiagnostics.IsEmpty)
                 {
                     return;
                 }

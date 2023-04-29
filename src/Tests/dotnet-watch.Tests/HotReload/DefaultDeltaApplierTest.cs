@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Watcher.Tools
     public class DefaultDeltaApplierTest
     {
         [Fact]
-        public async Task InitializeAsync_ConfiguresEnvironmentVariables()
+        public void Initialize_ConfiguresEnvironmentVariables()
         {
             // Arrange
             var applier = new DefaultDeltaApplier(Mock.Of<IReporter>()) { SuppressNamedPipeForTests = true };
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             };
 
             // Act
-            await applier.InitializeAsync(context, default);
+            applier.Initialize(context, default);
 
             // Assert
             Assert.Equal("debug", process.EnvironmentVariables["DOTNET_MODIFIABLE_ASSEMBLIES"]);

@@ -90,7 +90,7 @@ internal sealed class StartupHook
             Log("Attempting to apply deltas.");
 
             hotReloadAgent.ApplyDeltas(update.Deltas);
-            pipeClient.WriteByte((byte)ApplyResult.Success);
+            pipeClient.WriteByte(UpdatePayload.ApplySuccessValue);
         }
 
         Log("Stopped received delta updates. Server is no longer connected.");
