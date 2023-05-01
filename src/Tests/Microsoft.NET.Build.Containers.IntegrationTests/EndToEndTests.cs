@@ -81,7 +81,7 @@ public class EndToEndTests
     [DockerDaemonAvailableFact]
     public async Task ApiEndToEndWithLocalLoad()
     {
-        string publishDirectory = BuildLocalApp(tfm: "net7.0");
+        string publishDirectory = BuildLocalApp(tfm: "net8.0");
 
         // Build the image
 
