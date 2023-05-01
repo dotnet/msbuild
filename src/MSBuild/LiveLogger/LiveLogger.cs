@@ -53,7 +53,7 @@ internal sealed class LiveLogger : INodeLogger
                 : ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectBuilding_WithTF",
                     Indentation,
                     Project,
-                    TargetFramework,
+                    AnsiCodes.Colorize(TargetFramework, TargetFrameworkColor),
                     Target,
                     duration);
         }
@@ -63,6 +63,8 @@ internal sealed class LiveLogger : INodeLogger
     /// The indentation to use for all build output.
     /// </summary>
     private const string Indentation = "  ";
+
+    private const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
 
     /// <summary>
     /// Protects access to state shared between the logger callbacks and the rendering thread.
@@ -363,7 +365,7 @@ internal sealed class LiveLogger : INodeLogger
                         Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
                             Indentation,
                             projectFile,
-                            project.TargetFramework,
+                            AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
                             buildResult,
                             duration));
                     }
