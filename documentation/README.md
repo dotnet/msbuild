@@ -61,6 +61,7 @@ The folder contains collection of docs and references for MSBuild, detailed info
 * [Target maps](wiki/Target-Maps.md)
 * [Managing parallelism in MSBuild](specs/resource-management.md)
 * [SDK resolution](specs/sdk-resolvers-algorithm.md)
+* [RAR core scenarios](specs/rar-core-scenarios.md)
 
 ### Tasks
 
@@ -75,10 +76,13 @@ The folder contains collection of docs and references for MSBuild, detailed info
 * [Binary log](wiki/Binary-Log.md)
 * [Live logger: how to opt in](livelogger/Opt-In-Mechanism.md)
 
-## Designs
-
-* [Resolve Assembly Reference as a service](design/rar-as-service.md)
+## Archived Designs
+* [Resolve Assembly Reference as a service](specs/rar-as-service.md)
    * Prototype: https://github.com/dotnet/msbuild/issues/6193
+
+## Proposed Designs
+* [Packages Sourcing](specs/proposed/interactive-package-references.md)
+* [Secrets Metadata](specs/proposed/security-metadata.md)
 
 ## Community contributions
 
