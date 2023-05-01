@@ -1314,8 +1314,7 @@ namespace Microsoft.Build.UnitTests
 
             string logContents = ExecuteMSBuildExeExpectSuccess(contents, envsToCreate: environmentVars, arguments: aggregateArguments);
 
-            string expected = $@"Task priority is '{expectedPrority}'";
-            logContents.ShouldContain(expected, () => logContents);
+            logContents.ShouldContain($@"Task priority is '{expectedPrority}'", customMessage: logContents);
         }
 
         /// <summary>
@@ -2173,8 +2172,8 @@ $@"<Project>
 
             string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: "/t:Target1 /t:Target2");
 
-            logContents.ShouldContain("7514CB1641A948D0A3930C5EC2DC1940", () => logContents);
-            logContents.ShouldContain("E2C73B5843F94B63B067D9BEB2C4EC52", () => logContents);
+            logContents.ShouldContain("7514CB1641A948D0A3930C5EC2DC1940", customMessage: logContents);
+            logContents.ShouldContain("E2C73B5843F94B63B067D9BEB2C4EC52", customMessage: logContents);
         }
 
         [Theory]
@@ -2197,8 +2196,8 @@ $@"<Project>
 
             var output = RunnerUtilities.ExecMSBuild(parametersLoggerOptional, out bool successfulExit, _output);
             successfulExit.ShouldBe(true);
-            output.ShouldContain("Hello", output);
-            output.ShouldContain("The specified logger could not be created and will not be used.", output);
+            output.ShouldContain("Hello", customMessage: output);
+            output.ShouldContain("The specified logger could not be created and will not be used.", customMessage: output);
         }
 
         [Theory]
@@ -2463,7 +2462,7 @@ EndGlobal
         {
             (bool result, string output) = ExecuteMSBuildExe(projectContents, filesToCreate, envsToCreate, arguments);
 
-            result.ShouldBeTrue(() => output);
+            result.ShouldBeTrue(output);
 
             return output;
         }
@@ -2472,7 +2471,7 @@ EndGlobal
         {
             (bool result, string output) = ExecuteMSBuildExe(projectContents, filesToCreate, envsToCreate, arguments);
 
-            result.ShouldBeFalse(() => output);
+            result.ShouldBeFalse(output);
 
             return output;
         }

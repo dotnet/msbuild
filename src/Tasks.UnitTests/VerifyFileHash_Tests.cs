@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests
                 Hash = hash,
             };
 
-            task.Execute().ShouldBeFalse(() => _mockEngine.Log);
+            task.Execute().ShouldBeFalse(_mockEngine.Log);
 
             var errorEvent = _mockEngine.ErrorEvents.ShouldHaveSingleItem();
 

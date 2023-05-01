@@ -338,7 +338,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
             Before:
             Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
-            
+
             Utilities.AssertStateFileWasWritten(t);
             After:
             Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
@@ -1557,10 +1557,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 string generatedSource = File.ReadAllText(t.StronglyTypedFileName);
 
-                generatedSource.ShouldNotContain("object Image1", "Strongly-typed resource accessor is returning type `object` instead of `System.Drawing.Bitmap`");
+                generatedSource.ShouldNotContain("object Image1", customMessage: "Strongly-typed resource accessor is returning type `object` instead of `System.Drawing.Bitmap`");
                 generatedSource.ShouldContain("Bitmap Image1");
 
-                generatedSource.ShouldNotContain("object MyString", "Strongly-typed resource accessor is returning type `object` instead of `string`");
+                generatedSource.ShouldNotContain("object MyString", customMessage: "Strongly-typed resource accessor is returning type `object` instead of `string`");
                 generatedSource.ShouldContain("static string MyString");
                 generatedSource.ShouldMatch("//.*Looks up a localized string similar to MyValue", "Couldn't find a comment in the usual format for a string resource.");
             }
@@ -1718,7 +1718,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
                 Before:
                 Assert.False(success);
-                
+
                 Utilities.AssertStateFileWasWritten(t);
                 After:
                 Assert.False(success);
@@ -1797,7 +1797,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
                 Before:
                 Assert.False(success);
-                
+
                 Utilities.AssertStateFileWasWritten(t);
                 After:
                 Assert.False(success);
@@ -2317,7 +2317,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
                 Before:
                 Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
-                
+
                 Utilities.AssertStateFileWasWritten(t);
                 After:
                 Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
