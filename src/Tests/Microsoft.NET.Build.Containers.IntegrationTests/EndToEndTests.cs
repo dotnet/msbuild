@@ -89,7 +89,7 @@ public class EndToEndTests
 
         ImageBuilder imageBuilder = await registry.GetImageManifestAsync(
             DockerRegistryManager.RuntimeBaseImage,
-            DockerRegistryManager.Net7ImageTag,
+            DockerRegistryManager.Net8PreviewImageTag,
             "linux-x64",
             ToolsetUtils.GetRuntimeGraphFilePath(),
             cancellationToken: default).ConfigureAwait(false);
