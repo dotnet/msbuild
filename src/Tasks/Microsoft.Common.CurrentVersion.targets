@@ -1027,7 +1027,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </MSBuild>
   </Target>
 
-  <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
+  <ItemGroup Condition="'$(IsGraphBuild)' == 'true' and '$(BuildPassReferences)' == 'true'">
     <ProjectReferenceTargets Include="BuildGenerateSources" Targets="BuildGenerateSources" />
   </ItemGroup>
 
@@ -1056,7 +1056,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </MSBuild>
   </Target>
 
-  <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
+  <ItemGroup Condition="'$(IsGraphBuild)' == 'true' and '$(BuildPassReferences)' == 'true'">
     <ProjectReferenceTargets Include="BuildCompile" Targets="BuildCompile" />
   </ItemGroup>
 
@@ -1085,7 +1085,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </MSBuild>
   </Target>
 
-  <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
+  <ItemGroup Condition="'$(IsGraphBuild)' == 'true' and '$(BuildPassReferences)' == 'true'">
     <ProjectReferenceTargets Include="BuildLink" Targets="BuildLink" />
   </ItemGroup>
 
