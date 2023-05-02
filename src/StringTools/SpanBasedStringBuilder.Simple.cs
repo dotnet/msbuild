@@ -35,7 +35,7 @@ namespace Microsoft.NET.StringTools
             /// <summary>
             /// Returns the current character.
             /// </summary>
-            public char Current => _builder[_charIndex];
+            public readonly char Current => _builder[_charIndex];
 
             /// <summary>
             /// Moves to the next character.

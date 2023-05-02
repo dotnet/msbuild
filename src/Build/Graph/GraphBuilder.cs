@@ -254,11 +254,15 @@ namespace Microsoft.Build.Graph
 
             ErrorUtilities.VerifyThrowArgument(entryPoints.Count == 1, "StaticGraphAcceptsSingleSolutionEntryPoint");
 
-            var solutionEntryPoint = entryPoints.Single();
-            var solutionGlobalProperties = ImmutableDictionary.CreateRange(
+            ProjectGraphEntryPoint solutionEntryPoint = entryPoints.Single();
+            ImmutableDictionary<string, string>.Builder solutionGlobalPropertiesBuilder = ImmutableDictionary.CreateBuilder(
                 keyComparer: StringComparer.OrdinalIgnoreCase,
-                valueComparer: StringComparer.OrdinalIgnoreCase,
-                items: solutionEntryPoint.GlobalProperties ?? ImmutableDictionary<string, string>.Empty);
+                valueComparer: StringComparer.OrdinalIgnoreCase);
+
+            if (solutionEntryPoint.GlobalProperties != null)
+            {
+                solutionGlobalPropertiesBuilder.AddRange(solutionEntryPoint.GlobalProperties);
+            }
 
             var solution = SolutionFile.Parse(solutionEntryPoint.ProjectFile);
 
@@ -272,29 +276,39 @@ namespace Microsoft.Build.Graph
                         string.Join(";", solution.SolutionParserErrorCodes)));
             }
 
-            var projectsInSolution = GetBuildableProjects(solution);
+            IReadOnlyCollection<ProjectInSolution> projectsInSolution = GetBuildableProjects(solution);
 
-            var currentSolutionConfiguration = SelectSolutionConfiguration(solution, solutionGlobalProperties);
+            SolutionConfigurationInSolution currentSolutionConfiguration = SelectSolutionConfiguration(solution, solutionEntryPoint.GlobalProperties);
+
+            string solutionConfigurationXml = SolutionProjectGenerator.GetSolutionConfiguration(solution, currentSolutionConfiguration);
+            solutionGlobalPropertiesBuilder["CurrentSolutionConfigurationContents"] = solutionConfigurationXml;
+
+            // Project configurations are reused heavily, so cache the global properties for each
+            Dictionary<string, ImmutableDictionary<string, string>> globalPropertiesForProjectConfiguration = new(StringComparer.OrdinalIgnoreCase);
 
             var newEntryPoints = new List<ProjectGraphEntryPoint>(projectsInSolution.Count);
 
-            foreach (var project in projectsInSolution)
+            foreach (ProjectInSolution project in projectsInSolution)
             {
                 if (project.ProjectConfigurations.Count == 0)
                 {
                     continue;
                 }
 
-                var projectConfiguration = SelectProjectConfiguration(currentSolutionConfiguration, project.ProjectConfigurations);
+                ProjectConfigurationInSolution projectConfiguration = SelectProjectConfiguration(currentSolutionConfiguration, project.ProjectConfigurations);
 
                 if (projectConfiguration.IncludeInBuild)
                 {
-                    newEntryPoints.Add(
-                        new ProjectGraphEntryPoint(
-                            project.AbsolutePath,
-                            solutionGlobalProperties
-                                .SetItem("Configuration", projectConfiguration.ConfigurationName)
-                                .SetItem("Platform", projectConfiguration.PlatformName)));
+                    if (!globalPropertiesForProjectConfiguration.TryGetValue(projectConfiguration.FullName, out ImmutableDictionary<string, string> projectGlobalProperties))
+                    {
+                        solutionGlobalPropertiesBuilder["Configuration"] = projectConfiguration.ConfigurationName;
+                        solutionGlobalPropertiesBuilder["Platform"] = projectConfiguration.PlatformName;
+
+                        projectGlobalProperties = solutionGlobalPropertiesBuilder.ToImmutable();
+                        globalPropertiesForProjectConfiguration.Add(projectConfiguration.FullName, projectGlobalProperties);
+                    }
+
+                    newEntryPoints.Add(new ProjectGraphEntryPoint(project.AbsolutePath, projectGlobalProperties));
                 }
             }
 
@@ -307,13 +321,13 @@ namespace Microsoft.Build.Graph
                 return solutionFile.ProjectsInOrder.Where(p => p.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat && solutionFile.ProjectShouldBuild(p.RelativePath)).ToImmutableArray();
             }
 
-            SolutionConfigurationInSolution SelectSolutionConfiguration(SolutionFile solutionFile, ImmutableDictionary<string, string> globalProperties)
+            SolutionConfigurationInSolution SelectSolutionConfiguration(SolutionFile solutionFile, IDictionary<string, string> globalProperties)
             {
-                var solutionConfiguration = globalProperties.TryGetValue("Configuration", out string configuration)
+                var solutionConfiguration = globalProperties != null && globalProperties.TryGetValue("Configuration", out string configuration)
                     ? configuration
                     : solutionFile.GetDefaultConfigurationName();
 
-                var solutionPlatform = globalProperties.TryGetValue("Platform", out string platform)
+                var solutionPlatform = globalProperties != null && globalProperties.TryGetValue("Platform", out string platform)
                     ? platform
                     : solutionFile.GetDefaultPlatformName();
 
@@ -544,7 +558,6 @@ namespace Microsoft.Build.Graph
         private List<ProjectInterpretation.ReferenceInfo> ParseReferences(ProjectGraphNode parsedProject)
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
-
 
             foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstance, _projectCollection, _projectInstanceFactory))
             {

@@ -390,6 +390,9 @@ dotnet_diagnostic.IDE0241.severity = suggestion
 # Struct can be made 'readonly'
 dotnet_diagnostic.IDE0250.severity = suggestion
 
+# Struct methods can be made 'readonly'
+dotnet_diagnostic.IDE0251.severity = suggestion
+
 # Null check can be simplified
 dotnet_diagnostic.IDE0270.severity = suggestion
 
