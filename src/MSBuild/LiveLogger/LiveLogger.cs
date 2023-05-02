@@ -422,7 +422,20 @@ internal sealed class LiveLogger : INodeLogger
                                 MessageSeverity.Error => TerminalColor.Red,
                                 _ => TerminalColor.Default,
                             };
-                            Terminal.WriteColorLine(color, $"{Indentation}{Indentation}{buildMessage.Message}");
+                            char symbol = buildMessage.Severity switch
+                            {
+                                MessageSeverity.Warning => '⚠',
+                                MessageSeverity.Error => '❌',
+                                _ => ' ',
+                            };
+
+                            // The error and warning symbols may be rendered with different width on some terminals. To make sure that the message text
+                            // is always aligned, we print the symbol, move back to the start of the line, then move forward to the desired column, and
+                            // finally print the message text.
+                            int maxSymbolWidth = 2;
+                            int messageStartColumn = Indentation.Length + Indentation.Length + maxSymbolWidth;
+                            Terminal.WriteColorLine(color, $"{Indentation}{Indentation}{symbol}\uFE0E{AnsiCodes.CSI}{messageStartColumn + 1}{AnsiCodes.MoveBackward}" +
+                                $"{AnsiCodes.CSI}{messageStartColumn}{AnsiCodes.MoveForward} {buildMessage.Message}");
                         }
                     }
 
@@ -526,7 +539,7 @@ internal sealed class LiveLogger : INodeLogger
         if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             string message = EventArgsFormatting.FormatEventMessage(e, false);
-            project.AddBuildMessage(MessageSeverity.Warning, $"⚠\uFE0E {message}");
+            project.AddBuildMessage(MessageSeverity.Warning, message);
         }
     }
 
@@ -539,7 +552,7 @@ internal sealed class LiveLogger : INodeLogger
         if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             string message = EventArgsFormatting.FormatEventMessage(e, false);
-            project.AddBuildMessage(MessageSeverity.Error, $"❌\uFE0E {message}");
+            project.AddBuildMessage(MessageSeverity.Error, message);
         }
     }
 
