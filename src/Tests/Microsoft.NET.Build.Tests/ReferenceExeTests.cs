@@ -147,7 +147,7 @@ public class ReferencedExeProgram
 
             if (buildFailureCode == null)
             {
-                buildOrPublishCommand.Execute("-bl:C:\\users\\noahgilson\\abpublish.binlog")
+                buildOrPublishCommand.Execute()
                     .Should()
                     .Pass();
 
