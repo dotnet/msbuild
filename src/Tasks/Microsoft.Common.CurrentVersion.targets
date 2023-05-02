@@ -2711,7 +2711,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </Target>
 
   <ItemGroup Condition="'$(IsGraphBuild)' == 'true' and '$(FindInvalidProjectReferences)' == 'true'">
-    <ProjectReferenceTargets Include="Build" Targets="FindInvalidProjectReferences" />
+    <ProjectReferenceTargets Include="Build" Targets="GetTargetPathWithTargetPlatformMoniker" />
   </ItemGroup>
 
    <!--
