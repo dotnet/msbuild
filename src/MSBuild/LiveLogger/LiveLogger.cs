@@ -782,15 +782,15 @@ internal sealed class LiveLogger : INodeLogger
                 (false, true) => ResourceUtilities.GetResourceString("BuildResult_FailedWithWarnings"),
                 _ => ResourceUtilities.GetResourceString("BuildResult_Failed"),
             };
-            return Terminal.RenderColor(TerminalColor.Red, text);
+            return AnsiCodes.Colorize(text, TerminalColor.Red);
         }
         else if (hasWarning)
         {
-            return Terminal.RenderColor(TerminalColor.Yellow, ResourceUtilities.GetResourceString("BuildResult_SucceededWithWarnings"));
+            return AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_SucceededWithWarnings"), TerminalColor.Yellow);
         }
         else
         {
-            return Terminal.RenderColor(TerminalColor.Green, ResourceUtilities.GetResourceString("BuildResult_Succeeded"));
+            return AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
         }
     }
 
