@@ -674,6 +674,12 @@ setx PATH "%PATH%;{0}"
   <data name="CommandPrereleaseOptionDescription" xml:space="preserve">
     <value>Allows prerelease packages to be installed.</value>
   </data>
+  <data name="SolutionArgumentMisplaced" xml:space="preserve">
+    <value>Solution argument '{0}' is misplaced.</value>
+  </data>
+  <data name="DidYouMean" xml:space="preserve">
+    <value>Did you mean the following command?</value>
+  </data>
   <data name="ArchitectureOptionDescription" xml:space="preserve">
     <value>The target architecture.</value>
   </data>

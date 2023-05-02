@@ -57,6 +57,11 @@
         <target state="translated">V {0} se nenašel žádný projekt.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DidYouMean">
+        <source>Did you mean the following command?</source>
+        <target state="new">Did you mean the following command?</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
         <source>Force the command to ignore any persistent build servers.</source>
         <target state="translated">Vynuťte, aby příkaz ignoroval všechny trvalé buildovací servery.</target>
@@ -220,6 +225,11 @@ Pokud se zadá identifikátor modulu runtime, výchozí hodnota je true.</target
       <trans-unit id="Solution">
         <source>Solution</source>
         <target state="translated">Řešení</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionArgumentMisplaced">
+        <source>Solution argument '{0}' is misplaced.</source>
+        <target state="new">Solution argument '{0}' is misplaced.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">

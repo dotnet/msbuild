@@ -57,6 +57,11 @@
         <target state="translated">Non è stato trovato alcun progetto in `{0}`.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DidYouMean">
+        <source>Did you mean the following command?</source>
+        <target state="new">Did you mean the following command?</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
         <source>Force the command to ignore any persistent build servers.</source>
         <target state="translated">Forza il comando a ignorare tutti i server di compilazione persistenti.</target>
@@ -220,6 +225,11 @@ L'impostazione predefinita è 'true' se si specifica un identificatore di runtim
       <trans-unit id="Solution">
         <source>Solution</source>
         <target state="translated">Soluzione</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionArgumentMisplaced">
+        <source>Solution argument '{0}' is misplaced.</source>
+        <target state="new">Solution argument '{0}' is misplaced.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">
