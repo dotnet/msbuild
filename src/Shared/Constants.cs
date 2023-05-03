@@ -189,6 +189,7 @@ namespace Microsoft.Build.Shared
         internal const string executableExtension = "ExecutableExtension";
         internal const string embedInteropTypes = "EmbedInteropTypes";
         internal const string frameworkReferenceName = "FrameworkReferenceName";
+        internal const string assemblyName = "AssemblyName";
         internal const string assemblyVersion = "AssemblyVersion";
         internal const string publicKeyToken = "PublicKeyToken";
 
