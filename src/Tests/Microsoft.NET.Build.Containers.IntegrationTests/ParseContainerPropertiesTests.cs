@@ -16,7 +16,7 @@ public class ParseContainerPropertiesTests
     [DockerDaemonAvailableFact]
     public void Baseline()
     {
-        var (project, _, d) = ProjectInitializer.InitProject(new () {
+        var (project, logs, d) = ProjectInitializer.InitProject(new () {
             [ContainerBaseImage] = "mcr.microsoft.com/dotnet/runtime:7.0",
             [ContainerRegistry] = "localhost:5010",
             [ContainerRepository] = "dotnet/testimage",
@@ -24,7 +24,7 @@ public class ParseContainerPropertiesTests
         });
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
-        Assert.True(instance.Build(new[]{ComputeContainerConfig}, null, null, out var outputs));
+        Assert.True(instance.Build(new[]{ComputeContainerConfig}, new [] { logs }, null, out var outputs));
 
         Assert.Equal("mcr.microsoft.com", instance.GetPropertyValue(ContainerBaseRegistry));
         Assert.Equal("dotnet/runtime", instance.GetPropertyValue(ContainerBaseName));
@@ -38,13 +38,13 @@ public class ParseContainerPropertiesTests
     [DockerDaemonAvailableFact]
     public void SpacesGetReplacedWithDashes()
     {
-         var (project, _, d) = ProjectInitializer.InitProject(new () {
+         var (project, logs, d) = ProjectInitializer.InitProject(new () {
             [ContainerBaseImage] = "mcr microsoft com/dotnet runtime:7.0",
             [ContainerRegistry] = "localhost:5010"
         });
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
-        Assert.True(instance.Build(new[]{ComputeContainerConfig}, null, null, out var outputs));
+        Assert.True(instance.Build(new[]{ComputeContainerConfig}, new [] { logs }, null, out var outputs));
 
         Assert.Equal("mcr-microsoft-com",instance.GetPropertyValue(ContainerBaseRegistry));
         Assert.Equal("dotnet-runtime", instance.GetPropertyValue(ContainerBaseName));

@@ -9,6 +9,8 @@ internal static class KnownStrings
     {
         public static readonly string ContainerBaseImage = nameof(ContainerBaseImage);
         public static readonly string ContainerRegistry = nameof(ContainerRegistry);
+        /// <summary>Note that this is deprecated in favor of <see cref="ContainerRepository"/></summary>
+        public static readonly string ContainerImageName = nameof(ContainerImageName);
         public static readonly string ContainerRepository = nameof(ContainerRepository);
         public static readonly string ContainerImageTag = nameof(ContainerImageTag);
         public static readonly string ContainerImageTags = nameof(ContainerImageTags);
@@ -31,6 +33,7 @@ internal static class KnownStrings
 
     public static class ErrorCodes
     {
+        public static readonly string CONTAINER003 = nameof(CONTAINER003);
         public static readonly string CONTAINER1011 = nameof(CONTAINER1011);
         public static readonly string CONTAINER1012 = nameof(CONTAINER1012);
         public static readonly string CONTAINER1013 = nameof(CONTAINER1013);

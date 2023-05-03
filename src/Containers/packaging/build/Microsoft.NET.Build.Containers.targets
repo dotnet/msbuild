@@ -70,7 +70,7 @@
     </PropertyGroup>
 
     <!-- Compatibility: previous versions used ImageName, but the proper term is Repository. Keep using that if explicitly set. -->
-    <Error Condition="'$(ContainerImageName)' != ''" Code="CONTAINER003" Text="The property 'ContainerImageName' was set but is obsolete - please use 'ContainerRepository' instead." />
+    <Warning Condition="'$(ContainerImageName)' != ''" Code="CONTAINER003" Text="The property 'ContainerImageName' was set but is obsolete - please use 'ContainerRepository' instead." />
 
     <!-- Container Defaults -->
     <PropertyGroup>
