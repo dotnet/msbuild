@@ -263,11 +263,13 @@ public class ReferencedExeProgram
             {
                 var ns = project.Root.Name.Namespace;
 
-                project.Root.Element(ns + "PropertyGroup")
-                    .Add(XElement.Parse($@"<RuntimeIdentifier Condition=""'$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}'"">" + EnvironmentInfo.GetCompatibleRid() + "</RuntimeIdentifier>"));
+                var propertyGroup = new XElement(ns + "PropertyGroup",
+                    new XAttribute("Condition", $"'$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}'"));
 
-                project.Root.Element(ns + "PropertyGroup")
-                    .Add(new XElement(ns + "SelfContained", "true"));
+                propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", EnvironmentInfo.GetCompatibleRid()));
+                propertyGroup.Add(new XElement(ns + "SelfContained", "true"));
+
+                project.Root.Add(propertyGroup);
             });
 
 
