@@ -18,6 +18,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
         bool GetEnvironmentVariableAsBool(string name, bool defaultValue);
 
+        int? GetEnvironmentVariableAsNullableInt(string name);
+
         string GetEnvironmentVariable(string name);
 
         string GetEnvironmentVariable(string variable, EnvironmentVariableTarget target);
