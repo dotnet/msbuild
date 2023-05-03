@@ -1550,7 +1550,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns><c>true</c> if the toolset was found and removed; <c>false</c> otherwise.</returns>
         private bool RemoveToolsetInternal(string toolsVersion)
         {
-            Debug.Assert(Monitor.IsEntered(_toolsets));
+            Debug.Assert(Monitor.IsEntered(_lockerToolsets));
 
             if (!_toolsets.Remove(toolsVersion))
             {
