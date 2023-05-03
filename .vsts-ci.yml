@@ -4,6 +4,7 @@ trigger:
     include:
     - main
     - release/7.0.4xx
+    - release/8.0.1xx-preview*
     - internal/release/*
     - exp/*
 
