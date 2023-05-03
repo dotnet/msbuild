@@ -845,7 +845,7 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
 
-            string name = Path.GetFileNameWithoutExtension(item.ItemSpec);
+            string name = item.GetMetadata(FileUtilities.ItemSpecModifiers.Filename);
 
             AssemblyName assemblyName = new AssemblyName($"{name}, Version={version}, Culture=neutral, PublicKeyToken={publicKeyToken}");
             return new AssemblyNameExtension(assemblyName);
