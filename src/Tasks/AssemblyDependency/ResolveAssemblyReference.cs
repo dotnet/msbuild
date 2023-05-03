@@ -2291,7 +2291,6 @@ namespace Microsoft.Build.Tasks
 
                     // Load any prior saved state.
                     ReadStateFile(fileExists);
-                    _cache.SetGetLastWriteTime(getLastWriteTime);
                     _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
 
                     // Cache delegates.
