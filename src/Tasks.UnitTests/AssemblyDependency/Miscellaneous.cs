@@ -8580,6 +8580,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             item.SetMetadata("FrameworkReferenceName", "Microsoft.NETCore.App");
             item.SetMetadata("FrameworkReferenceVersion", "8.0.0");
 
+            item.SetMetadata("AssemblyName", "System.Candy");
             item.SetMetadata("AssemblyVersion", "8.1.2.3");
             item.SetMetadata("PublicKeyToken", "b03f5f7f11d50a3a");
 
@@ -8616,6 +8617,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             rar.ResolvedFiles.Length.ShouldBe(1);
             rar.ResolvedFiles[0].ItemSpec.ShouldBe(refPath);
+            rar.ResolvedFiles[0].GetMetadata("FusionName").ShouldBe("System.Candy, Version=8.1.2.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
         }
     }
 }
