@@ -225,10 +225,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <returns>Return true to indicate success, return false to indicate failure and NO retry, return NULL to indicate retry.</returns>
         private bool? CopyFileWithLogging(
-            FileState sourceFileState,      // The source file
+            FileState sourceFileState,
             FileState destinationFileState,
             string sourceFileFullPath,
-            string destinationFileFullPath)  // The destination file
+            string destinationFileFullPath)
         {
             if (destinationFileState.DirectoryExists)
             {
@@ -308,11 +308,11 @@ namespace Microsoft.Build.Tasks
                     if (UseSymboliclinksIfPossible)
                     {
                         // This is a message for fallback to SymbolicLinks if HardLinks fail when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true
-                        Log.LogMessage(MessageImportance.Normal, RetryingAsSymbolicLink, sourceFileState.Name, destinationFileState.Name, errorMessage);
+                        Log.LogMessage(MessageImportance.Normal, RetryingAsSymbolicLink, sourceFileFullPath, destinationFileFullPath, errorMessage);
                     }
                     else
                     {
-                        Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.Name, destinationFileState.Name, errorMessage);
+                        Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileFullPath, destinationFileFullPath, errorMessage);
                     }
                 }
             }
@@ -328,13 +328,13 @@ namespace Microsoft.Build.Tasks
                         errorMessage = Log.FormatResourceString("Copy.NonWindowsLinkErrorMessage", "symlink()", errorMessage);
                     }
 
-                    Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.Name, destinationFileState.Name, errorMessage);
+                    Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileFullPath, destinationFileFullPath, errorMessage);
                 }
             }
 
             if (ErrorIfLinkFails && !hardLinkCreated && !symbolicLinkCreated)
             {
-                Log.LogErrorWithCodeFromResources("Copy.LinkFailed", sourceFileState.Name, destinationFileState.Name);
+                Log.LogErrorWithCodeFromResources("Copy.LinkFailed", sourceFileFullPath, destinationFileFullPath);
                 return false;
             }
 
