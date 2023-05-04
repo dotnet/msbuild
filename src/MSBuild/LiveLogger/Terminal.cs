@@ -132,14 +132,8 @@ internal sealed class Terminal : ITerminal
         }
         else
         {
-            Write(RenderColor(color, text));
+            Write(AnsiCodes.Colorize(text, color));
         }
-    }
-
-    /// <inheritdoc/>
-    public string RenderColor(TerminalColor color, string text)
-    {
-        return $"{AnsiCodes.CSI}{(int)color}{AnsiCodes.SetColor}{text}{AnsiCodes.SetDefaultColor}";
     }
 
     /// <inheritdoc/>
