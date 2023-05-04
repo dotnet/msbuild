@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Exceptions;
@@ -522,6 +523,20 @@ namespace Microsoft.Build.Graph.UnitTests
             exception.ShouldBeNull();
 
             var graphFromSolutionEdges = graphFromSolution.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
+
+            // Solutions add the CurrentSolutionConfigurationContents global property for platform resolution
+            foreach ((ConfigurationMetadata, ConfigurationMetadata) graphFromSolutionEdge in graphFromSolutionEdges.Keys)
+            {
+                graphFromSolutionEdge.Item1.GlobalProperties.ShouldContainKey("CurrentSolutionConfigurationContents");
+                graphFromSolutionEdge.Item2.GlobalProperties.ShouldContainKey("CurrentSolutionConfigurationContents");
+            }
+
+            // Remove CurrentSolutionConfigurationContents for comparison purposes. This is done as a separate pass since some edges may be sharing an instance.
+            foreach ((ConfigurationMetadata, ConfigurationMetadata) graphFromSolutionEdge in graphFromSolutionEdges.Keys)
+            {
+                graphFromSolutionEdge.Item1.GlobalProperties.Remove("CurrentSolutionConfigurationContents");
+                graphFromSolutionEdge.Item2.GlobalProperties.Remove("CurrentSolutionConfigurationContents");
+            }
 
             // Original edges get preserved.
             foreach (var graphEdge in graphEdges)

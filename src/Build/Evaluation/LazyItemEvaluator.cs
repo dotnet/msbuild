@@ -135,7 +135,7 @@ namespace Microsoft.Build.Evaluation
                 _normalizedItemValue = normalizedItemValue;
             }
 
-            public ItemData Clone(IItemFactory<I, I> itemFactory, ProjectItemElement initialItemElementForFactory)
+            public readonly ItemData Clone(IItemFactory<I, I> itemFactory, ProjectItemElement initialItemElementForFactory)
             {
                 // setting the factory's item element to the original item element that produced the item
                 // otherwise you get weird things like items that appear to have been produced by update elements

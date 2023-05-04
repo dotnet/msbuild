@@ -85,4 +85,14 @@ internal static class AnsiCodes
     /// Shows/restores the cursor.
     /// </summary>
     public const string ShowCursor = "\x1b[?25h";
+
+    public static string Colorize(string? s, TerminalColor color)
+    {
+        if (string.IsNullOrWhiteSpace(s))
+        {
+            return s ?? "";
+        }
+
+        return $"{CSI}{(int)color}{SetColor}{s}{SetDefaultColor}";
+    }
 }
