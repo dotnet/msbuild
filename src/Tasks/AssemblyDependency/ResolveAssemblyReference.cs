@@ -42,6 +42,11 @@ namespace Microsoft.Build.Tasks
         private const string NETStandardAssemblyName = "netstandard";
 
         /// <summary>
+        /// The well-known CLR 4.0 metadata version used in all managed assemblies.
+        /// </summary>
+        private const string DotNetAssemblyRuntimeVersion = "v4.0.30319";
+
+        /// <summary>
         /// Delegate to a method that takes a targetFrameworkDirectory and returns an array of redist or subset list paths
         /// </summary>
         /// <param name="targetFrameworkDirectory">TargetFramework directory to search for redist or subset list</param>
@@ -1963,7 +1968,7 @@ namespace Microsoft.Build.Tasks
             if (!reference.IsUnresolvable && !reference.IsBadImage)
             {
                 // Don't log the overwhelming default as it just pollutes the logs.
-                if (reference.ImageRuntime != "v4.0.30319")
+                if (reference.ImageRuntime != DotNetAssemblyRuntimeVersion)
                 {
                     Log.LogMessage(importance, Strings.ImageRuntimeVersion, reference.ImageRuntime);
                 }
@@ -2298,7 +2303,6 @@ namespace Microsoft.Build.Tasks
                     fileExists = _cache.CacheDelegate();
                     directoryExists = _cache.CacheDelegate(directoryExists);
                     getDirectories = _cache.CacheDelegate(getDirectories);
-                    getRuntimeVersion = _cache.CacheDelegate(getRuntimeVersion);
 
                     ReferenceTable dependencyTable = null;
 
@@ -2314,12 +2318,23 @@ namespace Microsoft.Build.Tasks
                         return getLastWriteTime(path);
                     });
 
-                    // Wrap the GetAssemblyName callback with a check for SDK/immutable files.
+                    // Wrap the GetAssemblyName and GetRuntimeVersion callbacks with a check for SDK/immutable files.
                     GetAssemblyName originalGetAssemblyName = getAssemblyName;
                     getAssemblyName = _cache.CacheDelegate(path =>
                     {
                         AssemblyNameExtension assemblyName = dependencyTable?.GetImmutableFileAssemblyName(path);
                         return assemblyName ?? originalGetAssemblyName(path);
+                    });
+
+                    GetAssemblyRuntimeVersion originalGetRuntimeVersion = getRuntimeVersion;
+                    getRuntimeVersion = _cache.CacheDelegate(path =>
+                    {
+                        if (dependencyTable?.IsImmutableFile(path) == true)
+                        {
+                            // There are no WinRT assemblies in the SDK, everything has the .NET metadata version.
+                            return DotNetAssemblyRuntimeVersion;
+                        }
+                        return originalGetRuntimeVersion(path);
                     });
 
                     _projectTargetFramework = FrameworkVersionFromString(_projectTargetFrameworkAsString);

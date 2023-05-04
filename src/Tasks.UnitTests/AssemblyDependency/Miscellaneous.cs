@@ -8607,7 +8607,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 getRegistrySubKeyDefaultValue,
 #endif
                 _ => throw new ShouldAssertException("Unexpected GetLastWriteTime callback"),
-                getRuntimeVersion,
+                _ => throw new ShouldAssertException("Unexpected GetAssemblyRuntimeVersion callback"),
 #if FEATURE_WIN32_REGISTRY
                 openBaseKey,
 #endif
