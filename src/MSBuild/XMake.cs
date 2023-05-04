@@ -35,6 +35,7 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
@@ -1687,7 +1688,7 @@ namespace Microsoft.Build.CommandLine
         /// The custom language that was set by the user for an 'external' tool besides MSBuild.
         /// Returns <see langword="null"/> if none are set.
         /// </returns>
-        private static CultureInfo GetExternalOverridenUILanguageIfSupportableWithEncoding()
+        public static CultureInfo GetExternalOverridenUILanguageIfSupportableWithEncoding()
         {
             CultureInfo externalLanguageSetting = GetExternalOverriddenUILanguage();
             if (externalLanguageSetting != null)
