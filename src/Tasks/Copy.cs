@@ -285,7 +285,7 @@ namespace Microsoft.Build.Tasks
                 MakeFileWriteable(destinationFileState, true);
             }
 
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) && destinationFileState.FileExists && !destinationFileState.IsReadOnly)
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) && destinationFileState.FileExists && !destinationFileState.IsReadOnly)
             {
                 FileUtilities.DeleteNoThrow(destinationFileState.Name);
             }

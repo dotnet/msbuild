@@ -23,6 +23,9 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 
 ## Current Rotation of Change Waves
 
+### 17.8
+- [Delete destination file before copy](https://github.com/dotnet/msbuild/pull/8685)
+
 ### 17.6
 - [Parse invalid property under target](https://github.com/dotnet/msbuild/pull/8190)
 - [Eliminate project string cache](https://github.com/dotnet/msbuild/pull/7965)
