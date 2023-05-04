@@ -17,9 +17,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     /// <param name="source">Source file</param>
     /// <param name="destination">Destination file</param>
-    /// <param name="sourceFileFullPath">Source file's full path</param>
-    /// <param name="destinationFileFullPath">Destination file's full path</param>
-    internal delegate bool? CopyFileWithState(FileState source, FileState destination, string sourceFileFullPath, string destinationFileFullPath);
+    internal delegate bool? CopyFileWithState(FileState source, FileState destination);
 
     /// <summary>
     /// Short-term cache saves the result of IO operations on a filename. Should only be
@@ -232,6 +230,11 @@ namespace Microsoft.Build.Tasks
         /// The name of the file.
         /// </summary>
         private readonly string _filename;
+
+        /// <summary>
+        /// Holds the full path equivalent of _filename
+        /// </summary>
+        public string FileNameFullPath;
 
         /// <summary>
         /// Actual file or directory information
