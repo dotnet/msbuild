@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Xml.Linq;
 using Microsoft.Build.Framework;
 using NuGet.Frameworks;
@@ -58,9 +59,18 @@ namespace Microsoft.NET.Build.Tasks
                 bool referencedProjectHadSelfContainedSpecified = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["_SelfContainedWasSpecified"]);
 
                 // We can only access TargetFrameworks and NearestTargetFramework to find the referenced project "TargetFramework".
-                // We rely on the nearest one because it will pick the lowest 'most-compatible' tfm for the two projects.
-                // Since 'younger' TFMs are the ones that would error and are generally also what gets picked as 'most-copmaptible' we can use it.
-                var referencedProjectTargetFramework = NuGetFramework.Parse(nearestTargetFramework);
+                // We rely on the nearest one because it will pick the lowest 'most-compatible' tfm for the referencer and referencee projects.
+                // Since 'younger' TFMs are the ones that would error and are generally also what gets picked as 'most-copmaptible,' we can use it.
+                FrameworkName? referencedProjectTargetFramework = null;
+                var targetFrameworkMonikerIndex = Array.FindIndex(project.GetMetadata("TargetFrameworks").Split(';'), targetFramework => targetFramework == nearestTargetFramework);
+
+                // Since TargetFrameworks can have aliases that aren't the real TFM, we need to uncover the potential alias to the raw TargetFramework in the TFMs by using its index
+                var targetFrameworkMonikers = project.GetMetadata("TargetFrameworkMonikers").Split(';');
+                if (targetFrameworkMonikerIndex != -1 && targetFrameworkMonikerIndex < targetFrameworkMonikers.Length)
+                {
+                    // we never expect this if statement to not go through, but if there is a bug with targetframeworks we need to be careful not to fail here.
+                    referencedProjectTargetFramework = new FrameworkName(targetFrameworkMonikers[targetFrameworkMonikerIndex]);
+                }
 
                 var globalProperties = BuildEngine6.GetGlobalProperties();
 
@@ -85,8 +95,8 @@ namespace Microsoft.NET.Build.Tasks
                     }
 
                     //  We need to check if referenced project will become SelfContained because of its RuntimeIdentifier. This only happens on TargetFrameworks less than net8.0.
-                    var sdkVersionWhereRuntimeIdentifierNoLongerInfersSelfContained = NuGetFramework.Parse("net8.0");
-                    bool runtimeIdentifierInfersSelfContained = referencedProjectTargetFramework.Platform == ".NETCoreApp" && referencedProjectTargetFramework.Version < sdkVersionWhereRuntimeIdentifierNoLongerInfersSelfContained.Version;
+                    var sdkVersionWhereRuntimeIdentifierNoLongerInfersSelfContained = new FrameworkName(".NETCoreApp,Version=v8.0");
+                    bool runtimeIdentifierInfersSelfContained = referencedProjectTargetFramework != null && referencedProjectTargetFramework.Identifier == ".NETCoreApp" && referencedProjectTargetFramework.Version < sdkVersionWhereRuntimeIdentifierNoLongerInfersSelfContained.Version;
 
                     //  If the project is NOT RID agnostic, then a global RuntimeIdentifier will flow to it.
                     //  If the project didn't explicitly specify a value for SelfContained, then this will
