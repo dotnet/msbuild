@@ -2255,6 +2255,82 @@ namespace Microsoft.Build.UnitTests
             Assert.False(result);
             engine.AssertLogContains("MSB3892");
         }
+
+        /// <summary>
+        /// An existing link source should not be modified.
+        /// </summary>
+        /// <remarks>
+        /// Related to issue [#8273](https://github.com/dotnet/msbuild/issues/8273)
+        /// </remarks>
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        public void DoNotCorruptSourceOfLink(bool useHardLink, bool useSymbolicLink)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile sourceFile1 = env.CreateFile("source1.tmp", "This is the first source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
+            TransientTestFile sourceFile2 = env.CreateFile("source2.tmp", "This is the second source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
+            TransientTestFolder destFolder = env.CreateFolder(createFolder: false);
+            string destFile = Path.Combine(destFolder.Path, "The Destination");
+
+            // Don't create the dest folder, let task do that
+            ITaskItem[] sourceFiles = { new TaskItem(sourceFile1.Path) };
+            ITaskItem[] destinationFiles = { new TaskItem(destFile) };
+
+            var me = new MockEngine(true);
+            var t = new Copy
+            {
+                RetryDelayMilliseconds = 1, // speed up tests!
+                BuildEngine = me,
+                SourceFiles = sourceFiles,
+                DestinationFiles = destinationFiles,
+                SkipUnchangedFiles = true,
+                UseHardlinksIfPossible = useHardLink,
+                UseSymboliclinksIfPossible = useSymbolicLink,
+            };
+
+            t.Execute().ShouldBeTrue();
+            File.Exists(destFile).ShouldBeTrue();
+            File.ReadAllText(destFile).ShouldBe("This is the first source temp file.");
+
+            sourceFiles = new TaskItem[] { new TaskItem(sourceFile2.Path) };
+
+            t = new Copy
+            {
+                RetryDelayMilliseconds = 1, // speed up tests!
+                BuildEngine = me,
+                SourceFiles = sourceFiles,
+                DestinationFiles = destinationFiles,
+                SkipUnchangedFiles = true,
+                UseHardlinksIfPossible = false,
+                UseSymboliclinksIfPossible = false,
+            };
+
+            t.Execute().ShouldBeTrue();
+            File.Exists(destFile).ShouldBeTrue();
+            File.ReadAllText(destFile).ShouldBe("This is the second source temp file.");
+
+            // Read the source file (it should not have been overwritten)
+            File.ReadAllText(sourceFile1.Path).ShouldBe("This is the first source temp file.");
+            ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
+
+            destinationFiles = new TaskItem[] { new TaskItem(
+                Path.Combine(Path.GetDirectoryName(sourceFile2.Path), ".", Path.GetFileName(sourceFile2.Path))) // sourceFile2.Path with a "." inserted before the file name
+            };
+
+            t = new Copy
+            {
+                RetryDelayMilliseconds = 1, // speed up tests!
+                BuildEngine = me,
+                SourceFiles = sourceFiles,
+                DestinationFiles = destinationFiles,
+                SkipUnchangedFiles = true,
+            };
+
+            t.Execute().ShouldBeTrue();
+            File.Exists(sourceFile2.Path).ShouldBeTrue();
+        }
     }
 
     public class CopyHardLink_Tests : Copy_Tests
