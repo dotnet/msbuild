@@ -132,7 +132,7 @@ internal sealed class Terminal : ITerminal
         }
         else
         {
-            Write($"{AnsiCodes.CSI}{(int)color}{AnsiCodes.SetColor}{text}{AnsiCodes.SetDefaultColor}");
+            Write(AnsiCodes.Colorize(text, color));
         }
     }
 

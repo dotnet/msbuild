@@ -817,7 +817,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Returns the corresponding property name - eg. "$(MSBuildExtensionsPath32)"
         /// </summary>
-        public string MSBuildPropertyName => String.Format($"$({StringRepresentation})");
+        public readonly string MSBuildPropertyName => String.Format($"$({StringRepresentation})");
 
         /// <summary>
         /// Tries to find a reference to MSBuildExtensionsPath* property in the given string

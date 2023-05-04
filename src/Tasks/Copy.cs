@@ -228,6 +228,8 @@ namespace Microsoft.Build.Tasks
             FileState sourceFileState,
             FileState destinationFileState)
         {
+            bool destinationFileExists = false;
+
             if (destinationFileState.DirectoryExists)
             {
                 Log.LogErrorWithCodeFromResources("Copy.DestinationIsDirectory", sourceFileState.Name, destinationFileState.Name);
@@ -283,14 +285,7 @@ namespace Microsoft.Build.Tasks
             if (OverwriteReadOnlyFiles)
             {
                 MakeFileWriteable(destinationFileState, true);
-            }
-
-            // If the destination file is a hard or symbolic link, File.Copy would overwrite the source.
-            // To prevent this, we need to delete the existing entry before we Copy or create a link.
-            // We could try to figure out if the file is a link, but I can't think of a reason to not simply delete it always.
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) && destinationFileState.FileExists && !destinationFileState.IsReadOnly)
-            {
-                FileUtilities.DeleteNoThrow(destinationFileState.Name);
+                destinationFileExists = destinationFileState.FileExists;
             }
 
             bool symbolicLinkCreated = false;
@@ -300,7 +295,7 @@ namespace Microsoft.Build.Tasks
             // Create hard links if UseHardlinksIfPossible is true
             if (UseHardlinksIfPossible)
             {
-                TryCopyViaLink(HardLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, out hardLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage, Log));
+                TryCopyViaLink(HardLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out hardLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage, Log));
                 if (!hardLinkCreated)
                 {
                     if (UseSymboliclinksIfPossible)
@@ -318,7 +313,7 @@ namespace Microsoft.Build.Tasks
             // Create symbolic link if UseSymboliclinksIfPossible is true and hard link is not created
             if (!hardLinkCreated && UseSymboliclinksIfPossible)
             {
-                TryCopyViaLink(SymbolicLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, out symbolicLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethodsShared.MakeSymbolicLink(destination, source, ref errorMessage));
+                TryCopyViaLink(SymbolicLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out symbolicLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethodsShared.MakeSymbolicLink(destination, source, ref errorMessage));
                 if (!symbolicLinkCreated)
                 {
                     if (!NativeMethodsShared.IsWindows)
@@ -344,27 +339,40 @@ namespace Microsoft.Build.Tasks
                 Log.LogMessage(MessageImportance.Normal, FileComment, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath);
 
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
-
-                // If the destinationFile file exists, then make sure it's read-write.
-                // The File.Copy command copies attributes, but our copy needs to
-                // leave the file writeable.
-                if (sourceFileState.IsReadOnly)
-                {
-                    destinationFileState.Reset();
-                    MakeFileWriteable(destinationFileState, false);
-                }
             }
 
             // Files were successfully copied or linked. Those are equivalent here.
             WroteAtLeastOneFile = true;
 
+            destinationFileState.Reset();
+
+            // If the destinationFile file exists, then make sure it's read-write.
+            // The File.Copy command copies attributes, but our copy needs to
+            // leave the file writeable.
+            if (sourceFileState.IsReadOnly)
+            {
+                MakeFileWriteable(destinationFileState, false);
+            }
+
             return true;
         }
 
-        private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, out bool linkCreated, ref string errorMessage, Func<string, string, string, bool> createLink)
+        private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, ref bool destinationFileExists, out bool linkCreated, ref string errorMessage, Func<string, string, string, bool> createLink)
         {
             // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
             Log.LogMessage(MessageImportance.Normal, linkComment, sourceFileState.Name, destinationFileState.Name);
+
+            if (!OverwriteReadOnlyFiles)
+            {
+                destinationFileExists = destinationFileState.FileExists;
+            }
+
+            // CreateHardLink and CreateSymbolicLink cannot overwrite an existing file or link
+            // so we need to delete the existing entry before we create the hard or symbolic link.
+            if (destinationFileExists)
+            {
+                FileUtilities.DeleteNoThrow(destinationFileState.Name);
+            }
 
             linkCreated = createLink(sourceFileState.Name, destinationFileState.Name, errorMessage);
         }
@@ -835,11 +843,6 @@ namespace Microsoft.Build.Tasks
                                 {
                                     LogDiagnostic("Retrying on ERROR_ACCESS_DENIED because MSBUILDALWAYSRETRY = 1");
                                 }
-                            }
-                            else if (code == NativeMethods.ERROR_INVALID_FILENAME)
-                            {
-                                // Invalid characters used in file name, no point retrying.
-                                throw;
                             }
 
                             if (e is UnauthorizedAccessException)
