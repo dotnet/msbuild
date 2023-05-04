@@ -118,6 +118,7 @@ namespace Microsoft.Build.BackEnd
         /// incremental build is needed.
         /// </remarks>
         /// <param name="bucket"></param>
+        /// <param name="question"></param>
         /// <param name="changedTargetInputs"></param>
         /// <param name="upToDateTargetInputs"></param>
         /// <returns>
@@ -129,6 +130,7 @@ namespace Microsoft.Build.BackEnd
         /// </returns>
         internal DependencyAnalysisResult PerformDependencyAnalysis(
             ItemBucket bucket,
+            bool question,
             out ItemDictionary<ProjectItemInstance> changedTargetInputs,
             out ItemDictionary<ProjectItemInstance> upToDateTargetInputs)
         {
@@ -200,7 +202,7 @@ namespace Microsoft.Build.BackEnd
                          * 
                          */
                         ErrorUtilities.VerifyThrow(itemVectorsReferencedInBothTargetInputsAndOutputs.Count > 0, "The target must have inputs.");
-                        ErrorUtilities.VerifyThrow(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs).Count > 0, "The target must have inputs.");
+                        ErrorUtilities.VerifyThrow(!IsItemVectorEmpty(itemVectorsInTargetInputs), "The target must have inputs.");
 
                         result = PerformDependencyAnalysisIfDiscreteInputs(itemVectorsInTargetInputs,
                                     itemVectorTransformsInTargetInputs, discreteItemsInTargetInputs, itemVectorsReferencedOnlyInTargetInputs,
@@ -252,7 +254,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            LogReasonForBuildingTarget(result);
+            LogReasonForBuildingTarget(result, question);
 
             return result;
         }
@@ -261,15 +263,23 @@ namespace Microsoft.Build.BackEnd
         /// Does appropriate logging to indicate why this target is being built fully or partially.
         /// </summary>
         /// <param name="result"></param>
-        private void LogReasonForBuildingTarget(DependencyAnalysisResult result)
+        /// <param name="question"></param>
+        private void LogReasonForBuildingTarget(DependencyAnalysisResult result, bool question)
         {
             // Only if we are not logging just critical events should we be logging the details
             if (!_loggingService.OnlyLogCriticalEvents)
             {
                 if (result == DependencyAnalysisResult.FullBuild && _dependencyAnalysisDetail.Count > 0)
                 {
-                    // For the full build decision the are three possible outcomes
-                    _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "BuildTargetCompletely", _targetToAnalyze.Name);
+                    if (question)
+                    {
+                        _loggingService.LogError(_buildEventContext, new BuildEventFileInfo(String.Empty), "BuildTargetCompletely", _targetToAnalyze.Name);
+                    }
+                    else
+                    {
+                        // For the full build decision, there are three possible outcomes
+                        _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "BuildTargetCompletely", _targetToAnalyze.Name);
+                    }
 
                     foreach (DependencyAnalysisLogDetail logDetail in _dependencyAnalysisDetail)
                     {
@@ -279,8 +289,15 @@ namespace Microsoft.Build.BackEnd
                 }
                 else if (result == DependencyAnalysisResult.IncrementalBuild)
                 {
-                    // For the partial build decision the are three possible outcomes
-                    _loggingService.LogComment(_buildEventContext, MessageImportance.Normal, "BuildTargetPartially", _targetToAnalyze.Name);
+                    if (question)
+                    {
+                        _loggingService.LogError(_buildEventContext, new BuildEventFileInfo(String.Empty), "BuildTargetPartially", _targetToAnalyze.Name);
+                    }
+                    else
+                    {
+                        // For the partial build decision the are three possible outcomes
+                        _loggingService.LogComment(_buildEventContext, MessageImportance.Normal, "BuildTargetPartially", _targetToAnalyze.Name);
+                    }
                     foreach (DependencyAnalysisLogDetail logDetail in _dependencyAnalysisDetail)
                     {
                         string reason = GetIncrementalBuildReason(logDetail);
@@ -510,7 +527,7 @@ namespace Microsoft.Build.BackEnd
             // cannot correlate them to any output item
             foreach (string itemVectorType in itemVectorsReferencedOnlyInTargetInputs)
             {
-                discreteTargetInputItemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs, itemVectorType));
+                discreteTargetInputItemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs, itemVectorType, itemVectorsInTargetInputs[itemVectorType]));
             }
 
             // if there are any discrete input items, we can treat them as "meta" inputs, because:
@@ -840,6 +857,19 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        private static bool IsItemVectorEmpty(ItemVectorPartitionCollection itemVectors)
+        {
+            foreach (KeyValuePair<string, ItemVectorPartition> item in itemVectors)
+            {
+                if (GetItemSpecsFromItemVectors(itemVectors, item.Key, item.Value).Any())
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Retrieves the item-specs of all items in the given item vector collection.
         /// </summary>
@@ -847,11 +877,11 @@ namespace Microsoft.Build.BackEnd
         /// <returns>list of item-specs</returns>
         private static List<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors)
         {
-            List<string> itemSpecs = new List<string>();
+            List<string> itemSpecs = new();
 
-            foreach (string itemType in itemVectors.Keys)
+            foreach (KeyValuePair<string, ItemVectorPartition> item in itemVectors)
             {
-                itemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectors, itemType));
+                itemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectors, item.Key, item.Value));
             }
 
             return itemSpecs;
@@ -862,13 +892,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="itemVectors"></param>
         /// <param name="itemType"></param>
+        /// <param name="itemVectorPartition"></param>
         /// <returns>list of item-specs</returns>
-        private static List<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors, string itemType)
+        private static IEnumerable<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors, string itemType, ItemVectorPartition itemVectorPartition)
         {
-            List<string> itemSpecs = new List<string>();
-
-            ItemVectorPartition itemVectorPartition = itemVectors[itemType];
-
             if (itemVectorPartition != null)
             {
                 foreach (IList<ProjectItemInstance> items in itemVectorPartition.Values)
@@ -878,12 +905,10 @@ namespace Microsoft.Build.BackEnd
                         // The item can be null in the case of an item transform.
                         // eg., @(Compile->'%(NonExistentMetadata)')
                         // Nevertheless, include these, so that correlation can still occur.
-                        itemSpecs.Add((item == null) ? null : ((IItem)item).EvaluatedIncludeEscaped);
+                        yield return item == null ? null : ((IItem)item).EvaluatedIncludeEscaped;
                     }
                 }
             }
-
-            return itemSpecs;
         }
 
         /// <summary>

@@ -150,7 +150,7 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
         private void CurrentDomainOnAssemblyLoad(object? sender, AssemblyLoadEventArgs args)
         {
             string? assemblyName = args.LoadedAssembly.FullName;
-            string assemblyPath = args.LoadedAssembly.Location;
+            string assemblyPath = args.LoadedAssembly.IsDynamic ? string.Empty : args.LoadedAssembly.Location;
             Guid mvid = args.LoadedAssembly.ManifestModule.ModuleVersionId;
             string? appDomainDescriptor = _appDomain.IsDefaultAppDomain()
                 ? null

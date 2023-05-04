@@ -257,12 +257,12 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The <see cref="ProjectCollection"/> the project is added to.</param>
         /// <param name="loadSettings">The <see cref="ProjectLoadSettings"/> to use for evaluation.</param>
         public Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
-            : this(xml, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null, null)
+            : this(xml, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, evaluationContext: null, directoryCacheFactory: null, interactive: false)
         {
         }
 
         private Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
-            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory)
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -273,7 +273,7 @@ namespace Microsoft.Build.Evaluation
             implementation = defaultImplementation;
 
             _directoryCacheFactory = directoryCacheFactory;
-            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive);
         }
 
         /// <summary>
@@ -351,12 +351,12 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
         /// <param name="loadSettings">The load settings for this project.</param>
         public Project(XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
-            : this(xmlReader, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null, null)
+            : this(xmlReader, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, evaluationContext: null, directoryCacheFactory: null, interactive: false)
         {
         }
 
         private Project(XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
-            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory)
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xmlReader, nameof(xmlReader));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -367,7 +367,7 @@ namespace Microsoft.Build.Evaluation
             implementation = defaultImplementation;
 
             _directoryCacheFactory = directoryCacheFactory;
-            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive);
         }
 
         /// <summary>
@@ -447,12 +447,12 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
         /// <param name="loadSettings">The load settings for this project.</param>
         public Project(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
-            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null, null)
+            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, evaluationContext: null, directoryCacheFactory: null, interactive: false)
         {
         }
 
         private Project(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
-            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory)
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -469,7 +469,7 @@ namespace Microsoft.Build.Evaluation
             // seems the XmlReader based one should also clean the same way.
             try
             {
-                defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+                defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive);
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
@@ -500,7 +500,8 @@ namespace Microsoft.Build.Evaluation
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
                 options.EvaluationContext,
-                options.DirectoryCacheFactory);
+                options.DirectoryCacheFactory,
+                options.Interactive);
         }
 
         /// <summary>
@@ -518,7 +519,8 @@ namespace Microsoft.Build.Evaluation
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
                 options.EvaluationContext,
-                options.DirectoryCacheFactory);
+                options.DirectoryCacheFactory,
+                options.Interactive);
         }
 
         /// <summary>
@@ -536,7 +538,8 @@ namespace Microsoft.Build.Evaluation
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
                 options.EvaluationContext,
-                options.DirectoryCacheFactory);
+                options.DirectoryCacheFactory,
+                options.Interactive);
         }
 
         /// <summary>
@@ -1872,6 +1875,11 @@ namespace Microsoft.Build.Evaluation
             private RenameHandlerDelegate _renameHandler;
 
             /// <summary>
+            /// Indicates if the process of loading the project is allowed to interact with the user.
+            /// </summary>
+            private bool _interactive = false;
+
+            /// <summary>
             ///
             /// </summary>
             /// <param name="owner">The owning project object.</param>
@@ -2550,7 +2558,7 @@ namespace Microsoft.Build.Evaluation
                     };
                 }
 
-                public void AccumulateInformationFromRemoveItemSpec(EvaluationItemSpec removeSpec)
+                public readonly void AccumulateInformationFromRemoveItemSpec(EvaluationItemSpec removeSpec)
                 {
                     IEnumerable<string> removeSpecFragmentStrings = removeSpec.FlattenFragmentsAsStrings();
                     var removeGlob = removeSpec.ToMSBuildGlob();
@@ -3733,7 +3741,8 @@ namespace Microsoft.Build.Evaluation
                     s_buildEventContext,
                     evaluationContext.SdkResolverService,
                     BuildEventContext.InvalidSubmissionId,
-                    evaluationContext);
+                    evaluationContext,
+                    _interactive);
 
                 ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
@@ -3766,7 +3775,7 @@ namespace Microsoft.Build.Evaluation
             /// Global properties may be null.
             /// Tools version may be null.
             /// </summary>
-            internal void Initialize(IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
+            internal void Initialize(IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext, bool interactive)
             {
                 Xml.MarkAsExplicitlyLoaded();
 
@@ -3801,6 +3810,7 @@ namespace Microsoft.Build.Evaluation
                 _data = new Data(Owner, globalPropertiesCollection, toolsVersion, subToolsetVersion, canEvaluateElementsWithFalseConditions);
 
                 _loadSettings = loadSettings;
+                _interactive = interactive;
 
                 ErrorUtilities.VerifyThrow(LastEvaluationId == BuildEventContext.InvalidEvaluationId, "This is the first evaluation therefore the last evaluation id is invalid");
 

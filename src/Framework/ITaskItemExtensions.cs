@@ -35,7 +35,9 @@ namespace Microsoft.Build.Framework
                 return enumerableMetadata;
             }
 
-            // In theory this should never be reachable.
+            // Fallback for
+            //  * ITaskItem implementations from MSBuild 3.5 from the GAC
+            //  * Custom ITaskItems that don't use Dictionary<string,string>
             var list = new KeyValuePair<string, string>[customMetadata.Count];
             int i = 0;
 
@@ -57,8 +59,7 @@ namespace Microsoft.Build.Framework
                     Debug.Fail(e.ToString());
                 }
 
-                list[i] = new KeyValuePair<string, string>(metadataName, valueOrError);
-                i += 1;
+                list[i++] = new KeyValuePair<string, string>(metadataName, valueOrError);
             }
 
             return list;

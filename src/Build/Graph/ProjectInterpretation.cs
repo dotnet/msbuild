@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
+using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
@@ -33,6 +35,9 @@ namespace Microsoft.Build.Graph
         private const string PlatformMetadataName = "Platform";
         private const string PlatformsMetadataName = "Platforms";
         private const string EnableDynamicPlatformResolutionMetadataName = "EnableDynamicPlatformResolution";
+        private const string OverridePlatformNegotiationValue = "OverridePlatformNegotiationValue";
+        private const string ProjectMetadataName = "Project";
+        private const string ConfigurationMetadataName = "Configuration";
 
         private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
 
@@ -51,17 +56,7 @@ namespace Microsoft.Build.Graph
             NonMultitargeting,
         }
 
-        internal readonly struct ReferenceInfo
-        {
-            public ConfigurationMetadata ReferenceConfiguration { get; }
-            public ProjectItemInstance ProjectReferenceItem { get; }
-
-            public ReferenceInfo(ConfigurationMetadata referenceConfiguration, ProjectItemInstance projectReferenceItem)
-            {
-                ReferenceConfiguration = referenceConfiguration;
-                ProjectReferenceItem = projectReferenceItem;
-            }
-        }
+        internal readonly record struct ReferenceInfo(ConfigurationMetadata ReferenceConfiguration, ProjectItemInstance ProjectReferenceItem);
 
         private readonly struct TargetSpecification
         {
@@ -82,7 +77,7 @@ namespace Microsoft.Build.Graph
             public bool SkipIfNonexistent { get; }
         }
 
-        public IEnumerable<ReferenceInfo> GetReferences(ProjectInstance requesterInstance, ProjectCollection _projectCollection, ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory)
+        public IEnumerable<ReferenceInfo> GetReferences(ProjectInstance requesterInstance, ProjectCollection projectCollection, ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory)
         {
             IEnumerable<ProjectItemInstance> projectReferenceItems;
             IEnumerable<GlobalPropertiesModifier> globalPropertiesModifiers = null;
@@ -104,7 +99,14 @@ namespace Microsoft.Build.Graph
                     throw new ArgumentOutOfRangeException();
             }
 
-            foreach (var projectReferenceItem in projectReferenceItems)
+            SolutionConfiguration solutionConfiguration = null;
+            string solutionConfigurationXml = requesterInstance.GetPropertyValue(SolutionProjectGenerator.CurrentSolutionConfigurationContents);
+            if (!string.IsNullOrWhiteSpace(solutionConfigurationXml))
+            {
+                solutionConfiguration = new SolutionConfiguration(solutionConfigurationXml);
+            }
+
+            foreach (ProjectItemInstance projectReferenceItem in projectReferenceItems)
             {
                 if (!String.IsNullOrEmpty(projectReferenceItem.GetMetadataValue(ToolsVersionMetadataName)))
                 {
@@ -117,24 +119,59 @@ namespace Microsoft.Build.Graph
                             requesterInstance.FullPath));
                 }
 
-                var projectReferenceFullPath = projectReferenceItem.GetMetadataValue(FullPathMetadataName);
+                string projectReferenceFullPath = projectReferenceItem.GetMetadataValue(FullPathMetadataName);
+                bool enableDynamicPlatformResolution = ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName));
 
-                var referenceGlobalProperties = GetGlobalPropertiesForItem(projectReferenceItem, requesterInstance.GlobalPropertiesDictionary, globalPropertiesModifiers);
+                PropertyDictionary<ProjectPropertyInstance> referenceGlobalProperties = GetGlobalPropertiesForItem(
+                    projectReferenceItem,
+                    requesterInstance.GlobalPropertiesDictionary,
+                    // Only allow reuse in scenarios where we will not mutate the collection.
+                    // TODO: Should these mutations be moved to globalPropertiesModifiers in the future?
+                    allowCollectionReuse: solutionConfiguration == null && !enableDynamicPlatformResolution,
+                    globalPropertiesModifiers);
 
-                var requesterPlatform = "";
-                var requesterPlatformLookupTable = "";
-
-                if (!projectReferenceItem.HasMetadata(SetPlatformMetadataName) && ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
+                // Match what AssignProjectConfiguration does to resolve project references.
+                if (solutionConfiguration != null)
                 {
-                    requesterPlatform = requesterInstance.GetPropertyValue("Platform");
-                    requesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");
+                    string projectGuid = projectReferenceItem.GetMetadataValue(ProjectMetadataName);
+                    if (solutionConfiguration.TryGetProjectByGuid(projectGuid, out XmlElement projectElement)
+                        || solutionConfiguration.TryGetProjectByAbsolutePath(projectReferenceFullPath, out projectElement))
+                    {
+                        // Note: AssignProjectConfiguration sets various metadata on the ProjectReference item, but ultimately it just translates to the Configuration and Platform global properties on the MSBuild task.
+                        string projectConfiguration = projectElement.InnerText;
+                        string[] configurationPlatformParts = projectConfiguration.Split(SolutionConfiguration.ConfigPlatformSeparator[0]);
+                        SetProperty(referenceGlobalProperties, ConfigurationMetadataName, configurationPlatformParts[0]);
 
-                    var projectInstance = _projectInstanceFactory(
+                        if (configurationPlatformParts.Length > 1)
+                        {
+                            SetProperty(referenceGlobalProperties, PlatformMetadataName, configurationPlatformParts[1]);
+                        }
+                        else
+                        {
+                            referenceGlobalProperties.Remove(PlatformMetadataName);
+                        }
+                    }
+                    else
+                    {
+                        referenceGlobalProperties.Remove(ConfigurationMetadataName);
+                        referenceGlobalProperties.Remove(PlatformMetadataName);
+                    }
+                }
+
+                // Note: Dynamic platform resolution is not enabled for sln-based builds.
+                else if (!projectReferenceItem.HasMetadata(SetPlatformMetadataName) && enableDynamicPlatformResolution)
+                {
+                    string requesterPlatform = requesterInstance.GetPropertyValue("Platform");
+                    string requesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");
+
+                    var projectInstance = projectInstanceFactory(
                         projectReferenceFullPath,
                         null, // Platform negotiation requires an evaluation with no global properties first
-                        _projectCollection);
+                        projectCollection);
 
-                    var selectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), requesterInstance.GetPropertyValue(PlatformLookupTableMetadataName), projectInstance.FullPath, requesterInstance.GetPropertyValue(PlatformMetadataName));
+                    string overridePlatformNegotiationMetadataValue = projectReferenceItem.GetMetadataValue(OverridePlatformNegotiationValue);
+
+                    var selectedPlatform = PlatformNegotiation.GetNearestPlatform(overridePlatformNegotiationMetadataValue, projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), requesterInstance.GetPropertyValue(PlatformLookupTableMetadataName), projectInstance.FullPath, requesterInstance.GetPropertyValue(PlatformMetadataName));
 
                     if (selectedPlatform.Equals(String.Empty))
                     {
@@ -142,14 +179,19 @@ namespace Microsoft.Build.Graph
                     }
                     else
                     {
-                        var platformPropertyInstance = ProjectPropertyInstance.Create(PlatformMetadataName, selectedPlatform);
-                        referenceGlobalProperties[PlatformMetadataName] = platformPropertyInstance;
+                        SetProperty(referenceGlobalProperties, PlatformMetadataName, selectedPlatform);
                     }
                 }
 
                 var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties);
 
                 yield return new ReferenceInfo(referenceConfig, projectReferenceItem);
+
+                static void SetProperty(PropertyDictionary<ProjectPropertyInstance> properties, string propertyName, string propertyValue)
+                {
+                    ProjectPropertyInstance propertyInstance = ProjectPropertyInstance.Create(propertyName, propertyValue);
+                    properties[propertyName] = propertyInstance;
+                }
             }
         }
 
@@ -324,7 +366,8 @@ namespace Microsoft.Build.Graph
         private static PropertyDictionary<ProjectPropertyInstance> GetGlobalPropertiesForItem(
             ProjectItemInstance projectReference,
             PropertyDictionary<ProjectPropertyInstance> requesterGlobalProperties,
-            IEnumerable<GlobalPropertiesModifier> globalPropertyModifiers = null)
+            bool allowCollectionReuse,
+            IEnumerable<GlobalPropertiesModifier> globalPropertyModifiers)
         {
             ErrorUtilities.VerifyThrowInternalNull(projectReference, nameof(projectReference));
             ErrorUtilities.VerifyThrowArgumentNull(requesterGlobalProperties, nameof(requesterGlobalProperties));
@@ -337,7 +380,7 @@ namespace Microsoft.Build.Graph
 
             var globalPropertyParts = globalPropertyModifiers?.Aggregate(defaultParts, (currentProperties, modifier) => modifier(currentProperties, projectReference)) ?? defaultParts;
 
-            if (globalPropertyParts.AllEmpty())
+            if (globalPropertyParts.AllEmpty() && allowCollectionReuse)
             {
                 return requesterGlobalProperties;
             }

@@ -246,15 +246,15 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Event set when message is consumed from queue.
         /// </summary>
-        private ManualResetEventSlim _dequeueEvent;
+        private AutoResetEvent _dequeueEvent;
         /// <summary>
         /// Event set when queue become empty.
         /// </summary>
-        private ManualResetEventSlim _emptyQueueEvent;
+        private ManualResetEvent _emptyQueueEvent;
         /// <summary>
         /// Even set when message is added into queue.
         /// </summary>
-        private ManualResetEventSlim _enqueueEvent;
+        private AutoResetEvent _enqueueEvent;
 
         /// <summary>
         /// CTS for stopping logging event processing.
@@ -1183,8 +1183,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 while (_eventQueue.Count >= _queueCapacity)
                 {
                     // Block and wait for dequeue event.
-                    _dequeueEvent.Wait();
-                    _dequeueEvent.Reset();
+                    _dequeueEvent.WaitOne();
                 }
 
                 _eventQueue.Enqueue(buildEvent);
@@ -1209,12 +1208,12 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             while (_eventQueue?.IsEmpty == false)
             {
-                _emptyQueueEvent?.Wait();
+                _emptyQueueEvent?.WaitOne();
             }
             // To avoid race condition when last message has been removed from queue but
             //   not yet fully processed (handled by loggers), we need to make sure _emptyQueueEvent
             //   is set as it is guaranteed to be in set state no sooner than after event has been processed.
-            _emptyQueueEvent?.Wait();
+            _emptyQueueEvent?.WaitOne();
         }
 
         /// <summary>
@@ -1263,9 +1262,9 @@ namespace Microsoft.Build.BackEnd.Logging
         private void StartLoggingEventProcessing()
         {
             _eventQueue = new ConcurrentQueue<object>();
-            _dequeueEvent = new ManualResetEventSlim(false);
-            _emptyQueueEvent = new ManualResetEventSlim(false);
-            _enqueueEvent = new ManualResetEventSlim(false);
+            _dequeueEvent = new AutoResetEvent(false);
+            _emptyQueueEvent = new ManualResetEvent(false);
+            _enqueueEvent = new AutoResetEvent(false);
             _loggingEventProcessingCancellation = new CancellationTokenSource();
 
             _loggingEventProcessingThread = new Thread(LoggingEventProc);
@@ -1276,7 +1275,7 @@ namespace Microsoft.Build.BackEnd.Logging
             void LoggingEventProc()
             {
                 var completeAdding = _loggingEventProcessingCancellation.Token;
-                WaitHandle[] waitHandlesForNextEvent = { completeAdding.WaitHandle, _enqueueEvent.WaitHandle };
+                WaitHandle[] waitHandlesForNextEvent = { completeAdding.WaitHandle, _enqueueEvent };
 
                 do
                 {
@@ -1295,7 +1294,6 @@ namespace Microsoft.Build.BackEnd.Logging
                             WaitHandle.WaitAny(waitHandlesForNextEvent);
                         }
 
-                        _enqueueEvent.Reset();
                         _emptyQueueEvent.Reset();
                     }
                 } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
@@ -1639,7 +1637,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </remarks>
         private void UpdateMinimumMessageImportance(ILogger logger)
         {
-            var innerLogger = (logger is Evaluation.ProjectCollection.ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
+            var innerLogger = (logger is ProjectCollection.ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
 
             MessageImportance? minimumImportance = innerLogger switch
             {
@@ -1653,8 +1651,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 // The null logger has no effect on minimum verbosity.
                 Execution.BuildManager.NullLogger => null,
 
-                // If the logger is not on our whitelist, there are no importance guarantees. Fall back to "any importance".
-                _ => MessageImportance.Low
+                // The live logger consumes only high priority messages.
+                _ => innerLogger.GetType().FullName == "Microsoft.Build.Logging.LiveLogger.LiveLogger"
+                    ? MessageImportance.High
+                    // If the logger is not on our allow list, there are no importance guarantees. Fall back to "any importance".
+                    : MessageImportance.Low,
             };
 
             if (minimumImportance != null)

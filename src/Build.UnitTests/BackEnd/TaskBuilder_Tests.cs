@@ -16,6 +16,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -84,6 +85,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogDoesntContain("Made it");
         }
 
+        [Fact]
+        public void TasksOnlyLogStartedEventOnceEach()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectFileContents = ObjectModelHelpers.CleanupFileContents(
+            @"<Project>
+              <Target Name='t'>
+                  <Message Text='Made it'/>
+              </Target>
+            </Project>");
+
+            TransientTestFile projectFile = env.CreateFile("myProj.proj", projectFileContents);
+            env.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", @"C:\Users\namytelk\Desktop");
+
+            string results = RunnerUtilities.ExecMSBuild(projectFile.Path + " /v:diag", out bool success);
+
+            int count = 0;
+            for (int index = results.IndexOf("Task \"Message\""); index >= 0; index = results.IndexOf("Task \"Message\"", index))
+            {
+                count++;
+                index += 14; // Skip to the end of this string
+            }
+
+            count.ShouldBe(1);
+        }
+
         /// <summary>
         /// Tests that when the task condition is false, Execute still returns true even though we never loaded
         /// the task.  We verify that we never loaded the task because if we did try, the task load itself would
@@ -137,7 +164,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Loggers = new ILogger[] { logger },
                     EnableNodeReuse = false
                 };
-                ;
 
                 BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[] { "test" }, collection.HostServices);
                 manager.BeginBuild(_parameters);
@@ -568,6 +594,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
             logger.AssertLogContains("[foo: ]");
+        }
+
+        /// <summary>
+        /// If an item returned from a task has bare-minimum metadata implementation, we shouldn't crash.
+        /// </summary>
+        [Fact]
+        public void MinimalLegacyOutputItems()
+        {
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+
+            string projectContents = $"""
+                                     <Project>
+                                       <UsingTask TaskName="TaskThatReturnsMinimalItem" AssemblyFile="{customTaskPath}" />
+
+                                       <Target Name="Build">
+                                         <TaskThatReturnsMinimalItem>
+                                           <Output TaskParameter="MinimalTaskItemOutput" ItemName="Outputs"/>
+                                         </TaskThatReturnsMinimalItem>
+
+                                         <Message Text="[%(Outputs.Identity): %(Outputs.a)]" Importance="High" />
+                                       </Target>
+                                     </Project>
+                                     """;
+
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
         }
 
         /// <summary>

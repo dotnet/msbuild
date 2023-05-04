@@ -10,6 +10,50 @@
       fire this error.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="BuildFinished">
+        <source>Build {0} in {1}s</source>
+        <target state="new">Build {0} in {1}s</target>
+        <note>
+      Overall build summary
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_Failed">
+        <source>failed</source>
+        <target state="new">failed</target>
+        <note>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithErrors">
+        <source>failed with errors</source>
+        <target state="new">failed with errors</target>
+        <note>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithWarnings">
+        <source>failed with warnings</source>
+        <target state="new">failed with warnings</target>
+        <note>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_Succeeded">
+        <source>succeeded</source>
+        <target state="new">succeeded</target>
+        <note>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_SucceededWithWarnings">
+        <source>succeeded with warnings</source>
+        <target state="new">succeeded with warnings</target>
+        <note>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">Argumenty příkazového řádku = {0}</target>
@@ -27,6 +71,27 @@
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
         <target state="translated">MSBUILD : error MSB1027: Přepínač -noAutoResponse nelze zadat v souboru automatických odpovědí MSBuild.rsp ani v žádném jiném souboru odpovědí, na který se v souboru automatických odpovědí odkazuje.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_41_QuestionSwitch">
+        <source>  -question
+                     (Experimental) Question whether there is any build work.
+                     MSBuild will error out when it detects a target or task
+                     that can be incremental (has inputs and outputs),
+                     but isn't up to date.
+                     (Short form: -q)
+    </source>
+        <target state="new">  -question
+                     (Experimental) Question whether there is any build work.
+                     MSBuild will error out when it detects a target or task
+                     that can be incremental (has inputs and outputs),
+                     but isn't up to date.
+                     (Short form: -q)
+    </target>
+        <note>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-question" and "-q" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
@@ -150,16 +215,25 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="needs-review-translation">  -isolateProjects[:True|False]
-                     Způsobí, že MSBuild sestaví jednotlivé projekty izolovaně.
+        <target state="new">  -isolateProjects[:True|MessageUponIsolationViolation|False]
+                     Causes MSBuild to build each project in isolation.
 
-                     Jde o omezenější režim nástroje MSBuild, protože vyžaduje,
-                     aby byl graf projektu staticky zjistitelný v okamžiku
-                     vyhodnocení, může ale vylepšit plánování a snížit
-                     režii paměti při sestavování velké sady projektů.
-                     (Krátký tvar: -isolate)
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
 
-                     Tento příznak je experimentální a nemusí fungovat tak, jak byl zamýšlen.
+                     This is a more restrictive mode of MSBuild as it requires
+                     that the project graph be statically discoverable at
+                     evaluation time, but can improve scheduling and reduce
+                     memory overhead when building a large set of projects.
+                     (Short form: -isolate)
+
+                     This flag is experimental and may not work as intended.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -265,8 +339,7 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_40_WarnNotAsErrorSwitch">
-        <source>
-      -warnNotAsError[:code[;code2]]
+        <source>  -warnNotAsError[:code[;code2]]
                      List of warning codes to treats not treat as errors.
                      Use a semicolon or a comma to separate
                      multiple warning codes. Has no effect if the -warnaserror
@@ -275,14 +348,13 @@
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="translated">
-      -warnNotAsError[:code[;code2]]
-                     Seznam kódů upozornění, které se nemají považovat za chyby.
-                     Pomocí středníku nebo čárky oddělte
-                     více kódů upozornění. Nemá žádný vliv, pokud přepínač -warnaserror
-                     není nastavený.
+        <target state="new">  -warnNotAsError[:code[;code2]]
+                     List of warning codes to treats not treat as errors.
+                     Use a semicolon or a comma to separate
+                     multiple warning codes. Has no effect if the -warnaserror
+                     switch is not set.
 
-                     Příklad:
+                     Example:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -345,9 +417,9 @@
         <target state="translated">  @&lt;soubor&gt;            Vložení nastavení příkazového řádku z textového souboru. Chcete-li zadat
                      více souborů odpovědí, uveďte každý soubor
                      odpovědí zvlášť.
-
-                     Automaticky jsou použity všechny soubory s názvem msbuild.rsp
-                     nacházející se v následujících umístěních:
+                     
+                     Automaticky jsou použity všechny soubory s názvem msbuild.rsp 
+                     nacházející se v následujících umístěních: 
                      (1) adresář nástroje msbuild.exe
                      (2) adresář prvního sestaveného projektu nebo řešení
 </target>
@@ -408,7 +480,7 @@
 </source>
         <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Nastavení nebo potlačení daných vlastností na úrovni
                      projektu. &lt;n&gt; je název vlastnosti a &lt;v&gt; je její hodnota. Více
-                     vlastností oddělte středníkem či čárkou nebo zadejte
+                     vlastností oddělte středníkem či čárkou nebo zadejte 
                      každou vlastnost zvlášť. (Krátký tvar: -p)
                      Příklad:
                        -property:WarningLevel=2;OutDir=bin\Debug\
@@ -449,7 +521,7 @@
                      Syntaxe hodnoty &lt;sestavení_protok_nást&gt;:
                         {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
-                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se
+                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se 
                      protokolovacímu nástroji přesně v tom tvaru, v jakém
                      byly zadány. (Krátký tvar: -l)
                      Příklady:
@@ -596,10 +668,10 @@
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate          Ověřit projekt podle výchozího schématu.
+        <target state="translated">  -validate          Ověřit projekt podle výchozího schématu. 
                      (Krátký tvar: -val)
 
-  -validate:&lt;schéma&gt; Ověřit projekt podle zadaného schématu.
+  -validate:&lt;schéma&gt; Ověřit projekt podle zadaného schématu. 
                      (Krátký tvar: -val)
                      Příklad:
                        -validate:MyExtendedBuildSchema.xsd
@@ -659,11 +731,10 @@
                      will read build results from. If -isolateProjects is set
                      to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="needs-review-translation">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Seznam středníkem oddělených vstupních souborů mezipaměti, ze kterých
-                     MSBuild přečte výsledky sestavení.
-                     Nastavení tohoto atributu zároveň zapne izolované buildy (-isolate).
-                     (Krátký tvar: -irc)
+        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Semicolon separated list of input cache files that MSBuild
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -677,11 +748,11 @@
                      If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="needs-review-translation">  -outputResultsCache:[souborMezipaměti]...
-                     Výstupní soubor mezipaměti, do něhož bude MSBuild
-                     zapisovat obsah svých mezipamětí výsledků sestavení.
-                     Nastavením této možnosti zapnete také izolované buildy (-isolate).
-                     (krátký tvar: -orc)
+        <target state="new">  -outputResultsCache:[cacheFile]
+                     Output cache file where MSBuild will write the contents of
+                     its build result caches at the end of the build.
+                     If -isolateProjects is set to False, this sets it to True.
+                     (short form: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -713,11 +784,11 @@
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;
+        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;                     
                      Použít zadaný protokolovací nástroj pro protokolování událostí
-                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci
-                     protokolovacího nástroje. Chcete-li zadat více
-                     protokolovacích nástrojů, uveďte je jednotlivě.
+                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci 
+                     protokolovacího nástroje. Chcete-li zadat více 
+                     protokolovacích nástrojů, uveďte je jednotlivě. 
                      (Krátký tvar: -dl)
                      Syntaxe hodnoty &lt;protok_nást&gt;:
                         [&lt;třída_protok_nást&gt;,]&lt;sestav_protok_nást&gt;
@@ -781,7 +852,7 @@
         <target state="translated">  -toolsversion:&lt;verze&gt;
                      Verze sady nástrojů MSBuild (úloh, cílů apod.), která má být
                      použita při sestavení. Tato verze má přednost před verzemi
-                     uvedenými v jednotlivých projektech.
+                     uvedenými v jednotlivých projektech. 
                      (Krátký tvar: -tv)
                      Příklad:
                        -toolsversion:3.5
@@ -899,25 +970,25 @@
                      popis přepínače -distributedFileLogger.
                      (Krátký tvar: -flp[n])
                      K dispozici jsou stejné parametry jako ty,
-                     které jsou uvedeny u protokolovacího nástroje
+                     které jsou uvedeny u protokolovacího nástroje 
                      konzoly. Některé další dostupné parametry:
                        LogFile – cesta k souboru protokolu, do nějž bude zapsán
-                                  protokol sestavení
+                                  protokol sestavení 
                        Append  – určuje, zda bude protokol sestavení připojen
-                                  k souboru protokolu, nebo jej přepíše. Při nastavení
+                                  k souboru protokolu, nebo jej přepíše. Při nastavení 
                                   přepínače bude protokol sestavení připojen k souboru
-                                  protokolu. Není-li přepínač nastaven, bude obsah
-                                  existujícího souboru protokolu přepsán.
+                                  protokolu. Není-li přepínač nastaven, bude obsah 
+                                  existujícího souboru protokolu přepsán. 
                                   Podle výchozího nastavení je soubor protokolu přepsán.
-                       Encoding – určuje kódování souboru, například
+                       Encoding – určuje kódování souboru, například 
                      UTF-8, Unicode nebo ASCII.
                        Výchozí úroveň podrobností je Detailed.
                      Příklady:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                              Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+                       -flp1:warningsonly;logfile=msbuild.wrn 
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1040,7 +1111,7 @@
       </trans-unit>
       <trans-unit id="InvalidIsolateProjectsValue">
         <source>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</source>
-        <target state="needs-review-translation">MSBUILD : error MSB1056: Hodnota izolace projektů není platná. {0}</target>
+        <target state="translated">MSBUILD : error MSB1056: Hodnota izolace projektů není platná. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1307,6 +1378,60 @@
         <target state="translated">Proces = {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectBuilding_NoTF">
+        <source>{0}{1} {2} ({3}s)</source>
+        <target state="new">{0}{1} {2} ({3}s)</target>
+        <note>
+      Project building.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target
+      {3}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectBuilding_WithTF">
+        <source>{0}{1} {2} {3} ({4}s)</source>
+        <target state="new">{0}{1} {2} {3} ({4}s)</target>
+        <note>
+      Project building including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: target
+      {4}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectFinished_NoTF">
+        <source>{0}{1} {2} ({3}s)</source>
+        <target state="new">{0}{1} {2} ({3}s)</target>
+        <note>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectFinished_OutputPath">
+        <source> → {0}</source>
+        <target state="new"> → {0}</target>
+        <note>
+      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
+      {0}: VT100 coded hyperlink to project output directory
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectFinished_WithTF">
+        <source>{0}{1} {2} {3} ({4}s)</source>
+        <target state="new">{0}{1} {2} {3} ({4}s)</target>
+        <note>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectNotFoundError">
         <source>MSBUILD : error MSB1009: Project file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1009: Soubor projektu neexistuje.</target>
@@ -1352,6 +1477,22 @@
         <target state="translated">{0} přišla z {1}</target>
         <note>
       These are response file switches with the location of the response file on disk.
+    </note>
+      </trans-unit>
+      <trans-unit id="RestoreComplete">
+        <source>Restore complete ({0}s)</source>
+        <target state="new">Restore complete ({0}s)</target>
+        <note>
+      {0}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
+      <trans-unit id="RestoreCompleteWithMessage">
+        <source>Restore {0} in {1}s</source>
+        <target state="new">Restore {0} in {1}s</target>
+        <note>
+      Restore summary when finished with warning or error
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
       <trans-unit id="SchemaFileLocation">
@@ -1412,6 +1553,11 @@
         <source>MSBUILD : error MSB1015: MSBuild does not run on this version of the operating system. It is only supported on Windows 7 and later versions.</source>
         <target state="translated">MSBUILD : error MSB1015: MSBuild nejde spustit v této verzi operačního systému. Podporuje se jenom v systémech Windows 7 a novějších verzích.</target>
         <note>{StrBegin="MSBUILD : error MSB1015: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedSwitchForSolutionFiles">
+        <source>The '{0}' switch is not supported for solution files.</source>
+        <target state="new">The '{0}' switch is not supported for solution files.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Using35Engine">
         <source>Forcing load of Microsoft.Build.Engine because MSBUILDOLDOM=1...</source>

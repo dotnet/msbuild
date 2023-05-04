@@ -1232,7 +1232,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         RootPath="$(TargetFrameworkRootPath)"
         TargetFrameworkFallbackSearchPaths="$(TargetFrameworkFallbackSearchPaths)"
         BypassFrameworkInstallChecks="$(BypassFrameworkInstallChecks)"
-        >
+        ContinueOnError="!$(BuildingProject)">
       <Output TaskParameter="ReferenceAssemblyPaths" PropertyName="_TargetFrameworkDirectories"/>
       <Output TaskParameter="FullFrameworkReferenceAssemblyPaths" PropertyName="_FullFrameworkReferenceAssemblyPaths"/>
       <Output TaskParameter="TargetFrameworkMonikerDisplayName" PropertyName="TargetFrameworkMonikerDisplayName" Condition="'$(TargetFrameworkMonikerDisplayName)' == ''"/>
@@ -1471,6 +1471,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       ResolveNativeReferences;
       ResolveAssemblyReferences;
       GenerateBindingRedirects;
+      GenerateBindingRedirectsUpdateAppConfig;
       ResolveComReferences;
       AfterResolveReferences
     </ResolveReferencesDependsOn>
@@ -1631,11 +1632,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <UseDefaultPlatformLookupTables Condition="'$(UseDefaultPlatformLookupTables)' == ''">true</UseDefaultPlatformLookupTables>
   </PropertyGroup>
 
-  <!-- This target skips VS builds because they already supply Platform and
-       Configuration information. -->
+  <!-- This target skips sln-based builds because they already supply Platform and
+       Configuration information. See AssignProjectConfiguration -->
   <Target Name="_GetProjectReferencePlatformProperties"
           Condition="'$(EnableDynamicPlatformResolution)' == 'true'
-                     and '$(BuildingInsideVisualStudio)' != 'true'
+                     and '$(CurrentSolutionConfigurationContents)' == ''
                      and '@(_MSBuildProjectReferenceExistent)' != ''">
 
     <!-- Allow preset SetPlatform to override this operation -->
@@ -2464,20 +2465,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ====================================================================================================
   -->
   <Target Name="GenerateBindingRedirects"
-    Inputs="$(MSBuildAllProjects);@(AppConfigFile);$(ResolveAssemblyReferencesStateFile);$(SuggestedBindingRedirectsCacheFile)"
+    Inputs="$(MSBuildAllProjects);@(AppConfigWithTargetPath);$(ResolveAssemblyReferencesStateFile);$(SuggestedBindingRedirectsCacheFile)"
     Outputs="$(_GenerateBindingRedirectsIntermediateAppConfig)"
-    Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true'"
+    Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true' and '@(SuggestedBindingRedirects)' != ''"
     DependsOnTargets="_GenerateSuggestedBindingRedirectsCache">
 
     <GenerateBindingRedirects
       AppConfigFile="@(AppConfigWithTargetPath)"
       TargetName="$(TargetFileName).config"
       OutputAppConfigFile="$(_GenerateBindingRedirectsIntermediateAppConfig)"
-      SuggestedRedirects="@(SuggestedBindingRedirects)"
-      >
-      <Output TaskParameter="OutputAppConfigFile" ItemName="FileWrites" />
-    </GenerateBindingRedirects>
+      SuggestedRedirects="@(SuggestedBindingRedirects)" />
 
+    <ItemGroup>
+      <FileWrites Include="$(_GenerateBindingRedirectsIntermediateAppConfig)" />
+    </ItemGroup>
   </Target>
 
   <!--
@@ -2489,20 +2490,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ====================================================================================================
   -->
   <Target Name="GenerateBindingRedirectsUpdateAppConfig"
-    AfterTargets="GenerateBindingRedirects"
-    Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true' and Exists('$(_GenerateBindingRedirectsIntermediateAppConfig)')">
+    Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true'">
 
     <PropertyGroup>
-      <AppConfig>$(_GenerateBindingRedirectsIntermediateAppConfig)</AppConfig>
+      <_NewGenerateBindingRedirectsIntermediateAppConfig Condition="Exists('$(_GenerateBindingRedirectsIntermediateAppConfig)')">true</_NewGenerateBindingRedirectsIntermediateAppConfig>
+      <AppConfig Condition="$(_NewGenerateBindingRedirectsIntermediateAppConfig) == 'true'">$(_GenerateBindingRedirectsIntermediateAppConfig)</AppConfig>
     </PropertyGroup>
-
-    <ItemGroup>
+    
+    <ItemGroup Condition="$(_NewGenerateBindingRedirectsIntermediateAppConfig) == 'true'">
       <AppConfigWithTargetPath Remove="@(AppConfigWithTargetPath)" />
       <AppConfigWithTargetPath Include="$(AppConfig)">
         <TargetPath>$(TargetFileName).config</TargetPath>
       </AppConfigWithTargetPath>
     </ItemGroup>
-
   </Target>
 
   <!--
@@ -3328,8 +3328,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         SdkToolsPath="$(ResgenToolPath)"
         ExecuteAsTool="$(ResGenExecuteAsTool)"
         EnvironmentVariables="$(ResGenEnvironment)"
+        WarnOnBinaryFormatterUse="$(GenerateResourceWarnOnBinaryFormatterUse)"
         MSBuildRuntime="$(GenerateResourceMSBuildRuntime)"
-        MSBuildArchitecture="$(GenerateResourceMSBuildArchitecture)">
+        MSBuildArchitecture="$(GenerateResourceMSBuildArchitecture)"
+        >
 
       <Output TaskParameter="FilesWritten" ItemName="FileWrites"/>
       <Output TaskParameter="StronglyTypedFileName" ItemName="Compile"/>
@@ -3581,7 +3583,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           DependsOnTargets="PrepareForBuild;GetReferenceAssemblyPaths"
           Inputs="$(MSBuildToolsPath)\Microsoft.Common.targets"
           Outputs="$(TargetFrameworkMonikerAssemblyAttributesPath)"
-          Condition="'$(GenerateTargetFrameworkAttribute)' == 'true'">
+          Condition="'@(Compile)' != '' and '$(GenerateTargetFrameworkAttribute)' == 'true'">
 
     <!-- This is a file shared between projects so we have to take care to handle simultaneous writes (by ContinueOnError)
              and a race between clean from one project and build from another (by not adding to FilesWritten so it doesn't clean) -->
@@ -5671,7 +5673,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <MakeDir Directories="$(IntermediateOutputPath)"/>
 
     <!-- Write new list of current files back to disk. -->
-    <WriteLinesToFile File="$(IntermediateOutputPath)$(CleanFile)" Lines="@(_CleanUniqueRemainingFileWrites)" Overwrite="true" />
+    <WriteLinesToFile File="$(IntermediateOutputPath)$(CleanFile)" Lines="@(_CleanUniqueRemainingFileWrites)" WriteOnlyWhenDifferent="true" Overwrite="true" />
 
   </Target>
 
@@ -5703,7 +5705,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <WriteLinesToFile
         File="$(IntermediateOutputPath)$(CleanFile)"
         Lines="@(_CleanUniqueFileWrites)"
-        Overwrite="true" />
+        Overwrite="true"
+        WriteOnlyWhenDifferent="true" />
 
   </Target>
 

@@ -72,9 +72,6 @@
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
       <Link>Shared\CopyOnWriteDictionary.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\EncodingUtilities.cs">
-      <Link>Shared\EncodingUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Shared\ErrorUtilities.cs</Link>
     </Compile>

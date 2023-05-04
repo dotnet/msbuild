@@ -101,7 +101,7 @@ namespace Microsoft.Build.Framework.Profiler
         public EvaluationLocationKind Kind { get; }
 
         /// <nodoc/>
-        public bool IsEvaluationPass => File == null;
+        public readonly bool IsEvaluationPass => File == null;
 
         /// <nodoc/>
         public static EvaluationLocation CreateLocationForCondition(long? parentId, EvaluationPass evaluationPass, string evaluationDescription, string file,
@@ -183,7 +183,7 @@ namespace Microsoft.Build.Framework.Profiler
         public static EvaluationLocation EmptyLocation { get; } = CreateEmptyLocation();
 
         /// <nodoc/>
-        public EvaluationLocation WithEvaluationPass(EvaluationPass evaluationPass, string passDescription = null)
+        public readonly EvaluationLocation WithEvaluationPass(EvaluationPass evaluationPass, string passDescription = null)
         {
             return new EvaluationLocation(this.Id, evaluationPass, passDescription ?? PassDefaultDescription[evaluationPass],
                 this.File, this.Line, this.ElementName, this.ElementDescription, this.Kind);

@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
@@ -18,7 +19,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Represents a task that can download a file.
     /// </summary>
-    public sealed class DownloadFile : TaskExtension, ICancelableTask
+    public sealed class DownloadFile : TaskExtension, ICancelableTask, IIncrementalTask
     {
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
@@ -64,6 +65,8 @@ namespace Microsoft.Build.Tasks
         /// Gets or sets the number of milliseconds to wait before the request times out.
         /// </summary>
         public int Timeout { get; set; } = 100_000;
+
+        public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
         /// Gets or sets a <see cref="HttpMessageHandler"/> to use.  This is used by unit tests to mock a connection to a remote server.
@@ -125,7 +128,15 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, actualException.ToString());
+                        StringBuilder flattenedMessage = new StringBuilder(actualException.Message);
+                        Exception excep = actualException;
+                        while (excep.InnerException != null)
+                        {
+                            excep = excep.InnerException;
+                            flattenedMessage.Append(" ---> ").Append(excep.Message);
+                        }
+                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, flattenedMessage.ToString());
+                        Log.LogMessage(MessageImportance.Low, actualException.ToString());
                         break;
                     }
                 }
@@ -181,6 +192,11 @@ namespace Microsoft.Build.Tasks
 
                         DownloadedFile = new TaskItem(destinationFile.FullName);
 
+                        return;
+                    }
+                    else if (FailIfNotIncremental)
+                    {
+                        Log.LogErrorFromResources("DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
                         return;
                     }
 

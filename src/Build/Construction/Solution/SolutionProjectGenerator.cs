@@ -239,6 +239,23 @@ namespace Microsoft.Build.Construction
             msbuildProject.AppendChild(solutionConfigurationProperties);
             solutionConfigurationProperties.Condition = GetConditionStringForConfiguration(solutionConfiguration);
 
+            string escapedSolutionConfigurationContents = GetSolutionConfiguration(solutionFile, solutionConfiguration);
+
+            solutionConfigurationProperties.AddProperty("CurrentSolutionConfigurationContents", escapedSolutionConfigurationContents);
+
+            msbuildProject.AddItem(
+                "SolutionConfiguration",
+                solutionConfiguration.FullName,
+                new Dictionary<string, string>
+                {
+                    { "Configuration", solutionConfiguration.ConfigurationName },
+                    { "Platform", solutionConfiguration.PlatformName },
+                    { "Content", escapedSolutionConfigurationContents },
+                });
+        }
+
+        internal static string GetSolutionConfiguration(SolutionFile solutionFile, SolutionConfigurationInSolution solutionConfiguration)
+        {
             var solutionConfigurationContents = new StringBuilder(1024);
             var settings = new XmlWriterSettings
             {
@@ -247,7 +264,7 @@ namespace Microsoft.Build.Construction
             };
             using (XmlWriter xw = XmlWriter.Create(solutionConfigurationContents, settings))
             {
-                // TODO: fix code clone for parsing CurrentSolutionConfiguration xml: https://github.com/dotnet/msbuild/issues/6751
+                // TODO: Consider augmenting SolutionConfiguration with this code
                 xw.WriteStartElement("SolutionConfiguration");
 
                 // add a project configuration entry for each project in the solution
@@ -292,19 +309,8 @@ namespace Microsoft.Build.Construction
                 xw.WriteEndElement(); // </SolutionConfiguration>
             }
 
-            var escapedSolutionConfigurationContents = EscapingUtilities.Escape(solutionConfigurationContents.ToString());
-
-            solutionConfigurationProperties.AddProperty("CurrentSolutionConfigurationContents", escapedSolutionConfigurationContents);
-
-            msbuildProject.AddItem(
-                "SolutionConfiguration",
-                solutionConfiguration.FullName,
-                new Dictionary<string, string>
-                {
-                    { "Configuration", solutionConfiguration.ConfigurationName },
-                    { "Platform", solutionConfiguration.PlatformName },
-                    { "Content", escapedSolutionConfigurationContents },
-                });
+            string escapedSolutionConfigurationContents = EscapingUtilities.Escape(solutionConfigurationContents.ToString());
+            return escapedSolutionConfigurationContents;
         }
 
         /// <summary>
