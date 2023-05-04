@@ -959,10 +959,18 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static bool PathsAreIdentical(string source, string destination, out string sourceFileFullPath, out string destinationFileFullPath)
         {
+            // If the source and destination strings are identical, we will not do the copy or even log the full path,
+            // so we can lie here about whether the paths are full paths.
+            if (String.Equals(source, destination, FileUtilities.PathComparison))
+            {
+                sourceFileFullPath = source;
+                destinationFileFullPath = destination;
+                return true;
+            }
+
             sourceFileFullPath = Path.GetFullPath(source);
             destinationFileFullPath = Path.GetFullPath(destination);
-            StringComparison filenameComparison = NativeMethodsShared.IsWindows ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-            return String.Equals(sourceFileFullPath, destinationFileFullPath, filenameComparison);
+            return String.Equals(sourceFileFullPath, destinationFileFullPath, FileUtilities.PathComparison);
         }
 
         private static int GetParallelismFromEnvironment()
