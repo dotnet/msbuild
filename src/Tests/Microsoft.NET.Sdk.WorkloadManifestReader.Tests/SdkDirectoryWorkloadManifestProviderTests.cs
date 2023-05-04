@@ -267,7 +267,7 @@ namespace ManifestReaderTests
             CreateMockManifest(fakeDotnetRootDirectory, "7.0.100", "Android");
             CreateMockManifest(fakeDotnetRootDirectory, "7.0.100", "iOS");
 
-            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", "6.0.100", "IncludedWorkloadManifests.txt");
+            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", "6.0.100", "KnownWorkloadManifests.txt");
             Directory.CreateDirectory(Path.GetDirectoryName(knownWorkloadsFilePath)!);
             File.WriteAllText(knownWorkloadsFilePath, "Android\niOS");
 
@@ -299,7 +299,7 @@ namespace ManifestReaderTests
             CreateMockManifest(fakeDotnetRootDirectory, "7.0.100", "iOS");
 
             var prev4Version = "6.0.100-preview.4.12345";
-            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", prev4Version, "IncludedWorkloadManifests.txt");
+            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", prev4Version, "KnownWorkloadManifests.txt");
             Directory.CreateDirectory(Path.GetDirectoryName(knownWorkloadsFilePath)!);
             File.WriteAllText(knownWorkloadsFilePath, "Android\niOS");
 
@@ -331,7 +331,7 @@ namespace ManifestReaderTests
             CreateMockManifest(fakeDotnetRootDirectory, "6.0.100", "Android");
 
             var prev4Version = "6.0.100-preview.4.12345";
-            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", prev4Version, "IncludedWorkloadManifests.txt");
+            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", prev4Version, "KnownWorkloadManifests.txt");
             Directory.CreateDirectory(Path.GetDirectoryName(knownWorkloadsFilePath)!);
             File.WriteAllText(knownWorkloadsFilePath, "Android\niOS");
 
@@ -344,7 +344,7 @@ namespace ManifestReaderTests
         }
 
         [Fact]
-        public void ItReturnsManifestsInOrderFromIncludedWorkloadManifestsFile()
+        public void ItReturnsManifestsInOrderFromKnownWorkloadManifestsFile()
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var fakeDotnetRootDirectory = Path.Combine(testDirectory, "dotnet");
@@ -360,7 +360,7 @@ namespace ManifestReaderTests
             CreateMockManifest(fakeDotnetRootDirectory, fallbackWorkloadBand, "Microsoft.Net.Workload.Emscripten.net6");
             CreateMockManifest(fakeDotnetRootDirectory, currentSdkVersion, "Microsoft.Net.Workload.Emscripten.net7");
 
-            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", currentSdkVersion, "IncludedWorkloadManifests.txt");
+            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", currentSdkVersion, "KnownWorkloadManifests.txt");
             Directory.CreateDirectory(Path.GetDirectoryName(knownWorkloadsFilePath)!);
             File.WriteAllText(knownWorkloadsFilePath, @"
 Microsoft.Net.Workload.Mono.Toolchain.net6
@@ -406,7 +406,7 @@ Microsoft.Net.Workload.Emscripten.net7"
             Directory.CreateDirectory(Path.Combine(manifestDirectory6, "iOS"));
             File.WriteAllText(Path.Combine(manifestDirectory6, "iOS", "WorkloadManifest.json"), "iOS-6.0.100");
 
-            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", "6.0.100", "IncludedWorkloadManifests.txt");
+            var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", "6.0.100", "KnownWorkloadManifests.txt");
             Directory.CreateDirectory(Path.GetDirectoryName(knownWorkloadsFilePath)!);
             File.WriteAllText(knownWorkloadsFilePath, "Android\niOS");
 

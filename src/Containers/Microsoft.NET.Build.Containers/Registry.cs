@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Build.Containers.Resources;
 using NuGet.RuntimeModel;
 using System.Diagnostics;
@@ -25,16 +26,32 @@ internal sealed class Registry
     /// <remarks>
     /// Relates to https://github.com/dotnet/sdk-container-builds/pull/383#issuecomment-1466408853
     /// </remarks>
-    private static readonly bool s_chunkedUploadEnabled = bool.TrueString.Equals(
-        Environment.GetEnvironmentVariable(ContainerHelpers.ChunkedUploadEnabled) ?? "true", // we want to default this to 'on'
-        StringComparison.OrdinalIgnoreCase);
+    private static readonly bool s_chunkedUploadEnabled = Env.GetEnvironmentVariableAsBool(ContainerHelpers.ChunkedUploadEnabled, defaultValue: false);
+
+    /// <summary>
+    /// When chunking is enabled, allows explicit control over the size of the chunks uploaded
+    /// </summary>
+    /// <remarks>
+    /// Our default of 64KB is very conservative, so raising this to 1MB or more can speed up layer uploads reasonably well.
+    /// </remarks>
+    private static readonly int? s_chunkedUploadSizeBytes = Env.GetEnvironmentVariableAsNullableInt(ContainerHelpers.ChunkedUploadSizeBytes);
+
+    /// <summary>
+    /// Whether we should upload blobs in parallel (enabled by default, but disabled for certain registries in conjunction with the explicit support check below).
+    /// </summary>
+    /// <remarks>
+    /// Enabling this can swamp some registries, so this is an escape hatch.
+    /// </remarks>
+    private static readonly bool s_parallelUploadEnabled =  Env.GetEnvironmentVariableAsBool(ContainerHelpers.ParallelUploadEnabled, defaultValue: true);
+
+    private static readonly int s_defaultChunkSizeBytes = 1024 * 64;
 
     /// <summary>
     /// The name of the registry, which is the host name, optionally followed by a colon and the port number.
     /// This is used in user-facing error messages, and it should match what the user would manually enter as
     /// part of Docker commands like `docker login`.
     /// </summary>
-    private string RegistryName { get; init; }
+    public string RegistryName { get; init; }
 
     public Registry(Uri baseUri)
     {
@@ -66,7 +83,7 @@ internal sealed class Registry
     /// <remarks>
     /// This varies by registry target, for example Amazon Elastic Container Registry requires 5MB chunks for all but the last chunk.
     /// </remarks>
-    public int MaxChunkSizeBytes => IsAmazonECRRegistry ? 5248080 : 1024 * 64;
+    public int MaxChunkSizeBytes => s_chunkedUploadSizeBytes.HasValue ? s_chunkedUploadSizeBytes.Value : (IsAmazonECRRegistry ? 5248080 : s_defaultChunkSizeBytes);
 
     /// <summary>
     /// Check to see if the registry is for Amazon Elastic Container Registry (ECR).
@@ -116,13 +133,13 @@ internal sealed class Registry
     /// <summary>
     /// Google Artifact Registry doesn't support chunked upload, but Amazon ECR, GitHub Packages, and DockerHub do. We want the capability check to be agnostic to the target.
     /// </summary>
-    private bool SupportsChunkedUpload => !IsGoogleArtifactRegistry || IsAmazonECRRegistry || IsGithubPackageRegistry || IsDockerHub;
+    private bool SupportsChunkedUpload => (!IsGoogleArtifactRegistry || IsAmazonECRRegistry || IsGithubPackageRegistry || IsDockerHub) && s_chunkedUploadEnabled;
 
     /// <summary>
     /// Pushing to ECR uses a much larger chunk size. To avoid getting too many socket disconnects trying to do too many
     /// parallel uploads be more conservative and upload one layer at a time.
     /// </summary>
-    private bool SupportsParallelUploads => !IsAmazonECRRegistry;
+    private bool SupportsParallelUploads => !IsAmazonECRRegistry && s_parallelUploadEnabled;
 
     public async Task<ImageBuilder> GetImageManifestAsync(string repositoryName, string reference, string runtimeIdentifier, string runtimeIdentifierGraphPath, CancellationToken cancellationToken)
     {
@@ -435,7 +452,7 @@ internal sealed class Registry
     private Task<UriBuilder> UploadBlobContentsAsync(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (SupportsChunkedUpload && s_chunkedUploadEnabled)
+        if (SupportsChunkedUpload)
         {
             return UploadBlobChunkedAsync(repository, digest, contents, client, uploadUri, cancellationToken);
         }
