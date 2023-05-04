@@ -1199,6 +1199,51 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Post action argument &apos;{0}&apos; is mandatory, but not configured..
+        /// </summary>
+        internal static string PostAction_ModifyJson_Error_ArgumentNotConfigured {
+            get {
+                return ResourceManager.GetString("PostAction_ModifyJson_Error_ArgumentNotConfigured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to More than one file found that matches &apos;{0}&apos;..
+        /// </summary>
+        internal static string PostAction_ModifyJson_Error_MultipleJsonFiles {
+            get {
+                return ResourceManager.GetString("PostAction_ModifyJson_Error_MultipleJsonFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to find the json file in the solution.
+        /// </summary>
+        internal static string PostAction_ModifyJson_Error_NoJsonFile {
+            get {
+                return ResourceManager.GetString("PostAction_ModifyJson_Error_NoJsonFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parent property path &apos;{0}&apos; could not be traversed..
+        /// </summary>
+        internal static string PostAction_ModifyJson_Error_ParentPropertyPathInvalid {
+            get {
+                return ResourceManager.GetString("PostAction_ModifyJson_Error_ParentPropertyPathInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully modified {0}..
+        /// </summary>
+        internal static string PostAction_ModifyJson_Succeeded {
+            get {
+                return ResourceManager.GetString("PostAction_ModifyJson_Succeeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to run the command: argument &apos;executable&apos; is missing in post action configuration..
         /// </summary>
         internal static string PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable {

@@ -1,0 +1,26 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TestAssets.PostActions.AddJsonProperty.WithExistingProject.ExistingProject",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.PostActions.AddJsonProperty.WithExistingProject.ExistingProject",
+  "precedence": "100",
+  "identity": "TestAssets.PostActions.AddJsonProperty.WithExistingProject.ExistingProject",
+  "shortName": "TestAssets.PostActions.AddJsonProperty.WithExistingProject.ExistingProject",
+  "primaryOutputs": [
+    {
+      "path": "IoTEdgeProject.csproj"
+    }
+  ],
+  "postActions": [
+    {
+      "description": "Add projects to solution",
+      "manualInstructions": [ { "text": "Add generated project to solution manually." } ],
+      "args": {
+        "solutionFolder": "src"
+      },
+      "actionId": "D396686C-DE0E-4DE6-906D-291CD29FC5DE",
+      "continueOnError": false
+    }
+  ]
+}
