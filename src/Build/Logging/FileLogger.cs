@@ -39,6 +39,11 @@ namespace Microsoft.Build.Logging
                 colorReset: BaseConsoleLogger.DontResetColor)
         {
             WriteHandler = Write;
+
+            if (EncodingUtilities.GetExternalOverridenUILanguageIfSupportableWithEncoding() != null)
+            {
+                _encoding = Encoding.UTF8;
+            }
         }
 
         #endregion
@@ -50,11 +55,6 @@ namespace Microsoft.Build.Logging
         /// <param name="eventSource">Available events.</param>
         public override void Initialize(IEventSource eventSource)
         {
-            if (EncodingUtilities.GetExternalOverridenUILanguageIfSupportableWithEncoding() != null)
-            {
-                _encoding = Encoding.UTF8;
-            }
-
             ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
             eventSource.BuildFinished += FileLoggerBuildFinished;
             InitializeFileLogger(eventSource, 1);

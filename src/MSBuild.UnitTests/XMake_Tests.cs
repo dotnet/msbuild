@@ -647,7 +647,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ConsoleUIRespectsSDKLanguage()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !MSBuildApp.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
             {
                 return; // The feature to detect .NET SDK Languages is not enabled on this machine, so don't test it.
             }
