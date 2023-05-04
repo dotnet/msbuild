@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using System.Text;
 #if NETFRAMEWORK
 using Microsoft.Build.Shared;
@@ -28,6 +29,8 @@ internal sealed class Terminal : ITerminal
     /// True if <see cref="BeginUpdate"/> was called and <c>Write*</c> methods are buffering instead of directly printing.
     /// </summary>
     private bool _isBuffering = false;
+
+    internal TextWriter Output { private get; set; } = Console.Out;
 
     private const int BigUnknownDimension = 2 << 23;
 
@@ -65,6 +68,13 @@ internal sealed class Terminal : ITerminal
         Console.OutputEncoding = Encoding.UTF8;
     }
 
+    internal Terminal(TextWriter output)
+    {
+        Output = output;
+
+        _originalOutputEncoding = Encoding.UTF8;
+    }
+
     /// <inheritdoc/>
     public void BeginUpdate()
     {
@@ -84,7 +94,7 @@ internal sealed class Terminal : ITerminal
         }
         _isBuffering = false;
 
-        Console.Write(_outputBuilder.ToString());
+        Output.Write(_outputBuilder.ToString());
         _outputBuilder.Clear();
     }
 
@@ -110,7 +120,7 @@ internal sealed class Terminal : ITerminal
         }
         else
         {
-            Console.Out.Write(text);
+            Output.Write(text);
         }
     }
 
@@ -123,7 +133,7 @@ internal sealed class Terminal : ITerminal
         }
         else
         {
-            Console.WriteLine(text);
+            Output.WriteLine(text);
         }
     }
 
@@ -138,7 +148,7 @@ internal sealed class Terminal : ITerminal
         }
         else
         {
-            Console.Out.WriteLine(truncatedText);
+            Output.WriteLine(truncatedText);
         }
     }
 
