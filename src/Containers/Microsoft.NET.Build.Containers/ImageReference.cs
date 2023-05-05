@@ -10,7 +10,7 @@ internal readonly record struct ImageReference(Registry? Registry, string Reposi
     public override string ToString()
     {
         if (Registry is {} reg) {
-            return $"{reg.BaseUri.GetComponents(UriComponents.HostAndPort, UriFormat.Unescaped)}/{Repository}:{Tag}";
+            return $"{reg.RegistryName}/{Repository}:{Tag}";
         } else {
             return RepositoryAndTag;
         }

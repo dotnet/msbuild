@@ -141,8 +141,7 @@ public class EndToEndTests
     }
 
     [DockerDaemonAvailableTheory]
-    //ignored until is in: https://github.com/dotnet/sdk/pull/31488 to avoid adding Microsoft.NET.Build.Containers v0.4.0 to feeds
-    //[InlineData(false)]
+    [InlineData(false)]
     [InlineData(true)]
     public async Task EndToEnd_NoAPI_Web(bool addPackageReference)
     {
@@ -213,7 +212,7 @@ public class EndToEndTests
         string imageTag = "1.0";
 
         // Build & publish the project
-        new DotnetCommand(
+        CommandResult commandResult = new DotnetCommand(
             _testOutput,
             "publish",
             "/p:publishprofile=DefaultContainer",
@@ -225,8 +224,18 @@ public class EndToEndTests
             $"/p:Version={imageTag}")
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
             .WithWorkingDirectory(newProjectDir.FullName)
-            .Execute()
-            .Should().Pass();
+            .Execute();
+
+        commandResult.Should().Pass();
+
+        if (addPackageReference)
+        {
+            commandResult.Should().HaveStdOutContaining("warning : Microsoft.NET.Build.Containers NuGet package is explicitly referenced. Consider removing the package reference to Microsoft.NET.Build.Containers as it is now part of .NET SDK.");
+        }
+        else
+        {
+            commandResult.Should().NotHaveStdOutContaining("warning");
+        }
 
         new RunExeCommand(_testOutput, "docker", "pull", $"{DockerRegistryManager.LocalRegistry}/{imageName}:{imageTag}")
             .Execute()
