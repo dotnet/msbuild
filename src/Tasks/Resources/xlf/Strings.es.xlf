@@ -2805,8 +2805,8 @@
         <note>{StrBegin="MSB3705: "}</note>
       </trans-unit>
       <trans-unit id="XslTransform.SecuritySettingsViaUseTrustedSettings">
-        <source>You are enabling relaxed XSLT security settings via UseTrustedSettings parameter. For more details on security implications of this settings please see https://aka.ms/msbuild/xsltransformation-task</source>
-        <target state="new">You are enabling relaxed XSLT security settings via UseTrustedSettings parameter. For more details on security implications of this settings please see https://aka.ms/msbuild/xsltransformation-task</target>
+        <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
+        <target state="new">You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</target>
         <note />
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
