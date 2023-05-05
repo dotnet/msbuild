@@ -1155,6 +1155,11 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static int Count(IEnumerable enumerable)
         {
+            if (enumerable is ICollection c)
+            {
+                return c.Count;
+            }
+
             int i = 0;
             foreach (object _ in enumerable)
             {

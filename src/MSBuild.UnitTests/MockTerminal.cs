@@ -99,6 +99,7 @@ namespace Microsoft.Build.UnitTests
         public void Write(ReadOnlySpan<char> text) { AddOutput(text.ToString()); }
         public void WriteColor(TerminalColor color, string text) => AddOutput(text);
         public void WriteColorLine(TerminalColor color, string text) { AddOutput(text); AddOutput("\n"); }
+
         public void WriteLine(string text) { AddOutput(text); AddOutput("\n"); }
         public void WriteLineFitToWidth(ReadOnlySpan<char> text)
         {

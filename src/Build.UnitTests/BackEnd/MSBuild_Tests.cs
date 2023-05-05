@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -824,7 +823,8 @@ namespace Microsoft.Build.UnitTests
                       </Target>
                     </Project>
                 """;
-            var projectFile = env.CreateFile("test.proj", ObjectModelHelpers.CleanupFileContents(projectContent));
+            string projFileName = "test.proj";
+            var projectFile = env.CreateFile(projFileName, ObjectModelHelpers.CleanupFileContents(projectContent));
 
             MockLogger logger = new MockLogger(_testOutput);
             ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile.Path, logger);
@@ -839,6 +839,10 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains(string.Format(ResourceUtilities.GetResourceString("ItemReferencingSelfInTarget"), "iin1", "Filename"));
             logger.AssertLogContains(string.Format(ResourceUtilities.GetResourceString("ItemReferencingSelfInTarget"), "iin1", "Extension"));
             logger.AssertMessageCount("MSB4120", 6);
+            // The location of the offending attribute (TargetPath) is transferred - for both metadatums (%(Filename) and %(Extension)) on correct locations in xml
+            logger.AssertMessageCount($"{projFileName}(4,34):", 2, false);
+            logger.AssertMessageCount($"{projFileName}(5,34):", 2, false);
+            logger.AssertMessageCount($"{projFileName}(6,34):", 2, false);
             Assert.Equal(0, logger.WarningCount);
             Assert.Equal(0, logger.ErrorCount);
         }

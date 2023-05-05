@@ -324,7 +324,7 @@ namespace Microsoft.Build.Construction
                 }
                 else if (isValidMetadataNameInAttribute)
                 {
-                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute.Name, attribute.Value);
+                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute);
                     metadatum.ExpressedAsAttribute = true;
                     metadatum.Parent = item;
 
@@ -744,7 +744,7 @@ namespace Microsoft.Build.Construction
                 }
                 else if (isValidMetadataNameInAttribute)
                 {
-                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute.Name, attribute.Value);
+                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute);
                     metadatum.ExpressedAsAttribute = true;
                     metadatum.Parent = itemDefinition;
 
