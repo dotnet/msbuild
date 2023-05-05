@@ -159,6 +159,11 @@ namespace Microsoft.Build.Tasks
             // Do the transformation.
             try
             {
+                if (UseTrustedSettings)
+                {
+                    Log.LogMessageFromResources(MessageImportance.High, "XslTransform.SecuritySettingsViaUseTrustedSettings");
+                }
+
                 for (int i = 0; i < xmlinput.Count; i++)
                 {
                     using (XmlWriter xmlWriter = XmlWriter.Create(_outputPaths[i].ItemSpec, xslct.OutputSettings))
