@@ -61,6 +61,14 @@ internal static class AnsiCodes
     public const string MoveForward = "C";
 
     /// <summary>
+    /// Moves backward (to the left) the specified number of characters.
+    /// </summary>
+    /// <remarks>
+    /// Print <see cref="CSI"/>N<see cref="MoveBackward"/> to move N characters backward.
+    /// </remarks>
+    public const string MoveBackward = "D";
+
+    /// <summary>
     /// Clears everything from cursor to end of screen.
     /// </summary>
     /// <remarks>
