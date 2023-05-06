@@ -23,7 +23,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void MSBuildAddInteger(bool enableIntrinsicFunctionOverloads)
+        public void MSBuildAddInteger(bool isIntrinsicFunctionOverloadsEnabled)
         {
             const string projectContent = @"
                     <Project>
@@ -32,12 +32,12 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                         </PropertyGroup>
                     </Project>";
 
-            string expected = enableIntrinsicFunctionOverloads ? unchecked(long.MaxValue + 1).ToString() : (long.MaxValue + 1.0).ToString();
+            string expected = isIntrinsicFunctionOverloadsEnabled ? unchecked(long.MaxValue + 1).ToString() : (long.MaxValue + 1.0).ToString();
 
             using TestEnvironment env = TestEnvironment.Create();
 
             ChangeWaves.ResetStateForTests();
-            if (!enableIntrinsicFunctionOverloads)
+            if (!isIntrinsicFunctionOverloadsEnabled)
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaveForOverloading.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void MSBuildSubtractInteger(bool enableIntrinsicFunctionOverloads)
+        public void MSBuildSubtractInteger(bool isIntrinsicFunctionOverloadsEnabled)
         {
             const string projectContent = @"
                     <Project>
@@ -81,12 +81,12 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                         </PropertyGroup>
                     </Project>";
 
-            string expected = enableIntrinsicFunctionOverloads ? 1.ToString() : 0.ToString();
+            string expected = isIntrinsicFunctionOverloadsEnabled ? 1.ToString() : 0.ToString();
 
             using TestEnvironment env = TestEnvironment.Create();
 
             ChangeWaves.ResetStateForTests();
-            if (!enableIntrinsicFunctionOverloads)
+            if (!isIntrinsicFunctionOverloadsEnabled)
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaveForOverloading.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
@@ -121,7 +121,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void MSBuildMultiplyInteger(bool enableIntrinsicFunctionOverloads)
+        public void MSBuildMultiplyInteger(bool isIntrinsicFunctionOverloadsEnabled)
         {
             const string projectContent = @"
                     <Project>
@@ -130,12 +130,12 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                         </PropertyGroup>
                     </Project>";
 
-            string expected = enableIntrinsicFunctionOverloads ? unchecked(long.MaxValue * 2).ToString() : (long.MaxValue * 2.0).ToString();
+            string expected = isIntrinsicFunctionOverloadsEnabled ? unchecked(long.MaxValue * 2).ToString() : (long.MaxValue * 2.0).ToString();
 
             using TestEnvironment env = TestEnvironment.Create();
 
             ChangeWaves.ResetStateForTests();
-            if (!enableIntrinsicFunctionOverloads)
+            if (!isIntrinsicFunctionOverloadsEnabled)
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaveForOverloading.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
@@ -170,7 +170,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void MSBuildDivideInteger(bool enableIntrinsicFunctionOverloads)
+        public void MSBuildDivideInteger(bool isIntrinsicFunctionOverloadsEnabled)
         {
             const string projectContent = @"
                     <Project>
@@ -179,12 +179,12 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                         </PropertyGroup>
                     </Project>";
 
-            string expected = enableIntrinsicFunctionOverloads ? (10 / 3).ToString() : (10.0 / 3.0).ToString();
+            string expected = isIntrinsicFunctionOverloadsEnabled ? (10 / 3).ToString() : (10.0 / 3.0).ToString();
 
             using TestEnvironment env = TestEnvironment.Create();
 
             ChangeWaves.ResetStateForTests();
-            if (!enableIntrinsicFunctionOverloads)
+            if (!isIntrinsicFunctionOverloadsEnabled)
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaveForOverloading.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
@@ -219,7 +219,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void MSBuildModuloInteger(bool enableIntrinsicFunctionOverloads)
+        public void MSBuildModuloInteger(bool isIntrinsicFunctionOverloadsEnabled)
         {
             const string projectContent = @"
                     <Project>
@@ -233,7 +233,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             using TestEnvironment env = TestEnvironment.Create();
 
             ChangeWaves.ResetStateForTests();
-            if (!enableIntrinsicFunctionOverloads)
+            if (!isIntrinsicFunctionOverloadsEnabled)
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaveForOverloading.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();

@@ -4710,7 +4710,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (!EnableIntrinsicFunctionOverloads() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
+                if (!IsIntrinsicFunctionOverloadsEnabled() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
                 {
                     if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
                     {
@@ -4736,7 +4736,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (!EnableIntrinsicFunctionOverloads() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
+                if (!IsIntrinsicFunctionOverloadsEnabled() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
                 {
                     if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
                     {
@@ -4762,7 +4762,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (!EnableIntrinsicFunctionOverloads() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
+                if (!IsIntrinsicFunctionOverloadsEnabled() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
                 {
                     if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
                     {
@@ -4788,7 +4788,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (!EnableIntrinsicFunctionOverloads() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
+                if (!IsIntrinsicFunctionOverloadsEnabled() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
                 {
                     if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
                     {
@@ -4814,7 +4814,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (!EnableIntrinsicFunctionOverloads() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
+                if (!IsIntrinsicFunctionOverloadsEnabled() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
                 {
                     if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
                     {
@@ -5345,7 +5345,7 @@ namespace Microsoft.Build.Evaluation
                     : TypeCode.Empty;
             }
 
-            private static bool EnableIntrinsicFunctionOverloads() => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8);
+            private static bool IsIntrinsicFunctionOverloadsEnabled() => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8);
 
             /// <summary>
             /// Construct and instance of objectType based on the constructor or method arguments provided.
@@ -5389,7 +5389,7 @@ namespace Microsoft.Build.Evaluation
                             // Order by the TypeCode of the first parameter.
                             // When change wave is enabled, order long before double.
                             // Otherwise preserve prior behavior of double before long.
-                            IComparer<TypeCode> comparer = EnableIntrinsicFunctionOverloads()
+                            IComparer<TypeCode> comparer = IsIntrinsicFunctionOverloadsEnabled()
                                 ? Comparer<TypeCode>.Create((key0, key1) => key0.CompareTo(key1))
                                 : Comparer<TypeCode>.Create((key0, key1) => key1.CompareTo(key0));
                             members = members.OrderBy(SelectTypeOfFirstParameter, comparer);
