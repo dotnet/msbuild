@@ -33,6 +33,22 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Tests
             return assemblyPath;
         }
 
+        public static Stream EmitAssemblyStreamFromSyntax(string syntax,
+            bool enableNullable = false,
+            byte[] publicKey = null,
+            [CallerMemberName] string assemblyName = "",
+            bool allowUnsafe = false)
+        {
+            CSharpCompilation compilation = CreateCSharpCompilationFromSyntax(syntax, assemblyName, enableNullable, publicKey, allowUnsafe);
+
+            Assert.Empty(compilation.GetDiagnostics());
+
+            MemoryStream stream = new MemoryStream();
+            compilation.Emit(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
+        }
+
         public static IAssemblySymbol GetAssemblyFromSyntax(string syntax,
             bool enableNullable = false,
             byte[] publicKey = null,
