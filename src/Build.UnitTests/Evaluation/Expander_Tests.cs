@@ -4178,15 +4178,29 @@ $(
         }
 
         [Fact]
-        public void PropertyFunctionMSBuildAdd()
+        public void PropertyFunctionMSBuildAddIntegerLiteral()
         {
             TestPropertyFunction("$([MSBuild]::Add($(X), 5))", "X", "7", "12");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildAddRealLiteral()
+        {
             TestPropertyFunction("$([MSBuild]::Add($(X), 0.5))", "X", "7", "7.5");
+        }
 
-            // Overflow wrapping
-            TestPropertyFunction("$([MSBuild]::Add($(X), 1))", "X", long.MaxValue.ToString(), "-9223372036854775808");
+        [Fact]
+        public void PropertyFunctionMSBuildAddIntegerOverflow()
+        {
+            // Overflow wrapping - result exceeds size of long
+            string expected = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) ? "-9223372036854775808" : (long.MaxValue + 1.0).ToString();
+            TestPropertyFunction("$([MSBuild]::Add($(X), 1))", "X", long.MaxValue.ToString(), expected);
+        }
 
-            // Argument exceeds size of long
+        [Fact]
+        public void PropertyFunctionMSBuildAddRealArgument()
+        {
+            // string argument is an integer that exceeds the size of long.
             double value = long.MaxValue + 1.0;
             double expected = value + 1.0;
             TestPropertyFunction("$([MSBuild]::Add($(X), 1))", "X", value.ToString(), expected.ToString());
@@ -4199,18 +4213,43 @@ $(
         }
 
         [Fact]
-        public void PropertyFunctionMSBuildSubtract()
+        public void PropertyFunctionMSBuildSubtractIntegerLiteral()
         {
             TestPropertyFunction("$([MSBuild]::Subtract($(X), 20100000))", "X", "20100042", "42");
-            TestPropertyFunction("$([MSBuild]::Subtract($(X), 20100000.0))", "X", "20100042", "42");
-            TestPropertyFunction("$([MSBuild]::Subtract($(X), 9223372036854775806))", "X", long.MaxValue.ToString(), "1");
         }
 
         [Fact]
-        public void PropertyFunctionMSBuildMultiply()
+        public void PropertyFunctionMSBuildSubtractRealLiteral()
+        {
+            TestPropertyFunction("$([MSBuild]::Subtract($(X), 20100000.0))", "X", "20100042", "42");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildSubtractIntegerMaxValue()
+        {
+            // If the double overload is used, there will be a rounding error.
+            string expected = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) ? "1" : "0";
+            TestPropertyFunction("$([MSBuild]::Subtract($(X), 9223372036854775806))", "X", long.MaxValue.ToString(), expected);
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildMultiplyIntegerLiteral()
         {
             TestPropertyFunction("$([MSBuild]::Multiply($(X), 8800))", "X", "2", "17600");
-            TestPropertyFunction("$([MSBuild]::Multiply($(X), .5))", "X", "2", "1");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildMultiplyRealLiteral()
+        {
+            TestPropertyFunction("$([MSBuild]::Multiply($(X), 1.5))", "X", "2", "3");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildMultiplyIntegerOverflow()
+        {
+            // Overflow - result exceeds size of long
+            string expected = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) ? "-2" : (long.MaxValue * 2.0).ToString();
+            TestPropertyFunction("$([MSBuild]::Multiply($(X), 2))", "X", long.MaxValue.ToString(), expected);
         }
 
         [Fact]
@@ -4220,16 +4259,27 @@ $(
         }
 
         [Fact]
-        public void PropertyFunctionMSBuildDivide()
+        public void PropertyFunctionMSBuildDivideIntegerLiteral()
         {
-            TestPropertyFunction("$([MSBuild]::Divide($(X), 10000))", "X", "65536", "6");
+            string expected = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) ? "6" : "6.5536";
+            TestPropertyFunction("$([MSBuild]::Divide($(X), 10000))", "X", "65536", expected);
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildDivideRealLiteral()
+        {
             TestPropertyFunction("$([MSBuild]::Divide($(X), 10000.0))", "X", "65536", "6.5536");
         }
 
         [Fact]
-        public void PropertyFunctionMSBuildModulo()
+        public void PropertyFunctionMSBuildModuloIntegerLiteral()
         {
             TestPropertyFunction("$([MSBuild]::Modulo($(X), 3))", "X", "10", "1");
+        }
+
+        [Fact]
+        public void PropertyFunctionMSBuildModuloRealLiteral()
+        {
             TestPropertyFunction("$([MSBuild]::Modulo($(X), 3.0))", "X", "10", "1");
         }
 

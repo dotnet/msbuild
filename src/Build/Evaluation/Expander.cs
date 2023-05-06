@@ -5337,13 +5337,20 @@ namespace Microsoft.Build.Evaluation
                 return methodName != "GetType";
             }
 
+            private static TypeCode SelectTypeOfFirstParameter(MethodBase method)
+            {
+                ParameterInfo[] parameters = method.GetParameters();
+                return parameters.Length > 0
+                    ? Type.GetTypeCode(parameters[0].ParameterType)
+                    : TypeCode.Empty;
+            }
+
             /// <summary>
             /// Construct and instance of objectType based on the constructor or method arguments provided.
             /// Arguments must never be null.
             /// </summary>
             private object LateBindExecute(Exception ex, BindingFlags bindingFlags, object objectInstance /* null unless instance method */, object[] args, bool isConstructor)
             {
-
                 // First let's try for a method where all arguments are strings..
                 Type[] types = new Type[_arguments.Length];
                 for (int n = 0; n < _arguments.Length; n++)
@@ -5365,15 +5372,26 @@ namespace Microsoft.Build.Evaluation
                 // search for a method with the right number of arguments
                 if (memberInfo == null)
                 {
-                    MethodBase[] members;
                     // Gather all methods that may match
+                    IEnumerable<MethodBase> members;
                     if (isConstructor)
                     {
                         members = _receiverType.GetConstructors(bindingFlags);
                     }
                     else
                     {
-                        members = _receiverType.GetMethods(bindingFlags);
+                        members = _receiverType.GetMethods(bindingFlags).Where(m => string.Equals(m.Name, _methodMethodName, StringComparison.OrdinalIgnoreCase));
+
+                        if (_receiverType == typeof(IntrinsicFunctions))
+                        {
+                            // Order by the TypeCode of the first parameter.
+                            // When change wave is enabled, order long before double.
+                            // Otherwise preserve prior behavior of double before long.
+                            IComparer<TypeCode> comparer = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8)
+                                ? Comparer<TypeCode>.Create((key0, key1) => key0.CompareTo(key1))
+                                : Comparer<TypeCode>.Create((key0, key1) => key1.CompareTo(key0));
+                            members = members.OrderBy(SelectTypeOfFirstParameter, comparer);
+                        }
                     }
 
                     foreach (MethodBase member in members)
@@ -5383,22 +5401,19 @@ namespace Microsoft.Build.Evaluation
                         // Simple match on name and number of params, we will be case insensitive
                         if (parameters.Length == _arguments.Length)
                         {
-                            if (isConstructor || String.Equals(member.Name, _methodMethodName, StringComparison.OrdinalIgnoreCase))
-                            {
-                                // Try to find a method with the right name, number of arguments and
-                                // compatible argument types
-                                // we have a match on the name and argument number
-                                // now let's try to coerce the arguments we have
-                                // into the arguments on the matching method
-                                object[] coercedArguments = CoerceArguments(args, parameters);
+                            // Try to find a method with the right name, number of arguments and
+                            // compatible argument types
+                            // we have a match on the name and argument number
+                            // now let's try to coerce the arguments we have
+                            // into the arguments on the matching method
+                            object[] coercedArguments = CoerceArguments(args, parameters);
 
-                                if (coercedArguments != null)
-                                {
-                                    // We have a complete match
-                                    memberInfo = member;
-                                    args = coercedArguments;
-                                    break;
-                                }
+                            if (coercedArguments != null)
+                            {
+                                // We have a complete match
+                                memberInfo = member;
+                                args = coercedArguments;
+                                break;
                             }
                         }
                     }
