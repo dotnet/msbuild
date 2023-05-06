@@ -1382,8 +1382,8 @@
     </note>
       </trans-unit>
       <trans-unit id="ProjectBuilding_WithTF">
-        <source>{0}{1} [{2}] {3} ({4}s)</source>
-        <target state="new">{0}{1} [{2}] {3} ({4}s)</target>
+        <source>{0}{1} {2} {3} ({4}s)</source>
+        <target state="new">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project building including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1413,8 +1413,8 @@
     </note>
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
-        <source>{0}{1} [{2}] {3} ({4}s)</source>
-        <target state="new">{0}{1} [{2}] {3} ({4}s)</target>
+        <source>{0}{1} {2} {3} ({4}s)</source>
+        <target state="new">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1476,6 +1476,15 @@
         <target state="new">Restore complete ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
+    </note>
+      </trans-unit>
+      <trans-unit id="RestoreCompleteWithMessage">
+        <source>Restore {0} in {1}s</source>
+        <target state="new">Restore {0} in {1}s</target>
+        <note>
+      Restore summary when finished with warning or error
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
       <trans-unit id="SchemaFileLocation">

@@ -63,25 +63,4 @@ internal interface ITerminal : IDisposable
     /// Writes a string to the output using the given color. Or buffers it if <see cref="BeginUpdate"/> was called.
     /// </summary>
     void WriteColorLine(TerminalColor color, string text);
-
-    /// <summary>
-    /// Return string representing text wrapped in VT100 color codes.
-    /// </summary>
-    string RenderColor(TerminalColor color, string text);
-}
-
-/// <summary>
-/// Enumerates the text colors supported by <see cref="ITerminal"/>.
-/// </summary>
-internal enum TerminalColor
-{
-    Black = 30,
-    Red = 31,
-    Green = 32,
-    Yellow = 33,
-    Blue = 34,
-    Magenta = 35,
-    Cyan = 36,
-    White = 37,
-    Default = 39
 }

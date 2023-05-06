@@ -1373,6 +1373,14 @@
       {0}: duration in seconds with 1 decimal point
     </comment>
   </data>
+  <data name="RestoreCompleteWithMessage" xml:space="preserve">
+    <value>Restore {0} in {1}s</value>
+    <comment>
+      Restore summary when finished with warning or error
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
   <data name="BuildFinished" xml:space="preserve">
     <value>Build {0} in {1}s</value>
     <comment>
@@ -1422,7 +1430,7 @@
     </comment>
   </data>
   <data name="ProjectFinished_WithTF" xml:space="preserve">
-    <value>{0}{1} [{2}] {3} ({4}s)</value>
+    <value>{0}{1} {2} {3} ({4}s)</value>
     <comment>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1450,7 +1458,7 @@
     </comment>
   </data>
   <data name="ProjectBuilding_WithTF" xml:space="preserve">
-    <value>{0}{1} [{2}] {3} ({4}s)</value>
+    <value>{0}{1} {2} {3} ({4}s)</value>
     <comment>
       Project building including target framework information.
       {0}: indentation - few spaces to visually indent row

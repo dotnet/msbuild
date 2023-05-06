@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,13 +12,14 @@ using System.Resources;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
-using Microsoft.Build.UnitTests.Shared;
+using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
+using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
 #nullable disable
@@ -8563,6 +8565,59 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Directory.CreateDirectory(redistDirectory);
 
             File.WriteAllText(profileRedistList, profileListContents);
+        }
+
+        [Fact]
+        public void SDKReferencesAreResolvedWithoutIO()
+        {
+            InitializeRARwithMockEngine(_output, out MockEngine mockEngine, out ResolveAssemblyReference rar);
+
+            string refPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+            TaskItem item = new TaskItem(refPath);
+            item.SetMetadata("ExternallyResolved", "true");
+
+            item.SetMetadata("FrameworkReferenceName", "Microsoft.NETCore.App");
+            item.SetMetadata("FrameworkReferenceVersion", "8.0.0");
+
+            item.SetMetadata("AssemblyName", "System.Candy");
+            item.SetMetadata("AssemblyVersion", "8.1.2.3");
+            item.SetMetadata("PublicKeyToken", "b03f5f7f11d50a3a");
+
+            rar.Assemblies = new ITaskItem[] { item };
+            rar.SearchPaths = new string[]
+            {
+                "{CandidateAssemblyFiles}",
+                "{HintPathFromItem}",
+                "{TargetFrameworkDirectory}",
+                "{RawFileName}",
+            };
+            rar.WarnOrErrorOnTargetArchitectureMismatch = "Warning";
+
+            // Execute RAR and assert that we receive no I/O callbacks because the task gets what it needs from item metadata.
+            rar.Execute(
+                _ => throw new ShouldAssertException("Unexpected FileExists callback"),
+                directoryExists,
+                getDirectories,
+                _ => throw new ShouldAssertException("Unexpected GetAssemblyName callback"),
+                (string path, ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache, out AssemblyNameExtension[] dependencies, out string[] scatterFiles, out FrameworkNameVersioning frameworkName)
+                  => throw new ShouldAssertException("Unexpected GetAssemblyMetadata callback"),
+#if FEATURE_WIN32_REGISTRY
+                getRegistrySubKeyNames,
+                getRegistrySubKeyDefaultValue,
+#endif
+                _ => throw new ShouldAssertException("Unexpected GetLastWriteTime callback"),
+                _ => throw new ShouldAssertException("Unexpected GetAssemblyRuntimeVersion callback"),
+#if FEATURE_WIN32_REGISTRY
+                openBaseKey,
+#endif
+                checkIfAssemblyIsInGac,
+                isWinMDFile,
+                readMachineTypeFromPEHeader).ShouldBeTrue();
+
+            rar.ResolvedFiles.Length.ShouldBe(1);
+            rar.ResolvedFiles[0].ItemSpec.ShouldBe(refPath);
+            rar.ResolvedFiles[0].GetMetadata("FusionName").ShouldBe("System.Candy, Version=8.1.2.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
         }
     }
 }
