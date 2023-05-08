@@ -124,12 +124,12 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 {
                     if (destinationImageReference.Registry is not null)
                     {
-                        await (destinationImageReference.Registry.PushAsync(
+                        await destinationImageReference.Registry.PushAsync(
                             builtImage,
                             sourceImageReference,
                             destinationImageReference,
                             message => SafeLog(message),
-                            cancellationToken)).ConfigureAwait(false);
+                            cancellationToken).ConfigureAwait(false);
                         SafeLog("Pushed container '{0}' to registry '{1}'", destinationImageReference.RepositoryAndTag, OutputRegistry);
                     }
                 }
