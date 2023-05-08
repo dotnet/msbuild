@@ -95,8 +95,7 @@ namespace Microsoft.NET.Build.Tasks
                     }
 
                     //  We need to check if referenced project will become SelfContained because of its RuntimeIdentifier. This only happens on TargetFrameworks less than net8.0.
-                    var sdkVersionWhereRuntimeIdentifierNoLongerInfersSelfContained = new FrameworkName(".NETCoreApp,Version=v8.0");
-                    bool runtimeIdentifierInfersSelfContained = referencedProjectTargetFramework != null && referencedProjectTargetFramework.Identifier == ".NETCoreApp" && referencedProjectTargetFramework.Version < sdkVersionWhereRuntimeIdentifierNoLongerInfersSelfContained.Version;
+                    bool runtimeIdentifierInfersSelfContained = referencedProjectTargetFramework != null && referencedProjectTargetFramework.Identifier == ".NETCoreApp" && referencedProjectTargetFramework.Version.Major < 8;
 
                     //  If the project is NOT RID agnostic, then a global RuntimeIdentifier will flow to it.
                     //  If the project didn't explicitly specify a value for SelfContained, then this will
