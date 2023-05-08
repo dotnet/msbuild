@@ -41,28 +41,11 @@
     <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition="'$(TargetFramework)'=='net472'" />
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonVersion)" Condition="'$(TargetFramework)'=='net472'" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="$(MicrosoftExtensionsFileSystemGlobbingPackageVersion)" />
+    <PackageReference Include="Microsoft.Css.Parser" Version="$(MicrosoftCssParserVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="**\*.cs" />
-    <Compile Include="..\..\RazorSdk\Tool\CommandLine\ArgumentEscaper.cs">
-      <Link>Shared\CommandLine\%(FileName)</Link>
-    </Compile>
-    <Compile Include="..\..\RazorSdk\Tool\ServerProtocol\*.cs">
-      <Link>Shared\ServerProtocol\%(FileName)</Link>
-    </Compile>
-    <Compile Include="..\..\RazorSdk\Tool\PipeName.cs">
-      <Link>Shared\PipeName.cs</Link>
-    </Compile>
-    <Compile Include="..\..\RazorSdk\Tool\MutexName.cs">
-      <Link>Shared\MutexName.cs</Link>
-    </Compile>
-    <Compile Include="..\..\RazorSdk\Tool\Client.cs">
-      <Link>Shared\Client.cs</Link>
-    </Compile>
-    <Compile Include="..\..\RazorSdk\Tasks\DotnetToolTask.cs">
-      <Link>Shared\DotnetToolTask.cs</Link>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -91,6 +74,18 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(_FileSystemGlobbingContent)" DestinationFiles="@(_FileSystemGlobbingContent->'$(PackageLayoutOutputPath)%(TargetPath)')">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
+    </Copy>
+  </Target>
+
+  <Target Name="CopyCssParser" BeforeTargets="PrepareAdditionalFilesToLayout" AfterTargets="ResolveReferences" Condition="'$(TargetFramework)' == '$(SdkTargetFramework)'">
+    <ItemGroup>
+      <_CssParser Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)' == 'Microsoft.Css.Parser'" />
+      <_CssParserContent Include ="@(_CssParser)" TargetPath="tasks\$(SdkTargetFramework)\%(_CssParser.Filename)%(_CssParser.Extension)" />
+      <AdditionalContent Include="@(_CssParser)" PackagePath="tasks\$(SdkTargetFramework)" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_CssParserContent)" DestinationFiles="@(_CssParserContent->'$(PackageLayoutOutputPath)%(TargetPath)')">
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
     </Copy>
   </Target>

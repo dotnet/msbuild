@@ -63,7 +63,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </PropertyGroup>
 
-  <Target Name="_ResolveJsModuleInputs" BeforeTargets="AssignRazorComponentTargetPaths;AssignRazorGenerateTargetPaths" DependsOnTargets="ResolveProjectStaticWebAssets">
+  <Target Name="_ResolveJsModuleInputs" DependsOnTargets="ResolveProjectStaticWebAssets">
 
     <ItemGroup>
       <_JSModuleCandidates Include="@(StaticWebAsset)" Condition="'%(SourceType)' == 'Discovered'" />

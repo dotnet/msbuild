@@ -39,7 +39,6 @@ namespace Microsoft.NET.Sdk.Razor.Tool
             Commands.Add(new ShutdownCommand(this));
             Commands.Add(new DiscoverCommand(this));
             Commands.Add(new GenerateCommand(this));
-            Commands.Add(new RewriteCssCommand(this));
         }
 
         public CancellationToken CancellationToken { get; }
