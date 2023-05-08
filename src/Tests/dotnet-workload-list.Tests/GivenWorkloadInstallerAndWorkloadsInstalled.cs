@@ -31,8 +31,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         private WorkloadListCommand _workloadListCommand;
         private string _testDirectory;
 
-        private List<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition>
-            Workloads)> _mockManifestUpdates;
+        private List<(ManifestVersionUpdate manifestUpdate, Dictionary<WorkloadId, WorkloadDefinition> Workloads)> _mockManifestUpdates;
 
         private MockNuGetPackageDownloader _nugetDownloader;
         private string _dotnetRoot;
@@ -46,13 +45,17 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             _testDirectory = _testAssetsManager.CreateTestDirectory(identifier: identifier).Path;
             _dotnetRoot = Path.Combine(_testDirectory, "dotnet");
             _nugetDownloader = new(_dotnetRoot);
+            var currentSdkFeatureBand = new SdkFeatureBand(CurrentSdkVersion);
 
             _mockManifestUpdates = new()
             {
                 (
-                    new ManifestId("manifest1"),
-                    new ManifestVersion(CurrentSdkVersion),
-                    new ManifestVersion(UpdateAvailableVersion),
+                    new ManifestVersionUpdate(
+                        new ManifestId("manifest1"),
+                        new ManifestVersion(CurrentSdkVersion),
+                        currentSdkFeatureBand.ToString(),
+                        new ManifestVersion(UpdateAvailableVersion),
+                        currentSdkFeatureBand.ToString()),
                     new Dictionary<WorkloadId, WorkloadDefinition>
                     {
                         [new WorkloadId(InstallingWorkload)] = new(
@@ -63,9 +66,12 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                             WorkloadDefinitionKind.Dev, null, null, null)
                     }),
                 (
-                    new ManifestId("manifest-other"),
-                    new ManifestVersion(CurrentSdkVersion),
-                    new ManifestVersion("7.0.101"),
+                    new ManifestVersionUpdate(
+                        new ManifestId("manifest-other"),
+                        new ManifestVersion(CurrentSdkVersion),
+                        currentSdkFeatureBand.ToString(),
+                        new ManifestVersion("7.0.101"),
+                        currentSdkFeatureBand.ToString()),
                     new Dictionary<WorkloadId, WorkloadDefinition>
                     {
                         [new WorkloadId("other-manifest-workload")] = new(
@@ -74,9 +80,12 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                             WorkloadDefinitionKind.Dev, null, null, null)
                     }),
                 (
-                    new ManifestId("manifest-older-version"),
-                    new ManifestVersion(CurrentSdkVersion),
-                    new ManifestVersion("6.0.100"),
+                    new ManifestVersionUpdate(
+                        new ManifestId("manifest-older-version"),
+                        new ManifestVersion(CurrentSdkVersion),
+                        currentSdkFeatureBand.ToString(),
+                        new ManifestVersion("6.0.100"),
+                        currentSdkFeatureBand.ToString()),
                     new Dictionary<WorkloadId, WorkloadDefinition>
                     {
                         [new WorkloadId("other-manifest-workload")] = new(

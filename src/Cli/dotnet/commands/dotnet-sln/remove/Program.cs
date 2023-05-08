@@ -21,13 +21,13 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
         public RemoveProjectFromSolutionCommand(
             ParseResult parseResult) : base(parseResult)
         {
-            _arguments = (parseResult.ValueForArgument<IEnumerable<string>>(SlnRemoveParser.ProjectPathArgument) ?? Array.Empty<string>()).ToList().AsReadOnly();
+            _arguments = (parseResult.GetValueForArgument(SlnRemoveParser.ProjectPathArgument) ?? Array.Empty<string>()).ToList().AsReadOnly();
             if (_arguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove);
             }
 
-            _fileOrDirectory = parseResult.ValueForArgument<string>(SlnCommandParser.SlnArgument);
+            _fileOrDirectory = parseResult.GetValueForArgument(SlnCommandParser.SlnArgument);
         }
 
         public override int Execute()

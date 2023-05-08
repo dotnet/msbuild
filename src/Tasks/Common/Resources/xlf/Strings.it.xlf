@@ -561,8 +561,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
-        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: La destinazione .NET 6.0 in Visual Studio 2019 non è supportata.</target>
+        <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: la destinazione .NET 6.0 o versione successiva in Visual Studio 2019 non è supportata.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -750,11 +750,6 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1179: quando si usa '--runtime' è necessaria una delle opzioni '--self-contained' o '--no-self-contained'.</target>
         <note>{StrBegin="NETSDK1179: "}</note>
       </trans-unit>
-      <trans-unit id="SingleFileWin7Incompatible">
-        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
-        <target state="translated">NETSDK1180: l'identificatore di runtime specificato '{0}'' implica la compatibilità con Windows 7. La pubblicazione di file singoli non è compatibile con Windows 7.</target>
-        <note>{StrBegin="NETSDK1180: "}</note>
-      </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: per GenerateRuntimeConfigurationFiles è stato specificato 'AdditionalProbingPaths', ma questo valore verrà ignorato perché 'RuntimeConfigDevPath' è vuoto.</target>
@@ -914,10 +909,10 @@ Potrebbe essere necessario compilare il progetto in un altro sistema operativo o
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
+To install these workloads, run the following command: dotnet workload restore</source>
         <target state="translated">NETSDK1147: per compilare questo progetto devono essere installati i seguenti carichi di lavoro: {0}
-Per installare questi carichi di lavoro, eseguire il seguente comando: {1}</target>
-        <note>{StrBegin="NETSDK1147: "}</note>
+Per installare questi carichi di lavoro, eseguire il seguente comando: dotnet workload restore</target>
+        <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>
   </file>

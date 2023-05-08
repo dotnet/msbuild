@@ -25,7 +25,7 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30" PrivateAssets="All" ExcludeAssets="Runtime" />
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(MicrosoftVisualStudioSetupConfigurationInteropVersion)" PrivateAssets="All" ExcludeAssets="Runtime" />
   </ItemGroup>
 
   <Target Name="ResolveHostfxrCopyLocalContent" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" DependsOnTargets="RunResolvePackageDependencies" BeforeTargets="AssignTargetPaths">

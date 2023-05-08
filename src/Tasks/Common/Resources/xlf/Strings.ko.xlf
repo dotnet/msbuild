@@ -561,8 +561,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
-        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: Visual Studio 2019에서 .NET 6.0을 대상으로 지정하는 것은 지원되지 않습니다.</target>
+        <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: Visual Studio 2019에서 .NET 6.0 이상을 대상으로 하는 것은 지원되지 않습니다.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -750,11 +750,6 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1179: '--runtime'을 사용하는 경우 '--no-self-contained' 또는 '--no-self-contained' 옵션 중 하나가 필요합니다.</target>
         <note>{StrBegin="NETSDK1179: "}</note>
       </trans-unit>
-      <trans-unit id="SingleFileWin7Incompatible">
-        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
-        <target state="translated">NETSDK1180: 지정된 런타임 식별자 '{0}'은(는) Windows 7 호환성을 의미합니다. 단일 파일 게시는 Windows 7과 호환되지 않습니다.</target>
-        <note>{StrBegin="NETSDK1180: "}</note>
-      </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: GenerateRuntimeConfigurationFiles에 대해 'AdditionalProbingPaths'가 지정되었지만 'RuntimeConfigDevPath'가 비어 있어서 건너뜁니다.</target>
@@ -914,10 +909,10 @@ You may need to build the project on another operating system or architecture, o
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
+To install these workloads, run the following command: dotnet workload restore</source>
         <target state="translated">NETSDK1147: 이 프로젝트를 빌드하려면 다음 워크로드를 설치해야 합니다. {0}
-이러한 워크로드를 설치하려면 다음 명령을 실행하세요: {1}</target>
-        <note>{StrBegin="NETSDK1147: "}</note>
+ 이러한 워크로드를 설치하려면 dotnet workload restore 명령을 실행합니다.</target>
+        <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>
   </file>

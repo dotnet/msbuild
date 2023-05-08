@@ -30,6 +30,11 @@ namespace Microsoft.DotNet.PackageValidation
             _packageAssets.Load(packageAssets);
             _conventions = new ManagedCodeConventions(runtimeGraph);
 
+#pragma warning disable CS0618
+            // https://github.com/dotnet/sdk/issues/23301
+            // FindItems is marked obsolete.  We should find a different way to do this.  
+            // The goal of this code is to be consistent with NuGet's selection algorithm 
+            // so it might need to change to use PopulateItemGroups.
             PackageAssets = _packageAssets.FindItems(_conventions.Patterns.AnyTargettedFile);
             RefAssets = _packageAssets.FindItems(_conventions.Patterns.CompileRefAssemblies);
             LibAssets = _packageAssets.FindItems(_conventions.Patterns.CompileLibAssemblies);
@@ -37,6 +42,7 @@ namespace Microsoft.DotNet.PackageValidation
 
             RuntimeSpecificAssets = _packageAssets.FindItems(_conventions.Patterns.RuntimeAssemblies).Where(t => t.Path.StartsWith("runtimes"));
             RuntimeAssets = _packageAssets.FindItems(_conventions.Patterns.RuntimeAssemblies);
+#pragma warning restore CS0618
 
             Rids = RuntimeSpecificAssets?.Select(t => (string)t.Properties["rid"]);
 

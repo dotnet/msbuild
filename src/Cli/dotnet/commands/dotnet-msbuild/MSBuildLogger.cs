@@ -61,6 +61,13 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         public void Initialize(IEventSource eventSource)
         {
+            // Declare lack of dependency on having properties/items in ProjectStarted events
+            // (since this logger doesn't ever care about those events it's irrelevant)
+            if (eventSource is IEventSource4 eventSource4)
+            {
+                eventSource4.IncludeEvaluationPropertiesAndItems();
+            }
+
             try
             {
                 if (_telemetry != null && _telemetry.Enabled)

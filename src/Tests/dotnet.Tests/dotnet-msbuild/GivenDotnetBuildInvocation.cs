@@ -4,9 +4,11 @@
 using Microsoft.DotNet.Tools.Build;
 using FluentAssertions;
 using Xunit;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
+    [Collection(TestConstants.UsesStaticTelemetryState)]
     public class GivenDotnetBuildInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         const string ExpectedPrefix = "-maxcpucount -verbosity:m";
@@ -17,7 +19,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [Theory]
         [InlineData(new string[] { }, "")]
         [InlineData(new string[] { "-o", "foo" }, "-property:OutputPath=<cwd>foo")]
-        [InlineData(new string[] { "-property:Verbosity=diag" }, "-property:Verbosity=diag")]
+        [InlineData(new string[] { "-property:Verbosity=diag" }, "--property:Verbosity=diag")]
         [InlineData(new string[] { "--output", "foo" }, "-property:OutputPath=<cwd>foo")]
         [InlineData(new string[] { "-o", "foo1 foo2" }, "\"-property:OutputPath=<cwd>foo1 foo2\"")]
         [InlineData(new string[] { "--no-incremental" }, "-target:Rebuild")]
@@ -54,8 +56,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
         [Theory]
         [InlineData(new string[] { "-f", "tfm" }, "-target:Restore", "-property:TargetFramework=tfm")]
-        [InlineData(new string[] { "-p:TargetFramework=tfm" }, "-target:Restore", "-p:TargetFramework=tfm")]
-        [InlineData(new string[] { "/p:TargetFramework=tfm" }, "-target:Restore", "-property:TargetFramework=tfm")]
+        [InlineData(new string[] { "-p:TargetFramework=tfm" }, "-target:Restore", "--property:TargetFramework=tfm")]
+        [InlineData(new string[] { "/p:TargetFramework=tfm" }, "-target:Restore", "--property:TargetFramework=tfm")]
         [InlineData(new string[] { "-t:Run", "-f", "tfm" }, "-target:Restore", "-property:TargetFramework=tfm -t:Run")]
         [InlineData(new string[] { "/t:Run", "-f", "tfm" }, "-target:Restore", "-property:TargetFramework=tfm /t:Run")]
         [InlineData(new string[] { "-o", "myoutput", "-f", "tfm", "-v", "diag", "/ArbitrarySwitchForMSBuild" },

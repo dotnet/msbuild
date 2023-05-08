@@ -3,15 +3,16 @@
 
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
+using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Tools.Fsi
 {
     public class FsiCommand
     {
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            DebugHelper.HandleDebugSwitch(ref args);
-            return new FsiForwardingApp(args).Execute();
+            parseResult.HandleDebugSwitch();
+            return new FsiForwardingApp(parseResult).Execute();
         }
     }
 }

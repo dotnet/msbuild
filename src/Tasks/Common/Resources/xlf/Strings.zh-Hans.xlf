@@ -224,7 +224,7 @@
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequiresSelfContained">
         <source>NETSDK1176: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
-        <target state="translated">NETSDK1176: 仅支持在发布独立的应用程序时进行单个文件包中的压缩。</target>
+        <target state="translated">NETSDK1176: 仅在发布独立应用程序时才支持在单个文件捆绑包中进行压缩。</target>
         <note>{StrBegin="NETSDK1176: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
@@ -561,8 +561,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
-        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: 不支持在 Visual Studio 2019 中以 .NET 6.0 为目标。</target>
+        <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: 不支持在 Visual Studio 2019 中以 .NET 6.0 或更高版本为目标。</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -747,13 +747,8 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
         <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
-        <target state="translated">NETSDK1179: 使用“--runtime”时，必需选择“--自包含”或“--非自包含”选项。</target>
+        <target state="translated">NETSDK1179: 使用“--runtime”时，必需选择“--self-contained”或“--no-self-contained”选项。</target>
         <note>{StrBegin="NETSDK1179: "}</note>
-      </trans-unit>
-      <trans-unit id="SingleFileWin7Incompatible">
-        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
-        <target state="translated">NETSDK1180: 指定的运行时标识符“{0}”不意味着 Windows 7 兼容性。单个文件发布与 Windows 7 不兼容。</target>
-        <note>{StrBegin="NETSDK1180: "}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
@@ -872,7 +867,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WinMDReferenceNotSupportedOnTargetFramework">
         <source>NETSDK1130: {1} cannot be referenced. Referencing a Windows Metadata component directly when targeting .NET 5 or higher is not supported. For more information, see https://aka.ms/netsdk1130</source>
-        <target state="translated">NETSDK1130: 无法引用 {1}。不支持以 .NET 5 或更高版本为目标时，请直接饮用 Windows 元数据组件。有关详细信息，请参阅 https://aka.ms/netsdk1130</target>
+        <target state="translated">NETSDK1130: 无法引用 {1}。不支持在以 .NET 5 或更高版本为目标时直接引用 Windows 元数据组件。有关详细信息，请参阅 https://aka.ms/netsdk1130</target>
         <note>{StrBegin="NETSDK1130: "}</note>
       </trans-unit>
       <trans-unit id="WinMDTransitiveReferenceNotSupported">
@@ -914,10 +909,10 @@ You may need to build the project on another operating system or architecture, o
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
+To install these workloads, run the following command: dotnet workload restore</source>
         <target state="translated">NETSDK1147: 要构建此项目，必须安装以下工作负载: {0}
- 要安装这些工作负载，请运行以下命令: {1}</target>
-        <note>{StrBegin="NETSDK1147: "}</note>
+要安装这些工作负载，请运行以下命令: dotnet workload restore</target>
+        <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>
   </file>

@@ -408,7 +408,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="RunProduceContentAssets"
           DependsOnTargets="ResolvePackageAssets"
-          Condition="'@(_ContentFilesToPreprocess)' != ''">
+          Condition="'@(_ContentFilesToPreprocess)' != '' and '$(_CleaningWithoutRebuilding)' != 'true'">
 
     <ProduceContentAssets
       ContentFileDependencies="@(_ContentFilesToPreprocess)"
@@ -419,7 +419,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <Output TaskParameter="CopyLocalItems" ItemName="_ContentCopyLocalItems" />
       <Output TaskParameter="ProcessedContentItems" ItemName="_ProcessedContentItems" />
-      <Output TaskParameter="FileWrites" ItemName="FileWrites" />
+      <Output TaskParameter="ProcessedContentItems" ItemName="FileWrites" />
     </ProduceContentAssets>
 
     <!-- The items in _ProcessedContentItems need to go into the appropriately-named item group,
@@ -427,7 +427,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CreateItem Include="@(_ProcessedContentItems)" Condition="'@(_ProcessedContentItems)' != ''">
       <Output TaskParameter="Include" ItemName="%(_ProcessedContentItems.ProcessedItemType)" />
     </CreateItem>
-
   </Target>
 
   <!--

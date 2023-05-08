@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine.Parsing;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using static Microsoft.DotNet.Cli.Parser;
@@ -12,9 +13,24 @@ namespace Microsoft.DotNet.Cli
 {
     public static class ParseResultExtensions
     {
+        ///<summary>
+        /// Finds the command of the parse result and invokes help for that command.
+        /// If no command is specified, invokes help for the application.
+        ///<summary>
+        ///<remarks>
+        /// This is accomplished by finding a set of tokens that should be valid and appending a help token
+        /// to that list, then re-parsing the list of tokens. This is not ideal - either we should have a direct way
+        /// of invoking help for a ParseResult, or we should eliminate this custom, ad-hoc help invocation by moving
+        /// more situations that want to show help into Parsing Errors (which trigger help in the default System.CommandLine pipeline)
+        /// or custom Invocation Middleware, so we can more easily create our version of a HelpResult type.
+        ///</remarks>
         public static void ShowHelp(this ParseResult parseResult)
         {
-            DotnetHelpBuilder.Instance.Value.Write(parseResult.CommandResult.Command);
+            // take from the start of the list until we hit an option/--/unparsed token
+            // since commands can have arguments, we must take those as well in order to get accurate help
+            var tokenList = parseResult.Tokens.TakeWhile(token => token.Type == TokenType.Argument || token.Type == TokenType.Command || token.Type == TokenType.Directive).Select(t => t.Value).ToList();
+            tokenList.Add("-h");
+            Parser.Instance.Parse(tokenList).Invoke();
         }
 
         public static void ShowHelpOrErrorIfAppropriate(this ParseResult parseResult)
@@ -22,7 +38,7 @@ namespace Microsoft.DotNet.Cli
             if (parseResult.Errors.Any())
             {
                 var unrecognizedTokenErrors = parseResult.Errors.Where(error =>
-                    error.Message.Contains(Parser.Instance.Configuration.Resources.UnrecognizedCommandOrArgument(string.Empty).Replace("'", string.Empty)));
+                    error.Message.Contains(Parser.Instance.Configuration.LocalizationResources.UnrecognizedCommandOrArgument(string.Empty).Replace("'", string.Empty)));
                 if (parseResult.CommandResult.Command.TreatUnmatchedTokensAsErrors ||
                     parseResult.Errors.Except(unrecognizedTokenErrors).Any())
                 {
@@ -31,11 +47,6 @@ namespace Microsoft.DotNet.Cli
                                              parseResult.Errors.Select(e => e.Message)), 
                         parseResult: parseResult);
                 }
-            }
-            else if (parseResult.HasOption("--help"))
-            {
-                parseResult.ShowHelp();
-                throw new HelpException(string.Empty);
             }
         }
 
@@ -48,12 +59,34 @@ namespace Microsoft.DotNet.Cli
 
         public static bool IsDotnetBuiltInCommand(this ParseResult parseResult)
         {
-            return string.IsNullOrEmpty(parseResult.RootSubCommandResult()) || BuiltInCommandsCatalog.Commands.ContainsKey(parseResult.RootSubCommandResult());
+            return string.IsNullOrEmpty(parseResult.RootSubCommandResult()) || 
+                Parser.GetBuiltInCommand(parseResult.RootSubCommandResult()) != null;
         }
 
         public static bool IsTopLevelDotnetCommand(this ParseResult parseResult)
         {
             return parseResult.CommandResult.Command.Equals(RootCommand) && string.IsNullOrEmpty(parseResult.RootSubCommandResult());
+        }
+
+        public static bool CanBeInvoked(this ParseResult parseResult)
+        {
+            return Parser.GetBuiltInCommand(parseResult.RootSubCommandResult()) != null ||
+                parseResult.Directives.Count() > 0 ||
+                (parseResult.IsTopLevelDotnetCommand() && string.IsNullOrEmpty(parseResult.GetValueForArgument(Parser.DotnetSubCommand)));
+        }
+
+        public static int HandleMissingCommand(this ParseResult parseResult)
+        {
+            Reporter.Error.WriteLine(Tools.CommonLocalizableStrings.RequiredCommandNotPassed.Red());
+            parseResult.ShowHelp();
+            return 1;
+        }
+
+        public static string[] GetArguments(this ParseResult parseResult)
+        {
+            return parseResult.Tokens.Select(t => t.Value)
+                .ToArray()
+                .GetSubArguments();
         }
 
         public static string[] GetSubArguments(this string[] args)
@@ -75,7 +108,7 @@ namespace Microsoft.DotNet.Cli
 
         private static string GetSymbolResultValue(ParseResult parseResult, SymbolResult symbolResult)
         {
-            if (symbolResult.Token() == null)
+            if (symbolResult.Token() == default)
             {
                 return parseResult.FindResultFor(Parser.DotnetSubCommand)?.GetValueOrDefault<string>();
             }
@@ -94,23 +127,26 @@ namespace Microsoft.DotNet.Cli
         }
 
         public static bool BothArchAndOsOptionsSpecified(this ParseResult parseResult) =>
-            parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) && 
-            parseResult.HasOption(CommonOptions.OperatingSystemOption().Aliases.First());
+            (parseResult.HasOption(CommonOptions.ArchitectureOption) ||
+            parseResult.HasOption(CommonOptions.LongFormArchitectureOption)) && 
+            parseResult.HasOption(CommonOptions.OperatingSystemOption);
 
         internal static string GetCommandLineRuntimeIdentifier(this ParseResult parseResult)
         {
             return parseResult.HasOption(RunCommandParser.RuntimeOption) ?
-                parseResult.ValueForOption<string>(RunCommandParser.RuntimeOption) :
-                parseResult.HasOption(CommonOptions.OperatingSystemOption().Aliases.First()) || parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) ?
+                parseResult.GetValueForOption(RunCommandParser.RuntimeOption) :
+                parseResult.HasOption(CommonOptions.OperatingSystemOption) ||
+                parseResult.HasOption(CommonOptions.ArchitectureOption) ||
+                parseResult.HasOption(CommonOptions.LongFormArchitectureOption) ?
                 CommonOptions.ResolveRidShorthandOptionsToRuntimeIdentifier(
-                    parseResult.ValueForOption<string>(CommonOptions.OperatingSystemOption().Aliases.First()),
-                    parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First())) :
+                    parseResult.GetValueForOption(CommonOptions.OperatingSystemOption),
+                    CommonOptions.ArchOptionValue(parseResult)) :
                 null;
         }
 
         public static bool UsingRunCommandShorthandProjectOption(this ParseResult parseResult)
         {
-            if (parseResult.HasOption(RunCommandParser.PropertyOption) && parseResult.ValueForOption(RunCommandParser.PropertyOption).Any())
+            if (parseResult.HasOption(RunCommandParser.PropertyOption) && parseResult.GetValueForOption(RunCommandParser.PropertyOption).Any())
             {
                 var projVals = parseResult.GetRunCommandShorthandProjectValues();
                 if (projVals.Any())
@@ -146,6 +182,15 @@ namespace Microsoft.DotNet.Cli
             var propertyOptions = options.Where(o => o.Token().Value.Equals(optionString));
             var propertyValues = propertyOptions.SelectMany(o => o.Children.SelectMany(c => c.Tokens.Select(t=> t.Value))).ToArray();
             return propertyValues;
+        }
+
+        [Conditional("DEBUG")]
+        public static void HandleDebugSwitch(this ParseResult parseResult)
+        {
+            if (parseResult.HasOption(CommonOptions.DebugOption))
+            {
+                DebugHelper.WaitForDebugger();
+            }
         }
     }
 }

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.Tools.Internal
@@ -18,6 +19,7 @@ namespace Microsoft.Extensions.Tools.Internal
 
         private PhysicalConsole()
         {
+            Console.OutputEncoding = Encoding.UTF8;
             Console.CancelKeyPress += (o, e) =>
             {
                 CancelKeyPress?.Invoke(o, e);

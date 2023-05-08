@@ -456,10 +456,12 @@ namespace Microsoft.NET.Build.Tasks
         {
             var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
             var knownFrameworkReferenceRuntimePackRuntimeIdentifiers = selectedRuntimePack.RuntimePackRuntimeIdentifiers.Split(';');
+            var knownFrameworkReferenceRuntimePackExcludedRuntimeIdentifiers = selectedRuntimePack.RuntimePackExcludedRuntimeIdentifiers.Split(';');
 
-            string runtimePackRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(
+            string runtimePackRuntimeIdentifier = NuGetUtils.GetBestMatchingRidWithExclusion(
                     runtimeGraph,
                     runtimeIdentifier,
+                    knownFrameworkReferenceRuntimePackExcludedRuntimeIdentifiers,
                     knownFrameworkReferenceRuntimePackRuntimeIdentifiers,
                     out bool wasInGraph);
 
@@ -848,6 +850,8 @@ namespace Microsoft.NET.Build.Tasks
             public string RuntimePackNamePatterns => _item.GetMetadata("RuntimePackNamePatterns");
 
             public string RuntimePackRuntimeIdentifiers => _item.GetMetadata(MetadataKeys.RuntimePackRuntimeIdentifiers);
+
+            public string RuntimePackExcludedRuntimeIdentifiers => _item.GetMetadata(MetadataKeys.RuntimePackExcludedRuntimeIdentifiers);
 
             public string IsTrimmable => _item.GetMetadata(MetadataKeys.IsTrimmable);
 

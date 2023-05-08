@@ -3,6 +3,7 @@
 
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Store;
+using Microsoft.NET.TestFramework;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -10,6 +11,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
+    [Collection(TestConstants.UsesStaticTelemetryState)]
     public class GivenDotnetStoreInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         const string ExpectedPrefix = "-maxcpucount -verbosity:m -target:ComposeStore <project>";

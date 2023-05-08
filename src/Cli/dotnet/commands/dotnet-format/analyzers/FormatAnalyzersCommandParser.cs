@@ -3,14 +3,23 @@
 //
 
 using System.CommandLine;
-
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.Cli;
 using static Microsoft.DotNet.Tools.Format.FormatCommandCommon;
 
 namespace Microsoft.DotNet.Tools.Format
 {
     internal static class FormatAnalyzersCommandParser
     {
+        private static readonly Command Command = ConstructCommand();
+
         public static Command GetCommand()
+        {
+            return Command;
+        }
+
+        private static Command ConstructCommand()
         {
             var command = new Command("analyzers", LocalizableStrings.Run_3rd_party_analyzers__and_apply_fixes)
             {
@@ -18,6 +27,7 @@ namespace Microsoft.DotNet.Tools.Format
                 SeverityOption,
             };
             command.AddCommonOptions();
+            command.SetHandler((ParseResult parseResult) => FormatCommand.Run(parseResult.GetArguments()));
             return command;
         }
     }

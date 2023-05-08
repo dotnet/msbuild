@@ -3,7 +3,7 @@
 #nullable disable
 
 using System;
-
+using System.Collections.Generic;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 using NuGet.Versioning;
@@ -11,8 +11,10 @@ using NuGet.Versioning;
 namespace Microsoft.DotNet.Installer.Windows
 {
     /// <summary>
-    /// Represents a single workload pack installation record in the registry created
-    /// by a workload pack MSI.
+    /// Represents a workload pack installation record in the registry created
+    /// by a workload pack MSI.  This may represent either an individual workload pack
+    /// MSI, or a workload pack group MSI which is a single MSI that installs multiple
+    /// workload packs.
     /// </summary>
     internal class WorkloadPackRecord
     {
@@ -26,22 +28,29 @@ namespace Microsoft.DotNet.Installer.Windows
         }
 
         /// <summary>
-        /// The ID of the workload pack.
+        /// An identifier for the MSI.  If this is an MSI for a single workload pack, it will be the ID of the pack.
+        /// If it's an MSI with multiple workload packs (a workload pack group), then the ID will be the ID of the group.
+        /// This ID does NOT include the ".Msi.{HostArchitecture}" suffix
         /// </summary>
-        public WorkloadPackId PackId
+        public string MsiId
         {
             get;
             set;
         }
 
         /// <summary>
-        /// The semantic version of the workload pack.
+        /// The version of the workload pack installed by this MSI, or the version of the group of packs
         /// </summary>
-        public NuGetVersion PackVersion
+        public string MsiNuGetVersion
         {
             get;
             set;
         }
+
+        /// <summary>
+        /// The workload pack IDs and versions that are installed by this MSI
+        /// </summary>
+        public List<(WorkloadPackId id, NuGetVersion version)> InstalledPacks { get; set; } = new();
 
         /// <summary>
         /// The product code (GUID) of the workload pack MSI.

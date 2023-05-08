@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -51,6 +52,8 @@ namespace Microsoft.DotNet.Watcher.Tools
             var processStartInfo = _spec.GetProcessStartInfo();
             processStartInfo.RedirectStandardOutput = true;
             processStartInfo.RedirectStandardError = true;
+            processStartInfo.StandardOutputEncoding = Encoding.UTF8;
+            processStartInfo.StandardErrorEncoding = Encoding.UTF8;
             processStartInfo.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "true";
 
             _process = new Process
@@ -69,6 +72,18 @@ namespace Microsoft.DotNet.Watcher.Tools
             _process.BeginErrorReadLine();
             _process.BeginOutputReadLine();
             WriteTestOutput($"{DateTime.Now}: process started: '{_process.StartInfo.FileName} {_process.StartInfo.Arguments}'");
+        }
+
+        public Task<string> GetOutputLineAsyncWithConsoleHistoryAsync(string message, TimeSpan timeout)
+        {
+            if (_lines.Contains(message))
+            {
+                WriteTestOutput($"Found [msg == '{message}'] in console history.");
+                return Task.FromResult(message);
+            }
+            
+            WriteTestOutput($"Did not find [msg == '{message}'] in console history.");
+            return GetOutputLineAsync(message, timeout);
         }
 
         public async Task<string> GetOutputLineAsync(string message, TimeSpan timeout)

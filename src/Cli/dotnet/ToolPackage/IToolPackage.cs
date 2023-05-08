@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Frameworks;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ToolPackage
@@ -21,5 +22,7 @@ namespace Microsoft.DotNet.ToolPackage
         IEnumerable<string> Warnings { get; }
 
         IReadOnlyList<FilePath> PackagedShims { get; }
+
+        IEnumerable<NuGetFramework> Frameworks { get; }
     }
 }

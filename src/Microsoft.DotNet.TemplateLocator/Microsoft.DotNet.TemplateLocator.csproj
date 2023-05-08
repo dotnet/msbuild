@@ -47,7 +47,7 @@
        2 different ways of doing things
   -->
   <ItemGroup>
-    <Compile Include="..\Resolvers\Microsoft.NET.Sdk.WorkloadManifestReader\**\*.cs" LinkBase="Microsoft.DotNet.SdkResolver"/>
+    <Compile Include="..\Resolvers\Microsoft.NET.Sdk.WorkloadManifestReader\**\*.cs" LinkBase="Microsoft.NET.Sdk.WorkloadManifestReader"/>
     <Compile Include="..\Resolvers\Microsoft.DotNet.MSBuildSdkResolver\FXVersion.cs" LinkBase="Microsoft.DotNet.SdkResolver"/>
     <Compile Include="$(RepoRoot)src\Common\EnvironmentVariableNames.cs" LinkBase="Common"/>
     <Compile Include="$(RepoRoot)src\Common\WorkloadFileBasedInstall.cs" LinkBase="Common"/>

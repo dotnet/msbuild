@@ -28,15 +28,24 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableWebSdkImplicitPackageVersions>false</EnableWebSdkImplicitPackageVersions>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <__WindowsAppSdkDefaultImageIncludes>**/*.png;**/*.bmp;**/*.jpg;**/*.dds;**/*.tif;**/*.tga;**/*.gif</__WindowsAppSdkDefaultImageIncludes>
+  </PropertyGroup>
 
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' ">
     <Compile Include="**/*$(DefaultLanguageSourceExtension)" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
     <EmbeddedResource Include="**/*.resx" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultEmbeddedResourceItems)' == 'true' " />
+    <!-- Microsoft.WindowsAppSDK is a NuGet delivered SDK. EnableDefaultWindowsAppSdkContentItems and EnableDefaultWindowsAppSdkPRIResourceItems are overridable properties that the SDK will set to true by default. -->
+    <Content Include="$(__WindowsAppSdkDefaultImageIncludes)" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultContentItems)' != 'false' And '$(EnableDefaultWindowsAppSdkContentItems)' == 'true' " />
+    <PRIResource Include="**/*.resw" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition=" '$(EnableDefaultPRIResourceItems)' != 'false' And '$(EnableDefaultWindowsAppSdkPRIResourceItems)' == 'true' "/>
   </ItemGroup>
   <ItemGroup Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultNoneItems)' == 'true' ">
     <None Include="**/*" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
     <None Remove="**/*$(DefaultLanguageSourceExtension)" />
     <None Remove="**/*.resx" />
+    <!-- Microsoft.WindowsAppSDK is a NuGet delivered SDK. EnableDefaultWindowsAppSdkContentItems and EnableDefaultWindowsAppSdkPRIResourceItems are overridable properties that the SDK will set to true by default. -->
+    <None Remove="$(__WindowsAppSdkDefaultImageIncludes)" Condition=" '$(EnableDefaultWindowsAppSdkContentItems)' == 'true' "/>
+    <None Remove="**/*.resw" Condition=" '$(EnableDefaultWindowsAppSdkPRIResourceItems)' == 'true' "/>
   </ItemGroup>
 
   <!-- Automatically reference NETStandard.Library or Microsoft.NETCore.App package if targeting the corresponding target framework.

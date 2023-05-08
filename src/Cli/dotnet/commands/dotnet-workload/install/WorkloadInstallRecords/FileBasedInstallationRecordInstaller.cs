@@ -9,12 +9,12 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
 {
-    internal class NetSdkManagedInstallationRecordRepository : IWorkloadInstallationRecordRepository
+    internal class FileBasedInstallationRecordRepository : IWorkloadInstallationRecordRepository
     {
         private readonly string _workloadMetadataDir;
         private const string InstalledWorkloadDir = "InstalledWorkloads";
 
-        public NetSdkManagedInstallationRecordRepository(string workloadMetadataDir)
+        public FileBasedInstallationRecordRepository(string workloadMetadataDir)
         {
             _workloadMetadataDir = workloadMetadataDir;
         }

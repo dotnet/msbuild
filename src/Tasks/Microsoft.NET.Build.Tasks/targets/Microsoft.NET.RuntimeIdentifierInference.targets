@@ -109,6 +109,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     Default SelfContained based on the RuntimeIdentifier, so projects don't have to explicitly set SelfContained.
     This avoids a breaking change from 1.0 behavior.
     -->
+  <PropertyGroup>
+    <!-- Detecting property presence is not harmful and can be done in an unconditioned way -->
+    <_SelfContainedWasSpecified Condition="'$(SelfContained)' != ''">true</_SelfContainedWasSpecified>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
     <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != ''">true</SelfContained>
     <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
@@ -158,10 +162,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
                  ResourceName="PublishSingleFileRequiresVersion30" />
-
-    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and $(RuntimeIdentifier.StartsWith('win7-'))"
-                 ResourceName="SingleFileWin7Incompatible"
-                 FormatArguments="$(RuntimeIdentifier)" />
 
     <!-- The TFM version checks for PublishReadyToRun PublishTrimmed only generate warnings in .Net core 3.1
          because we do not want the behavior to be a breaking change compared to version 3.0 -->

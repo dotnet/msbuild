@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
-            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
+            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null, testProject.Name);
 
             // First we run without references. Without references, ApiCompat should not be able to see that class First
             // removed an interface due to it's base class removing that implementation. We validate that APICompat doesn't
@@ -192,7 +192,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
-            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
+            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null, testProject.Name);
 
             Dictionary<string, HashSet<string>> references = new()
             {
@@ -238,7 +238,7 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
-            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
+            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null, testProject.Name);
 
             Dictionary<string, HashSet<string>> references = new()
             {
@@ -284,7 +284,7 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
-            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
+            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null, testProject.Name);
 
             Dictionary<string, HashSet<string>> references = new()
             {
@@ -311,7 +311,7 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
-            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
+            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null, testProject.Name);
 
             Dictionary<string, HashSet<string>> references = new()
             {
@@ -324,6 +324,30 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
                 Assert.Empty(log.errors.Where(e => e.Contains("CP1003")));
             else
                 Assert.NotEmpty(log.errors.Where(e => e.Contains("CP1003")));
+        }
+
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
+        public void ValidatePackageValidationRunsWhenAssemblyNameIsDifferentThanPackageId()
+        {
+            TestLogger log = new TestLogger();
+
+            string sourceCode = @"
+public class MyType
+{
+#if NETSTANDARD2_0
+  public void Foo() { }
+#endif
+}";
+
+            TestProject testProject = CreateTestProject(sourceCode, "netstandard2.0;net5.0");
+            TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
+            var result = packCommand.Execute("/p:PackageId=MyAwesomePackage");
+            Assert.Equal(string.Empty, result.StdErr);
+            Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(packageId: "MyAwesomePackage"), null, testProject.Name);
+
+            new CompatibleFrameworkInPackageValidator(string.Empty, null, false, log, null).Validate(package);
+            Assert.NotEmpty(log.errors.Where(e => e.Contains("CP0002")));
         }
 
         private TestProject CreateTestProject(string sourceCode, string tfms, IEnumerable<TestProject> referenceProjects = null)

@@ -8,9 +8,9 @@
     <WarningsAsErrors>true</WarningsAsErrors>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <IsPackable>true</IsPackable>
-    
+
     <Nullable>Enable</Nullable>
-    
+
     <UseSystemTextJson Condition="'$(TargetFramework)'!='netstandard2.0' And '$(TargetFramework)'!='net472'">True</UseSystemTextJson>
     <DefineConstants Condition="'$(UseSystemTextJson)'=='True'">$(DefineConstants);USE_SYSTEM_TEXT_JSON</DefineConstants>
 
@@ -27,7 +27,7 @@
       <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('NuGetPackageId', 'Newtonsoft.Json'))" />
     </ItemGroup>
   </Target>
-  
+
   <ItemGroup>
     <EmbeddedResource Include="..\Microsoft.NET.Sdk.WorkloadManifestReader\Strings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.NET.Sdk.Localization"/>
   </ItemGroup>
@@ -37,8 +37,17 @@
   <Target Name="WriteFullFrameworkResolverManifest" AfterTargets="AfterBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PropertyGroup>
       <_ResolverManifestDir>$(OutputPath)\SdkResolvers\$(AssemblyName)\</_ResolverManifestDir>
-      <_TargetPathRelativePath>$([System.IO.Path]::GetRelativePath('$(_ResolverManifestDir)','$(TargetPath)'))</_TargetPathRelativePath>
+      <_TargetPathRelativePath>..\..\$(TargetFileName)</_TargetPathRelativePath>
     </PropertyGroup>
+
+    <!-- Path.GetRelativePath doesn't exist on full framework. So we hard-code the relative path, and then if we're running on .NET, we check
+         to make sure the value we hard-coded is the same as we would get by calling Path.GetRelativePath -->
+    <PropertyGroup Condition=" '$(MSBuildRuntimeType)' == 'Core'">
+      <_TargetPathRelativePathCheck>$([System.IO.Path]::GetRelativePath('$(_ResolverManifestDir)','$(TargetPath)'))</_TargetPathRelativePathCheck>
+    </PropertyGroup>
+
+    <Error Condition=" '$(MSBuildRuntimeType)' == 'Core' And '$(_TargetPathRelativePath)' != '$(_TargetPathRelativePathCheck)'"
+           Text="Incorrect relative path calculation"/>
 
     <ItemGroup>
       <ManifestLines Include="&lt;SdkResolver&gt;" />
@@ -48,7 +57,7 @@
 
     <WriteLinesToFile File="$(_ResolverManifestDir)$(AssemblyName).xml" Lines="@(ManifestLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
   </Target>
-  
+
   <ItemGroup>
     <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
   </ItemGroup>
@@ -65,7 +74,7 @@
     <Compile Include="..\Microsoft.DotNet.SdkResolver\**\*.cs" LinkBase="Microsoft.DotNet.SdkResolver" />
     <Compile Include="..\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver\CachingWorkloadResolver.cs" LinkBase="Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver" />
     <Compile Include="..\Microsoft.NET.Sdk.WorkloadManifestReader\**\*.cs" LinkBase="Microsoft.NET.Sdk.WorkloadManifestReader" />
-    <Compile Include="..\..\Cli\dotnet\commands\dotnet-workload\install\WorkloadInstallRecords\**\*.cs" 
+    <Compile Include="..\..\Cli\dotnet\commands\dotnet-workload\install\WorkloadInstallRecords\**\*.cs"
              Exclude="..\..\Cli\dotnet\commands\dotnet-workload\install\WorkloadInstallRecords\RegistryWorkloadInstallationRecordRepository.cs"
              LinkBase="WorkloadInstallRecords" />
 
@@ -81,14 +90,14 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30" PrivateAssets="All" ExcludeAssets="Runtime" />
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(MicrosoftVisualStudioSetupConfigurationInteropVersion)" PrivateAssets="All" ExcludeAssets="Runtime" />
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <!-- No PackageReference to System.Text.Json necessary, because it's included in .NET 5.0 and higher -->
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" Condition="'$(UseSystemTextJson)'!='True'"/>
-    
+
     <!-- Reference this package to avoid package downgrade errors.  See https://github.com/dotnet/sdk/issues/3044 for details -->
     <PackageReference Include="Microsoft.NETCore.Targets" Version="2.1.0" ExcludeAssets="all" PrivateAssets="all" />
   </ItemGroup>
@@ -101,6 +110,10 @@
       </Content>
       <Content Include="@(FileDefinitions->'%(ResolvedPath)')" Condition="'%(FileDefinitions.Path)' == 'runtimes/win-x64/native/hostfxr.dll'">
         <Link>x64/hostfxr.dll</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="@(FileDefinitions->'%(ResolvedPath)')" Condition="'%(FileDefinitions.Path)' == 'runtimes/win-arm64/native/hostfxr.dll'">
+        <Link>arm64/hostfxr.dll</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

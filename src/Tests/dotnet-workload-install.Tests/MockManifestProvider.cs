@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 using System;
@@ -20,12 +21,10 @@ namespace ManifestReaderTests
                 string manifestId = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(mp));
                 return (manifestId, mp);
             });
+            SdkFeatureBand = new SdkFeatureBand("6.0.100");
         }
 
-        public MockManifestProvider(params (string name, string path)[] manifests)
-        {
-            _manifests = manifests;
-        }
+        public SdkFeatureBand SdkFeatureBand { get; set; }
 
         public IEnumerable<string> GetManifestDirectories()
         {
@@ -35,11 +34,11 @@ namespace ManifestReaderTests
             }
         }
 
-        public IEnumerable<(string manifestId, string informationalPath, Func<Stream> openManifestStream, Func<Stream> openLocalizationStream)> GetManifests()
+        public IEnumerable<ReadableWorkloadManifest> GetManifests()
             {
                 foreach ((var id, var path) in _manifests)
                 {
-                    yield return (
+                    yield return new(
                         id,
                         path,
                         () => File.OpenRead(path),
@@ -48,6 +47,6 @@ namespace ManifestReaderTests
                 }
             }
 
-        public string GetSdkFeatureBand() => "6.0.100";
+        public string GetSdkFeatureBand() => SdkFeatureBand.ToString();
     }
 }

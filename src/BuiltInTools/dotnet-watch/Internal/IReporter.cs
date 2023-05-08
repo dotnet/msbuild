@@ -10,9 +10,9 @@ namespace Microsoft.Extensions.Tools.Internal
     public interface IReporter
     {
         public bool IsVerbose => false;
-        void Verbose(string message);
-        void Output(string message);
-        void Warn(string message);
-        void Error(string message);
+        void Verbose(string message, string emoji = "⌚");
+        void Output(string message, string emoji = "⌚");
+        void Warn(string message, string emoji = "⌚");
+        void Error(string message, string emoji = "❌");
     }
 }

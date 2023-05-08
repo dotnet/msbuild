@@ -72,7 +72,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     var candidate = Candidates[i];
                     if (ShouldFilterCandidate(candidate, TimeZoneSupport, InvariantGlobalization, CopySymbols, out var reason))
                     {
-                        Log.LogMessage("Skipping asset '{0}' because '{1}'", candidate.ItemSpec, reason);
+                        Log.LogMessage(MessageImportance.Low, "Skipping asset '{0}' because '{1}'", candidate.ItemSpec, reason);
                         filesToRemove.Add(candidate);
                         continue;
                     }
@@ -81,7 +81,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     if (satelliteAssembly != null)
                     {
                         var inferredCulture = satelliteAssembly.GetMetadata("DestinationSubDirectory").Trim('\\', '/');
-                        Log.LogMessage("Found satellite assembly '{0}' asset for candidate '{1}' with inferred culture '{2}'", satelliteAssembly.ItemSpec, candidate.ItemSpec, inferredCulture);
+                        Log.LogMessage(MessageImportance.Low, "Found satellite assembly '{0}' asset for candidate '{1}' with inferred culture '{2}'", satelliteAssembly.ItemSpec, candidate.ItemSpec, inferredCulture);
 
                         var assetCandidate = new TaskItem(satelliteAssembly);
                         assetCandidate.SetMetadata("AssetKind", "Build");
@@ -153,7 +153,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
                         candidate.SetMetadata("RelatedAsset", relatedAssetPath);
 
-                        Log.LogMessage("Found satellite assembly '{0}' asset for inferred candidate '{1}' with culture '{2}'", candidate.ItemSpec, relatedAssetPath, culture);
+                        Log.LogMessage(MessageImportance.Low, "Found satellite assembly '{0}' asset for inferred candidate '{1}' with culture '{2}'", candidate.ItemSpec, relatedAssetPath, culture);
                     }
 
                     assetCandidates.Add(candidate);

@@ -3,13 +3,12 @@
 
 using System;
 using System.CommandLine.Parsing;
-using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Workloads.Workload.Install;
 
 namespace Microsoft.DotNet.Workloads.Workload.Elevate
 {
-    internal class WorkloadElevateCommand : CommandBase
+    internal class WorkloadElevateCommand : WorkloadCommandBase
     {
         private NetSdkMsiInstallerServer _server;
 
@@ -23,7 +22,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Elevate
             {
                 try
                 {
-                    _server = NetSdkMsiInstallerServer.Create();
+                    _server = NetSdkMsiInstallerServer.Create(VerifySignatures);
                     _server.Run();
                 }
                 catch (Exception e)

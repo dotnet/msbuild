@@ -108,14 +108,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
                     if (TryGetLazyLoadedAssembly(resourceName, out var lazyLoad))
                     {
-                        Log.LogMessage("Candidate '{0}' is defined as a lazy loaded assembly.", resource.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Candidate '{0}' is defined as a lazy loaded assembly.", resource.ItemSpec);
                         remainingLazyLoadAssemblies.Remove(lazyLoad);
                         resourceData.lazyAssembly ??= new ResourceHashesByNameDictionary();
                         resourceList = resourceData.lazyAssembly;
                     }
                     else if (string.Equals("Culture", assetTraitName))
                     {
-                        Log.LogMessage("Candidate '{0}' is defined as satellite assembly with culture '{1}'.", resource.ItemSpec, assetTraitValue);
+                        Log.LogMessage(MessageImportance.Low, "Candidate '{0}' is defined as satellite assembly with culture '{1}'.", resource.ItemSpec, assetTraitValue);
                         resourceData.satelliteResources ??= new Dictionary<string, ResourceHashesByNameDictionary>(StringComparer.OrdinalIgnoreCase);
                         resourceName = assetTraitValue + "/" + resourceName;
 
@@ -129,32 +129,32 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     {
                         if (TryGetLazyLoadedAssembly($"{fileName}.dll", out _))
                         {
-                            Log.LogMessage("Candidate '{0}' is defined as a lazy loaded symbols file.", resource.ItemSpec);
+                            Log.LogMessage(MessageImportance.Low, "Candidate '{0}' is defined as a lazy loaded symbols file.", resource.ItemSpec);
                             resourceData.lazyAssembly ??= new ResourceHashesByNameDictionary();
                             resourceList = resourceData.lazyAssembly;
                         }
                         else
                         {
-                            Log.LogMessage("Candidate '{0}' is defined as symbols file.", resource.ItemSpec);
+                            Log.LogMessage(MessageImportance.Low, "Candidate '{0}' is defined as symbols file.", resource.ItemSpec);
                             resourceData.pdb ??= new ResourceHashesByNameDictionary();
                             resourceList = resourceData.pdb;
                         }
                     }
                     else if (string.Equals("runtime", assetTraitValue, StringComparison.OrdinalIgnoreCase))
                     {
-                        Log.LogMessage("Candidate '{0}' is defined as an app assembly.", resource.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Candidate '{0}' is defined as an app assembly.", resource.ItemSpec);
                         resourceList = resourceData.assembly;
                     }
                     else if (string.Equals(assetTraitName, "BlazorWebAssemblyResource", StringComparison.OrdinalIgnoreCase) &&
                             string.Equals(assetTraitValue, "native", StringComparison.OrdinalIgnoreCase))
                     {
-                        Log.LogMessage("Candidate '{0}' is defined as a native application resource.", resource.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Candidate '{0}' is defined as a native application resource.", resource.ItemSpec);
                         resourceList = resourceData.runtime;
                     }
                     else if (string.Equals("JSModule", assetTraitName, StringComparison.OrdinalIgnoreCase) &&
                              string.Equals(assetTraitValue, "JSLibraryModule", StringComparison.OrdinalIgnoreCase))
                     {
-                        Log.LogMessage("Candidate '{0}' is defined as a library initializer resource.", resource.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Candidate '{0}' is defined as a library initializer resource.", resource.ItemSpec);
                         resourceData.libraryInitializers ??= new();
                         resourceList = resourceData.libraryInitializers;
                         var targetPath = resource.GetMetadata("TargetPath");
@@ -165,7 +165,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     else if (string.Equals("BlazorWebAssemblyResource", assetTraitName, StringComparison.OrdinalIgnoreCase) &&
                              assetTraitValue.StartsWith("extension:", StringComparison.OrdinalIgnoreCase))
                     {
-                        Log.LogMessage("Candidate '{0}' is defined as an extension resource '{1}'.", resource.ItemSpec, assetTraitValue);
+                        Log.LogMessage(MessageImportance.Low, "Candidate '{0}' is defined as an extension resource '{1}'.", resource.ItemSpec, assetTraitValue);
                         var extensionName = assetTraitValue.Substring("extension:".Length);
                         resourceData.extensions ??= new();
                         if (!resourceData.extensions.TryGetValue(extensionName, out resourceList))
@@ -180,7 +180,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     }
                     else
                     {
-                        Log.LogMessage("Skipping resource '{0}' since it doesn't belong to a defined category.", resource.ItemSpec);
+                        Log.LogMessage(MessageImportance.Low, "Skipping resource '{0}' since it doesn't belong to a defined category.", resource.ItemSpec);
                         // This should include items such as XML doc files, which do not need to be recorded in the manifest.
                         continue;
                     }
@@ -229,7 +229,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             {
                 if (!resourceList.ContainsKey(resourceKey))
                 {
-                    Log.LogMessage("Added resource '{0}' to the manifest.", resource.ItemSpec);
+                    Log.LogMessage(MessageImportance.Low, "Added resource '{0}' to the manifest.", resource.ItemSpec);
                     resourceList.Add(resourceKey, $"sha256-{resource.GetMetadata("FileHash")}");
                 }
             }

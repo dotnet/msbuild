@@ -33,12 +33,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
                 try
                 {
-                    foreach ((string manifestId, string informationalPath, Func<Stream> openManifestStream, Func<Stream> openLocalizationStream) in manifests)
+                    foreach (var readableManifest in manifests)
                     {
-                        using (var manifestStream = openManifestStream())
-                        using (var localizationStream = openLocalizationStream())
+                        using (var manifestStream = readableManifest.OpenManifestStream())
+                        using (var localizationStream = readableManifest.OpenLocalizationStream())
                         {
-                            var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream, localizationStream, informationalPath);
+                            var manifest = WorkloadManifestReader.ReadWorkloadManifest(readableManifest.ManifestId, manifestStream, localizationStream, readableManifest.ManifestPath);
                         }
                     }
                 }

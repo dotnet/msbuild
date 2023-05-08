@@ -33,13 +33,13 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     string fileOutputPath = null;                    
                     if (!(asset.IsDiscovered() || asset.IsComputed()))
                     {
-                        Log.LogMessage("Skipping asset '{0}' since source type is '{1}'", asset.Identity, asset.SourceType);
+                        Log.LogMessage(MessageImportance.Low, "Skipping asset '{0}' since source type is '{1}'", asset.Identity, asset.SourceType);
                         continue;
                     }
 
                     if (asset.IsForReferencedProjectsOnly())
                     {
-                        Log.LogMessage("Skipping asset '{0}' since asset mode is '{1}'", asset.Identity, asset.AssetMode);
+                        Log.LogMessage(MessageImportance.Low, "Skipping asset '{0}' since asset mode is '{1}'", asset.Identity, asset.AssetMode);
                     }
 
                     if (asset.ShouldCopyToOutputDirectory())
@@ -51,17 +51,17 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                         {
                             if (asset.Identity.StartsWith(normalizedOutputPath, StringComparison.Ordinal))
                             {
-                                Log.LogMessage("Source for asset '{0}' is '{1}' since the identity points to the output path.", asset.Identity, asset.OriginalItemSpec);
+                                Log.LogMessage(MessageImportance.Low, "Source for asset '{0}' is '{1}' since the identity points to the output path.", asset.Identity, asset.OriginalItemSpec);
                                 source = asset.OriginalItemSpec;
                             }
                             else if (File.Exists(asset.Identity))
                             {
-                                Log.LogMessage("Source for asset '{0}' is '{0}' since the asset exists.", asset.Identity);
+                                Log.LogMessage(MessageImportance.Low, "Source for asset '{0}' is '{0}' since the asset exists.", asset.Identity);
                                 source = asset.Identity;
                             }
                             else
                             {
-                                Log.LogMessage("Source for asset '{0}' is '{1}' since the asset does not exist.", asset.Identity, asset.OriginalItemSpec);
+                                Log.LogMessage(MessageImportance.Low, "Source for asset '{0}' is '{1}' since the asset does not exist.", asset.Identity, asset.OriginalItemSpec);
                                 source = asset.OriginalItemSpec;
                             }
                         }
@@ -79,7 +79,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     }
                     else
                     {
-                        Log.LogMessage("Skipping asset '{0}' since copy to output directory option is '{1}'", asset.Identity, asset.CopyToOutputDirectory);
+                        Log.LogMessage(MessageImportance.Low, "Skipping asset '{0}' since copy to output directory option is '{1}'", asset.Identity, asset.CopyToOutputDirectory);
                     }
                 }
 

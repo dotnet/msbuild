@@ -224,7 +224,7 @@
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequiresSelfContained">
         <source>NETSDK1176: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
-        <target state="translated">NETSDK1176: La compresión en un único paquete de archivos solo se admite al publicar una aplicación independiente.</target>
+        <target state="translated">NETSDK1176: la compresión en un único paquete de archivos solo se admite al publicar una aplicación independiente.</target>
         <note>{StrBegin="NETSDK1176: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
@@ -561,8 +561,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
-        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: No se admite el destino de .NET 6.0 en Visual Studio 2019.</target>
+        <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: No se admite el destino de .NET 6.0 o superior en Visual Studio 2019.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -657,7 +657,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PlaceholderRunCommandProjectAbbreviationDeprecated">
         <source>NETSDK1174: Placeholder</source>
-        <target state="translated">NETSDK1174: marcador de posición</target>
+        <target state="translated">NETSDK1174: Marcador de posición</target>
         <note>{StrBegin="NETSDK1174: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
@@ -749,11 +749,6 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
         <target state="translated">NETSDK1179: Se requiere una de las opciones "--self-contained" o "--no-self-contained" cuando se usa "--runtime".</target>
         <note>{StrBegin="NETSDK1179: "}</note>
-      </trans-unit>
-      <trans-unit id="SingleFileWin7Incompatible">
-        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
-        <target state="translated">NETSDK1180: El identificador en tiempo de ejecución especificado '{0}" implica compatibilidad con Windows 7. La publicación de archivos únicos no es compatible con Windows 7.</target>
-        <note>{StrBegin="NETSDK1180: "}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
@@ -914,10 +909,10 @@ Puede que necesite compilar el proyecto en otro sistema operativo o arquitectura
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
+To install these workloads, run the following command: dotnet workload restore</source>
         <target state="translated">NETSDK1147: para compilar este proyecto, deben estar instaladas las siguientes cargas de trabajo: {0}
-Para instalar estas cargas de trabajo, ejecute el comando siguiente: {1}</target>
-        <note>{StrBegin="NETSDK1147: "}</note>
+Para instalar estas cargas de trabajo, ejecute el comando siguiente: dotnet workload restore</target>
+        <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>
   </file>

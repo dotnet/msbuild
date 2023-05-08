@@ -1,40 +1,45 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using Microsoft.DotNet.Tools;
-using System.CommandLine;
-using System.IO;
-using Microsoft.DotNet.Tools.Common;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Tools.Common;
+using System;
+using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Completions;
 using System.CommandLine.Parsing;
+using System.IO;
+using System.Linq;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class CommonOptions
     {
-        public static Option<string[]> PropertiesOption() =>
-            new ForwardedOption<string[]>(new string[] { "-property", "/p" })
+        public static Option<string[]> PropertiesOption =
+            // these are all of the forms that the property switch can be understood by in MSBuild
+            new ForwardedOption<string[]>(new string[] { "--property", "-property", "/property", "/p", "-p", "--p" })
             {
                 IsHidden = true
             }.ForwardAsProperty()
             .AllowSingleArgPerToken();
+            
+        public static Option<VerbosityOptions> VerbosityOption =
+            new ForwardedOption<VerbosityOptions>(
+                new string[] { "-v", "--verbosity" },
+                description: CommonLocalizableStrings.VerbosityOptionDescription)
+                {
+                    ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
+                }.ForwardAsSingle(o => $"-verbosity:{o}");
 
-        public static Option<VerbosityOptions> VerbosityOption() =>
-            VerbosityOption(o => $"-verbosity:{o}");
-
-        public static Option<VerbosityOptions> HiddenVerbosityOption() =>
-            VerbosityOption().Hide();
-
-        public static Option<VerbosityOptions> VerbosityOption(Func<VerbosityOptions, string> format) =>
+        public static Option<VerbosityOptions> HiddenVerbosityOption =
             new ForwardedOption<VerbosityOptions>(
                 new string[] { "-v", "--verbosity" },
                 description: CommonLocalizableStrings.VerbosityOptionDescription)
             {
-                ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
-            }.ForwardAsSingle(format);
+                ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName,
+                IsHidden = true
+            }.ForwardAsSingle(o => $"-verbosity:{o}");
 
         public static Option<string> FrameworkOption(string description) =>
             new ForwardedOption<string>(
@@ -44,16 +49,27 @@ namespace Microsoft.DotNet.Cli
                 ArgumentHelpName = CommonLocalizableStrings.FrameworkArgumentName
                     
             }.ForwardAsSingle(o => $"-property:TargetFramework={o}")
-            .AddSuggestions(Suggest.TargetFrameworksFromProjectFile());
+            .AddCompletions(Complete.TargetFrameworksFromProjectFile);
 
-        public static Option<string> RuntimeOption(string description, bool withShortOption = true) =>
+        private static string RuntimeArgName = CommonLocalizableStrings.RuntimeIdentifierArgumentName;
+        private static Func<string, IEnumerable<string>> RuntimeArgFunc = o => new string[] { $"-property:RuntimeIdentifier={o}", "-property:_CommandLineDefinedRuntimeIdentifier=true" };
+        private static CompletionDelegate RuntimeCompletions = Complete.RunTimesFromProjectFile;
+        
+        public static Option<string> RuntimeOption = 
             new ForwardedOption<string>(
-                withShortOption ? new string[] { "-r", "--runtime" } : new string[] { "--runtime" },
-                description)
+                new string[] { "-r", "--runtime" })
             {
-                ArgumentHelpName = CommonLocalizableStrings.RuntimeIdentifierArgumentName
-            }.ForwardAsMany(o => new string[] { $"-property:RuntimeIdentifier={o}", "-property:_CommandLineDefinedRuntimeIdentifier=true" })
-            .AddSuggestions(Suggest.RunTimesFromProjectFile());
+                ArgumentHelpName = RuntimeArgName
+            }.ForwardAsMany(RuntimeArgFunc)
+            .AddCompletions(RuntimeCompletions);
+
+        public static Option<string> LongFormRuntimeOption =
+            new ForwardedOption<string>(
+                new string[] { "--runtime" })
+            {
+                ArgumentHelpName = RuntimeArgName
+            }.ForwardAsMany(RuntimeArgFunc)
+            .AddCompletions(RuntimeCompletions);
 
         public static Option<bool> CurrentRuntimeOption(string description) =>
             new ForwardedOption<bool>("--use-current-runtime", description)
@@ -66,9 +82,9 @@ namespace Microsoft.DotNet.Cli
             {
                 ArgumentHelpName = CommonLocalizableStrings.ConfigurationArgumentName
             }.ForwardAsSingle(o => $"-property:Configuration={o}")
-            .AddSuggestions(Suggest.ConfigurationsFromProjectFileOrDefaults());
+            .AddCompletions(Complete.ConfigurationsFromProjectFileOrDefaults);
 
-        public static Option<string> VersionSuffixOption() =>
+        public static Option<string> VersionSuffixOption =
             new ForwardedOption<string>(
                 "--version-suffix",
                 CommonLocalizableStrings.CmdVersionSuffixDescription)
@@ -82,47 +98,64 @@ namespace Microsoft.DotNet.Cli
             return arg;
         }
 
-        public static Option<bool> NoRestoreOption() =>
+        public static Option<bool> NoRestoreOption =
             new Option<bool>(
                 "--no-restore",
                 CommonLocalizableStrings.NoRestoreDescription);
 
-        public static Option<bool> InteractiveMsBuildForwardOption() =>
+        public static Option<bool> InteractiveMsBuildForwardOption =
             new ForwardedOption<bool>(
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription)
             .ForwardAs("-property:NuGetInteractive=true");
 
-        public static Option<bool> InteractiveOption() =>
+        public static Option<bool> InteractiveOption =
             new Option<bool>(
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription);
 
-        public static Option<string> ArchitectureOption(bool includeShortVersion = true) =>
+        public static Option<string> ArchitectureOption =
             new ForwardedOption<string>(
-                includeShortVersion ? new string[] { "--arch", "-a" } : new string[] { "--arch" },
+                new string[] { "--arch", "-a" },
                 CommonLocalizableStrings.ArchitectureOptionDescription)
             .SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
 
-        public static Option<string> OperatingSystemOption() =>
+        public static Option<string> LongFormArchitectureOption =
+            new ForwardedOption<string>(
+                new string[] { "--arch" },
+                CommonLocalizableStrings.ArchitectureOptionDescription)
+            .SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
+
+        internal static string ArchOptionValue(ParseResult parseResult) =>
+            string.IsNullOrEmpty(parseResult.GetValueForOption(CommonOptions.ArchitectureOption)) ?
+                parseResult.GetValueForOption(CommonOptions.LongFormArchitectureOption) :
+                parseResult.GetValueForOption(CommonOptions.ArchitectureOption);
+
+        public static Option<string> OperatingSystemOption =
             new ForwardedOption<string>(
                 "--os",
                 CommonLocalizableStrings.OperatingSystemOptionDescription)
             .SetForwardingFunction(ResolveOsOptionToRuntimeIdentifier);
 
-        public static Option<bool> DebugOption() => new Option<bool>("--debug");
+        public static Option<bool> DebugOption = new Option<bool>("--debug");
 
-        public static Option<bool> SelfContainedOption() =>
+        public static Option<bool> SelfContainedOption =
             new ForwardedOption<bool>(
                 new string[] { "--sc", "--self-contained" },
                 CommonLocalizableStrings.SelfContainedOptionDescription)
             .ForwardAsMany(o => new string[] { $"-property:SelfContained={o}", "-property:_CommandLineDefinedSelfContained=true" });
 
-        public static Option<bool> NoSelfContainedOption() =>
+        public static Option<bool> NoSelfContainedOption =
             new ForwardedOption<bool>(
                 "--no-self-contained",
                 CommonLocalizableStrings.FrameworkDependentOptionDescription)
             .ForwardAsMany(o => new string[] { "-property:SelfContained=false", "-property:_CommandLineDefinedSelfContained=true" });
+
+        public static readonly Option<string> TestPlatformOption = new Option<string>("--Platform");
+
+        public static readonly Option<string> TestFrameworkOption = new Option<string>("--Framework");
+
+        public static readonly Option<string[]> TestLoggerOption = new Option<string[]>("--logger");
 
         public static bool VerbosityIsDetailedOrDiagnostic(this VerbosityOptions verbosity)
         {
@@ -142,7 +175,7 @@ namespace Microsoft.DotNet.Cli
 
         internal static IEnumerable<string> ResolveArchOptionToRuntimeIdentifier(string arg, ParseResult parseResult)
         {
-            if (parseResult.HasOption(RuntimeOption(string.Empty).Aliases.First()))
+            if (parseResult.HasOption(RuntimeOption) || parseResult.HasOption(LongFormRuntimeOption))
             {
                 throw new GracefulException(CommonLocalizableStrings.CannotSpecifyBothRuntimeAndArchOptions);
             }
@@ -153,21 +186,21 @@ namespace Microsoft.DotNet.Cli
                 return Array.Empty<string>();
             }
             
-            var selfContainedSpecified = parseResult.HasOption(SelfContainedOption().Aliases.First()) || parseResult.HasOption(NoSelfContainedOption().Aliases.First());
+            var selfContainedSpecified = parseResult.HasOption(SelfContainedOption) || parseResult.HasOption(NoSelfContainedOption);
             return ResolveRidShorthandOptions(null, arg, selfContainedSpecified);
         }
 
         internal static IEnumerable<string> ResolveOsOptionToRuntimeIdentifier(string arg, ParseResult parseResult)
         {
-            if (parseResult.HasOption(RuntimeOption(string.Empty).Aliases.First()))
+            if (parseResult.HasOption(RuntimeOption) || parseResult.HasOption(LongFormRuntimeOption))
             {
                 throw new GracefulException(CommonLocalizableStrings.CannotSpecifyBothRuntimeAndOsOptions);
             }
 
-            var selfContainedSpecified = parseResult.HasOption(SelfContainedOption().Aliases.First()) || parseResult.HasOption(NoSelfContainedOption().Aliases.First());
+            var selfContainedSpecified = parseResult.HasOption(SelfContainedOption) || parseResult.HasOption(NoSelfContainedOption);
             if (parseResult.BothArchAndOsOptionsSpecified())
             {
-                return ResolveRidShorthandOptions(arg, parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First()), selfContainedSpecified);
+                return ResolveRidShorthandOptions(arg, ArchOptionValue(parseResult), selfContainedSpecified);
             }
 
             return ResolveRidShorthandOptions(arg, null, selfContainedSpecified);
@@ -210,9 +243,9 @@ namespace Microsoft.DotNet.Cli
             return currentRuntimeIdentifiers[0]; // First rid is the most specific (ex win-x64)
         }
 
-        private static string GetOsFromRid(string rid) => rid.Substring(0, rid.LastIndexOf("-"));
+        private static string GetOsFromRid(string rid) => rid.Substring(0, rid.LastIndexOf("-", StringComparison.InvariantCulture));
 
-        private static string GetArchFromRid(string rid) => rid.Substring(rid.LastIndexOf("-") + 1, rid.Length - rid.LastIndexOf("-") - 1);
+        private static string GetArchFromRid(string rid) => rid.Substring(rid.LastIndexOf("-", StringComparison.InvariantCulture) + 1, rid.Length - rid.LastIndexOf("-", StringComparison.InvariantCulture) - 1);
     }
 
     public enum VerbosityOptions

@@ -155,8 +155,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
             foreach (TestPackageReference packageReference in PackageReferences)
             {
+                var includeOrUpdate = packageReference.UpdatePackageReference ? "Update" : "Include";
                 var packageReferenceElement = new XElement(ns + "PackageReference",
-                    new XAttribute("Include", packageReference.ID));
+                    new XAttribute(includeOrUpdate, packageReference.ID));
                 if (packageReference.Version != null)
                 {
                     packageReferenceElement.Add(new XAttribute("Version", packageReference.Version));

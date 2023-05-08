@@ -169,7 +169,7 @@
     <value>Download of workload packs to offline cache failed: {0}</value>
   </data>
   <data name="WorkloadAlreadyInstalled" xml:space="preserve">
-    <value>Workload '{0}' is already installed.</value>
+    <value>Workload(s) '{0}' are already installed.</value>
   </data>
   <data name="InvalidNuGetVersionRange" xml:space="preserve">
     <value>Specified version '{0}' isn't a valid NuGet version range.</value>
@@ -320,5 +320,14 @@
   </data>
   <data name="DownloadToCacheOptionArgumentName" xml:space="preserve">
     <value>DIRECTORY</value>
+  </data>
+  <data name="CannotCombineSkipManifestAndRollback" xml:space="preserve">
+    <value>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</value>
+  </data>
+  <data name="SkipSignCheckOptionDescription" xml:space="preserve">
+    <value>Skip signature verification of workload packages and installers.</value>
+  </data>
+  <data name="CheckForUpdatedWorkloadManifests" xml:space="preserve">
+    <value>Checking for updated workload manifests.</value>
   </data>
 </root>

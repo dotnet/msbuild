@@ -190,7 +190,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             BufferedReporter bufferedReporter = new BufferedReporter();
             NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
-                new MockFirstPartyNuGetPackageSigningVerifier(isExecutableIsFirstPartySignedWithoutValidation: false),
+                new MockFirstPartyNuGetPackageSigningVerifier(),
                 _logger, bufferedReporter, restoreActionConfig: new RestoreActionConfig(NoCache: true));
             await nuGetPackageDownloader.DownloadPackageAsync(
                 TestPackageId,
@@ -205,7 +205,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
 
             bufferedReporter.Lines.Should()
                 .ContainSingle(
-                    LocalizableStrings.SkipNuGetpackageSigningValidationSDKNotFirstParty);
+                    LocalizableStrings.NuGetPackageSignatureVerificationSkipped);
             File.Exists(packagePath).Should().BeTrue();
         }
 
@@ -215,7 +215,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             string commandOutput = "COMMAND OUTPUT";
             NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
                 new MockFirstPartyNuGetPackageSigningVerifier(verifyResult: false, commandOutput: commandOutput),
-                _logger, restoreActionConfig: new RestoreActionConfig(NoCache: true));
+                _logger, restoreActionConfig: new RestoreActionConfig(NoCache: true), verifySignatures: true);
 
             NuGetPackageInstallerException ex = await Assert.ThrowsAsync<NuGetPackageInstallerException>(() =>
                 nuGetPackageDownloader.DownloadPackageAsync(
@@ -231,7 +231,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             BufferedReporter bufferedReporter = new BufferedReporter();
             NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
-                new MockFirstPartyNuGetPackageSigningVerifier(isExecutableIsFirstPartySignedWithoutValidation: false),
+                new MockFirstPartyNuGetPackageSigningVerifier(),
                 _logger, bufferedReporter, restoreActionConfig: new RestoreActionConfig(NoCache: true));
             await nuGetPackageDownloader.DownloadPackageAsync(
                 TestPackageId,

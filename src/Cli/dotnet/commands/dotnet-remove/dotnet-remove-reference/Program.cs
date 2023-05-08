@@ -19,8 +19,8 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
         public RemoveProjectToProjectReferenceCommand(
             ParseResult parseResult) : base(parseResult)
         {
-            _fileOrDirectory = parseResult.ValueForArgument<string>(RemoveCommandParser.ProjectArgument);
-            _arguments = parseResult.ValueForArgument<IEnumerable<string>>(RemoveProjectToProjectReferenceParser.ProjectPathArgument).ToList().AsReadOnly();
+            _fileOrDirectory = parseResult.GetValueForArgument(RemoveCommandParser.ProjectArgument);
+            _arguments = parseResult.GetValueForArgument(RemoveProjectToProjectReferenceParser.ProjectPathArgument).ToList().AsReadOnly();
 
             if (_arguments.Count == 0)
             {
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
             });
 
             int numberOfRemovedReferences = msbuildProj.RemoveProjectToProjectReferences(
-                _parseResult.ValueForOption<string>(RemoveProjectToProjectReferenceParser.FrameworkOption),
+                _parseResult.GetValueForOption(RemoveProjectToProjectReferenceParser.FrameworkOption),
                 references);
 
             if (numberOfRemovedReferences != 0)

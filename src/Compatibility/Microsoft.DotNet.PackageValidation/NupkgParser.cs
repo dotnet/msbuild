@@ -20,18 +20,19 @@ namespace Microsoft.DotNet.PackageValidation
         /// </summary>
         /// <param name="packagePath">The path to the package path.</param>
         /// <param name="runtimeGraph">The path to the the runtime graph.</param>
+        /// <param name="assemblyName">The name of the assembly to be used for API comparisons.</param>
         /// <returns>The package object.</returns>
-        public static Package CreatePackage(string packagePath, RuntimeGraph runtimeGraph)
+        public static Package CreatePackage(string packagePath, RuntimeGraph runtimeGraph, string assemblyName)
         {
             using (PackageArchiveReader packageReader = new PackageArchiveReader(packagePath))
             {
-                Package package = CreatePackage(packageReader, runtimeGraph);
+                Package package = CreatePackage(packageReader, runtimeGraph, assemblyName);
                 package.PackagePath = packagePath;
                 return package;
             }
         }
 
-        private static Package CreatePackage(PackageArchiveReader packageReader, RuntimeGraph runtimeGraph)
+        private static Package CreatePackage(PackageArchiveReader packageReader, RuntimeGraph runtimeGraph, string assemblyName)
         {
             NuspecReader nuspecReader = packageReader.NuspecReader;
             string packageId = nuspecReader.GetId();
@@ -44,7 +45,7 @@ namespace Microsoft.DotNet.PackageValidation
                 packageDependencies.Add(item.TargetFramework, item.Packages);
             }
 
-            return new Package(packageId, version, packageReader.GetFiles()?.Where(t => t.EndsWith(packageId + ".dll")), packageDependencies, runtimeGraph);
+            return new Package(packageId, version, packageReader.GetFiles()?.Where(t => t.EndsWith((assemblyName ?? packageId) + ".dll")), packageDependencies, runtimeGraph);
         }
     }
 }

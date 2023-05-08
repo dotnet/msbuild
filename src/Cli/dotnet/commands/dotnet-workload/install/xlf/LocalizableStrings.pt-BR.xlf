@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
         <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="new">Failed to update advertising manifest. Manifest package {0} doesn't exist.</target>
+        <target state="translated">Falha ao atualizar o manifesto de publicidade. O pacote de manifesto {0} não existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -14,12 +14,22 @@
       </trans-unit>
       <trans-unit id="CacheMissingPackage">
         <source>Package {0} version {1} doesn't exist in offline cache {2}.</source>
-        <target state="new">Package {0} version {1} doesn't exist in offline cache {2}.</target>
+        <target state="translated">O pacote {0} versão {1} não existe no cache offline {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">Não é possível usar as opções {0} e {1} juntas. Se estiver instalando a partir de um arquivo de reversão, remova {0}. Caso contrário, remova {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">Verificando manifestos de carga de trabalho atualizados.</target>
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
         <source>Uninstalling workload pack {0} version {1}…</source>
-        <target state="new">Uninstalling workload pack {0} version {1}…</target>
+        <target state="translated">Desinstalando pacote de carga de trabalho {0} versão {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -29,12 +39,12 @@
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionDescription">
         <source>Download packages needed to install a workload to a folder that can be used for offline installation.</source>
-        <target state="new">Download packages needed to install a workload to a folder that can be used for offline installation.</target>
+        <target state="translated">Baixe os pacotes necessários para instalar uma carga de trabalho em uma pasta que pode ser usada para instalação offline.</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
         <source>Downloading pack {0} version {1} to offline cache {2}…</source>
-        <target state="new">Downloading pack {0} version {1} to offline cache {2}…</target>
+        <target state="translated">Baixando pacote {0} versão {1} para o cache offline {2}...</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
@@ -49,7 +59,7 @@
       </trans-unit>
       <trans-unit id="FailedToGetPackageManifestUrl">
         <source>Failed to resolve manifest package URL {0}.</source>
-        <target state="new">Failed to resolve manifest package URL {0}.</target>
+        <target state="translated">Falha ao resolver URL do pacote de manifesto {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
@@ -79,7 +89,7 @@
       </trans-unit>
       <trans-unit id="InadequatePermissions">
         <source>Inadequate permissions. Run the command with elevated privileges.</source>
-        <target state="new">Inadequate permissions. Run the command with elevated privileges.</target>
+        <target state="translated">Permissões inadequadas. Execute o comando com privilégios elevados.</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludePreviewOptionDescription">
@@ -89,7 +99,7 @@
       </trans-unit>
       <trans-unit id="IncompatibleManifests">
         <source>The current SDK isn't compatible with workload manifests of SDK version {0}.</source>
-        <target state="new">The current SDK isn't compatible with workload manifests of SDK version {0}.</target>
+        <target state="translated">O SDK atual não é compatível com manifestos de carga de trabalho da versão SDK {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -104,7 +114,7 @@
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
         <source>Installing workload manifest {0} version {1}…</source>
-        <target state="new">Installing workload manifest {0} version {1}…</target>
+        <target state="translated">Instalando manifesto de carga de trabalho {0} versão {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
@@ -134,7 +144,7 @@
       </trans-unit>
       <trans-unit id="ManifestDoesNotExist">
         <source>No manifest with ID {0} exists.</source>
-        <target state="new">No manifest with ID {0} exists.</target>
+        <target state="translated">Não existe nenhum manifesto com ID {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
@@ -174,12 +184,12 @@
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">
         <source>Resolving package URLs for workload(s) {0}...</source>
-        <target state="new">Resolving package URLs for workload(s) {0}...</target>
+        <target state="translated">Resolvendo URLs de pacote para carga(s) de trabalho {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="RollBackFailedMessage">
         <source>Installation rollback failed: {0}</source>
-        <target state="new">Installation rollback failed: {0}</target>
+        <target state="translated">Falha na reversão da instalação: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
@@ -194,7 +204,7 @@
       </trans-unit>
       <trans-unit id="RollingBackInstall">
         <source>Workload installation failed. Rolling back installed packs...</source>
-        <target state="new">Workload installation failed. Rolling back installed packs...</target>
+        <target state="translated">A instalação da carga de trabalho falhou, revertendo os pacotes instalados...</target>
         <note />
       </trans-unit>
       <trans-unit id="RollingBackPackInstall">
@@ -207,9 +217,14 @@
         <target state="translated">Ignorar a atualização dos manifestos de carga de trabalho.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="translated">Ignorar a verificação de assinatura de pacotes de carga de trabalho e instaladores.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
         <source>Manifest packages were not found. Skipping manifest update...</source>
-        <target state="new">Manifest packages were not found. Skipping manifest update...</target>
+        <target state="translated">Pacotes de manifesto não foram encontrados. Ignorando atualização de manifesto...</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceOptionDescription">
@@ -224,7 +239,7 @@
       </trans-unit>
       <trans-unit id="TempDirOptionDescription">
         <source>Specify a temporary directory for this command to download and extract NuGet packages (must be secure).</source>
-        <target state="new">Specify a temporary directory for this command to download and extract NuGet packages (must be secure).</target>
+        <target state="translated">Especifique um diretório temporário para este comando baixar e extrair pacotes NuGet (deve ser seguro).</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownInstallType">
@@ -278,13 +293,13 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
-        <source>Workload '{0}' is already installed.</source>
-        <target state="translated">A carga de trabalho '{0}' já está instalada.</target>
+        <source>Workload(s) '{0}' are already installed.</source>
+        <target state="translated">A(s) carga(s) de trabalho '{0}' já está(ão) instalada(s).</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadCacheDownloadFailed">
         <source>Download of workload packs to offline cache failed: {0}</source>
-        <target state="new">Download of workload packs to offline cache failed: {0}</target>
+        <target state="translated">Falha no download de pacotes de carga de trabalho para cache offline: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdArgumentDescription">
@@ -304,12 +319,12 @@
       </trans-unit>
       <trans-unit id="WorkloadNotRecognized">
         <source>Workload ID {0} is not recognized.</source>
-        <target state="new">Workload ID {0} is not recognized.</target>
+        <target state="translated">A ID de carga de trabalho {0} não é reconhecida.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotSupportedOnPlatform">
         <source>Workload ID {0} isn't supported on this platform.</source>
-        <target state="new">Workload ID {0} isn't supported on this platform.</target>
+        <target state="translated">A ID de carga de trabalho {0} não tem suporte nesta plataforma.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadPackAlreadyInstalledMessage">

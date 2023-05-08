@@ -79,10 +79,8 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
             return 0;
         }
 
-        public static int Run(string[] args)
+        public static int Run(ParseResult parseResult)
         {
-            var parseResult = Parser.Instance.ParseFrom("dotnet sdk check", args);
-
             return new SdkCheckCommand(parseResult).Execute();
         }
     }

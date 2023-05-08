@@ -561,8 +561,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
-        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: Cílení na .NET 6.0 ve Visual Studiu 2019 se nepodporuje.</target>
+        <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: Cílení na .NET 6.0 nebo vyšší ve Visual Studio 2019 se nepodporuje.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -750,11 +750,6 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1179: Při použití příkazu --runtime je vyžadována jedna z možností --self-contained nebo --no-self-contained.</target>
         <note>{StrBegin="NETSDK1179: "}</note>
       </trans-unit>
-      <trans-unit id="SingleFileWin7Incompatible">
-        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
-        <target state="translated">NETSDK1180: Zadaný identifikátor modulu runtime {0} představuje kompatibilitu s Windows 7. Publikování jednoho souboru není kompatibilní se systémem Windows 7.</target>
-        <note>{StrBegin="NETSDK1180: "}</note>
-      </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: Cesty AdditionalProbingPaths byly zadány pro GenerateRuntimeConfigurationFiles, ale vynechávají se, protože RuntimeConfigDevPath je prázdné.</target>
@@ -914,10 +909,10 @@ Možná bude nutné sestavit projekt v jiném operačním systému nebo architek
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
+To install these workloads, run the following command: dotnet workload restore</source>
         <target state="translated">NETSDK1147: k sestavení tohoto projektu musí být nainstalované následující úlohy: {0}
-Pokud chcete nainstalovat tyto úlohy, spusťte následující příkaz: {1}</target>
-        <note>{StrBegin="NETSDK1147: "}</note>
+Pokud chcete nainstalovat tyto úlohy, spusťte následující příkaz: dotnet workload restore</target>
+        <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>
   </file>

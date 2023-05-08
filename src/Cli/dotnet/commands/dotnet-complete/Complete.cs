@@ -3,7 +3,7 @@
 
 using System;
 using System.CommandLine.Parsing;
-using System.CommandLine.Suggestions;
+using System.CommandLine.Completions;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Evaluation;
@@ -13,72 +13,65 @@ using static System.Array;
 
 namespace Microsoft.DotNet.Cli
 {
-    internal static class Suggest
+    internal static class Complete
     {
-        public static SuggestDelegate TargetFrameworksFromProjectFile()
-        {
-            return (ParseResult parseResult, string textToMatch) =>
+
+        private static CompletionItem ToCompletionItem (string s) => new CompletionItem(s);
+
+        public static CompletionDelegate TargetFrameworksFromProjectFile =>
+            (_context) =>
             {
                 try
                 {
-                    return GetMSBuildProject()?.GetTargetFrameworks().Select(tf => tf.GetShortFolderName()) ?? Empty<string>();
+                    return GetMSBuildProject()?.GetTargetFrameworks().Select(tf => tf.GetShortFolderName()).Select(ToCompletionItem) ?? Empty<CompletionItem>();
                 }
                 catch (Exception)
                 {
-                    return Empty<string>();
+                    return Empty<CompletionItem>();
                 }
             };
-
-        }
 
         private static void Report(Exception e) =>
-            Reporter.Verbose.WriteLine($"Exception occurred while getting suggestions: {e}");
+            Reporter.Verbose.WriteLine($"Exception occurred while getting completions: {e}");
 
-        public static SuggestDelegate RunTimesFromProjectFile()
-        {
-            return (ParseResult parseResult, string textToMatch) =>
+        public static CompletionDelegate RunTimesFromProjectFile =>
+            (_context) =>
             {
                 try
                 {
-                    return GetMSBuildProject()?.GetRuntimeIdentifiers() ?? Empty<string>();
+                    return GetMSBuildProject()?.GetRuntimeIdentifiers().Select(ToCompletionItem) ?? Empty<CompletionItem>();
                 }
                 catch (Exception)
                 {
-                    return Empty<string>();
+                    return Empty<CompletionItem>();
                 }
             };
-        }
-            
 
-        public static SuggestDelegate ProjectReferencesFromProjectFile()
-        {
-            return (ParseResult parseResult, string textToMatch) =>
+        public static CompletionDelegate ProjectReferencesFromProjectFile =>
+            (_context) =>
             {
                 try
                 {
-                    return GetMSBuildProject()?.GetProjectToProjectReferences().Select(r => r.Include) ?? Empty<string>();
+                    return GetMSBuildProject()?.GetProjectToProjectReferences().Select(r => ToCompletionItem(r.Include)) ?? Empty<CompletionItem>();
                 }
                 catch (Exception)
                 {
-                    return Empty<string>();
+                    return Empty<CompletionItem>();
                 }
             };
-        }
 
-        public static SuggestDelegate ConfigurationsFromProjectFileOrDefaults()
-        {
-            return (ParseResult parseResult, string textToMatch) =>
+        public static CompletionDelegate ConfigurationsFromProjectFileOrDefaults => 
+            (_context) =>
             {
                 try
                 {
-                    return GetMSBuildProject()?.GetConfigurations() ?? new[] { "Debug", "Release" };
+                    return (GetMSBuildProject()?.GetConfigurations() ?? new[] { "Debug", "Release" }).Select(ToCompletionItem);
                 }
                 catch (Exception)
                 {
-                    return Empty<string>();
+                    return Empty<CompletionItem>();
                 }
             };
-        }
 
         private static MsbuildProject GetMSBuildProject()
         {

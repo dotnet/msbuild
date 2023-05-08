@@ -29,6 +29,7 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Utilities;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.PackageInstall.Tests
 {
@@ -844,6 +845,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             package.Id.Should().Be(TestPackageId);
             package.Version.ToNormalizedString().Should().Be(TestPackageVersion);
             package.PackageDirectory.Value.Should().Contain(store.Root.Value);
+            package.Frameworks.Should().BeEquivalentTo(TestFrameworks);
 
             storeQuery.EnumeratePackageVersions(TestPackageId)
                 .Select(p => p.Version.ToNormalizedString())
@@ -976,8 +978,10 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             if (useMock)
             {
                 fileSystem = new FileSystemMockBuilder().Build();
+                var frameworksMap = new Dictionary<PackageId, IEnumerable<NuGetFramework>>()
+                        { {TestPackageId, TestFrameworks } };
                 WriteNugetConfigFileToPointToTheFeed(fileSystem, writeLocalFeedToNugetConfig);
-                var toolPackageStoreMock = new ToolPackageStoreMock(root, fileSystem);
+                var toolPackageStoreMock = new ToolPackageStoreMock(root, fileSystem, frameworksMap);
                 store = toolPackageStoreMock;
                 storeQuery = toolPackageStoreMock;
                 installer = new ToolPackageInstallerMock(
@@ -988,7 +992,8 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                         reporter: reporter,
                         feeds: feeds == null
                             ? GetMockFeedsForConfigFile(writeLocalFeedToNugetConfig)
-                            : feeds.Concat(GetMockFeedsForConfigFile(writeLocalFeedToNugetConfig)).ToList()));
+                            : feeds.Concat(GetMockFeedsForConfigFile(writeLocalFeedToNugetConfig)).ToList()),
+                    frameworksMap: frameworksMap);
                 uninstaller = new ToolPackageUninstallerMock(fileSystem, toolPackageStoreMock);
             }
             else
@@ -1054,6 +1059,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         private readonly string _testTargetframework = BundledTargetFramework.GetTargetFrameworkMoniker();
         private const string TestPackageVersion = "1.0.4";
         private static readonly PackageId TestPackageId = new PackageId("global.tool.console.demo");
+        private static readonly IEnumerable<NuGetFramework> TestFrameworks = new NuGetFramework[] { NuGetFramework.Parse("netcoreapp2.1") };
 
         public ToolPackageInstallerTests(ITestOutputHelper log) : base(log)
         {

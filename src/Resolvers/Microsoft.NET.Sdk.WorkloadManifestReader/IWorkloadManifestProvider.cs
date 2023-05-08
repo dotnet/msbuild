@@ -13,7 +13,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// </summary>
     public interface IWorkloadManifestProvider
     {
-        IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream, Func<Stream?> openLocalizationStream)> GetManifests();
+        IEnumerable<ReadableWorkloadManifest> GetManifests();
 
         IEnumerable<string> GetManifestDirectories();
 

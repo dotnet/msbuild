@@ -85,6 +85,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                         {
                             var newRelativePathCandidate = match.Files.Single().Stem;
                             Log.LogMessage(
+                                MessageImportance.Low,
                                 "The relative path '{0}' matched the pattern '{1}'. Replacing relative path with '{2}'.",
                                 relativePathCandidate,
                                 RelativePathPattern,
@@ -97,6 +98,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     if (filter != null && !filter.Match(relativePathCandidate).HasMatches)
                     {
                         Log.LogMessage(
+                            MessageImportance.Low,
                             "Skipping '{0}' because the relative path '{1}' did not match the filter '{2}'.",
                             candidate.ItemSpec,
                             relativePathCandidate,
@@ -118,10 +120,10 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     var copyToOutputDirectory = ComputePropertyValue(candidate, nameof(StaticWebAsset.CopyToOutputDirectory), CopyToOutputDirectory);
                     var copyToPublishDirectory = ComputePropertyValue(candidate, nameof(StaticWebAsset.CopyToPublishDirectory), CopyToPublishDirectory);
                     var originalItemSpec = ComputePropertyValue(
-                        candidate, 
+                        candidate,
                         nameof(StaticWebAsset.OriginalItemSpec),
                         PropertyOverrides == null || PropertyOverrides.Length == 0 ? candidate.ItemSpec : candidate.GetMetadata("OriginalItemSpec"));
-                    
+
                     // If we are not able to compute the value based on an existing value or a default, we produce an error and stop.
                     if (Log.HasLoggedErrors)
                     {
@@ -178,14 +180,14 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             var candidateFullPath = Path.GetFullPath(candidate.GetMetadata("FullPath"));
             if (contentRoot == null)
             {
-                Log.LogMessage("Identity for candidate '{0}' is '{1}' because content root is not defined.", candidate.ItemSpec, candidateFullPath);
+                Log.LogMessage(MessageImportance.Low, "Identity for candidate '{0}' is '{1}' because content root is not defined.", candidate.ItemSpec, candidateFullPath);
                 return (candidateFullPath, false);
             }
 
             var normalizedContentRoot = StaticWebAsset.NormalizeContentRootPath(contentRoot);
             if (candidateFullPath.StartsWith(normalizedContentRoot))
             {
-                Log.LogMessage("Identity for candidate '{0}' is '{1}' because it starts with content root '{2}'.", candidate.ItemSpec, candidateFullPath, normalizedContentRoot);
+                Log.LogMessage(MessageImportance.Low, "Identity for candidate '{0}' is '{1}' because it starts with content root '{2}'.", candidate.ItemSpec, candidateFullPath, normalizedContentRoot);
                 return (candidateFullPath, false);
             }
             else
@@ -203,19 +205,19 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     var identitySubPath = Path.GetDirectoryName(relativePath);
                     var itemSpecFileName = Path.GetFileName(candidateFullPath);
                     var finalIdentity = Path.Combine(normalizedContentRoot, identitySubPath, itemSpecFileName);
-                    Log.LogMessage("Identity for candidate '{0}' is '{1}' because it did not start with the content root '{2}'", candidate.ItemSpec, finalIdentity, normalizedContentRoot);
+                    Log.LogMessage(MessageImportance.Low, "Identity for candidate '{0}' is '{1}' because it did not start with the content root '{2}'", candidate.ItemSpec, finalIdentity, normalizedContentRoot);
                     return (finalIdentity, true);
                 }
                 else if (!matchResult.HasMatches)
                 {
-                    Log.LogMessage("Identity for candidate '{0}' is '{1}' because it didn't match the relative path pattern", candidate.ItemSpec, candidateFullPath);
+                    Log.LogMessage(MessageImportance.Low, "Identity for candidate '{0}' is '{1}' because it didn't match the relative path pattern", candidate.ItemSpec, candidateFullPath);
                     return (candidateFullPath, false);
                 }
                 else
                 {
                     var stem = matchResult.Files.Single().Stem;
                     var assetIdentity = Path.GetFullPath(Path.Combine(normalizedContentRoot, stem));
-                    Log.LogMessage("Computed identity '{0}' for candidate '{1}'", assetIdentity, candidate.ItemSpec);
+                    Log.LogMessage(MessageImportance.Low, "Computed identity '{0}' for candidate '{1}'", assetIdentity, candidate.ItemSpec);
 
                     return (assetIdentity, true);
                 }
@@ -257,7 +259,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             if (!string.IsNullOrEmpty(relativePath))
             {
                 var normalizedPath = StaticWebAsset.Normalize(relativePath, allowEmpyPath: true);
-                Log.LogMessage("RelativePath '{0}' normalized to '{1}' found for candidate '{2}' and will be used for matching.", relativePath, normalizedPath, candidate.ItemSpec);
+                Log.LogMessage(MessageImportance.Low, "RelativePath '{0}' normalized to '{1}' found for candidate '{2}' and will be used for matching.", relativePath, normalizedPath, candidate.ItemSpec);
                 return normalizedPath;
             }
 
@@ -265,7 +267,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             if (!string.IsNullOrEmpty(targetPath))
             {
                 var normalizedPath = StaticWebAsset.Normalize(targetPath, allowEmpyPath: true);
-                Log.LogMessage("TargetPath '{0}' normalized to '{1}' found for candidate '{2}' and will be used for matching.", targetPath, normalizedPath, candidate.ItemSpec);
+                Log.LogMessage(MessageImportance.Low, "TargetPath '{0}' normalized to '{1}' found for candidate '{2}' and will be used for matching.", targetPath, normalizedPath, candidate.ItemSpec);
                 return normalizedPath;
             }
 
@@ -273,13 +275,13 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             if (!string.IsNullOrEmpty(linkPath))
             {
                 var normalizedPath = StaticWebAsset.Normalize(linkPath, allowEmpyPath: true);
-                Log.LogMessage("Link '{0}'  normalized to '{1}' found for candidate '{2}' and will be used for matching.", linkPath, normalizedPath, candidate.ItemSpec);
+                Log.LogMessage(MessageImportance.Low, "Link '{0}'  normalized to '{1}' found for candidate '{2}' and will be used for matching.", linkPath, normalizedPath, candidate.ItemSpec);
 
                 return linkPath;
             }
 
             var normalizedContentRoot = StaticWebAsset.NormalizeContentRootPath(string.IsNullOrEmpty(candidate.GetMetadata(nameof(StaticWebAsset.ContentRoot))) ?
-                ContentRoot : 
+                ContentRoot :
                 candidate.GetMetadata(nameof(StaticWebAsset.ContentRoot)));
 
             var normalizedAssetPath = Path.GetFullPath(candidate.GetMetadata("FullPath"));
