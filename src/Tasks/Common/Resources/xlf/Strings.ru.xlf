@@ -756,8 +756,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1124: "}</note>
       </trans-unit>
       <trans-unit id="PublishUnsupportedWithoutTargetFramework">
-        <source>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</source>
-        <target state="translated">NETSDK1129: целевой объект "Publish" не поддерживается без указания целевой платформы. Для текущего проекта указано несколько целевых платформ, необходимо указать платформу для опубликованного приложения.</target>
+        <source>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify one of the following frameworks in order to publish: {0}</source>
+        <target state="new">NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify one of the following frameworks in order to publish: {0}</target>
         <note>{StrBegin="NETSDK1129: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
