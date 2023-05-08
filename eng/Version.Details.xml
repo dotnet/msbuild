@@ -309,5 +309,9 @@
       <Sha>740189d758fb3bbdc118c5b6171ef1a7351a8c44</Sha>
       <SourceBuild RepoName="xliff-tasks" ManagedOnly="true" />
     </Dependency>
+    <Dependency Name="Microsoft.TemplateEngine.TestHelper" Version="7.0.301-rtm.23253.5">
+      <Uri>https://github.com/dotnet/templating</Uri>
+      <Sha>1aba81f29698f89023e1c6e22d8dd225885be910</Sha>
+    </Dependency>
   </ToolsetDependencies>
 </Dependencies>
