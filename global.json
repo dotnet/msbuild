@@ -4,6 +4,9 @@
     "runtimes": {
       "dotnet": [
         "$(VSRedistCommonNetCoreSharedFrameworkx6480PackageVersion)"
+      ],
+      "aspnetcore": [
+        "$(MicrosoftAspNetCoreAppRefPackageVersion)"
       ]
     },
     "vs-opt": {
