@@ -22,8 +22,6 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool UseAttributeForTargetFrameworkInfoPropertyNames { get; set; }
 
-        public bool RuntimeIdentifierInfersSelfContained { get; set; }
-
         protected override void ExecuteCore()
         {
             if (!IsExecutable)
