@@ -832,7 +832,8 @@ class Program
                 Name = "GenerateFilesTest",
                 TargetFrameworks = TFM,
                 RuntimeIdentifier = runtimeIdentifier,
-                IsExe = true
+                IsExe = true,
+                SelfContained = "true"
             };
 
             var testAsset = _testAssetsManager

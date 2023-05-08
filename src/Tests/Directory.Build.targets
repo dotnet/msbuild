@@ -13,8 +13,6 @@
 
     <!-- Put packages for tests in subfolder so we don't try to sign them -->
     <PackageOutputPath>$(PackageOutputPath)tests\</PackageOutputPath>
-
-    <UserRuntimeConfig>$(MSBuildThisFileDirectory)Common\runtimeconfig.template.json</UserRuntimeConfig>
   </PropertyGroup>
   
   <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">

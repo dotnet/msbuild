@@ -1,16 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
-using System.Collections.Generic;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.ApiSymbolExtensions;
 using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
+using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 using Microsoft.DotNet.GenAPI.Filtering;
-using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 using Xunit;
 
 namespace Microsoft.DotNet.GenAPI.Tests
@@ -22,11 +22,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
             public bool Include(ISymbol symbol) => true;
         }
 
-        private static IEnumerable<MetadataReference> MetadataReferences
-        {
-            get => new List<MetadataReference> {
-                MetadataReference.CreateFromFile(typeof(Object).Assembly!.Location!) };
-        }
+        private static MetadataReference[] MetadataReferences { get; } = new[] { MetadataReference.CreateFromFile(typeof(object).Assembly!.Location!) };
 
         private static SyntaxTree GetSyntaxTree(string syntax) =>
             CSharpSyntaxTree.ParseText(syntax);
@@ -36,22 +32,27 @@ namespace Microsoft.DotNet.GenAPI.Tests
             bool includeInternalSymbols = true,
             bool includeEffectivelyPrivateSymbols = true,
             bool includeExplicitInterfaceImplementationSymbols = true,
-            bool allowUnsafe = false)
+            bool allowUnsafe = false,
+            [CallerMemberName]string assemblyName = "")
         {
             StringWriter stringWriter = new();
 
-            var compositeFilter = new CompositeSymbolFilter()
+            CompositeSymbolFilter compositeFilter = new CompositeSymbolFilter()
                 .Add(new ImplicitSymbolFilter())
                 .Add(new AccessibilitySymbolFilter(includeInternalSymbols,
                     includeEffectivelyPrivateSymbols, includeExplicitInterfaceImplementationSymbols));
             IAssemblySymbolWriter csharpFileBuilder = new CSharpFileBuilder(new ConsoleLog(MessageImportance.Low),
                 compositeFilter, stringWriter, null, false, MetadataReferences);
 
-            IAssemblySymbol assemblySymbol = SymbolFactory.GetAssemblyFromSyntax(original, enableNullable: true, allowUnsafe: allowUnsafe);
+            using Stream assemblyStream = SymbolFactory.EmitAssemblyStreamFromSyntax(original, enableNullable: true, allowUnsafe: allowUnsafe, assemblyName: assemblyName);
+            AssemblySymbolLoader assemblySymbolLoader = new AssemblySymbolLoader(resolveAssemblyReferences:true, includeInternals: includeInternalSymbols);
+            assemblySymbolLoader.AddReferenceSearchPaths(typeof(object).Assembly!.Location!);            
+            IAssemblySymbol assemblySymbol = assemblySymbolLoader.LoadAssembly(assemblyName, assemblyStream);
+
             csharpFileBuilder.WriteAssembly(assemblySymbol);
 
             StringBuilder stringBuilder = stringWriter.GetStringBuilder();
-            var resultedString = stringBuilder.ToString();
+            string resultedString = stringBuilder.ToString();
 
             stringBuilder.Remove(0, stringBuilder.Length);
 
@@ -109,7 +110,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 """);
         }
 
-        [Fact]
+        [Fact(Skip= "https://github.com/dotnet/sdk/issues/32196")]
         public void TestStructDeclaration()
         {
             RunTest(original: """
@@ -1151,7 +1152,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
-        public void TestBaseTypeWithoutExplicitDefaultConstructor()
+        public void TestBaseTypeWithoutExplicitDefault()
         {
             RunTest(original: """
                     namespace A
@@ -1175,7 +1176,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
 
                         public partial class C : B
                         {
-                            public C() {}
                         }
                     }
                     """);
@@ -1203,12 +1203,10 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         public partial class B
                         {
-                            public B() {}
                         }
 
                         public partial class C : B
                         {
-                            public C() {}
                         }
                     }
                     """);
@@ -1304,6 +1302,72 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     }
                     """,
                     includeInternalSymbols: false);
+        }
+
+        [Fact]
+        public void TestInternalParameterizedConstructorsPreserveInternals()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class B
+                        {
+                            public B(int i) {}
+                        }
+                    
+                        public class C : B
+                        {
+                            internal C() : base(0) {}
+                        }
+                    
+                        public class D : B
+                        {
+                            internal D(int i) : base(i) {}
+                        }
+
+                        public class E
+                        {
+                            internal E(int i) {}
+                            internal E(string s) {}
+                            internal E(P p) {}
+                        }
+
+                        internal class P { }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class B
+                        {
+                            public B(int i) { }
+                        }
+
+                        public partial class C : B
+                        {
+                            internal C() : base(default) { }
+                        }
+
+                        public partial class D : B
+                        {
+                            internal D(int i) : base(default) { }
+                        }
+
+                        public partial class E
+                        {
+                            internal E(P p) { }
+
+                            internal E(int i) { }
+
+                            internal E(string s) { }
+                        }
+
+                        internal partial class P
+                        {
+                        }
+                    }
+                    """,
+                    includeInternalSymbols: true);
         }
 
         [Fact]
@@ -1989,6 +2053,32 @@ namespace Microsoft.DotNet.GenAPI.Tests
         }
 
         [Fact]
+        public void TestExplicitParameterlessConstructorNotRemoved()
+        {
+            RunTest(original: """
+                    namespace A
+                    {
+                        public class Bar
+                        {
+                            public Bar() { }
+                            public Bar(int a) { }
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace A
+                    {
+                        public partial class Bar
+                        {
+                            public Bar() { }
+                            public Bar(int a) { }
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false);
+        }
+
+        [Fact]
         public void TestBaseClassWithExplicitDefaultConstructor()
         {
             RunTest(original: """
@@ -2009,7 +2099,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         public partial class Bar
                         {
-                            public Bar() { }
                         }
 
                         public partial class Foo : Bar
@@ -2308,10 +2397,11 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     }
                     
                     """,
+                // https://github.com/dotnet/sdk/issues/32195 tracks interface expansion
                 expected: """
                     namespace A
                     {
-                        public partial class Foo<T> : System.Collections.ICollection, System.Collections.Generic.ICollection<T>
+                        public partial class Foo<T> : System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.Generic.ICollection<T>, System.Collections.Generic.IEnumerable<T>
                         {
                             int System.Collections.Generic.ICollection<T>.Count { get { throw null; } }
                             bool System.Collections.Generic.ICollection<T>.IsReadOnly { get { throw null; } }

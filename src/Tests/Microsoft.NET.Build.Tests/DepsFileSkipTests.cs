@@ -52,7 +52,8 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "SkipRuntimeAssemblyFromRuntimePack",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
-                IsExe = true
+                IsExe = true,
+                SelfContained = "true"
             };
 
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
@@ -105,7 +106,8 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "SkipNativeAssetFromRuntimePack",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
-                IsExe = true
+                IsExe = true,
+                SelfContained = "true"
             };
 
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);

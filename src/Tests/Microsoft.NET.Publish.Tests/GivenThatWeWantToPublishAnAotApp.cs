@@ -684,7 +684,7 @@ namespace Microsoft.NET.Publish.Tests
                 testProject.AdditionalProperties["PublishAot"] = "true";
                 testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
                 testProject.AdditionalProperties["NativeLib"] = "Static";
-                testProject.AdditionalProperties["SelfContained"] = "true";
+                testProject.SelfContained = "true";
                 var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
                 var publishCommand = new PublishCommand(testAsset);

@@ -30,7 +30,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var build = new BuildCommand(ProjectDirectory);
             build.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            var buildResult = build.Execute("/bl");
+            var buildResult = build.Execute();
             buildResult.Should().Pass();
 
             var outputPath = build.GetOutputDirectory(DefaultTfm).ToString();
@@ -64,7 +64,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var publish = new PublishCommand(ProjectDirectory);
             publish.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            var publishResult = publish.Execute("/bl");
+            var publishResult = publish.Execute();
             publishResult.Should().Pass();
 
             var publishPath = publish.GetOutputDirectory(DefaultTfm).ToString();
@@ -91,7 +91,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var build = new BuildCommand(ProjectDirectory, "blazorhosted");
             build.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            var buildResult = build.Execute("/bl");
+            var buildResult = build.Execute();
             buildResult.Should().Pass();
 
             var outputPath = build.GetOutputDirectory(DefaultTfm).ToString();
@@ -126,7 +126,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var publish = new PublishCommand(ProjectDirectory, "blazorhosted");
             publish.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            var publishResult = publish.Execute("/bl");
+            var publishResult = publish.Execute();
             publishResult.Should().Pass();
 
             var publishPath = publish.GetOutputDirectory(DefaultTfm).ToString();
@@ -157,7 +157,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var publish = new PublishCommand(ProjectDirectory, "blazorhosted");
             publish.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            var publishResult = publish.Execute("/p:GenerateDocumentationFile=true", "/bl");
+            var publishResult = publish.Execute("/p:GenerateDocumentationFile=true");
             publishResult.Should().Pass();
 
             var publishPath = publish.GetOutputDirectory(DefaultTfm).ToString();
@@ -202,7 +202,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var build = new BuildCommand(ProjectDirectory, "blazorhosted");
             build.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            var buildResult = build.Execute("/bl");
+            var buildResult = build.Execute();
             buildResult.Should().Pass();
 
             var outputPath = build.GetOutputDirectory(DefaultTfm).ToString();
@@ -256,7 +256,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var publish = new PublishCommand(ProjectDirectory, "blazorhosted");
             publish.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            var publishResult = publish.Execute("/bl");
+            var publishResult = publish.Execute();
             publishResult.Should().Pass();
 
             var publishPath = publish.GetOutputDirectory(DefaultTfm).ToString();

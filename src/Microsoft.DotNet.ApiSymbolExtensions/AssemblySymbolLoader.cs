@@ -38,11 +38,16 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
         /// </summary>
         public const string AssemblyReferenceNotFoundErrorCode = "CP1002";
 
-        /// <inheritdoc />
-        public AssemblySymbolLoader(bool resolveAssemblyReferences = false)
+        /// <summary>
+        /// Creates a new instance of the <see cref="AssemblySymbolLoader"/> class.
+        /// </summary>
+        /// <param name="resolveAssemblyReferences">True to attempt to load references for loaded assemblies from the locations specified with <see cref="AddReferenceSearchPaths(string[])"/>.  Default is false.</param>
+        /// <param name="includeInternals">True to include all internal metadata for assemblies loaded.  Default is false which only includes public and some internal metadata.  <seealso cref="MetadataImportOptions"/></param>
+        public AssemblySymbolLoader(bool resolveAssemblyReferences = false, bool includeInternals = false)
         {
             _loadedAssemblies = new Dictionary<string, MetadataReference>();
-            var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable);
+            CSharpCompilationOptions compilationOptions = new(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable,
+                metadataImportOptions: includeInternals ? MetadataImportOptions.Internal : MetadataImportOptions.Public);
             _cSharpCompilation = CSharpCompilation.Create($"AssemblyLoader_{DateTime.Now:MM_dd_yy_HH_mm_ss_FFF}", options: compilationOptions);
             _resolveReferences = resolveAssemblyReferences;
         }

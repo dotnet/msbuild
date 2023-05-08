@@ -174,6 +174,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolveRazorEmbeddedResources;
     </ResolveRazorCompileInputsDependsOn>
 
+    <ResolveScopedCssOutputsDependsOn>
+      $(ResolveScopedCssOutputsDependsOn);
+      ResolveCssScopes;
+    </ResolveScopedCssOutputsDependsOn>
+
     <DebugSymbolsProjectOutputGroupDependsOn>
       $(DebugSymbolsProjectOutputGroupDependsOn);
       _RazorAddDebugSymbolsProjectOutputGroupOutput
@@ -541,6 +546,26 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <Content Condition="'%(Content.Extension)'=='.razor'" CopyToPublishDirectory="Never" />
+    </ItemGroup>
+  </Target>
+
+  <!-- This target validates that there is at most one scoped css file per component, that there are no scoped css files without a
+     matching component, and then adds the associated scope to the razor components that have a matching scoped css file.
+  -->
+  <Target
+    Name="ResolveCssScopes"
+    Condition="'$(ScopedCssEnabled)' == 'true'"
+    BeforeTargets="AssignRazorComponentTargetPaths;AssignRazorGenerateTargetPaths"
+    DependsOnTargets="ComputeCssScope;ResolveRazorComponentInputs;ResolveRazorGenerateInputs">
+    <ApplyCssScopes RazorComponents="@(RazorComponent)" RazorGenerate="@(RazorGenerate)" ScopedCss="@(_ScopedCss)">
+      <Output TaskParameter="RazorComponentsWithScopes" ItemName="_RazorComponentsWithScopes" />
+      <Output TaskParameter="RazorGenerateWithScopes" ItemName="_RazorGenerateWithScopes" />
+    </ApplyCssScopes>
+    <ItemGroup>
+      <RazorComponent Remove="@(_RazorComponentsWithScopes)" />
+      <RazorComponent Include="@(_RazorComponentsWithScopes)" />
+      <RazorGenerate Remove="@(_RazorGenerateWithScopes)" />
+      <RazorGenerate Include="@(_RazorGenerateWithScopes)" />
     </ItemGroup>
   </Target>
 

@@ -76,6 +76,7 @@
             <Content Include="$(OutDir)Valleysoft.DockerCredsProvider.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
             <Content Include="$(OutDir)NuGet.*.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
             <Content Include="$(OutDir)Newtonsoft.Json.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
+            <Content Include="$(OutDir)Microsoft.DotNet.Cli.Utils.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
             <!-- runtime deps json -->
             <Content Include="$(ArtifactsDir)bin/Microsoft.NET.Build.Containers/$(Configuration)/$(TargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(TargetFramework)" />
             <!-- actual DLL  -->

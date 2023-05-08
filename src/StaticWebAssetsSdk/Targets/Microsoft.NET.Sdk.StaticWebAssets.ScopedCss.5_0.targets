@@ -83,6 +83,10 @@ Integration with static web assets:
     _AddScopedCssBundles;
   </ResolveStaticWebAssetsInputsDependsOn>
 
+  <ResolveScopedCssOutputsDependsOn>
+    $(ResolveScopedCssOutputsDependsOn);
+  </ResolveScopedCssOutputsDependsOn>
+
   <!-- When used as a reference, the app will have been built before and as a result the list of static web assets will include the bundle
   instead of the individual files. We need to correct that in GetCopyToOuputDirectoryItems -->
 
@@ -135,31 +139,15 @@ Integration with static web assets:
 </Target>
 
 <!-- This target just generates a Scope identifier for the items that we deemed were scoped css files -->
-<Target Name="_ComputeCssScope" DependsOnTargets="ResolveScopedCssInputs">
+<Target Name="ComputeCssScope" DependsOnTargets="ResolveScopedCssInputs">
   <ComputeCssScope ScopedCssInput="@(ScopedCssInput)" Targetname="$(TargetName)">
     <Output TaskParameter="ScopedCss" ItemName="_ScopedCss" />
   </ComputeCssScope>
 </Target>
 
-<!-- This target validates that there is at most one scoped css file per component, that there are no scoped css files without a
-     matching component, and then adds the associated scope to the razor components that have a matching scoped css file.
--->
-<Target Name="_ResolveCssScopes" BeforeTargets="AssignRazorComponentTargetPaths;AssignRazorGenerateTargetPaths" DependsOnTargets="_ComputeCssScope;ResolveRazorComponentInputs;ResolveRazorGenerateInputs">
-  <ApplyCssScopes RazorComponents="@(RazorComponent)" RazorGenerate="@(RazorGenerate)" ScopedCss="@(_ScopedCss)">
-    <Output TaskParameter="RazorComponentsWithScopes" ItemName="_RazorComponentsWithScopes" />
-    <Output TaskParameter="RazorGenerateWithScopes" ItemName="_RazorGenerateWithScopes" />
-  </ApplyCssScopes>
-  <ItemGroup>
-    <RazorComponent Remove="@(_RazorComponentsWithScopes)" />
-    <RazorComponent Include="@(_RazorComponentsWithScopes)" />
-    <RazorGenerate Remove="@(_RazorGenerateWithScopes)" />
-    <RazorGenerate Include="@(_RazorGenerateWithScopes)" />
-  </ItemGroup>
-</Target>
-
 <!-- Sets the output path for the processed scoped css files. They will all have a '.rz.scp.css' extension to flag them as processed
      scoped css files. -->
-<Target Name="_ResolveScopedCssOutputs" DependsOnTargets="_ResolveCssScopes">
+<Target Name="ResolveScopedCssOutputs" DependsOnTargets="$(ResolveScopedCssOutputsDependsOn)">
   <PropertyGroup>
     <_ScopedCssIntermediatePath>$([System.IO.Path]::GetFullPath($(IntermediateOutputPath)scopedcss\))</_ScopedCssIntermediatePath>
   </PropertyGroup>
@@ -181,19 +169,14 @@ Integration with static web assets:
 
 <Target
     Name="_ResolveScopedCssOutputsDesignTime"
-    DependsOnTargets="_ResolveScopedCssOutputs"
+    DependsOnTargets="ResolveScopedCssOutputs"
     BeforeTargets="CollectUpToDateCheckInputDesignTime;CollectUpToDateCheckBuiltDesignTime" />
 
 <!-- Transforms the original scoped CSS files into their scoped versions on their designated output paths -->
-<Target Name="_GenerateScopedCssFiles" Inputs="@(_ScopedCss)" Outputs="@(_ScopedCssOutputs)" DependsOnTargets="_ResolveScopedCssOutputs">
+<Target Name="_GenerateScopedCssFiles" Inputs="@(_ScopedCss)" Outputs="@(_ScopedCssOutputs)" DependsOnTargets="ResolveScopedCssOutputs">
 
   <MakeDir Directories="$(_ScopedCssIntermediatePath)" />
-  <RewriteCss
-    FilesToTransform="@(_ScopedCss)"
-    ToolAssembly="$(_StaticWebAssetsSdkRazorToolAssembly)"
-    ToolExe="$(_StaticWebAssetsSdkDotNetHostFileName)"
-    ToolPath="$(_StaticWebAssetsSdkDotNetHostDirectory)">
-  </RewriteCss>
+  <RewriteCss FilesToTransform="@(_ScopedCss)" />
 
   <ItemGroup>
     <FileWrites Include="%(_ScopedCss.OutputFile)" />
@@ -324,7 +307,7 @@ Integration with static web assets:
 <!-- This target is only called as part of GetCurrentProjectStaticWebAssets which is only invoked on referenced projects to get the list
      of their assets. We return the list of css outputs we will produce and let the main app do the final bundling. -->
 
-<Target Name="_AddGeneratedScopedCssFiles" DependsOnTargets="_ResolveScopedCssOutputs;ResolveStaticWebAssetsConfiguration">
+<Target Name="_AddGeneratedScopedCssFiles" DependsOnTargets="ResolveScopedCssOutputs;ResolveStaticWebAssetsConfiguration">
   <!-- We do this in two steps because we will be modifying the list of static web assets if we bundle the files and these assets need to be
   available when called from GetCurrentProjectStaticWebAssets -->
   <ItemGroup>

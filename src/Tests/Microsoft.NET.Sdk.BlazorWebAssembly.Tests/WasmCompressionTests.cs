@@ -100,7 +100,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.WithWorkingDirectory(testInstance.TestRoot);
-            publishCommand.Execute("/bl").Should().Pass();
+            publishCommand.Execute().Should().Pass();
 
             var buildOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
@@ -164,7 +164,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             
             var publishCommand = new PublishCommand(testInstance, "blazorwasm");
             publishCommand.WithWorkingDirectory(testInstance.TestRoot);
-            publishCommand.Execute("/bl").Should().Pass();
+            publishCommand.Execute().Should().Pass();
 
             var extensions = new[] { ".dll", ".js", ".pdb", ".wasm", ".map", ".json", ".dat" };
 
