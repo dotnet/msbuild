@@ -4707,7 +4707,7 @@ namespace Microsoft.Build.Evaluation
                     return null;
                 }
 
-                // Check if the type is in the whitelist cache. If it is, use it or load it.
+                // Check if the type is in the allowlist cache. If it is, use it or load it.
                 cachedTypeInformation = AvailableStaticMethods.GetTypeInformationFromTypeCache(typeName, simpleMethodName);
                 if (cachedTypeInformation != null)
                 {
@@ -4730,7 +4730,7 @@ namespace Microsoft.Build.Evaluation
 
                         // If the type information from the cache is not loadable, it means the cache information got corrupted somehow
                         // Throw here to prevent adding null types in the cache
-                        ErrorUtilities.VerifyThrowInternalNull(receiverType, $"Type information for {typeName} was present in the whitelist cache as {assemblyQualifiedTypeName} but the type could not be loaded.");
+                        ErrorUtilities.VerifyThrowInternalNull(receiverType, $"Type information for {typeName} was present in the allowlist cache as {assemblyQualifiedTypeName} but the type could not be loaded.");
 
                         // If we've used it once, chances are that we'll be using it again
                         // We can record the type here since we know it's available for calling from the fact that is was in the AvailableStaticMethods table
@@ -4748,7 +4748,7 @@ namespace Microsoft.Build.Evaluation
                     // DO NOT CACHE THE TYPE HERE!
                     // We don't add the resolved type here in the AvailableStaticMethods table. This is because that table is used
                     // during function parse, but only later during execution do we check for the ability to call specific methods on specific types.
-                    // Caching it here would load any type into the white list.
+                    // Caching it here would load any type into the allow list.
                     return receiverType;
                 }
 
@@ -5151,7 +5151,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// Check the property function whitelist whether this method is available.
+            /// Check the property function allowlist whether this method is available.
             /// </summary>
             private static bool IsStaticMethodAvailable(Type receiverType, string methodName)
             {

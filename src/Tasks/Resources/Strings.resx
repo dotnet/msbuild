@@ -1744,7 +1744,7 @@
   <data name="ResolveAssemblyReference.TargetFrameworkSubsetLogHeader">
     <value>TargetFramework Profile List Information:</value>
   </data>
-  <data name="ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader">
+  <data name="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
     <value>TargetFramework Profile List Paths:</value>
   </data>
   <data name="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">

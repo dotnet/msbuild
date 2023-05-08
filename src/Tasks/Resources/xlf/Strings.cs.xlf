@@ -2120,7 +2120,7 @@
         <target state="translated">Informace o seznamu profilu TargetFramework:</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader">
+      <trans-unit id="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
         <source>TargetFramework Profile List Paths:</source>
         <target state="translated">Cesty seznamu profilu TargetFramework:</target>
         <note />
