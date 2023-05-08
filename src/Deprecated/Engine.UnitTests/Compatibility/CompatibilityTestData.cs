@@ -150,7 +150,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Test Data Item
         /// </summary>
-        internal const string ContentSimpleInvalidEncoding = @"<?xml version='1.0' encoding='crazy'?>
+        internal const string ContentSimpleInvalidEncoding = @"<?xml version='1.0' encoding='different'?>
                     <Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <Target Name='TestTarget'>
                             <Message Text='Executed TestTarget'/>

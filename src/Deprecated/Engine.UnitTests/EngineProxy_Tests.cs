@@ -213,7 +213,7 @@ namespace Microsoft.Build.UnitTests
             engine.RegisterLogger(myLogger);
             // Create a custom build event args that derives from MSBuild's BuildErrorEventArgs.
             // Set a custom field on this event (FXCopRule).
-            MyCustomBuildErrorEventArgs fxcopError = new MyCustomBuildErrorEventArgs("Your code is lame.");
+            MyCustomBuildErrorEventArgs fxcopError = new MyCustomBuildErrorEventArgs("Your code isbad.");
             fxcopError.FXCopRule = "CodeLamenessViolation";
 
             // Log the custom event args.  (Pretend that the task actually did this.)
@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests
 
             // Make sure the special fields in the custom event match what we originally logged.
             fxcopError = myLogger.lastError as MyCustomBuildErrorEventArgs;
-            Assertion.AssertEquals("Your code is lame.", fxcopError.Message);
+            Assertion.AssertEquals("Your code isbad.", fxcopError.Message);
             Assertion.AssertEquals("CodeLamenessViolation", fxcopError.FXCopRule);
         }
 

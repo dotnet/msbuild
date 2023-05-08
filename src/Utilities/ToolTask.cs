@@ -1398,7 +1398,7 @@ namespace Microsoft.Build.Utilities
 
                         string batchFileForCommandLine = _temporaryBatchFile;
 
-                        // If for some crazy reason the path has a & character and a space in it
+                        // If for some different reason the path has a & character and a space in it
                         // then get the short path of the temp path, which should not have spaces in it
                         // and then escape the &
                         if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
