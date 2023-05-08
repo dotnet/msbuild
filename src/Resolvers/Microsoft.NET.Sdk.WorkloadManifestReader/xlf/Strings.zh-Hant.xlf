@@ -97,6 +97,11 @@
         <target state="translated">重新導向工作負載 '{0}' 具有 'redirect-to' 以外的其他金鑰</target>
         <note />
       </trans-unit>
+      <trans-unit id="SpecifiedManifestNotFound">
+        <source>Specified workload manifest was not found: {0}</source>
+        <target state="new">Specified workload manifest was not found: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">位移 {1} 有未預期的權杖 '{0}'</target>

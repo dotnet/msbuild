@@ -97,6 +97,11 @@
         <target state="translated">A carga de trabalho de redirecionamento '{0}' tem chaves diferentes além de 'redirecionar-para'</target>
         <note />
       </trans-unit>
+      <trans-unit id="SpecifiedManifestNotFound">
+        <source>Specified workload manifest was not found: {0}</source>
+        <target state="new">Specified workload manifest was not found: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">Token inesperado '{0}' no deslocamento {1}</target>

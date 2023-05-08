@@ -189,4 +189,7 @@
   <data name="InvalidManifestVersion" xml:space="preserve">
     <value>Invalid version: {0}</value>
   </data>
+  <data name="SpecifiedManifestNotFound" xml:space="preserve">
+    <value>Specified workload manifest was not found: {0}</value>
+  </data>
 </root>

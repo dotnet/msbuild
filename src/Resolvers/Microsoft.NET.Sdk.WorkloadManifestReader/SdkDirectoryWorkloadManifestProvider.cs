@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Workloads.Workload;
+using Microsoft.NET.Sdk.Localization;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
@@ -15,18 +16,20 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     {
         private readonly string _sdkRootPath;
         private readonly SdkFeatureBand _sdkVersionBand;
-        private readonly string [] _manifestDirectories;
+        private readonly string[] _manifestRoots;
         private static HashSet<string> _outdatedManifestIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "microsoft.net.workload.android", "microsoft.net.workload.blazorwebassembly", "microsoft.net.workload.ios",
             "microsoft.net.workload.maccatalyst", "microsoft.net.workload.macos", "microsoft.net.workload.tvos", "microsoft.net.workload.mono.toolchain" };
         private readonly Dictionary<string, int>? _knownManifestIdsAndOrder;
 
-        public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, string? userProfileDir)
-            : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable, userProfileDir)
+        private readonly Dictionary<string, ManifestSpecifier> _requestedManifestVersions;
+
+        public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, string? userProfileDir, IEnumerable<ManifestSpecifier>? requestedManifestVersions = null)
+            : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable, userProfileDir, requestedManifestVersions)
         {
 
         }
 
-        internal SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, Func<string, string?> getEnvironmentVariable, string? userProfileDir)
+        internal SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, Func<string, string?> getEnvironmentVariable, string? userProfileDir, IEnumerable<ManifestSpecifier>? requestedManifestVersions = null)
         {
             if (string.IsNullOrWhiteSpace(sdkVersion))
             {
@@ -58,15 +61,18 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 }
             }
 
-            string? userManifestsDir = userProfileDir is null ? null : Path.Combine(userProfileDir, "sdk-manifests", _sdkVersionBand.ToString());
-            string dotnetManifestDir = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand.ToString());
-            if (userManifestsDir != null && WorkloadFileBasedInstall.IsUserLocal(_sdkRootPath, _sdkVersionBand.ToString()) && Directory.Exists(userManifestsDir))
+            if (getEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_MANIFEST_IGNORE_DEFAULT_ROOTS) == null)
             {
-                _manifestDirectories = new[] { userManifestsDir, dotnetManifestDir };
-            }
-            else
-            {
-                _manifestDirectories = new[] { dotnetManifestDir };
+                string? userManifestsRoot = userProfileDir is null ? null : Path.Combine(userProfileDir, "sdk-manifests");
+                string dotnetManifestRoot = Path.Combine(_sdkRootPath, "sdk-manifests");
+                if (userManifestsRoot != null && WorkloadFileBasedInstall.IsUserLocal(_sdkRootPath, _sdkVersionBand.ToString()) && Directory.Exists(userManifestsRoot))
+                {
+                    _manifestRoots = new[] { userManifestsRoot, dotnetManifestRoot };
+                }
+                else
+                {
+                    _manifestRoots = new[] { dotnetManifestRoot };
+                }
             }
 
             var manifestDirectoryEnvironmentVariable = getEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_MANIFEST_ROOTS);
@@ -74,9 +80,21 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             {
                 //  Append the SDK version band to each manifest root specified via the environment variable.  This allows the same
                 //  environment variable settings to be shared by multiple SDKs.
-                _manifestDirectories = manifestDirectoryEnvironmentVariable.Split(Path.PathSeparator)
-                    .Select(p => Path.Combine(p, _sdkVersionBand.ToString()))
-                    .Concat(_manifestDirectories).ToArray();
+                _manifestRoots = manifestDirectoryEnvironmentVariable.Split(Path.PathSeparator)
+                                    .Concat(_manifestRoots ?? Array.Empty<string>()).ToArray();
+
+            }
+
+            _manifestRoots = _manifestRoots ?? Array.Empty<string>();
+
+            _requestedManifestVersions = new Dictionary<string, ManifestSpecifier>(StringComparer.OrdinalIgnoreCase);
+
+            if (requestedManifestVersions != null)
+            {
+                foreach (var manifestVersion in requestedManifestVersions)
+                {
+                    _requestedManifestVersions[manifestVersion.Id.ToString()] = manifestVersion;
+                }
             }
         }
 
@@ -98,13 +116,16 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public IEnumerable<string> GetManifestDirectories()
         {
+            //  Scan manifest directories
+            //  TODO: Handle new format with subfolders for version
             var manifestIdsToDirectories = new Dictionary<string, string>();
-            if (_manifestDirectories.Length == 1)
+            if (_manifestRoots.Length == 1)
             {
                 //  Optimization for common case where test hook to add additional directories isn't being used
-                if (Directory.Exists(_manifestDirectories[0]))
+                var manifestDirectory = Path.Combine(_manifestRoots[0], _sdkVersionBand.ToString());
+                if (Directory.Exists(manifestDirectory))
                 {
-                    foreach (var workloadManifestDirectory in Directory.EnumerateDirectories(_manifestDirectories[0]))
+                    foreach (var workloadManifestDirectory in Directory.EnumerateDirectories(manifestDirectory))
                     {
                         if (!IsManifestIdOutdated(workloadManifestDirectory))
                         {
@@ -117,8 +138,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             {
                 //  If the same folder name is in multiple of the workload manifest directories, take the first one
                 Dictionary<string, string> directoriesWithManifests = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                foreach (var manifestDirectory in _manifestDirectories.Reverse())
+                foreach (var manifestRoot in _manifestRoots.Reverse())
                 {
+                    var manifestDirectory = Path.Combine(manifestRoot, _sdkVersionBand.ToString());
                     if (Directory.Exists(manifestDirectory))
                     {
                         foreach (var workloadManifestDirectory in Directory.EnumerateDirectories(manifestDirectory))
@@ -135,6 +157,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         manifestIdsToDirectories.Add(Path.GetFileName(workloadManifestDirectory), workloadManifestDirectory);
                     }
                 }
+            }
+
+            //  Load manifests that were explicitly specified
+            foreach (var kvp in _requestedManifestVersions)
+            {
+                manifestIdsToDirectories.Add(kvp.Key, GetManifestDirectoryFromSpecifier(kvp.Value));
             }
 
             if (_knownManifestIdsAndOrder != null && _knownManifestIdsAndOrder.Keys.Any(id => !manifestIdsToDirectories.ContainsKey(id)))
@@ -169,7 +197,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         private string FallbackForMissingManifest(string manifestId)
         {
-            var sdkManifestPath = Path.Combine(_sdkRootPath, "sdk-manifests");
+            //  Only use the last manifest root (usually the dotnet folder itself) for fallback
+            var sdkManifestPath = _manifestRoots.Last();
             if (!Directory.Exists(sdkManifestPath))
             {
                 return string.Empty;
@@ -190,6 +219,21 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 // Manifest does not exist
                 return string.Empty;
             }
+        }
+
+        private string GetManifestDirectoryFromSpecifier(ManifestSpecifier manifestSpecifier)
+        {
+            foreach (var manifestDirectory in _manifestRoots)
+            {
+                var specifiedManifestDirectory = Path.Combine(manifestDirectory, manifestSpecifier.FeatureBand.ToString(), manifestSpecifier.Id.ToString(),
+                    manifestSpecifier.Version.ToString());
+                if (File.Exists(Path.Combine(specifiedManifestDirectory, "WorkloadManifest.json")))
+                {
+                    return specifiedManifestDirectory;
+                }
+            }
+
+            throw new FileNotFoundException(string.Format(Strings.SpecifiedManifestNotFound, manifestSpecifier.ToString()));
         }
 
         private bool IsManifestIdOutdated(string workloadManifestDir)
