@@ -101,7 +101,7 @@ namespace Microsoft.NET.Build.Tasks
                     //  If the project is NOT RID agnostic, then a global RuntimeIdentifier will flow to it.
                     //  If the project didn't explicitly specify a value for SelfContained, then this will
                     //  set SelfContained to true
-                    if (RuntimeIdentifierInfersSelfContained && runtimeIdentifierIsGlobalProperty && !referencedProjectHadSelfContainedSpecified)
+                    if (runtimeIdentifierInfersSelfContained && runtimeIdentifierIsGlobalProperty && !referencedProjectHadSelfContainedSpecified)
                     {
                         referencedProjectIsSelfContained = true;
                     }
