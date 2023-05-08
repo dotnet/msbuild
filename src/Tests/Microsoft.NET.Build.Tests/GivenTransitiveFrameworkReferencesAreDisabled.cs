@@ -52,7 +52,7 @@ namespace Microsoft.NET.Build.Tests
             if (selfContained)
             {
                 testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid();
-                testProject.AdditionalProperties["SelfContained"] = "true";
+                testProject.SelfContained = "true";
             }
             else
             {
@@ -168,11 +168,10 @@ namespace Microsoft.NET.Build.Tests
             {
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
+                SelfContained = "true"
             };
 
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid();
-            testProject.AdditionalProperties["SelfContained"] = "true";
-
             testProject.AdditionalProperties["DisableTransitiveFrameworkReferenceDownloads"] = "True";
             testProject.AdditionalProperties["RestorePackagesPath"] = nugetPackagesFolder;
 

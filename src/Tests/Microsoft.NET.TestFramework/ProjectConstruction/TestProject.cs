@@ -38,6 +38,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         /// </summary>
         public bool IsWinExe { get; set; }
 
+
         public string ProjectSdk { get; set; }
 
         /// <summary>
@@ -49,6 +50,9 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         public string RuntimeFrameworkVersion { get; set; }
 
         public string RuntimeIdentifier { get; set; }
+
+        // Set to either true, false, or empty string "". The empty string does not undefine SelfContained, it just doesn't specify it.
+        public string SelfContained { get; set; } = "";
 
         //  TargetFrameworkVersion applies to non-SDK projects
         public string TargetFrameworkVersion { get; set; }
@@ -276,6 +280,11 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             else if (this.IsWinExe)
             {
                 propertyGroup.Element(ns + "OutputType").SetValue("WinExe");
+            }
+
+            if(this.SelfContained != "")
+            {
+                propertyGroup.Add(new XElement(ns + "SelfContained", String.Equals(this.SelfContained, "true", StringComparison.OrdinalIgnoreCase) ? "true" : "false"));
             }
 
             if (this.ReferencedProjects.Any())

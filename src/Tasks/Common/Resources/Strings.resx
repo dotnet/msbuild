@@ -904,5 +904,8 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1200: If UseArtifactsPath is set to true and ArtifactsPath is not set, there must be a Directory.Build.props file in order to determine where the artifacts folder should be located.</value>
     <comment>{StrBegin="NETSDK1200: "}</comment>
   </data>
-  
+  <data name="RuntimeIdentifierWillNoLongerImplySelfContained" xml:space="preserve">
+    <value>NETSDK1201: For projects targeting .NET 8.0 and higher, specifying a RuntimeIdentifier will no longer produce a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use the --self-contained argument.</value>
+    <comment>{StrBegin="NETSDK1201: "}</comment>
+  </data>
 </root>

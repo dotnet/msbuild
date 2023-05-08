@@ -5,6 +5,7 @@
     <TargetFramework>$(CurrentTargetFramework)</TargetFramework>
     <PublishTrimmed>true</PublishTrimmed>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+    <SelfContained>True</SelfContained>
   </PropertyGroup>
 
   <Target Name="BuildLocalNuget" BeforeTargets="Restore">

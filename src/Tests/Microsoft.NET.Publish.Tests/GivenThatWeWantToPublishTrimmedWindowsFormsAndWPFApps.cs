@@ -74,10 +74,10 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WinformsErrorPresentFailTest",
                 TargetFrameworks = targetFramework,
-                IsWinExe = true
+                IsWinExe = true,
+                SelfContained = "true"
             };
             testProject.AdditionalProperties["UseWindowsForms"] = "true";
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -98,10 +98,10 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WinformsErrorSuppressedPassTest",
                 TargetFrameworks = targetFramework,
-                IsWinExe = true
+                IsWinExe = true,
+                SelfContained = "true"
             };
             testProject.AdditionalProperties["UseWindowsForms"] = "true";
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
             testProject.AdditionalProperties["_SuppressWinFormsTrimError"] = "true";
@@ -171,10 +171,10 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WpfErrorPresentPassTest",
                 TargetFrameworks = targetFramework,
-                IsWinExe = true
+                IsWinExe = true,
+                SelfContained = "true"
             };
             testProject.AdditionalProperties["UseWPF"] = "true";
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -195,10 +195,10 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WpfPassTest",
                 TargetFrameworks = targetFramework,
-                IsWinExe = true
+                IsWinExe = true,
+                SelfContained = "true"
             };
             testProject.AdditionalProperties["UseWPF"] = "true";
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             testProject.AdditionalProperties["_SuppressWpfTrimError"] = "true";
             testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";

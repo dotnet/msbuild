@@ -29,6 +29,7 @@ namespace Microsoft.NET.Publish.Tests
             Type loggerType = typeof(LogTelemetryToStdOutForTest);
             var TelemetryTestLogger = new[]
                 {
+                    "--property:SelfContained=true",
                     $"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}"
                 };
 
@@ -46,6 +47,7 @@ namespace Microsoft.NET.Publish.Tests
             Type loggerType = typeof(LogTelemetryToStdOutForTest);
             var TelemetryTestLogger = new[]
                 {
+                    "--property:SelfContained=true",
                     $"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}"
                 };
 

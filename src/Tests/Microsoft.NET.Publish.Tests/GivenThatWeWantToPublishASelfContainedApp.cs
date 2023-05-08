@@ -154,7 +154,7 @@ namespace Microsoft.NET.Publish.Tests
             var command = new PublishCommand(testProjectInstance);
 
             command
-                .Execute($"/p:RuntimeIdentifier={rid}")
+                .Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true")
                 .Should()
                 .Pass();
 
@@ -199,7 +199,7 @@ namespace Microsoft.NET.Publish.Tests
             var command = new PublishCommand(testProjectInstance);
 
             command
-                .Execute($"/p:RuntimeIdentifier={rid}")
+                .Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true")
                 .Should()
                 .Pass();
 

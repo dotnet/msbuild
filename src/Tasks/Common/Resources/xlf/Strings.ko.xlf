@@ -795,6 +795,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1028: RuntimeIdentifier 지정</target>
         <note>{StrBegin="NETSDK1028: "}</note>
       </trans-unit>
+      <trans-unit id="RuntimeIdentifierWillNoLongerImplySelfContained">
+        <source>NETSDK1201: For projects targeting .NET 8.0 and higher, specifying a RuntimeIdentifier will no longer produce a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use the --self-contained argument.</source>
+        <target state="new">NETSDK1201: For projects targeting .NET 8.0 and higher, specifying a RuntimeIdentifier will no longer produce a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use the --self-contained argument.</target>
+        <note>{StrBegin="NETSDK1201: "}</note>
+      </trans-unit>
       <trans-unit id="RuntimeListNotFound">
         <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
         <target state="translated">NETSDK1109: 런타임 목록 파일 '{0}'을(를) 찾을 수 없습니다. https://aka.ms/dotnet-sdk-issue에서 .NET 팀에 이 오류를 보고하세요.</target>
