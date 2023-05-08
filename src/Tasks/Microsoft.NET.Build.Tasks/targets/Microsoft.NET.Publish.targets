@@ -15,8 +15,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultCopyToPublishDirectoryMetadata Condition="'$(DefaultCopyToPublishDirectoryMetadata)' == ''">true</DefaultCopyToPublishDirectoryMetadata>
     <_GetChildProjectCopyToPublishDirectoryItems Condition="'$(_GetChildProjectCopyToPublishDirectoryItems)' == ''">true</_GetChildProjectCopyToPublishDirectoryItems>
     <IsPublishable Condition="'$(IsPublishable)' == ''">true</IsPublishable>
+  </PropertyGroup>
+
+  <!-- Trimming/AOT/publish* property configuration -->
+  <PropertyGroup>
     <!-- PublishAot depends on PublishTrimmed. This must be set early enough for the KnownILLinkPack to be restored. -->
     <PublishTrimmed Condition="'$(PublishTrimmed)' == '' And '$(PublishAot)' == 'true'">true</PublishTrimmed>
+    <IsTrimmable Condition="'$(IsTrimmable)' == '' and '$(IsAotCompatible)' == 'true'">true</IsTrimmable>
     <_IsTrimmingEnabled Condition="'$(_IsTrimmingEnabled)' == '' And ('$(PublishTrimmed)' == 'true' Or '$(IsTrimmable)' == 'true')">true</_IsTrimmingEnabled>
     <_IsTrimmingEnabled Condition="'$(_IsTrimmingEnabled)' == ''">false</_IsTrimmingEnabled>
     <DynamicCodeSupport Condition="'$(DynamicCodeSupport)' == '' And '$(PublishAot)' == 'true'">false</DynamicCodeSupport>
@@ -125,7 +130,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="CompressionInSingleFileRequiresSelfContained" />
 
     <NETSdkWarning Condition="'$(PublishProfileImported)' != 'true' and '$(PublishProfile)' != ''"
-                   ResourceName="PublishProfileNotPresent" 
+                   ResourceName="PublishProfileNotPresent"
                    FormatArguments="$(PublishProfile)"/>
 
     <!-- Projects in a solution cannot have conflicting configurations. This checks if PublishRelease conflicted at runtime to avoid extra project evaluations.
@@ -137,7 +142,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             '$(_SolutionLevelPublishRelease)' != '$(PublishRelease)'"
                  ResourceName="SolutionProjectConfigurationsConflict"
                  FormatArguments="PublishRelease;$(ProjectName)"/>
-    
+
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
       <PublishDir Condition="!HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>

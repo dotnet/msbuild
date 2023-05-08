@@ -154,8 +154,8 @@
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelOutputPath">
         <source>NETSDK1194: The "--output" option isn't supported when building a solution. Specifying a solution-level output path results in all projects copying outputs to the same directory, which can lead to inconsistent builds.</source>
-        <target state="translated">NETSDK1194: Die Option "--output" wird beim Erstellen einer Lösung nicht unterstützt. Die Angabe eines Ausgabepfads auf Projektmappenebene führt dazu, dass alle Projekte Ausgaben in dasselbe Verzeichnis kopieren, was zu inkonsistenten Builds führen kann.</target>
-        <note>{StrBegin="NETSDK1194: "}</note>
+        <target state="needs-review-translation">NETSDK1194: Die Option "--output" wird beim Erstellen einer Lösung nicht unterstützt. Die Angabe eines Ausgabepfads auf Projektmappenebene führt dazu, dass alle Projekte Ausgaben in dasselbe Verzeichnis kopieren, was zu inkonsistenten Builds führen kann.</target>
+        <note>{StrBegin="NETSDK1194: "}{Locked="--output"}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelRuntimeIdentifier">
         <source>NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specify the RID at the individual project level instead.</source>
@@ -822,8 +822,8 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
         <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
-        <target state="translated">NETSDK1179: Eine der Optionen „--self-contained“ oder „--no-self-contained“ ist erforderlich, wenn „--runtime“ verwendet wird.</target>
-        <note>{StrBegin="NETSDK1179: "}</note>
+        <target state="needs-review-translation">NETSDK1179: Eine der Optionen „--self-contained“ oder „--no-self-contained“ ist erforderlich, wenn „--runtime“ verwendet wird.</target>
+        <note>{StrBegin="NETSDK1179: "}{Locked="--self-contained"}{Locked="--no-self-contained"}{Locked="--runtime"}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>

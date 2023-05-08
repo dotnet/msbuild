@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.IO;
 using System.Linq;
@@ -93,7 +96,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
             Uri uri = new Uri($"{zipDeployPublishUrl}?isAsync=true", UriKind.Absolute);
             string userAgent = $"{UserAgentName}/{userAgentVersion}";
             FileStream stream = File.OpenRead(zipToPublishPath);
-            IHttpResponse response = await client.PostWithBasicAuthAsync(uri, userName, password, "application/zip", userAgent, Encoding.UTF8, stream);
+            IHttpResponse response = await client.PostRequestAsync(uri, userName, password, "application/zip", userAgent, Encoding.UTF8, stream);
             if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Accepted)
             {
                 if (logMessages)

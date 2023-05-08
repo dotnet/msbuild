@@ -29,11 +29,4 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="Sdk.targets" />
 
   <Import Sdk="Microsoft.NET.Sdk.Publish" Project="Sdk.targets" />
-
-  <!-- include library-packs folder as additional source for the restore -->
-  <PropertyGroup Condition=" '$(DisableImplicitMicrosoftNETBuildContainersReference)' != 'true' ">
-    <_WebLibraryPacksFolder Condition="'$(WebLibraryPacksFolder)' == ''">$([MSBuild]::EnsureTrailingSlash('$(MSBuildThisFileDirectory)'))../library-packs</_WebLibraryPacksFolder>
-    <RestoreAdditionalProjectSources Condition="Exists('$(_WebLibraryPacksFolder)')">$(RestoreAdditionalProjectSources);$(_WebLibraryPacksFolder)</RestoreAdditionalProjectSources>
-  </PropertyGroup>
-
 </Project>

@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -365,7 +365,7 @@ namespace Microsoft.NET.Publish.Tests
                     .And.HaveStdOutContaining("Hello World");
             }
         }
-        
+
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void NativeAot_hw_runs_with_cross_target_PublishAot_is_enabled(string targetFramework)
@@ -520,6 +520,40 @@ namespace Microsoft.NET.Publish.Tests
                 .Should().Pass()
                 .And.HaveStdOutContaining("warning IL3050")
                 .And.HaveStdOutContaining("warning IL3056")
+                .And.NotHaveStdOutContaining("warning IL2026")
+                .And.NotHaveStdOutContaining("warning IL3002");
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
+        public void IsAotCompatible_implies_enable_analyzers(string targetFramework)
+        {
+            var projectName = "WarningAppWithAotAnalyzer";
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName, true);
+            testProject.AdditionalProperties["IsAotCompatible"] = "true";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            buildCommand
+                .Execute()
+                .Should().Pass()
+                .And.HaveStdOutContaining("warning IL3050")
+                .And.HaveStdOutContaining("warning IL3056")
+                .And.HaveStdOutContaining("warning IL2026")
+                .And.HaveStdOutContaining("warning IL3002");
+
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework).FullName;
+            var assemblyPath = Path.Combine(outputDirectory, $"{projectName}.dll");
+
+            // injects the IsTrimmable attribute
+            AssemblyInfo.Get(assemblyPath)["AssemblyMetadataAttribute"].Should().Be("IsTrimmable:True");
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand
+                .Execute(RuntimeIdentifier, "/p:RunAnalyzers=false")
+                .Should().Pass()
+                .And.NotHaveStdOutContaining("warning IL3050")
+                .And.NotHaveStdOutContaining("warning IL3056")
                 .And.NotHaveStdOutContaining("warning IL2026")
                 .And.NotHaveStdOutContaining("warning IL3002");
         }

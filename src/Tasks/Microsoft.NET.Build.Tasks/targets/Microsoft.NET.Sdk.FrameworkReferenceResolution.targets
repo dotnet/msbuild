@@ -101,6 +101,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
                                 TrimmingEnabled="$(_IsTrimmingEnabled)"
                                 AotEnabled="$(PublishAot)"
+                                AotUseKnownRuntimePackForTarget="$(PublishAotUsingRuntimePack)"
                                 RuntimeIdentifier="$(RuntimeIdentifier)"
                                 RuntimeIdentifiers="$(RuntimeIdentifiers)"
                                 RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"

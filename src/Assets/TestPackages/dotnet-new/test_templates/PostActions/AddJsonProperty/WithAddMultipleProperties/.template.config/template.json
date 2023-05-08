@@ -1,0 +1,42 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TestAssets.PostActions.AddJsonProperty.WithAddMultipleProperties",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.PostActions.AddJsonProperty.WithAddMultipleProperties",
+  "precedence": "100",
+  "identity": "TestAssets.PostActions.AddJsonProperty.WithAddMultipleProperties",
+  "shortName": "TestAssets.PostActions.AddJsonProperty.WithAddMultipleProperties",
+  "sourceName": "MyTestProject",
+  "primaryOutputs": [
+    {
+      "path": "MyTestProject.csproj"
+    }
+  ],
+  "postActions": [
+    {
+      "description": "Add first JSON property",
+      "manualInstructions": [ { "text": "Modify the JSON file manually." } ],
+      "args": {
+        "jsonFileName": "testfile.json",
+        "parentPropertyPath": "root",
+        "newJsonPropertyName": "prop1",
+        "newJsonPropertyValue": "{}"
+      },
+      "actionId": "695A3659-EB40-4FF5-A6A6-C9C4E629FCB0",
+      "continueOnError": true
+    },
+    {
+      "description": "Add second JSON property",
+      "manualInstructions": [ { "text": "Modify the JSON file manually." } ],
+      "args": {
+        "jsonFileName": "testfile.json",
+        "parentPropertyPath": "root:prop1",
+        "newJsonPropertyName": "prop2",
+        "newJsonPropertyValue": "bar"
+      },
+      "actionId": "695A3659-EB40-4FF5-A6A6-C9C4E629FCB0",
+      "continueOnError": true
+    }
+  ]
+}

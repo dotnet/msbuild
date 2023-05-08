@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -171,6 +171,15 @@ namespace Microsoft.DotNet.GenAPI
         }
 
         /// <summary>
+        /// If the named type is a generic and not already unbound construct an unbound generic type.
+        /// Unbound types are required for typeof expressions.
+        /// </summary>
+        /// <param name="namedType">type to consider</param>
+        /// <returns>Unbound generic type if necessary, otherwise the original named type.</returns>
+        public static INamedTypeSymbol MakeUnboundIfGeneric(this INamedTypeSymbol namedType) =>
+            namedType.IsGenericType && !namedType.IsUnboundGenericType ? namedType.ConstructUnboundGenericType() : namedType;
+
+        /// <summary>
         /// Detects if a generic type contains inaccessible type arguments.
         /// </summary>
         /// <param name="namedType">A loaded named type symbol <see cref="INamedTypeSymbol"/>.</param>
@@ -186,41 +195,48 @@ namespace Microsoft.DotNet.GenAPI
         /// <param name="symbolFilter">Assembly symbol filter <see cref="ISymbolFilter"/>.</param>
         public static IEnumerable<SyntaxNode> TryGetInternalDefaultConstructor(this INamedTypeSymbol namedType, ISymbolFilter symbolFilter)
         {
-            IEnumerable<IMethodSymbol> constructors = namedType.InstanceConstructors;
-
-            // if non-implicit constructors exist and all are filtered
-            if (constructors.Any(c => !c.IsImplicitlyDeclared) && !constructors.Any(symbolFilter.Include))
+            // only non-static classes can have a default constructor that differs in visibility
+            if (namedType.IsStatic ||
+                namedType.TypeKind != TypeKind.Class)
             {
-                SyntaxKind visibility = SyntaxKind.InternalKeyword;
-
-                static bool IncludeInternalSymbols(ISymbolFilter filter) =>
-                    filter is AccessibilitySymbolFilter accessibilityFilter && accessibilityFilter.IncludeInternalSymbols;
-
-                // Use the `Private` visibility if internal symbols are not filtered out.
-                if (IncludeInternalSymbols(symbolFilter) ||
-                    (symbolFilter is CompositeSymbolFilter compositeSymbolFilter &&
-                        compositeSymbolFilter.Filters.Any(filter => IncludeInternalSymbols(filter))))
-                {
-                    visibility = SyntaxKind.PrivateKeyword;
-                }
-
-                ConstructorDeclarationSyntax constructor = SyntaxFactory.ConstructorDeclaration(
-                    new SyntaxList<AttributeListSyntax>(),
-                    SyntaxFactory.TokenList(new[] { SyntaxFactory.Token(visibility) }),
-                    SyntaxFactory.Identifier(namedType.ToDisplayString()),
-                    SyntaxFactory.ParameterList(),
-                    default!,
-                    default(BlockSyntax)!);
-
-                // find base constructor to call if it's not implicit.
-                IEnumerable<IMethodSymbol> baseConstructors = namedType.BaseType?.Constructors.Where(symbolFilter.Include) ?? Enumerable.Empty<IMethodSymbol>();
-                if (baseConstructors.Any() && baseConstructors.All(c => !c.Parameters.IsEmpty))
-                {
-                    constructor = constructor.WithInitializer(baseConstructors.First().GenerateBaseConstructorInitializer());
-                }
-
-                yield return constructor;
+                yield break;
             }
+
+            // Nothing to do if type already exposes constructor, or has an excluded implicit constructor (since it would match visibility)
+            if (namedType.InstanceConstructors.Any(c => symbolFilter.Include(c) || c.IsImplicitlyDeclared))
+            {
+                yield break;
+            }
+
+            SyntaxKind visibility = SyntaxKind.InternalKeyword;
+
+            static bool IncludeInternalSymbols(ISymbolFilter filter) =>
+                filter is AccessibilitySymbolFilter accessibilityFilter && accessibilityFilter.IncludeInternalSymbols;
+
+            // Use the `Private` visibility if internal symbols are not filtered out.
+            if (IncludeInternalSymbols(symbolFilter) ||
+                (symbolFilter is CompositeSymbolFilter compositeSymbolFilter &&
+                    compositeSymbolFilter.Filters.Any(filter => IncludeInternalSymbols(filter))))
+            {
+                visibility = SyntaxKind.PrivateKeyword;
+            }
+
+            ConstructorDeclarationSyntax constructor = SyntaxFactory.ConstructorDeclaration(
+                new SyntaxList<AttributeListSyntax>(),
+                SyntaxFactory.TokenList(new[] { SyntaxFactory.Token(visibility) }),
+                SyntaxFactory.Identifier(namedType.ToDisplayString()),
+                SyntaxFactory.ParameterList(),
+                default!,
+                default(BlockSyntax)!);
+
+            // find base constructor to call if it's not implicit.
+            IEnumerable<IMethodSymbol> baseConstructors = namedType.BaseType?.Constructors.Where(symbolFilter.Include) ?? Enumerable.Empty<IMethodSymbol>();
+            if (baseConstructors.Any() && baseConstructors.All(c => !c.Parameters.IsEmpty))
+            {
+                constructor = constructor.WithInitializer(baseConstructors.First().GenerateBaseConstructorInitializer());
+            }
+
+            yield return constructor;
         }
 
         /// <summary>

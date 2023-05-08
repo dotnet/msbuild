@@ -89,6 +89,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                         RuntimePackLabels="Mono"
                         Condition="'$(UseMonoRuntime)' == 'true' And ('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '6.0')" />
 
+    <!-- Allow opt-in to NativeAOT runtime pack for .NET 8.0 or higher -->
+    <FrameworkReference Update="Microsoft.NETCore.App"
+                        RuntimePackLabels="NativeAOT"
+                        Condition="'$(PublishAotUsingRuntimePack)' == 'true' And ('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '8.0')" />
+
   </ItemGroup>
 
 </Project>

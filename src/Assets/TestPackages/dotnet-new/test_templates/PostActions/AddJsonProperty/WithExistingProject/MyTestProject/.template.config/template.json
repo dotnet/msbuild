@@ -1,0 +1,30 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TestAssets.PostActions.AddJsonProperty.WithExistingProject.MyProject",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.PostActions.AddJsonProperty.WithExistingProject.MyProject",
+  "precedence": "100",
+  "identity": "TestAssets.PostActions.AddJsonProperty.WithExistingProject.MyProject",
+  "shortName": "TestAssets.PostActions.AddJsonProperty.WithExistingProject.MyProject",
+  "sourceName": "MyProject",
+  "primaryOutputs": [
+    {
+      "path": "MyProject.csproj"
+    }
+  ],
+  "postActions": [
+    {
+      "description": "Modify JSON file",
+      "manualInstructions": [ { "text": "Modify the JSON file manually." } ],
+      "args": {
+        "jsonFileName": "deployment.template.json",
+        "parentPropertyPath": "modulesContent:$edgeAgent:properties.desired:modules",
+        "newJsonPropertyName": "MyProject",
+        "newJsonPropertyValue": "{\"version\":\"1.0.0\", \"type\":\"docker\", \"settings\":{\"image\":\"${MODULEDIR<../MyProject>}\"}}"
+      },
+      "actionId": "695A3659-EB40-4FF5-A6A6-C9C4E629FCB0",
+      "continueOnError": true
+    }
+  ]
+}
