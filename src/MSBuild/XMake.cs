@@ -39,9 +39,6 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Logging.LiveLogger;
-using System.Runtime.InteropServices;
-using Microsoft.Win32;
 
 #nullable disable
 
@@ -1275,7 +1272,7 @@ namespace Microsoft.Build.CommandLine
                     }
                     else
                     {
-                        Evaluation.Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+                        Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
 
                         project.SaveLogicalProject(preprocessWriter);
 
@@ -1521,7 +1518,7 @@ namespace Microsoft.Build.CommandLine
         {
             try
             {
-                Evaluation.Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+                Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
 
                 foreach (string target in project.Targets.Keys)
                 {
