@@ -40,7 +40,7 @@ namespace Microsoft.Build.Logging
         {
             WriteHandler = Write;
 
-            if (EncodingUtilities.GetExternalOverridenUILanguageIfSupportableWithEncoding() != null)
+            if (EncodingUtilities.GetExternalOverriddenUILanguageIfSupportableWithEncoding() != null)
             {
                 _encoding = Encoding.UTF8;
             }

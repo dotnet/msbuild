@@ -1676,7 +1676,7 @@ namespace Microsoft.Build.CommandLine
             Thread thisThread = Thread.CurrentThread;
 
             // Eliminate the complex script cultures from the language selection.
-            var desiredCulture = EncodingUtilities.GetExternalOverridenUILanguageIfSupportableWithEncoding() ?? CultureInfo.CurrentUICulture.GetConsoleFallbackUICulture();
+            var desiredCulture = EncodingUtilities.GetExternalOverriddenUILanguageIfSupportableWithEncoding() ?? CultureInfo.CurrentUICulture.GetConsoleFallbackUICulture();
             thisThread.CurrentUICulture = desiredCulture;
 
             // For full framework, both the above and below must be set. This is not true in core, but it is a no op in core.

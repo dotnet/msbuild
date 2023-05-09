@@ -262,8 +262,13 @@ namespace Microsoft.Build.Shared
         /// The custom language that was set by the user for an 'external' tool besides MSBuild.
         /// Returns <see langword="null"/> if none are set.
         /// </returns>
-        public static CultureInfo GetExternalOverridenUILanguageIfSupportableWithEncoding()
+        public static CultureInfo GetExternalOverriddenUILanguageIfSupportableWithEncoding()
         {
+            if (string.Equals(Environment.GetEnvironmentVariable("MSBUILDDISABLEDYNAMICUTFENCODING"), "true", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
             CultureInfo externalLanguageSetting = GetExternalOverriddenUILanguage();
             if (externalLanguageSetting != null)
             {
