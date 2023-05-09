@@ -251,7 +251,7 @@ namespace Microsoft.Build.Shared
                         : EncodingUtilities.Utf8WithoutBom;
             }
         }
-
+#nullable enable
         /// <summary>
         /// The .NET SDK and Visual Studio both have environment variables that set a custom language. MSBuild should respect the SDK variable.
         /// To use the corresponding UI culture, in certain cases the console encoding must be changed. This function will change the encoding in these cases.
@@ -262,14 +262,14 @@ namespace Microsoft.Build.Shared
         /// The custom language that was set by the user for an 'external' tool besides MSBuild.
         /// Returns <see langword="null"/> if none are set.
         /// </returns>
-        public static CultureInfo GetExternalOverriddenUILanguageIfSupportableWithEncoding()
+        public static CultureInfo? GetExternalOverriddenUILanguageIfSupportableWithEncoding()
         {
             if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
             {
                 return null;
             }
 
-            CultureInfo externalLanguageSetting = GetExternalOverriddenUILanguage();
+            CultureInfo? externalLanguageSetting = GetExternalOverriddenUILanguage();
             if (externalLanguageSetting != null)
             {
                 if (
@@ -298,18 +298,19 @@ namespace Microsoft.Build.Shared
             {
                 try
                 {
-                    using RegistryKey windowsVersionRegistry = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
-                    var buildNumber = windowsVersionRegistry.GetValue("CurrentBuildNumber").ToString();
-                    const int buildNumberThatOfficialySupportsUTF8 = 18363;
-                    return int.Parse(buildNumber) >= buildNumberThatOfficialySupportsUTF8 || ForceUniversalEncodingOptInEnabled();
+                    using RegistryKey? windowsVersionRegistry = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+                    string? buildNumber = windowsVersionRegistry?.GetValue("CurrentBuildNumber")?.ToString();
+                    const int buildNumberThatOfficiallySupportsUTF8 = 18363;
+                    return buildNumber != null && (int.Parse(buildNumber) >= buildNumberThatOfficiallySupportsUTF8 || ForceUniversalEncodingOptInEnabled());
                 }
-                catch (Exception ex) when (ex is SecurityException || ex is ObjectDisposedException)
+                catch (Exception ex) when (ex is SecurityException or ObjectDisposedException)
                 {
                     // We don't want to break those in VS on older versions of Windows with a non-en language.
                     // Allow those without registry permissions to force the encoding, however.
                     return ForceUniversalEncodingOptInEnabled();
                 }
             }
+
             return false;
         }
 
@@ -325,10 +326,10 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <returns>The custom language that was set by the user for an 'external' tool besides MSBuild.
         /// Returns null if none are set.</returns>
-        private static CultureInfo GetExternalOverriddenUILanguage()
+        private static CultureInfo? GetExternalOverriddenUILanguage()
         {
             // DOTNET_CLI_UI_LANGUAGE=<culture name> is the main way for users to customize the CLI's UI language via the .NET SDK.
-            string dotnetCliLanguage = Environment.GetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE");
+            string? dotnetCliLanguage = Environment.GetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE");
             if (dotnetCliLanguage != null)
             {
                 try
@@ -342,3 +343,4 @@ namespace Microsoft.Build.Shared
         }
     }
 }
+
