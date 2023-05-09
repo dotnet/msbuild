@@ -1677,7 +1677,7 @@ namespace Microsoft.Build.CommandLine
             thisThread.CurrentUICulture = desiredCulture;
 
             // For full framework, both the above and below must be set. This is not true in core, but it is a no op in core.
-            // https://learn.microsoft.com/en-us/dotnet/api/system.globalization.cultureinfo.defaultthreadcurrentculture?redirectedfrom=MSDN&view=net-7.0#remarks
+            // https://learn.microsoft.com/dotnet/api/system.globalization.cultureinfo.defaultthreadcurrentculture#remarks
             CultureInfo.CurrentUICulture = desiredCulture;
             CultureInfo.DefaultThreadCurrentUICulture = desiredCulture;
 
