@@ -26,6 +26,7 @@
     <PackageReference Update="System.Private.Uri" Version="4.3.2" />
     <PackageReference Update="System.Reflection.Metadata" Version="1.6.0" />
     <PackageReference Update="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
+    <PackageReference Update="System.Runtime" Version="4.3.1" />
     <PackageReference Update="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
     <PackageReference Update="System.Security.Cryptography.X509Certificates" Version="4.1.2" />
     <PackageReference Update="System.Security.Cryptography.Pkcs" Version="4.7.0" />
