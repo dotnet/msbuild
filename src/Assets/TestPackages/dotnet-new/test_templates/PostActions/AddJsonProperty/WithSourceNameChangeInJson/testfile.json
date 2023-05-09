@@ -1,0 +1,11 @@
+{
+  "moduleConfiguration": {
+    "edgeAgent": {
+      "properties.desired": {
+        "modules": {
+          "module1": "someValue"
+        }
+      }
+    }
+  }
+}

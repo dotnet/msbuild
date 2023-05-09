@@ -1,6 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.IO;
@@ -250,7 +249,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var publish = new PublishCommand(projectDirectory);
             publish.WithWorkingDirectory(projectDirectory.TestRoot);
-            publish.Execute("/bl").Should().Pass();
+            publish.Execute().Should().Pass();
 
             var publishOutputPath = publish.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 
@@ -267,7 +266,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(projectDirectory);
             build.WithWorkingDirectory(projectDirectory.Path);
-            var buildResult = build.Execute("/bl");
+            var buildResult = build.Execute();
             buildResult.Should().Pass();
 
             var publish = new PublishCommand(projectDirectory);
@@ -305,7 +304,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var publish = new PublishCommand(projectDirectory);
             publish.WithWorkingDirectory(projectDirectory.TestRoot);
-            publish.Execute("/p:DisableScopedCssBundling=true", "/bl").Should().Pass();
+            publish.Execute("/p:DisableScopedCssBundling=true").Should().Pass();
 
             var publishOutputPath = publish.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 
@@ -416,7 +415,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
             build.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            build.Execute("/bl").Should().Pass();
+            build.Execute().Should().Pass();
 
             var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
@@ -460,7 +459,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
             build.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            build.Execute("/bl").Should().Pass();
+            build.Execute().Should().Pass();
 
             var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
@@ -503,7 +502,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new PublishCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
             build.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            build.Execute("/bl").Should().Pass();
+            build.Execute().Should().Pass();
 
             var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();

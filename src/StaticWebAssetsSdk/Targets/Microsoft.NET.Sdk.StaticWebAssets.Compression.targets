@@ -129,7 +129,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GZipCompress Condition="'@(_GZipCompressedStaticWebAssets)' != ''"
       FilesToCompress="@(_GZipCompressedStaticWebAssets)" />
 
-    <BrotliCompress
+    <BrotliCompress Condition="'@(_BrotliCompressedStaticWebAssets)' != ''"
       FilesToCompress="@(_BrotliCompressedStaticWebAssets)"
       CompressionLevel="$(_BlazorBrotliCompressionLevel)"
       ToolAssembly="$(_StaticWebAssetsSdkToolAssembly)"
@@ -155,7 +155,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GZipCompress Condition="'@(_GZipCompressedStaticWebAssetsForPublish)' != ''"
       FilesToCompress="@(_GZipCompressedStaticWebAssetsForPublish)" />
 
-    <BrotliCompress
+    <BrotliCompress Condition="'@(_BrotliCompressedStaticWebAssetsForPublish)' != ''"
       FilesToCompress="@(_BrotliCompressedStaticWebAssetsForPublish)"
       CompressionLevel="$(_BlazorBrotliCompressionLevel)"
       ToolAssembly="$(_StaticWebAssetsSdkToolAssembly)"

@@ -1,6 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -33,7 +32,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(ProjectDirectory);
             build.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            build.Execute("/bl").Should().Pass();
+            build.Execute().Should().Pass();
 
             var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
@@ -176,7 +175,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
             build.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            build.Execute("/bl").Should().Pass();
+            build.Execute().Should().Pass();
 
             var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
@@ -228,7 +227,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
             build.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            build.Execute("/bl").Should().Pass();
+            build.Execute().Should().Pass();
 
             var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
@@ -286,7 +285,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var publish = new PublishCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
             publish.WithWorkingDirectory(ProjectDirectory.Path);
-            publish.Execute("/bl").Should().Pass();
+            publish.Execute().Should().Pass();
 
             var intermediateOutputPath = publish.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var publishPath = publish.GetOutputDirectory(DefaultTfm, "Debug").ToString();
@@ -619,7 +618,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var publish = new PublishCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
             publish.WithWorkingDirectory(ProjectDirectory.Path);
-            publish.Execute("/bl").Should().Pass();
+            publish.Execute().Should().Pass();
 
             var intermediateOutputPath = publish.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var publishPath = publish.GetOutputDirectory(DefaultTfm, "Debug").ToString();
@@ -692,7 +691,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
             build.WithWorkingDirectory(ProjectDirectory.TestRoot);
-            build.Execute("/bl").Should().Pass();
+            build.Execute().Should().Pass();
 
             var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
@@ -761,7 +760,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var publish = new PublishCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
             publish.WithWorkingDirectory(ProjectDirectory.Path);
-            publish.Execute("/p:AppendTargetFrameworkToOutputPath=false", "/bl").Should().Pass();
+            publish.Execute("/p:AppendTargetFrameworkToOutputPath=false").Should().Pass();
 
             //  Hard code output paths here to account for AppendTargetFrameworkToOutputPath=false
             var intermediateOutputPath = Path.Combine(ProjectDirectory.Path, "AppWithPackageAndP2PReference", "obj", "Debug");
@@ -914,7 +913,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             result.Should().Pass();
 
@@ -944,7 +943,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(projectDirectory, "Pack");
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             result.Should().Pass();
 
@@ -979,7 +978,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             result.Should().Pass();
 
@@ -1007,13 +1006,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             result.Should().Pass();
 
             var pack2 = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack2.WithWorkingDirectory(projectDirectory.Path);
-            var result2 = pack2.Execute("/bl");
+            var result2 = pack2.Execute();
 
             result2.Should().Pass();
 
@@ -1045,7 +1044,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             result.Should().Pass();
 
@@ -1078,7 +1077,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var buildCommand = new BuildCommand(projectDirectory, "PackageLibraryDirectDependency");
             buildCommand.WithWorkingDirectory(projectDirectory.Path);
-            var result = buildCommand.Execute("/p:GeneratePackageOnBuild=true", "/bl");
+            var result = buildCommand.Execute("/p:GeneratePackageOnBuild=true");
 
             result.Should().Pass();
 
@@ -1110,7 +1109,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var buildCommand = new BuildCommand(projectDirectory, "PackageLibraryDirectDependency");
             buildCommand.WithWorkingDirectory(projectDirectory.Path);
-            var result = buildCommand.Execute("/p:GeneratePackageOnBuild=true", "/bl");
+            var result = buildCommand.Execute("/p:GeneratePackageOnBuild=true");
 
             result.Should().Pass();
 
@@ -1151,7 +1150,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             result.Should().Pass();
 
@@ -1192,11 +1191,11 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(projectDirectory, "PackageLibraryDirectDependency");
             build.WithWorkingDirectory(projectDirectory.Path);
-            var buildResult = build.Execute("/bl");
+            var buildResult = build.Execute();
 
             var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/p:NoBuild=true", "/bl");
+            var result = pack.Execute("/p:NoBuild=true");
 
             result.Should().Pass();
 
@@ -1237,11 +1236,11 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(Log, projectDirectory.Path, "PackageLibraryDirectDependency");
             build.WithWorkingDirectory(projectDirectory.Path);
-            var buildResult = build.Execute("/bl");
+            var buildResult = build.Execute();
 
             var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/p:NoBuild=true", "/bl");
+            var result = pack.Execute("/p:NoBuild=true");
 
             result.Should().Pass();
 
@@ -1280,7 +1279,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(projectDirectory, "PackageLibraryDirectDependency");
             build.WithWorkingDirectory(projectDirectory.Path);
-            var result = build.Execute("/p:GeneratePackageOnBuild=true", "/bl");
+            var result = build.Execute("/p:GeneratePackageOnBuild=true");
 
             result.Should().Pass();
 
@@ -1321,7 +1320,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(projectDirectory, "PackageLibraryDirectDependency");
             build.WithWorkingDirectory(projectDirectory.Path);
-            var result = build.Execute("/p:GeneratePackageOnBuild=true", "/bl");
+            var result = build.Execute("/p:GeneratePackageOnBuild=true");
 
             result.Should().Pass();
 
@@ -1382,7 +1381,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             result.Should().Pass();
 
@@ -1452,7 +1451,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             result.Should().Pass();
 
@@ -1521,13 +1520,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(Log, projectDirectory.Path);
             build.WithWorkingDirectory(projectDirectory.Path);
-            var buildResult = build.Execute("/bl");
+            var buildResult = build.Execute();
 
             buildResult.Should().Pass();
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/p:NoBuild=true", "/bl");
+            var result = pack.Execute("/p:NoBuild=true");
 
             result.Should().Pass();
 
@@ -1597,13 +1596,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(Log, projectDirectory.Path);
             build.WithWorkingDirectory(projectDirectory.Path);
-            var buildResult = build.Execute("/bl");
+            var buildResult = build.Execute();
 
             buildResult.Should().Pass();
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/p:NoBuild=true", "/bl");
+            var result = pack.Execute("/p:NoBuild=true");
 
             result.Should().Pass();
 
@@ -1672,7 +1671,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(Log, projectDirectory.Path);
             build.WithWorkingDirectory(projectDirectory.Path);
-            var result = build.Execute("/p:GeneratePackageOnBuild=true", "/bl");
+            var result = build.Execute("/p:GeneratePackageOnBuild=true");
 
             result.Should().Pass();
 
@@ -1742,7 +1741,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(Log, projectDirectory.Path);
             build.WithWorkingDirectory(projectDirectory.Path);
-            var result = build.Execute("/p:GeneratePackageOnBuild=true", "/bl");
+            var result = build.Execute("/p:GeneratePackageOnBuild=true");
 
             result.Should().Pass();
 
@@ -1809,7 +1808,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             result.Should().Pass();
 
@@ -1877,7 +1876,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             result.Should().Pass();
 
@@ -1944,13 +1943,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(Log, projectDirectory.Path);
             build.WithWorkingDirectory(projectDirectory.Path);
-            var buildResult = build.Execute("/bl");
+            var buildResult = build.Execute();
 
             buildResult.Should().Pass();
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/p:NoBuild=true", "/bl");
+            var result = pack.Execute("/p:NoBuild=true");
 
             result.Should().Pass();
 
@@ -2018,13 +2017,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(Log, projectDirectory.Path);
             build.WithWorkingDirectory(projectDirectory.Path);
-            var buildResult = build.Execute("/bl");
+            var buildResult = build.Execute();
 
             buildResult.Should().Pass();
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/p:NoBuild=true", "/bl");
+            var result = pack.Execute("/p:NoBuild=true");
 
             result.Should().Pass();
 
@@ -2091,7 +2090,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(Log, projectDirectory.Path);
             build.WithWorkingDirectory(projectDirectory.Path);
-            var result = build.Execute("/p:GeneratePackageOnBuild=true", "/bl");
+            var result = build.Execute("/p:GeneratePackageOnBuild=true");
 
             result.Should().Pass();
 
@@ -2159,7 +2158,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var build = new BuildCommand(Log, projectDirectory.Path);
             build.WithWorkingDirectory(projectDirectory.Path);
-            var result = build.Execute("/p:GeneratePackageOnBuild=true", "/bl");
+            var result = build.Execute("/p:GeneratePackageOnBuild=true");
 
             result.Should().Pass();
 
@@ -2233,7 +2232,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             result.Should().Pass();
 
@@ -2312,7 +2311,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack2 = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             pack2.WithWorkingDirectory(projectDirectory.Path);
-            var result2 = pack2.Execute("/bl");
+            var result2 = pack2.Execute();
 
             result2.Should().Pass();
 
@@ -2387,7 +2386,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             result.Should().Pass();
 
@@ -2430,7 +2429,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             result.Should().Pass();
 
@@ -2457,7 +2456,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.TestRoot);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             result.Should().Pass();
 
@@ -2518,7 +2517,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.TestRoot);
-            var result = pack.Execute("/p:NoBuild=true", "/bl");
+            var result = pack.Execute("/p:NoBuild=true");
 
             var outputPath = pack.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 
@@ -2549,7 +2548,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.TestRoot);
-            var result = pack.Execute("/p:NoBuild=true", "/bl");
+            var result = pack.Execute("/p:NoBuild=true");
 
             var outputPath = pack.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 
@@ -2602,7 +2601,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(projectDirectory, "Pack");
             pack.WithWorkingDirectory(projectDirectory.TestRoot);
-            var result = pack.Execute("/bl");
+            var result = pack.Execute();
 
             var intermediateOutputPath = pack.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var outputPath = pack.GetOutputDirectory(DefaultTfm, "Debug").ToString();

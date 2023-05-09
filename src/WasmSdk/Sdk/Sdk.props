@@ -18,6 +18,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- WASM projects defaults to browser-wasm -->
     <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">browser-wasm</RuntimeIdentifier>
     <UseMonoRuntime>true</UseMonoRuntime>
+    
+    <SelfContained>true</SelfContained>
 
     <_WasmSdkImportsMicrosoftNETSdkPublish Condition="'$(UsingMicrosoftNETSdkPublish)' != 'true'">true</_WasmSdkImportsMicrosoftNETSdkPublish>
     <_WasmSdkImportsMicrosoftNETSdkStaticWebAssets Condition="'$(UsingMicrosoftNETSdkStaticWebAssets)' != 'true'">true</_WasmSdkImportsMicrosoftNETSdkStaticWebAssets>

@@ -57,6 +57,11 @@
         <target state="translated">Não foi possível encontrar nenhum projeto em ‘{0}’.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DidYouMean">
+        <source>Did you mean the following command?</source>
+        <target state="new">Did you mean the following command?</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
         <source>Force the command to ignore any persistent build servers.</source>
         <target state="translated">Force o comando a ignorar quaisquer servidores de compilação persistentes.</target>
@@ -207,8 +212,8 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
-        <target state="translated">As opções '--auto--contidas ' e '--não-independentes ' não podem ser usadas juntas.</target>
-        <note />
+        <target state="needs-review-translation">As opções '--auto--contidas ' e '--não-independentes ' não podem ser usadas juntas.</target>
+        <note>{Locked="--self-contained"}{Locked="--no-self-contained"}</note>
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
@@ -220,6 +225,11 @@ O padrão é 'true' se um identificador de runtime for especificado.</target>
       <trans-unit id="Solution">
         <source>Solution</source>
         <target state="translated">Solução</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionArgumentMisplaced">
+        <source>Solution argument '{0}' is misplaced.</source>
+        <target state="new">Solution argument '{0}' is misplaced.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">

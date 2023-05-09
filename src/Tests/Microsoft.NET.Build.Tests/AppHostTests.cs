@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -371,8 +371,8 @@ namespace Microsoft.NET.Build.Tests
                 //  Use "any" as RID so that it will fail to find AppHost
                 RuntimeIdentifier = "any",
                 IsExe = true,
+                SelfContained = "false"
             };
-            testProject.AdditionalProperties["SelfContained"] = "false";
             testProject.AdditionalProperties["UseAppHost"] = "false";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);

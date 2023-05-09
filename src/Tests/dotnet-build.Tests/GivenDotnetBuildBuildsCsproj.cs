@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -181,7 +181,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         }
 
         [Fact]
-        public void It_warns_on_rid_without_self_contained_options()
+        public void It_no_longer_warns_on_rid_without_self_contained_options()
         {
             var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld")
                 .WithSource()
@@ -194,7 +194,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .Should()
                .Pass()
                .And
-               .HaveStdOutContaining("NETSDK1179");
+               .NotHaveStdOutContaining("NETSDK1179");
         }
 
         [Fact]
@@ -204,8 +204,8 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             {
                 IsExe = true,
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                SelfContained = "true"
             };
-            testProject.AdditionalProperties["SelfContained"] = "true";
 
             var testInstance = _testAssetsManager.CreateTestProject(testProject);
 

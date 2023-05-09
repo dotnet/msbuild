@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -23,9 +23,9 @@ namespace Microsoft.DotNet.Watcher.Tools
             _compilationHandler = new CompilationHandler(reporter);
         }
 
-        public async ValueTask InitializeAsync(DotNetWatchContext dotNetWatchContext, CancellationToken cancellationToken)
+        public void Initialize(DotNetWatchContext dotNetWatchContext, CancellationToken cancellationToken)
         {
-            await _compilationHandler.InitializeAsync(dotNetWatchContext, cancellationToken);
+            _compilationHandler.Initialize(dotNetWatchContext, cancellationToken);
         }
 
         public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem[] files, CancellationToken cancellationToken)

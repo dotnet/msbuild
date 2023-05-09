@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
@@ -194,7 +194,7 @@ namespace Microsoft.NET.Publish.Tests
   <PropertyGroup>
     <RuntimeIdentifier>{rid}</RuntimeIdentifier>
     {(selfContained.HasValue ? $"<SelfContained>{selfContained}</SelfContained>" : "")}
-    {((!(selfContained ?? true) && useAppHost.HasValue) ? $"<UseAppHost>{useAppHost}</UseAppHost>" : "")}
+    {((!(selfContained ?? false) && useAppHost.HasValue) ? $"<UseAppHost>{useAppHost}</UseAppHost>" : "")}
   </PropertyGroup>
 </Project>
 ");
@@ -214,7 +214,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"{testProject.Name}.runtimeconfig.json"
             });
 
-            if (selfContained ?? true)
+            if (selfContained ?? false)
             {
                 output.Should().HaveFiles(new[] {
                     $"{FileConstants.DynamicLibPrefix}hostfxr{FileConstants.DynamicLibSuffix}",
@@ -229,7 +229,7 @@ namespace Microsoft.NET.Publish.Tests
                 });
             }
 
-            if ((selfContained ?? true) || (useAppHost ?? true))
+            if ((selfContained ?? false) || (useAppHost ?? true))
             {
                 output.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
             }

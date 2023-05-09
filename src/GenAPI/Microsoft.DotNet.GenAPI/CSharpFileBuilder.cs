@@ -96,7 +96,6 @@ namespace Microsoft.DotNet.GenAPI
 
             document.GetSyntaxRootAsync().Result!
                 .Rewrite(new SingleLineStatementCSharpSyntaxRewriter())
-                .Rewrite(new TypeForwardAttributeCSharpSyntaxRewriter())
                 .WriteTo(_textWriter);
         }
 
@@ -121,50 +120,6 @@ namespace Microsoft.DotNet.GenAPI
             }
 
             return namespaceNode;
-        }
-
-        // Compare the equality of two method signatures for the purpose of emitting a "new"
-        // keyword on a method's return type. This is *not* meant to be complete implementation,
-        // but rather a heuristic to check that one method may hide another.
-        private static bool SignatureEquals(IMethodSymbol? method, IMethodSymbol? baseMethod)
-        {
-            if (method is null || baseMethod is null)
-            {
-                return false;
-            }
-
-            if (method.Equals(baseMethod, SymbolEqualityComparer.Default))
-            {
-                return true;
-            }
-
-            if (method.Name != baseMethod.Name)
-            {
-                return false;
-            }
-
-            if (method.Arity != baseMethod.Arity || method.Parameters.Length != baseMethod.Parameters.Length)
-            {
-                return false;
-            }
-
-            // compare parameter types
-            for (int i = 0; i < method.Parameters.Length; i++)
-            {
-                if (!method.Parameters[i].Type.Equals(baseMethod.Parameters[i].Type, SymbolEqualityComparer.Default))
-                {
-                    return false;
-                }
-            }
-
-            // TODO: GenAPI does not currently preserve __arglist as a parameter.
-            // Add test case for this branch when that is fixed.
-            if (method.IsVararg != baseMethod.IsVararg)
-            {
-                return false;
-            }
-
-            return true;
         }
 
         // Name hiding through inheritance occurs when classes or structs redeclare names that were inherited from base classes.This type of name hiding takes one of the following forms:
@@ -194,7 +149,7 @@ namespace Microsoft.DotNet.GenAPI
                 return baseType.GetMembers(member.Name)
                     .Any(baseMember => _symbolFilter.Include(baseMember) &&
                          (baseMember.Kind != SymbolKind.Method ||
-                          SignatureEquals(method, (IMethodSymbol)baseMember)));
+                          method.SignatureEquals((IMethodSymbol)baseMember)));
             }
             else if (member is IPropertySymbol prop && prop.IsIndexer)
             {
@@ -202,8 +157,8 @@ namespace Microsoft.DotNet.GenAPI
                 return baseType.GetMembers(member.Name)
                     .Any(baseMember => baseMember is IPropertySymbol baseProperty &&
                          _symbolFilter.Include(baseMember) &&
-                         (SignatureEquals(prop.GetMethod, baseProperty.GetMethod) ||
-                          SignatureEquals(prop.SetMethod, baseProperty.SetMethod)));
+                         (prop.GetMethod.SignatureEquals(baseProperty.GetMethod) ||
+                          prop.SetMethod.SignatureEquals(baseProperty.SetMethod)));
             }
             else
             {
@@ -227,15 +182,24 @@ namespace Microsoft.DotNet.GenAPI
 
             foreach (ISymbol member in members.Order())
             {
-                // If the method is ExplicitInterfaceImplementation and is derived from an interface that was filtered out, we must filter out it either.
-                if (member is IMethodSymbol method &&
-                    method.MethodKind == MethodKind.ExplicitInterfaceImplementation &&
-                    method.ExplicitInterfaceImplementations.Any(m => !_symbolFilter.Include(m.ContainingSymbol) ||
+                if (member is IMethodSymbol method)
+                {
+                    // If the method is ExplicitInterfaceImplementation and is derived from an interface that was filtered out, we must filter out it as well.
+                    if (method.MethodKind == MethodKind.ExplicitInterfaceImplementation &&
+                        method.ExplicitInterfaceImplementations.Any(m => !_symbolFilter.Include(m.ContainingSymbol) ||
                         // if explicit interface implementation method has inaccessible type argument
                         m.ContainingType.HasInaccessibleTypeArgument(_symbolFilter)))
-                {
-                    continue;
+                    {
+                        continue;
+                    }
+
+                    // Filter out default constructors since these will be added automatically
+                    if (method.IsImplicitDefaultConstructor(_symbolFilter))
+                    {
+                        continue;
+                    }
                 }
+
                 // If the property is derived from an interface that was filter out, we must filtered out it either.
                 if (member is IPropertySymbol property && !property.ExplicitInterfaceImplementations.IsEmpty &&
                     property.ExplicitInterfaceImplementations.Any(m => !_symbolFilter.Include(m.ContainingSymbol)))
@@ -314,7 +278,9 @@ namespace Microsoft.DotNet.GenAPI
             {
                 if (symbol.TypeKind != TypeKind.Error)
                 {
-                    TypeSyntax typeSyntaxNode = (TypeSyntax)_syntaxGenerator.TypeExpression(symbol);
+                    // see https://github.com/dotnet/roslyn/issues/67341
+                    // GetForwardedTypes returns bound generics, but `typeof` requires unbound
+                    TypeSyntax typeSyntaxNode = (TypeSyntax)_syntaxGenerator.TypeExpression(symbol.MakeUnboundIfGeneric());
                     compilationUnit = _syntaxGenerator.AddAttributes(compilationUnit,
                         _syntaxGenerator.Attribute(typeof(TypeForwardedToAttribute).FullName!,
                             SyntaxFactory.TypeOfExpression(typeSyntaxNode)).WithTrailingTrivia(SyntaxFactory.LineFeed));

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -49,7 +52,8 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "SkipRuntimeAssemblyFromRuntimePack",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
-                IsExe = true
+                IsExe = true,
+                SelfContained = "true"
             };
 
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
@@ -102,7 +106,8 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "SkipNativeAssetFromRuntimePack",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
-                IsExe = true
+                IsExe = true,
+                SelfContained = "true"
             };
 
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);

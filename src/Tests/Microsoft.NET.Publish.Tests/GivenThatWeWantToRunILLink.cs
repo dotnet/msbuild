@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -146,7 +146,8 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework)
-                .WithProjectChanges(project => {
+                .WithProjectChanges(project =>
+                {
                     var ns = project.Root.Name.Namespace;
                     project.Root.Add(new XElement(ns + "ItemGroup",
                         new XElement("KnownILLinkPack",
@@ -682,21 +683,22 @@ namespace Microsoft.NET.Publish.Tests
                 "ILLink : Trim analysis warning IL2063: System.RuntimeType.GetInterface(String, Boolean",
                 "ILLink : Trim analysis warning IL2065: System.Runtime.Serialization.FormatterServices.InternalGetSerializableMembers(Type",
             };
-            switch (targetFramework) {
-            case "net6.0":
-                expectedOutput.AddRange(new string[] {
+            switch (targetFramework)
+            {
+                case "net6.0":
+                    expectedOutput.AddRange(new string[] {
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
                 });
-                break;
-            case "net7.0":
-            case "net8.0":
-                expectedOutput.AddRange(new string[] {
+                    break;
+                case "net7.0":
+                case "net8.0":
+                    expectedOutput.AddRange(new string[] {
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssemblyInContextWhenSupported(IntPtr, IntPtr",
                 });
-                break;
-            default:
-                throw new InvalidOperationException();
+                    break;
+                default:
+                    throw new InvalidOperationException();
             }
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
@@ -729,17 +731,18 @@ namespace Microsoft.NET.Publish.Tests
                 "ILLink : Trim analysis warning IL2026: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream, Assembly",
                 "ILLink : Trim analysis warning IL2026: System.StartupHookProvider.ProcessStartupHooks(",
             };
-            switch (targetFramework) {
-            case "net6.0":
-                expectedOutput.AddRange(new string[] {
+            switch (targetFramework)
+            {
+                case "net6.0":
+                    expectedOutput.AddRange(new string[] {
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
                     "ILLink : Trim analysis warning IL2055: System.Runtime.Serialization.ClassDataContract.UnadaptedClassType.get",
                     "ILLink : Trim analysis warning IL2067: System.Runtime.Serialization.SurrogateDataContract.GetUninitializedObject(Type"
                 });
-                break;
-            case "net7.0":
-            case "net8.0":
-                expectedOutput.AddRange(new string[] {
+                    break;
+                case "net7.0":
+                case "net8.0":
+                    expectedOutput.AddRange(new string[] {
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.ComActivator.GetClassFactoryForTypeInternal(ComActivationContextInternal*",
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssemblyInContextWhenSupported(IntPtr, IntPtr",
@@ -752,9 +755,9 @@ namespace Microsoft.NET.Publish.Tests
                     "ILLink : Trim analysis warning IL2045: System.Runtime.InteropServices.ComAwareEventInfo.GetDataForComInvocation(EventInfo, Guid&, Int32&",
                     "ILLink : Trim analysis warning IL2045: System.Runtime.InteropServices.ComAwareEventInfo.GetDataForComInvocation(EventInfo, Guid&, Int32&"
                 });
-                break;
-            default:
-                throw new InvalidOperationException();
+                    break;
+                default:
+                    throw new InvalidOperationException();
             }
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
@@ -1402,7 +1405,7 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testAsset);
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
                                     "/p:TreatWarningsAsErrors=true", "/p:ILLinkTreatWarningsAsErrors=false", "/p:EnableTrimAnalyzer=false")
                 .Should().Pass()
                 .And.HaveStdOutContaining("warning IL2026")
@@ -1420,7 +1423,7 @@ namespace Microsoft.NET.Publish.Tests
             var projectName = "HelloWorld";
             var referenceProjectName = "ClassLibForILLink";
 
-            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName, setSelfContained: false);
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testAsset);
@@ -1555,6 +1558,8 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName, isExe);
             testProject.AdditionalProperties["IsTrimmable"] = "true";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework + isExe);
 
             var buildCommand = new BuildCommand(testAsset);
@@ -1563,7 +1568,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should().Pass()
                 .And.HaveStdOutMatching("warning IL2026.*Program.IL_2026.*Testing analysis warning IL2026");
 
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework).FullName;
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: rid).FullName;
             var assemblyPath = Path.Combine(outputDirectory, $"{projectName}.dll");
             var runtimeConfigPath = Path.Combine(outputDirectory, $"{projectName}.runtimeconfig.json");
 
@@ -1792,7 +1797,8 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = projectName,
                 TargetFrameworks = targetFramework,
-                IsExe = isExe
+                IsExe = isExe,
+                SelfContained = "true"
             };
 
             // Don't error when generators/analyzers can't be loaded.
@@ -1867,10 +1873,11 @@ public class Program
             {
                 Name = projectName,
                 TargetFrameworks = targetFramework,
-                IsExe = true
+                IsExe = true,
+                SelfContained = "true"
             };
-            testProject.AdditionalProperties["PublishTrimmed"] = "true";
 
+            testProject.AdditionalProperties["PublishTrimmed"] = "true";
             testProject.SourceFiles[$"{projectName}.cs"] = @"
 using System;
 public class Program
@@ -1971,7 +1978,8 @@ public static class UnusedNonTrimmableAssembly
             [CallerMemberName] string callingMethod = "",
             string referenceProjectIdentifier = null,
             Action<TestProject> modifyReferencedProject = null,
-            bool addAssemblyReference = false)
+            bool addAssemblyReference = false,
+            bool setSelfContained = true)
         {
             var testProject = new TestProject()
             {
@@ -1979,6 +1987,11 @@ public static class UnusedNonTrimmableAssembly
                 TargetFrameworks = targetFramework,
                 IsExe = true
             };
+
+            if (setSelfContained)
+            {
+                testProject.SelfContained = "true";
+            }
 
             testProject.SourceFiles[$"{mainProjectName}.cs"] = @"
 using System;
@@ -2085,7 +2098,8 @@ public class ClassLib
 
         private void CheckILLinkVersion(TestAsset testAsset, string targetFramework)
         {
-            var getKnownPacks = new GetValuesCommand(testAsset, "KnownILLinkPack", GetValuesCommand.ValueType.Item, targetFramework) {
+            var getKnownPacks = new GetValuesCommand(testAsset, "KnownILLinkPack", GetValuesCommand.ValueType.Item, targetFramework)
+            {
                 MetadataNames = new List<string> { "TargetFramework", "ILLinkPackVersion" }
             };
             getKnownPacks.Execute().Should().Pass();

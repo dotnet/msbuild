@@ -1,9 +1,8 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Runtime.InteropServices;
-using FluentAssertions;
+using System.Text.Json.Nodes;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -926,6 +925,199 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             cmd.Should().Pass()
                 .And.HaveStdOutContaining("Determining projects to restore...")
                 .And.HaveStdOutContaining("Restore succeeded.");
+        }
+
+        [Fact]
+        public void AddJsonProperty_Basic()
+        {
+            const string templateLocation = "PostActions/AddJsonProperty/Basic";
+            const string templateName = "TestAssets.PostActions.AddJsonProperty.Basic";
+
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+
+            new DotnetNewCommand(_log, templateName)
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining($"The template \"{templateName}\" was created successfully.")
+                .And.HaveStdOutContaining("Successfully modified testfile.json.")
+                .And.NotHaveStdOutContaining("Manual instructions: Modify the JSON file manually.");
+        }
+
+        [Fact]
+        public void AddJsonProperty_InOtherProjectOfSameSolution()
+        {
+            const string existingProjectTemplateLocation = "PostActions/AddJsonProperty/WithExistingProject/ExistingProject";
+            const string existingProjectTemplateName = "TestAssets.PostActions.AddJsonProperty.WithExistingProject.ExistingProject";
+
+            const string myProjectTemplateLocation = "PostActions/AddJsonProperty/WithExistingProject/MyTestProject";
+            const string myProjectTemplateName = "TestAssets.PostActions.AddJsonProperty.WithExistingProject.MyProject";
+
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+
+            InstallTestTemplate(existingProjectTemplateLocation, _log, home, workingDirectory);
+            InstallTestTemplate(myProjectTemplateLocation, _log, home, workingDirectory);
+
+            // Create a solution that already contains a project that has a JSON file present.
+            // This is actually simulating an Azure IoT Edge project.
+            new DotnetNewCommand(_log, "sln", "-n", "MySolution")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            // Add the IoT Edge Project to the solution.  This project contains a deployment.template.json file
+            // When we add another project that represents an IoT Edge module, we want to make some modifications
+            // in that deployment.template.json file.
+            new DotnetNewCommand(_log, existingProjectTemplateName, "-o", "ExistingProject")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining($"The template \"{existingProjectTemplateName}\" was created successfully.")
+                .And.HaveStdOutContaining("Successfully added project(s) to a solution file.")
+                .And.NotHaveStdOutContaining("Manual instructions: Add generated project to solution manually.");
+
+            // Create the project that represents an IoT Edge module.  This project template must modify the
+            // deployment.template.json file that is part of the existing project that has been created in the step before.
+            new DotnetNewCommand(_log, myProjectTemplateName, "-o", "custommodule1", "-n", "custommodule1")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining($"The template \"{myProjectTemplateName}\" was created successfully.")
+                .And.HaveStdOutContaining("Successfully modified deployment.template.json.")
+                .And.NotHaveStdOutContaining("Manual instructions: Modify the JSON file manually.");
+        }
+
+        [Fact]
+        public void AddJsonProperty_WithSourceNameReplacementInNewJsonProperty()
+        {
+            const string templateLocation = "PostActions/AddJsonProperty/WithSourceNameChangeInJson";
+            const string templateName = "TestAssets.PostActions.AddJsonProperty.WithSourceNameChangeInJson";
+
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+
+            // Create the project that represents an IoT Edge module.  This project template must modify the
+            // deployment.template.json file that is part of the existing project that has been created in the step before.
+            new DotnetNewCommand(_log, templateName, "-n", "TheProjectName")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining($"The template \"{templateName}\" was created successfully.")
+                .And.HaveStdOutContaining("Successfully modified testfile.json.")
+                .And.NotHaveStdOutContaining("Manual instructions: Modify the JSON file manually.");
+
+            // Verify if the expected property is added to the deployment.template.json file
+            string jsonFileContents = File.ReadAllText(Path.Combine(workingDirectory, "testfile.json"));
+
+            JsonNode? jsonContents = JsonNode.Parse(jsonFileContents);
+            Assert.NotNull(jsonContents);
+            Assert.True(jsonContents["moduleConfiguration"]?["edgeAgent"]?["properties.desired"]?["modules"]?["TheProjectName"] != null);
+            Assert.Equal("${MODULEDIR<../TheProjectName>}", jsonContents["moduleConfiguration"]?["edgeAgent"]?["properties.desired"]?["modules"]?["TheProjectName"]?.ToString());
+        }
+
+        [Fact]
+        public void AddJsonProperty_WithMultipleAddJsonPropertyActions()
+        {
+            const string templateLocation = "PostActions/AddJsonProperty/WithAddMultipleProperties";
+            const string templateName = "TestAssets.PostActions.AddJsonProperty.WithAddMultipleProperties";
+
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+
+            new DotnetNewCommand(_log, templateName, "-n", "TheProjectName")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining($"The template \"{templateName}\" was created successfully.")
+                .And.HaveStdOutContaining("Successfully modified testfile.json.")
+                .And.NotHaveStdOutContaining("Manual instructions: Modify the JSON file manually.");
+
+            // Verify if the expected property is added to the deployment.template.json file
+            string jsonFileContents = File.ReadAllText(Path.Combine(workingDirectory, "testfile.json"));
+
+            JsonNode? jsonContents = JsonNode.Parse(jsonFileContents);
+            Assert.NotNull(jsonContents);
+
+            Assert.NotNull(jsonContents["root"]?["prop1"]);
+            Assert.NotNull(jsonContents["root"]?["prop1"]?["prop2"]);
+            Assert.Equal("bar", jsonContents["root"]?["prop1"]?["prop2"]?.ToString());
+        }
+
+        [Fact]
+        public void AddJsonProperty_FailsWhenJsonFileNotFound()
+        {
+            const string templateLocation = "PostActions/AddJsonProperty/FailsWhenJsonFileNotFound";
+            const string templateName = "TestAssets.PostActions.AddJsonProperty.FailsWhenJsonFileNotFound";
+
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+
+            // Create the project that represents an IoT Edge module.  This project template must modify the
+            // deployment.template.json file that is part of the existing project that has been created in the step before.
+            new DotnetNewCommand(_log, templateName)
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.HaveStdErrContaining("Unable to find the json file in the solution")
+                .And.HaveStdErrContaining("Manual instructions: Modify the JSON file manually.");
+        }
+
+        [Fact]
+        public void AddJsonProperty_FailsWhenJsonFileNotFoundInEligableDirectories()
+        {
+            const string templateLocation = "PostActions/AddJsonProperty/FailsWhenJsonFileNotFound";
+            const string templateName = "TestAssets.PostActions.AddJsonProperty.FailsWhenJsonFileNotFound";
+
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+
+            InstallTestTemplate(templateLocation, _log, home, workingDirectory);
+
+            string jsonFileLocation = Path.Combine(workingDirectory, "testfile.json");
+
+            File.WriteAllText(jsonFileLocation, @"{""foo"":{""bar"":{}}}");
+
+            // Create the project that represents an IoT Edge module.  This project template must modify the
+            // deployment.template.json file that is part of the existing project that has been created in the step before.
+            new DotnetNewCommand(_log, templateName, "-o", "SolutionFolder/SomeTestFolder")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.HaveStdErrContaining("Unable to find the json file in the solution")
+                .And.HaveStdErrContaining("Manual instructions: Modify the JSON file manually.");
+
+            File.Delete(jsonFileLocation);
         }
     }
 }

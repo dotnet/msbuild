@@ -674,6 +674,12 @@ setx PATH "%PATH%;{0}"
   <data name="CommandPrereleaseOptionDescription" xml:space="preserve">
     <value>Allows prerelease packages to be installed.</value>
   </data>
+  <data name="SolutionArgumentMisplaced" xml:space="preserve">
+    <value>Solution argument '{0}' is misplaced.</value>
+  </data>
+  <data name="DidYouMean" xml:space="preserve">
+    <value>Did you mean the following command?</value>
+  </data>
   <data name="ArchitectureOptionDescription" xml:space="preserve">
     <value>The target architecture.</value>
   </data>
@@ -698,6 +704,7 @@ The default is 'true' if a runtime identifier is specified.</value>
   </data>
   <data name="SelfContainAndNoSelfContainedConflict" xml:space="preserve">
     <value>The '--self-contained' and '--no-self-contained' options cannot be used together.</value>
+    <comment>{Locked="--self-contained"}{Locked="--no-self-contained"}</comment>
   </data>
   <data name="DisableBuildServersOptionDescription" xml:space="preserve">
     <value>Force the command to ignore any persistent build servers.</value>
