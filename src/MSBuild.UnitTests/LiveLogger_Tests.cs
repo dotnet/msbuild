@@ -4,6 +4,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging.LiveLogger;
 using Shouldly;
@@ -182,7 +184,7 @@ namespace Microsoft.Build.UnitTests
         public void PrintsBuildSummary_Succeeded()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () => { });
-            _mockTerminal.GetLastLine().ShouldBe("Build succeeded in 5.0s");
+            _mockTerminal.GetLastLine().WithoutAnsiCodes().ShouldBe("Build succeeded in 5.0s");
         }
 
         [Fact]
@@ -192,14 +194,14 @@ namespace Microsoft.Build.UnitTests
             {
                 WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning!"));
             });
-            _mockTerminal.GetLastLine().ShouldBe("Build succeeded with warnings in 5.0s");
+            _mockTerminal.GetLastLine().WithoutAnsiCodes().ShouldBe("Build succeeded with warnings in 5.0s");
         }
 
         [Fact]
         public void PrintBuildSummary_Failed()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () => { });
-            _mockTerminal.GetLastLine().ShouldBe("Build failed in 5.0s");
+            _mockTerminal.GetLastLine().WithoutAnsiCodes().ShouldBe("Build failed in 5.0s");
         }
 
         [Fact]
@@ -209,9 +211,20 @@ namespace Microsoft.Build.UnitTests
             {
                 ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
             });
-            _mockTerminal.GetLastLine().ShouldBe("Build failed with errors in 5.0s");
+            _mockTerminal.GetLastLine().WithoutAnsiCodes().ShouldBe("Build failed with errors in 5.0s");
         }
 
         #endregion
+
+    }
+
+    internal static class StringVT100Extensions
+    {
+        private static Regex s_removeAnsiCodes = new Regex("\\x1b\\[[0-9;]*[mGKHF]");
+
+        public static string WithoutAnsiCodes(this string text)
+        {
+            return s_removeAnsiCodes.Replace(text, string.Empty);
+        }
     }
 }

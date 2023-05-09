@@ -63,9 +63,4 @@ internal interface ITerminal : IDisposable
     /// Writes a string to the output using the given color. Or buffers it if <see cref="BeginUpdate"/> was called.
     /// </summary>
     void WriteColorLine(TerminalColor color, string text);
-
-    /// <summary>
-    /// Return string representing text wrapped in VT100 color codes.
-    /// </summary>
-    string RenderColor(TerminalColor color, string text);
 }
