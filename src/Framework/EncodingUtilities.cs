@@ -254,7 +254,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// The .NET SDK and Visual Studio both have environment variables that set a custom language. MSBuild should respect the SDK variable.
-        /// To use the correspoding UI culture, in certain cases the console encoding must be changed. This function will change the encoding in these cases.
+        /// To use the corresponding UI culture, in certain cases the console encoding must be changed. This function will change the encoding in these cases.
         /// This code introduces a breaking change in .NET 8 due to the encoding of the console being changed.
         /// If the environment variables are undefined, this function should be a no-op.
         /// </summary>
@@ -264,7 +264,7 @@ namespace Microsoft.Build.Shared
         /// </returns>
         public static CultureInfo GetExternalOverriddenUILanguageIfSupportableWithEncoding()
         {
-            if (string.Equals(Environment.GetEnvironmentVariable("MSBUILDDISABLEDYNAMICUTFENCODING"), "true", StringComparison.OrdinalIgnoreCase))
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
             {
                 return null;
             }
@@ -277,9 +277,9 @@ namespace Microsoft.Build.Shared
                     CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
                     )
                 {
-                    // Setting both encodings causes a change in the CHCP, making it so we dont need to P-Invoke chcp ourselves.
+                    // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
                     Console.OutputEncoding = Encoding.UTF8;
-                    // If the InputEncoding is not set, the encoding will work in CMD but not in Powershell, as the raw CHCP page won't be changed.
+                    // If the InputEncoding is not set, the encoding will work in CMD but not in PowerShell, as the raw CHCP page won't be changed.
                     Console.InputEncoding = Encoding.UTF8;
                     return externalLanguageSetting;
                 }
@@ -288,6 +288,7 @@ namespace Microsoft.Build.Shared
                     return externalLanguageSetting;
                 }
             }
+
             return null;
         }
 

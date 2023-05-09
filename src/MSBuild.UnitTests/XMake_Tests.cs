@@ -644,8 +644,10 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        [Fact]
-        public void ConsoleUIRespectsSDKLanguage()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ConsoleUIRespectsSDKLanguage(bool enableFeature)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
             {
@@ -665,12 +667,19 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 // Set the UI language based on the SDK environment var.
-                testEnvironment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, "ja"); // japanese chose arbitrarily.
-
+                testEnvironment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, "ja"); // Japanese chose arbitrarily.
+                ChangeWaves.ResetStateForTests();
+                if (!enableFeature)
+                {
+                    testEnvironment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_8.ToString());
+                }
                 MSBuildApp.SetConsoleUI();
 
-                Assert.Equal(new CultureInfo("ja"), thisThread.CurrentUICulture);
-                Assert.Equal(65001, Console.OutputEncoding.CodePage); // utf 8 enabled for correct rendering.
+                Assert.Equal(enableFeature ? new CultureInfo("ja") : originalUICulture, thisThread.CurrentUICulture);
+                if (enableFeature)
+                {
+                    Assert.Equal(65001, Console.OutputEncoding.CodePage); // UTF-8 enabled for correct rendering.
+                }
             }
             finally
             {
@@ -680,9 +689,11 @@ namespace Microsoft.Build.UnitTests
                 CultureInfo.CurrentCulture = originalUICulture;
                 CultureInfo.DefaultThreadCurrentUICulture = originalUICulture;
 
-                // MSbuild should also restore the encoding upon exit, but we don't create that context here.
+                // MSBuild should also restore the encoding upon exit, but we don't create that context here.
                 Console.OutputEncoding = originalOutputEncoding;
                 Console.InputEncoding = originalInputEncoding;
+
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
 
