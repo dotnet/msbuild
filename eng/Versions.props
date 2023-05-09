@@ -18,7 +18,6 @@
     <!-- Enable to remove prerelease label. -->
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">true</StabilizePackageVersion>
     <DotNetFinalVersionKind Condition="'$(StabilizePackageVersion)' == 'true'">release</DotNetFinalVersionKind>
-    <MicrosoftTemplateEngineTestHelperPackageVersion>7.0.301-rtm.23253.5</MicrosoftTemplateEngineTestHelperPackageVersion>
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
