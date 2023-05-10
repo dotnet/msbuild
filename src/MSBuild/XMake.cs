@@ -1693,7 +1693,8 @@ namespace Microsoft.Build.CommandLine
                     &&
                     codepage != thisThread.CurrentUICulture.TextInfo.OEMCodePage
                     &&
-                    codepage != thisThread.CurrentUICulture.TextInfo.ANSICodePage)
+                    codepage != thisThread.CurrentUICulture.TextInfo.ANSICodePage
+                    && !Equals(CultureInfo.InvariantCulture, thisThread.CurrentUICulture))
             {
                 thisThread.CurrentUICulture = new CultureInfo("en-US");
                 return;
