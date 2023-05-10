@@ -39,9 +39,6 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Logging.LiveLogger;
-using System.Runtime.InteropServices;
-using Microsoft.Win32;
 
 #nullable disable
 
@@ -1275,7 +1272,7 @@ namespace Microsoft.Build.CommandLine
                     }
                     else
                     {
-                        Evaluation.Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+                        Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
 
                         project.SaveLogicalProject(preprocessWriter);
 
@@ -1521,7 +1518,7 @@ namespace Microsoft.Build.CommandLine
         {
             try
             {
-                Evaluation.Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+                Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
 
                 foreach (string target in project.Targets.Keys)
                 {
@@ -1680,7 +1677,7 @@ namespace Microsoft.Build.CommandLine
             thisThread.CurrentUICulture = desiredCulture;
 
             // For full framework, both the above and below must be set. This is not true in core, but it is a no op in core.
-            // https://learn.microsoft.com/en-us/dotnet/api/system.globalization.cultureinfo.defaultthreadcurrentculture?redirectedfrom=MSDN&view=net-7.0#remarks
+            // https://learn.microsoft.com/dotnet/api/system.globalization.cultureinfo.defaultthreadcurrentculture#remarks
             CultureInfo.CurrentUICulture = desiredCulture;
             CultureInfo.DefaultThreadCurrentUICulture = desiredCulture;
 
