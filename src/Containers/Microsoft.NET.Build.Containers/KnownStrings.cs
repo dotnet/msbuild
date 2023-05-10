@@ -33,6 +33,7 @@ internal static class KnownStrings
 
     public static class ErrorCodes
     {
+        public static readonly string CONTAINER002 = nameof(CONTAINER002);
         public static readonly string CONTAINER003 = nameof(CONTAINER003);
         public static readonly string CONTAINER1011 = nameof(CONTAINER1011);
         public static readonly string CONTAINER1012 = nameof(CONTAINER1012);

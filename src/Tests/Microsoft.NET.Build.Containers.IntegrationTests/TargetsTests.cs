@@ -40,7 +40,7 @@ public class TargetsTests
         });
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
-        instance.Should().BuildSuccessfully(ComputeContainerConfig, logger);
+        instance.Build(new[] { ComputeContainerConfig }, new []{ logger });
         logger.Warnings.Should().HaveCount(1, "a warning for the use of the old ContainerImageName property should have been created");
         logger.Warnings[0].Code.Should().Be(KnownStrings.ErrorCodes.CONTAINER003);
         Assert.Equal(customImageName, instance.GetPropertyValue(ContainerRepository));
@@ -73,16 +73,25 @@ public class TargetsTests
     [Theory]
     public void CanWarnOnInvalidSDKVersions(string sdkVersion, bool isAllowed)
     {
-        var (project, _, d) = ProjectInitializer.InitProject(new()
+        var (project, logger, d) = ProjectInitializer.InitProject(new()
         {
             ["NETCoreSdkVersion"] = sdkVersion,
             ["PublishProfile"] = "DefaultContainer"
         }, projectName: $"{nameof(CanWarnOnInvalidSDKVersions)}_{sdkVersion}_{isAllowed}");
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        instance.Build(new[]{"_ContainerVerifySDKVersion"}, new[] { logger }, null, out var outputs).Should().Be(isAllowed);
         var derivedIsAllowed = Boolean.Parse(project.GetProperty("_IsSDKContainerAllowedVersion").EvaluatedValue);
-        // var buildResult = instance.Build(new[]{"_ContainerVerifySDKVersion"}, null, null, out var outputs);
-        derivedIsAllowed.Should().Be(isAllowed, $"SDK version {(isAllowed ? "should" : "should not")} have been allowed ");
+        if (isAllowed)
+        {
+            logger.Errors.Should().HaveCount(0, "an error should not have been created");
+            derivedIsAllowed.Should().Be(true, "SDK version {0} should have been allowed", sdkVersion);
+        }
+        else
+        {
+            logger.Errors.Should().HaveCount(1, "an error should have been created").And.Satisfy(error => error.Code == KnownStrings.ErrorCodes.CONTAINER002);
+            derivedIsAllowed.Should().Be(false, "SDK version {0} should not have been allowed", sdkVersion);
+        }
     }
 
     [InlineData(true)]
