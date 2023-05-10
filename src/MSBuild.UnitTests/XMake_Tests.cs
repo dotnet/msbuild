@@ -697,6 +697,30 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        /// <summary>
+        /// We shouldn't change the UI culture if the current UI culture is invariant.
+        /// In other cases, we can get an exception on CultureInfo creation when System.Globalization.Invariant enabled.
+        /// </summary>
+
+        [Fact]
+        public void SetConsoleUICultureInInvariantCulture()
+        {
+            Thread thisThread = Thread.CurrentThread;
+
+            // Save the current UI culture, so we can restore it at the end of this unit test.
+            CultureInfo originalUICulture = thisThread.CurrentUICulture;
+
+            thisThread.CurrentUICulture = CultureInfo.InvariantCulture;
+            MSBuildApp.SetConsoleUI();
+
+            // Make sure we don't change culture.
+            thisThread.CurrentUICulture.ShouldBe(CultureInfo.InvariantCulture);
+
+            // Restore the current UI culture back to the way it was at the beginning of this unit test.
+            thisThread.CurrentUICulture = originalUICulture;
+        }
+
+
 #if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Invalid configuration file should not dump stack.
