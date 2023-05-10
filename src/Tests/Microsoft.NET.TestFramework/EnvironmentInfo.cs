@@ -135,6 +135,21 @@ namespace Microsoft.NET.TestFramework
                     }
                 }
             }
+            else if (ridOS.Equals("debian", StringComparison.OrdinalIgnoreCase))
+            {
+                string restOfRid = currentRid.Substring(ridOS.Length + 1);
+                string debianVersionString = restOfRid.Split('-')[0];
+                if (int.TryParse(debianVersionString, out int debianVersion))
+                {
+                    if (debianVersion >= 9)
+                    {
+                        if (nugetFramework.Version < new Version(2, 1, 0, 0))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
             else if (ridOS.Equals("ubuntu", StringComparison.OrdinalIgnoreCase))
             {
                 string restOfRid = currentRid.Substring(ridOS.Length + 1);
