@@ -2942,11 +2942,9 @@ namespace Microsoft.Build.Execution
                 if (item.DirectMetadata != null)
                 {
                     directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
-                    foreach (ProjectMetadata directMetadatum in item.DirectMetadata)
-                    {
-                        ProjectMetadataInstance directMetadatumInstance = new ProjectMetadataInstance(directMetadatum);
-                        directMetadata.Set(directMetadatumInstance);
-                    }
+
+                    IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
+                    directMetadata.ImportProperties(projectMetadataInstances);
                 }
 
                 // For externally constructed ProjectItem, fall back to the publicly available EvaluateInclude
