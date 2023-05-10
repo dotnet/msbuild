@@ -3938,35 +3938,35 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Add), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryExecuteAdd(args, out returnVal))
+                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Add, IntrinsicFunctions.Add, out returnVal))
                             {
                                 return true;
                             }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Subtract), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryExecuteSubtract(args, out returnVal))
+                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Subtract, IntrinsicFunctions.Subtract, out returnVal))
                             {
                                 return true;
                             }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Multiply), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryExecuteMultiply(args, out returnVal))
+                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Multiply, IntrinsicFunctions.Multiply, out returnVal))
                             {
                                 return true;
                             }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Divide), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryExecuteDivide(args, out returnVal))
+                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Divide, IntrinsicFunctions.Divide, out returnVal))
                             {
                                 return true;
                             }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Modulo), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryExecuteModulo(args, out returnVal))
+                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Modulo, IntrinsicFunctions.Modulo, out returnVal))
                             {
                                 return true;
                             }
@@ -4701,7 +4701,7 @@ namespace Microsoft.Build.Evaluation
                 return value is double || (value is string str && str.Contains(numberDecimalSeparator));
             }
 
-            private static bool TryExecuteAdd(object[] args, out object resultValue)
+            private static bool TryExecuteArithmeticOverload(object[] args, Func<long, long, long> integerOperation, Func<double, double, double> realOperation, out object resultValue)
             {
                 resultValue = null;
 
@@ -4710,121 +4710,18 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (!IsIntrinsicFunctionOverloadsEnabled() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
+                if (IsIntrinsicFunctionOverloadsEnabled() && !IsFloatingPointRepresentation(args[0]) && !IsFloatingPointRepresentation(args[1]))
                 {
-                    if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
+                    if (TryConvertToLong(args[0], out long argLong0) && TryConvertToLong(args[1], out long argLong1))
                     {
-                        resultValue = IntrinsicFunctions.Add(arg0, arg1);
+                        resultValue = integerOperation(argLong0, argLong1);
                         return true;
                     }
                 }
-                else if (TryConvertToLong(args[0], out long arg0) && TryConvertToLong(args[1], out long arg1))
+
+                if (TryConvertToDouble(args[0], out double argDouble0) && TryConvertToDouble(args[1], out double argDouble1))
                 {
-                    resultValue = IntrinsicFunctions.Add(arg0, arg1);
-                    return true;
-                }
-
-                return false;
-            }
-
-            private static bool TryExecuteSubtract(object[] args, out object resultValue)
-            {
-                resultValue = null;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                if (!IsIntrinsicFunctionOverloadsEnabled() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
-                {
-                    if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
-                    {
-                        resultValue = IntrinsicFunctions.Subtract(arg0, arg1);
-                        return true;
-                    }
-                }
-                else if (TryConvertToLong(args[0], out long arg0) && TryConvertToLong(args[1], out long arg1))
-                {
-                    resultValue = IntrinsicFunctions.Subtract(arg0, arg1);
-                    return true;
-                }
-
-                return false;
-            }
-
-            private static bool TryExecuteMultiply(object[] args, out object resultValue)
-            {
-                resultValue = null;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                if (!IsIntrinsicFunctionOverloadsEnabled() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
-                {
-                    if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
-                    {
-                        resultValue = IntrinsicFunctions.Multiply(arg0, arg1);
-                        return true;
-                    }
-                }
-                else if (TryConvertToLong(args[0], out long arg0) && TryConvertToLong(args[1], out long arg1))
-                {
-                    resultValue = IntrinsicFunctions.Multiply(arg0, arg1);
-                    return true;
-                }
-
-                return false;
-            }
-
-            private static bool TryExecuteDivide(object[] args, out object resultValue)
-            {
-                resultValue = null;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                if (!IsIntrinsicFunctionOverloadsEnabled() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
-                {
-                    if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
-                    {
-                        resultValue = IntrinsicFunctions.Divide(arg0, arg1);
-                        return true;
-                    }
-                }
-                else if (TryConvertToLong(args[0], out long arg0) && TryConvertToLong(args[1], out long arg1))
-                {
-                    resultValue = IntrinsicFunctions.Divide(arg0, arg1);
-                    return true;
-                }
-
-                return false;
-            }
-
-            private static bool TryExecuteModulo(object[] args, out object resultValue)
-            {
-                resultValue = null;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                if (!IsIntrinsicFunctionOverloadsEnabled() || IsFloatingPointRepresentation(args[0]) || IsFloatingPointRepresentation(args[1]))
-                {
-                    if (TryConvertToDouble(args[0], out double arg0) && TryConvertToDouble(args[1], out double arg1))
-                    {
-                        resultValue = IntrinsicFunctions.Modulo(arg0, arg1);
-                        return true;
-                    }
-                }
-                else if (TryConvertToLong(args[0], out long arg0) && TryConvertToLong(args[1], out long arg1))
-                {
-                    resultValue = IntrinsicFunctions.Modulo(arg0, arg1);
+                    resultValue = realOperation(argDouble0, argDouble1);
                     return true;
                 }
 
