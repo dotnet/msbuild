@@ -623,14 +623,14 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        private static string pathOfInstalledWindowsKits = null;
+        private static string pathOfInstalledWindowsKits = string.Empty;
 
         internal static string PathOfInstalledWindowsKits
         {
             get
             {
                 #if FEATURE_WIN32_REGISTRY
-                if (FrameworkLocationHelper.pathOfInstalledWindowsKits == null)
+                if (string.IsNullOrEmpty(FrameworkLocationHelper.pathOfInstalledWindowsKits))
                 {
                     FrameworkLocationHelper.pathOfInstalledWindowsKits = FindRegistryValueUnderKey(
                        windowsKitsInstalledRootsRegistryPath,
