@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.GenAPI
         {
             bool resolveAssemblyReferences = context.AssemblyReferences?.Length > 0;
 
-            IAssemblySymbolLoader loader = new AssemblySymbolLoader(resolveAssemblyReferences);
+            IAssemblySymbolLoader loader = new AssemblySymbolLoader(resolveAssemblyReferences, context.IncludeVisibleOutsideOfAssembly);
 
             if (context.AssemblyReferences is not null)
             {

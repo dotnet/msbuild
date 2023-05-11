@@ -371,8 +371,8 @@ namespace Microsoft.NET.Build.Tests
                 //  Use "any" as RID so that it will fail to find AppHost
                 RuntimeIdentifier = "any",
                 IsExe = true,
+                SelfContained = "false"
             };
-            testProject.AdditionalProperties["SelfContained"] = "false";
             testProject.AdditionalProperties["UseAppHost"] = "false";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);

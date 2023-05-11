@@ -14,6 +14,7 @@ namespace Microsoft.TemplateEngine.Cli
                 (typeof(IPostActionProcessor), new ChmodPostActionProcessor()),
                 (typeof(IPostActionProcessor), new InstructionDisplayPostActionProcessor()),
                 (typeof(IPostActionProcessor), new ProcessStartPostActionProcessor()),
+                (typeof(IPostActionProcessor), new AddJsonPropertyPostActionProcessor())
             };
     }
 }

@@ -151,5 +151,15 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             Environment.SetEnvironmentVariable(variable, value, target);
         }
+
+        public int? GetEnvironmentVariableAsNullableInt(string variable)
+        {
+            if (Environment.GetEnvironmentVariable(variable) is string strValue && int.TryParse(strValue, out int intValue))
+            {
+                return intValue;
+            }
+
+            return null;
+        }
     }
 }

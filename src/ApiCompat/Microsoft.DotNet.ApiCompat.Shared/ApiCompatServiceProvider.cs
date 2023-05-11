@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.ApiCompat
                 return new ApiCompatRunner(SuppressableLog,
                     SuppressionEngine,
                     new ApiComparerFactory(ruleFactory(SuppressableLog), apiComparerSettings),
-                    new AssemblySymbolLoaderFactory());
+                    new AssemblySymbolLoaderFactory(respectInternals));
             });
         }
 

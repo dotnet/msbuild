@@ -706,6 +706,31 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Chcesz uruchomić tę akcję [{0}(tak)|{1}(nie)]?</target>
         <note />
       </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_ArgumentNotConfigured">
+        <source>Post action argument '{0}' is mandatory, but not configured.</source>
+        <target state="new">Post action argument '{0}' is mandatory, but not configured.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_MultipleJsonFiles">
+        <source>More than one file found that matches '{0}'.</source>
+        <target state="new">More than one file found that matches '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_NoJsonFile">
+        <source>Unable to find the json file in the solution</source>
+        <target state="new">Unable to find the json file in the solution</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_ParentPropertyPathInvalid">
+        <source>Parent property path '{0}' could not be traversed.</source>
+        <target state="new">Parent property path '{0}' could not be traversed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Succeeded">
+        <source>Successfully modified {0}.</source>
+        <target state="new">Successfully modified {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
         <source>Failed to run the command: argument 'executable' is missing in post action configuration.</source>
         <target state="translated">Nie można uruchomić polecenia: brak argumentu "executable" w konfiguracji akcji post.</target>

@@ -479,7 +479,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1093: "}</comment>
   </data>
   <data name="ReadyToRunNoValidRuntimePackageError" xml:space="preserve">
-    <value>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing and make sure to restore packages with the PublishReadyToRun property set to true.</value>
+    <value>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing. When targeting .NET 6 or higher, make sure to restore packages with the PublishReadyToRun property set to true.</value>
     <comment>{StrBegin="NETSDK1094: "}</comment>
   </data>
   <data name="ReadyToRunTargetNotSupportedError" xml:space="preserve">
@@ -620,7 +620,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1128: "}</comment>
   </data>
   <data name="PublishUnsupportedWithoutTargetFramework" xml:space="preserve">
-    <value>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</value>
+    <value>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify one of the following frameworks in order to publish: {0}</value>
     <comment>{StrBegin="NETSDK1129: "}</comment>
   </data>
   <data name="WinMDReferenceNotSupportedOnTargetFramework" xml:space="preserve">
@@ -825,7 +825,7 @@ You may need to build the project on another operating system or architecture, o
   </data>
   <data name="SelfContainedOptionShouldBeUsedWithRuntime" xml:space="preserve">
     <value>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</value>
-    <comment>{StrBegin="NETSDK1179: "}</comment>
+    <comment>{StrBegin="NETSDK1179: "}{Locked="--self-contained"}{Locked="--no-self-contained"}{Locked="--runtime"}</comment>
   </data>
   <data name="CouldNotGetPackVersionFromWorkloadManifests" xml:space="preserve">
     <value>NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</value>
@@ -877,7 +877,7 @@ You may need to build the project on another operating system or architecture, o
   </data>
   <data name="CannotHaveSolutionLevelOutputPath" xml:space="preserve">
     <value>NETSDK1194: The "--output" option isn't supported when building a solution. Specifying a solution-level output path results in all projects copying outputs to the same directory, which can lead to inconsistent builds.</value>
-    <comment>{StrBegin="NETSDK1194: "}</comment>
+    <comment>{StrBegin="NETSDK1194: "}{Locked="--output"}</comment>
   </data>
   <data name="ILLinkNoValidRuntimePackageError" xml:space="preserve">
     <value>NETSDK1195: Unable to optimize assemblies for size: a valid runtime package was not found. Either set the PublishTrimmed property to false, or use a supported target framework when publishing.</value>
@@ -904,5 +904,8 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1200: If UseArtifactsPath is set to true and ArtifactsPath is not set, there must be a Directory.Build.props file in order to determine where the artifacts folder should be located.</value>
     <comment>{StrBegin="NETSDK1200: "}</comment>
   </data>
-  
+  <data name="RuntimeIdentifierWillNoLongerImplySelfContained" xml:space="preserve">
+    <value>NETSDK1201: For projects targeting .NET 8.0 and higher, specifying a RuntimeIdentifier will no longer produce a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use the --self-contained argument.</value>
+    <comment>{StrBegin="NETSDK1201: "}</comment>
+  </data>
 </root>

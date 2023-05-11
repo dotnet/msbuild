@@ -855,6 +855,21 @@ The header is followed by the list of parameters and their errors (might be seve
   <data name="UnexpectedResult" xml:space="preserve">
     <value>Template generation ended with unexpected result: '{0}'. Details: {1}</value>
   </data>
+  <data name="PostAction_ModifyJson_Error_ArgumentNotConfigured" xml:space="preserve">
+    <value>Post action argument '{0}' is mandatory, but not configured.</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_MultipleJsonFiles" xml:space="preserve">
+    <value>More than one file found that matches '{0}'.</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_NoJsonFile" xml:space="preserve">
+    <value>Unable to find the json file in the solution</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_ParentPropertyPathInvalid" xml:space="preserve">
+    <value>Parent property path '{0}' could not be traversed.</value>
+  </data>
+  <data name="PostAction_ModifyJson_Succeeded" xml:space="preserve">
+    <value>Successfully modified {0}.</value>
+  </data>
   <data name="ColumnNameTrusted" xml:space="preserve">
     <value>Trusted</value>
     <comment>information about NuGet package origin; if a package has PrefixReserved indicator </comment>

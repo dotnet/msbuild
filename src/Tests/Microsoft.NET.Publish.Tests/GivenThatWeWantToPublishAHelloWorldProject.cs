@@ -97,7 +97,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithTargetFramework(targetFramework);
 
             var publishCommand = new PublishCommand(helloWorldAsset);
-            var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:CopyLocalLockFileAssemblies=true");
+            var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true", "/p:CopyLocalLockFileAssemblies=true");
 
             publishResult.Should().Pass();
 
@@ -884,7 +884,7 @@ public static class Program
   <PropertyGroup>
     <RuntimeIdentifier>{rid}</RuntimeIdentifier>
     {(selfContained.HasValue ? $"<SelfContained>{selfContained}</SelfContained>" : "")}
-    {((!(selfContained ?? true) && useAppHost.HasValue) ? $"<UseAppHost>{useAppHost}</UseAppHost>" : "")}
+    {((!(selfContained ?? false) && useAppHost.HasValue) ? $"<UseAppHost>{useAppHost}</UseAppHost>" : "")}
   </PropertyGroup>
 </Project>
 ");
@@ -904,7 +904,7 @@ public static class Program
                 $"{testProject.Name}.runtimeconfig.json",
             });
 
-            if (selfContained ?? true)
+            if (selfContained ?? false)
             {
                 output.Should().HaveFiles(new[] {
                     $"{FileConstants.DynamicLibPrefix}hostfxr{FileConstants.DynamicLibSuffix}",
@@ -919,7 +919,7 @@ public static class Program
                 });
             }
 
-            if ((selfContained ?? true) || (useAppHost ?? true))
+            if ((selfContained ?? false) || (useAppHost ?? true))
             {
                 output.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
             }

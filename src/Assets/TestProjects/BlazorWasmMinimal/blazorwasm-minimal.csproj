@@ -10,6 +10,11 @@
     <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
   </ItemGroup>
 
+  <!-- Based on .NET 8 breaking change: Add SelfContained if RuntimeIdentifier is defined to match old behavior.. -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != '' and '$(SelfContained)' == ''">
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+  
   <!-- Enabling compression increases build time. We want to avoid this for tests so we
   disable it here. This doesn't affect any test assertions. -->
   <PropertyGroup>

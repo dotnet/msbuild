@@ -34,7 +34,15 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             task.Execute().Should().BeTrue();
 
-            task.ReferencesToAdd[0].ItemSpec.Should().Be(Path.Combine(mockPackageDirectory, "lib/Microsoft.Windows.SDK.NET.dll"));
+            var reference = task.ReferencesToAdd[0];
+            reference.ItemSpec.Should().Be(Path.Combine(mockPackageDirectory, "lib/Microsoft.Windows.SDK.NET.dll"));
+            reference.GetMetadata("AssemblyName").Should().Be("Microsoft.Windows.SDK.NET");
+            reference.GetMetadata("AssemblyVersion").Should().Be("10.0.18362.3");
+            reference.GetMetadata("FileVersion").Should().Be("10.0.18362.3");
+            reference.GetMetadata("PublicKeyToken").Should().Be("null");
+            reference.GetMetadata("FrameworkReferenceName").Should().Be("Microsoft.Windows.SDK.NET.Ref");
+            reference.GetMetadata("FrameworkReferenceVersion").Should().Be("5.0.0-preview1");
+
             task.PlatformManifests[0].ItemSpec.Should().Be(Path.Combine(mockPackageDirectory, $"data{Path.DirectorySeparatorChar}PlatformManifest.txt"));
             task.AnalyzersToAdd.Length.Should().Be(2);
             task.AnalyzersToAdd[0].ItemSpec.Should().Be(Path.Combine(mockPackageDirectory, "analyzers/dotnet/anyAnalyzer.dll"));
