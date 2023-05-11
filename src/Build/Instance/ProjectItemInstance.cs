@@ -1696,7 +1696,6 @@ namespace Microsoft.Build.Execution
                     if (translator.TranslateNullable(_directMetadata))
                     {
                         int count = translator.Reader.ReadInt32();
-                        _directMetadata = (count == 0) ? null : new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
                         if (count > 0)
                         {
                             IEnumerable<ProjectMetadataInstance> metaData =
