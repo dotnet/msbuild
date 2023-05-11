@@ -499,7 +499,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Parses the different string passed into AssertItemsMatch and returns a list of ITaskItems.
+        /// Parses the string passed into AssertItemsMatch and returns a list of ITaskItems.
         /// </summary>
         /// <param name="expectedItemsString"></param>
         /// <returns></returns>

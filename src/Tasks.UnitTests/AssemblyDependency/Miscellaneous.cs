@@ -5567,7 +5567,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Test the case where the redist list is empty and we pass in an empty set of allow lists
-        /// We should return null as there is no point generating a allow list if there is nothing to subtract from.
+        /// We should return null as there is no point generating an allow list if there is nothing to subtract from.
         /// ResolveAssemblyReference will see this as null and log a warning indicating no redist assemblies were found therefore no deny list could be
         /// generated
         /// </summary>
