@@ -99,8 +99,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private const int RetryDelayMillisecondsDefault = 1000;
 
-        [Required]
         public ITaskItem[] SourceFiles { get; set; }
+
+        public ITaskItem[] SourceFolders { get; set; }
 
         public ITaskItem DestinationFolder { get; set; }
 
@@ -649,7 +650,15 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            // There must be a destinationFolder (either files or directory).
+            // There must be a source (either files or Folders).
+            if (SourceFiles == null && SourceFolders == null)
+            {
+                // TODO: Create new error message.
+                Log.LogErrorWithCodeFromResources("Copy.NeedsDestination", "SourceFiles", "SourceFolders");
+                return false;
+            }
+
+            // There must be a destination (either files or directory).
             if (DestinationFiles == null && DestinationFolder == null)
             {
                 Log.LogErrorWithCodeFromResources("Copy.NeedsDestination", "DestinationFiles", "DestinationFolder");
@@ -663,13 +672,20 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
+            // SourceFolders and DestinationFiles can't be used together.
+            if (SourceFolders != null && DestinationFiles != null)
+            {
+                // TODO: Create new error message.
+                Log.LogErrorWithCodeFromResources("Copy.NeedsDestination", "SourceFolders", "DestinationFiles");
+                return false;
+            }
+
             // If the caller passed in DestinationFiles, then its length must match SourceFiles.
             if (DestinationFiles != null && DestinationFiles.Length != SourceFiles.Length)
             {
                 Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", DestinationFiles.Length, SourceFiles.Length, "DestinationFiles", "SourceFiles");
                 return false;
             }
-
 
             if (ErrorIfLinkFails && !UseHardlinksIfPossible && !UseSymboliclinksIfPossible)
             {

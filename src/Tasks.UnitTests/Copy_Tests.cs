@@ -84,6 +84,21 @@ namespace Microsoft.Build.UnitTests
             Copy.RefreshInternalEnvironmentValues();
         }
 
+        [Fact]
+        public void NoInput()
+        {
+            var task = new Copy
+            {
+                BuildEngine = new MockEngine(true),
+            };
+            task.Execute().ShouldBeTrue();
+            task.CopiedFiles.ShouldNotBeNull();
+            task.CopiedFiles.Length.ShouldBe(0);
+            task.DestinationFiles.ShouldNotBeNull();
+            task.DestinationFiles.Length.ShouldBe(0);
+            task.WroteAtLeastOneFile.ShouldBeFalse();
+        }
+
         /// <summary>
         /// If OnlyCopyIfDifferent is set to "true" then we shouldn't copy over files that
         /// have the same date and time.
@@ -2194,7 +2209,7 @@ namespace Microsoft.Build.UnitTests
     public class CopyHardAndSymbolicLink_Tests
     {
         /// <summary>
-        /// Verify build sucessfully when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true 
+        /// Verify build successfully when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true
         /// </summary>
         [Fact]
         public void CopyWithHardAndSymbolicLinks()
