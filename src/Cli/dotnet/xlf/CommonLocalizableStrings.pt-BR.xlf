@@ -212,7 +212,7 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
-        <target state="new">The '--self-contained' and '--no-self-contained' options cannot be used together.</target>
+        <target state="translated">As opções '--self-contained' e '--no-self-contained' não podem ser usadas juntas.</target>
         <note>{Locked="--self-contained"}{Locked="--no-self-contained"}</note>
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
