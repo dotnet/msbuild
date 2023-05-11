@@ -4538,8 +4538,13 @@ namespace Microsoft.Build.Evaluation
                 switch (value)
                 {
                     case double d:
-                        arg0 = Convert.ToInt64(d);
-                        return arg0 == d;
+                        if (d >= long.MinValue && d <= long.MaxValue)
+                        {
+                            arg0 = Convert.ToInt64(d);
+                            return arg0 == d;
+                        }
+
+                        break;
                     case long i:
                         arg0 = i;
                         return true;
