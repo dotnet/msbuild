@@ -1061,10 +1061,6 @@ namespace Microsoft.Build.Tasks
 
                     // Read the version string
                     var v = Encoding.UTF8.GetString(sr.ReadBytes(length));
-                    if (v.Length < 2 || v[0] != 'v')
-                    {
-                        return string.Empty;
-                    }
 
                     // Per II.24.2.1, version string length is rounded up
                     // to a multiple of 4. So we may read eg "4.0.30319\0\0"
@@ -1075,11 +1071,6 @@ namespace Microsoft.Build.Tasks
                         v = v.Substring(0, firstNull);
                     }
 
-                    // Make sure it is a version number
-                    if (!Version.TryParse(v.Substring(1), out _))
-                    {
-                        return string.Empty;
-                    }
                     return v;
                 }
                 catch
