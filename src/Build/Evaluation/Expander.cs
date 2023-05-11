@@ -4520,8 +4520,13 @@ namespace Microsoft.Build.Evaluation
                 switch (value)
                 {
                     case double d:
-                        arg0 = Convert.ToInt32(d);
-                        return arg0 == d;
+                        if (d >= int.MinValue && d <= int.MaxValue)
+                        {
+                            arg0 = Convert.ToInt32(d);
+                            return arg0 == d;
+                        }
+
+                        break;
                     case int i:
                         arg0 = i;
                         return true;
