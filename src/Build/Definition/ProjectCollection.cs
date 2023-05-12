@@ -87,8 +87,8 @@ namespace Microsoft.Build.Evaluation
         /// <remarks>
         /// ProjectCollection is highly reentrant - project creation, toolset and logger changes, and so on
         /// all need lock protection, but there are a lot of read cases as well, and calls to create Projects
-        /// call back to the ProjectCollection under locks. Use a RW lock, but default to always using
-        /// upgradable read locks to avoid adding reentrancy bugs.
+        /// call back to the ProjectCollection under locks. Use a RW lock with recursion support to avoid
+        /// adding reentrancy bugs.
         /// </remarks>
         private readonly ReaderWriterLockSlim _locker = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 
@@ -508,7 +508,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                using (_locker.EnterDisposableReadLock())
                 {
                     ErrorUtilities.VerifyThrow(_defaultToolsVersion != null, "Should have a default");
                     return _defaultToolsVersion;
@@ -558,7 +558,7 @@ namespace Microsoft.Build.Evaluation
             {
                 Dictionary<string, string> dictionary;
 
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                using (_locker.EnterDisposableReadLock())
                 {
                     if (_globalProperties.Count == 0)
                     {
@@ -591,7 +591,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                using (_locker.EnterDisposableReadLock())
                 {
                     return _loadedProjects.Count;
                 }
@@ -609,7 +609,7 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                using (_locker.EnterDisposableReadLock())
                 {
                     return _loggingService.Loggers == null
                         ? (ICollection<ILogger>)ReadOnlyEmptyCollection<ILogger>.Instance
@@ -628,7 +628,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                using (_locker.EnterDisposableReadLock())
                 {
                     return new List<Toolset>(_toolsets.Values);
                 }
@@ -650,7 +650,7 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                using (_locker.EnterDisposableReadLock())
                 {
                     return _isBuildEnabled;
                 }
@@ -683,7 +683,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                using (_locker.EnterDisposableReadLock())
                 {
                     return _onlyLogCriticalEvents;
                 }
@@ -720,17 +720,20 @@ namespace Microsoft.Build.Evaluation
             get
             {
                 // Avoid write lock if possible, this getter is called a lot during Project construction.
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                using (_locker.EnterDisposableReadLock())
                 {
                     if (_hostServices != null)
                     {
                         return _hostServices;
                     }
-
-                    using (_locker.EnterDisposableWriteLock())
+                }
+                using (_locker.EnterDisposableWriteLock())
+                {
+                    if (_hostServices == null)
                     {
-                        return _hostServices ?? (_hostServices = new HostServices());
+                        _hostServices = new HostServices();
                     }
+                    return _hostServices;
                 }
             }
 
@@ -763,7 +766,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                using (_locker.EnterDisposableReadLock())
                 {
                     return _skipEvaluation;
                 }
@@ -799,7 +802,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                using (_locker.EnterDisposableReadLock())
                 {
                     return _disableMarkDirty;
                 }
@@ -849,7 +852,7 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                using (_locker.EnterDisposableReadLock())
                 {
                     return _loggingService;
                 }
@@ -867,7 +870,7 @@ namespace Microsoft.Build.Evaluation
             {
                 var clone = new PropertyDictionary<ProjectPropertyInstance>();
 
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                using (_locker.EnterDisposableReadLock())
                 {
                     foreach (ProjectPropertyInstance property in _globalProperties)
                     {
@@ -886,23 +889,24 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                // Retrieves the environment properties.
+                // This is only done once, when the project collection is created. Any subsequent
+                // environment changes will be ignored. Child nodes will be passed this set
+                // of properties in their build parameters.
+                using (_locker.EnterDisposableReadLock())
                 {
-                    // Retrieves the environment properties.
-                    // This is only done once, when the project collection is created. Any subsequent
-                    // environment changes will be ignored. Child nodes will be passed this set
-                    // of properties in their build parameters.
+                    if (_environmentProperties != null)
+                    {
+                        return new PropertyDictionary<ProjectPropertyInstance>(_environmentProperties);
+                    }
+                }
+
+                using (_locker.EnterDisposableWriteLock())
+                {
                     if (_environmentProperties == null)
                     {
-                        using (_locker.EnterDisposableWriteLock())
-                        {
-                            if (_environmentProperties == null)
-                            {
-                                _environmentProperties = Utilities.GetEnvironmentProperties();
-                            }
-                        }
+                        _environmentProperties = Utilities.GetEnvironmentProperties();
                     }
-
                     return new PropertyDictionary<ProjectPropertyInstance>(_environmentProperties);
                 }
             }
@@ -917,7 +921,7 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                using (_locker.EnterDisposableReadLock())
                 {
                     return _toolsetsVersion;
                 }
@@ -931,7 +935,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterDisposableUpgradeableReadLock())
+                using (_locker.EnterDisposableReadLock())
                 {
                     return _maxNodeCount;
                 }
@@ -1419,7 +1423,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public ProjectPropertyInstance GetGlobalProperty(string name)
         {
-            using (_locker.EnterDisposableUpgradeableReadLock())
+            using (_locker.EnterDisposableReadLock())
             {
                 return _globalProperties[name];
             }
