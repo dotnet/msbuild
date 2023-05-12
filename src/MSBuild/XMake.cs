@@ -220,6 +220,10 @@ namespace Microsoft.Build.CommandLine
             )
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
+            // Setup the console UI.
+            using AutomaticEncodingRestorer _ = new();
+            SetConsoleUI();
+
             DebuggerLaunchCheck();
 
             // Initialize new build telemetry and record start of this build.
@@ -662,9 +666,6 @@ namespace Microsoft.Build.CommandLine
 
                 // check the operating system the code is running on
                 VerifyThrowSupportedOS();
-
-                // Setup the console UI.
-                SetConsoleUI();
 
                 // reset the application state for this new build
                 ResetBuildState();
@@ -1672,14 +1673,20 @@ namespace Microsoft.Build.CommandLine
             Thread thisThread = Thread.CurrentThread;
 
             // Eliminate the complex script cultures from the language selection.
-            thisThread.CurrentUICulture = CultureInfo.CurrentUICulture.GetConsoleFallbackUICulture();
+            var desiredCulture = EncodingUtilities.GetExternalOverriddenUILanguageIfSupportableWithEncoding() ?? CultureInfo.CurrentUICulture.GetConsoleFallbackUICulture();
+            thisThread.CurrentUICulture = desiredCulture;
+
+            // For full framework, both the above and below must be set. This is not true in core, but it is a no op in core.
+            // https://learn.microsoft.com/dotnet/api/system.globalization.cultureinfo.defaultthreadcurrentculture#remarks
+            CultureInfo.CurrentUICulture = desiredCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = desiredCulture;
 
             // Determine if the language can be displayed in the current console codepage, otherwise set to US English
             int codepage;
 
             try
             {
-                codepage = System.Console.OutputEncoding.CodePage;
+                codepage = Console.OutputEncoding.CodePage;
             }
             catch (NotSupportedException)
             {
@@ -1693,7 +1700,8 @@ namespace Microsoft.Build.CommandLine
                     &&
                     codepage != thisThread.CurrentUICulture.TextInfo.OEMCodePage
                     &&
-                    codepage != thisThread.CurrentUICulture.TextInfo.ANSICodePage)
+                    codepage != thisThread.CurrentUICulture.TextInfo.ANSICodePage
+                    && !Equals(CultureInfo.InvariantCulture, thisThread.CurrentUICulture))
             {
                 thisThread.CurrentUICulture = new CultureInfo("en-US");
                 return;

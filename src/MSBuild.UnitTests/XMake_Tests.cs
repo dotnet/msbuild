@@ -9,6 +9,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Framework;
@@ -642,6 +643,84 @@ namespace Microsoft.Build.UnitTests
             thisThread.CurrentUICulture = originalUICulture;
         }
 
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ConsoleUIRespectsSDKLanguage(bool enableFeature)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
+            {
+                return; // The feature to detect .NET SDK Languages is not enabled on this machine, so don't test it.
+            }
+
+            const string DOTNET_CLI_UI_LANGUAGE = nameof(DOTNET_CLI_UI_LANGUAGE);
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            // Save the current environment info so it can be restored.
+            var originalUILanguage = Environment.GetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE);
+
+            var originalOutputEncoding = Console.OutputEncoding;
+            var originalInputEncoding = Console.InputEncoding;
+            Thread thisThread = Thread.CurrentThread;
+            CultureInfo originalUICulture = thisThread.CurrentUICulture;
+
+            try
+            {
+                // Set the UI language based on the SDK environment var.
+                testEnvironment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, "ja"); // Japanese chose arbitrarily.
+                ChangeWaves.ResetStateForTests();
+                if (!enableFeature)
+                {
+                    testEnvironment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_8.ToString());
+                }
+                MSBuildApp.SetConsoleUI();
+
+                Assert.Equal(enableFeature ? new CultureInfo("ja") : CultureInfo.CurrentUICulture.GetConsoleFallbackUICulture(), thisThread.CurrentUICulture);
+                if (enableFeature)
+                {
+                    Assert.Equal(65001, Console.OutputEncoding.CodePage); // UTF-8 enabled for correct rendering.
+                }
+            }
+            finally
+            {
+                // Restore the current UI culture back to the way it was at the beginning of this unit test.
+                thisThread.CurrentUICulture = originalUICulture;
+                // Restore for full framework
+                CultureInfo.CurrentCulture = originalUICulture;
+                CultureInfo.DefaultThreadCurrentUICulture = originalUICulture;
+
+                // MSBuild should also restore the encoding upon exit, but we don't create that context here.
+                Console.OutputEncoding = originalOutputEncoding;
+                Console.InputEncoding = originalInputEncoding;
+
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+            }
+        }
+
+        /// <summary>
+        /// We shouldn't change the UI culture if the current UI culture is invariant.
+        /// In other cases, we can get an exception on CultureInfo creation when System.Globalization.Invariant enabled.
+        /// </summary>
+
+        [Fact]
+        public void SetConsoleUICultureInInvariantCulture()
+        {
+            Thread thisThread = Thread.CurrentThread;
+
+            // Save the current UI culture, so we can restore it at the end of this unit test.
+            CultureInfo originalUICulture = thisThread.CurrentUICulture;
+
+            thisThread.CurrentUICulture = CultureInfo.InvariantCulture;
+            MSBuildApp.SetConsoleUI();
+
+            // Make sure we don't change culture.
+            thisThread.CurrentUICulture.ShouldBe(CultureInfo.InvariantCulture);
+
+            // Restore the current UI culture back to the way it was at the beginning of this unit test.
+            thisThread.CurrentUICulture = originalUICulture;
+        }
+
+
 #if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Invalid configuration file should not dump stack.
@@ -798,6 +877,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MSBuildEngineLogger()
         {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en"); // build machines may have other values.
+            CultureInfo.CurrentUICulture = new CultureInfo("en"); // Validate that the thread will produce an english log regardless of the machine OS language
+
             string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
             string projectString =
                    "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
@@ -833,6 +916,8 @@ namespace Microsoft.Build.UnitTests
                 File.Exists(logFile).ShouldBeTrue();
 
                 var logFileContents = File.ReadAllText(logFile);
+
+                Assert.Equal(new CultureInfo("en"), Thread.CurrentThread.CurrentUICulture);
 
                 logFileContents.ShouldContain("Process = ");
                 logFileContents.ShouldContain("MSBuild executable path = ");
