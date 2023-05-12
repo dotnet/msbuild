@@ -39,6 +39,11 @@ namespace Microsoft.Build.Logging
                 colorReset: BaseConsoleLogger.DontResetColor)
         {
             WriteHandler = Write;
+
+            if (EncodingUtilities.GetExternalOverriddenUILanguageIfSupportableWithEncoding() != null)
+            {
+                _encoding = Encoding.UTF8;
+            }
         }
 
         #endregion
