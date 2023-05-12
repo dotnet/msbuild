@@ -866,19 +866,30 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Given a path get the CLR runtime version of the file
+        /// Given a path get the CLR runtime version of the file.
         /// </summary>
         /// <param name="path">path to the file</param>
         /// <returns>The CLR runtime version or empty if the path does not exist or the file is not an assembly.</returns>
         public static string GetRuntimeVersion(string path)
         {
-            using (var sr = new BinaryReader(File.OpenRead(path)))
+            if (!FileSystems.Default.FileExists(path))
             {
-                if (!FileSystems.Default.FileExists(path))
-                {
-                    return string.Empty;
-                }
+                return string.Empty;
+            }
 
+            Stream stream = File.OpenRead(path);
+            return GetRuntimeVersion(stream);
+        }
+
+        /// <summary>
+        /// Given a stream get the CLR runtime version of the underlying file.
+        /// </summary>
+        /// <param name="stream">A stream representing the file</param>
+        /// <returns>The CLR runtime version or empty if the stream does not represent an assembly.</returns>
+        internal static string GetRuntimeVersion(Stream stream)
+        {
+            using (var sr = new BinaryReader(stream))
+            {
                 // This algorithm for getting the runtime version is based on
                 // the ECMA Standard 335: The Common Language Infrastructure (CLI)
                 // http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf
