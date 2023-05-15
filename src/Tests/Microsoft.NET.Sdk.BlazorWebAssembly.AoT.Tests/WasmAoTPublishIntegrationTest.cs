@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization.Json;
 using System.Xml.Linq;
 using Microsoft.NET.Sdk.BlazorWebAssembly.Tests;
 using static Microsoft.NET.Sdk.BlazorWebAssembly.Tests.ServiceWorkerAssert;
@@ -186,6 +187,41 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests
                             }
                         }
                     });
+        }
+
+        [RequiresMSBuildVersionFact("17.0.0")]
+        public void AoT_BuildWithRelink_DotnetJsContainsVersion()
+        {
+            // Arrange
+            var testAppName = "BlazorWasmWithLibrary";
+            var testInstance = CreateAspNetSdkTestAssetWithAot(testAppName, new[] { "blazorwasm" });
+
+            var command = new BuildCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            command.Execute("/p:WasmBuildNative=true").Should().Pass();
+
+            var buildDirectory = command.GetOutputDirectory(DefaultTfm, "Debug");
+            var bootConfigRelativePath = "wwwroot/_framework/blazor.boot.json";
+
+            buildDirectory.Should().HaveFile(bootConfigRelativePath);
+
+            using (var bootConfigContent = File.OpenRead(Path.Combine(buildDirectory.ToString(), bootConfigRelativePath)))
+            {
+                var bootConfig = ParseBootData(bootConfigContent);
+                var dotnetJs = bootConfig.resources.runtime.Keys.FirstOrDefault(k => k.StartsWith("dotnet.") && k.EndsWith(".js"));
+                dotnetJs.Should().NotBeNull();
+                dotnetJs.Should().NotContain("..");
+
+                buildDirectory.Should().HaveFile($"wwwroot/_framework/{dotnetJs}");
+            }
+        }
+
+        private static BootJsonData ParseBootData(Stream stream)
+        {
+            stream.Position = 0;
+            var serializer = new DataContractJsonSerializer(
+                typeof(BootJsonData),
+                new DataContractJsonSerializerSettings { UseSimpleDictionaryFormat = true });
+            return (BootJsonData)serializer.ReadObject(stream);
         }
     }
 }

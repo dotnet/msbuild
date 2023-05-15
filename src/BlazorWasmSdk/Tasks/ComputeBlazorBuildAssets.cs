@@ -34,6 +34,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         public string OutputPath { get; set; }
 
         [Required]
+        public string DotNetJsVersion { get; set; }
+
+        [Required]
         public bool TimeZoneSupport { get; set; }
 
         [Required]
@@ -99,7 +102,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                     if (candidate.GetMetadata("FileName") == "dotnet" && candidate.GetMetadata("Extension") == ".js")
                     {
                         var itemHash = FileHasher.GetFileHash(candidate.ItemSpec);
-                        var cacheBustedDotNetJSFileName = $"dotnet.{candidate.GetMetadata("NuGetPackageVersion")}.{itemHash}.js";
+                        var cacheBustedDotNetJSFileName = $"dotnet.{DotNetJsVersion}.{itemHash}.js";
 
                         var originalFileFullPath = Path.GetFullPath(candidate.ItemSpec);
                         var originalFileDirectory = Path.GetDirectoryName(originalFileFullPath);

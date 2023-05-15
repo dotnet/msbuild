@@ -153,11 +153,16 @@ Copyright (c) .NET Foundation. All rights reserved.
         Condition="'@(_BlazorJSFile->Count())' == '0'" />
 
       <_BlazorConfigFileCandidates Include="@(StaticWebAsset)" Condition="'%(SourceType)' == 'Discovered'" />
+      
+      <_DotNetJsItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(FileName)' == 'dotnet' and '%(Extension)' == '.js'" />
 
       <!-- Remove dotnet.js/wasm from runtime pack, in favor of the relinked ones in @(WasmNativeAsset) -->
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
                                Condition="@(WasmNativeAsset->Count()) > 0 and '%(FileName)' == 'dotnet' and ('%(Extension)' == '.wasm' or '%(Extension)' == '.js')" />
     </ItemGroup>
+    <PropertyGroup>
+      <_DotNetJsBuildVersion>%(_DotNetJsItem.NuGetPackageVersion)</_DotNetJsBuildVersion>
+    </PropertyGroup>
 
     <ComputeBlazorBuildAssets
       Candidates="@(ReferenceCopyLocalPaths);@(WasmNativeAsset)"
@@ -167,6 +172,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ProjectSatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath)"
       TimeZoneSupport="$(_BlazorEnableTimeZoneSupport)"
       InvariantGlobalization="$(_BlazorInvariantGlobalization)"
+      DotNetJsVersion="$(_DotNetJsBuildVersion)"
       CopySymbols="$(_BlazorCopyOutputSymbolsToOutputDirectory)"
       OutputPath="$(OutputPath)"
     >
