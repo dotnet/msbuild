@@ -6,9 +6,9 @@
     "dotnet": "6.0.311",
     "vs": {
       "version": "17.0"
-    }
+    },
+    "xcopy-msbuild": "17.0"
   },
-  "xcopy-msbuild": "17.0",
   "msbuild-sdks": {
     "Microsoft.Build.CentralPackageVersions": "2.0.1",
     "Microsoft.DotNet.Arcade.Sdk": "6.0.0-beta.23221.7"
