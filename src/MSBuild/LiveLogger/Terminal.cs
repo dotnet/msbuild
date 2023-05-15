@@ -29,11 +29,35 @@ internal sealed class Terminal : ITerminal
     /// </summary>
     private bool _isBuffering = false;
 
-    /// <inheritdoc/>
-    public int Height => Console.BufferHeight;
+    private const int BigUnknownDimension = 2 << 23;
 
     /// <inheritdoc/>
-    public int Width => Console.BufferWidth;
+    public int Height
+    {
+        get
+        {
+            if (Console.IsOutputRedirected)
+            {
+                return BigUnknownDimension;
+            }
+
+            return Console.BufferHeight;
+        }
+    }
+
+    /// <inheritdoc/>
+    public int Width
+    {
+        get
+        {
+            if (Console.IsOutputRedirected)
+            {
+                return BigUnknownDimension;
+            }
+
+            return Console.BufferWidth;
+        }
+    }
 
     public Terminal()
     {
