@@ -11,7 +11,8 @@
                                  OR $(NETCoreSdkVersion.Contains('-')) == false
                                 )
                           )">true</_IsSDKContainerAllowedVersion>
-    <_ContainerIsTargetingNet8TFM>$([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '8.0'))</_ContainerIsTargetingNet8TFM>
+    <_ContainerIsTargetingNet8TFM>false</_ContainerIsTargetingNet8TFM>
+    <_ContainerIsTargetingNet8TFM Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net8.0'))">true</_ContainerIsTargetingNet8TFM>
   </PropertyGroup>
 
   <ItemGroup>

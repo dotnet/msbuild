@@ -12,6 +12,7 @@
 
     <PropertyGroup>
       <Stage0IncludedWorkloadManifestsFile>$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/IncludedWorkloadManifests.txt</Stage0IncludedWorkloadManifestsFile>
+      <Stage0KnownWorkloadManifestsFile>$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/KnownWorkloadManifests.txt</Stage0KnownWorkloadManifestsFile>
     </PropertyGroup>
 
     <!-- Prepare the templates -->
@@ -36,6 +37,7 @@
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/RuntimeIdentifierGraph.json" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/NETCoreSdkRuntimeIdentifierChain.txt" />
       <OverlaySdkFilesFromStage0 Include="$(Stage0IncludedWorkloadManifestsFile)" Condition="Exists('$(Stage0IncludedWorkloadManifestsFile)')"/>
+      <OverlaySdkFilesFromStage0 Include="$(Stage0KnownWorkloadManifestsFile)" Condition="Exists('$(Stage0KnownWorkloadManifestsFile)')"/>
       <!-- Ignore dotnet-watch files from the SDK since we're building a newer version of it in this repo. -->
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/**/*" RelativeDestination="DotnetTools"
         Exclude="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/dotnet-watch/**" />
@@ -54,10 +56,10 @@
     <Copy SourceFiles="@(OverlaySdkFilesFromStage0)"
           DestinationFiles="@(OverlaySdkFilesFromStage0->'$(SdkOutputDirectory)\%(RelativeDestination)\%(RecursiveDir)%(Filename)%(Extension)')"/>
     
-    <!-- If the stage 0 SDK doesn't have IncludedWorkloadManifests.txt, then write a default version -->
-    <WriteLinesToFile File="$(SdkOutputDirectory)\IncludedWorkloadManifests.txt"
-                      Condition="!Exists('$(Stage0IncludedWorkloadManifestsFile)')"
-                      Lines="microsoft.net.sdk.android;microsoft.net.sdk.ios;microsoft.net.sdk.maccatalyst;microsoft.net.sdk.macos;microsoft.net.sdk.maui;microsoft.net.sdk.tvos;microsoft.net.workload.mono.toolchain;microsoft.net.workload.emscripten"/>
+    <!-- If the stage 0 SDK doesn't have KnownWorkloadManifests.txt, then write a default version -->
+    <WriteLinesToFile File="$(SdkOutputDirectory)\KnownWorkloadManifests.txt"
+                      Condition="!Exists('$(Stage0KnownWorkloadManifestsFile)')"
+                      Lines="microsoft.net.sdk.android;microsoft.net.sdk.ios;microsoft.net.sdk.maccatalyst;microsoft.net.sdk.macos;microsoft.net.sdk.maui;microsoft.net.sdk.tvos;microsoft.net.workload.mono.toolchain.current;microsoft.net.workload.emscripten.current;microsoft.net.workload.emscripten.net6;microsoft.net.workload.emscripten.net7;microsoft.net.workload.mono.toolchain.net6;microsoft.net.workload.mono.toolchain.net7"/>
 
     <OverrideAndCreateBundledNETCoreAppPackageVersion
       Stage0MicrosoftNETCoreAppRefPackageVersionPath="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/Microsoft.NETCoreSdk.BundledVersions.props"

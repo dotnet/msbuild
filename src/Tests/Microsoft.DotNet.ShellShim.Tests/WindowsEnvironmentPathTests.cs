@@ -185,6 +185,11 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 throw new NotImplementedException();
             }
 
+            public int? GetEnvironmentVariableAsNullableInt(string variable)
+            {
+                throw new NotImplementedException();
+            }
+
             private static string Expand(string path)
             {
                 return path?.Replace("%USERPROFILE%", @"C:\Users\username");

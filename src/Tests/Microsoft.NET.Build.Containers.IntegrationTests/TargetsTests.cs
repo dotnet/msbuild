@@ -149,6 +149,7 @@ public class TargetsTests
     {
         var (project, logger, d) = ProjectInitializer.InitProject(new()
         {
+            ["TargetFrameworkIdentifier"] = ".NETCoreApp",
             ["NETCoreSdkVersion"] = sdkVersion,
             ["TargetFrameworkVersion"] = tfm,
             ["PublishProfile"] = "DefaultContainer"
@@ -171,7 +172,9 @@ public class TargetsTests
     {
         var (project, logger, d) = ProjectInitializer.InitProject(new()
         {
+            ["TargetFrameworkIdentifier"] = ".NETCoreApp",
             ["TargetFrameworkVersion"] = tfm,
+            ["TargetFramework"] = "net" + tfm.TrimStart('v'),
             ["ContainerRuntimeIdentifier"] = rid
         }, projectName: $"{nameof(CanComputeTagsForSupportedSDKVersions)}_{tfm}_{rid}_{expectedUser}");
         using var _ = d;

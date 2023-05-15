@@ -188,7 +188,7 @@ export PATH="$PATH:{0}"
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
         <target state="translated">Die Optionen „--self-contained“ und „--no-self-contained“ können nicht gemeinsam verwendet werden.</target>
-        <note />
+        <note>{Locked="--self-contained"}{Locked="--no-self-contained"}</note>
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.

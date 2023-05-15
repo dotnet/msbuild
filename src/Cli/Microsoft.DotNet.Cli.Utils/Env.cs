@@ -37,6 +37,11 @@ namespace Microsoft.DotNet.Cli.Utils
             return _environment.GetEnvironmentVariableAsBool(name, defaultValue);
         }
 
+        public static int? GetEnvironmentVariableAsNullableInt(string name)
+        {
+            return _environment.GetEnvironmentVariableAsNullableInt(name);
+        }
+
         public static string GetEnvironmentVariable(string name)
         {
             return _environment.GetEnvironmentVariable(name);

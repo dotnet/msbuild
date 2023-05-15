@@ -29,6 +29,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_PublishTargetsDir Condition=" '$(_PublishTargetsDir)'=='' ">$(MSBuildThisFileDirectory)PublishTargets\</_PublishTargetsDir>
     <_DotNetCLIToolTargetsDir Condition=" '$(_DotNetCLIToolTargetsDir)'=='' ">$(MSBuildThisFileDirectory)DotNetCLIToolTargets\</_DotNetCLIToolTargetsDir>
     <_PublishProfilesDir Condition=" '$(_PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</_PublishProfilesDir>
+    <_ContainersTargetsDir Condition=" '$(_ContainersTargetsDir)'=='' ">$(MSBuildThisFileDirectory)..\..\..\Containers\build\</_ContainersTargetsDir>
 
     <PublishIISAssets Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
              And '$(_TargetFrameworkVersionWithoutV)' != ''
@@ -146,6 +147,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(_DotNetCLIToolTargetsDir)Microsoft.NET.Sdk.DotNetCLITool.targets" Condition="Exists('$(_DotNetCLIToolTargetsDir)Microsoft.NET.Sdk.DotNetCLITool.targets')"/>
 
+<!--
+  ***********************************************************************************************
+  Import the Containers target
+  ***********************************************************************************************
+ -->
+  <!-- Container publishing is only supported for a single TFM at a time at this point, so only import those targets in
+       'inner' builds  -->
+  <Import Project="$(_ContainersTargetsDir)Microsoft.NET.Build.Containers.targets"
+    Condition="'$(EnableSdkContainerSupport)' == 'true'
+               AND Exists('$(_ContainersTargetsDir)Microsoft.NET.Build.Containers.targets')
+               AND '$(TargetFramework)' != ''" />
+
   <!--
   ***********************************************************************************************
   TARGET : DotNetPublish
@@ -166,6 +179,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Condition=" '$(DeployOnBuild)' == 'true' " >
   </Target>
 
+  <Target Name="CheckContainersPackage" AfterTargets="Build" Condition="'$(EnableSdkContainerSupport)' == 'true'">
+    <PropertyGroup>
+      <ContainersPackageIdentity>Microsoft.NET.Build.Containers</ContainersPackageIdentity>
+    </PropertyGroup>
+    <ItemGroup>
+      <ContainersPackage Include="@(PackageReference)" Condition="'%(Identity)' == '$(ContainersPackageIdentity)'"/>
+    </ItemGroup>
+    <Warning Text="Microsoft.NET.Build.Containers NuGet package is explicitly referenced. Consider removing the package reference to Microsoft.NET.Build.Containers as it is now part of .NET SDK." Condition="'@(ContainersPackage)' != ''" />
+  </Target>
 
   <PropertyGroup>
     <CorePublishDependsOn>
