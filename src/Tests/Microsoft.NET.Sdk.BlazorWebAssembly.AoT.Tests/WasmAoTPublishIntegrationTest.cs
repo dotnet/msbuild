@@ -41,7 +41,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
+                "wwwroot/_framework/dotnet.native.wasm",
                 "wwwroot/_framework/blazorwasm.dll",
                 "wwwroot/_framework/System.Text.Json.dll",
                 "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
@@ -114,7 +114,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
+                "wwwroot/_framework/dotnet.native.wasm",
                 "wwwroot/_framework/blazorwasm.dll",
                 "wwwroot/_framework/System.Text.Json.dll"
             });
@@ -157,7 +157,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests
             // Verify compression works
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/dotnet.wasm.br",
+                "wwwroot/_framework/dotnet.native.wasm.br",
                 "wwwroot/_framework/blazorwasm.dll.br",
                 "wwwroot/_framework/RazorClassLibrary.dll.br",
                 "wwwroot/_framework/System.Text.Json.dll.br"
