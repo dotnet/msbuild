@@ -877,7 +877,7 @@ namespace Microsoft.Build.Tasks
                 return string.Empty;
             }
 
-            Stream stream = File.OpenRead(path);
+            using Stream stream = File.OpenRead(path);
             return GetRuntimeVersion(stream);
         }
 
