@@ -84,21 +84,6 @@ namespace Microsoft.Build.UnitTests
             Copy.RefreshInternalEnvironmentValues();
         }
 
-        [Fact]
-        public void NoInput()
-        {
-            var task = new Copy
-            {
-                BuildEngine = new MockEngine(true),
-            };
-            task.Execute().ShouldBeTrue();
-            task.CopiedFiles.ShouldNotBeNull();
-            task.CopiedFiles.Length.ShouldBe(0);
-            task.DestinationFiles.ShouldNotBeNull();
-            task.DestinationFiles.Length.ShouldBe(0);
-            task.WroteAtLeastOneFile.ShouldBeFalse();
-        }
-
         /// <summary>
         /// If OnlyCopyIfDifferent is set to "true" then we shouldn't copy over files that
         /// have the same date and time.
@@ -2697,6 +2682,187 @@ namespace Microsoft.Build.UnitTests
         internal override void ErrorIfLinkFailedCheck()
         {
             base.ErrorIfLinkFailedCheck();
+        }
+    }
+
+    public class CopyParameter_Tests
+    {
+        [Fact]
+        public void CopyWithNoInput()
+        {
+            var task = new Copy { BuildEngine = new MockEngine(true), };
+            task.Execute().ShouldBeTrue();
+            task.CopiedFiles.ShouldNotBeNull();
+            task.CopiedFiles.Length.ShouldBe(0);
+            task.DestinationFiles.ShouldNotBeNull();
+            task.DestinationFiles.Length.ShouldBe(0);
+            task.WroteAtLeastOneFile.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void CopyWithMatchingSourceFilesToDestinationFiles()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var sourceFile = env.CreateFile("source.txt");
+
+                var task = new Copy
+                {
+                    BuildEngine = new MockEngine(true),
+                    SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem("destination.txt") },
+                    RetryDelayMilliseconds = 1,
+                };
+                task.Execute().ShouldBeTrue();
+                task.CopiedFiles.ShouldNotBeNull();
+                task.CopiedFiles.Length.ShouldBe(1);
+                task.DestinationFiles.ShouldNotBeNull();
+                task.DestinationFiles.Length.ShouldBe(1);
+                task.WroteAtLeastOneFile.ShouldBeTrue();
+            }
+        }
+
+        [Fact]
+        public void CopyWithSourceFilesToDestinationFolder()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var sourceFile = env.CreateFile("source.txt");
+                var destinationFolder = env.CreateFolder(true);
+
+                var task = new Copy
+                {
+                    BuildEngine = new MockEngine(true),
+                    SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
+                    DestinationFolder = new TaskItem(destinationFolder.Path),
+                    RetryDelayMilliseconds = 1,
+                };
+                task.Execute().ShouldBeTrue();
+                task.CopiedFiles.ShouldNotBeNull();
+                task.CopiedFiles.Length.ShouldBe(1);
+                task.DestinationFiles.ShouldNotBeNull();
+                task.DestinationFiles.Length.ShouldBe(1);
+                task.WroteAtLeastOneFile.ShouldBeTrue();
+            }
+        }
+
+        [Fact]
+        public void CopyWithNoDestination()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var engine = new MockEngine(true);
+                var sourceFile = env.CreateFile("source.txt");
+
+                var task = new Copy
+                {
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
+                };
+                task.Execute().ShouldBeFalse();
+                engine.AssertLogContains("MSB3023"); // Copy.NeedsDestination
+                task.CopiedFiles.ShouldBeNull();
+                task.DestinationFiles.ShouldBeNull();
+                task.WroteAtLeastOneFile.ShouldBeFalse();
+            }
+        }
+
+        [Fact]
+        public void CopyWithMultipleDestinationTypes()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var engine = new MockEngine(true);
+                var sourceFile = env.CreateFile("source.txt");
+                var destinationFolder = env.CreateFolder(true);
+
+                var task = new Copy
+                {
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem("destination.txt") },
+                    DestinationFolder = new TaskItem(destinationFolder.Path),
+                };
+                task.Execute().ShouldBeFalse();
+                engine.AssertLogContains("MSB3022"); // Copy.ExactlyOneTypeOfDestination
+                task.CopiedFiles.ShouldBeNull();
+                task.DestinationFiles.ShouldNotBeNull();
+                task.WroteAtLeastOneFile.ShouldBeFalse();
+            }
+        }
+
+        [Fact]
+        public void CopyWithDifferentLengthSourceFilesToDestinationFiles()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var engine = new MockEngine(true);
+                var sourceFile = env.CreateFile("source.txt");
+
+                var task = new Copy
+                {
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem("destination0.txt"), new TaskItem("destination1.txt") },
+                };
+                task.Execute().ShouldBeFalse();
+                engine.AssertLogContains("MSB3094"); // General.TwoVectorsMustHaveSameLength
+                task.CopiedFiles.ShouldBeNull();
+                task.DestinationFiles.ShouldNotBeNull();
+                task.WroteAtLeastOneFile.ShouldBeFalse();
+            }
+        }
+
+        /// <summary>
+        /// Verifies that we error for retries less than 0
+        /// </summary>
+        [Fact]
+        public void CopyWithInvalidRetryCount()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var engine = new MockEngine(true);
+                var sourceFile = env.CreateFile("source.txt");
+
+                var task = new Copy
+                {
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem("destination.txt") },
+                    Retries = -1,
+                };
+                task.Execute().ShouldBeFalse();
+                engine.AssertLogContains("MSB3028"); // Copy.InvalidRetryCount
+                task.CopiedFiles.ShouldBeNull();
+                task.DestinationFiles.ShouldNotBeNull();
+                task.WroteAtLeastOneFile.ShouldBeFalse();
+            }
+        }
+
+        /// <summary>
+        /// Verifies that we error for retry delay less than 0
+        /// </summary>
+        [Fact]
+        public void CopyWithInvalidRetryDelay()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var engine = new MockEngine(true);
+                var sourceFile = env.CreateFile("source.txt");
+
+                var task = new Copy
+                {
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem("destination.txt") },
+                    RetryDelayMilliseconds = -1,
+                };
+                task.Execute().ShouldBeFalse();
+                engine.AssertLogContains("MSB3029"); // Copy.InvalidRetryDelay
+                task.CopiedFiles.ShouldBeNull();
+                task.DestinationFiles.ShouldNotBeNull();
+                task.WroteAtLeastOneFile.ShouldBeFalse();
+            }
         }
     }
 }
