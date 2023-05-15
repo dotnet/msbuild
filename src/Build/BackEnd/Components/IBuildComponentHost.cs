@@ -135,6 +135,11 @@ namespace Microsoft.Build.BackEnd
         /// The component which is the sink for file access reports and forwards reports to other components.
         /// </summary>
         FileAccessManager,
+
+        /// <summary>
+        /// The component which launches new MSBuild nodes.
+        /// </summary>
+        NodeLauncher,
     }
 
     /// <summary>

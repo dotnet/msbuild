@@ -362,6 +362,7 @@
     <Compile Include="BackEnd\Shared\TargetResult.cs" />
     <Compile Include="BackEnd\Shared\WorkUnitResult.cs" />
     <Compile Include="BackEnd\Components\BuildRequestEngine\IBuildRequestEngine.cs" />
+    <Compile Include="BackEnd\Components\Communications\INodeLauncher.cs" />
     <Compile Include="BackEnd\Components\Communications\INodeManager.cs" />
     <Compile Include="BackEnd\Components\Communications\INodeProvider.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeEndpointInProc.cs" />

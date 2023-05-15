@@ -16,8 +16,22 @@ using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 
 namespace Microsoft.Build.BackEnd
 {
-    internal class NodeLauncher
+    internal sealed class NodeLauncher : INodeLauncher, IBuildComponent
     {
+        public static IBuildComponent CreateComponent(BuildComponentType type)
+        {
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.NodeLauncher, nameof(type));
+            return new NodeLauncher();
+        }
+
+        public void InitializeComponent(IBuildComponentHost host)
+        {
+        }
+
+        public void ShutdownComponent()
+        {
+        }
+
         /// <summary>
         /// Creates a new MSBuild process
         /// </summary>

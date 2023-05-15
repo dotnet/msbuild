@@ -332,7 +332,7 @@ namespace Microsoft.Build.BackEnd
                     }
 #endif
                     // Create the node process
-                    NodeLauncher nodeLauncher = new NodeLauncher();
+                    INodeLauncher nodeLauncher = (INodeLauncher)_componentHost.GetComponent(BuildComponentType.NodeLauncher);
                     Process msbuildProcess = nodeLauncher.Start(msbuildLocation, commandLineArgs);
                     _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id), default);
 
