@@ -126,7 +126,8 @@ public class EndToEndTests
         }
         Directory.CreateDirectory(workingDirectory);
 
-        new DotnetCommand(_testOutput, "new", "console", "-f", tfm, "-o", "MinimalTestApp")
+        new DotnetNewCommand(_testOutput, "console", "-f", tfm, "-o", "MinimalTestApp")
+            .WithVirtualHive()        
             .WithWorkingDirectory(workingDirectory)
             .Execute()
             .Should().Pass();
@@ -174,7 +175,8 @@ public class EndToEndTests
             Assert.Fail("No nupkg found in expected package folder. You may need to rerun the build");
         }
 
-        new DotnetCommand(_testOutput, "new", "webapi", "-f", ToolsetInfo.CurrentTargetFramework)
+        new DotnetNewCommand(_testOutput, "webapi", "-f", ToolsetInfo.CurrentTargetFramework)
+            .WithVirtualHive()  
             .WithWorkingDirectory(newProjectDir.FullName)
             // do not pollute the primary/global NuGet package store with the private package(s)
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
@@ -316,7 +318,8 @@ public class EndToEndTests
             Assert.Fail("No nupkg found in expected package folder. You may need to rerun the build");
         }
 
-        new DotnetCommand(_testOutput, "new", "console", "-f", ToolsetInfo.CurrentTargetFramework)
+        new DotnetNewCommand(_testOutput, "console", "-f", ToolsetInfo.CurrentTargetFramework)
+            .WithVirtualHive()
             .WithWorkingDirectory(newProjectDir.FullName)
             // do not pollute the primary/global NuGet package store with the private package(s)
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
