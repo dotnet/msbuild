@@ -2804,6 +2804,11 @@
         <target state="translated">MSB3705: XslCompiledDllPath non è supportato quando si compila con .NET Core.</target>
         <note>{StrBegin="MSB3705: "}</note>
       </trans-unit>
+      <trans-unit id="XslTransform.SecuritySettingsViaUseTrustedSettings">
+        <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
+        <target state="new">You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</target>
+        <note />
+      </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
         <source>MSB3702: Unable to process the XsltParameters argument for the XslTransformation task. {0}</source>
         <target state="translated">MSB3702: non è possibile elaborare l'argomento XsltParameters per l'attività XslTransformation. {0}</target>
