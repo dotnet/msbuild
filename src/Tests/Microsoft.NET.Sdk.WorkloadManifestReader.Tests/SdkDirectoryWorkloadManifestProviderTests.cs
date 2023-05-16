@@ -107,8 +107,11 @@ namespace ManifestReaderTests
         {
             Initialize();
 
+            CreateMockManifest(_manifestRoot, "5.0.100-preview.5", "ios", "11.0.3", true);
+
             CreateMockManifest(_manifestRoot, "5.0.100", "ios", "11.0.1", true);
             CreateMockManifest(_manifestRoot, "5.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "5.0.100", "ios", "11.0.2-rc.1", true);
 
             var sdkDirectoryWorkloadManifestProvider
                 = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null);
