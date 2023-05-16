@@ -97,6 +97,11 @@
         <target state="translated">리디렉션 워크로드 '{0}'에 'redirect-to' 이외의 다른 키가 있습니다</target>
         <note />
       </trans-unit>
+      <trans-unit id="SpecifiedManifestNotFound">
+        <source>Specified workload manifest was not found: {0}</source>
+        <target state="new">Specified workload manifest was not found: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">오프셋 {1}에 예기치 않은 토큰 '{0}'이(가) 있습니다.</target>

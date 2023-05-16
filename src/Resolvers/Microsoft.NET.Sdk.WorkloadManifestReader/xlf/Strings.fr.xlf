@@ -97,6 +97,11 @@
         <target state="translated">La charge de travail de redirection « {0} » a des clés autres que « redirection vers ».</target>
         <note />
       </trans-unit>
+      <trans-unit id="SpecifiedManifestNotFound">
+        <source>Specified workload manifest was not found: {0}</source>
+        <target state="new">Specified workload manifest was not found: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">Jeton '{0}' inattendu à l'offset {1}</target>
