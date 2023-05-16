@@ -27,6 +27,43 @@ namespace Microsoft.Build.UnitTests
 {
     public class Copy_Tests : IDisposable
     {
+        /// <summary>
+        /// Gets data for testing with combinations of isUseHardLinks and isUseSymbolicLinks.
+        /// Index 0 is the value for isUseHardLinks.
+        /// Index 1 is the value for isUseSymbolicLinks.
+        /// </summary>
+        public static IEnumerable<object[]> GetHardLinksSymLinks() => new List<object[]>
+        {
+            new object[] { false, false },
+            new object[] { false, true },
+            new object[] { true, false },
+
+            /* Cases not covered
+            new object[] { true, true },
+            */
+        };
+
+        /// <summary>
+        /// Gets data for testing with combinations of isUseHardLinks, isUseSymbolicLinks, and isUseSingleThreadedCopy.
+        /// Index 0 is the value for isUseHardLinks.
+        /// Index 1 is the value for isUseSymbolicLinks.
+        /// Index 2 is the value for isUseSingleThreadedCopy.
+        /// </summary>
+        public static IEnumerable<object[]> GetHardLinksSymLinksSingleThreaded() => new List<object[]>
+        {
+            new object[] { false, false, false },
+            new object[] { false, false, true },
+            new object[] { false, true, false },
+            new object[] { true, false, false },
+
+            /* Cases not covered
+            new object[] { false, true, true },
+            new object[] { true, false, true },
+            new object[] { true, true, false },
+            new object[] { true, true, true },
+            */
+        };
+
         private const int NoParallelismThreadCount = 1;
         private const int DefaultParallelismThreadCount = int.MaxValue;
 
@@ -2577,32 +2614,6 @@ namespace Microsoft.Build.UnitTests
             t.Execute().ShouldBeTrue();
             File.Exists(sourceFile2.Path).ShouldBeTrue();
         }
-
-        public static IEnumerable<object[]> GetHardLinksSymLinks() => new List<object[]>
-            {
-                new object[] { false, false },
-                new object[] { false, true },
-                new object[] { true, false },
-
-                /* Missing cases
-                new object[] { true, true },
-                */
-            };
-
-        public static IEnumerable<object[]> GetHardLinksSymLinksSingleThreaded() => new List<object[]>
-            {
-                new object[] { false, false, false },
-                new object[] { false, false, true },
-                new object[] { false, true, false },
-                new object[] { true, false, false },
-
-                /* Missing cases
-                new object[] { false, true, true },
-                new object[] { true, false, true },
-                new object[] { true, true, false },
-                new object[] { true, true, true },
-                */
-            };
 
         internal sealed class CopyMonitor
         {
