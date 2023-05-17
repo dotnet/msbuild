@@ -97,6 +97,11 @@
         <target state="translated">Die Umleitungsworkload „{0}“ hat andere Schlüssel als „redirect-to“.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SpecifiedManifestNotFound">
+        <source>Specified workload manifest was not found: {0}</source>
+        <target state="new">Specified workload manifest was not found: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">Unerwartetes Token "{0}" bei Offset {1}.</target>

@@ -57,11 +57,6 @@
         <target state="translated">CONTAINER3001: Fehler beim Erstellen des Docker-Prozesses.</target>
         <note>{StrBegin="CONTAINER3001: "}</note>
       </trans-unit>
-      <trans-unit id="DontKnowHowToPullImages">
-        <source>CONTAINER1010: Don't know how to pull images from local daemons at the moment.</source>
-        <target state="translated">CONTAINER1010: Zurzeit ist nicht bekannt, wie Bilder aus lokalen Daemons abgerufen werden sollen.</target>
-        <note>{StrBegin="CONTAINER1010: "}</note>
-      </trans-unit>
       <trans-unit id="EmptyOrWhitespacePropertyIgnored">
         <source>CONTAINER4006: Property '{0}' is empty or contains whitespace and will be ignored.</source>
         <target state="translated">CONTAINER4006: Die Eigenschaft „{0}“ ist leer oder enthält Leerzeichen und wird ignoriert.</target>
@@ -86,6 +81,11 @@
         <source>CONTAINER1009: Failed to load image to local Docker daemon. stdout: {0}</source>
         <target state="translated">CONTAINER1009: Fehler beim Laden des Images in den lokalen Docker-Daemon. stdout: {0}</target>
         <note>{StrBegin="CONTAINER1009: "}</note>
+      </trans-unit>
+      <trans-unit id="ImagePullNotSupported">
+        <source>CONTAINER1010: Pulling images from local Docker daemon is not supported.</source>
+        <target state="new">CONTAINER1010: Pulling images from local Docker daemon is not supported.</target>
+        <note>{StrBegin="CONTAINER1010: "}</note>
       </trans-unit>
       <trans-unit id="InvalidContainerImageName">
         <source>CONTAINER2014: Invalid {0}: {1}.</source>
@@ -147,15 +147,10 @@
         <target state="translated">CONTAINER4005: Das Element „{0}“ enthält Elemente ohne Metadatum „Value“. Diese werden ignoriert.</target>
         <note>{StrBegin="CONTAINER4005: "}</note>
       </trans-unit>
-      <trans-unit id="LocalDaemondNotAvailable">
-        <source>CONTAINER1012: The local daemon is not available, but pushing to a local daemon was requested. Please start the daemon and try again.</source>
-        <target state="translated">CONTAINER1012: Der lokale Daemon ist nicht verfügbar, es wurde aber ein Pushvorgang an einen lokalen Daemon angefordert. Starten Sie den Daemon, und versuchen Sie es erneut.</target>
+      <trans-unit id="LocalDaemonNotAvailable">
+        <source>CONTAINER1012: The local Docker daemon is not available, but pushing to a local Docker daemon was requested. Please start the daemon and try again.</source>
+        <target state="new">CONTAINER1012: The local Docker daemon is not available, but pushing to a local Docker daemon was requested. Please start the daemon and try again.</target>
         <note>{StrBegin="CONTAINER1012: "}</note>
-      </trans-unit>
-      <trans-unit id="MissingLayerNode">
-        <source>CONTAINER2006: Tried to get layer information but there is no layer node?</source>
-        <target state="translated">CONTAINER2006: Es wurde versucht, Ebeneninformationen abzurufen, aber es ist kein Ebenenknoten vorhanden.</target>
-        <note>{StrBegin="CONTAINER2006: "}</note>
       </trans-unit>
       <trans-unit id="MissingLinkToRegistry">
         <source>CONTAINER2004: Unable to download layer with descriptor '{0}' from registry '{1}' because it does not exist.</source>

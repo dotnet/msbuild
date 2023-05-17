@@ -55,7 +55,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         }
         else
         {
-            throw new NotSupportedException(Resource.GetString(nameof(Strings.DontKnowHowToPullImages)));
+            throw new NotSupportedException(Resource.GetString(nameof(Strings.ImagePullNotSupported)));
         }
 
         if (imageBuilder is null)
@@ -105,7 +105,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 LocalDocker localDaemon = GetLocalDaemon(msg => Log.LogMessage(msg));
                 if (!(await localDaemon.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
                 {
-                    Log.LogErrorWithCodeFromResources(nameof(Strings.LocalDaemondNotAvailable));
+                    Log.LogErrorWithCodeFromResources(nameof(Strings.LocalDaemonNotAvailable));
                     return false;
                 }
                 try

@@ -97,6 +97,11 @@
         <target state="translated">'{0}' yeniden yönlendirme iş yükünde 'redirect-to' dışında anahtarlar var</target>
         <note />
       </trans-unit>
+      <trans-unit id="SpecifiedManifestNotFound">
+        <source>Specified workload manifest was not found: {0}</source>
+        <target state="new">Specified workload manifest was not found: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">{1} uzaklığında beklenmeyen '{0}' belirteci</target>
