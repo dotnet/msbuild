@@ -23,7 +23,7 @@ namespace Microsoft.Build.Evaluation
             private readonly int _elementOrder;
             private readonly string _rootDirectory;
             private readonly ImmutableSegmentedList<string> _excludes;
-            private readonly ImmutableList<ProjectMetadataElement> _metadata;
+            private readonly ImmutableArray<ProjectMetadataElement> _metadata;
 
             public IncludeOperation(IncludeOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
                 : base(builder, lazyEvaluator)
@@ -35,9 +35,9 @@ namespace Microsoft.Build.Evaluation
                 _metadata = builder.Metadata.ToImmutable();
             }
 
-            protected override ImmutableList<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected override ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                var itemsToAdd = ImmutableList.CreateBuilder<I>();
+                var itemsToAdd = ImmutableArray.CreateBuilder<I>();
 
                 Lazy<Func<string, bool>> excludeTester = null;
                 ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
@@ -153,12 +153,12 @@ namespace Microsoft.Build.Evaluation
                 return anyExcludes ? excludePatterns.ToImmutableHashSet() : globsToIgnore;
             }
 
-            protected override void MutateItems(ImmutableList<I> items)
+            protected override void MutateItems(ImmutableArray<I> items)
             {
                 DecorateItemsWithMetadata(items.Select(i => new ItemBatchingContext(i)), _metadata);
             }
 
-            protected override void SaveItems(ImmutableList<I> items, OrderedItemDataCollection.Builder listBuilder)
+            protected override void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder)
             {
                 foreach (var item in items)
                 {
