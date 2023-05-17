@@ -11,9 +11,9 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
         private readonly bool _includeInternals;
 
         /// <summary>
-        /// Creates a new AssemblyLoaderFactory
+        /// Creates a new AssemblySymbolLoaderFactory
         /// </summary>
-        /// <param name="includeInternals">True to include internal API when reading assemblies from the <see cref="AssemblyLoaderFactory"/> created.</param>
+        /// <param name="includeInternals">True to include internal API when reading assemblies from the <see cref="AssemblySymbolLoader"/> created.</param>
         public AssemblySymbolLoaderFactory(bool includeInternals = false)
         {
             _includeInternals = includeInternals;

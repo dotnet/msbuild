@@ -16,6 +16,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly IRuleSettings _settings;
 
+        /// <summary>
+        /// Instantiates the 'MemberMustExist' rule with <see cref="IRuleSettings"/> and an <see cref="IRuleRegistrationContext"/>.
+        /// </summary>
+        /// <param name="settings">The <see cref="IRuleSettings"/> that is used for comparison.</param>
+        /// <param name="context">The <see cref="IRuleRegistrationContext"/> that provides callback registration for comparing elements.</param>
         public MembersMustExist(IRuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
@@ -24,10 +29,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         }
 
         /// <summary>
-        /// Evaluates whether a type exists on both sides of the <see cref="TypeMapper"/>.
+        /// Evaluates whether a type exists on both sides of the <see cref="ITypeMapper"/>.
         /// </summary>
-        /// <param name="mapper">The <see cref="TypeMapper"/> to evaluate.</param>
-        /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
         private void RunOnTypeSymbol(ITypeSymbol? left, ITypeSymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             if (left != null && right == null)
@@ -53,10 +56,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         }
 
         /// <summary>
-        /// Evaluates whether member (Field, Property, Method, Constructor, Event) exists on both sides of the <see cref="MemberMapper"/>.
+        /// Evaluates whether member (Field, Property, Method, Constructor, Event) exists on both sides of the <see cref="IMemberMapper"/>.
         /// </summary>
-        /// <param name="mapper">The <see cref="MemberMapper"/> to evaluate.</param>
-        /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
         private void RunOnMemberSymbol(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             if (left != null && right == null)

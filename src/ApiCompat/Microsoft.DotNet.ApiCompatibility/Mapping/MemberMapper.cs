@@ -15,10 +15,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Mapping
         public ITypeMapper ContainingType { get; }
 
         /// <summary>
-        /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
+        /// Instantiates a member mapper.
         /// </summary>
-        /// <param name="settings">The settings used to diff the elements in the mapper.</param>
+        /// <param name="ruleRunner">The <see cref="IRuleRunner"/> that compares the member mapper elements.</param>
+        /// <param name="settings">The <see cref="IMapperSettings"/> used to compare the member mapper elements.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
+        /// <param name="containingType">The containing <see cref="ITypeMapper"/>.</param>
         public MemberMapper(IRuleRunner ruleRunner,
             IMapperSettings settings,
             int rightSetSize,

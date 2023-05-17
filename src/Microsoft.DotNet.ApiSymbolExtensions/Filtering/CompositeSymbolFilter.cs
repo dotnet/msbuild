@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Filtering
         /// <summary>
         /// Add a filter object to a list of filters.
         /// </summary>
-        /// <typeparam name="T"><see cref="ISymbolFilter" /> to evaluate.</typeparam>
+        /// <param name="filter">The <see cref="ISymbolFilter" /> to include to the list of filters.</param>
         /// <returns>Returns the current instance of the class.</returns>
         public CompositeSymbolFilter Add(ISymbolFilter filter)
         {

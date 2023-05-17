@@ -1,9 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.ApiSymbolExtensions
 {
@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
         void AddReferenceSearchPaths(params string[] paths);
 
         /// <summary>
-        /// Indicates if the <see cref="CSharpCompilation"/> used to resolve binaries has any roslyn diagnostics.
+        /// Indicates if the compilation used to resolve binaries has any roslyn diagnostics.
         /// Might be useful when loading an assembly from source files.
         /// </summary>
         /// <param name="diagnostics">List of diagnostics.</param>

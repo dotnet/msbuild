@@ -16,7 +16,7 @@ using NuGet.RuntimeModel;
 namespace Microsoft.DotNet.PackageValidation
 {
     /// <summary>
-    /// This class represents a nuget package.
+    /// This class represents a NuGet package.
     /// </summary>
     public class Package
     {

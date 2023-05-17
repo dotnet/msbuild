@@ -7,7 +7,7 @@ using Microsoft.DotNet.ApiCompatibility.Mapping;
 namespace Microsoft.DotNet.ApiCompatibility
 {
     /// <summary>
-    /// The visitor that traverses the mappers' tree and gets it's differences in a <see cref="DiagnosticBag{CompatDifference}"/>.
+    /// A visitor that traverses the mapping tree and stores found differences as <see cref="CompatDifference" /> items.
     /// </summary>
     public class DifferenceVisitor : IDifferenceVisitor
     {

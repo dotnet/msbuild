@@ -6,6 +6,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
+    /// <summary>
+    /// This rule validates that members aren't added to interfaces with strict mode comparison.
+    /// </summary>
     public class CannotAddMemberToInterface : IRule
     {
         public CannotAddMemberToInterface(IRuleSettings settings, IRuleRegistrationContext context)

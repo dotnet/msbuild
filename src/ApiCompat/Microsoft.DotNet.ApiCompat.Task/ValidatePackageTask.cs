@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.ApiCompat.Task
         public string[]? SuppressionFiles { get; set; }
 
         /// <summary>
-        /// The path to the suppression output file that is written to, when <see cref="GenerateCompatibilitySuppressionFile"/> is true.
+        /// The path to the suppression output file that is written to, when <see cref="GenerateSuppressionFile"/> is true.
         /// </summary>
         public string? SuppressionOutputFile { get; set; }
 

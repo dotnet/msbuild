@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime;
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
@@ -57,8 +56,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             };
         }
 
-        private void RunOnSymbol(
-            ISymbol? left,
+        private void RunOnSymbol(ISymbol? left,
             ISymbol? right,
             MetadataInformation leftMetadata,
             MetadataInformation rightMetadata,
@@ -94,15 +92,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             }
         }
 
-        private void RunOnTypeSymbol(
-            ITypeSymbol? left,
+        private void RunOnTypeSymbol(ITypeSymbol? left,
             ITypeSymbol? right,
             MetadataInformation leftMetadata,
             MetadataInformation rightMetadata,
             IList<CompatDifference> differences) => RunOnSymbol(left, right, leftMetadata, rightMetadata, differences);
 
-        private void RunOnMemberSymbol(
-            ISymbol? left,
+        private void RunOnMemberSymbol(ISymbol? left,
             ISymbol? right,
             ITypeSymbol leftContainingType,
             ITypeSymbol rightContainingType,

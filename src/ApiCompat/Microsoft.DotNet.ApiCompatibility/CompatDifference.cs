@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// </summary>
         /// <param name="left">The metadata information of the left comparison side.</param>
         /// <param name="right">The metadata information of the right comparison side.</param>
-        /// <param name="id"><see cref="string"/> representing the diagnostic ID.</param>
+        /// <param name="diagnosticId"><see cref="string"/> representing the diagnostic ID.</param>
         /// <param name="message"><see cref="string"/> message describing the difference.</param>
         /// <param name="type"><see cref="DifferenceType"/> to describe the type of the difference.</param>
         /// <param name="member"><see cref="ISymbol"/> for which the difference is associated to.</param>
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// </summary>
         /// <param name="left">The metadata information of the left comparison side.</param>
         /// <param name="right">The metadata information of the right comparison side.</param>
-        /// <param name="id"><see cref="string"/> representing the diagnostic ID.</param>
+        /// <param name="diagnosticId"><see cref="string"/> representing the diagnostic ID.</param>
         /// <param name="message"><see cref="string"/> message describing the difference.</param>
         /// <param name="type"><see cref="DifferenceType"/> to describe the type of the difference.</param>
         /// <param name="memberId"><see cref="string"/> containing the member ID for which the difference is associated to.</param>

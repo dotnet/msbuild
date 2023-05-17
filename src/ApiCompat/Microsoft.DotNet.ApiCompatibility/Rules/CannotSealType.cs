@@ -7,6 +7,10 @@ using Microsoft.DotNet.ApiSymbolExtensions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
+    /// <summary>
+    /// This rule validates that types aren't marked as sealed on the right when they weren't on the left.
+    /// In strict mode, it also validates that types aren't unsealed when they were sealed before.
+    /// </summary>
     public class CannotSealType : IRule
     {
         private readonly IRuleSettings _settings;

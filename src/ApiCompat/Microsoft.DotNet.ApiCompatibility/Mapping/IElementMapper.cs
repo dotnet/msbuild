@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Microsoft.DotNet.ApiCompatibility.Mapping
 {
     /// <summary>
-    /// Interface that represents a mapping in between two objects of type <see cref="T"/>.
+    /// Interface that represents a mapping in between two objects.
     /// </summary>
     public interface IElementMapper<T>
     {

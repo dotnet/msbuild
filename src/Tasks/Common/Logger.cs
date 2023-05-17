@@ -45,8 +45,8 @@ namespace Microsoft.NET.Build.Tasks
     /// Results in LogCore getting a Message instance with Code="NETSDK1234"
     /// and Text="Something is wrong."
     ///
-    /// Pattern inspired by <se cref="TaskLoggingHelper.LogErrorWithCodeFromResources"/>,
-    /// but retains completion via generated <see cref="Strings"/> instead of
+    /// Pattern inspired by TaskLoggingHelper.LogErrorWithCodeFromResources,
+    /// but retains completion via generated Strings instead of
     /// passing resource keys by name.
     ///
     /// All actual logging is deferred to subclass in <see cref="LogCore"/>,

@@ -94,10 +94,6 @@ namespace Microsoft.DotNet.GenAPI.Tool
             return rootCommand.Invoke(args);
         }
 
-        /// Splits delimiter separated list of pathes represented as a string to a List of paths.
-        /// </summary>
-        /// <param name="pathSet">Delimiter separated list of paths.</param>
-        /// <returns></returns>
         private static string[] ParseAssemblyArgument(ArgumentResult argumentResult)
         {
             List<string> args = new();

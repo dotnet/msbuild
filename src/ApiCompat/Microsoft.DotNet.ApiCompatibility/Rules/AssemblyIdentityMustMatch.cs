@@ -10,6 +10,15 @@ using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
+    /// <summary>
+    /// This rule validates that assembly identities are compatible. The following parameters are considered:
+    /// - Assembly exists
+    /// - Assembly name (equality)
+    /// - Assembly culture (equality)
+    /// - Assembly version (compatible)
+    /// - Assembly public key token (compatible)
+    /// Some checks behave differently in strict mode comparison.
+    /// </summary>
     public class AssemblyIdentityMustMatch : IRule
     {
         private readonly ISuppressableLog _log;

@@ -3,13 +3,15 @@
   <PropertyGroup>
     <TargetFrameworks>net6.0;net472</TargetFrameworks>
     <TargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net8.0;net472</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <StrongNameKeyId>Open</StrongNameKeyId>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
     <IsPackable>true</IsPackable>
     <IsShippingPackage>true</IsShippingPackage>
-    <StrongNameKeyId>Open</StrongNameKeyId>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <!-- This package doesn't contain any lib or ref assemblies because it's a tooling package.-->
     <NoWarn>$(NoWarn);NU5128</NoWarn>
-    <Nullable>enable</Nullable>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddBuildOutputToPackageCore;_AddBuildOutputToPackageDesktop</TargetsForTfmSpecificContentInPackage>
     <PackageDescription>MSBuild tasks and targets to perform api compatibility checks on assemblies and packages.</PackageDescription>
   </PropertyGroup>

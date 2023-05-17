@@ -317,7 +317,7 @@ namespace Microsoft.DotNet.GenAPI
 
         private OptionSet DefineFormattingOptions()
         {
-            /// TODO: consider to move configuration into file.
+            // TODO: consider to move configuration into file.
             return _adhocWorkspace.Options
                 .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInTypes, true)
                 .WithChangedOption(CSharpFormattingOptions.WrappingKeepStatementsOnSingleLine, true)
