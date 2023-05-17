@@ -20,7 +20,7 @@
     <!-- Source build does not need to worry about running on VS for Mac -->
     <ResolverTargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'">$(SdkTargetFramework)</ResolverTargetFramework>
 
-    <!-- Disable implict package target fallback, and disable warning for when we explicitly add it (currently needed for
+    <!-- Disable implicit package target fallback, and disable warning for when we explicitly add it (currently needed for
          Microsoft.ApplicationInsights) -->
     <NoWarn>$(NoWarn);NU1701</NoWarn>
     <!-- Temporarily NoWarn to avoid regression in preview 1.
