@@ -2151,8 +2151,6 @@ namespace Microsoft.Build.UnitTests
 
                 t.Execute().ShouldBeFalse();
                 engine.AssertLogContains("MSB3893");
-
-                // TODO: Add test for MSB3892 when ErrorIfLinkFails && !UseHardlinksIfPossible && !UseSymboliclinksIfPossible
             }
         }
 
