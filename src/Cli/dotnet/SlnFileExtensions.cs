@@ -112,6 +112,7 @@ namespace Microsoft.DotNet.Tools.Common
                                                                    && p.TypeGuid == ProjectTypeGuids.SolutionFolderGuid).FirstOrDefault();
                     if (duplicateProject != null)
                     {
+                       // Try making a new folder for the project to put it under so we can still add it despite there being one with the same name already in the parent folder
                         slnFile.AddSolutionFolders(slnProject, new List<string>() { Path.GetDirectoryName(relativeProjectPath) });
                     }
                 }
