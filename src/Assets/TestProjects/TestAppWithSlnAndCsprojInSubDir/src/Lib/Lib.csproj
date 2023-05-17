@@ -1,12 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
-
   <PropertyGroup>
     <TargetFramework>netstandard1.4</TargetFramework>
     <ProjectGuid>{84A45D44-B677-492D-A6DA-B3A71135AB8E}</ProjectGuid>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include="**\*.cs" />
-  </ItemGroup>
-
 </Project>

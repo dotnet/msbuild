@@ -3,6 +3,7 @@
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Sln.Internal;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.NET.TestFramework;
@@ -11,6 +12,7 @@ using Microsoft.NET.TestFramework.Commands;
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;
@@ -568,6 +570,54 @@ EndGlobal
             var expectedSlnContents = GetExpectedSlnContents(slnPath, ExpectedSlnFileAfterAddingNestedProj);
             File.ReadAllText(slnPath)
                 .Should().BeVisuallyEquivalentTo(expectedSlnContents);
+
+            cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"build", "App.sln");
+            cmd.Should().Pass();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void WhenNestedProjectIsAddedSolutionFoldersAreCreatedBuild(bool fooFirst)
+        {
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojInSubDirVS")
+                .WithSource()
+                .Path;
+            string projectToAdd;
+            CommandResult cmd;
+
+            if (fooFirst)
+            {
+                projectToAdd = "foo";
+                cmd = new DotnetCommand(Log)
+                    .WithWorkingDirectory(projectDirectory)
+                    .Execute($"sln", "App.sln", "add", projectToAdd);
+                cmd.Should().Pass();
+            }
+
+            projectToAdd = Path.Combine("foo", "bar");
+            cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"sln", "App.sln", "add", projectToAdd);
+            cmd.Should().Pass();
+
+            if (!fooFirst)
+            {
+                projectToAdd = "foo";
+                cmd = new DotnetCommand(Log)
+                    .WithWorkingDirectory(projectDirectory)
+                    .Execute($"sln", "App.sln", "add", projectToAdd);
+                cmd.Should().Pass();
+            }
+
+            cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"build", "App.sln");
+            cmd.Should().Pass();
+
         }
 
         [Theory]

@@ -387,6 +387,9 @@
   <data name="SolutionAlreadyContainsProject" xml:space="preserve">
     <value>Solution {0} already contains project {1}.</value>
   </data>
+  <data name="SolutionFolderAlreadyContainsProject" xml:space="preserve">
+    <value>Solution {0} already contains project {1} in solution folder {2}.</value>
+  </data>
   <data name="ReferenceNotFoundInTheProject" xml:space="preserve">
     <value>Specified reference {0} does not exist in project {1}.</value>
   </data>

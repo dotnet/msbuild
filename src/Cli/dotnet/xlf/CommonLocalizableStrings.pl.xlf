@@ -277,6 +277,11 @@ Jeśli określony jest identyfikator środowiska uruchomieniowego, wartość dom
         <target state="translated">Usuń</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionFolderAlreadyContainsProject">
+        <source>Solution {0} already contains project {1} in solution folder {2}.</source>
+        <target state="new">Solution {0} already contains project {1} in solution folder {2}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Update">
         <source>Update</source>
         <target state="translated">Aktualizuj</target>

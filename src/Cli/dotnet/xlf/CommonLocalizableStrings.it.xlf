@@ -277,6 +277,11 @@ L'impostazione predefinita è 'true' se si specifica un identificatore di runtim
         <target state="translated">Elimina</target>
         <note />
       </trans-unit>
+      <trans-unit id="SolutionFolderAlreadyContainsProject">
+        <source>Solution {0} already contains project {1} in solution folder {2}.</source>
+        <target state="new">Solution {0} already contains project {1} in solution folder {2}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Update">
         <source>Update</source>
         <target state="translated">Aggiorna</target>
