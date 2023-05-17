@@ -1810,18 +1810,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Returns <see cref="IDirectoryCache"/> as provided by the <see cref="IDirectoryCacheFactory"/> passed when creating the
-        /// project, specific for a given evaluation ID.
-        /// </summary>
-        /// <param name="evaluationId">The evaluation ID for which the cache is requested.</param>
-        /// <returns>An <see cref="IDirectoryCache"/> implementation, or null if this project has no <see cref="IDirectoryCacheFactory"/>
-        /// associated with it or it returned null.</returns>
-        internal IDirectoryCache GetDirectoryCacheForEvaluation(int evaluationId)
-        {
-            return _directoryCacheFactory?.GetDirectoryCacheForEvaluation(evaluationId);
-        }
-
-        /// <summary>
         /// Internal project evaluation implementation.
         /// </summary>
         private class ProjectImpl : ProjectLink, IProjectLinkInternal
@@ -3737,6 +3725,7 @@ namespace Microsoft.Build.Evaluation
                     loggingServiceForEvaluation,
                     new ProjectItemFactory(Owner),
                     ProjectCollection,
+                    Owner._directoryCacheFactory,
                     ProjectCollection.ProjectRootElementCache,
                     s_buildEventContext,
                     evaluationContext.SdkResolverService,

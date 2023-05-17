@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
@@ -128,14 +127,8 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        StringBuilder flattenedMessage = new StringBuilder(actualException.Message);
-                        Exception excep = actualException;
-                        while (excep.InnerException != null)
-                        {
-                            excep = excep.InnerException;
-                            flattenedMessage.Append(" ---> ").Append(excep.Message);
-                        }
-                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, flattenedMessage.ToString());
+                        string flattenedMessage = TaskLoggingHelper.GetInnerExceptionMessageString(e);
+                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, flattenedMessage);
                         Log.LogMessage(MessageImportance.Low, actualException.ToString());
                         break;
                     }
