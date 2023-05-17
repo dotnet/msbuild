@@ -8640,7 +8640,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 "qgFjAJsAoQGDAKsAqgGDALMArwGDAJMAoQGDALsAxAEDAAYABQAEgAAAAQAAAAAAAAAAAgAAAAANAAAABAACAAEAAAAAAAAARABxAAAAAAD/AP8A/wD/AAAAAABNAEQAAABWAAQAAAAAAAAAAAIAAAAA";
 
             using MemoryStream memoryStream = new MemoryStream(Convert.FromBase64String(windowsRuntimeAssemblyHeaderBase64Encoded));
-            string runtimeVersion = ManagedRuntimeVersionReader.GetRuntimeVersion(memoryStream);
+            using BinaryReader reader = new BinaryReader(memoryStream);
+            string runtimeVersion = ManagedRuntimeVersionReader.GetRuntimeVersion(reader);
 
             runtimeVersion.ShouldBe("WindowsRuntime 1.4;CLR v4.0.30319");
         }
