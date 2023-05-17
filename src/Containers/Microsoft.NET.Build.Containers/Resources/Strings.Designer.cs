@@ -169,15 +169,6 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER1010: Don&apos;t know how to pull images from local daemons at the moment..
-        /// </summary>
-        internal static string DontKnowHowToPullImages {
-            get {
-                return ResourceManager.GetString("DontKnowHowToPullImages", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to CONTAINER4006: Property &apos;{0}&apos; is empty or contains whitespace and will be ignored..
         /// </summary>
         internal static string EmptyOrWhitespacePropertyIgnored {
@@ -219,6 +210,15 @@ namespace Microsoft.NET.Build.Containers.Resources {
         internal static string ImageLoadFailed {
             get {
                 return ResourceManager.GetString("ImageLoadFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER1010: Pulling images from local Docker daemon is not supported..
+        /// </summary>
+        internal static string ImagePullNotSupported {
+            get {
+                return ResourceManager.GetString("ImagePullNotSupported", resourceCulture);
             }
         }
         
@@ -331,20 +331,11 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER1012: The local daemon is not available, but pushing to a local daemon was requested. Please start the daemon and try again..
+        ///   Looks up a localized string similar to CONTAINER1012: The local Docker daemon is not available, but pushing to a local Docker daemon was requested. Please start the daemon and try again..
         /// </summary>
-        internal static string LocalDaemondNotAvailable {
+        internal static string LocalDaemonNotAvailable {
             get {
-                return ResourceManager.GetString("LocalDaemondNotAvailable", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to CONTAINER2006: Tried to get layer information but there is no layer node?.
-        /// </summary>
-        internal static string MissingLayerNode {
-            get {
-                return ResourceManager.GetString("MissingLayerNode", resourceCulture);
+                return ResourceManager.GetString("LocalDaemonNotAvailable", resourceCulture);
             }
         }
         

@@ -35,7 +35,8 @@ public class CreateNewImageTests
 
         newProjectDir.Create();
 
-        new DotnetCommand(_testOutput, "new", "console", "-f", ToolsetInfo.CurrentTargetFramework)
+        new DotnetNewCommand(_testOutput, "console", "-f", ToolsetInfo.CurrentTargetFramework)
+            .WithVirtualHive()
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
             .Should().Pass();
@@ -75,7 +76,8 @@ public class CreateNewImageTests
 
         newProjectDir.Create();
 
-        new DotnetCommand(_testOutput, "new", "console", "-f", ToolsetInfo.CurrentTargetFramework)
+        new DotnetNewCommand(_testOutput, "console", "-f", ToolsetInfo.CurrentTargetFramework)
+            .WithVirtualHive()
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
             .Should().Pass();
@@ -131,7 +133,8 @@ public class CreateNewImageTests
 
         newProjectDir.Create();
 
-        new DotnetCommand(_testOutput, "new", "console", "-f", ToolsetInfo.CurrentTargetFramework)
+        new DotnetNewCommand(_testOutput, "console", "-f", ToolsetInfo.CurrentTargetFramework)
+            .WithVirtualHive()
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
             .Should().Pass();
