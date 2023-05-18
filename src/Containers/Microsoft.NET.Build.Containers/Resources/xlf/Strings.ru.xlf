@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="ImagePullNotSupported">
         <source>CONTAINER1010: Pulling images from local Docker daemon is not supported.</source>
-        <target state="new">CONTAINER1010: Pulling images from local Docker daemon is not supported.</target>
+        <target state="translated">CONTAINER1010: извлечение образов из локальной управляющей программы Docker не поддерживается.</target>
         <note>{StrBegin="CONTAINER1010: "}</note>
       </trans-unit>
       <trans-unit id="InvalidContainerImageName">
@@ -149,7 +149,7 @@
       </trans-unit>
       <trans-unit id="LocalDaemonNotAvailable">
         <source>CONTAINER1012: The local Docker daemon is not available, but pushing to a local Docker daemon was requested. Please start the daemon and try again.</source>
-        <target state="new">CONTAINER1012: The local Docker daemon is not available, but pushing to a local Docker daemon was requested. Please start the daemon and try again.</target>
+        <target state="translated">CONTAINER1012: локальная управляющая программа Docker недоступна, но запрошена отправка в локальную управляющую программу Docker. Запустите управляющую программу и повторите попытку.</target>
         <note>{StrBegin="CONTAINER1012: "}</note>
       </trans-unit>
       <trans-unit id="MissingLinkToRegistry">
