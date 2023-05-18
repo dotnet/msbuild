@@ -782,6 +782,25 @@ namespace Microsoft.Build.CommandLine
                     {
                         ReplayBinaryLog(projectFile, loggers, distributedLoggerRecords, cpuCount);
                     }
+                    else if ("a".Equals("A", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (FileUtilities.IsSolutionFilename(projectFile))
+                        {
+                            ProjectInstance.LoadSolutionForBuild
+                        }
+                        else
+                        {
+
+                        }
+                        Project p = Project.FromFile(projectFile, new Definition.ProjectOptions()
+                        {
+                            GlobalProperties = globalProperties,
+                            ToolsVersion = toolsVersion,
+                        });
+
+                        Console.WriteLine($"\"propertyName\": \"{p.GetPropertyValue("myProperty")}\"");
+                        Console.WriteLine($"\"propertyName\": \"{p.GetPropertyValue("otherProperty")}\"");
+                    }
                     else // regular build
                     {
                         // if everything checks out, and sufficient information is available to start building
