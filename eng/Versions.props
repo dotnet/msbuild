@@ -132,8 +132,8 @@
     <MicrosoftTemplateEngineUtilsPackageVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateEngineUtilsPackageVersion>
     <MicrosoftTemplateSearchCommonPackageVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateSearchCommonPackageVersion>
     <!-- test dependencies -->
-    <MicrosoftTemplateEngineMocksPackageVersion>7.0.304-servicing.23265.6</MicrosoftTemplateEngineMocksPackageVersion>
-    <MicrosoftTemplateEngineTestHelperPackageVersion>7.0.304-servicing.23265.6</MicrosoftTemplateEngineTestHelperPackageVersion>
+    <MicrosoftTemplateEngineMocksPackageVersion>7.0.304-servicing.23268.11</MicrosoftTemplateEngineMocksPackageVersion>
+    <MicrosoftTemplateEngineTestHelperPackageVersion>7.0.304-servicing.23268.11</MicrosoftTemplateEngineTestHelperPackageVersion>
     <MicrosoftTemplateEngineAuthoringTemplateVerifierVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateEngineAuthoringTemplateVerifierVersion>
   </PropertyGroup>
   <PropertyGroup>
