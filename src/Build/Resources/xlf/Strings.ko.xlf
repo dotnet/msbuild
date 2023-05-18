@@ -92,11 +92,6 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
-      <trans-unit id="DefaultSDKResolverError">
-        <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
-        <target state="new">MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: 동일한 작업의 여러 재정의를 만들려고 했습니다. {0}</target>
@@ -127,13 +122,6 @@
         <target state="translated">MSB4258: "{0}" 경로에서 출력 결과 캐시 파일을 쓰는 중 오류가 발생했습니다. {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToResolveSDK">
-        <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
-  {1}</source>
-        <target state="new">Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
-  {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: "{0}" 조건의 "{1}" 위치에 예기치 않은 공백이 있습니다. 공백을 제거했는지 확인하세요.</target>
@@ -153,11 +141,6 @@
         <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
         <target state="translated">SharingPolicy.Isolated로 만든 EvaluationContext 개체는 MSBuildFileSystemBase 파일 시스템 전달을 지원하지 않습니다.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="ItemReferencingSelfInTarget">
-        <source>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</source>
-        <target state="new">MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</target>
-        <note>{StrBegin="MSB4120: "}</note>
       </trans-unit>
       <trans-unit id="KillingProcessWithPid">
         <source>Killing process with pid = {0}.</source>
@@ -194,11 +177,6 @@
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
         <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
         <target state="translated">MSB4270: "{0}" 어셈블리에서 프로젝트 캐시 플러그 인을 찾을 수 없습니다. 1개가 필요합니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NodeReused">
-        <source>Reusing node {0} (PID: {1}).</source>
-        <target state="new">Reusing node {0} (PID: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -350,11 +328,6 @@
         <target state="translated">속성 초기 값: $({0})="{1}" 소스: {2}</target>
         <note />
       </trans-unit>
-      <trans-unit id="PropertyOutsidePropertyGroupInTarget">
-        <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
-        <target state="new">MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</target>
-        <note>{StrBegin="MSB4067: "}</note>
-      </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
         <target state="translated">MSB4274: 프록시 빌드 요청을 내보내는 프로젝트 캐시 플러그 인을 사용할 때 inproc 노드를 사용하지 않도록 설정하면 성능이 저하됩니다.</target>
@@ -368,11 +341,6 @@
       <trans-unit id="SDKResolverFailed">
         <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
         <target state="translated">SDK "{1}"을(를) 확인하는 동안 SDK 확인자 "{0}"이(가) 실패했습니다. 예외: "{2}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SDKResolverReturnedNull">
-        <source>SDK resolver "{0}" returned null.</source>
-        <target state="new">SDK resolver "{0}" returned null.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -424,11 +392,6 @@
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
         <target state="translated">"{0}" 작업에서 코어 {1}개를 요청했고 코어 {2}개를 획득했으며 지금 총 {3}개의 코어를 보유하고 있습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="TaskAssemblyLoaded">
-        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
-        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
