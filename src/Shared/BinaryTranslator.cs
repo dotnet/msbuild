@@ -477,7 +477,7 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateException(ref Exception value)
             {
-                throw new Exception("Not supported!!!");
+                throw new Exception("Not supported!!! " + value.GetType());
                 // TranslateDotNet<Exception>(ref value);
             }
 
@@ -1101,7 +1101,7 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateException(ref Exception value)
             {
-                throw new Exception("Not supported!!! #2");
+                throw new Exception("Not supported!!! #2 " + value.GetType());
                 // TranslateDotNet<Exception>(ref value);
             }
 
