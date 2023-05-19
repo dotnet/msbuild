@@ -1108,6 +1108,7 @@ namespace Microsoft.Build.BackEnd
                 if (value != null)
                 {
                     Console.WriteLine("Translating exception: " + value.GetType());
+                    Debugger.Launch();
 
                     if (value is not InternalErrorException)
                     {

@@ -15,6 +15,7 @@ namespace Microsoft.Build.Exceptions
     /// <summary>
     /// An exception representing the case where the build was aborted by request, as opposed to being
     /// unceremoniously shut down due to another kind of error exception.
+    /// todo
     /// </summary>
     /// <remarks>
     /// This is public because it may be returned in the Exceptions collection of a BuildResult.

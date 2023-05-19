@@ -11,6 +11,7 @@ namespace Microsoft.Build.Exceptions
     /// <summary>
     /// An exception representing the case where a BuildRequest has caused a circular project dependency.  This is used to
     /// terminate the request builder which initiated the failure path.
+    /// TODO: this
     /// </summary>
     /// <remarks>
     /// If you add fields to this class, add a custom serialization constructor and override GetObjectData().

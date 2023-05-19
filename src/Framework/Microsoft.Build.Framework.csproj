@@ -41,6 +41,9 @@
     <Compile Include="..\Shared\BinaryWriterExtensions.cs">
       <Link>Shared\BinaryWriterExtensions.cs</Link>
     </Compile>
+
+    <Compile Include="..\Shared\ITranslatable.cs" />
+    <Compile Include="..\Shared\ITranslator.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">

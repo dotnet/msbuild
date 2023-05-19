@@ -21,6 +21,7 @@ namespace Microsoft.Build.Framework
         /// Default constructor.
         /// SHOULD ONLY BE CALLED BY DESERIALIZER.
         /// SUPPLY A MESSAGE INSTEAD.
+        /// todo
         /// </summary>
         internal InternalErrorException() : base()
         {
