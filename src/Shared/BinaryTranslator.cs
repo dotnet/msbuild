@@ -477,8 +477,12 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateException(ref Exception value)
             {
-                throw new Exception("Not supported!!! " + value.GetType());
-                // TranslateDotNet<Exception>(ref value);
+                if (value != null)
+                {
+                    Console.WriteLine("Translating exception (read): " + value.GetType());
+                    // throw new Exception("Not supported!!! " + value.GetType());
+                }
+                TranslateDotNet<Exception>(ref value);
             }
 
 
@@ -1103,9 +1107,16 @@ namespace Microsoft.Build.BackEnd
             {
                 if (value != null)
                 {
-                    throw new Exception("Not supported!!! #2 " + value.GetType());
+                    Console.WriteLine("Translating exception: " + value.GetType());
+
+                    if (value is not InternalErrorException)
+                    {
+                        ErrorUtilities.ThrowInternalError("Translating exception: " + value.GetType());
+                    }
+
+                    // throw new Exception("Not supported!!! #2 " + value.GetType());
                 }
-                // TranslateDotNet<Exception>(ref value);
+                TranslateDotNet<Exception>(ref value);
             }
 
             /// <summary>
