@@ -135,6 +135,9 @@
     <Compile Include="..\Shared\BinaryTranslator.cs">
       <Link>BinaryTranslator.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\BuildTransferredException.cs">
+      <Link>BuildTransferredException.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\NodeShutdown.cs">
       <Link>NodeShutdown.cs</Link>
     </Compile>

@@ -477,7 +477,12 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateException(ref Exception value)
             {
-                TranslateDotNet<Exception>(ref value);
+                if (!TranslateNullable(value))
+                {
+                    return;
+                }
+
+                value = BuildTransferredException.ReadExceptionFromTranslator(this);
             }
 
 
@@ -1100,7 +1105,12 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateException(ref Exception value)
             {
-                TranslateDotNet<Exception>(ref value);
+                if (!TranslateNullable(value))
+                {
+                    return;
+                }
+
+                BuildTransferredException.WriteExceptionToTranslator(this, value);
             }
 
             /// <summary>
