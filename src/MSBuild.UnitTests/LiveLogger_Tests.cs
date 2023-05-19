@@ -4,12 +4,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging.LiveLogger;
 
+using VerifyTests;
 using VerifyXunit;
 using Xunit;
 
@@ -32,6 +36,10 @@ namespace Microsoft.Build.UnitTests
         private readonly DateTime _buildStartTime = new DateTime(2023, 3, 30, 16, 30, 0);
         private readonly DateTime _buildFinishTime = new DateTime(2023, 3, 30, 16, 30, 5);
 
+        private VerifySettings _settings = new();
+
+        private static Regex s_elapsedTime = new($@"\(\d+{Regex.Escape(CultureInfo.CurrentUICulture.NumberFormat.NumberDecimalSeparator)}\ds\)", RegexOptions.Compiled);
+
         public LiveLogger_Tests()
         {
             _mockTerminal = new Terminal(_outputWriter);
@@ -40,6 +48,16 @@ namespace Microsoft.Build.UnitTests
             _liveLogger.Initialize(this, _nodeCount);
 
             UseProjectRelativeDirectory("Snapshots");
+
+            // Scrub timestamps on intermediate execution lines,
+            // which are subject to the vagaries of the test machine
+            // and OS scheduler.
+            _settings.AddScrubber(static lineBuilder =>
+            {
+                string line = lineBuilder.ToString();
+                lineBuilder.Clear();
+                lineBuilder.Append(s_elapsedTime.Replace(line, "(0.0s)"));
+            });
         }
 
         #region IEventSource implementation
@@ -180,6 +198,8 @@ namespace Microsoft.Build.UnitTests
 
             additionalCallbacks();
 
+            Thread.Sleep(1_000);
+
             TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "Task", succeeded));
             TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile, "Build", succeeded));
 
@@ -192,7 +212,7 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () => { });
 
-            return Verify(_outputWriter.ToString());
+            return Verify(_outputWriter.ToString(), _settings);
         }
 
         [Fact]
@@ -203,14 +223,14 @@ namespace Microsoft.Build.UnitTests
                 WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning!"));
             });
 
-            return Verify(_outputWriter.ToString());
+            return Verify(_outputWriter.ToString(), _settings);
         }
 
         [Fact]
         public Task PrintBuildSummary_Failed()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () => { });
-            return Verify(_outputWriter.ToString());
+            return Verify(_outputWriter.ToString(), _settings);
         }
 
         [Fact]
@@ -221,7 +241,7 @@ namespace Microsoft.Build.UnitTests
                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
            });
 
-           return Verify(_outputWriter.ToString());
+           return Verify(_outputWriter.ToString(), _settings);
         }
 
         #endregion
