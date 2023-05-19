@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="SpecifiedManifestNotFound">
         <source>Specified workload manifest was not found: {0}</source>
-        <target state="new">Specified workload manifest was not found: {0}</target>
+        <target state="translated">No se encontró el manifiesto de carga de trabajo especificado: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
