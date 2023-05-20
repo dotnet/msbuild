@@ -16,6 +16,7 @@ public class DockerRegistryManager
     public const string Net6ImageTag = "6.0";
     public const string Net7ImageTag = "7.0";
     public const string Net8PreviewImageTag = "8.0-preview";
+    public const string Net8PreviewWindowsSpecificImageTag = $"{Net8PreviewImageTag}-nanoserver-ltsc2022";
     public const string LocalRegistry = "localhost:5010";
     public const string FullyQualifiedBaseImageDefault = $"{BaseImageSource}{RuntimeBaseImage}:{Net8PreviewImageTag}";
     public const string FullyQualifiedBaseImageAspNet = $"{BaseImageSource}{AspNetBaseImage}:{Net8PreviewImageTag}";
