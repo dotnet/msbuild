@@ -4728,9 +4728,7 @@ namespace Microsoft.Build.Evaluation
 
             private static bool IsFloatingPointRepresentation(object value)
             {
-                const char numberDecimalSeparator = '.';
-
-                return value is double || (value is string str && str.Contains(numberDecimalSeparator));
+                return value is double || (value is string str && double.TryParse(str, out double _));
             }
 
             private static bool TryExecuteArithmeticOverload(object[] args, Func<long, long, long> integerOperation, Func<double, double, double> realOperation, out object resultValue)
@@ -4742,7 +4740,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (IsIntrinsicFunctionOverloadsEnabled() && !IsFloatingPointRepresentation(args[0]) && !IsFloatingPointRepresentation(args[1]))
+                if (IsIntrinsicFunctionOverloadsEnabled())
                 {
                     if (TryConvertToLong(args[0], out long argLong0) && TryConvertToLong(args[1], out long argLong1))
                     {
