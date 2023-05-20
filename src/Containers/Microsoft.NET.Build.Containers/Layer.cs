@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
+using System.IO.Enumeration;
 
 namespace Microsoft.NET.Build.Containers;
 
@@ -45,83 +46,39 @@ internal record struct Layer
 
     public static Layer FromDirectory(string directory, string containerPath, bool isWindowsLayer)
     {
-        var fileList =
-            new DirectoryInfo(directory)
-            .EnumerateFiles("*", SearchOption.AllDirectories)
-            .Select(fsi =>
-                    {
-                        string destinationPath = Path.Join(containerPath, Path.GetRelativePath(directory, fsi.FullName)).Replace(Path.DirectorySeparatorChar, '/');
-                        return (fsi.FullName, destinationPath);
-                    });
-        return FromFiles(fileList, isWindowsLayer);
-    }
-
-    public static Layer FromFiles(IEnumerable<(string path, string containerPath)> fileList, bool isWindowsLayer)
-    {
         long fileSize;
         Span<byte> hash = stackalloc byte[SHA256.HashSizeInBytes];
         Span<byte> uncompressedHash = stackalloc byte[SHA256.HashSizeInBytes];
 
-        // this factory helps us creating the Tar entries with the right attributes
-        PaxTarEntry CreateTarEntry(TarEntryType entryType, string containerPath)
+        // Docker treats a COPY instruction that copies to a path like `/app` by
+        // including `app/` as a directory, with no leading slash. Emulate that here.
+        containerPath = containerPath.TrimStart(PathSeparators);
+
+        // For Windows layers we need to put files into a "Files" directory without drive letter.
+        if (isWindowsLayer)
         {
-            var extendedAttributes = new Dictionary<string, string>();
-            if (isWindowsLayer)
+            // Cut of drive letter:  /* C:\ */
+            if (containerPath[1] == ':')
             {
-                // We grant all users access to the application directory
-                // https://github.com/buildpacks/rfcs/blob/main/text/0076-windows-security-identifiers.md
-                extendedAttributes["MSWINDOWS.rawsd"] = BuiltinUsersSecurityDescriptor;
-                return new PaxTarEntry(entryType, containerPath, extendedAttributes);
+                containerPath = containerPath[3..];
             }
 
-            var entry = new PaxTarEntry(entryType, containerPath, extendedAttributes)
-            {
-                Mode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
-                       UnixFileMode.GroupRead | UnixFileMode.GroupExecute |
-                       UnixFileMode.OtherRead | UnixFileMode.OtherExecute
-            };
-            return entry;
+            containerPath = "Files/" + containerPath;
         }
 
-        string SanitizeContainerPath(string containerPath)
+        // Trim training path separator (if present).
+        containerPath = containerPath.TrimEnd(PathSeparators);
+
+        // Use only '/' as directory separator.
+        containerPath = containerPath.Replace('\\', '/');
+
+        var entryAttributes = new Dictionary<string, string>();
+        if (isWindowsLayer)
         {
-            // no leading slashes
-            containerPath = containerPath.TrimStart(PathSeparators);
-
-            // For Windows layers we need to put files into a "Files" directory without drive letter.
-            if (isWindowsLayer)
-            {
-                // Cut of drive letter:  /* C:\ */
-                if (containerPath[1] == ':')
-                {
-                    containerPath = containerPath[3..];
-                }
-
-                containerPath = "Files/" + containerPath;
-            }
-
-            return containerPath;
+            // We grant all users access to the application directory
+            // https://github.com/buildpacks/rfcs/blob/main/text/0076-windows-security-identifiers.md
+            entryAttributes["MSWINDOWS.rawsd"] = BuiltinUsersSecurityDescriptor;
         }
-
-        // Ensures that all directory entries for the given segments are created within the tar.
-        var directoryEntries = new HashSet<string>();
-        void EnsureDirectoryEntries(TarWriter tar,
-            IReadOnlyList<string> filePathSegments)
-        {
-            var pathBuilder = new StringBuilder();
-            for (int i = 0; i < filePathSegments.Count - 1; i++)
-            {
-                pathBuilder.Append(CultureInfo.InvariantCulture, $"{filePathSegments[i]}/");
-
-                string fullPath = pathBuilder.ToString();
-                if (!directoryEntries.Contains(fullPath))
-                {
-                    tar.WriteEntry(CreateTarEntry(TarEntryType.Directory, fullPath));
-                    directoryEntries.Add(fullPath);
-                }
-            }
-        }
-
 
         string tempTarballPath = ContentStore.GetTempFile();
         using (FileStream fs = File.Create(tempTarballPath))
@@ -130,25 +87,43 @@ internal record struct Layer
             {
                 using (TarWriter writer = new(gz, TarEntryFormat.Pax, leaveOpen: true))
                 {
+                    // Windows layers need a Files folder
+                    if (isWindowsLayer)
+                    {
+                        var entry = new PaxTarEntry(TarEntryType.Directory, "Files", entryAttributes);
+                        writer.WriteEntry(entry);
+                    }
+
+                    // Write an entry for the application directory.
+                    WriteTarEntryForFile(writer, new DirectoryInfo(directory), containerPath, entryAttributes);
+
+                    // Write entries for the application directory contents.
+                    var fileList = new FileSystemEnumerable<(FileSystemInfo file, string containerPath)>(
+                                directory: directory,
+                                transform: (ref FileSystemEntry entry) =>
+                                {
+                                    FileSystemInfo fsi = entry.ToFileSystemInfo();
+                                    string relativePath = Path.GetRelativePath(directory, fsi.FullName);
+                                    if (OperatingSystem.IsWindows())
+                                    {
+                                        // Use only '/' directory separators.
+                                        relativePath = relativePath.Replace('\\', '/');
+                                    }
+                                    return (fsi, $"{containerPath}/{relativePath}");
+                                },
+                                options: new EnumerationOptions()
+                                {
+                                    RecurseSubdirectories = true
+                                });
                     foreach (var item in fileList)
                     {
-                        // Docker treats a COPY instruction that copies to a path like `/app` by
-                        // including `app/` as a directory, with no leading slash. Emulate that here.
-                        string containerPath = SanitizeContainerPath(item.containerPath);
-
-                        EnsureDirectoryEntries(writer, containerPath.Split(PathSeparators));
-
-                        using var fileStream = File.OpenRead(item.path);
-                        var entry = CreateTarEntry(TarEntryType.RegularFile, containerPath);
-                        entry.DataStream = fileStream;
-
-                        writer.WriteEntry(entry);
+                        WriteTarEntryForFile(writer, item.file, item.containerPath, entryAttributes);
                     }
 
                     // Windows layers need a Hives folder, we do not need to create any Registry Hive deltas inside
                     if (isWindowsLayer)
                     {
-                        var entry = CreateTarEntry(TarEntryType.Directory, "Hives/");
+                        var entry = new PaxTarEntry(TarEntryType.Directory, "Hives", entryAttributes);
                         writer.WriteEntry(entry);
                     }
 
@@ -163,6 +138,43 @@ internal record struct Layer
             fs.Position = 0;
 
             SHA256.HashData(fs, hash);
+
+            // Writes a tar entry corresponding to the file system item.
+            static void WriteTarEntryForFile(TarWriter writer, FileSystemInfo file, string containerPath, IEnumerable<KeyValuePair<string, string>> entryAttributes)
+            {
+                UnixFileMode mode = DetermineFileMode(file);
+
+                if (file is FileInfo)
+                {
+                    using var fileStream = File.OpenRead(file.FullName);
+                    PaxTarEntry entry = new(TarEntryType.RegularFile, containerPath, entryAttributes)
+                    {
+                        Mode = mode,
+                        DataStream = fileStream
+                    };
+                    writer.WriteEntry(entry);
+                }
+                else
+                {
+                    PaxTarEntry entry = new(TarEntryType.Directory, containerPath, entryAttributes)
+                    {
+                        Mode = mode
+                    };
+                    writer.WriteEntry(entry);
+                }
+
+                static UnixFileMode DetermineFileMode(FileSystemInfo file)
+                {
+                    const UnixFileMode nonExecuteMode = UnixFileMode.UserRead | UnixFileMode.UserWrite |
+                                                        UnixFileMode.GroupRead |
+                                                        UnixFileMode.OtherRead;
+                    const UnixFileMode executeMode = nonExecuteMode | UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute;
+
+                    // On Unix, we can determine the x-bit based on the filesystem permission.
+                    // On Windows, we use executable permissions for all entries.
+                    return (OperatingSystem.IsWindows() || ((file.UnixFileMode | UnixFileMode.UserExecute) != 0)) ? executeMode : nonExecuteMode;
+                }
+            }
         }
 
         string contentHash = Convert.ToHexString(hash).ToLowerInvariant();

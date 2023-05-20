@@ -42,7 +42,7 @@ public sealed class LayerEndToEndTests : IDisposable
         VerifyDescriptorInfo(l);
 
         var allEntries = LoadAllTarEntries(l.BackingFile);
-        Assert.True(allEntries.TryGetValue("app/", out var appEntry) && appEntry.EntryType == TarEntryType.Directory, "Missing app directory entry");
+        Assert.True(allEntries.TryGetValue("app", out var appEntry) && appEntry.EntryType == TarEntryType.Directory, "Missing app directory entry");
         Assert.True(allEntries.TryGetValue("app/TestFile.txt", out var fileEntry) && fileEntry.EntryType == TarEntryType.RegularFile, "Missing TestFile.txt file entry");
     }
     
@@ -59,10 +59,10 @@ public sealed class LayerEndToEndTests : IDisposable
         Layer l = Layer.FromDirectory(directory: folder.Path, containerPath: "C:\\app", true);
 
         var allEntries = LoadAllTarEntries(l.BackingFile);
-        Assert.True(allEntries.TryGetValue("Files/", out var filesEntry) && filesEntry.EntryType == TarEntryType.Directory, "Missing Files/ directory entry");
-        Assert.True(allEntries.TryGetValue("Files/app/", out var appEntry) && appEntry.EntryType == TarEntryType.Directory, "Missing Files/app/ directory entry");
+        Assert.True(allEntries.TryGetValue("Files", out var filesEntry) && filesEntry.EntryType == TarEntryType.Directory, "Missing Files directory entry");
+        Assert.True(allEntries.TryGetValue("Files/app", out var appEntry) && appEntry.EntryType == TarEntryType.Directory, "Missing Files/app directory entry");
         Assert.True(allEntries.TryGetValue("Files/app/TestFile.txt", out var fileEntry) && fileEntry.EntryType == TarEntryType.RegularFile, "Missing Files/app/TestFile.txt file entry");
-        Assert.True(allEntries.TryGetValue("Hives/", out var hivesEntry) && hivesEntry.EntryType == TarEntryType.Directory, "Missing Hives/ directory entry");
+        Assert.True(allEntries.TryGetValue("Hives", out var hivesEntry) && hivesEntry.EntryType == TarEntryType.Directory, "Missing Hives directory entry");
 
         // Enable after https://github.com/dotnet/runtime/issues/81699 is resolved
         // foreach (var entry in allEntries.Values)
@@ -72,41 +72,6 @@ public sealed class LayerEndToEndTests : IDisposable
         //     Assert.IsTrue(pax.ExtendedAttributes.ContainsKey("MSWINDOWS.rawsd"),
         //         "Missing MSWINDOWS.rawsd definition for " + entry.Name);
         // }
-    }    
-
-    [Fact]
-    public void TwoFilesInTwoFolders()
-    {
-        using TransientTestFolder folder = new();
-
-        string testFilePath = Path.Join(folder.Path, "TestFile.txt");
-        string testString = $"Test content for {nameof(TwoFilesInTwoFolders)}";
-        File.WriteAllText(testFilePath, testString);
-
-        using TransientTestFolder folder2 = new();
-        string testFilePath2 = Path.Join(folder2.Path, "TestFile.txt");
-        string testString2 = $"Test content 2 for {nameof(TwoFilesInTwoFolders)}";
-        File.WriteAllText(testFilePath2, testString2);
-
-        Layer l = Layer.FromFiles(new[]
-        {
-            (testFilePath,  "/app/TestFile.txt"),
-            (testFilePath2, "/app/subfolder/TestFile.txt"),
-        }, false);
-
-        Console.WriteLine(l.Descriptor);
-
-        //Assert.AreEqual("application/vnd.oci.image.layer.v1.tar", l.Descriptor.MediaType); // TODO: configurability
-        Assert.True(l.Descriptor.Size is >= 150 and <= 500, $"'l.Descriptor.Size' should be between 150 and 500, but is {l.Descriptor.Size}"); // TODO: determinism!
-        //Assert.AreEqual("sha256:26140bc75f2fcb3bf5da7d3b531d995c93d192837e37df0eb5ca46e2db953124", l.Descriptor.Digest); // TODO: determinism!
-
-        VerifyDescriptorInfo(l);
-
-        var allEntries = LoadAllTarEntries(l.BackingFile);
-        Assert.True(allEntries.TryGetValue("app/", out var appEntry) && appEntry.EntryType == TarEntryType.Directory, "Missing app directory entry");
-        Assert.True(allEntries.TryGetValue("app/TestFile.txt", out var fileEntry) && fileEntry.EntryType == TarEntryType.RegularFile, "Missing TestFile.txt file entry");
-        Assert.True(allEntries.TryGetValue("app/subfolder/", out var subfolderEntry) && subfolderEntry.EntryType == TarEntryType.Directory, "Missing subfolder directory entry");
-        Assert.True(allEntries.TryGetValue("app/subfolder/TestFile.txt", out var subfolderFileEntry) && subfolderFileEntry.EntryType == TarEntryType.RegularFile, "Missing subfolder/TestFile.txt file entry");
     }
 
     private static void VerifyDescriptorInfo(Layer l)
