@@ -3162,7 +3162,7 @@ namespace Microsoft.Build.Evaluation
         /// It is also responsible for executing the function.
         /// </summary>
         /// <typeparam name="T">Type of the properties used to expand the expression.</typeparam>
-        private class Function<T>
+        internal class Function<T>
             where T : class, IProperty
         {
             /// <summary>
@@ -4515,66 +4515,88 @@ namespace Microsoft.Build.Evaluation
                 return true;
             }
 
-            private static bool TryConvertToInt(object value, out int arg0)
+            internal static bool TryConvertToInt(object value, out int arg)
             {
                 switch (value)
                 {
                     case double d:
                         if (d >= int.MinValue && d <= int.MaxValue)
                         {
-                            arg0 = Convert.ToInt32(d);
-                            return arg0 == d;
+                            arg = Convert.ToInt32(d);
+                            if (Math.Abs(arg - d) == 0)
+                            {
+                                return true;
+                            }
+                        }
+
+                        break;
+                    case long l:
+                        if (l >= int.MinValue && l <= int.MaxValue)
+                        {
+                            arg = Convert.ToInt32(l);
+                            return true;
                         }
 
                         break;
                     case int i:
-                        arg0 = i;
+                        arg = i;
                         return true;
-                    case string s when int.TryParse(s, out arg0):
+                    case string s when int.TryParse(s, out arg):
                         return true;
                 }
 
-                arg0 = 0;
+                arg = 0;
                 return false;
             }
 
-            private static bool TryConvertToLong(object value, out long arg0)
+            internal static bool TryConvertToLong(object value, out long arg)
             {
                 switch (value)
                 {
                     case double d:
                         if (d >= long.MinValue && d <= long.MaxValue)
                         {
-                            arg0 = Convert.ToInt64(d);
-                            return arg0 == d;
+                            arg = (long)d;
+                            if (Math.Abs(arg - d) == 0)
+                            {
+                                return true;
+                            }
                         }
 
                         break;
-                    case long i:
-                        arg0 = i;
+                    case long l:
+                        arg = l;
                         return true;
-                    case string s when long.TryParse(s, out arg0):
+                    case int i:
+                        arg = i;
                         return true;
-                }
-
-                arg0 = 0;
-                return false;
-            }
-
-            private static bool TryConvertToDouble(object value, out double arg)
-            {
-                if (value is double unboxed)
-                {
-                    arg = unboxed;
-                    return true;
-                }
-                else if (value is string str && double.TryParse(str, out arg))
-                {
-                    return true;
+                    case string s when long.TryParse(s, out arg):
+                        return true;
                 }
 
                 arg = 0;
                 return false;
+            }
+
+            internal static bool TryConvertToDouble(object value, out double arg)
+            {
+                switch (value)
+                {
+                    case double unboxed:
+                        arg = unboxed;
+                        return true;
+                    case long l:
+                        arg = l;
+                        return true;
+                    case int i:
+                        arg = i;
+                        return true;
+                    case string str when double.TryParse(str, out arg):
+                        return true;
+                    default:
+                        arg = 0;
+                        return false;
+                }
             }
 
             private static bool TryGetArg(object[] args, out string arg0)
