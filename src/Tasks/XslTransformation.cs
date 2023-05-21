@@ -159,13 +159,18 @@ namespace Microsoft.Build.Tasks
             // Do the transformation.
             try
             {
+                if (UseTrustedSettings)
+                {
+                    Log.LogMessageFromResources(MessageImportance.High, "XslTransform.SecuritySettingsViaUseTrustedSettings");
+                }
+
                 for (int i = 0; i < xmlinput.Count; i++)
                 {
                     using (XmlWriter xmlWriter = XmlWriter.Create(_outputPaths[i].ItemSpec, xslct.OutputSettings))
                     {
                         using (XmlReader xr = xmlinput.CreateReader(i))
                         {
-                            xslct.Transform(xr, arguments, xmlWriter);
+                            xslct.Transform(xr, arguments, xmlWriter, new XmlUrlResolver());
                         }
 
                         xmlWriter.Close();
@@ -174,7 +179,9 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                Log.LogErrorWithCodeFromResources("XslTransform.TransformError", e.Message);
+                string flattenedMessage = TaskLoggingHelper.GetInnerExceptionMessageString(e);
+                Log.LogErrorWithCodeFromResources("XslTransform.TransformError", flattenedMessage);
+                Log.LogMessage(MessageImportance.Low, e.ToString());
                 return false;
             }
 
