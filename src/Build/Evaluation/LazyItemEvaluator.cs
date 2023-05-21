@@ -492,7 +492,7 @@ namespace Microsoft.Build.Evaluation
 
         private class OperationBuilderWithMetadata : OperationBuilder
         {
-            public ImmutableList<ProjectMetadataElement>.Builder Metadata = ImmutableList.CreateBuilder<ProjectMetadataElement>();
+            public readonly ImmutableArray<ProjectMetadataElement>.Builder Metadata = ImmutableArray.CreateBuilder<ProjectMetadataElement>();
 
             public OperationBuilderWithMetadata(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {
