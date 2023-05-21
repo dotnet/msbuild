@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
+using System.Runtime.InteropServices;
 using Microsoft.Build.Evaluation;
 
 using Shouldly;
@@ -162,9 +162,20 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         [Fact]
         public void TryConvertToLongGivenDoubleWithLongMaxValue()
         {
-            // Because of loss of precision, long.MaxValue will not 'round trip' from long to double to long.
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong((double)long.MaxValue, out long actual).ShouldBeFalse();
-            actual.ShouldBe(0);
+            const long longMaxValue = long.MaxValue;
+            bool result = Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong((double)longMaxValue, out long actual);
+            if (RuntimeInformation.OSArchitecture != Architecture.Arm64)
+            {
+                // Because of loss of precision, long.MaxValue will not 'round trip' from long to double to long.
+                result.ShouldBeFalse();
+                actual.ShouldBe(0);
+            }
+            else
+            {
+                // Testing on macOS 12 on Apple Silicon M1 Pro produces different result.
+                result.ShouldBeTrue();
+                actual.ShouldBe(longMaxValue);
+            }
         }
 
         [Fact]
