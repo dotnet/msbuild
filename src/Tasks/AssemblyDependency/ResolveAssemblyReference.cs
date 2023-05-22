@@ -2313,7 +2313,7 @@ namespace Microsoft.Build.Tasks
                         {
                             // We don't want to perform I/O to see what the actual timestamp on disk is so we return a fixed made up value.
                             // Note that this value makes the file exist per the check in SystemState.FileTimestampIndicatesFileExists.
-                            return DateTime.MaxValue;
+                            return SystemState.FileState.ImmutableFileLastModifiedMarker;
                         }
                         return getLastWriteTime(path);
                     });
