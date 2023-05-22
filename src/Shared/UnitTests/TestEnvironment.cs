@@ -9,6 +9,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
@@ -95,6 +96,7 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
+                ChangeWaves.ResetStateForTests();
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
