@@ -3,15 +3,15 @@
   <ProductDependencies>
     <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="7.0.107">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-templating</Uri>
-      <Sha>d7102aca2157cbee1b6faf48dd5f94bb0bf81c2e</Sha>
+      <Sha>bda28db47229563fd1f7e54d2f27a80ffd42c5be</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.TestHelper" Version="7.0.107-servicing.23268.16">
+    <Dependency Name="Microsoft.TemplateEngine.TestHelper" Version="7.0.107-servicing.23272.8">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-templating</Uri>
-      <Sha>d7102aca2157cbee1b6faf48dd5f94bb0bf81c2e</Sha>
+      <Sha>bda28db47229563fd1f7e54d2f27a80ffd42c5be</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Mocks" Version="7.0.107-servicing.23268.16">
+    <Dependency Name="Microsoft.TemplateEngine.Mocks" Version="7.0.107-servicing.23272.8">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-templating</Uri>
-      <Sha>d7102aca2157cbee1b6faf48dd5f94bb0bf81c2e</Sha>
+      <Sha>bda28db47229563fd1f7e54d2f27a80ffd42c5be</Sha>
       <SourceBuild RepoName="templating" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="7.0.7">
