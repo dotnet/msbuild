@@ -844,4 +844,8 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</value>
     <comment>{StrBegin="NETSDK1185: "}</comment>
   </data>
+  <data name="WorkloadIsEol" xml:space="preserve">
+    <value>NETSDK1202: The workload '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</value>
+    <comment>{StrBegin="NETSDK1202: "}</comment>
+  </data>
 </root>
