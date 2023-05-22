@@ -708,6 +708,9 @@ namespace Microsoft.Build.CommandLine
                 string outputResultsCache = null;
                 bool question = false;
                 string[] getProperty = Array.Empty<string>();
+                string[] getItem = Array.Empty<string>();
+                string[] getTargetResult = Array.Empty<string>();
+                BuildResult result = null;
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
@@ -745,6 +748,8 @@ namespace Microsoft.Build.CommandLine
                                             ref lowPriority,
                                             ref question,
                                             ref getProperty,
+                                            ref getItem,
+                                            ref getTargetResult,
                                             recursing: false,
 #if FEATURE_GET_COMMANDLINE
                                             commandLine);
@@ -753,6 +758,11 @@ namespace Microsoft.Build.CommandLine
 #endif
 
                 CommandLineSwitches.SwitchesFromResponseFiles = null;
+
+                if (getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0)
+                {
+                    verbosity = LoggerVerbosity.Quiet;
+                }
 
                 if (buildCanBeInvoked)
                 {
@@ -784,22 +794,30 @@ namespace Microsoft.Build.CommandLine
                     {
                         ReplayBinaryLog(projectFile, loggers, distributedLoggerRecords, cpuCount);
                     }
-                    else if ("a".Equals("A", StringComparison.OrdinalIgnoreCase))
+                    else if ((getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0) && FileUtilities.IsSolutionFilename(projectFile))
                     {
-                        if (FileUtilities.IsSolutionFilename(projectFile))
-                        {
-                            throw new Exception();
-                        }
-                        else
-                        {
-                            Project p = Project.FromFile(projectFile, new Definition.ProjectOptions()
-                            {
-                                GlobalProperties = globalProperties,
-                                ToolsVersion = toolsVersion,
-                            });
 
-                            Console.WriteLine($"\"propertyName\": \"{p.GetPropertyValue("myProperty")}\"");
-                            Console.WriteLine($"\"propertyName\": \"{p.GetPropertyValue("otherProperty")}\"");
+                        CommandLineSwitchException.Throw("SolutionBuildInvalidForCommandLineEvaluation",
+                            getProperty.Length > 0 ? "getProperty" :
+                            getItem.Length > 0 ? "getItem" :
+                            "getTargetResult");
+                    }
+                    else if ((getProperty.Length > 0 || getItem.Length > 0) && (targets is null || targets.Length == 0))
+                    {
+                        Project project = Project.FromFile(projectFile, new Definition.ProjectOptions()
+                        {
+                            GlobalProperties = globalProperties,
+                            ToolsVersion = toolsVersion,
+                        });
+
+                        foreach (string property in getProperty)
+                        {
+                            Console.WriteLine($"\"{property}\": \"{project.GetPropertyValue(property)}\"");
+                        }
+
+                        foreach (string item in getItem)
+                        {
+                            Console.WriteLine($"\"{item}\": \"{project.GetItems(item)}\"");
                         }
                     }
                     else // regular build
@@ -836,6 +854,7 @@ namespace Microsoft.Build.CommandLine
                                     question,
                                     inputResultsCaches,
                                     outputResultsCache,
+                                    ref result,
                                     commandLine))
                         {
                             exitType = ExitType.BuildError;
@@ -847,6 +866,26 @@ namespace Microsoft.Build.CommandLine
                     TimeSpan elapsedTime = t2.Subtract(t1);
 
                     string timerOutputFilename = Environment.GetEnvironmentVariable("MSBUILDTIMEROUTPUTS");
+
+                    if ((getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0) && targets?.Length > 0 && result is not null)
+                    {
+                        ProjectInstance builtProject = result.ProjectStateAfterBuild;
+
+                        foreach (string property in getProperty)
+                        {
+                            Console.WriteLine($"\"{property}\": \"{builtProject.GetPropertyValue(property)}\"");
+                        }
+
+                        foreach (string item in getItem)
+                        {
+                            Console.WriteLine($"\"{item}\": \"{builtProject.GetItems(item)}\"");
+                        }
+
+                        foreach (string target in getTargetResult)
+                        {
+                            Console.WriteLine($"\"{target}\": \"{result.ResultsByTarget[target].ResultCode}\"");
+                        }
+                    }
 
                     if (!string.IsNullOrEmpty(timerOutputFilename))
                     {
@@ -1157,6 +1196,7 @@ namespace Microsoft.Build.CommandLine
             bool question,
             string[] inputResultsCaches,
             string outputResultsCache,
+            ref BuildResult result,
 #if FEATURE_GET_COMMANDLINE
             string commandLine)
 #else
@@ -1379,7 +1419,8 @@ namespace Microsoft.Build.CommandLine
 
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
 
-                    BuildResultCode? result = null;
+                    result = null;
+                    GraphBuildResult graphResult = null;
 
                     if (!Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager)
                     {
@@ -1435,9 +1476,9 @@ namespace Microsoft.Build.CommandLine
 
                             if (enableRestore || restoreOnly)
                             {
-                                (result, exception) = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties);
+                                result = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties);
 
-                                if (result != BuildResultCode.Success)
+                                if (result.OverallResult != BuildResultCode.Success)
                                 {
                                     return false;
                                 }
@@ -1447,17 +1488,18 @@ namespace Microsoft.Build.CommandLine
                             {
                                 if (graphBuildOptions != null)
                                 {
-                                    (result, exception) = ExecuteGraphBuild(buildManager, graphBuildRequest);
+                                    graphResult = ExecuteGraphBuild(buildManager, graphBuildRequest);
+                                    result = graphResult[graphBuildRequest.ProjectGraph.EntryPointNodes.First()];
                                 }
                                 else
                                 {
-                                    (result, exception) = ExecuteBuild(buildManager, buildRequest);
+                                    result = ExecuteBuild(buildManager, buildRequest);
                                 }
                             }
 
-                            if (result != null && exception == null)
+                            if (result != null && result.Exception == null)
                             {
-                                success = result == BuildResultCode.Success;
+                                success = result.OverallResult == BuildResultCode.Success;
                             }
                         }
                         finally
@@ -1600,7 +1642,7 @@ namespace Microsoft.Build.CommandLine
             return messages;
         }
 
-        private static (BuildResultCode result, Exception exception) ExecuteBuild(BuildManager buildManager, BuildRequestData request)
+        private static BuildResult ExecuteBuild(BuildManager buildManager, BuildRequestData request)
         {
             BuildSubmission submission;
             lock (s_buildLock)
@@ -1616,11 +1658,10 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-            var result = submission.Execute();
-            return (result.OverallResult, result.Exception);
+            return submission.Execute();
         }
 
-        private static (BuildResultCode result, Exception exception) ExecuteGraphBuild(BuildManager buildManager, GraphBuildRequestData request)
+        private static GraphBuildResult ExecuteGraphBuild(BuildManager buildManager, GraphBuildRequestData request)
         {
             GraphBuildSubmission submission;
             lock (s_buildLock)
@@ -1636,11 +1677,10 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-            GraphBuildResult result = submission.Execute();
-            return (result.OverallResult, result.Exception);
+            return submission.Execute();
         }
 
-        private static (BuildResultCode result, Exception exception) ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
+        private static BuildResult ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
         {
             // Make a copy of the global properties
             Dictionary<string, string> restoreGlobalProperties = new Dictionary<string, string>(globalProperties);
@@ -2282,6 +2322,8 @@ namespace Microsoft.Build.CommandLine
             ref bool lowPriority,
             ref bool question,
             ref string[] getProperty,
+            ref string[] getItem,
+            ref string[] getTargetResult,
             bool recursing,
             string commandLine)
         {
@@ -2399,6 +2441,8 @@ namespace Microsoft.Build.CommandLine
                                                            ref lowPriority,
                                                            ref question,
                                                            ref getProperty,
+                                                           ref getItem,
+                                                           ref getTargetResult,
                                                            recursing: true,
                                                            commandLine);
                     }
@@ -2406,8 +2450,10 @@ namespace Microsoft.Build.CommandLine
                     // figure out which targets we are building
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
 
-                    // If we are looking for the value of a specific property or properties post-evaluation, figure that out now
-                    getProperty = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetProperty];
+                    // If we are looking for the value of a specific property or item post-evaluation or a target post-build, figure that out now
+                    getProperty = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetProperty] ?? Array.Empty<string>();
+                    getItem = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetItem] ?? Array.Empty<string>();
+                    getTargetResult = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetTargetResult] ?? Array.Empty<string>();
 
                     // figure out which ToolsVersion has been set on the command line
                     toolsVersion = ProcessToolsVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ToolsVersion]);

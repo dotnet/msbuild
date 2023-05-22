@@ -103,7 +103,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The BuildRequestData being used for this submission.
         /// </summary>
-        internal BuildRequestData BuildRequestData { get; }
+        public BuildRequestData BuildRequestData { get; }
 
         /// <summary>
         /// The build request for execution.

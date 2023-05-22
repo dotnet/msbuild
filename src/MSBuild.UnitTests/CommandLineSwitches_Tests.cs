@@ -1020,6 +1020,7 @@ namespace Microsoft.Build.UnitTests
                     filename = FileUtilities.GetTemporaryFileName();
                     ProjectRootElement project = ProjectRootElement.Create();
                     project.Save(filename);
+                    BuildResult buildResult = null;
                     MSBuildApp.BuildProject(
                                         filename,
                                         null,
@@ -1051,6 +1052,7 @@ namespace Microsoft.Build.UnitTests
                                         question: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,
+                                        ref buildResult,
                                         commandLine: null);
                 }
                 finally
