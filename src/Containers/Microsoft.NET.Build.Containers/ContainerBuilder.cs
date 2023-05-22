@@ -80,7 +80,7 @@ public static class ContainerBuilder
             // ports are validated by System.CommandLine API
             imageBuilder.ExposePort(number, type);
         }
-        if (containerUser is { } user)
+        if (containerUser is { Length: > 0 } user)
         {
             imageBuilder.SetUser(user);
         }

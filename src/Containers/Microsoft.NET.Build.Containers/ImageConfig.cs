@@ -32,6 +32,8 @@ internal sealed class ImageConfig
     /// </summary>
     public bool IsWindows => "windows".Equals(_os, StringComparison.OrdinalIgnoreCase);
 
+    public string? User => _user;
+
     internal ImageConfig(string imageConfigJson) : this(JsonNode.Parse(imageConfigJson)!)
     {
     }

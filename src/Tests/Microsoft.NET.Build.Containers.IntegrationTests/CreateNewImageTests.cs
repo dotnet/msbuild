@@ -189,4 +189,81 @@ public class CreateNewImageTests
             .Should().Pass()
             .And.HaveStdOut("Foo");
     }
+
+    [DockerDaemonAvailableFact]
+    public async System.Threading.Tasks.Task CreateNewImage_RootlessBaseImage()
+    {
+        const string RootlessBase ="dotnet/rootlessbase";
+        const string AppImage = "dotnet/testimagerootless";
+        const string RootlessUser = "101";
+
+        // Build a rootless base runtime image.
+        Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.LocalRegistry));
+
+        ImageBuilder imageBuilder = await registry.GetImageManifestAsync(
+            DockerRegistryManager.RuntimeBaseImage,
+            DockerRegistryManager.Net8PreviewImageTag,
+            "linux-x64",
+            ToolsetUtils.GetRuntimeGraphFilePath(),
+            cancellationToken: default).ConfigureAwait(false);
+
+        Assert.NotNull(imageBuilder);
+
+        imageBuilder.SetUser(RootlessUser);
+
+        BuiltImage builtImage = imageBuilder.Build();
+
+        var sourceReference = new ImageReference(registry, DockerRegistryManager.RuntimeBaseImage, DockerRegistryManager.Net8PreviewImageTag);
+        var destinationReference = new ImageReference(registry, RootlessBase, "latest");
+
+        await registry.PushAsync(builtImage, sourceReference, destinationReference, Console.WriteLine, cancellationToken: default).ConfigureAwait(false);
+
+        // Build an application image on top of the rootless base runtime image.
+        DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, nameof(CreateNewImage_RootlessBaseImage)));
+
+        if (newProjectDir.Exists)
+        {
+            newProjectDir.Delete(recursive: true);
+        }
+
+        newProjectDir.Create();
+
+        new DotnetNewCommand(_testOutput, "console", "-f", ToolsetInfo.CurrentTargetFramework)
+            .WithVirtualHive()
+            .WithWorkingDirectory(newProjectDir.FullName)
+            .Execute()
+            .Should().Pass();
+
+        new DotnetCommand(_testOutput, "publish", "-c", "Release", "-r", "linux-x64", "--no-self-contained")
+            .WithWorkingDirectory(newProjectDir.FullName)
+            .Execute()
+            .Should().Pass();
+
+        CreateNewImage task = new CreateNewImage();
+        task.BaseRegistry = "localhost:5010";
+        task.BaseImageName = RootlessBase;
+        task.BaseImageTag = "latest";
+
+        task.OutputRegistry = "localhost:5010";
+        task.PublishDirectory = Path.Combine(newProjectDir.FullName, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "linux-x64", "publish");
+        task.ImageName = AppImage;
+        task.ImageTags = new[] { "latest" };
+        task.WorkingDirectory = "app/";
+        task.ContainerRuntimeIdentifier = "linux-x64";
+        task.Entrypoint = new TaskItem[] { new("dotnet"), new("build") };
+        task.RuntimeIdentifierGraphPath = ToolsetUtils.GetRuntimeGraphFilePath();
+
+        Assert.True(task.Execute());
+        newProjectDir.Delete(true);
+
+        // Verify the application image uses the non-root user from the base image.
+        imageBuilder = await registry.GetImageManifestAsync(
+            AppImage,
+            "latest",
+            "linux-x64",
+            ToolsetUtils.GetRuntimeGraphFilePath(),
+            cancellationToken: default).ConfigureAwait(false);
+
+        Assert.Equal(RootlessUser, imageBuilder.BaseImageConfig.User);
+    }
 }

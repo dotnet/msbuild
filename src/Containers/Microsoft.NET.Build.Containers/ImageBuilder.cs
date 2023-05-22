@@ -13,6 +13,8 @@ internal sealed class ImageBuilder
     private readonly ManifestV2 _manifest;
     private readonly ImageConfig _baseImageConfig;
 
+    public ImageConfig BaseImageConfig => _baseImageConfig;
+
     internal ImageBuilder(ManifestV2 manifest, ImageConfig baseImageConfig)
     {
         _manifest = manifest;
