@@ -2,28 +2,29 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace Microsoft.Build.BackEnd
 {
     internal sealed class BuildTransferredException : Exception
     {
-        private readonly string? _typeName;
+        private readonly string _originalTypeName;
 
         public BuildTransferredException(
-            string? message,
+            string message,
             Exception? inner,
-            string? typeName,
-            string deserializedStackTrace)
+            string originalTypeName,
+            string? deserializedStackTrace)
             : base(message, inner)
         {
-            _typeName = typeName;
+            _originalTypeName = originalTypeName;
             StackTrace = deserializedStackTrace;
         }
 
         public override string? StackTrace { get; }
 
-        public override string ToString() => $"{_typeName ?? "Unknown"}->{base.ToString()}";
+        public override string ToString() => $"{_originalTypeName}->{base.ToString()}";
 
         internal static Exception ReadExceptionFromTranslator(ITranslator translator)
         {
@@ -34,14 +35,14 @@ namespace Microsoft.Build.BackEnd
                 innerException = ReadExceptionFromTranslator(translator);
             }
 
-            string? message = ReadOptionalString(reader);
-            string? typeName = ReadOptionalString(reader);
-            string deserializedStackTrace = reader.ReadString();
+            string message = reader.ReadString();
+            string typeName = reader.ReadString();
+            string? deserializedStackTrace = ReadOptionalString(reader);
             BuildTransferredException exception = new(message, innerException, typeName, deserializedStackTrace)
             {
                 Source = ReadOptionalString(reader),
                 HelpLink = ReadOptionalString(reader),
-                // HResult = reader.ReadInt32(),
+                HResult = ReadOptionalInt32(reader),
             };
 
             return exception;
@@ -55,13 +56,21 @@ namespace Microsoft.Build.BackEnd
             {
                 WriteExceptionToTranslator(translator, exception.InnerException);
             }
-            WriteOptionalString(writer, exception.Message);
-            WriteOptionalString(writer, exception.GetType().FullName);
-            writer.Write(exception.StackTrace ?? string.Empty);
+            writer.Write(exception.Message);
+            writer.Write(exception.GetType().FullName ?? exception.GetType().ToString());
+            WriteOptionalString(writer, exception.StackTrace);
             WriteOptionalString(writer, exception.Source);
             WriteOptionalString(writer, exception.HelpLink);
             // HResult is completely protected up till net4.5
-            // writer.Write(System.Runtime.InteropServices.Marshal.GetHRForException(exception));
+#if NET || NET45_OR_GREATER
+            writer.Write((byte)1);
+            writer.Write(exception.HResult);
+#else
+            writer.Write((byte)0);
+#endif
+
+            Debug.Assert((exception.Data?.Count ?? 0) == 0,
+                "Exception Data is not supported in BuildTransferredException");
         }
 
         private static string? ReadOptionalString(BinaryReader reader)
@@ -80,6 +89,11 @@ namespace Microsoft.Build.BackEnd
                 writer.Write((byte)1);
                 writer.Write(value);
             }
+        }
+
+        private static int ReadOptionalInt32(BinaryReader reader)
+        {
+            return reader.ReadByte() == 0 ? 0 : reader.ReadInt32();
         }
     }
 }

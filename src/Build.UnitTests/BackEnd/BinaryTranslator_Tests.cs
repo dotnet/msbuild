@@ -201,6 +201,40 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
         }
 
+        [Fact]
+        public void TestSerializeException()
+        {
+            Exception value = new ArgumentNullException("The argument was null");
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+        }
+
+        [Fact]
+        public void TestSerializeException_NestedWithStack()
+        {
+            Exception value = null;
+            try
+            {
+                // Intentionally throw a nested exception with a stack trace.
+                value = value.InnerException;
+            }
+            catch (Exception e)
+            {
+                value = new ArgumentNullException("The argument was null", e);
+            }
+
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+        }
+
         /// <summary>
         /// Tests serializing an object with a default constructor.
         /// </summary>
