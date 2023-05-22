@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
             {
                 TransientTestFile file = env.CreateFile();
                 cache.SerializeCache(file.Path, null);
-                cache2 = StateFileBase.DeserializeCache(file.Path, null, typeof(ResolveComReferenceCache)) as ResolveComReferenceCache;
+                cache2 = StateFileBase.DeserializeCache<ResolveComReferenceCache>(file.Path, null);
             }
 
             cache2.tlbImpLocation.ShouldBe(cache.tlbImpLocation);

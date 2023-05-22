@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             systemState.SerializeCache(_rarCacheFile, _taskLoggingHelper);
 
-            var deserialized = SystemState.DeserializeCache(_rarCacheFile, _taskLoggingHelper, typeof(SystemState));
+            var deserialized = StateFileBase.DeserializeCache<SystemState>(_rarCacheFile, _taskLoggingHelper);
 
             deserialized.ShouldNotBeNull();
         }
@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 cacheStream.Close();
             }
 
-            var deserialized = SystemState.DeserializeCache(_rarCacheFile, _taskLoggingHelper, typeof(SystemState));
+            var deserialized = StateFileBase.DeserializeCache<SystemState>(_rarCacheFile, _taskLoggingHelper);
 
             deserialized.ShouldNotBeNull();
         }
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 cacheStream.Close();
             }
 
-            var deserialized = SystemState.DeserializeCache(_rarCacheFile, _taskLoggingHelper, typeof(SystemState));
+            var deserialized = StateFileBase.DeserializeCache<SystemState>(_rarCacheFile, _taskLoggingHelper);
 
             deserialized.ShouldBeNull();
         }
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 TransientTestFile file = env.CreateFile();
                 sysState.SerializeCache(file.Path, null);
-                sysState2 = SystemState.DeserializeCache(file.Path, null, typeof(SystemState)) as SystemState;
+                sysState2 = StateFileBase.DeserializeCache<SystemState>(file.Path, null);
             }
 
             Dictionary<string, SystemState.FileState> cache2 = sysState2.instanceLocalFileStateCache;

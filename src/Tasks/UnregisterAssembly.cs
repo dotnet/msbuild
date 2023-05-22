@@ -53,7 +53,7 @@ namespace Microsoft.Build.Tasks
 
             if (AssemblyListFile != null)
             {
-                cacheFile = (AssemblyRegistrationCache)StateFileBase.DeserializeCache(AssemblyListFile.ItemSpec, Log, typeof(AssemblyRegistrationCache));
+                cacheFile = StateFileBase.DeserializeCache<AssemblyRegistrationCache>(AssemblyListFile.ItemSpec, Log);
 
                 // no cache file, nothing to do. In case there was a problem reading the cache file, we can't do anything anyway.
                 if (cacheFile == null)

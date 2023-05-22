@@ -527,7 +527,7 @@ namespace Microsoft.Build.Tasks
             foreach (ITaskItem stateFile in stateFiles)
             {
                 // Verify that it's a real stateFile. Log message but do not error if not.
-                SystemState sysState = DeserializeCache(stateFile.ToString(), log, typeof(SystemState)) as SystemState;
+                SystemState sysState = DeserializeCache<SystemState>(stateFile.ToString(), log);
                 if (sysState == null)
                 {
                     continue;
