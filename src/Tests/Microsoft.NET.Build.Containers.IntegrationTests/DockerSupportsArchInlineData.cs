@@ -55,10 +55,20 @@ public class DockerSupportsArchInlineData : DataAttribute
 
     private static string[] GetSupportedLinuxPlatforms()
     {
-        var inspectResult = new RunExeCommand(NullLogger.Instance, "docker", "buildx", "inspect", "default").Execute();
-        inspectResult.Should().Pass();
-        var platformsLine = inspectResult.StdOut!.Split(Environment.NewLine).First(x => x.StartsWith("Platforms:", StringComparison.OrdinalIgnoreCase));
-        return platformsLine.Substring("Platforms: ".Length).Split(",", StringSplitOptions.TrimEntries);
+        if (ContainerCli.IsPodman)
+        {
+            var inspectResult = new RunExeCommand(NullLogger.Instance, "podman", "info").Execute();
+            inspectResult.Should().Pass();
+            var platformsLine = inspectResult.StdOut!.Split(Environment.NewLine).First(x => x.Contains("OsArch:", StringComparison.OrdinalIgnoreCase));
+            return new[] { platformsLine.Trim().Substring("OsArch: ".Length) };
+        }
+        else
+        {
+            var inspectResult = new RunExeCommand(NullLogger.Instance, "docker", "buildx", "inspect", "default").Execute();
+            inspectResult.Should().Pass();
+            var platformsLine = inspectResult.StdOut!.Split(Environment.NewLine).First(x => x.StartsWith("Platforms:", StringComparison.OrdinalIgnoreCase));
+            return platformsLine.Substring("Platforms: ".Length).Split(",", StringSplitOptions.TrimEntries);
+        }
     }
 
     private static bool GetIsWindowsDaemon()

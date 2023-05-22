@@ -28,22 +28,22 @@ public class DockerRegistryManager
         if (!new LocalDocker(testOutput.WriteLine).IsAvailable()) {
             throw new InvalidOperationException("Docker daemon is not started, tests cannot run");
         }
-        CommandResult processResult = new RunExeCommand(testOutput, "docker", "run", "--rm", "--publish", "5010:5000", "--detach", "registry:2").Execute();
+        CommandResult processResult = ContainerCli.RunCommand(testOutput, "--rm", "--publish", "5010:5000", "--detach", "docker.io/library/registry:2").Execute();
         processResult.Should().Pass().And.HaveStdOut();
         using var reader = new StringReader(processResult.StdOut!);
         s_registryContainerId = reader.ReadLine();
 
         foreach (var tag in new[] { Net6ImageTag, Net7ImageTag, Net8PreviewImageTag })
         {
-            new RunExeCommand(testOutput, "docker", "pull", $"{BaseImageSource}{RuntimeBaseImage}:{tag}")
+            ContainerCli.PullCommand(testOutput, $"{BaseImageSource}{RuntimeBaseImage}:{tag}")
                 .Execute()
                 .Should().Pass();
 
-            new RunExeCommand(testOutput, "docker", "tag", $"{BaseImageSource}{RuntimeBaseImage}:{tag}", $"{LocalRegistry}/{RuntimeBaseImage}:{tag}")
+            ContainerCli.TagCommand(testOutput, $"{BaseImageSource}{RuntimeBaseImage}:{tag}", $"{LocalRegistry}/{RuntimeBaseImage}:{tag}")
                 .Execute()
                 .Should().Pass();
 
-            new RunExeCommand(testOutput, "docker", "push", $"{LocalRegistry}/{RuntimeBaseImage}:{tag}")
+            ContainerCli.PushCommand(testOutput, $"{LocalRegistry}/{RuntimeBaseImage}:{tag}")
                 .Execute()
                 .Should().Pass();
         }
@@ -53,7 +53,7 @@ public class DockerRegistryManager
     {
         if (s_registryContainerId != null)
         {
-            new RunExeCommand(testOutput, "docker", "stop", s_registryContainerId)
+            ContainerCli.StopCommand(testOutput, s_registryContainerId)
                 .Execute()
                 .Should().Pass();
         }
