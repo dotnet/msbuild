@@ -707,6 +707,7 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
                 bool question = false;
+                string[] getProperty = Array.Empty<string>();
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
@@ -743,6 +744,7 @@ namespace Microsoft.Build.CommandLine
                                             ref outputResultsCache,
                                             ref lowPriority,
                                             ref question,
+                                            ref getProperty,
                                             recursing: false,
 #if FEATURE_GET_COMMANDLINE
                                             commandLine);
@@ -786,20 +788,19 @@ namespace Microsoft.Build.CommandLine
                     {
                         if (FileUtilities.IsSolutionFilename(projectFile))
                         {
-                            ProjectInstance.LoadSolutionForBuild
+                            throw new Exception();
                         }
                         else
                         {
+                            Project p = Project.FromFile(projectFile, new Definition.ProjectOptions()
+                            {
+                                GlobalProperties = globalProperties,
+                                ToolsVersion = toolsVersion,
+                            });
 
+                            Console.WriteLine($"\"propertyName\": \"{p.GetPropertyValue("myProperty")}\"");
+                            Console.WriteLine($"\"propertyName\": \"{p.GetPropertyValue("otherProperty")}\"");
                         }
-                        Project p = Project.FromFile(projectFile, new Definition.ProjectOptions()
-                        {
-                            GlobalProperties = globalProperties,
-                            ToolsVersion = toolsVersion,
-                        });
-
-                        Console.WriteLine($"\"propertyName\": \"{p.GetPropertyValue("myProperty")}\"");
-                        Console.WriteLine($"\"propertyName\": \"{p.GetPropertyValue("otherProperty")}\"");
                     }
                     else // regular build
                     {
@@ -2280,6 +2281,7 @@ namespace Microsoft.Build.CommandLine
             ref string outputResultsCache,
             ref bool lowPriority,
             ref bool question,
+            ref string[] getProperty,
             bool recursing,
             string commandLine)
         {
@@ -2396,12 +2398,16 @@ namespace Microsoft.Build.CommandLine
                                                            ref outputResultsCache,
                                                            ref lowPriority,
                                                            ref question,
+                                                           ref getProperty,
                                                            recursing: true,
                                                            commandLine);
                     }
 
                     // figure out which targets we are building
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
+
+                    // If we are looking for the value of a specific property or properties post-evaluation, figure that out now
+                    getProperty = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetProperty];
 
                     // figure out which ToolsVersion has been set on the command line
                     toolsVersion = ProcessToolsVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ToolsVersion]);
