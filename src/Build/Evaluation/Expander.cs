@@ -5264,14 +5264,6 @@ namespace Microsoft.Build.Evaluation
                 return methodName != "GetType";
             }
 
-            private static TypeCode SelectTypeOfFirstParameter(MethodBase method)
-            {
-                ParameterInfo[] parameters = method.GetParameters();
-                return parameters.Length > 0
-                    ? Type.GetTypeCode(parameters[0].ParameterType)
-                    : TypeCode.Empty;
-            }
-
             /// <summary>
             /// Construct and instance of objectType based on the constructor or method arguments provided.
             /// Arguments must never be null.
@@ -5305,14 +5297,19 @@ namespace Microsoft.Build.Evaluation
                     {
                         members = _receiverType.GetConstructors(bindingFlags);
                     }
+                    else if (_receiverType == typeof(IntrinsicFunctions) && IntrinsicFunctionOverload.IsKnownOverloadMethodName(_methodMethodName))
+                    {
+                        MemberInfo[] foundMembers = _receiverType.FindMembers(
+                            MemberTypes.Method,
+                            bindingFlags,
+                            (info, criteria) => string.Equals(info.Name, (string)criteria, StringComparison.OrdinalIgnoreCase),
+                            _methodMethodName);
+                        Array.Sort(foundMembers, IntrinsicFunctionOverload.IntrinsicFunctionOverloadMethodComparer);
+                        members = foundMembers.Cast<MethodBase>();
+                    }
                     else
                     {
                         members = _receiverType.GetMethods(bindingFlags).Where(m => string.Equals(m.Name, _methodMethodName, StringComparison.OrdinalIgnoreCase));
-
-                        if (_receiverType == typeof(IntrinsicFunctions))
-                        {
-                            members = members.OrderBy(SelectTypeOfFirstParameter, IntrinsicFunctionOverload.IntrinsicFunctionOverloadComparer);
-                        }
                     }
 
                     foreach (MethodBase member in members)
@@ -5412,20 +5409,38 @@ namespace Microsoft.Build.Evaluation
 
     internal static class IntrinsicFunctionOverload
     {
-        private static IComparer<TypeCode> s_intrinsicFunctionOverloadComparer;
+        private static readonly string[] s_knownOverloadName = { "Add", "Subtract", "Multiply", "Divide", "Modulo", };
 
         // Order by the TypeCode of the first parameter.
         // When change wave is enabled, order long before double.
         // Otherwise preserve prior behavior of double before long.
         // For reuse, the comparer is cached in a non-generic type.
-        internal static IComparer<TypeCode> IntrinsicFunctionOverloadComparer =>
-            s_intrinsicFunctionOverloadComparer ??= IsIntrinsicFunctionOverloadsEnabled()
-                ? Comparer<TypeCode>.Create((key0, key1) => key0.CompareTo(key1))
-                : Comparer<TypeCode>.Create((key0, key1) => key1.CompareTo(key0));
+        // Both comparer instances can be cached to support change wave testing.
+        private static IComparer<MemberInfo> s_comparerLongBeforeDouble;
+        private static IComparer<MemberInfo> s_comparerDoubleBeforeLong;
 
-        /* When the change wave is retired, the expression body should be changed to
-           s_intrinsicFunctionOverloadComparer ??= Comparer<TypeCode>.Create((key0, key1) => key0.CompareTo(key1)); . */
+        internal static IComparer<MemberInfo> IntrinsicFunctionOverloadMethodComparer => IsIntrinsicFunctionOverloadsEnabled() ? LongBeforeDoubleComparer : DoubleBeforeLongComparer;
+
+        private static IComparer<MemberInfo> LongBeforeDoubleComparer => s_comparerLongBeforeDouble ??= Comparer<MemberInfo>.Create((key0, key1) => SelectTypeOfFirstParameter(key0).CompareTo(SelectTypeOfFirstParameter(key1)));
+
+        private static IComparer<MemberInfo> DoubleBeforeLongComparer => s_comparerDoubleBeforeLong ??= Comparer<MemberInfo>.Create((key0, key1) => SelectTypeOfFirstParameter(key1).CompareTo(SelectTypeOfFirstParameter(key0)));
 
         internal static bool IsIntrinsicFunctionOverloadsEnabled() => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8);
+
+        internal static bool IsKnownOverloadMethodName(string methodName) => s_knownOverloadName.Any(name => string.Equals(name, methodName, StringComparison.OrdinalIgnoreCase));
+
+        private static TypeCode SelectTypeOfFirstParameter(MemberInfo member)
+        {
+            MethodBase method = member as MethodBase;
+            if (method == null)
+            {
+                return TypeCode.Empty;
+            }
+
+            ParameterInfo[] parameters = method.GetParameters();
+            return parameters.Length > 0
+                ? Type.GetTypeCode(parameters[0].ParameterType)
+                : TypeCode.Empty;
+        }
     }
 }
