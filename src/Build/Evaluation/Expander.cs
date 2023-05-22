@@ -4740,7 +4740,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (IsIntrinsicFunctionOverloadsEnabled())
+                if (IntrinsicFunctionOverload.IsIntrinsicFunctionOverloadsEnabled())
                 {
                     if (TryConvertToLong(args[0], out long argLong0) && TryConvertToLong(args[1], out long argLong1))
                     {
@@ -5272,8 +5272,6 @@ namespace Microsoft.Build.Evaluation
                     : TypeCode.Empty;
             }
 
-            private static bool IsIntrinsicFunctionOverloadsEnabled() => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8);
-
             /// <summary>
             /// Construct and instance of objectType based on the constructor or method arguments provided.
             /// Arguments must never be null.
@@ -5313,13 +5311,7 @@ namespace Microsoft.Build.Evaluation
 
                         if (_receiverType == typeof(IntrinsicFunctions))
                         {
-                            // Order by the TypeCode of the first parameter.
-                            // When change wave is enabled, order long before double.
-                            // Otherwise preserve prior behavior of double before long.
-                            IComparer<TypeCode> comparer = IsIntrinsicFunctionOverloadsEnabled()
-                                ? Comparer<TypeCode>.Create((key0, key1) => key0.CompareTo(key1))
-                                : Comparer<TypeCode>.Create((key0, key1) => key1.CompareTo(key0));
-                            members = members.OrderBy(SelectTypeOfFirstParameter, comparer);
+                            members = members.OrderBy(SelectTypeOfFirstParameter, IntrinsicFunctionOverload.IntrinsicFunctionOverloadComparer);
                         }
                     }
 
@@ -5416,5 +5408,24 @@ namespace Microsoft.Build.Evaluation
             get;
             set;
         }
+    }
+
+    internal static class IntrinsicFunctionOverload
+    {
+        private static IComparer<TypeCode> s_intrinsicFunctionOverloadComparer;
+
+        // Order by the TypeCode of the first parameter.
+        // When change wave is enabled, order long before double.
+        // Otherwise preserve prior behavior of double before long.
+        // For reuse, the comparer is cached in a non-generic type.
+        internal static IComparer<TypeCode> IntrinsicFunctionOverloadComparer =>
+            s_intrinsicFunctionOverloadComparer ??= IsIntrinsicFunctionOverloadsEnabled()
+                ? Comparer<TypeCode>.Create((key0, key1) => key0.CompareTo(key1))
+                : Comparer<TypeCode>.Create((key0, key1) => key1.CompareTo(key0));
+
+        /* When the change wave is retired, the expression body should be changed to
+           s_intrinsicFunctionOverloadComparer ??= Comparer<TypeCode>.Create((key0, key1) => key0.CompareTo(key1)); . */
+
+        internal static bool IsIntrinsicFunctionOverloadsEnabled() => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8);
     }
 }
