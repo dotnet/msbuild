@@ -46,10 +46,7 @@ public class ResolveCompressedAssetsTest
         }.ToTaskItem();
 
         var gzipExplicitAsset = new TaskItem(asset.ItemSpec, asset.CloneCustomMetadata());
-        gzipExplicitAsset.SetMetadata("ConfigurationName", "BuildCompressionGzip");
-
         var brotliExplicitAsset = new TaskItem(asset.ItemSpec, asset.CloneCustomMetadata());
-        brotliExplicitAsset.SetMetadata("ConfigurationName", "BuildCompressionBrotli");
 
         var task = new ResolveCompressedAssets()
         {
@@ -156,10 +153,7 @@ public class ResolveCompressedAssetsTest
         }.ToTaskItem();
 
         var gzipExplicitAsset = new TaskItem(asset.ItemSpec, asset.CloneCustomMetadata());
-        gzipExplicitAsset.SetMetadata("ConfigurationName", "BuildCompressionGzip");
-
         var brotliExplicitAsset = new TaskItem(asset.ItemSpec, asset.CloneCustomMetadata());
-        brotliExplicitAsset.SetMetadata("ConfigurationName", "BuildCompressionBrotli");
 
         var buildTask = new ResolveCompressedAssets()
         {
@@ -182,7 +176,7 @@ public class ResolveCompressedAssetsTest
     }
 
     [Fact]
-    public void IgnoresAssetsCompressedInPreviousTaskRun()
+    public void IgnoresAssetsCompressedInPreviousTaskRun_Gzip()
     {
         // Arrange
         var errorMessages = new List<string>();
@@ -214,7 +208,6 @@ public class ResolveCompressedAssetsTest
         task1.AssetsToCompress[0].ItemSpec.Should().EndWith(".gz");
 
         var brotliExplicitAsset = new TaskItem(asset.ItemSpec, asset.CloneCustomMetadata());
-        brotliExplicitAsset.SetMetadata("ConfigurationName", "BuildCompressionBrotli");
 
         var task2 = new ResolveCompressedAssets()
         {
@@ -231,5 +224,56 @@ public class ResolveCompressedAssetsTest
         result2.Should().BeTrue();
         task2.AssetsToCompress.Should().HaveCount(1);
         task2.AssetsToCompress[0].ItemSpec.Should().EndWith(".br");
+    }
+
+    [Fact]
+    public void IgnoresAssetsCompressedInPreviousTaskRun_Brotli()
+    {
+        // Arrange
+        var errorMessages = new List<string>();
+        var buildEngine = new Mock<IBuildEngine>();
+        buildEngine.Setup(e => e.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
+            .Callback<BuildErrorEventArgs>(args => errorMessages.Add(args.Message));
+
+        var asset = new StaticWebAsset()
+        {
+            Identity = ItemSpec,
+            OriginalItemSpec = OriginalItemSpec,
+            RelativePath = Path.GetFileName(ItemSpec),
+        }.ToTaskItem();
+
+        // Act/Assert
+        var task1 = new ResolveCompressedAssets()
+        {
+            OutputPath = OutputBasePath,
+            BuildEngine = buildEngine.Object,
+            CandidateAssets = new[] { asset },
+            IncludePatterns = "**\\*.tmp",
+            Formats = "brotli",
+        };
+
+        var result1 = task1.Execute();
+
+        result1.Should().BeTrue();
+        task1.AssetsToCompress.Should().HaveCount(1);
+        task1.AssetsToCompress[0].ItemSpec.Should().EndWith(".br");
+
+        var gzipExplicitAsset = new TaskItem(asset.ItemSpec, asset.CloneCustomMetadata());
+
+        var task2 = new ResolveCompressedAssets()
+        {
+            OutputPath = OutputBasePath,
+            BuildEngine = buildEngine.Object,
+            CandidateAssets = new[] { asset, task1.AssetsToCompress[0] },
+            IncludePatterns = "**\\*.tmp",
+            ExplicitAssets = new[] { gzipExplicitAsset },
+            Formats = "gzip;brotli"
+        };
+
+        var result2 = task2.Execute();
+
+        result2.Should().BeTrue();
+        task2.AssetsToCompress.Should().HaveCount(1);
+        task2.AssetsToCompress[0].ItemSpec.Should().EndWith(".gz");
     }
 }
