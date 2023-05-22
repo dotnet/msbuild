@@ -18,7 +18,7 @@ namespace Microsoft.NET.Restore.Tests
         {
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/32737")]
         public void It_restores_Microsoft_Net_Compilers_Toolset_Framework_when_requested()
         {
             const string testProjectName = "NetCoreApp";
