@@ -68,12 +68,12 @@ public class EndToEndTests
         await registry.PushAsync(builtImage, sourceReference, destinationReference, Console.WriteLine, cancellationToken: default).ConfigureAwait(false);
 
         // pull it back locally
-        new RunExeCommand(_testOutput, "docker", "pull", $"{DockerRegistryManager.LocalRegistry}/{NewImageName()}:latest")
+        ContainerCli.PullCommand(_testOutput, $"{DockerRegistryManager.LocalRegistry}/{NewImageName()}:latest")
             .Execute()
             .Should().Pass();
 
         // Run the image
-        new RunExeCommand(_testOutput, "docker", "run", "--rm", "--tty", $"{DockerRegistryManager.LocalRegistry}/{NewImageName()}:latest")
+        ContainerCli.RunCommand(_testOutput, "--rm", "--tty", $"{DockerRegistryManager.LocalRegistry}/{NewImageName()}:latest")
             .Execute()
             .Should().Pass();
     }
@@ -110,7 +110,7 @@ public class EndToEndTests
         await new LocalDocker(Console.WriteLine).LoadAsync(builtImage, sourceReference, destinationReference, default).ConfigureAwait(false);
 
         // Run the image
-        new RunExeCommand(_testOutput, "docker", "run", "--rm", "--tty", $"{NewImageName()}:latest")
+        ContainerCli.RunCommand(_testOutput, "--rm", "--tty", $"{NewImageName()}:latest")
             .Execute()
             .Should().Pass();
     }
@@ -246,15 +246,13 @@ public class EndToEndTests
             commandResult.Should().NotHaveStdOutContaining("warning");
         }
 
-        new RunExeCommand(_testOutput, "docker", "pull", $"{DockerRegistryManager.LocalRegistry}/{imageName}:{imageTag}")
+        ContainerCli.PullCommand(_testOutput, $"{DockerRegistryManager.LocalRegistry}/{imageName}:{imageTag}")
             .Execute()
             .Should().Pass();
 
         var containerName = "test-container-1";
-        CommandResult processResult = new RunExeCommand(
+        CommandResult processResult = ContainerCli.RunCommand(
             _testOutput,
-            "docker",
-            "run",
             "--rm",
             "--name",
             containerName,
@@ -290,13 +288,13 @@ public class EndToEndTests
             await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
         }
 
-        new RunExeCommand(_testOutput, "docker", "logs", appContainerId)
+        ContainerCli.LogsCommand(_testOutput, appContainerId)
             .Execute()
             .Should().Pass();
 
         Assert.True(everSucceeded, "http://localhost:5017/weatherforecast never responded.");
 
-        new RunExeCommand(_testOutput, "docker", "stop", appContainerId)
+        ContainerCli.StopCommand(_testOutput, appContainerId)
             .Execute()
             .Should().Pass();
 
@@ -376,15 +374,13 @@ public class EndToEndTests
             .Execute()
             .Should().Pass();
 
-        new RunExeCommand(_testOutput, "docker", "pull", $"{DockerRegistryManager.LocalRegistry}/{imageName}:{imageTag}")
+        ContainerCli.PullCommand(_testOutput, $"{DockerRegistryManager.LocalRegistry}/{imageName}:{imageTag}")
             .Execute()
             .Should().Pass();
 
         var containerName = "test-container-2";
-        CommandResult processResult = new RunExeCommand(
+        CommandResult processResult = ContainerCli.RunCommand(
             _testOutput,
-            "docker",
-            "run",
             "--rm",
             "--name",
             containerName,
@@ -433,10 +429,8 @@ public class EndToEndTests
         await new LocalDocker(Console.WriteLine).LoadAsync(builtImage, sourceReference, destinationReference, default).ConfigureAwait(false);
 
         // Run the image
-        new RunExeCommand(
+        ContainerCli.RunCommand(
             _testOutput,
-            "docker",
-            "run",
             "--rm",
             "--tty",
             "--platform",

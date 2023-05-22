@@ -184,7 +184,7 @@ public class CreateNewImageTests
 
         Assert.True(cni.Execute());
 
-        new RunExeCommand(_testOutput, "docker", "run", "--rm", $"{pcp.NewContainerImageName}:latest")
+        ContainerCli.RunCommand(_testOutput, "--rm", $"{pcp.NewContainerImageName}:latest")
             .Execute()
             .Should().Pass()
             .And.HaveStdOut("Foo");
