@@ -550,6 +550,7 @@
     <Compile Include="XamlTaskFactory\XamlTaskFactory.cs" />
     <Compile Include="StateFileBase.cs" />
     <Compile Include="SystemState.cs" />
+    <Compile Include="ResolveAssemblyReferenceCache.cs" />
     <Compile Include="DependencyFile.cs" />
     <Compile Include="ZipDirectory.cs" />
   </ItemGroup>

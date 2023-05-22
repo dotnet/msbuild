@@ -26,9 +26,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     _cache = new SystemState()
                 };
-                t._cache.instanceLocalFileStateCache = new Dictionary<string, SystemState.FileState>() {
-                    { Path.Combine(standardCache.Path, "assembly1"), new SystemState.FileState(DateTime.Now) },
-                    { Path.Combine(standardCache.Path, "assembly2"), new SystemState.FileState(DateTime.Now) { Assembly = new Shared.AssemblyNameExtension("hi") } } };
+                t._cache.instanceLocalFileStateCache = new Dictionary<string, ResolveAssemblyReferenceCache.FileState>() {
+                    { Path.Combine(standardCache.Path, "assembly1"), new ResolveAssemblyReferenceCache.FileState(DateTime.Now) },
+                    { Path.Combine(standardCache.Path, "assembly2"), new ResolveAssemblyReferenceCache.FileState(DateTime.Now) { Assembly = new Shared.AssemblyNameExtension("hi") } } };
                 t._cache.IsDirty = true;
                 t.StateFile = standardCache.Path;
                 t.WriteStateFile();
@@ -57,7 +57,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     _cache = new SystemState()
                 };
-                rarWriterTask._cache.instanceLocalFileStateCache = new Dictionary<string, SystemState.FileState>();
+                rarWriterTask._cache.instanceLocalFileStateCache = new Dictionary<string, ResolveAssemblyReferenceCache.FileState>();
                 rarWriterTask.StateFile = standardCache.Path;
                 rarWriterTask._cache.IsDirty = true;
                 // Write standard cache
@@ -65,7 +65,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 string dllName = Path.Combine(Path.GetDirectoryName(standardCache.Path), "randomFolder", "dll.dll");
                 rarWriterTask._cache.instanceLocalFileStateCache.Add(dllName,
-                    new SystemState.FileState(DateTime.Now)
+                    new ResolveAssemblyReferenceCache.FileState(DateTime.Now)
                     {
                         Assembly = null,
                         RuntimeVersion = "v4.0.30319",
@@ -105,10 +105,10 @@ namespace Microsoft.Build.Tasks.UnitTests
                     _cache = new SystemState()
                 };
                 string dllName = Path.Combine(Path.GetDirectoryName(precomputedCache.Path), "randomFolder", "dll.dll");
-                rarWriterTask._cache.instanceLocalFileStateCache = new Dictionary<string, SystemState.FileState>() {
-                    { Path.Combine(precomputedCache.Path, "..", "assembly1", "assembly1"), new SystemState.FileState(DateTime.Now) },
-                    { Path.Combine(precomputedCache.Path, "assembly2"), new SystemState.FileState(DateTime.Now) { Assembly = new Shared.AssemblyNameExtension("hi") } },
-                    { dllName, new SystemState.FileState(DateTime.Now) {
+                rarWriterTask._cache.instanceLocalFileStateCache = new Dictionary<string, ResolveAssemblyReferenceCache.FileState>() {
+                    { Path.Combine(precomputedCache.Path, "..", "assembly1", "assembly1"), new ResolveAssemblyReferenceCache.FileState(DateTime.Now) },
+                    { Path.Combine(precomputedCache.Path, "assembly2"), new ResolveAssemblyReferenceCache.FileState(DateTime.Now) { Assembly = new Shared.AssemblyNameExtension("hi") } },
+                    { dllName, new ResolveAssemblyReferenceCache.FileState(DateTime.Now) {
                         Assembly = null,
                         RuntimeVersion = "v4.0.30319",
                         FrameworkNameAttribute = new System.Runtime.Versioning.FrameworkName(".NETFramework", Version.Parse("4.7.2"), "Profile"),
@@ -133,7 +133,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 // Then we verify that the information contained in that cache matches what we'd expect.
                 rarReaderTask.ReadStateFile(p => true);
                 rarReaderTask._cache.instanceLocalFileStateCache.ShouldContainKey(dllName);
-                SystemState.FileState assembly3 = rarReaderTask._cache.instanceLocalFileStateCache[dllName];
+                ResolveAssemblyReferenceCache.FileState assembly3 = rarReaderTask._cache.instanceLocalFileStateCache[dllName];
                 assembly3.Assembly.ShouldBeNull();
                 assembly3.RuntimeVersion.ShouldBe("v4.0.30319");
                 assembly3.FrameworkNameAttribute.Version.ShouldBe(Version.Parse("4.7.2"));

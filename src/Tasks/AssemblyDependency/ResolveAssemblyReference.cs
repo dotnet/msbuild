@@ -2036,18 +2036,15 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void ReadStateFile(FileExists fileExists)
         {
-            _cache = SystemState.DeserializeCache<SystemState>(_stateFile, Log);
+            ResolveAssemblyReferenceCache rarDiskCache = StateFileBase.DeserializeCache<ResolveAssemblyReferenceCache>(_stateFile, Log);
 
             // Construct the cache only if we can't find any caches.
-            if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
+            if (rarDiskCache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
             {
-                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths, Log, fileExists);
+                rarDiskCache = ResolveAssemblyReferenceCache.DeserializePrecomputedCaches(AssemblyInformationCachePaths, Log, fileExists);
             }
 
-            if (_cache == null)
-            {
-                _cache = new SystemState();
-            }
+            _cache = (rarDiskCache != null ? new SystemState(rarDiskCache) : new SystemState());
         }
 
         /// <summary>
