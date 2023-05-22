@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="SpecifiedManifestNotFound">
         <source>Specified workload manifest was not found: {0}</source>
-        <target state="new">Specified workload manifest was not found: {0}</target>
+        <target state="translated">지정한 워크로드 매니페스트를 찾을 수 없습니다. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
