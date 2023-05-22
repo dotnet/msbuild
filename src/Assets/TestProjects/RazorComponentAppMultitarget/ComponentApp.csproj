@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(AspNetTestTfm);$(AspNetTestTfm)-browser1.0</TargetFrameworks>
+    <EnableSdkContainerSupport>false</EnableSdkContainerSupport>
+
+    <!-- Until we have support for it, pretend it supports it -->
+    <TargetPlatformSupported>true</TargetPlatformSupported>
+  </PropertyGroup>
+
+  <!-- Until we have support for it, pretend it supports it -->
+  <ItemGroup>
+    <SdkSupportedTargetPlatformVersion Include="1.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- We don't want to run build server when not running as tests. -->
+    <UseRazorBuildServer>false</UseRazorBuildServer>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$([MSBuild]::GetTargetPlatformIdentifier($(TargetFramework)))' == 'browser'">
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.0-preview.4.23260.4" />
+  </ItemGroup>
+
+  <Target Name="_IntrospectGetCopyToOutputDirectoryItems">
+    <Message Text="AllItemsFullPathWithTargetPath: %(AllItemsFullPathWithTargetPath.TargetPath)" Importance="High" />
+  </Target>
+
+  <Target Name="_IntrospectWatchItems" DependsOnTargets="_RazorSdkCustomCollectWatchItems">
+    <Message Text="Watch: %(Watch.FileName)%(Watch.Extension)" Importance="High" />
+  </Target>
+
+  <Target Name="_IntrospectRazorGenerateComponentDesignTime" DependsOnTargets="RazorGenerateComponentDesignTime">
+    <Message Text="RazorComponentWithTargetPath: %(RazorComponentWithTargetPath.FileName) %(RazorComponentWithTargetPath.TargetPath)" Importance="High" />
+  </Target>
+
+  <Target Name="_IntrospectReferences" AfterTargets="ResolveAssemblyReferences">
+      <PropertyGroup>
+        <_ReferencesFilePath>$(IntermediateOutputPath)captured-references.txt</_ReferencesFilePath>
+      </PropertyGroup>
+      <ItemGroup>
+        <_CapturedReferences Include="@(ReferencePath->'%(Identity)')"/>
+    </ItemGroup>
+
+    <WriteLinesToFile
+        File="$(_ReferencesFilePath)"
+        Lines="@(_CapturedReferences)"
+        Overwrite="true"/>
+
+  </Target>
+</Project>

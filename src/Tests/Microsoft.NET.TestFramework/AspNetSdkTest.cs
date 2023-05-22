@@ -47,5 +47,25 @@ namespace Microsoft.NET.TestFramework
                 });
             return projectDirectory;
         }
+
+        public TestAsset CreateMultitargetAspNetSdkTestAsset(
+            string testAsset,
+            [CallerMemberName] string callerName = "",
+            string subdirectory = "",
+            string overrideTfm = null,
+            string identifier = null)
+        {
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset(testAsset, callingMethod: callerName, testAssetSubdirectory: subdirectory, identifier: identifier)
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var targetFramework = project.Descendants()
+                       .Single(e => e.Name.LocalName == "TargetFrameworks");
+                    targetFramework.Value = targetFramework.Value.Replace("$(AspNetTestTfm)", overrideTfm ?? DefaultTfm);
+                });
+            return projectDirectory;
+        }
     }
 }

@@ -11,10 +11,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!-- Imports the .NET, Razor, and other web related SDKs on projects that target server scenarios. -->
-  <Import Project="..\Targets\Sdk.Server.targets" Condition="'$([MSBuild]::GetTargetPlatformIdentifier($(TargetFramework)))' != 'browser'" />
-
-  <!-- Delegates to the Blazor Webassembly SDK on projects that target browser scenarios -->
-  <Import Project="..\Targets\Sdk.Browser.targets" Condition="'$([MSBuild]::GetTargetPlatformIdentifier($(TargetFramework)))' == 'browser'" />
+  <Import Sdk="Microsoft.NET.Sdk.BlazorWebAssembly" Project="Sdk.targets" />
 
 </Project>
