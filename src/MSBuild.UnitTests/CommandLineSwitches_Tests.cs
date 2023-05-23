@@ -1052,6 +1052,7 @@ namespace Microsoft.Build.UnitTests
                                         question: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,
+                                        saveProject: false,
                                         ref buildResult,
                                         commandLine: null);
                 }

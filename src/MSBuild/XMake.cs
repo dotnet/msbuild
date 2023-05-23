@@ -759,11 +759,6 @@ namespace Microsoft.Build.CommandLine
 
                 CommandLineSwitches.SwitchesFromResponseFiles = null;
 
-                if (getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0)
-                {
-                    verbosity = LoggerVerbosity.Quiet;
-                }
-
                 if (buildCanBeInvoked)
                 {
                     // Unfortunately /m isn't the default, and we are not yet brave enough to make it the default.
@@ -817,7 +812,7 @@ namespace Microsoft.Build.CommandLine
 
                         foreach (string item in getItem)
                         {
-                            Console.WriteLine($"\"{item}\": \"{project.GetItems(item)}\"");
+                            Console.WriteLine($"\"{item}\": \"{string.Join(";", project.GetItems(item).Select(i => i.EvaluatedInclude))}\"");
                         }
                     }
                     else // regular build
@@ -854,6 +849,7 @@ namespace Microsoft.Build.CommandLine
                                     question,
                                     inputResultsCaches,
                                     outputResultsCache,
+                                    saveProject: getProperty.Length > 0 || getItem.Length > 0,
                                     ref result,
                                     commandLine))
                         {
@@ -878,7 +874,7 @@ namespace Microsoft.Build.CommandLine
 
                         foreach (string item in getItem)
                         {
-                            Console.WriteLine($"\"{item}\": \"{builtProject.GetItems(item)}\"");
+                            Console.WriteLine($"\"{item}\": \"{string.Join(";", builtProject.GetItems(item).Select(i => i.EvaluatedInclude))}\"");
                         }
 
                         foreach (string target in getTargetResult)
@@ -1196,6 +1192,7 @@ namespace Microsoft.Build.CommandLine
             bool question,
             string[] inputResultsCaches,
             string outputResultsCache,
+            bool saveProject,
             ref BuildResult result,
 #if FEATURE_GET_COMMANDLINE
             string commandLine)
@@ -1464,13 +1461,19 @@ namespace Microsoft.Build.CommandLine
                             BuildRequestData buildRequest = null;
                             if (!restoreOnly)
                             {
+                                BuildRequestDataFlags flags = BuildRequestDataFlags.None;
+                                if (saveProject)
+                                {
+                                    flags |= BuildRequestDataFlags.ProvideProjectStateAfterBuild;
+                                }
+
                                 if (graphBuildOptions != null)
                                 {
-                                    graphBuildRequest = new GraphBuildRequestData(new[] { new ProjectGraphEntryPoint(projectFile, globalProperties) }, targets, null, BuildRequestDataFlags.None, graphBuildOptions);
+                                    graphBuildRequest = new GraphBuildRequestData(new[] { new ProjectGraphEntryPoint(projectFile, globalProperties) }, targets, null, flags, graphBuildOptions);
                                 }
                                 else
                                 {
-                                    buildRequest = new BuildRequestData(projectFile, globalProperties, toolsVersion, targets, null);
+                                    buildRequest = new BuildRequestData(projectFile, globalProperties, toolsVersion, targets, null, flags);
                                 }
                             }
 
@@ -2348,9 +2351,15 @@ namespace Microsoft.Build.CommandLine
             }
 #endif
 
+            bool shouldShowLogo = !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoLogo] &&
+                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess) &&
+                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetProperty) &&
+                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetItem) &&
+                                  !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetTargetResult);
+
             // show copyright message if nologo switch is not set
             // NOTE: we heed the nologo switch even if there are switch errors
-            if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoLogo] && !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess))
+            if (!recursing && shouldShowLogo)
             {
                 DisplayVersionMessage();
             }
@@ -2454,6 +2463,10 @@ namespace Microsoft.Build.CommandLine
                     getProperty = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetProperty] ?? Array.Empty<string>();
                     getItem = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetItem] ?? Array.Empty<string>();
                     getTargetResult = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetTargetResult] ?? Array.Empty<string>();
+                    if (getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0)
+                    {
+                        commandLineSwitches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Verbosity, "q", "q", true, true, true);
+                    }
 
                     // figure out which ToolsVersion has been set on the command line
                     toolsVersion = ProcessToolsVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ToolsVersion]);

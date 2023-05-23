@@ -108,10 +108,10 @@ namespace Microsoft.Build.CommandLine
             LowPriority,
             Question,
             DetailedSummary,
-            NumberOfParameterizedSwitches,
             GetProperty,
             GetItem,
             GetTargetResult,
+            NumberOfParameterizedSwitches,
         }
 
         /// <summary>
