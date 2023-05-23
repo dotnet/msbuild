@@ -73,7 +73,5 @@ namespace Microsoft.Build.BackEnd
             Debug.Assert((exception.Data?.Count ?? 0) == 0,
                 "Exception Data is not supported in BuildTransferredException");
         }
-
-
     }
 }

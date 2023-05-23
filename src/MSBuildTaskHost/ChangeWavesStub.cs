@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Build.Shared
+namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// Stub implementation of ChangeWaves, that always returns true for AreFeaturesEnabled.
