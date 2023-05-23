@@ -20,13 +20,13 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
     public class WasmPwaManifestTests : AspNetSdkTest
     {
-        public WasmPwaManifestTests(ITestOutputHelper log) : base(log) {}
+        public WasmPwaManifestTests(ITestOutputHelper log) : base(log) { }
 
         [Fact]
         public void Build_ServiceWorkerAssetsManifest_Works()
         {
             // Arrange
-            var expectedExtensions = new[] { ".dll", ".pdb", ".js", ".wasm" };
+            var expectedExtensions = new[] { ".pdb", ".js", ".wasm" };
             var testAppName = "BlazorWasmWithLibrary";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
@@ -38,8 +38,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var buildOutputDirectory = buildCommand.GetOutputDirectory(DefaultTfm).ToString();
 
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json")).Should().Exist();
-            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
-            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazorwasm.dll")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.native.wasm")).Should().Exist();
+            new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazorwasm.wasm")).Should().Exist();
 
             var serviceWorkerAssetsManifest = Path.Combine(buildOutputDirectory, "wwwroot", "service-worker-assets.js");
             // Trim prefix 'self.assetsManifest = ' and suffix ';'
@@ -63,7 +63,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         public void Build_HostedAppWithServiceWorker_Works()
         {
             // Arrange
-            var expectedExtensions = new[] { ".dll", ".pdb", ".js", ".wasm" };
+            var expectedExtensions = new[] { ".pdb", ".js", ".wasm" };
             var testAppName = "BlazorHosted";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
@@ -89,7 +89,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         public void PublishWithPWA_ProducesAssets()
         {
             // Arrange
-            var expectedExtensions = new[] { ".dll", ".pdb", ".js", ".wasm" };
+            var expectedExtensions = new[] { ".pdb", ".js", ".wasm" };
             var testAppName = "BlazorWasmWithLibrary";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
@@ -117,7 +117,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         public void PublishHostedWithPWA_ProducesAssets()
         {
             // Arrange
-            var expectedExtensions = new[] { ".dll", ".pdb", ".js", ".wasm" };
+            var expectedExtensions = new[] { ".pdb", ".js", ".wasm" };
             var testAppName = "BlazorHosted";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
 

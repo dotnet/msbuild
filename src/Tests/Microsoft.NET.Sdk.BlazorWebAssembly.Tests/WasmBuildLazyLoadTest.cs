@@ -20,7 +20,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
     public class WasmBuildLazyLoadTest : AspNetSdkTest
     {
-        public WasmBuildLazyLoadTest(ITestOutputHelper log) : base(log) {}
+        public WasmBuildLazyLoadTest(ITestOutputHelper log) : base(log) { }
 
         [Fact]
         public void Build_LazyLoadExplicitAssembly_Debug_Works()
@@ -34,7 +34,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 var ns = project.Root.Name.Namespace;
                 var itemGroup = new XElement(ns + "ItemGroup");
                 itemGroup.Add(new XElement("BlazorWebAssemblyLazyLoad",
-                    new XAttribute("Include", "RazorClassLibrary.dll")));
+                    new XAttribute("Include", "RazorClassLibrary.wasm")));
                 project.Root.Add(itemGroup);
             });
 
@@ -50,7 +50,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var expectedFiles = new[]
             {
                 "wwwroot/_framework/blazor.boot.json",
-                "wwwroot/_framework/RazorClassLibrary.dll"
+                "wwwroot/_framework/RazorClassLibrary.wasm"
             };
 
             outputDirectory.Should().HaveFiles(expectedFiles);
@@ -63,12 +63,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             lazyAssemblies.Should().NotBeNull();
 
-            lazyAssemblies.Keys.Should().Contain("RazorClassLibrary.dll");
-            assemblies.Keys.Should().NotContain("RazorClassLibrary.dll");
+            lazyAssemblies.Keys.Should().Contain("RazorClassLibrary.wasm");
+            assemblies.Keys.Should().NotContain("RazorClassLibrary.wasm");
 
             // App assembly should not be lazy loaded
-            lazyAssemblies.Keys.Should().NotContain("blazorwasm.dll");
-            assemblies.Keys.Should().Contain("blazorwasm.dll");
+            lazyAssemblies.Keys.Should().NotContain("blazorwasm.wasm");
+            assemblies.Keys.Should().Contain("blazorwasm.wasm");
         }
 
         [Fact]
@@ -83,7 +83,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 var ns = project.Root.Name.Namespace;
                 var itemGroup = new XElement(ns + "ItemGroup");
                 itemGroup.Add(new XElement("BlazorWebAssemblyLazyLoad",
-                    new XAttribute("Include", "RazorClassLibrary.dll")));
+                    new XAttribute("Include", "RazorClassLibrary.wasm")));
                 project.Root.Add(itemGroup);
             });
 
@@ -98,7 +98,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var expectedFiles = new[]
             {
                 "wwwroot/_framework/blazor.boot.json",
-                "wwwroot/_framework/RazorClassLibrary.dll"
+                "wwwroot/_framework/RazorClassLibrary.wasm"
             };
 
             outputDirectory.Should().HaveFiles(expectedFiles);
@@ -111,12 +111,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             lazyAssemblies.Should().NotBeNull();
 
-            lazyAssemblies.Keys.Should().Contain("RazorClassLibrary.dll");
-            assemblies.Keys.Should().NotContain("RazorClassLibrary.dll");
+            lazyAssemblies.Keys.Should().Contain("RazorClassLibrary.wasm");
+            assemblies.Keys.Should().NotContain("RazorClassLibrary.wasm");
 
             // App assembly should not be lazy loaded
-            lazyAssemblies.Keys.Should().NotContain("blazorwasm.dll");
-            assemblies.Keys.Should().Contain("blazorwasm.dll");
+            lazyAssemblies.Keys.Should().NotContain("blazorwasm.wasm");
+            assemblies.Keys.Should().Contain("blazorwasm.wasm");
         }
 
         [Fact]
@@ -131,7 +131,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 var ns = project.Root.Name.Namespace;
                 var itemGroup = new XElement(ns + "ItemGroup");
                 itemGroup.Add(new XElement("BlazorWebAssemblyLazyLoad",
-                    new XAttribute("Include", "RazorClassLibrary.dll")));
+                    new XAttribute("Include", "RazorClassLibrary.wasm")));
                 project.Root.Add(itemGroup);
             });
 
@@ -147,7 +147,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var expectedFiles = new[]
             {
                 "wwwroot/_framework/blazor.boot.json",
-                "wwwroot/_framework/RazorClassLibrary.dll"
+                "wwwroot/_framework/RazorClassLibrary.wasm"
             };
 
             outputDirectory.Should().HaveFiles(expectedFiles);
@@ -160,12 +160,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             lazyAssemblies.Should().NotBeNull();
 
-            lazyAssemblies.Keys.Should().Contain("RazorClassLibrary.dll");
-            assemblies.Keys.Should().NotContain("RazorClassLibrary.dll");
+            lazyAssemblies.Keys.Should().Contain("RazorClassLibrary.wasm");
+            assemblies.Keys.Should().NotContain("RazorClassLibrary.wasm");
 
             // App assembly should not be lazy loaded
-            lazyAssemblies.Keys.Should().NotContain("blazorwasm.dll");
-            assemblies.Keys.Should().Contain("blazorwasm.dll");
+            lazyAssemblies.Keys.Should().NotContain("blazorwasm.wasm");
+            assemblies.Keys.Should().Contain("blazorwasm.wasm");
         }
 
         [Fact]
@@ -180,7 +180,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 var ns = project.Root.Name.Namespace;
                 var itemGroup = new XElement(ns + "ItemGroup");
                 itemGroup.Add(new XElement("BlazorWebAssemblyLazyLoad",
-                    new XAttribute("Include", "RazorClassLibrary.dll")));
+                    new XAttribute("Include", "RazorClassLibrary.wasm")));
                 project.Root.Add(itemGroup);
             });
 
@@ -195,7 +195,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var expectedFiles = new[]
             {
                 "wwwroot/_framework/blazor.boot.json",
-                "wwwroot/_framework/RazorClassLibrary.dll"
+                "wwwroot/_framework/RazorClassLibrary.wasm"
             };
 
             outputDirectory.Should().HaveFiles(expectedFiles);
@@ -208,12 +208,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             lazyAssemblies.Should().NotBeNull();
 
-            lazyAssemblies.Keys.Should().Contain("RazorClassLibrary.dll");
-            assemblies.Keys.Should().NotContain("RazorClassLibrary.dll");
+            lazyAssemblies.Keys.Should().Contain("RazorClassLibrary.wasm");
+            assemblies.Keys.Should().NotContain("RazorClassLibrary.wasm");
 
             // App assembly should not be lazy loaded
-            lazyAssemblies.Keys.Should().NotContain("blazorwasm.dll");
-            assemblies.Keys.Should().Contain("blazorwasm.dll");
+            lazyAssemblies.Keys.Should().NotContain("blazorwasm.wasm");
+            assemblies.Keys.Should().Contain("blazorwasm.wasm");
         }
 
         [Fact]
@@ -228,7 +228,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 var ns = project.Root.Name.Namespace;
                 var itemGroup = new XElement(ns + "ItemGroup");
                 itemGroup.Add(new XElement("BlazorWebAssemblyLazyLoad",
-                    new XAttribute("Include", "RazorClassLibraryInvalid.dll")));
+                    new XAttribute("Include", "RazorClassLibraryInvalid.wasm")));
                 project.Root.Add(itemGroup);
             });
 
@@ -249,7 +249,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 var ns = project.Root.Name.Namespace;
                 var itemGroup = new XElement(ns + "ItemGroup");
                 itemGroup.Add(new XElement("BlazorWebAssemblyLazyLoad",
-                    new XAttribute("Include", "RazorClassLibraryInvalid.dll")));
+                    new XAttribute("Include", "RazorClassLibraryInvalid.wasm")));
                 project.Root.Add(itemGroup);
             });
 

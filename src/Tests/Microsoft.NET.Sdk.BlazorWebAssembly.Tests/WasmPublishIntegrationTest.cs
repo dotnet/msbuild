@@ -40,8 +40,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
-                "wwwroot/_framework/blazorwasm-minimal.dll",
+                "wwwroot/_framework/dotnet.native.wasm",
+                "wwwroot/_framework/blazorwasm-minimal.wasm",
                 "wwwroot/index.html",
                 "web.config"
             };
@@ -71,9 +71,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
-                "wwwroot/_framework/blazorwasm.dll",
-                "wwwroot/_framework/System.Text.Json.dll",
+                "wwwroot/_framework/dotnet.native.wasm",
+                "wwwroot/_framework/blazorwasm.wasm",
+                "wwwroot/_framework/System.Text.Json.wasm",
                 "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
                 "wwwroot/_content/RazorClassLibrary/styles.css",
                 "wwwroot/index.html",
@@ -137,15 +137,15 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "blazor.boot.json")).Should().Exist();
             new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "blazor.webassembly.js")).Should().Exist();
-            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
-            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "dotnet.wasm.gz")).Should().Exist();
-            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "blazorwasm.dll")).Should().Exist();
-            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "System.Text.Json.dll")).Should().Exist();
-            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "System.Text.Json.dll.gz")).Should().Exist();
-            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "System.dll")).Should().Exist();
-            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "System.dll.gz")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "dotnet.native.wasm")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "dotnet.native.wasm.gz")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "blazorwasm.wasm")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "System.Text.Json.wasm")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "System.Text.Json.wasm.gz")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "System.wasm")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "System.wasm.gz")).Should().Exist();
 
-            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "RazorClassLibrary.dll")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "RazorClassLibrary.wasm")).Should().Exist();
         }
 
         [Fact]
@@ -167,9 +167,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
-                "wwwroot/_framework/blazorwasm.dll",
-                "wwwroot/_framework/System.Text.Json.dll",
+                "wwwroot/_framework/dotnet.native.wasm",
+                "wwwroot/_framework/blazorwasm.wasm",
+                "wwwroot/_framework/System.Text.Json.wasm",
                 "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
                 "wwwroot/_content/RazorClassLibrary/styles.css",
                 "wwwroot/index.html",
@@ -209,9 +209,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
-                "wwwroot/_framework/blazorwasm.dll",
-                "wwwroot/_framework/System.Text.Json.dll",
+                "wwwroot/_framework/dotnet.native.wasm",
+                "wwwroot/_framework/blazorwasm.wasm",
+                "wwwroot/_framework/System.Text.Json.wasm",
                 "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
                 "wwwroot/_content/RazorClassLibrary/styles.css",
                 "wwwroot/index.html",
@@ -268,9 +268,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
-                "wwwroot/_framework/blazorwasm.dll",
-                "wwwroot/_framework/System.Text.Json.dll",
+                "wwwroot/_framework/dotnet.native.wasm",
+                "wwwroot/_framework/blazorwasm.wasm",
+                "wwwroot/_framework/System.Text.Json.wasm",
                 "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
                 "wwwroot/_content/RazorClassLibrary/styles.css",
                 "wwwroot/index.html",
@@ -320,9 +320,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/different-path/_framework/blazor.boot.json",
                 "wwwroot/different-path/_framework/blazor.webassembly.js",
-                "wwwroot/different-path/_framework/dotnet.wasm",
-                "wwwroot/different-path/_framework/blazorwasm.dll",
-                "wwwroot/different-path/_framework/System.Text.Json.dll",
+                "wwwroot/different-path/_framework/dotnet.native.wasm",
+                "wwwroot/different-path/_framework/blazorwasm.wasm",
+                "wwwroot/different-path/_framework/System.Text.Json.wasm",
                 "wwwroot/different-path/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
                 "wwwroot/different-path/_content/RazorClassLibrary/styles.css",
                 "wwwroot/different-path/index.html",
@@ -381,16 +381,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/different-path/_framework/blazor.boot.json",
                 "wwwroot/different-path/_framework/blazor.webassembly.js",
-                "wwwroot/different-path/_framework/dotnet.wasm",
-                "wwwroot/different-path/_framework/dotnet.wasm.br",
-                "wwwroot/different-path/_framework/dotnet.wasm.gz",
-                "wwwroot/different-path/_framework/blazorwasm.dll",
-                "wwwroot/different-path/_framework/blazorwasm.dll.gz",
-                "wwwroot/different-path/_framework/System.Text.Json.dll",
-                "wwwroot/different-path/_framework/System.Text.Json.dll.gz",
-                "wwwroot/different-path/_framework/System.Text.Json.dll.br",
-                "wwwroot/different-path/_framework/RazorClassLibrary.dll.gz",
-                "wwwroot/different-path/_framework/RazorClassLibrary.dll.br",
+                "wwwroot/different-path/_framework/dotnet.native.wasm",
+                "wwwroot/different-path/_framework/dotnet.native.wasm.br",
+                "wwwroot/different-path/_framework/dotnet.native.wasm.gz",
+                "wwwroot/different-path/_framework/blazorwasm.wasm",
+                "wwwroot/different-path/_framework/blazorwasm.wasm.gz",
+                "wwwroot/different-path/_framework/System.Text.Json.wasm",
+                "wwwroot/different-path/_framework/System.Text.Json.wasm.gz",
+                "wwwroot/different-path/_framework/System.Text.Json.wasm.br",
+                "wwwroot/different-path/_framework/RazorClassLibrary.wasm.gz",
+                "wwwroot/different-path/_framework/RazorClassLibrary.wasm.br",
                 "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
                 "wwwroot/_content/RazorClassLibrary/styles.css",
                 "wwwroot/different-path/index.html",
@@ -448,16 +448,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
-                "wwwroot/_framework/blazorwasm.dll",
-                "wwwroot/_framework/System.Text.Json.dll"
+                "wwwroot/_framework/dotnet.native.wasm",
+                "wwwroot/_framework/blazorwasm.wasm",
+                "wwwroot/_framework/System.Text.Json.wasm"
             });
 
             // Verify compression works
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/dotnet.wasm.br",
-                "wwwroot/_framework/System.Text.Json.dll.br"
+                "wwwroot/_framework/dotnet.native.wasm.br",
+                "wwwroot/_framework/System.Text.Json.wasm.br"
             });
 
             // Verify static assets are in the publish directory
@@ -486,7 +486,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 assetsManifestPath: "custom-service-worker-assets.js");
 
             // Verify assemblies are not trimmed
-            var loggingAssemblyPath = Path.Combine(blazorPublishDirectory, "_framework", "Microsoft.Extensions.Logging.Abstractions.dll");
+            var loggingAssemblyPath = Path.Combine(blazorPublishDirectory, "_framework", "Microsoft.Extensions.Logging.Abstractions.wasm");
             VerifyAssemblyHasTypes(loggingAssemblyPath, new[] { "Microsoft.Extensions.Logging.Abstractions.NullLogger" });
         }
 
@@ -519,13 +519,13 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/Microsoft.CodeAnalysis.CSharp.dll",
-                "wwwroot/_framework/fr/Microsoft.CodeAnalysis.CSharp.resources.dll"
+                "wwwroot/_framework/Microsoft.CodeAnalysis.CSharp.wasm",
+                "wwwroot/_framework/fr/Microsoft.CodeAnalysis.CSharp.resources.wasm"
             });
 
             var bootJsonData = new FileInfo(Path.Combine(blazorPublishDirectory, "_framework", "blazor.boot.json"));
-            bootJsonData.Should().Contain("\"Microsoft.CodeAnalysis.CSharp.dll\"");
-            bootJsonData.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.dll\"");
+            bootJsonData.Should().Contain("\"Microsoft.CodeAnalysis.CSharp.wasm\"");
+            bootJsonData.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.wasm\"");
 
             VerifyBootManifestHashes(testInstance, blazorPublishDirectory);
         }
@@ -556,15 +556,15 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
-                "wwwroot/_framework/blazorwasm.dll",
-                "wwwroot/_framework/System.Text.Json.dll"
+                "wwwroot/_framework/dotnet.native.wasm",
+                "wwwroot/_framework/blazorwasm.wasm",
+                "wwwroot/_framework/System.Text.Json.wasm"
             });
 
             // Verify project references appear as static web assets
             publishOutputDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/RazorClassLibrary.dll",
+                "wwwroot/_framework/RazorClassLibrary.wasm",
                 "RazorClassLibrary.dll"
             });
 
@@ -592,18 +592,18 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Verify compression works
             publishOutputDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/dotnet.wasm.br",
-                "wwwroot/_framework/blazorwasm.dll.br",
-                "wwwroot/_framework/RazorClassLibrary.dll.br",
-                "wwwroot/_framework/System.Text.Json.dll.br"
+                "wwwroot/_framework/dotnet.native.wasm.br",
+                "wwwroot/_framework/blazorwasm.wasm.br",
+                "wwwroot/_framework/RazorClassLibrary.wasm.br",
+                "wwwroot/_framework/System.Text.Json.wasm.br"
             });
 
             publishOutputDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/dotnet.wasm.gz",
-                "wwwroot/_framework/blazorwasm.dll.gz",
-                "wwwroot/_framework/RazorClassLibrary.dll.gz",
-                "wwwroot/_framework/System.Text.Json.dll.gz"
+                "wwwroot/_framework/dotnet.native.wasm.gz",
+                "wwwroot/_framework/blazorwasm.wasm.gz",
+                "wwwroot/_framework/RazorClassLibrary.wasm.gz",
+                "wwwroot/_framework/System.Text.Json.wasm.gz"
             });
 
             VerifyServiceWorkerFiles(testInstance, blazorPublishDirectory,
@@ -634,12 +634,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var bootJsonData = ReadBootJsonData(bootJsonPath);
 
             var runtime = bootJsonData.resources.runtime;
-            runtime.Should().ContainKey("dotnet.wasm");
+            runtime.Should().ContainKey("dotnet.native.wasm");
 
             var assemblies = bootJsonData.resources.assembly;
-            assemblies.Should().ContainKey("blazorwasm.dll");
-            assemblies.Should().ContainKey("RazorClassLibrary.dll");
-            assemblies.Should().ContainKey("System.Text.Json.dll");
+            assemblies.Should().ContainKey("blazorwasm.wasm");
+            assemblies.Should().ContainKey("RazorClassLibrary.wasm");
+            assemblies.Should().ContainKey("System.Text.Json.wasm");
 
             bootJsonData.resources.satelliteResources.Should().BeNull();
 
@@ -685,14 +685,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             publishOutputDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/blazorwasm.dll",
-                "wwwroot/_framework/classlibrarywithsatelliteassemblies.dll",
-                "wwwroot/_framework/Microsoft.CodeAnalysis.CSharp.dll",
-                "wwwroot/_framework/fr/Microsoft.CodeAnalysis.CSharp.resources.dll",
+                "wwwroot/_framework/blazorwasm.wasm",
+                "wwwroot/_framework/classlibrarywithsatelliteassemblies.wasm",
+                "wwwroot/_framework/Microsoft.CodeAnalysis.CSharp.wasm",
+                "wwwroot/_framework/fr/Microsoft.CodeAnalysis.CSharp.resources.wasm",
             });
 
-            bootJsonData.Should().Contain("\"Microsoft.CodeAnalysis.CSharp.dll\"");
-            bootJsonData.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.dll\"");
+            bootJsonData.Should().Contain("\"Microsoft.CodeAnalysis.CSharp.wasm\"");
+            bootJsonData.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.wasm\"");
         }
 
         [Fact]
@@ -739,16 +739,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
-                "wwwroot/_framework/blazorwasm.dll",
-                "wwwroot/_framework/System.Text.Json.dll"
+                "wwwroot/_framework/dotnet.native.wasm",
+                "wwwroot/_framework/blazorwasm.wasm",
+                "wwwroot/_framework/System.Text.Json.wasm"
             });
 
             // Verify project references appear as static web assets
             // Also verify project references to the server project appear in the publish output
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/RazorClassLibrary.dll",
+                "wwwroot/_framework/RazorClassLibrary.wasm",
                 "RazorClassLibrary.dll"
             });
 
@@ -776,18 +776,18 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Verify compression works
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/dotnet.wasm.br",
-                "wwwroot/_framework/blazorwasm.dll.br",
-                "wwwroot/_framework/RazorClassLibrary.dll.br",
-                "wwwroot/_framework/System.Text.Json.dll.br"
+                "wwwroot/_framework/dotnet.native.wasm.br",
+                "wwwroot/_framework/blazorwasm.wasm.br",
+                "wwwroot/_framework/RazorClassLibrary.wasm.br",
+                "wwwroot/_framework/System.Text.Json.wasm.br"
             });
 
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/dotnet.wasm.gz",
-                "wwwroot/_framework/blazorwasm.dll.gz",
-                "wwwroot/_framework/RazorClassLibrary.dll.gz",
-                "wwwroot/_framework/System.Text.Json.dll.gz"
+                "wwwroot/_framework/dotnet.native.wasm.gz",
+                "wwwroot/_framework/blazorwasm.wasm.gz",
+                "wwwroot/_framework/RazorClassLibrary.wasm.gz",
+                "wwwroot/_framework/System.Text.Json.wasm.gz"
             });
 
             VerifyServiceWorkerFiles(testInstance, Path.Combine(publishDirectory.ToString(), "wwwroot"),
@@ -818,9 +818,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
-                "wwwroot/_framework/blazorwasm.dll",
-                "wwwroot/_framework/System.Text.Json.dll"
+                "wwwroot/_framework/dotnet.native.wasm",
+                "wwwroot/_framework/blazorwasm.wasm",
+                "wwwroot/_framework/System.Text.Json.wasm"
             });
 
             // Verify static assets are in the publish directory
@@ -881,16 +881,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
-                "wwwroot/_framework/blazorwasm.dll",
-                "wwwroot/_framework/System.Text.Json.dll"
+                "wwwroot/_framework/dotnet.native.wasm",
+                "wwwroot/_framework/blazorwasm.wasm",
+                "wwwroot/_framework/System.Text.Json.wasm"
             });
 
             // Verify project references appear as static web assets
             // Also verify project references to the server project appear in the publish output
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/RazorClassLibrary.dll",
+                "wwwroot/_framework/RazorClassLibrary.wasm",
                 "RazorClassLibrary.dll"
             });
 
@@ -918,10 +918,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Verify compression works
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/dotnet.wasm.br",
-                "wwwroot/_framework/blazorwasm.dll.br",
-                "wwwroot/_framework/RazorClassLibrary.dll.br",
-                "wwwroot/_framework/System.Text.Json.dll.br"
+                "wwwroot/_framework/dotnet.native.wasm.br",
+                "wwwroot/_framework/blazorwasm.wasm.br",
+                "wwwroot/_framework/RazorClassLibrary.wasm.br",
+                "wwwroot/_framework/System.Text.Json.wasm.br"
             });
 
             var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
@@ -967,16 +967,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
-                "wwwroot/_framework/blazorwasm.dll",
-                "wwwroot/_framework/System.Text.Json.dll"
+                "wwwroot/_framework/dotnet.native.wasm",
+                "wwwroot/_framework/blazorwasm.wasm",
+                "wwwroot/_framework/System.Text.Json.wasm"
             });
 
             // Verify project references appear as static web assets
             // Also verify project references to the server project appear in the publish output
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/RazorClassLibrary.dll",
+                "wwwroot/_framework/RazorClassLibrary.wasm",
                 "RazorClassLibrary.dll"
             });
 
@@ -1010,10 +1010,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Verify compression works
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/dotnet.wasm.br",
-                "wwwroot/_framework/blazorwasm.dll.br",
-                "wwwroot/_framework/RazorClassLibrary.dll.br",
-                "wwwroot/_framework/System.Text.Json.dll.br"
+                "wwwroot/_framework/dotnet.native.wasm.br",
+                "wwwroot/_framework/blazorwasm.wasm.br",
+                "wwwroot/_framework/RazorClassLibrary.wasm.br",
+                "wwwroot/_framework/System.Text.Json.wasm.br"
             });
 
             VerifyBootManifestHashes(testInstance, blazorPublishDirectory);
@@ -1062,14 +1062,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             publishDirectory.Should().HaveFiles(new[]
             {
                 "wwwroot/_framework/blazor.boot.json",
-                "wwwroot/_framework/ja/blazorwasm.resources.dll",
-                "wwwroot/_framework/fr/Microsoft.CodeAnalysis.CSharp.resources.dll"
+                "wwwroot/_framework/ja/blazorwasm.resources.wasm",
+                "wwwroot/_framework/fr/Microsoft.CodeAnalysis.CSharp.resources.wasm"
             });
 
             var bootJsonData = new FileInfo(Path.Combine(blazorPublishDirectory, "_framework", "blazor.boot.json"));
-            bootJsonData.Should().Contain("\"es-ES\\/classlibrarywithsatelliteassemblies.resources.dll\"");
-            bootJsonData.Should().Contain("\"ja\\/blazorwasm.resources.dll\"");
-            bootJsonData.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.dll\"");
+            bootJsonData.Should().Contain("\"es-ES\\/classlibrarywithsatelliteassemblies.resources.wasm\"");
+            bootJsonData.Should().Contain("\"ja\\/blazorwasm.resources.wasm\"");
+            bootJsonData.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.wasm\"");
 
             VerifyBootManifestHashes(testInstance, blazorPublishDirectory);
         }
@@ -1166,16 +1166,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
-                "wwwroot/_framework/blazorwasm.dll",
-                "wwwroot/_framework/System.Text.Json.dll"
+                "wwwroot/_framework/dotnet.native.wasm",
+                "wwwroot/_framework/blazorwasm.wasm",
+                "wwwroot/_framework/System.Text.Json.wasm"
             });
 
 
             publishDirectory.Should().HaveFiles(new[]
             {
                 // Verify project references appear as static web assets
-                "wwwroot/_framework/RazorClassLibrary.dll",
+                "wwwroot/_framework/RazorClassLibrary.wasm",
                 // Also verify project references to the server project appear in the publish output
                 "RazorClassLibrary.dll",
             });
@@ -1207,17 +1207,17 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Verify compression works
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/dotnet.wasm.br",
-                "wwwroot/_framework/blazorwasm.dll.br",
-                "wwwroot/_framework/RazorClassLibrary.dll.br",
-                "wwwroot/_framework/System.Text.Json.dll.br"
+                "wwwroot/_framework/dotnet.native.wasm.br",
+                "wwwroot/_framework/blazorwasm.wasm.br",
+                "wwwroot/_framework/RazorClassLibrary.wasm.br",
+                "wwwroot/_framework/System.Text.Json.wasm.br"
             });
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/dotnet.wasm.gz",
-                "wwwroot/_framework/blazorwasm.dll.gz",
-                "wwwroot/_framework/RazorClassLibrary.dll.gz",
-                "wwwroot/_framework/System.Text.Json.dll.gz"
+                "wwwroot/_framework/dotnet.native.wasm.gz",
+                "wwwroot/_framework/blazorwasm.wasm.gz",
+                "wwwroot/_framework/RazorClassLibrary.wasm.gz",
+                "wwwroot/_framework/System.Text.Json.wasm.gz"
             });
 
             VerifyServiceWorkerFiles(testInstance, Path.Combine(publishDirectory.ToString(), "wwwroot"),
@@ -1230,7 +1230,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             var publishDirectory = command.GetOutputDirectory(DefaultTfm, "Release", "linux-x64");
 
-            if(selfContained)
+            if (selfContained)
             {
                 // Make sure the main project exists
                 publishDirectory.Should().HaveFiles(new[]
@@ -1249,16 +1249,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
-                "wwwroot/_framework/blazorwasm.dll",
-                "wwwroot/_framework/System.Text.Json.dll"
+                "wwwroot/_framework/dotnet.native.wasm",
+                "wwwroot/_framework/blazorwasm.wasm",
+                "wwwroot/_framework/System.Text.Json.wasm"
             });
 
 
             publishDirectory.Should().HaveFiles(new[]
             {
                 // Verify project references appear as static web assets
-                "wwwroot/_framework/RazorClassLibrary.dll",
+                "wwwroot/_framework/RazorClassLibrary.wasm",
                 // Also verify project references to the server project appear in the publish output
                 "RazorClassLibrary.dll",
             });
@@ -1290,17 +1290,17 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Verify compression works
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/dotnet.wasm.br",
-                "wwwroot/_framework/blazorwasm.dll.br",
-                "wwwroot/_framework/RazorClassLibrary.dll.br",
-                "wwwroot/_framework/System.Text.Json.dll.br"
+                "wwwroot/_framework/dotnet.native.wasm.br",
+                "wwwroot/_framework/blazorwasm.wasm.br",
+                "wwwroot/_framework/RazorClassLibrary.wasm.br",
+                "wwwroot/_framework/System.Text.Json.wasm.br"
             });
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_framework/dotnet.wasm.gz",
-                "wwwroot/_framework/blazorwasm.dll.gz",
-                "wwwroot/_framework/RazorClassLibrary.dll.gz",
-                "wwwroot/_framework/System.Text.Json.dll.gz"
+                "wwwroot/_framework/dotnet.native.wasm.gz",
+                "wwwroot/_framework/blazorwasm.wasm.gz",
+                "wwwroot/_framework/RazorClassLibrary.wasm.gz",
+                "wwwroot/_framework/System.Text.Json.wasm.gz"
             });
 
             VerifyServiceWorkerFiles(testInstance, Path.Combine(publishDirectory.ToString(), "wwwroot"),
@@ -1335,12 +1335,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             bootJsonData.icuDataMode.Should().Be(ICUDataMode.Invariant);
             var runtime = bootJsonData.resources.runtime;
 
-            runtime.Should().ContainKey("dotnet.wasm");
+            runtime.Should().ContainKey("dotnet.native.wasm");
             runtime.Should().NotContainKey("icudt.dat");
             runtime.Should().NotContainKey("icudt_EFIGS.dat");
 
 
-            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "dotnet.native.wasm")).Should().Exist();
             new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt.dat")).Should().NotExist();
             new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt_CJK.dat")).Should().NotExist();
             new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt_EFIGS.dat")).Should().NotExist();
@@ -1374,14 +1374,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var firstBootJson = ReadBootJsonData(firstBootJsonPath);
 
             // Do a sanity check that the boot json has files.
-            firstBootJson.resources.assembly.Keys.Should().Contain("System.Text.Json.dll");
+            firstBootJson.resources.assembly.Keys.Should().Contain("System.Text.Json.wasm");
 
             VerifyBootManifestHashes(testInstance, firstAppPublishDirectory);
 
             // Verify compression works
-            new FileInfo(Path.Combine(firstAppPublishDirectory, "_framework", "dotnet.wasm.br")).Should().Exist();
-            new FileInfo(Path.Combine(firstAppPublishDirectory, "_framework", "BlazorMultipleApps.FirstClient.dll.br")).Should().Exist();
-            new FileInfo(Path.Combine(firstAppPublishDirectory, "_framework", "Newtonsoft.Json.dll.br")).Should().Exist();
+            new FileInfo(Path.Combine(firstAppPublishDirectory, "_framework", "dotnet.native.wasm.br")).Should().Exist();
+            new FileInfo(Path.Combine(firstAppPublishDirectory, "_framework", "BlazorMultipleApps.FirstClient.wasm.br")).Should().Exist();
+            new FileInfo(Path.Combine(firstAppPublishDirectory, "_framework", "Newtonsoft.Json.wasm.br")).Should().Exist();
 
             var secondAppPublishDirectory = Path.Combine(publishOutputDirectory, "wwwroot", "SecondApp");
 
@@ -1393,15 +1393,15 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var secondBootJson = ReadBootJsonData(secondBootJsonPath);
 
             // Do a sanity check that the boot json has files.
-            secondBootJson.resources.assembly.Keys.Should().Contain("System.Private.CoreLib.dll");
+            secondBootJson.resources.assembly.Keys.Should().Contain("System.Private.CoreLib.wasm");
 
             VerifyBootManifestHashes(testInstance, secondAppPublishDirectory);
 
             // Verify compression works
-            new FileInfo(Path.Combine(secondAppPublishDirectory, "_framework", "dotnet.wasm.br")).Should().Exist();
-            new FileInfo(Path.Combine(secondAppPublishDirectory, "_framework", "BlazorMultipleApps.SecondClient.dll.br")).Should().Exist();
-            new FileInfo(Path.Combine(secondAppPublishDirectory, "_framework", "System.Private.CoreLib.dll.br")).Should().Exist();
-            new FileInfo(Path.Combine(secondAppPublishDirectory, "_framework", "Newtonsoft.Json.dll.br")).Should().NotExist();
+            new FileInfo(Path.Combine(secondAppPublishDirectory, "_framework", "dotnet.native.wasm.br")).Should().Exist();
+            new FileInfo(Path.Combine(secondAppPublishDirectory, "_framework", "BlazorMultipleApps.SecondClient.wasm.br")).Should().Exist();
+            new FileInfo(Path.Combine(secondAppPublishDirectory, "_framework", "System.Private.CoreLib.wasm.br")).Should().Exist();
+            new FileInfo(Path.Combine(secondAppPublishDirectory, "_framework", "Newtonsoft.Json.wasm.br")).Should().NotExist();
         }
 
         [Fact]
@@ -1424,7 +1424,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 {
                     var ns = project.Root.Name.Namespace;
                     // <ItemGroup>
-                    //  <Reference Include="classlibrarywithsatelliteassemblies" HintPath="$Path\classlibrarywithsatelliteassemblies.dll" />
+                    //  <Reference Include="classlibrarywithsatelliteassemblies" HintPath="$Path\classlibrarywithsatelliteassemblies.wasm" />
                     // </ItemGroup>
                     var itemGroup = new XElement(ns + "ItemGroup",
                         new XElement(ns + "Reference",
@@ -1449,17 +1449,13 @@ public class TestReference
 
             // Assert
             var outputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
-            var fileInWwwroot = new FileInfo(Path.Combine(outputDirectory, "wwwroot", "_framework", "classlibrarywithsatelliteassemblies.dll"));
+            var fileInWwwroot = new FileInfo(Path.Combine(outputDirectory, "wwwroot", "_framework", "classlibrarywithsatelliteassemblies.wasm"));
             fileInWwwroot.Should().Exist();
-
-            // Make sure it's a the correct copy.
-            fileInWwwroot.Length.Should().Be(referenceAssemblyPath.Length);
-            Assert.Equal(File.ReadAllBytes(referenceAssemblyPath.FullName), File.ReadAllBytes(fileInWwwroot.FullName));
         }
 
         private void VerifyTypeGranularTrimming(string blazorPublishDirectory)
         {
-            VerifyAssemblyHasTypes(Path.Combine(blazorPublishDirectory, "_framework", "Microsoft.AspNetCore.Components.dll"), new[] {
+            VerifyAssemblyHasTypes(Path.Combine(blazorPublishDirectory, "_framework", "Microsoft.AspNetCore.Components.wasm"), new[] {
                     "Microsoft.AspNetCore.Components.RouteView",
                     "Microsoft.AspNetCore.Components.RouteData",
                     "Microsoft.AspNetCore.Components.CascadingParameterAttribute"
@@ -1470,17 +1466,18 @@ public class TestReference
         {
             new FileInfo(assemblyPath).Should().Exist();
 
-            using (var file = File.OpenRead(assemblyPath))
-            {
-                using var peReader = new PEReader(file);
-                var metadataReader = peReader.GetMetadataReader();
-                var types = metadataReader.TypeDefinitions.Where(t => !t.IsNil).Select(t =>
-                {
-                    var type = metadataReader.GetTypeDefinition(t);
-                    return metadataReader.GetString(type.Namespace) + "." + metadataReader.GetString(type.Name);
-                }).ToArray();
-                types.Should().Contain(expectedTypes);
-            }
+            // TODO MF: Test moved to runtime
+            // using (var file = File.OpenRead(assemblyPath))
+            // {
+            //     using var peReader = new PEReader(file);
+            //     var metadataReader = peReader.GetMetadataReader();
+            //     var types = metadataReader.TypeDefinitions.Where(t => !t.IsNil).Select(t =>
+            //     {
+            //         var type = metadataReader.GetTypeDefinition(t);
+            //         return metadataReader.GetString(type.Namespace) + "." + metadataReader.GetString(type.Name);
+            //     }).ToArray();
+            //     types.Should().Contain(expectedTypes);
+            // }
         }
 
         private static BootJsonData ReadBootJsonData(string path)

@@ -256,9 +256,6 @@ jobs:
             BuildConfig: $(_BuildConfig)
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
             HelixAccessToken: ${{ parameters.HelixAccessToken }}
-        - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload update --from-rollback-file $(Build.SourcesDirectory)\artifacts\bin\redist\$(_BuildConfig)\dotnet\TestRollback.json
-          displayName: Update wasm-tools Workload from rollback
-          continueOnError: false
         - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload install wasm-tools --skip-manifest-update
           displayName: Install wasm-tools Workload
           continueOnError: false
@@ -291,9 +288,6 @@ jobs:
           displayName: Build
           env:
             BuildConfig: $(_BuildConfig)
-        - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload update --from-rollback-file $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/TestRollback.json
-          displayName: Update wasm-tools Workload from rollback
-          continueOnError: false
         - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload install wasm-tools --skip-manifest-update
           displayName: Install wasm-tools Workload
           continueOnError: false

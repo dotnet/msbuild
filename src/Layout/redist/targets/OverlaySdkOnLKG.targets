@@ -71,8 +71,8 @@
     </ItemGroup>
 
     <!-- Create a rollback file for installing workloads during the build  -->
-    <WriteLinesToFile File="$(RedistLayoutPath)\TestRollback.json"
-                      Condition="!Exists('$(RedistLayoutPath)\TestRollback.json')"
+    <WriteLinesToFile File="$(RedistLayoutPath)TestRollback.json"
+                      Condition="!Exists('$(RedistLayoutPath)TestRollback.json')"
                       Lines="{;@(WasmWorkloads->'&quot;%(Identity)&quot;: &quot;%(Version)&quot;', ', ');}"/>
 
     <OverrideAndCreateBundledNETCoreAppPackageVersion
@@ -88,6 +88,11 @@
          use message so that it doesn't interfere with tests which check the output of commands. -->
     <Exec Command="$(RedistLayoutPath)dotnet new"
           EnvironmentVariables="DOTNET_CLI_HOME=$(ArtifactsTmpDir)" />
+
+    <!-- Install a coherent set of workload manifests -->
+    <Exec Condition="Exists('$(RedistLayoutPath)TestRollback.json')"
+          Command="$(RedistLayoutPath)dotnet workload update --from-rollback-file $(RedistLayoutPath)TestRollback.json"
+          EnvironmentVariables="DOTNET_CLI_HOME=$(ArtifactsTmpDir)"/>
   </Target>
 
 

@@ -25,12 +25,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 WriteFile = new TaskItem(tempFile),
                 SatelliteAssembly = new[]
                 {
-                    new TaskItem("Resources.fr.dll", new Dictionary<string, string>
+                    new TaskItem("Resources.fr.wasm", new Dictionary<string, string>
                     {
                         ["Culture"] = "fr",
                         ["DestinationSubDirectory"] = "fr\\",
                     }),
-                    new TaskItem("Resources.ja-jp.dll", new Dictionary<string, string>
+                    new TaskItem("Resources.ja-jp.wasm", new Dictionary<string, string>
                     {
                         ["Culture"] = "ja-jp",
                         ["DestinationSubDirectory"] = "ja-jp\\",
@@ -50,14 +50,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             reader.Execute();
 
-            reader.SatelliteAssembly.Should().Contain(assembly => 
-                assembly.ItemSpec == "Resources.fr.dll" && 
+            reader.SatelliteAssembly.Should().Contain(assembly =>
+                assembly.ItemSpec == "Resources.fr.wasm" &&
                 assembly.GetMetadata("Culture") == "fr" &&
                 assembly.GetMetadata("DestinationSubDirectory") == "fr\\"
             );
 
             reader.SatelliteAssembly.Should().Contain(assembly =>
-                assembly.ItemSpec == "Resources.ja-jp.dll" && 
+                assembly.ItemSpec == "Resources.ja-jp.wasm" &&
                 assembly.GetMetadata("Culture") == "ja-jp" &&
                 assembly.GetMetadata("DestinationSubDirectory") == "ja-jp\\"
             );
