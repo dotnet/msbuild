@@ -1,3 +1,7 @@
+export function receiveHotReload() {
+  return BINDING.js_to_mono_obj(new Promise((resolve) => receiveHotReloadAsync().then(resolve(0))));
+}
+
 export async function receiveHotReloadAsync() {
   const cache = window.sessionStorage.getItem('blazor-webassembly-cache');
   let headers;
