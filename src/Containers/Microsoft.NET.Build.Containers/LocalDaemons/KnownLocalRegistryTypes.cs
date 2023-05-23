@@ -3,8 +3,9 @@
 
 namespace Microsoft.NET.Build.Containers;
 
-public static class KnownDaemonTypes
+public static class KnownLocalRegistryTypes
 {
     public const string Docker = nameof(Docker);
-    public static readonly string[] SupportedLocalDaemonTypes = new [] { Docker };
+
+    public static readonly string[] SupportedLocalRegistryTypes = new [] { Docker };
 }

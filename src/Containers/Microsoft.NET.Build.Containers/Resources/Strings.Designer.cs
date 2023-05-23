@@ -205,7 +205,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER1009: Failed to load image to local Docker daemon. stdout: {0}.
+        ///   Looks up a localized string similar to CONTAINER1009: Failed to load image to local registry. stdout: {0}.
         /// </summary>
         internal static string ImageLoadFailed {
             get {
@@ -214,7 +214,7 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER1010: Pulling images from local Docker daemon is not supported..
+        ///   Looks up a localized string similar to CONTAINER1010: Pulling images from local registry is not supported..
         /// </summary>
         internal static string ImagePullNotSupported {
             get {
@@ -331,11 +331,11 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER1012: The local Docker daemon is not available, but pushing to a local Docker daemon was requested. Please start the daemon and try again..
+        ///   Looks up a localized string similar to CONTAINER1012: The local registry is not available, but pushing to a local registry was requested.
         /// </summary>
-        internal static string LocalDaemonNotAvailable {
+        internal static string LocalRegistryNotAvailable {
             get {
-                return ResourceManager.GetString("LocalDaemonNotAvailable", resourceCulture);
+                return ResourceManager.GetString("LocalRegistryNotAvailable", resourceCulture);
             }
         }
         
@@ -439,11 +439,11 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER2002: Unknown local container daemon type &apos;{0}&apos;. Valid local container daemon types are {1}..
+        ///   Looks up a localized string similar to CONTAINER2002: Unknown local registry type &apos;{0}&apos;. Valid local container registry types are {1}..
         /// </summary>
-        internal static string UnknownDaemonType {
+        internal static string UnknownLocalRegistryType {
             get {
-                return ResourceManager.GetString("UnknownDaemonType", resourceCulture);
+                return ResourceManager.GetString("UnknownLocalRegistryType", resourceCulture);
             }
         }
         

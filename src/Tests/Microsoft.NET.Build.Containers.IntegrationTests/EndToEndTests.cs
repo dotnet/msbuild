@@ -35,7 +35,7 @@ public class EndToEndTests
         return callerMemberName;
     }
 
-    [DockerDaemonAvailableFact]
+    [DockerAvailableFact]
     public async Task ApiEndToEndWithRegistryPushAndPull()
     {
         string publishDirectory = BuildLocalApp();
@@ -78,7 +78,7 @@ public class EndToEndTests
             .Should().Pass();
     }
 
-    [DockerDaemonAvailableFact]
+    [DockerAvailableFact]
     public async Task ApiEndToEndWithLocalLoad()
     {
         string publishDirectory = BuildLocalApp(tfm: "net8.0");
@@ -103,11 +103,11 @@ public class EndToEndTests
 
         BuiltImage builtImage = imageBuilder.Build();
 
-        // Load the image into the local Docker daemon
+        // Load the image into the local registry
         var sourceReference = new ImageReference(registry, DockerRegistryManager.RuntimeBaseImage, DockerRegistryManager.Net7ImageTag);
         var destinationReference = new ImageReference(registry, NewImageName(), "latest");
 
-        await new LocalDocker(Console.WriteLine).LoadAsync(builtImage, sourceReference, destinationReference, default).ConfigureAwait(false);
+        await new DockerCli(Console.WriteLine).LoadAsync(builtImage, sourceReference, destinationReference, default).ConfigureAwait(false);
 
         // Run the image
         ContainerCli.RunCommand(_testOutput, "--rm", "--tty", $"{NewImageName()}:latest")
@@ -148,7 +148,7 @@ public class EndToEndTests
         return publishDirectory;
     }
 
-    [DockerDaemonAvailableTheory]
+    [DockerAvailableTheory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task EndToEnd_NoAPI_Web(bool addPackageReference)
@@ -302,7 +302,7 @@ public class EndToEndTests
         privateNuGetAssets.Delete(true);
     }
 
-    [DockerDaemonAvailableFact]
+    [DockerAvailableFact]
     public void EndToEnd_NoAPI_Console()
     {
         DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, "CreateNewImageTest"));
@@ -397,7 +397,7 @@ public class EndToEndTests
     [DockerSupportsArchInlineData("linux/386", "linux-x86", "/app", Skip = "There's no apphost for linux-x86 so we can't execute self-contained, and there's no .NET runtime base image for linux-x86 so we can't execute framework-dependent.")]
     [DockerSupportsArchInlineData("windows/amd64", "win-x64", "C:\\app")]
     [DockerSupportsArchInlineData("linux/amd64", "linux-x64", "/app")]
-    [DockerDaemonAvailableTheory]
+    [DockerAvailableTheory]
     public async Task CanPackageForAllSupportedContainerRIDs(string dockerPlatform, string rid, string workingDir)
     {
         string publishDirectory = BuildLocalApp(tfm: ToolsetInfo.CurrentTargetFramework, rid: rid);
@@ -423,10 +423,10 @@ public class EndToEndTests
 
         BuiltImage builtImage = imageBuilder.Build();
 
-        // Load the image into the local Docker daemon
+        // Load the image into the local registry
         var sourceReference = new ImageReference(registry, DockerRegistryManager.RuntimeBaseImage, DockerRegistryManager.Net7ImageTag);
         var destinationReference = new ImageReference(registry, NewImageName(), rid);
-        await new LocalDocker(Console.WriteLine).LoadAsync(builtImage, sourceReference, destinationReference, default).ConfigureAwait(false);
+        await new DockerCli(Console.WriteLine).LoadAsync(builtImage, sourceReference, destinationReference, default).ConfigureAwait(false);
 
         // Run the image
         ContainerCli.RunCommand(

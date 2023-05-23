@@ -13,7 +13,7 @@ namespace Microsoft.NET.Build.Containers.Resources
     /// </summary>
     /// <remarks>
     /// Codes used for warnings/errors:
-    /// CONTAINER1xxx: HTTP or local daemon related failures
+    /// CONTAINER1xxx: HTTP or local registry related failures
     /// CONTAINER2xxx: Invalid/missing data related failures
     /// CONTAINER3xxx: Docker process related failures
     /// CONTAINER4xxx: Invalid command line parameters

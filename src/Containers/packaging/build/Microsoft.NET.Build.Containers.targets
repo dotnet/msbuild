@@ -71,11 +71,11 @@
 
     <!-- Container Defaults -->
     <PropertyGroup>
-      <!-- An empty ContainerRegistry implies pushing to the local daemon, putting this here for documentation purposes -->
+      <!-- An empty ContainerRegistry implies pushing to the local registry, putting this here for documentation purposes -->
       <!-- <ContainerRegistry></ContainerRegistry> -->
 
-      <!-- Set which local container daemon to use. We only explicitly support Docker (or things that mimic Docker APIs and binary names) at the moment. -->
-      <LocalContainerDaemon Condition="'$(LocalContainerDaemon)' == ''">Docker</LocalContainerDaemon>
+      <!-- Set which local container registry to use. We only explicitly support Docker (or things that mimic Docker APIs and binary names) at the moment. -->
+      <LocalRegistry Condition="'$(LocalRegistry)' == ''">Docker</LocalRegistry>
 
       <!-- Note: spaces will be replaced with '-' in ContainerImageName and ContainerImageTag -->
       <ContainerImageName Condition="'$(ContainerImageName)' == ''">$(AssemblyName)</ContainerImageName>
@@ -199,7 +199,7 @@
                     BaseRegistry="$(ContainerBaseRegistry)"
                     BaseImageName="$(ContainerBaseName)"
                     BaseImageTag="$(ContainerBaseTag)"
-                    LocalContainerDaemon="$(LocalContainerDaemon)"
+                    LocalRegistry="$(LocalRegistry)"
                     OutputRegistry="$(ContainerRegistry)"
                     ImageName="$(ContainerImageName)"
                     ImageTags="@(ContainerImageTags)"

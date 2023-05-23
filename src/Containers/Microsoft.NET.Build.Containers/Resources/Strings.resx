@@ -162,7 +162,7 @@
     <comment>{StrBegin="CONTAINER3001: "}</comment>
   </data>
   <data name="ImagePullNotSupported" xml:space="preserve">
-    <value>CONTAINER1010: Pulling images from local Docker daemon is not supported.</value>
+    <value>CONTAINER1010: Pulling images from local registry is not supported.</value>
     <comment>{StrBegin="CONTAINER1010: "}</comment>
   </data>
   <data name="EmptyOrWhitespacePropertyIgnored" xml:space="preserve">
@@ -181,7 +181,7 @@
     <value>No host object detected.</value>
   </data>
   <data name="ImageLoadFailed" xml:space="preserve">
-    <value>CONTAINER1009: Failed to load image to local Docker daemon. stdout: {0}</value>
+    <value>CONTAINER1009: Failed to load image from local registry. stdout: {0}</value>
     <comment>{StrBegin="CONTAINER1009: "}</comment>
   </data>
   <data name="InvalidContainerImageName" xml:space="preserve">
@@ -232,8 +232,8 @@
     <value>CONTAINER4005: Item '{0}' contains items without metadata 'Value', and they will be ignored.</value>
     <comment>{StrBegin="CONTAINER4005: "}</comment>
   </data>
-  <data name="LocalDaemonNotAvailable" xml:space="preserve">
-    <value>CONTAINER1012: The local Docker daemon is not available, but pushing to a local Docker daemon was requested. Please start the daemon and try again.</value>
+  <data name="LocalRegistryNotAvailable" xml:space="preserve">
+    <value>CONTAINER1012: The local registry is not available, but pushing to a local registry was requested.</value>
     <comment>{StrBegin="CONTAINER1012: "}</comment>
   </data>
   <data name="MissingLinkToRegistry" xml:space="preserve">
@@ -279,8 +279,8 @@
     <value>CONTAINER1006: Too many retries, stopping.</value>
     <comment>{StrBegin="CONTAINER1006: "}</comment>
   </data>
-  <data name="UnknownDaemonType" xml:space="preserve">
-    <value>CONTAINER2002: Unknown local container daemon type '{0}'. Valid local container daemon types are {1}.</value>
+  <data name="UnknownLocalRegistryType" xml:space="preserve">
+    <value>CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry types are {1}.</value>
     <comment>{StrBegin="CONTAINER2002: "}</comment>
   </data>
   <data name="UnknownMediaType" xml:space="preserve">

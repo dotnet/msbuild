@@ -13,7 +13,7 @@ namespace Microsoft.NET.Build.Containers.Tasks.IntegrationTests;
 [Collection("Docker tests")]
 public class ParseContainerPropertiesTests
 {
-    [DockerDaemonAvailableFact]
+    [DockerAvailableFact]
     public void Baseline()
     {
         var (project, _, d) = ProjectInitializer.InitProject(new () {
@@ -35,7 +35,7 @@ public class ParseContainerPropertiesTests
         instance.GetItems("ProjectCapability").Select(i => i.EvaluatedInclude).ToArray().Should().BeEquivalentTo(new[] { "NetSdkOCIImageBuild" });
     }
 
-    [DockerDaemonAvailableFact]
+    [DockerAvailableFact]
     public void SpacesGetReplacedWithDashes()
     {
          var (project, _, d) = ProjectInitializer.InitProject(new () {
@@ -51,7 +51,7 @@ public class ParseContainerPropertiesTests
         Assert.Equal("7.0", instance.GetPropertyValue(ContainerBaseTag));
     }
 
-    [DockerDaemonAvailableFact]
+    [DockerAvailableFact]
     public void RegexCatchesInvalidContainerNames()
     {
          var (project, logs, d) = ProjectInitializer.InitProject(new () {
@@ -66,7 +66,7 @@ public class ParseContainerPropertiesTests
         Assert.Contains(logs.Messages, m => m.Message?.Contains("'ContainerImageName' was not a valid container image name, it was normalized to 'dotnet-testimage'") == true);
     }
 
-    [DockerDaemonAvailableFact]
+    [DockerAvailableFact]
     public void RegexCatchesInvalidContainerTags()
     {
         var (project, logs, d) = ProjectInitializer.InitProject(new () {
@@ -83,7 +83,7 @@ public class ParseContainerPropertiesTests
         Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2007);
     }
 
-    [DockerDaemonAvailableFact]
+    [DockerAvailableFact]
     public void CanOnlySupplyOneOfTagAndTags()
     {
         var (project, logs, d) = ProjectInitializer.InitProject(new () {

@@ -23,7 +23,7 @@ public class CreateNewImageTests
         _testOutput = testOutput;
     }
 
-    [DockerDaemonAvailableFact]
+    [DockerAvailableFact]
     public void CreateNewImage_Baseline()
     {
         DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, nameof(CreateNewImage_Baseline)));
@@ -64,7 +64,7 @@ public class CreateNewImageTests
         newProjectDir.Delete(true);
     }
 
-    [DockerDaemonAvailableFact]
+    [DockerAvailableFact]
     public void ParseContainerProperties_EndToEnd()
     {
         DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, nameof(ParseContainerProperties_EndToEnd)));
@@ -121,7 +121,7 @@ public class CreateNewImageTests
     /// <summary>
     /// Creates a console app that outputs the environment variable added to the image.
     /// </summary>
-    [DockerDaemonAvailableFact]
+    [DockerAvailableFact]
     public void Tasks_EndToEnd_With_EnvironmentVariable_Validation()
     {
         DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, nameof(Tasks_EndToEnd_With_EnvironmentVariable_Validation)));
@@ -180,7 +180,7 @@ public class CreateNewImageTests
         cni.ContainerEnvironmentVariables = pcp.NewContainerEnvironmentVariables;
         cni.ContainerRuntimeIdentifier = "linux-x64";
         cni.RuntimeIdentifierGraphPath = ToolsetUtils.GetRuntimeGraphFilePath();
-        cni.LocalContainerDaemon = global::Microsoft.NET.Build.Containers.KnownDaemonTypes.Docker;
+        cni.LocalRegistry = global::Microsoft.NET.Build.Containers.KnownLocalRegistryTypes.Docker;
 
         Assert.True(cni.Execute());
 
@@ -190,7 +190,7 @@ public class CreateNewImageTests
             .And.HaveStdOut("Foo");
     }
 
-    [DockerDaemonAvailableFact]
+    [DockerAvailableFact]
     public async System.Threading.Tasks.Task CreateNewImage_RootlessBaseImage()
     {
         const string RootlessBase ="dotnet/rootlessbase";

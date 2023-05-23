@@ -12,11 +12,11 @@ using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers;
 
-internal sealed class LocalDocker : ILocalDaemon
+internal sealed class DockerCli : ILocalRegistry
 {
     private readonly Action<string> logger;
 
-    public LocalDocker(Action<string> logger)
+    public DockerCli(Action<string> logger)
     {
         this.logger = logger;
     }

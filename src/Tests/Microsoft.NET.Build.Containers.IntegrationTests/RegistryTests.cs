@@ -9,7 +9,7 @@ namespace Microsoft.NET.Build.Containers.IntegrationTests;
 [Collection("Docker tests")]
 public class RegistryTests
 {
-    [DockerDaemonAvailableFact]
+    [DockerAvailableFact]
     public async Task GetFromRegistry()
     {
         Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.LocalRegistry));

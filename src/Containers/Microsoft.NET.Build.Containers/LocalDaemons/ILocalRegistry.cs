@@ -4,23 +4,22 @@
 namespace Microsoft.NET.Build.Containers;
 
 /// <summary>
-/// Abstracts over the concept of a local container runtime of some kind. Currently this is only modeled by Docker,
-/// but users have expressed desires for Podman, nerdctl, etc as well so this kind of abstraction makes sense to have.
+/// Abstracts over the concept of a local registry storeof some kind.
 /// </summary>
-internal interface ILocalDaemon {
+internal interface ILocalRegistry {
 
     /// <summary>
-    /// Loads an image (presumably from a tarball) into the local container runtime.
+    /// Loads an image (presumably from a tarball) into the local registry.
     /// </summary>
     public Task LoadAsync(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Checks to see if the local container runtime is available. This is used to give nice errors to the user.
+    /// Checks to see if the local registry is available. This is used to give nice errors to the user.
     /// </summary>
     public Task<bool> IsAvailableAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    /// Checks to see if the local container runtime is available. This is used to give nice errors to the user.
+    /// Checks to see if the local registry is available. This is used to give nice errors to the user.
     /// See <see cref="IsAvailableAsync(CancellationToken)"/> for async version.
     /// </summary>
     public bool IsAvailable();
