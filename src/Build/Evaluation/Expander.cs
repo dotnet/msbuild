@@ -5425,6 +5425,7 @@ namespace Microsoft.Build.Evaluation
 
         private static IComparer<MemberInfo> DoubleBeforeLongComparer => s_comparerDoubleBeforeLong ??= Comparer<MemberInfo>.Create((key0, key1) => SelectTypeOfFirstParameter(key1).CompareTo(SelectTypeOfFirstParameter(key0)));
 
+        // The arithmetic overload feature uses this method to test for the change wave.
         internal static bool IsIntrinsicFunctionOverloadsEnabled() => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8);
 
         internal static bool IsKnownOverloadMethodName(string methodName) => s_knownOverloadName.Any(name => string.Equals(name, methodName, StringComparison.OrdinalIgnoreCase));
