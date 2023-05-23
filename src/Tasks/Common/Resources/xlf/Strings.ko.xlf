@@ -960,6 +960,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1148: 참조된 어셈블리가 최신 버전의 Microsoft.Windows.SDK.NET.dll을 사용하여 컴파일되었습니다. 이 어셈블리를 참조하려면 최신 .NET SDK로 업데이트하세요.</target>
         <note>{StrBegin="NETSDK1148: "}</note>
       </trans-unit>
+      <trans-unit id="WorkloadIsEol">
+        <source>NETSDK1202: The workload '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</source>
+        <target state="new">NETSDK1202: The workload '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</target>
+        <note>{StrBegin="NETSDK1202: "}</note>
+      </trans-unit>
       <trans-unit id="WorkloadNotAvailable">
         <source>NETSDK1178: The project depends on the following workload packs that do not exist in any of the workloads available in this installation: {0}
 You may need to build the project on another operating system or architecture, or update the .NET SDK.</source>
