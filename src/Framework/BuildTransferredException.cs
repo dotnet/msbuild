@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -37,12 +38,12 @@ namespace Microsoft.Build.BackEnd
 
             string message = reader.ReadString();
             string typeName = reader.ReadString();
-            string? deserializedStackTrace = ReadOptionalString(reader);
+            string? deserializedStackTrace = reader.ReadOptionalString();
             BuildTransferredException exception = new(message, innerException, typeName, deserializedStackTrace)
             {
-                Source = ReadOptionalString(reader),
-                HelpLink = ReadOptionalString(reader),
-                HResult = ReadOptionalInt32(reader),
+                Source = reader.ReadOptionalString(),
+                HelpLink = reader.ReadOptionalString(),
+                HResult = reader.ReadOptionalInt32(),
             };
 
             return exception;
@@ -58,9 +59,9 @@ namespace Microsoft.Build.BackEnd
             }
             writer.Write(exception.Message);
             writer.Write(exception.GetType().FullName ?? exception.GetType().ToString());
-            WriteOptionalString(writer, exception.StackTrace);
-            WriteOptionalString(writer, exception.Source);
-            WriteOptionalString(writer, exception.HelpLink);
+            writer.WriteOptionalString(exception.StackTrace);
+            writer.WriteOptionalString(exception.Source);
+            writer.WriteOptionalString(exception.HelpLink);
             // HResult is completely protected up till net4.5
 #if NET || NET45_OR_GREATER
             writer.Write((byte)1);
@@ -73,27 +74,6 @@ namespace Microsoft.Build.BackEnd
                 "Exception Data is not supported in BuildTransferredException");
         }
 
-        private static string? ReadOptionalString(BinaryReader reader)
-        {
-            return reader.ReadByte() == 0 ? null : reader.ReadString();
-        }
 
-        private static void WriteOptionalString(BinaryWriter writer, string? value)
-        {
-            if (value == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(value);
-            }
-        }
-
-        private static int ReadOptionalInt32(BinaryReader reader)
-        {
-            return reader.ReadByte() == 0 ? 0 : reader.ReadInt32();
-        }
     }
 }

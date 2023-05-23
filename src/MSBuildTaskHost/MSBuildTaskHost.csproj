@@ -70,8 +70,11 @@
     </Compile>
     <Compile Include="..\Shared\Constants.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
-    <Compile Include="..\Shared\ErrorUtilities.cs">
+    <Compile Include="..\Framework\ErrorUtilities.cs">
       <Link>ErrorUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\ErrorUtilities.cs">
+      <Link>SharedErrorUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>EscapingUtilities.cs</Link>
@@ -97,18 +100,24 @@
     <Compile Include="..\Shared\INodePacketHandler.cs">
       <Link>INodePacketHandler.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ITranslatable.cs">
+    <Compile Include="..\Framework\ITranslatable.cs">
       <Link>ITranslatable.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ITranslator.cs">
+    <Compile Include="..\Framework\ITranslator.cs">
       <Link>ITranslator.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
     <Compile Include="..\Framework\InternalErrorException.cs">
       <Link>InternalErrorException.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\InterningBinaryReader.cs">
+    <Compile Include="..\Framework\InterningBinaryReader.cs">
       <Link>InterningBinaryReader.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\BinaryReaderExtensions.cs">
+      <Link>BinaryReaderExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\BinaryWriterExtensions.cs">
+      <Link>BinaryWriterExtensions.cs</Link>
     </Compile>
     <Compile Include="..\Shared\LogMessagePacketBase.cs">
       <Link>LogMessagePacketBase.cs</Link>
@@ -132,10 +141,10 @@
     <Compile Include="..\Shared\NodePacketFactory.cs">
       <Link>NodePacketFactory.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\BinaryTranslator.cs">
+    <Compile Include="..\Framework\BinaryTranslator.cs">
       <Link>BinaryTranslator.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\BuildTransferredException.cs">
+    <Compile Include="..\Framework\BuildTransferredException.cs">
       <Link>BuildTransferredException.cs</Link>
     </Compile>
     <Compile Include="..\Shared\NodeShutdown.cs">

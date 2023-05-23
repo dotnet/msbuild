@@ -1,0 +1,9 @@
+{
+  "solution": {
+    "path": "MSBuild.sln",
+    "projects": [
+      "src\\MSBuildTaskHost\\MSBuildTaskHost.csproj",
+      "src\\StringTools\\StringTools.csproj"
+    ]
+  }
+}

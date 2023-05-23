@@ -88,7 +88,7 @@ namespace Microsoft.Build.BackEnd
             {
                 get
                 {
-                    ErrorUtilities.ThrowInternalError("Cannot get writer from reader.");
+                    EscapeHatches.ThrowInternalError("Cannot get writer from reader.");
                     return null;
                 }
             }
@@ -772,7 +772,7 @@ namespace Microsoft.Build.BackEnd
             {
                 get
                 {
-                    ErrorUtilities.ThrowInternalError("Cannot get reader from writer.");
+                    EscapeHatches.ThrowInternalError("Cannot get reader from writer.");
                     return null;
                 }
             }
