@@ -14,7 +14,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     [SuppressMessage("Microsoft.Design", "CA1032:ImplementStandardExceptionConstructors", Justification = "No point in adding the serialization constructors since BuildRequest is not serializable")]
     [SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable", Justification = "No point in marking as ISerializable since BuildRequest is not. ")]
-    internal class SchedulerCircularDependencyException : Exception
+    internal class SchedulerCircularDependencyException : BuildExceptionBase
     {
         /// <summary>
         /// The ancestors which led to this circular dependency.
@@ -34,6 +34,11 @@ namespace Microsoft.Build.BackEnd
             _request = request;
             _ancestors = ancestors;
         }
+
+        // Do not remove - used by BuildExceptionSerializationHelper
+        internal SchedulerCircularDependencyException(string message, Exception inner)
+            : base(message, inner)
+        { }
 
         /// <summary>
         /// Gets an enumeration of the ancestors which led to this circular dependency.

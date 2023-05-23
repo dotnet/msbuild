@@ -3,6 +3,8 @@
 
 using System;
 using System.Runtime.Serialization;
+using Microsoft.Build.BackEnd;
+using System.Collections.Generic;
 
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
@@ -22,7 +24,7 @@ namespace Microsoft.Build.CommandLine
     /// Unlike the CommandLineSwitchException, this exception is NOT thrown for syntax errors in switches.
     /// </remarks>
     [Serializable]
-    internal sealed class InitializationException : Exception
+    internal sealed class InitializationException : BuildExceptionBase
     {
         /// <summary>
         /// This constructor initializes the exception message.
@@ -61,6 +63,11 @@ namespace Microsoft.Build.CommandLine
             invalidSwitch = info.GetString("invalidSwitch");
         }
 
+        // Do not remove - used by BuildExceptionSerializationHelper
+        private InitializationException(string message, Exception inner)
+            : base(message, inner)
+        { }
+
         /// <summary>
         /// Gets the error message and the invalid switch, or only the error message if no invalid switch is set.
         /// </summary>
@@ -94,6 +101,20 @@ namespace Microsoft.Build.CommandLine
 
             info.AddValue("invalidSwitch", invalidSwitch, typeof(string));
         }
+
+        protected override IDictionary<string, string> FlushCustomState()
+        {
+            return new Dictionary<string, string>()
+            {
+                { nameof(invalidSwitch), invalidSwitch }
+            };
+        }
+
+        protected override void InitializeCustomState(IDictionary<string, string> state)
+        {
+            invalidSwitch = state[nameof(invalidSwitch)];
+        }
+
 
         /// <summary>
         /// Throws the exception if the specified condition is not met.

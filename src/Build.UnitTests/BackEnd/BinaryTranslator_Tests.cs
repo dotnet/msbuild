@@ -8,6 +8,8 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
 
@@ -227,6 +229,35 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 value = new ArgumentNullException("The argument was null", e);
             }
 
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+        }
+
+        [Fact]
+        public void TestSerializeBuildException_NestedWithStack()
+        {
+            Exception value = null;
+            try
+            {
+                throw new InvalidProjectFileException("sample message");
+            }
+            catch (Exception e)
+            {
+                try
+                {
+                    throw new ArgumentNullException("The argument was null", e);
+                }
+                catch (Exception exception)
+                {
+                    value = new InternalErrorException("Another message", exception);
+                }
+            }
+
+            Assert.NotNull(value);
             TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
 
             Exception deserializedValue = null;

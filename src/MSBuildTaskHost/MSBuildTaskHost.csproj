@@ -144,8 +144,8 @@
     <Compile Include="..\Framework\BinaryTranslator.cs">
       <Link>BinaryTranslator.cs</Link>
     </Compile>
-    <Compile Include="..\Framework\BuildTransferredException.cs">
-      <Link>BuildTransferredException.cs</Link>
+    <Compile Include="..\Framework\BuildException.cs">
+      <Link>BuildException.cs</Link>
     </Compile>
     <Compile Include="..\Shared\NodeShutdown.cs">
       <Link>NodeShutdown.cs</Link>

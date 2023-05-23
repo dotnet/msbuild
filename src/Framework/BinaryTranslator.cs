@@ -487,7 +487,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                value = BuildTransferredException.ReadExceptionFromTranslator(this);
+                value = BuildExceptionBase.ReadExceptionFromTranslator(this);
             }
 
 
@@ -1121,7 +1121,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                BuildTransferredException.WriteExceptionToTranslator(this, value);
+                BuildExceptionBase.WriteExceptionToTranslator(this, value);
             }
 
             /// <summary>

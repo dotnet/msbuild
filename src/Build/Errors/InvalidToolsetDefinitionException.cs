@@ -5,6 +5,8 @@ using System;
 
 using Microsoft.Build.Shared;
 using System.Runtime.Serialization;
+using Microsoft.Build.BackEnd;
+using System.Collections.Generic;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
@@ -17,7 +19,7 @@ namespace Microsoft.Build.Exceptions
     /// Exception subclass that ToolsetReaders should throw.
     /// </summary>
     [Serializable]
-    public class InvalidToolsetDefinitionException : Exception
+    public class InvalidToolsetDefinitionException : BuildExceptionBase
     {
         /// <summary>
         /// The MSBuild error code corresponding with this exception.
@@ -101,6 +103,19 @@ namespace Microsoft.Build.Exceptions
             base.GetObjectData(info, context);
 
             info.AddValue("errorCode", errorCode);
+        }
+
+        protected override IDictionary<string, string> FlushCustomState()
+        {
+            return new Dictionary<string, string>()
+            {
+                { nameof(errorCode), errorCode }
+            };
+        }
+
+        protected override void InitializeCustomState(IDictionary<string, string> state)
+        {
+            errorCode = state[nameof(errorCode)];
         }
 
         /// <summary>

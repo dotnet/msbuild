@@ -12,7 +12,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// <summary>
     /// Represents an exception that occurs when an SdkResolver throws an unhandled exception.
     /// </summary>
-    public class SdkResolverException : Exception
+    public class SdkResolverException : BuildExceptionBase
     {
         public SdkResolver Resolver { get; private set; }
 
@@ -24,5 +24,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             Resolver = resolver;
             Sdk = sdk;
         }
+
+        // Do not remove - used by BuildExceptionSerializationHelper
+        internal SdkResolverException(string message, Exception inner)
+            : base(message, inner)
+        { }
     }
 }

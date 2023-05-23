@@ -19,7 +19,7 @@ namespace Microsoft.Build.BackEnd
     /// If you add fields to this class, add a custom serialization constructor and override GetObjectData().
     /// </remarks>
     [Serializable]
-    internal class NodeFailedToLaunchException : Exception
+    internal class NodeFailedToLaunchException : BuildExceptionBase
     {
         /// <summary>
         /// Constructs a standard NodeFailedToLaunchException.
@@ -31,6 +31,10 @@ namespace Microsoft.Build.BackEnd
 
         internal NodeFailedToLaunchException(Exception innerException)
             : base(innerException.Message, innerException)
+        { }
+
+        public NodeFailedToLaunchException(string message, Exception inner)
+            : base(message, inner)
         { }
 
         /// <summary>

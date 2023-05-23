@@ -3,6 +3,8 @@
 
 using System;
 using System.Runtime.Serialization;
+using Microsoft.Build.BackEnd;
+using System.Collections.Generic;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
@@ -17,7 +19,7 @@ namespace Microsoft.Build.CommandLine
     /// This exception is used to flag (syntax) errors in command line switches passed to the application.
     /// </summary>
     [Serializable]
-    internal sealed class CommandLineSwitchException : Exception
+    internal sealed class CommandLineSwitchException : BuildExceptionBase
     {
         /// <summary>
         /// This constructor initializes the exception message.
@@ -55,6 +57,11 @@ namespace Microsoft.Build.CommandLine
 
             commandLineArg = info.GetString("commandLineArg");
         }
+
+        // Do not remove - used by BuildExceptionSerializationHelper
+        private CommandLineSwitchException(string message, Exception inner)
+            : base(message, inner)
+        { }
 
         /// <summary>
         /// Gets the error message and the invalid switch, or only the error message if no invalid switch is set.
@@ -100,6 +107,19 @@ namespace Microsoft.Build.CommandLine
             base.GetObjectData(info, context);
 
             info.AddValue("commandLineArg", commandLineArg, typeof(string));
+        }
+
+        protected override IDictionary<string, string> FlushCustomState()
+        {
+            return new Dictionary<string, string>()
+            {
+                { nameof(commandLineArg), commandLineArg }
+            };
+        }
+
+        protected override void InitializeCustomState(IDictionary<string, string> state)
+        {
+            commandLineArg = state[nameof(commandLineArg)];
         }
 
         /// <summary>
