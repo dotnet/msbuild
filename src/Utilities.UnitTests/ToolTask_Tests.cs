@@ -838,7 +838,7 @@ namespace Microsoft.Build.UnitTests
         /// predefined amount of time. The first execution may time out, but all following ones won't. It is expected
         /// that all following executions return success.
         /// </remarks>
-        [Theory]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/8750")]
         [InlineData(1, 1, 1, -1)] // Normal case, no repeat.
         [InlineData(3, 1, 1, -1)] // Repeat without timeout.
         [InlineData(3, 10000, 1, 1000)] // Repeat with timeout.
