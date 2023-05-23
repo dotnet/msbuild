@@ -1483,6 +1483,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
             }
 
+            if (buildEventArgs is BuildErrorEventArgs errorEventValue)
+            {
+                // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
+                _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEventValue.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
+            }
+
             if (loggingEvent is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
             {
                 int key = GetWarningsAsErrorOrMessageKey(projectFinishedEvent);
