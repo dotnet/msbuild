@@ -1013,7 +1013,7 @@
     <PackageReference Include="System.Security.Cryptography.Xml" />
     <PackageReference Include="System.Security.Permissions" />
 
-    <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\net6.0\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
+    <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\netcore\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(MonoBuild)' == 'true'">
