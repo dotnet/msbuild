@@ -50,13 +50,13 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
       <Sha>8e3442dd52923615959c161ce49b9960375ea07b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="17.4.3">
+    <Dependency Name="Microsoft.Build" Version="17.4.4">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>7e646be438ea3fdd8fdab0553cd0e5b505174b65</Sha>
+      <Sha>8e9cb295288f13095e9b7739cc4cbb04e9d246d2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.4.3-preview-23171-03">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.4.4-preview-23268-03">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>7e646be438ea3fdd8fdab0553cd0e5b505174b65</Sha>
+      <Sha>8e9cb295288f13095e9b7739cc4cbb04e9d246d2</Sha>
     </Dependency>
     <Dependency Name="Microsoft.FSharp.Compiler" Version="12.4.0-beta.22571.5">
       <Uri>https://github.com/dotnet/fsharp</Uri>
@@ -67,9 +67,9 @@
       <Sha>1d892dd78d5dcb261a1d26f72efb333834436a02</Sha>
       <SourceBuild RepoName="fsharp" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="dotnet-format" Version="7.0.357101">
+    <Dependency Name="dotnet-format" Version="7.1.426910">
       <Uri>https://github.com/dotnet/format</Uri>
-      <Sha>49c2ef651359526841d13e66129b71d1bcd9cef9</Sha>
+      <Sha>bfa0dafc618e42b2564d53868d49bc19d2cf5a51</Sha>
       <SourceBuildTarball RepoName="format" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.4.0-6.23101.13">
