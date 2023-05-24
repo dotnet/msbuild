@@ -18,7 +18,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
     public string FullyQualifiedBaseImageName { get; set; }
 
     /// <summary>
-    /// The registry to push the new container to. This will be null if the container is to be pushed to a local daemon.
+    /// The registry to push the new container to. This will be null if the container is to be pushed to a local registry.
     /// </summary>
     public string ContainerRegistry { get; set; }
 

@@ -78,13 +78,13 @@
         <note />
       </trans-unit>
       <trans-unit id="ImageLoadFailed">
-        <source>CONTAINER1009: Failed to load image to local Docker daemon. stdout: {0}</source>
-        <target state="translated">CONTAINER1009: ローカル Docker デーモンにイメージを読み込めませんでした。stdout: {0}</target>
+        <source>CONTAINER1009: Failed to load image from local registry. stdout: {0}</source>
+        <target state="needs-review-translation">CONTAINER1009: ローカル Docker デーモンにイメージを読み込めませんでした。stdout: {0}</target>
         <note>{StrBegin="CONTAINER1009: "}</note>
       </trans-unit>
       <trans-unit id="ImagePullNotSupported">
-        <source>CONTAINER1010: Pulling images from local Docker daemon is not supported.</source>
-        <target state="translated">CONTAINER1010: ローカル Docker デーモンからのイメージのプルはサポートされていません。</target>
+        <source>CONTAINER1010: Pulling images from local registry is not supported.</source>
+        <target state="needs-review-translation">CONTAINER1010: ローカル Docker デーモンからのイメージのプルはサポートされていません。</target>
         <note>{StrBegin="CONTAINER1010: "}</note>
       </trans-unit>
       <trans-unit id="InvalidContainerImageName">
@@ -147,9 +147,9 @@
         <target state="translated">CONTAINER4005: 項目 '{0}' にメタデータ 'Value' のない項目が含まれており、これらは無視されます。</target>
         <note>{StrBegin="CONTAINER4005: "}</note>
       </trans-unit>
-      <trans-unit id="LocalDaemonNotAvailable">
-        <source>CONTAINER1012: The local Docker daemon is not available, but pushing to a local Docker daemon was requested. Please start the daemon and try again.</source>
-        <target state="translated">CONTAINER1012: ローカル Docker デーモンは使用できませんが、ローカル Docker デーモンへのプッシュが要求されました。 デーモンを起動して、もう一度お試しください。</target>
+      <trans-unit id="LocalRegistryNotAvailable">
+        <source>CONTAINER1012: The local registry is not available, but pushing to a local registry was requested.</source>
+        <target state="new">CONTAINER1012: The local registry is not available, but pushing to a local registry was requested.</target>
         <note>{StrBegin="CONTAINER1012: "}</note>
       </trans-unit>
       <trans-unit id="MissingLinkToRegistry">
@@ -207,9 +207,9 @@
         <target state="translated">CONTAINER1006: 再試行回数が多すぎます。停止しています。</target>
         <note>{StrBegin="CONTAINER1006: "}</note>
       </trans-unit>
-      <trans-unit id="UnknownDaemonType">
-        <source>CONTAINER2002: Unknown local container daemon type '{0}'. Valid local container daemon types are {1}.</source>
-        <target state="translated">CONTAINER2002: 不明なローカル コンテナー デーモンの種類 '{0}'。有効なローカル コンテナー デーモンの種類は {1} です。</target>
+      <trans-unit id="UnknownLocalRegistryType">
+        <source>CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry types are {1}.</source>
+        <target state="new">CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry types are {1}.</target>
         <note>{StrBegin="CONTAINER2002: "}</note>
       </trans-unit>
       <trans-unit id="UnknownMediaType">

@@ -46,10 +46,10 @@ partial class CreateNewImage
     public string OutputRegistry { get; set; }
 
     /// <summary>
-    /// The kind of local daemon to use, if any.
+    /// The kind of local registry to use, if any.
     /// </summary>
     [Required]
-    public string LocalContainerDaemon { get; set; }
+    public string LocalRegistry { get; set; }
 
     /// <summary>
     /// The name of the output image that will be pushed to the registry.
@@ -151,7 +151,7 @@ partial class CreateNewImage
         ContainerEnvironmentVariables = Array.Empty<ITaskItem>();
         ContainerRuntimeIdentifier = "";
         RuntimeIdentifierGraphPath = "";
-        LocalContainerDaemon = "";
+        LocalRegistry = "";
         ContainerUser = "";
 
         GeneratedContainerConfiguration = "";

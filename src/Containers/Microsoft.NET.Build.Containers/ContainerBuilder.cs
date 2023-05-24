@@ -23,7 +23,7 @@ public static class ContainerBuilder
         Dictionary<string, string> envVars,
         string containerRuntimeIdentifier,
         string ridGraphPath,
-        string localContainerDaemon,
+        string localRegistry,
         string? containerUser,
         CancellationToken cancellationToken)
     {
@@ -32,12 +32,12 @@ public static class ContainerBuilder
         {
             throw new ArgumentException(string.Format(Resource.GetString(nameof(Strings.PublishDirectoryDoesntExist)), nameof(publishDirectory), publishDirectory.FullName));
         }
-        bool isDaemonPull = string.IsNullOrEmpty(baseRegistry);
-        Registry? sourceRegistry = isDaemonPull ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(baseRegistry));
+        bool isLocalPull = string.IsNullOrEmpty(baseRegistry);
+        Registry? sourceRegistry = isLocalPull ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(baseRegistry));
         ImageReference sourceImageReference = new(sourceRegistry, baseImageName, baseImageTag);
 
-        bool isDaemonPush = string.IsNullOrEmpty(outputRegistry);
-        Registry? destinationRegistry = isDaemonPush ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(outputRegistry!));
+        bool isLocalPush = string.IsNullOrEmpty(outputRegistry);
+        Registry? destinationRegistry = isLocalPush ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(outputRegistry!));
         IEnumerable<ImageReference> destinationImageReferences = imageTags.Select(t => new ImageReference(destinationRegistry, imageName, t));
 
         ImageBuilder? imageBuilder;
@@ -89,19 +89,19 @@ public static class ContainerBuilder
 
         foreach (ImageReference destinationImageReference in destinationImageReferences)
         {
-            if (isDaemonPush)
+            if (isLocalPush)
             {
-                LocalDocker localDaemon = GetLocalDaemon(localContainerDaemon,Console.WriteLine);
-                if (!(await localDaemon.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
+                ILocalRegistry containerRegistry = GetLocalRegistry(localRegistry,Console.WriteLine);
+                if (!(await containerRegistry.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
                 {
-                    Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.LocalDaemonNotAvailable)));
+                    Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.LocalRegistryNotAvailable)));
                     return 7;
                 }
 
                 try
                 {
-                    await localDaemon.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
-                    Console.WriteLine("Containerize: Pushed container '{0}' to Docker daemon", destinationImageReference.RepositoryAndTag);
+                    await containerRegistry.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
+                    Console.WriteLine("Containerize: Pushed container '{0}' to local registry", destinationImageReference.RepositoryAndTag);
                 }
                 catch (Exception ex)
                 {
@@ -134,13 +134,13 @@ public static class ContainerBuilder
         return 0;
     }
 
-    private static LocalDocker GetLocalDaemon(string localDaemonType, Action<string> logger)
+    private static ILocalRegistry GetLocalRegistry(string localRegistryType, Action<string> logger)
     {
-        LocalDocker daemon = localDaemonType switch
+        ILocalRegistry registry = localRegistryType switch
         {
-            KnownDaemonTypes.Docker => new LocalDocker(logger),
-            _ => throw new ArgumentException(Resource.FormatString(nameof(Strings.UnknownDaemonType), localDaemonType, String.Join(",", KnownDaemonTypes.SupportedLocalDaemonTypes)), nameof(localDaemonType))
+            KnownLocalRegistryTypes.Docker => new DockerCli(logger),
+            _ => throw new ArgumentException(Resource.FormatString(nameof(Strings.UnknownLocalRegistryType), localRegistryType, String.Join(",", KnownLocalRegistryTypes.SupportedLocalRegistryTypes)), nameof(localRegistryType))
         };
-        return daemon;
+        return registry;
     }
 }

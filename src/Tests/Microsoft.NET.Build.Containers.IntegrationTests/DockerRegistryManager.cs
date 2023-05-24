@@ -25,8 +25,8 @@ public class DockerRegistryManager
     public static void StartAndPopulateDockerRegistry(ITestOutputHelper testOutput)
     {
         testOutput.WriteLine("Spawning local registry");
-        if (!new LocalDocker(testOutput.WriteLine).IsAvailable()) {
-            throw new InvalidOperationException("Docker daemon is not started, tests cannot run");
+        if (!new DockerCli(testOutput.WriteLine).IsAvailable()) {
+            throw new InvalidOperationException("Docker is not available, tests cannot run");
         }
         CommandResult processResult = ContainerCli.RunCommand(testOutput, "--rm", "--publish", "5010:5000", "--detach", "docker.io/library/registry:2").Execute();
         processResult.Should().Pass().And.HaveStdOut();

@@ -124,9 +124,9 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
         {
             builder.AppendSwitchIfNotNull("--outputregistry ", OutputRegistry);
         }
-        if (!string.IsNullOrWhiteSpace(LocalContainerDaemon))
+        if (!string.IsNullOrWhiteSpace(LocalRegistry))
         {
-            builder.AppendSwitchIfNotNull("--localcontainerdaemon ", LocalContainerDaemon);
+            builder.AppendSwitchIfNotNull("--localregistry ", LocalRegistry);
         }
 
         if (EntrypointArgs.Any(e => string.IsNullOrWhiteSpace(e.ItemSpec)))

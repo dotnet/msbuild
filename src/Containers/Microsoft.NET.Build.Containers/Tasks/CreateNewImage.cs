@@ -21,9 +21,9 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
     /// </summary>
     public string ToolPath { get; set; }
 
-    private bool IsDaemonPush => string.IsNullOrEmpty(OutputRegistry);
+    private bool IsLocalPush => string.IsNullOrEmpty(OutputRegistry);
 
-    private bool IsDaemonPull => string.IsNullOrEmpty(BaseRegistry);
+    private bool IsLocalPull => string.IsNullOrEmpty(BaseRegistry);
 
     public void Cancel() => _cancellationTokenSource.Cancel();
 
@@ -100,18 +100,18 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
 
         foreach (ImageReference destinationImageReference in destinationImageReferences)
         {
-            if (IsDaemonPush)
+            if (IsLocalPush)
             {
-                LocalDocker localDaemon = GetLocalDaemon(msg => Log.LogMessage(msg));
-                if (!(await localDaemon.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
+                ILocalRegistry localRegistry = GetLocalRegistry(msg => Log.LogMessage(msg));
+                if (!(await localRegistry.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
                 {
-                    Log.LogErrorWithCodeFromResources(nameof(Strings.LocalDaemonNotAvailable));
+                    Log.LogErrorWithCodeFromResources(nameof(Strings.LocalRegistryNotAvailable));
                     return false;
                 }
                 try
                 {
-                    await localDaemon.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
-                    SafeLog("Pushed container '{0}' to local daemon", destinationImageReference.RepositoryAndTag);
+                    await localRegistry.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
+                    SafeLog("Pushed container '{0}' to local registry", destinationImageReference.RepositoryAndTag);
                 }
                 catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
                 {
@@ -191,22 +191,22 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         }
     }
 
-    private LocalDocker GetLocalDaemon(Action<string> logger) {
-        var daemon = LocalContainerDaemon switch {
-            KnownDaemonTypes.Docker => new LocalDocker(logger),
+    private ILocalRegistry GetLocalRegistry(Action<string> logger) {
+        var registry = LocalRegistry switch {
+            KnownLocalRegistryTypes.Docker => new DockerCli(logger),
             _ => throw new NotSupportedException(
                 Resource.FormatString(
-                    nameof(Strings.UnknownDaemonType),
-                    LocalContainerDaemon,
-                    string.Join(",", KnownDaemonTypes.SupportedLocalDaemonTypes)))
+                    nameof(Strings.UnknownLocalRegistryType),
+                    LocalRegistry,
+                    string.Join(",", KnownLocalRegistryTypes.SupportedLocalRegistryTypes)))
         };
-        return daemon;
+        return registry;
     }
 
     private Lazy<Registry?> SourceRegistry
     {
         get {
-            if(IsDaemonPull) {
+            if(IsLocalPull) {
                 return new Lazy<Registry?>(() => null);
             } else {
                 return new Lazy<Registry?>(() => new Registry(ContainerHelpers.TryExpandRegistryToUri(BaseRegistry)));
@@ -216,7 +216,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
 
     private Lazy<Registry?> DestinationRegistry {
         get {
-            if(IsDaemonPush) {
+            if(IsLocalPush) {
                 return new Lazy<Registry?>(() => null);
             } else {
                 return new Lazy<Registry?>(() => new Registry(ContainerHelpers.TryExpandRegistryToUri(OutputRegistry)));

@@ -79,10 +79,10 @@ internal class ContainerizeCommand : RootCommand
                 AllowMultipleArgumentsPerToken = true
             };
 
-    internal Option<string> LocalContainerDaemonOption { get; } = new Option<string>(
-            name: "--localcontainerdaemon",
-            description: "The local daemon type to push to")
-        .AcceptOnlyFromAmong(KnownDaemonTypes.SupportedLocalDaemonTypes);
+    internal Option<string> LocalRegistryOption { get; } = new Option<string>(
+            name: "--localregistry",
+            description: "The local registry to push to")
+        .AcceptOnlyFromAmong(KnownLocalRegistryTypes.SupportedLocalRegistryTypes);
 
     internal Option<Dictionary<string, string>> LabelsOption { get; } = new(
             name: "--labels",
@@ -184,7 +184,7 @@ internal class ContainerizeCommand : RootCommand
         this.AddOption(EnvVarsOption);
         this.AddOption(RidOption);
         this.AddOption(RidGraphPathOption);
-        this.AddOption(LocalContainerDaemonOption);
+        this.AddOption(LocalRegistryOption);
         this.AddOption(ContainerUserOption);
 
         this.SetHandler(async (context) =>
@@ -204,7 +204,7 @@ internal class ContainerizeCommand : RootCommand
             Dictionary<string, string> _envVars = context.ParseResult.GetValue(EnvVarsOption) ?? new Dictionary<string, string>();
             string _rid = context.ParseResult.GetValue(RidOption)!;
             string _ridGraphPath = context.ParseResult.GetValue(RidGraphPathOption)!;
-            string _localContainerDaemon = context.ParseResult.GetValue(LocalContainerDaemonOption)!;
+            string _localRegistry = context.ParseResult.GetValue(LocalRegistryOption)!;
             string? _containerUser = context.ParseResult.GetValue(ContainerUserOption);
             await ContainerBuilder.ContainerizeAsync(
                 _publishDir,
@@ -222,7 +222,7 @@ internal class ContainerizeCommand : RootCommand
                 _envVars,
                 _rid,
                 _ridGraphPath,
-                _localContainerDaemon,
+                _localRegistry,
                 _containerUser,
                 context.GetCancellationToken()).ConfigureAwait(false);
         });

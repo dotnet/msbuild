@@ -5,26 +5,26 @@ using Xunit;
 
 namespace Microsoft.NET.Build.Containers.UnitTests;
 
-public class DockerDaemonAvailableTheoryAttribute : TheoryAttribute
+public class DockerAvailableTheoryAttribute : TheoryAttribute
 {
-    private static bool IsDaemonAvailable = new LocalDocker(Console.WriteLine).IsAvailable();
-    public DockerDaemonAvailableTheoryAttribute()
+    private static bool IsAvailable = new DockerCli(Console.WriteLine).IsAvailable();
+    public DockerAvailableTheoryAttribute()
     {
-        if (!IsDaemonAvailable)
+        if (!IsAvailable)
         {
             base.Skip = "Skipping test because Docker is not available on this host.";
         }
     }
 }
 
-public class DockerDaemonAvailableFactAttribute : FactAttribute
+public class DockerAvailableFactAttribute : FactAttribute
 {
     // tiny optimization - since there are many instances of this attribute we should only get
     // the daemon status once
-    private static bool IsDaemonAvailable = new LocalDocker(Console.WriteLine).IsAvailable();
-    public DockerDaemonAvailableFactAttribute()
+    private static bool IsAvailable = new DockerCli(Console.WriteLine).IsAvailable();
+    public DockerAvailableFactAttribute()
     {
-        if (!IsDaemonAvailable)
+        if (!IsAvailable)
         {
             base.Skip = "Skipping test because Docker is not available on this host.";
         }
