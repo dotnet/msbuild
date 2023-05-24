@@ -3,7 +3,6 @@
 
 using System;
 using System.Runtime.Serialization;
-using Microsoft.Build.BackEnd;
 using System.Collections.Generic;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
@@ -23,7 +22,9 @@ namespace Microsoft.Build.Exceptions
     // promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type
     // without following certain special FX guidelines, can break both forward and backward compatibility
     [Serializable]
-    public sealed class InvalidProjectFileException : BuildExceptionBase
+    // WARNING: Intentionally deriving from Microsoft.Build.Internal.BuildExceptionBase and not Microsoft.Build.Backend.BuildExceptionBase
+    //  as due to nuget.exe limitations this cannot depend on Microsoft.Build.Framework assembly
+    public sealed class InvalidProjectFileException : Microsoft.Build.Internal.BuildExceptionBase
     {
         #region Basic constructors
 

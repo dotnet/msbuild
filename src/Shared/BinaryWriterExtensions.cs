@@ -29,6 +29,22 @@ namespace Microsoft.Build.Shared
 #if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
+        public static void WriteOptionalInt32(this BinaryWriter writer, int? value)
+        {
+            if (value == null)
+            {
+                writer.Write((byte)0);
+            }
+            else
+            {
+                writer.Write((byte)1);
+                writer.Write(value.Value);
+            }
+        }
+
+#if !TASKHOST
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static void WriteTimestamp(this BinaryWriter writer, DateTime timestamp)
         {
             writer.Write(timestamp.Ticks);

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
+using Xunit;
 
 #nullable disable
 
@@ -85,7 +86,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Compares two exceptions.
         /// </summary>
-        internal static bool CompareExceptions(Exception left, Exception right)
+        internal static bool CompareExceptions(Exception left, Exception right, bool detailed = false)
         {
             if (ReferenceEquals(left, right))
             {
@@ -107,7 +108,54 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 return false;
             }
 
-            return CompareExceptions(left.InnerException, right.InnerException);
+            if (!CompareExceptions(left.InnerException, right.InnerException, detailed))
+            {
+                return false;
+            }
+
+            if (detailed)
+            {
+                if (left.GetType() != right.GetType())
+                {
+                    return false;
+                }
+
+                foreach (var prop in left.GetType().GetProperties())
+                {
+                    if (!IsSimpleType(prop.PropertyType))
+                    {
+                        continue;
+                    }
+
+                    object leftProp = prop.GetValue(left, null);
+                    object rightProp = prop.GetValue(right, null);
+
+                    if (leftProp == null && rightProp != null)
+                    {
+                        return false;
+                    }
+
+                    if (leftProp != null && !prop.GetValue(left, null).Equals(prop.GetValue(right, null)))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        internal static bool IsSimpleType(Type type)
+        {
+            // Nullables
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                return IsSimpleType(type.GetGenericArguments()[0]);
+            }
+            return type.IsPrimitive
+                   || type.IsEnum
+                   || type == typeof(string)
+                   || type == typeof(decimal);
         }
 
         internal static string GetPropertiesString(IEnumerable properties)

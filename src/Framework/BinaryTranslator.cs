@@ -487,7 +487,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                value = BuildExceptionBase.ReadExceptionFromTranslator(this);
+                value = BuildExceptionSerializationHelper.ReadExceptionFromTranslator(this);
             }
 
 
@@ -1121,7 +1121,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                BuildExceptionBase.WriteExceptionToTranslator(this, value);
+                BuildExceptionSerializationHelper.WriteExceptionToTranslator(this, value);
             }
 
             /// <summary>

@@ -59,12 +59,7 @@ namespace Microsoft.Build.Execution
         }
 
         // Do not remove - used by BuildExceptionSerializationHelper
-        private static HostObjectException CreateFromRemote(string message, Exception innerException)
-        {
-            return new HostObjectException(message, innerException, true /* calledFromDeserialization */);
-        }
-
-        private HostObjectException(string message, Exception innerException, bool calledFromDeserialization)
+        private HostObjectException(string message, Exception innerException)
             : base(
                 message,
                 innerException)

@@ -697,6 +697,9 @@
       <Link>Errors\ErrorUtilities.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Framework\BuildException\BuildExceptionBase.cs">
+      <Link>Errors\BuildExceptionBase.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>SharedUtilities\EscapingUtilities.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

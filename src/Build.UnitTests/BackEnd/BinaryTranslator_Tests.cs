@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Exceptions;
@@ -264,6 +265,55 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
 
             Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+        }
+
+        public static IEnumerable<object[]> GetBuildExceptionsAsTestData()
+            => BuildExceptionSerializationHelper.EnumerateBuildExceptionTypes().Select(t => new object[] { t });
+
+        [Theory]
+        [MemberData(nameof(GetBuildExceptionsAsTestData))]
+        public void TestSerializationOfBuildExceptions(Type exceptionType)
+        {
+            Exception e = (Exception)Activator.CreateInstance(exceptionType, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.CreateInstance | BindingFlags.Instance, null, new object[]{"msg", new GenericBuildTransferredException() }, System.Globalization.CultureInfo.CurrentCulture);
+            //Activator.CreateInstance(exceptionType, true);
+            Exception remote;
+            try
+            {
+                throw e;
+            }
+            catch (Exception exception)
+            {
+                remote = exception;
+            }
+
+            Assert.NotNull(remote);
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref remote);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(remote, deserializedValue, true), $"Exception type {exceptionType.FullName} not properly de/serialized");
+        }
+
+        [Fact]
+        public void TestInvalidProjectFileException_NestedWithStack()
+        {
+            Exception value = null;
+            try
+            {
+                throw new InvalidProjectFileException("sample message", new InternalErrorException("Another message"));
+            }
+            catch (Exception e)
+            {
+                value = e;
+            }
+
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, true));
         }
 
         /// <summary>
