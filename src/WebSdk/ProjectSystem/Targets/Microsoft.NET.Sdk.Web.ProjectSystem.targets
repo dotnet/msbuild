@@ -46,16 +46,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableUnsafeBinaryFormatterSerialization Condition="'$(EnableUnsafeBinaryFormatterSerialization)' == ''">false</EnableUnsafeBinaryFormatterSerialization>
   </PropertyGroup>
 
+  <!-- Default settings for trimmed and aot'd apps. -->
   <PropertyGroup Condition="'$(PublishTrimmed)' == 'true' Or '$(PublishAot)' == 'true'">
-    <!-- Runtime feature defaults to trim unnecessary code -->
     <JsonSerializerIsReflectionEnabledByDefault Condition="'$(JsonSerializerIsReflectionEnabledByDefault)' == ''">false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
 
-  <!--
-    Enable the RequestDelegateGenerator by default for NativeAot apps.
-    This will be enabled for all PublishTrimmed apps once the RequestDelegateGenerator supports all MinimalApi features.
-   -->
+  <!-- Default settings for aot'd apps. -->
   <PropertyGroup Condition="'$(PublishAot)' == 'true'">
+    <!-- Enable the built-in source generators. -->
     <EnableRequestDelegateGenerator Condition="'$(EnableRequestDelegateGenerator)' == ''">true</EnableRequestDelegateGenerator>
     <EnableConfigurationBindingGenerator Condition="'$(EnableConfigurationBindingGenerator)' == ''">true</EnableConfigurationBindingGenerator>
   </PropertyGroup>
