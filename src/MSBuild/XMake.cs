@@ -805,15 +805,10 @@ namespace Microsoft.Build.CommandLine
                             ToolsVersion = toolsVersion,
                         });
 
-                        foreach (string property in getProperty)
-                        {
-                            Console.WriteLine($"\"{property}\": \"{project.GetPropertyValue(property)}\"");
-                        }
-
-                        foreach (string item in getItem)
-                        {
-                            Console.WriteLine($"\"{item}\": \"{string.Join(";", project.GetItems(item).Select(i => i.EvaluatedInclude))}\"");
-                        }
+                        Console.WriteLine("{");
+                        PrintPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
+                        PrintItemsInJsonFormat(getItem, project);
+                        Console.WriteLine("},");
                     }
                     else // regular build
                     {
@@ -866,21 +861,11 @@ namespace Microsoft.Build.CommandLine
                     if ((getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0) && targets?.Length > 0 && result is not null)
                     {
                         ProjectInstance builtProject = result.ProjectStateAfterBuild;
-
-                        foreach (string property in getProperty)
-                        {
-                            Console.WriteLine($"\"{property}\": \"{builtProject.GetPropertyValue(property)}\"");
-                        }
-
-                        foreach (string item in getItem)
-                        {
-                            Console.WriteLine($"\"{item}\": \"{string.Join(";", builtProject.GetItems(item).Select(i => i.EvaluatedInclude))}\"");
-                        }
-
-                        foreach (string target in getTargetResult)
-                        {
-                            Console.WriteLine($"\"{target}\": \"{result.ResultsByTarget[target].ResultCode}\"");
-                        }
+                        Console.WriteLine("{");
+                        PrintPropertiesInJsonFormat(getProperty, property => builtProject.GetPropertyValue(property));
+                        PrintItemInstancesInJsonFormat(getItem, builtProject);
+                        PrintTargetResultsInJsonFormat(getTargetResult, result);
+                        Console.WriteLine("},");
                     }
 
                     if (!string.IsNullOrEmpty(timerOutputFilename))
@@ -1038,6 +1023,114 @@ namespace Microsoft.Build.CommandLine
              *********************************************************************************************************************/
 
             return exitType;
+        }
+
+        private static void PrintPropertiesInJsonFormat(string[] propertyNames, Func<string, string> getProperty)
+        {
+            if (propertyNames.Length == 0)
+            {
+                return;
+            }
+
+            Console.WriteLine("\t\"Properties\":");
+            Console.WriteLine("\t{");
+            foreach (string property in propertyNames)
+            {
+                Console.WriteLine($"\t\t\"{property}\": \"{getProperty(property)}\",");
+            }
+
+            Console.WriteLine("\t},");
+        }
+
+        private static void PrintItemInstancesInJsonFormat(string[] itemNames, ProjectInstance project)
+        {
+            if (itemNames.Length == 0)
+            {
+                return;
+            }
+
+            Console.WriteLine("\t\"Items\":");
+            Console.WriteLine("\t{");
+            foreach (string itemName in itemNames)
+            {
+                Console.WriteLine($"\t\t\"{itemName}\":");
+                Console.WriteLine("\t\t[");
+                foreach (ProjectItemInstance item in project.GetItems(itemName))
+                {
+                    Console.WriteLine("\t\t\t{");
+                    foreach (ProjectMetadataInstance metadatum in item.Metadata)
+                    {
+                        Console.WriteLine($"\t\t\t\t\"{metadatum.Name}\": \"{metadatum.EvaluatedValue}\",");
+                    }
+
+                    Console.WriteLine("\t\t\t},");
+                }
+            }
+
+            Console.WriteLine("\t},");
+        }
+
+        private static void PrintItemsInJsonFormat(string[] itemNames, Project project)
+        {
+            if (itemNames.Length == 0)
+            {
+                return;
+            }
+
+            Console.WriteLine("\t\"Items\":");
+            Console.WriteLine("\t{");
+            foreach (string itemName in itemNames)
+            {
+                Console.WriteLine($"\t\t\"{itemName}\":");
+                Console.WriteLine("\t\t[");
+                foreach (ProjectItem item in project.GetItems(itemName))
+                {
+                    Console.WriteLine("\t\t\t{");
+                    foreach (ProjectMetadata metadatum in item.Metadata)
+                    {
+                        Console.WriteLine($"\t\t\t\t\"{metadatum.Name}\": \"{metadatum.EvaluatedValue}\",");
+                    }
+
+                    Console.WriteLine("\t\t\t},");
+                }
+            }
+
+            Console.WriteLine("\t},");
+        }
+
+        private static void PrintTargetResultsInJsonFormat(string[] targetNames, BuildResult result)
+        {
+            if (targetNames.Length == 0)
+            {
+                return;
+            }
+
+            Console.WriteLine("\t\"Target Results\":");
+            Console.WriteLine("\t{");
+            foreach (string targetName in targetNames)
+            {
+                TargetResult targetResult = result.ResultsByTarget[targetName];
+                Console.WriteLine($"\t\t\"{targetName}\":");
+                Console.WriteLine("\t\t{");
+                Console.WriteLine($"\t\t\t\"Result\": \"{targetResult.ResultCode}\"");
+                Console.WriteLine($"\t\t\t\"Items\":");
+                Console.WriteLine("\t\t\t[");
+                foreach (ITaskItem item in targetResult.Items)
+                {
+                    Console.WriteLine("\t\t\t\t{");
+                    foreach (KeyValuePair<string, string> metadatum in item.EnumerateMetadata())
+                    {
+                        Console.WriteLine($"\t\t\t\t\t\"{metadatum.Key}\": \"{metadatum.Value}\",");
+                    }
+
+                    Console.WriteLine("\t\t\t\t},");
+                }
+
+                Console.WriteLine("\t\t\t],");
+                Console.WriteLine("\t\t},");
+            }
+
+            Console.WriteLine("\t},");
         }
 
         /// <summary>
