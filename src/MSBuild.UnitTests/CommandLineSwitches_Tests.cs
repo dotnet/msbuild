@@ -13,6 +13,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -477,6 +478,52 @@ namespace Microsoft.Build.UnitTests
             unquoteParameters.ShouldBeTrue();
         }
 
+        [Fact]
+        public void EvaluationFromCommandLineSwitchIdentificationTests()
+        {
+            CommandLineSwitches.IsParameterizedSwitch(
+                "getProperty",
+                out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch,
+                out string duplicateSwitchErrorMessage,
+                out bool multipleParametersAllowed,
+                out string missingParametersErrorMessage,
+                out _,
+                out _);
+
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.GetProperty);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeTrue();
+            missingParametersErrorMessage.ShouldNotBeNullOrEmpty();
+
+            CommandLineSwitches.IsParameterizedSwitch(
+                "getItem",
+                out parameterizedSwitch,
+                out duplicateSwitchErrorMessage,
+                out multipleParametersAllowed,
+                out missingParametersErrorMessage,
+                out _,
+                out _);
+
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.GetItem);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeTrue();
+            missingParametersErrorMessage.ShouldNotBeNullOrEmpty();
+
+            CommandLineSwitches.IsParameterizedSwitch(
+                "getTargetResult",
+                out parameterizedSwitch,
+                out duplicateSwitchErrorMessage,
+                out multipleParametersAllowed,
+                out missingParametersErrorMessage,
+                out _,
+                out _);
+
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.GetTargetResult);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeTrue();
+            missingParametersErrorMessage.ShouldNotBeNullOrEmpty();
+        }
+
         [Theory]
         [InlineData("targets")]
         [InlineData("tArGeTs")]
@@ -741,6 +788,96 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(2, parameters.Length);
             Assert.Equal("A", parameters[0]);
             Assert.Equal("B", parameters[1]);
+        }
+
+        [Fact]
+        public void SettingGetPropertyTurnsDownVerbosity()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string path = env.CreateFile("foo.csproj", string.Empty).Path;
+            CommandLineSwitches switches = new();
+            switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Verbosity, "diag", "diag", true, true, true);
+            switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.BinaryLogger, "outputPath.binlog", "outputPath.binlog", true, true, true);
+            switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.GetProperty, "MyProp", "MyProp", true, true, true);
+            switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Project, path, path, true, true, true);
+            switches.SetParameterlessSwitch(CommandLineSwitches.ParameterlessSwitch.NoAutoResponse, "-noautoresponse");
+            string projectFile = string.Empty;
+            string[] targets = Array.Empty<string>();
+            string toolsVersion = string.Empty;
+            Dictionary<string, string> globalProperties = new(0);
+            ILogger[] loggers = Array.Empty<ILogger>();
+            LoggerVerbosity verbosity = LoggerVerbosity.Normal;
+            LoggerVerbosity originalVerbosity = LoggerVerbosity.Normal;
+            List<DistributedLoggerRecord> distributedLoggerRecords = new(0);
+#if FEATURE_XML_SCHEMA_VALIDATION
+            bool needToValidateProject = false;
+            string schemaFile = string.Empty;
+#endif
+            int cpuCount = 0;
+            bool enableNodeReuse = false;
+            TextWriter preprocessWriter = null;
+            TextWriter targetsWriter = null;
+            bool detailedSummary = false;
+            ISet<string> warningsAsErrors = new HashSet<string>(0);
+            ISet<string> warningsNotAsErrors = new HashSet<string>(0);
+            ISet<string> warningsAsMessages = new HashSet<string>(0);
+            bool enableRestore = false;
+            bool interactive = false;
+            ProfilerLogger profilerLogger = null;
+            bool enableProfiler = false;
+            Dictionary<string, string> restoreProperties = new(0);
+            ProjectIsolationMode isolateProjects = ProjectIsolationMode.False;
+            GraphBuildOptions graphBuild = null;
+            string[] inputResultsCaches = Array.Empty<string>();
+            string outputResultsCache = string.Empty;
+            bool lowPriority = false;
+            bool question = false;
+            string[] getProperty = Array.Empty<string>();
+            string[] getItem = Array.Empty<string>();
+            string[] getTargetResult = Array.Empty<string>();
+            bool recursing = false;
+            string commandLine = string.Empty;
+            MSBuildApp.ProcessCommandLineSwitches(
+                new CommandLineSwitches(),
+                switches,
+                ref projectFile,
+                ref targets,
+                ref toolsVersion,
+                ref globalProperties,
+                ref loggers,
+                ref verbosity,
+                ref originalVerbosity,
+                ref distributedLoggerRecords,
+    #if FEATURE_XML_SCHEMA_VALIDATION
+                ref needToValidateProject,
+                ref schemaFile,
+    #endif
+                ref cpuCount,
+                ref enableNodeReuse,
+                ref preprocessWriter,
+                ref targetsWriter,
+                ref detailedSummary,
+                ref warningsAsErrors,
+                ref warningsNotAsErrors,
+                ref warningsAsMessages,
+                ref enableRestore,
+                ref interactive,
+                ref profilerLogger,
+                ref enableProfiler,
+                ref restoreProperties,
+                ref isolateProjects,
+                ref graphBuild,
+                ref inputResultsCaches,
+                ref outputResultsCache,
+                ref lowPriority,
+                ref question,
+                ref getProperty,
+                ref getItem,
+                ref getTargetResult,
+                recursing,
+                commandLine).ShouldBeTrue();
+
+            verbosity.ShouldBe(LoggerVerbosity.Quiet, "Should have been quiet; was " + verbosity);
         }
 
         [Fact]

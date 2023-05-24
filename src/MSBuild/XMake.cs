@@ -1063,8 +1063,15 @@ namespace Microsoft.Build.CommandLine
                         Console.WriteLine($"\t\t\t\t\"{metadatum.Name}\": \"{metadatum.EvaluatedValue}\",");
                     }
 
+                    foreach (string metadatumName in FileUtilities.ItemSpecModifiers.All)
+                    {
+                        Console.WriteLine($"\t\t\t\t\"{metadatumName}\": \"{item.GetMetadataValue(metadatumName)}\",");
+                    }
+
                     Console.WriteLine("\t\t\t},");
                 }
+
+                Console.WriteLine("\t\t],");
             }
 
             Console.WriteLine("\t},");
@@ -1091,8 +1098,15 @@ namespace Microsoft.Build.CommandLine
                         Console.WriteLine($"\t\t\t\t\"{metadatum.Name}\": \"{metadatum.EvaluatedValue}\",");
                     }
 
+                    foreach (string metadatumName in FileUtilities.ItemSpecModifiers.All)
+                    {
+                        Console.WriteLine($"\t\t\t\t\"{metadatumName}\": \"{item.GetMetadataValue(metadatumName)}\",");
+                    }
+
                     Console.WriteLine("\t\t\t},");
                 }
+
+                Console.WriteLine("\t\t],");
             }
 
             Console.WriteLine("\t},");
@@ -2383,7 +2397,7 @@ namespace Microsoft.Build.CommandLine
         /// performs deeper error checking on the switches and their parameters.
         /// </summary>
         /// <returns>true, if build can be invoked</returns>
-        private static bool ProcessCommandLineSwitches(
+        internal static bool ProcessCommandLineSwitches(
             CommandLineSwitches switchesFromAutoResponseFile,
             CommandLineSwitches switchesNotFromAutoResponseFile,
             ref string projectFile,
@@ -2640,6 +2654,7 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation],
                         groupedFileLoggerParameters,
+                        getProperty.Length + getItem.Length + getTargetResult.Length == 0,
                         out distributedLoggerRecords,
                         out verbosity,
                         out originalVerbosity,
@@ -3513,6 +3528,7 @@ namespace Microsoft.Build.CommandLine
             string[] binaryLoggerParameters,
             string[] profileEvaluationParameters,
             string[][] groupedFileLoggerParameters,
+            bool canAdjustVerbosity,
             out List<DistributedLoggerRecord> distributedLoggerRecords,
             out LoggerVerbosity verbosity,
             out LoggerVerbosity originalVerbosity,
@@ -3533,7 +3549,7 @@ namespace Microsoft.Build.CommandLine
             var loggers = new List<ILogger>();
 
             var outVerbosity = verbosity;
-            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref outVerbosity);
+            ProcessBinaryLogger(binaryLoggerParameters, loggers, canAdjustVerbosity, ref outVerbosity);
 
             ProcessLoggerSwitch(loggerSwitchParameters, loggers, verbosity);
 
@@ -3649,7 +3665,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, List<ILogger> loggers, ref LoggerVerbosity verbosity)
+        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, List<ILogger> loggers, bool canAdjustVerbosity, ref LoggerVerbosity verbosity)
         {
             if (binaryLoggerParameters == null || binaryLoggerParameters.Length == 0)
             {
@@ -3663,7 +3679,7 @@ namespace Microsoft.Build.CommandLine
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.
             // Since we always want task inputs for a binary logger, set it to diagnostic.
-            verbosity = LoggerVerbosity.Diagnostic;
+            verbosity = canAdjustVerbosity ? LoggerVerbosity.Diagnostic : verbosity;
 
             loggers.Add(logger);
         }
