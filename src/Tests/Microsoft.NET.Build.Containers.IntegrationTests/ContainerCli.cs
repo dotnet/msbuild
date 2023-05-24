@@ -32,13 +32,11 @@ static class ContainerCli
 
     private static RunExeCommand CreateCommand(ITestOutputHelper log, string command, string[] args)
     {
-        bool isPodman = _isPodman.Value;
-
-        string commandPath = _isPodman.Value ? "podman" : "docker";
+        string commandPath = IsPodman ? "podman" : "docker";
 
         // The local registry is not accessible via https.
         // Podman doesn't want to use it unless we set 'tls-verify' to 'false'.
-        if (isPodman && (command == "push" || command == "pull"))
+        if (IsPodman && (command == "push" || command == "pull"))
         {
             if (args.Length > 0)
             {
@@ -53,21 +51,6 @@ static class ContainerCli
         return new RunExeCommand(log, commandPath, new[] { command }.Concat(args).ToArray());
     }
 
-    private static readonly Lazy<bool> _isPodman = new(() =>
-    {
-        try
-        {
-            ProcessStartInfo psi = new("podman", "version")
-            {
-                  RedirectStandardOutput = true,
-                  RedirectStandardError = true
-            };
-            using var process = Process.Start(psi)!;
-            process.WaitForExit();
-            return process.ExitCode == 0;
-        }
-        catch
-        { }
-        return false;
-    });
+    private static readonly Lazy<bool> _isPodman =
+      new(() => new DockerCli(logger: s => { }).GetCommand() == DockerCli.PodmanCommand);
 }

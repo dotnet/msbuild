@@ -158,7 +158,7 @@
     <comment>{StrBegin="CONTAINER3002: "}</comment>
   </data>
   <data name="DockerProcessCreationFailed" xml:space="preserve">
-    <value>CONTAINER3001: Failed creating docker process.</value>
+    <value>CONTAINER3001: Failed creating {0} process.</value>
     <comment>{StrBegin="CONTAINER3001: "}</comment>
   </data>
   <data name="ImagePullNotSupported" xml:space="preserve">

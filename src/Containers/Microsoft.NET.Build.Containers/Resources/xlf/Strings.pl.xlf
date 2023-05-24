@@ -53,8 +53,8 @@
         <note>{StrBegin="CONTAINER3002: "}</note>
       </trans-unit>
       <trans-unit id="DockerProcessCreationFailed">
-        <source>CONTAINER3001: Failed creating docker process.</source>
-        <target state="translated">CONTAINER3001: nie można utworzyć procesu platformy Docker.</target>
+        <source>CONTAINER3001: Failed creating {0} process.</source>
+        <target state="new">CONTAINER3001: Failed creating {0} process.</target>
         <note>{StrBegin="CONTAINER3001: "}</note>
       </trans-unit>
       <trans-unit id="EmptyOrWhitespacePropertyIgnored">

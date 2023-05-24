@@ -7,26 +7,47 @@ namespace Microsoft.NET.Build.Containers.UnitTests;
 
 public class DockerAvailableTheoryAttribute : TheoryAttribute
 {
-    private static bool IsAvailable = new DockerCli(Console.WriteLine).IsAvailable();
-    public DockerAvailableTheoryAttribute()
+    public DockerAvailableTheoryAttribute(bool skipPodman = false)
     {
-        if (!IsAvailable)
+        if (!DockerCliStatus.IsAvailable)
         {
             base.Skip = "Skipping test because Docker is not available on this host.";
+        }
+
+        if (skipPodman && DockerCliStatus.Command == DockerCli.PodmanCommand)
+        {
+            base.Skip = $"Skipping test with {DockerCliStatus.Command} cli.";
         }
     }
 }
 
 public class DockerAvailableFactAttribute : FactAttribute
 {
-    // tiny optimization - since there are many instances of this attribute we should only get
-    // the daemon status once
-    private static bool IsAvailable = new DockerCli(Console.WriteLine).IsAvailable();
-    public DockerAvailableFactAttribute()
+    public DockerAvailableFactAttribute(bool skipPodman = false)
     {
-        if (!IsAvailable)
+        if (!DockerCliStatus.IsAvailable)
         {
             base.Skip = "Skipping test because Docker is not available on this host.";
         }
+
+        if (skipPodman && DockerCliStatus.Command == DockerCli.PodmanCommand)
+        {
+            base.Skip = $"Skipping test with {DockerCliStatus.Command} cli.";
+        }
+    }
+}
+
+// tiny optimization - since there are many instances of this attribute we should only get
+// the daemon status once
+file static class DockerCliStatus
+{
+    public static readonly bool IsAvailable;
+    public static readonly string? Command;
+
+    static DockerCliStatus()
+    {
+        DockerCli cli = new(Console.WriteLine);
+        IsAvailable = cli.IsAvailable();
+        Command = cli.GetCommand();
     }
 }

@@ -13,7 +13,7 @@ public class DaemonTestsCollection
 [Collection("Daemon Tests")]
 public class DockerDaemonTests
 {
-    [DockerAvailableFact]
+    [DockerAvailableFact(skipPodman: true)] // podman is a local cli not meant for connecting to remote Docker daemons.
     public async Task Can_detect_when_no_daemon_is_running() {
         // mimic no daemon running by setting the DOCKER_HOST to a nonexistent socket
         try {
