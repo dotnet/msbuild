@@ -18,6 +18,8 @@ internal sealed class DockerCli : ILocalRegistry
     public const string DockerCommand = "docker";
     public const string PodmanCommand = "podman";
 
+    private const string Commands = $"{DockerCommand}/{PodmanCommand}";
+
     private readonly Action<string> logger;
     private string? commandPath;
 
@@ -44,7 +46,7 @@ internal sealed class DockerCli : ILocalRegistry
         string? commandPath = await GetCommandPathAsync(cancellationToken);
         if (commandPath is null)
         {
-            throw new NotImplementedException(Resource.FormatString(Strings.DockerProcessCreationFailed, $"{DockerCommand}/{PodmanCommand}"));
+            throw new NotImplementedException(Resource.FormatString(Strings.DockerProcessCreationFailed, Commands));
         }
 
         // call `docker load` and get it ready to receive input
@@ -80,10 +82,11 @@ internal sealed class DockerCli : ILocalRegistry
 
     public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken)
     {
+        bool commandPathWasUnknown = this.commandPath is null; // avoid running the version command twice.
         string? commandPath = await GetCommandPathAsync(cancellationToken);
         if (commandPath is null)
         {
-            logger($"Cannot find {DockerCommand}/{PodmanCommand} executable.");
+            logger($"Cannot find {Commands} executable.");
             return false;
         }
 
@@ -112,7 +115,7 @@ internal sealed class DockerCli : ILocalRegistry
                     }
                 }
                 case PodmanCommand:
-                    return true;
+                    return commandPathWasUnknown || await TryRunVersionCommandAsync(PodmanCommand, cancellationToken);
                 default:
                     throw new NotImplementedException($"{commandPath} is an unknown command.");
             }
@@ -253,30 +256,37 @@ internal sealed class DockerCli : ILocalRegistry
         // We try to find podman first so we can identify those systems to be using podman.
         foreach (var command in new[] { PodmanCommand, DockerCommand })
         {
-            try
+            if (await TryRunVersionCommandAsync(command, cancellationToken))
             {
-                ProcessStartInfo psi = new(command, "version")
-                {
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                };
-                using var process = Process.Start(psi)!;
-                await process.WaitForExitAsync(cancellationToken);
-                if (process.ExitCode == 0)
-                {
-                    commandPath = command;
-                    break;
-                }
+                commandPath = command;
+                break;
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch
-            { }
         }
 
         return commandPath;
+    }
+
+    private async Task<bool> TryRunVersionCommandAsync(string command, CancellationToken cancellationToken)
+    {
+        try
+        {
+            ProcessStartInfo psi = new(command, "version")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+            using var process = Process.Start(psi)!;
+            await process.WaitForExitAsync(cancellationToken);
+            return process.ExitCode == 0;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
 }

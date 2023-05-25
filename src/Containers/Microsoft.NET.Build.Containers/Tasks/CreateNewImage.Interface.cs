@@ -48,7 +48,6 @@ partial class CreateNewImage
     /// <summary>
     /// The kind of local registry to use, if any.
     /// </summary>
-    [Required]
     public string LocalRegistry { get; set; }
 
     /// <summary>
