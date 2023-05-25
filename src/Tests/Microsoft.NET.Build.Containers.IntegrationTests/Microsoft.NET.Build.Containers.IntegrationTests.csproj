@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Tasks.Core"  Version="$(MicrosoftBuildTasksCorePackageVersion)"/>
     <PackageReference Include="Microsoft.Build.Utilities.Core"  Version="$(MicrosoftBuildUtilitiesCorePackageVersion)"/>
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkVersion)"/>
