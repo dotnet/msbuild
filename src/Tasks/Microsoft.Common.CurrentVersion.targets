@@ -1300,7 +1300,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                         AssignLinkMetadata
 
-       For items of a certain set of whitelisted types, make sure that
+       For items of a certain set of allowlisted types, make sure that
        if they are defined in a file other than the project file, that
        they have "Link" metadata set to an appropriate default.
     ============================================================

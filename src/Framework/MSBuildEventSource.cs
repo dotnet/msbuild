@@ -316,7 +316,7 @@ namespace Microsoft.Build.Eventing
         }
 
         /// <summary>
-        /// Call this method to notify listeners of profiling for the method that removes blacklisted references from the reference table. It puts primary and dependency references in invalid file lists.
+        /// Call this method to notify listeners of profiling for the method that removes denylisted references from the reference table. It puts primary and dependency references in invalid file lists.
         /// </summary>
         [Event(35, Keywords = Keywords.All)]
         public void RarRemoveReferencesMarkedForExclusionStart()
