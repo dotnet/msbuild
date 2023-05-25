@@ -4541,7 +4541,7 @@ namespace Microsoft.Build.Evaluation
                     case int i:
                         arg = i;
                         return true;
-                    case string s when int.TryParse(s, out arg):
+                    case string s when int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture.NumberFormat, out arg):
                         return true;
                 }
 
@@ -4570,7 +4570,7 @@ namespace Microsoft.Build.Evaluation
                     case int i:
                         arg = i;
                         return true;
-                    case string s when long.TryParse(s, out arg):
+                    case string s when long.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture.NumberFormat, out arg):
                         return true;
                 }
 
@@ -4591,7 +4591,7 @@ namespace Microsoft.Build.Evaluation
                     case int i:
                         arg = i;
                         return true;
-                    case string str when double.TryParse(str, out arg):
+                    case string str when double.TryParse(str, NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out arg):
                         return true;
                     default:
                         arg = 0;
@@ -4728,7 +4728,7 @@ namespace Microsoft.Build.Evaluation
 
             private static bool IsFloatingPointRepresentation(object value)
             {
-                return value is double || (value is string str && double.TryParse(str, out double _));
+                return value is double || (value is string str && double.TryParse(str, NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out double _));
             }
 
             private static bool TryExecuteArithmeticOverload(object[] args, Func<long, long, long> integerOperation, Func<double, double, double> realOperation, out object resultValue)
