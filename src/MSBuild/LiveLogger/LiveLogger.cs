@@ -611,7 +611,7 @@ internal sealed class LiveLogger : INodeLogger
     /// Render Nodes section.
     /// It shows what all build nodes do.
     /// </summary>
-    private void DisplayNodes()
+    internal void DisplayNodes()
     {
         NodesFrame newFrame = new NodesFrame(_nodes, width: Terminal.Width, height: Terminal.Height);
 

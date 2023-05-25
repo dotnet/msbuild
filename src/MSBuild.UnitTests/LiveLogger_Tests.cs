@@ -245,5 +245,16 @@ namespace Microsoft.Build.UnitTests
         }
 
         #endregion
+
+        [Fact]
+        public void DisplayNodesShowsCurrent()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, async () =>
+            {
+                _liveLogger.DisplayNodes();
+
+                await Verify(_outputWriter.ToString(), _settings);
+            });
+        }
     }
 }
