@@ -51,6 +51,8 @@ public sealed class ProjectInitializer
         // test setup parameters so that we can load the props/targets/tasks
         props["ContainerCustomTasksAssembly"] = Path.GetFullPath(Path.Combine(".", "Microsoft.NET.Build.Containers.dll"));
         props["_IsTest"] = "true";
+        // default here, can be overridden by tests if needed
+        props["NETCoreSdkPortableRuntimeIdentifier"] = "linux-x64";
 
         var safeBinlogFileName = projectName.Replace(" ", "_").Replace(":", "_").Replace("/", "_").Replace("\\", "_").Replace("*", "_");
         var loggers = new List<ILogger>
