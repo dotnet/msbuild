@@ -371,6 +371,38 @@ namespace ManifestReaderTests
         }
 
         [Fact]
+        public void ItThrowsExceptionIfWorkloadSetJsonFilesHaveDuplicateManifests()
+        {
+            Initialize("8.0.200");
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockManifest(_manifestRoot, "8.0.200", "android", "33.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "android", "33.0.2-rc.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "android", "33.0.2", true);
+
+
+            var workloadSetDirectory = Path.Combine(_manifestRoot, "8.0.200", "workloadsets", "8.0.200");
+            Directory.CreateDirectory(workloadSetDirectory);
+            File.WriteAllText(Path.Combine(workloadSetDirectory, "1.workloadset.json"), """
+                {
+                    "ios": "11.0.2/8.0.100"
+                }
+                """);
+            File.WriteAllText(Path.Combine(workloadSetDirectory, "2.workloadset.json"), """
+                {
+                  "android": "33.0.2-rc.1/8.0.200",
+                  "ios": "11.0.2/8.0.100"
+                }
+                """);
+
+            Assert.Throws<ArgumentException>(() =>
+                new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null));
+        }
+
+        [Fact]
         public void ItShouldReturnManifestsFromTestHook()
         {
             Initialize();

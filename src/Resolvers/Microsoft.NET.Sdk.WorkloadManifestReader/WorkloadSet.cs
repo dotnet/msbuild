@@ -44,7 +44,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     SdkFeatureBand manifestFeatureBand;
                     var parts = manifest.Value.Split('/');
 
-                    string manifestVersionString = (parts[0]);
+                    string manifestVersionString = parts[0];
                     if (!FXVersion.TryParse(manifestVersionString, out FXVersion version))
                     {
                         throw new FormatException(String.Format(Strings.InvalidVersionForWorkload, manifest.Key, manifestVersionString));
