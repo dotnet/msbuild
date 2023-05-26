@@ -277,6 +277,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             => AppDomain
                 .CurrentDomain
                 .GetAssemblies()
+                // TaskHost is copying code files - so has a copy of types with identical names.
+                .Where(a => !a.FullName!.StartsWith("MSBuildTaskHost", StringComparison.CurrentCultureIgnoreCase))
                 .SelectMany(s => s.GetTypes())
                 .Where(BuildExceptionSerializationHelper.IsSupportedExceptionType)
                 .Select(t => new object[] { t });
