@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
+using System;
 using System.IO;
 using System.Linq;
 using Microsoft.NET.TestFramework;
@@ -298,6 +299,37 @@ namespace Microsoft.NET.Publish.Tests
             CheckPublishOutput(publishDir1, new string[] { ".dll", ".deps.json", ".runtimeconfig.json", ".exe", ".pdb" }
                 .Select(ending => newName + ending), expectedSingleExeFiles.Concat(expectedNonSingleExeFiles));
             CheckPublishOutput(publishDir2, expectedSingleExeFiles, expectedNonSingleExeFiles);
+        }
+
+        [Theory]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
+        public void GeneratePublishDependencyFile_runs_incrementally(string targetFramework)
+        {
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            var testProject = new TestProject()
+            {
+                Name = "PublishDependencyFileIncremental",
+                TargetFrameworks = targetFramework,
+                IsExe = true,
+                RuntimeIdentifier = rid
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", "13.0.1", publish: "false"));
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+
+            var publishCommand = new PublishCommand(testAsset);
+            var publishDir = publishCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: rid).FullName;
+            var depsJsonPath = Path.Combine(publishDir, testProject.Name + ".deps.json");
+
+            publishCommand.Execute().Should().Pass();
+            DateTime depsJsonFirstModifiedTime = File.GetLastWriteTimeUtc(depsJsonPath);
+
+            WaitForUtcNowToAdvance();
+
+            publishCommand.Execute().Should().Pass();
+            DateTime depsJsonSecondModifiedTime = File.GetLastWriteTimeUtc(depsJsonPath);
+
+            depsJsonSecondModifiedTime.Should().Be(depsJsonFirstModifiedTime);
         }
 
         private void CheckPublishOutput(string publishDir, IEnumerable<string> expectedFiles, IEnumerable<string> unexpectedFiles)

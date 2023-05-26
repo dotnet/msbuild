@@ -919,11 +919,37 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
   </Target>
 
+  <Target Name="_GenerateSingleFileBundleInputCache">
+    <ItemGroup>
+      <_GenerateSingleFileBundlePropertyInputsCacheToHash Include="$(PublishedSingleFilePath)" />
+      <_GenerateSingleFileBundlePropertyInputsCacheToHash Include="$(TraceSingleFileBundler)" />
+      <_GenerateSingleFileBundlePropertyInputsCacheToHash Include="$(IncludeSymbolsInSingleFile)" />
+      <_GenerateSingleFileBundlePropertyInputsCacheToHash Include="$(IncludeAllContentForSelfExtract)" />
+      <_GenerateSingleFileBundlePropertyInputsCacheToHash Include="$(IncludeNativeLibrariesForSelfExtract)" />
+      <_GenerateSingleFileBundlePropertyInputsCacheToHash Include="$(EnableCompressionInSingleFile)" />
+      <_GenerateSingleFileBundlePropertyInputsCacheToHash Include="$(PublishedSingleFileName)" />
+      <_GenerateSingleFileBundlePropertyInputsCacheToHash Include="$(RuntimeIdentifier)" />
+      <_GenerateSingleFileBundlePropertyInputsCacheToHash Include="$(PublishDir)" />
+      <_GenerateSingleFileBundlePropertyInputsCacheToHash Include="$(_TargetFrameworkVersionWithoutV)" />
+      <_GenerateSingleFileBundlePropertyInputsCacheToHash Include="@(FilesToBundle)" />
+    </ItemGroup>
+
+    <Hash ItemsToHash="@(_GenerateSingleFileBundlePropertyInputsCacheToHash)">
+      <Output TaskParameter="HashResult" PropertyName="_GenerateSingleFileBundlePropertyInputsCacheHash" />
+    </Hash>
+
+    <WriteLinesToFile
+      Lines="$(_GenerateSingleFileBundlePropertyInputsCacheHash)"
+      File="$(_GenerateSingleFileBundlePropertyInputsCache)"
+      Overwrite="true"
+      WriteOnlyWhenDifferent="true" />
+  </Target>
+
   <UsingTask TaskName="GenerateBundle" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="GenerateSingleFileBundle"
           Condition="'$(PublishSingleFile)' == 'true'"
-          DependsOnTargets="_ComputeFilesToBundle;PrepareForBundle"
-          Inputs="@(FilesToBundle)"
+          DependsOnTargets="_ComputeFilesToBundle;PrepareForBundle;_GenerateSingleFileBundleInputCache"
+          Inputs="@(FilesToBundle);$(_GenerateSingleFileBundlePropertyInputsCache)"
           Outputs="$(PublishedSingleFilePath)">
 
     <PropertyGroup>
@@ -957,6 +983,50 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <Target Name="_ComputeIntermediateDepsFilePath">
+    <PropertyGroup>
+      <!-- IntermediateDepsFilePath is the location where the deps.json file is originally created -->
+      <IntermediateDepsFilePath Condition=" '$(PublishDepsFilePath)' != ''">$(PublishDepsFilePath)</IntermediateDepsFilePath >
+      <IntermediateDepsFilePath Condition=" '$(PublishDepsFilePath)' == ''">$(IntermediateOutputPath)$(ProjectDepsFileName)</IntermediateDepsFilePath >
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="_GeneratePublishDependencyFileInputCache"
+          DependsOnTargets="_ComputeIntermediateDepsFilePath">
+    <ItemGroup>
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(PublishDepsFilePath)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(PublishSingleFile)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(MSBuildProjectFullPath)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(ProjectAssetsFile)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(IntermediateDepsFilePath)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(TargetFramework)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(AssemblyName)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(TargetExt)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(Version)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(IncludeMainProjectInDepsFile)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(RuntimeIdentifier)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(MicrosoftNETPlatformLibrary)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(SelfContained)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(IncludeFileVersionsInDependencyFile)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(BundledRuntimeIdentifierGraphFile)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(IncludeProjectsNotInAssetsFileInDepsFile)" />
+    </ItemGroup>
+
+    <Hash ItemsToHash="@(_GeneratePublishDependencyFilePropertyInputsCacheToHash)">
+      <Output TaskParameter="HashResult" PropertyName="_GeneratePublishDependencyFilePropertyInputsCacheHash" />
+    </Hash>
+
+    <WriteLinesToFile
+      Lines="$(_GeneratePublishDependencyFilePropertyInputsCacheHash)"
+      File="$(_GeneratePublishDependencyFilePropertyInputsCache)"
+      Overwrite="True"
+      WriteOnlyWhenDifferent="True" />
+
+    <ItemGroup>
+      <FileWrites Include="$(_GeneratePublishDependencyFilePropertyInputsCache)" />
+    </ItemGroup>
+  </Target>
+
   <!--
     ============================================================
     _GeneratePublishDependencyFile
@@ -965,25 +1035,27 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="GeneratePublishDependencyFile"
           DependsOnTargets="_ComputeUseBuildDependencyFile;
+                            _ComputeIntermediateDepsFilePath;
                             _DefaultMicrosoftNETPlatformLibrary;
                             _HandlePackageFileConflicts;
                             _HandlePackageFileConflictsForPublish;
                             _ComputeReferenceAssemblies;
                             _ComputeUserRuntimeAssemblies;
                             ResolveRuntimePackAssets;
-                            _ComputePackageReferencePublish"
-          Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true' and '$(PublishAot)' != 'true'">
+                            _ComputePackageReferencePublish;
+                            _GeneratePublishDependencyFileInputCache"
+          Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true' and '$(PublishAot)' != 'true'"
+          Inputs="$(ProjectAssetsFile);$(ProjectAssetsCacheFile);$(MSBuildAllProjects);$(_GeneratePublishDependencyFilePropertyInputsCache)"
+          Outputs="$(IntermediateDepsFilePath)">
 
     <PropertyGroup>
-      <!-- IntermediateDepsFilePath is the location where the deps.json file is originally created
-           PublishDepsFilePath is the location where the deps.json resides when published
-           PublishDepsFilePath is empty (by default) for PublishSingleFile, since the deps.json file is embedde within the single-file bundle -->
-      <IntermediateDepsFilePath Condition=" '$(PublishDepsFilePath)' != ''">$(PublishDepsFilePath)</IntermediateDepsFilePath >
-      <IntermediateDepsFilePath Condition=" '$(PublishDepsFilePath)' == ''">$(IntermediateOutputPath)$(ProjectDepsFileName)</IntermediateDepsFilePath >
+      <!-- PublishDepsFilePath is the location where the deps.json resides when published
+           PublishDepsFilePath is empty (by default) for PublishSingleFile, since the deps.json file is embedded within the single-file bundle -->
       <PublishDepsFilePath Condition=" '$(PublishDepsFilePath)' == '' And '$(PublishSingleFile)' != 'true'">$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>
       <_IsSingleFilePublish Condition="'$(PublishSingleFile)' == ''">false</_IsSingleFilePublish>
       <_IsSingleFilePublish Condition="'$(PublishSingleFile)' != ''">$(PublishSingleFile)</_IsSingleFilePublish>
     </PropertyGroup>
+
     <ItemGroup>
       <ResolvedCompileFileDefinitions Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' == 'Reference'" />
       <RuntimeTargetsCopyLocalItems Remove="@(_PublishConflictPackageFiles)" Condition="'%(_PublishConflictPackageFiles.ConflictItemType)' != 'Reference'" />
