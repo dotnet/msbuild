@@ -185,6 +185,7 @@
     <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
     <Compile Include="PerformanceLogEventListener.cs" />
+    <Compile Include="SerializationContractInitializer.cs" />
     <Compile Include="XMake.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
@@ -23,6 +24,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class BinaryTranslator_Tests
     {
+        static BinaryTranslator_Tests()
+        {
+            Microsoft.Build.CommandLine.SerializationContractInitializer.RegisterExcpetions();
+        }
+
         /// <summary>
         /// Tests the SerializationMode property
         /// </summary>
@@ -186,7 +192,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ArgumentNullException deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDotNet(ref deserializedValue);
 
-            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
         }
 
         /// <summary>
@@ -201,7 +207,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ArgumentNullException deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDotNet(ref deserializedValue);
 
-            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
         }
 
         [Fact]
@@ -213,7 +219,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Exception deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
 
-            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
         }
 
         [Fact]
@@ -235,7 +241,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Exception deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
 
-            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
         }
 
         [Fact]
@@ -264,11 +270,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Exception deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
 
-            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
         }
 
         public static IEnumerable<object[]> GetBuildExceptionsAsTestData()
-            => BuildExceptionSerializationHelper.EnumerateBuildExceptionTypes().Select(t => new object[] { t });
+            => AppDomain
+                .CurrentDomain
+                .GetAssemblies()
+                .SelectMany(s => s.GetTypes())
+                .Where(BuildExceptionSerializationHelper.IsSupportedExceptionType)
+                .Select(t => new object[] { t });
 
         [Theory]
         [MemberData(nameof(GetBuildExceptionsAsTestData))]
@@ -291,7 +302,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Exception deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
 
-            Assert.True(TranslationHelpers.CompareExceptions(remote, deserializedValue, true), $"Exception type {exceptionType.FullName} not properly de/serialized");
+            Assert.True(TranslationHelpers.CompareExceptions(remote, deserializedValue, out string diffReason, true), $"Exception type {exceptionType.FullName} not properly de/serialized: {diffReason}");
         }
 
         [Fact]
@@ -312,7 +323,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Exception deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
 
-            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, true));
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason, true), diffReason);
         }
 
         /// <summary>

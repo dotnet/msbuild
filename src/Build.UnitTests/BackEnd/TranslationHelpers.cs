@@ -86,8 +86,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Compares two exceptions.
         /// </summary>
-        internal static bool CompareExceptions(Exception left, Exception right, bool detailed = false)
+        internal static bool CompareExceptions(Exception left, Exception right, out string diffReason, bool detailed = false)
         {
+            diffReason = null;
             if (ReferenceEquals(left, right))
             {
                 return true;
@@ -95,21 +96,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             if ((left == null) ^ (right == null))
             {
+                diffReason = "One exception is null and the other is not.";
                 return false;
             }
 
             if (left.Message != right.Message)
             {
+                diffReason = $"Exception messages are different ({left.Message} vs {right.Message}).";
                 return false;
             }
 
             if (left.StackTrace != right.StackTrace)
             {
+                diffReason = $"Exception stack traces are different ({left.StackTrace} vs {right.StackTrace}).";
                 return false;
             }
 
-            if (!CompareExceptions(left.InnerException, right.InnerException, detailed))
+            if (!CompareExceptions(left.InnerException, right.InnerException, out diffReason, detailed))
             {
+                diffReason = "Inner exceptions are different: " + diffReason;
                 return false;
             }
 
@@ -117,6 +122,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 if (left.GetType() != right.GetType())
                 {
+                    diffReason = $"Exception types are different ({left.GetType().FullName} vs {right.GetType().FullName}).";
                     return false;
                 }
 
@@ -132,11 +138,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                     if (leftProp == null && rightProp != null)
                     {
+                        diffReason = $"Property {prop.Name} is null on left but not on right.";
                         return false;
                     }
 
                     if (leftProp != null && !prop.GetValue(left, null).Equals(prop.GetValue(right, null)))
                     {
+                        diffReason = $"Property {prop.Name} is different ({prop.GetValue(left, null)} vs {prop.GetValue(rightProp, null)}).";
                         return false;
                     }
                 }

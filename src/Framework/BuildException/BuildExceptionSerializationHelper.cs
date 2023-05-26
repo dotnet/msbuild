@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
+using System.Threading;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
@@ -30,7 +31,7 @@ namespace Microsoft.Build.BackEnd
             internal Func<Exception, IDictionary<string, string?>?> RemoteStateExtractor { get; }
         }
 
-        private static readonly Dictionary<string, BuildExceptionConstructionCallbacks> s_exceptionFactories = FetchExceptionsConstructors();
+        private static Dictionary<string, BuildExceptionConstructionCallbacks>? s_exceptionFactories;
 
         private static readonly BuildExceptionConstructionCallbacks s_defaultFactory =
             new BuildExceptionConstructionCallbacks(
@@ -98,19 +99,22 @@ namespace Microsoft.Build.BackEnd
                     type.BaseType!.Name.Equals(nameof(BuildExceptionBase)));
         }
 
-        internal static IEnumerable<Type> EnumerateBuildExceptionTypes()
-            => AppDomain
-                .CurrentDomain
-                .GetAssemblies()
-                .SelectMany(s => s.GetTypes())
-                .Where(IsSupportedExceptionType);
+        internal static void InitializeSerializationContract(params Type[] exceptionTypesWhitelist)
+        {
+            InitializeSerializationContract((IEnumerable<Type>)exceptionTypesWhitelist);
+        }
 
-        private static Dictionary<string, BuildExceptionConstructionCallbacks> FetchExceptionsConstructors()
+        internal static void InitializeSerializationContract(IEnumerable<Type> exceptionTypesWhitelist)
         {
             var exceptionFactories = new Dictionary<string, BuildExceptionConstructionCallbacks>();
 
-            foreach (Type exceptionType in EnumerateBuildExceptionTypes())
+            foreach (Type exceptionType in exceptionTypesWhitelist)
             {
+                if (!IsSupportedExceptionType(exceptionType))
+                {
+                    EscapeHatches.ThrowInternalError($"Type {exceptionType.FullName} is not recognized as a build exception type.");
+                }
+
                 Func<Exception, IDictionary<string, string?>?>? remoteStateExtractor =
                     GetRemoteStateExtractor(exceptionType);
 
@@ -166,7 +170,10 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            return exceptionFactories;
+            if (Interlocked.Exchange(ref s_exceptionFactories, exceptionFactories) != null)
+            {
+                EscapeHatches.ThrowInternalError("Serialization contract was already initialized.");
+            }
         }
 
         internal static string GetExceptionSerializationKey(Type exceptionType)
@@ -176,13 +183,17 @@ namespace Microsoft.Build.BackEnd
 
         private static BuildExceptionConstructionCallbacks CreateExceptionFactory(string serializationType)
         {
-            BuildExceptionConstructionCallbacks? factory;
-            if (!s_exceptionFactories.TryGetValue(serializationType, out factory))
+            BuildExceptionConstructionCallbacks? factory = null;
+            if (s_exceptionFactories == null)
             {
-                factory = s_defaultFactory;
+                EscapeHatches.ThrowInternalError("Serialization contract was not initialized.");
+            }
+            else
+            {
+                s_exceptionFactories.TryGetValue(serializationType, out factory);
             }
 
-            return factory;
+            return factory ?? s_defaultFactory;
         }
 
         internal static void WriteExceptionToTranslator(ITranslator translator, Exception exception)
