@@ -838,10 +838,11 @@ namespace Microsoft.Build.UnitTests
         /// predefined amount of time. The first execution may time out, but all following ones won't. It is expected
         /// that all following executions return success.
         /// </remarks>
-        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/8750")]
+        //[Theory(Skip = "https://github.com/dotnet/msbuild/issues/8750")]
+        [Theory]
         [InlineData(1, 1, 1, -1)] // Normal case, no repeat.
         [InlineData(3, 1, 1, -1)] // Repeat without timeout.
-        [InlineData(3, 10000, 1, 1000)] // Repeat with timeout.
+        [InlineData(3, 10001, 1, 1000)] // Repeat with timeout.
         public void ToolTaskThatTimeoutAndRetry(int repeats, int initialDelay, int followupDelay, int timeout)
         {
             using var env = TestEnvironment.Create(_output);
