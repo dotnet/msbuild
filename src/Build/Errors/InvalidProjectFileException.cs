@@ -125,7 +125,7 @@ namespace Microsoft.Build.Exceptions
             info.AddValue("hasBeenLogged", hasBeenLogged);
         }
 
-        protected override IDictionary<string, string> FlushCustomState()
+        protected internal override IDictionary<string, string> FlushCustomState()
         {
             return new Dictionary<string, string>()
             {
@@ -141,7 +141,7 @@ namespace Microsoft.Build.Exceptions
             };
         }
 
-        protected override void InitializeCustomState(IDictionary<string, string> state)
+        protected internal override void InitializeCustomState(IDictionary<string, string> state)
         {
             file = state[nameof(file)];
             lineNumber = int.Parse(state[nameof(lineNumber)]);

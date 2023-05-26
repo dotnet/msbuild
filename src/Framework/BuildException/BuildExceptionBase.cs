@@ -17,22 +17,22 @@ public abstract class BuildExceptionBase : Exception
     private string? _remoteTypeName;
     private string? _remoteStackTrace;
 
-    protected BuildExceptionBase()
+    protected internal BuildExceptionBase()
         : base()
     { }
 
-    protected BuildExceptionBase(string message)
+    protected internal BuildExceptionBase(string message)
         : base(message)
     { }
 
-    protected BuildExceptionBase(
+    protected internal BuildExceptionBase(
         string message,
         Exception? inner)
         : base(message, inner)
     { }
 
     // This is needed as soon as we allow opt out of the non-BinaryFormatter serialization
-    protected BuildExceptionBase(SerializationInfo info, StreamingContext context)
+    protected internal BuildExceptionBase(SerializationInfo info, StreamingContext context)
         : base(info, context)
     { }
 
@@ -40,10 +40,10 @@ public abstract class BuildExceptionBase : Exception
 
     public override string ToString() => string.IsNullOrEmpty(_remoteTypeName) ? base.ToString() : $"{_remoteTypeName}->{base.ToString()}";
 
-    protected virtual void InitializeCustomState(IDictionary<string, string?>? customKeyedSerializedData)
+    protected internal virtual void InitializeCustomState(IDictionary<string, string?>? customKeyedSerializedData)
     { /* This is it. Override for exceptions with custom state */ }
 
-    protected virtual IDictionary<string, string?>? FlushCustomState()
+    protected internal virtual IDictionary<string, string?>? FlushCustomState()
     {
         /* This is it. Override for exceptions with custom state */
         return null;

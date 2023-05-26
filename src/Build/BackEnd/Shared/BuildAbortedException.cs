@@ -75,7 +75,7 @@ namespace Microsoft.Build.Exceptions
             }
         }
 
-        protected override IDictionary<string, string> FlushCustomState()
+        protected internal override IDictionary<string, string> FlushCustomState()
         {
             return new Dictionary<string, string>()
             {
@@ -83,7 +83,7 @@ namespace Microsoft.Build.Exceptions
             };
         }
 
-        protected override void InitializeCustomState(IDictionary<string, string> state)
+        protected internal override void InitializeCustomState(IDictionary<string, string> state)
         {
             ErrorCode = state[nameof(ErrorCode)];
         }
