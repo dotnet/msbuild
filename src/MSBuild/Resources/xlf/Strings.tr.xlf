@@ -541,9 +541,7 @@
                      Example:
                        -verbosity:quiet
 
-                     Note: File loggers' verbosity is set separately by -fileloggerparameters or -flg.
-                     Example:
-                       -flg:v=diag
+                     Note: File loggers' verbosity is set separately by -fileloggerparameters.
 </source>
         <target state="needs-review-translation">  -verbosity:&lt;düzey&gt; Olay günlüğünde bu miktarda bilgi görüntüler.
                      Kullanılabilen ayrıntı düzeyleri: q[uiet], m[inimal],

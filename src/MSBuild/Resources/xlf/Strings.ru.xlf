@@ -540,9 +540,7 @@
                      Example:
                        -verbosity:quiet
 
-                     Note: File loggers' verbosity is set separately by -fileloggerparameters or -flg.
-                     Example:
-                       -flg:v=diag
+                     Note: File loggers' verbosity is set separately by -fileloggerparameters.
 </source>
         <target state="needs-review-translation">  -verbosity:&lt;уровень&gt; Отображать эти сведения в журнале событий.
                      Доступными уровнями детализации являются: q[uiet], m[inimal],
