@@ -106,6 +106,11 @@ namespace Microsoft.Build.BackEnd
 
         internal static void InitializeSerializationContract(IEnumerable<Type> exceptionTypesWhitelist)
         {
+            if (s_exceptionFactories != null)
+            {
+                return;
+            }
+
             var exceptionFactories = new Dictionary<string, BuildExceptionConstructionCallbacks>();
 
             foreach (Type exceptionType in exceptionTypesWhitelist)

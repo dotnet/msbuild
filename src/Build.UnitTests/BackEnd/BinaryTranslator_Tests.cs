@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     {
         static BinaryTranslator_Tests()
         {
-            Microsoft.Build.CommandLine.SerializationContractInitializer.RegisterExcpetions();
+            SerializationContractInitializer.Initialize();
         }
 
         /// <summary>

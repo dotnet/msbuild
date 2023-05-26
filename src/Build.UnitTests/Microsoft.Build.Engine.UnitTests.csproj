@@ -125,9 +125,6 @@
     <Compile Include="..\UnitTests.Shared\RequiresSymbolicLinksFactAttribute.cs">
       <Link>RequiresSymbolicLinksFactAttribute.cs</Link>
     </Compile>
-    <Compile Include="..\MSBuild\SerializationContractInitializer.cs">
-      <Link>BackEnd\SerializationContractInitializer.cs</Link>
-    </Compile>
 
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>

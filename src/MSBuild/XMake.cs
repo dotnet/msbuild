@@ -223,7 +223,7 @@ namespace Microsoft.Build.CommandLine
             // Setup the console UI.
             using AutomaticEncodingRestorer _ = new();
             SetConsoleUI();
-            SerializationContractInitializer.RegisterExcpetions();
+
             DebuggerLaunchCheck();
 
             // Initialize new build telemetry and record start of this build.
