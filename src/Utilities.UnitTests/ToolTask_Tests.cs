@@ -842,7 +842,7 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         [InlineData(1, 1, 1, -1)] // Normal case, no repeat.
         [InlineData(3, 1, 1, -1)] // Repeat without timeout.
-        [InlineData(3, 10001, 1, 1000)] // Repeat with timeout.
+        [InlineData(3, 10000, 1, 1000)] // Repeat with timeout.
         public void ToolTaskThatTimeoutAndRetry(int repeats, int initialDelay, int followupDelay, int timeout)
         {
             using var env = TestEnvironment.Create(_output);
