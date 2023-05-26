@@ -8618,6 +8618,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             rar.ResolvedFiles.Length.ShouldBe(1);
             rar.ResolvedFiles[0].ItemSpec.ShouldBe(refPath);
             rar.ResolvedFiles[0].GetMetadata("FusionName").ShouldBe("System.Candy, Version=8.1.2.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+
+            // The reference is not worth persisting in the per-instance cache.
+            rar._cache.IsDirty.ShouldBeFalse();
         }
 
         [Fact]
