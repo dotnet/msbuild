@@ -40,6 +40,8 @@ public class ContainerHelpersTests
     // Alias 'docker.io' to Docker registry.
     [InlineData("docker.io/ubuntu:jammy", true, DefaultRegistry, "library/ubuntu", "jammy")]
     [InlineData("docker.io/ubuntu/runtime:jammy", true, DefaultRegistry, "ubuntu/runtime", "jammy")]
+    // 'localhost' registry.
+    [InlineData("localhost/ubuntu:jammy", true, "localhost", "ubuntu", "jammy")]
     public void TryParseFullyQualifiedContainerName(string fullyQualifiedName, bool expectedReturn, string expectedRegistry, string expectedImage, string expectedTag)
     {
         Assert.Equal(expectedReturn, ContainerHelpers.TryParseFullyQualifiedContainerName(fullyQualifiedName, out string? containerReg, out string? containerName, out string? containerTag, out string? containerDigest));
