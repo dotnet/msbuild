@@ -7,6 +7,8 @@ namespace Microsoft.NET.Build.Containers.UnitTests;
 
 public class ContainerHelpersTests
 {
+    private const string DefaultRegistry = "registry-1.docker.io";
+
     [Theory]
     // Valid Tests
     [InlineData("mcr.microsoft.com", true)]
@@ -32,7 +34,12 @@ public class ContainerHelpersTests
     [InlineData("mcr.microsoft.com:0/dotnet/runtime", true, "mcr.microsoft.com:0", "dotnet/runtime", null)]
     // We don't allow hosts with missing ports when a port is anticipated
     [InlineData("mcr.microsoft.com:/dotnet/runtime", false, null, null, null)]
-    [InlineData("ubuntu:jammy", true, ContainerHelpers.DefaultRegistry, "ubuntu", "jammy")]
+    // Use default registry when no registry specified.
+    [InlineData("ubuntu:jammy", true, DefaultRegistry, "library/ubuntu", "jammy")]
+    [InlineData("ubuntu/runtime:jammy", true, DefaultRegistry, "ubuntu/runtime", "jammy")]
+    // Alias 'docker.io' to Docker registry.
+    [InlineData("docker.io/ubuntu:jammy", true, DefaultRegistry, "library/ubuntu", "jammy")]
+    [InlineData("docker.io/ubuntu/runtime:jammy", true, DefaultRegistry, "ubuntu/runtime", "jammy")]
     public void TryParseFullyQualifiedContainerName(string fullyQualifiedName, bool expectedReturn, string expectedRegistry, string expectedImage, string expectedTag)
     {
         Assert.Equal(expectedReturn, ContainerHelpers.TryParseFullyQualifiedContainerName(fullyQualifiedName, out string? containerReg, out string? containerName, out string? containerTag, out string? containerDigest));
