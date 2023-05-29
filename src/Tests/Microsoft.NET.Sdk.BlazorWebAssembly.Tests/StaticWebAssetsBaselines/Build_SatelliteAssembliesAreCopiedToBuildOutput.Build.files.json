@@ -881,8 +881,6 @@
   "${OutputPath}\\wwwroot\\_framework\\dotnet.js.gz",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.js",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.js.gz",
-  "${OutputPath}\\wwwroot\\_framework\\dotnet.js",
-  "${OutputPath}\\wwwroot\\_framework\\dotnet.js.gz",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.wasm",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.wasm.gz",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.js",

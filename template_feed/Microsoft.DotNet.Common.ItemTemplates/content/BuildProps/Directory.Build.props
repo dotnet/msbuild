@@ -7,7 +7,7 @@
   <PropertyGroup>
 
 <!--#if useArtifacts -->
-  <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
 <!--#endif-->
 
   </PropertyGroup>
