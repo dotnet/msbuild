@@ -412,7 +412,8 @@ internal sealed class Registry
         HttpResponseMessage patchResponse = await client.SendAsync(patchMessage, cancellationToken).ConfigureAwait(false);
 
         cancellationToken.ThrowIfCancellationRequested();
-        if (patchResponse.StatusCode != HttpStatusCode.Accepted)
+        // Fail the upload if the response code is not Accepted (202) or if uploading to Amazon ECR which returns back Created (201).
+        if (!(patchResponse.StatusCode == HttpStatusCode.Accepted || (IsAmazonECRRegistry && patchResponse.StatusCode == HttpStatusCode.Created)))
         {
             var headers = patchResponse.Headers.ToString();
             var detail = await patchResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
