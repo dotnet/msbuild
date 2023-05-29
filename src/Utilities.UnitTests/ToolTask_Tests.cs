@@ -886,7 +886,7 @@ namespace Microsoft.Build.UnitTests
         /// </remarks>
         private sealed class ToolTaskThatSleeps : ToolTask
         {
-            // PowerShell command to sleep:
+            // Windows command to sleep:
             private readonly string _windowsSleep = "/c start /wait timeout {0}";
 
             // UNIX command to sleep:
@@ -898,7 +898,7 @@ namespace Microsoft.Build.UnitTests
             public ToolTaskThatSleeps()
                 : base()
             {
-                // Determines shell to use: PowerShell for Windows, sh for UNIX-like systems:
+                // Determines shell to use: cmd for Windows, sh for UNIX-like systems:
                 _pathToShell = NativeMethodsShared.IsUnixLike ? "/bin/sh" : "cmd.exe";
             }
 
