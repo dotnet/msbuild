@@ -1,7 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Threading;
+
 using Microsoft.Build.Evaluation;
 
 using Shouldly;
@@ -245,6 +248,32 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             const string value = "10";
             Expander<IProperty, IItem>.Function<IProperty>.TryConvertToDouble(value, out double actual).ShouldBeTrue();
             actual.ShouldBe(10.0);
+        }
+
+        [Fact]
+        public void TryConvertToDoubleGivenStringAndLocale()
+        {
+            const string value = "1,2";
+
+            Thread currentThread = Thread.CurrentThread;
+            CultureInfo originalCulture = currentThread.CurrentCulture;
+
+            try
+            {
+                // English South Africa locale uses ',' as decimal separator.
+                // The invariant culture should be used and "1,2" should be 12.0 not 1.2.
+                var cultureEnglishSouthAfrica = CultureInfo.CreateSpecificCulture("en-ZA");
+                currentThread.CurrentCulture = cultureEnglishSouthAfrica;
+                Expander<IProperty, IItem>.Function<IProperty>.TryConvertToDouble(value, out double actual).ShouldBeTrue();
+                actual.ShouldBe(12.0);
+            }
+            finally
+            {
+                // Restore CultureInfo.
+                currentThread.CurrentCulture = originalCulture;
+                CultureInfo.CurrentCulture = originalCulture;
+                CultureInfo.DefaultThreadCurrentCulture = originalCulture;
+            }
         }
     }
 }
