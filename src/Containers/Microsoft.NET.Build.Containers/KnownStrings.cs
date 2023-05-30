@@ -27,6 +27,8 @@ internal static class KnownStrings
         public static readonly string ContainerBaseTag = nameof(ContainerBaseTag);
 
         public static readonly string ContainerGenerateLabels = nameof(ContainerGenerateLabels);
+
+        public static readonly string ContainerRuntimeIdentifier = nameof(ContainerRuntimeIdentifier);
     }
 
     public static class ErrorCodes
