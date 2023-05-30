@@ -90,10 +90,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             }
             else if (_printRollbackDefinitionOnly)
             {
-                var manifests = _workloadResolver.GetInstalledManifests().ToDictionary(m => m.Id, m => m.Version + "/" + m.ManifestFeatureBand, StringComparer.OrdinalIgnoreCase);
+                var workloadSet = WorkloadSet.FromManifests(_workloadResolver.GetInstalledManifests());
 
                 Reporter.WriteLine("==workloadRollbackDefinitionJsonOutputStart==");
-                Reporter.WriteLine(JsonSerializer.Serialize(manifests, new JsonSerializerOptions() { WriteIndented = true }));
+                Reporter.WriteLine(workloadSet.ToJson());
                 Reporter.WriteLine("==workloadRollbackDefinitionJsonOutputEnd==");
             }
             else
