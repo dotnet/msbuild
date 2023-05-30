@@ -89,9 +89,9 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             int maxInputSize = 2000;
             string input = "";
-            using (var sha1 = System.Security.Cryptography.SHA1.Create())
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
             {
-                var stringBuilder = new System.Text.StringBuilder(sha1.HashSize);
+                var stringBuilder = new System.Text.StringBuilder(sha256.HashSize);
                 MockEngine mockEngine = new();
                 for (int i = 0; i < maxInputSize; i++)
                 {
@@ -106,7 +106,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     Assert.True(hashTask.Execute());
                     string actualHash = hashTask.HashResult;
 
-                    byte[] hash = sha1.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input + '\u2028'));
+                    byte[] hash = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input + '\u2028'));
                     stringBuilder.Clear();
                     foreach (var b in hash)
                     {
