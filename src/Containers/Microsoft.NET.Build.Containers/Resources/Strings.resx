@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -161,8 +161,8 @@
     <value>CONTAINER3001: Failed creating docker process.</value>
     <comment>{StrBegin="CONTAINER3001: "}</comment>
   </data>
-  <data name="DontKnowHowToPullImages" xml:space="preserve">
-    <value>CONTAINER1010: Don't know how to pull images from local daemons at the moment.</value>
+  <data name="ImagePullNotSupported" xml:space="preserve">
+    <value>CONTAINER1010: Pulling images from local Docker daemon is not supported.</value>
     <comment>{StrBegin="CONTAINER1010: "}</comment>
   </data>
   <data name="EmptyOrWhitespacePropertyIgnored" xml:space="preserve">
@@ -184,7 +184,7 @@
     <value>CONTAINER1009: Failed to load image to local Docker daemon. stdout: {0}</value>
     <comment>{StrBegin="CONTAINER1009: "}</comment>
   </data>
-  <data name="InvalidContainerImageName" xml:space="preserve">
+  <data name="InvalidContainerRepository" xml:space="preserve">
     <value>CONTAINER2014: Invalid {0}: {1}.</value>
     <comment>{StrBegin="CONTAINER2014: "}</comment>
   </data>
@@ -232,13 +232,9 @@
     <value>CONTAINER4005: Item '{0}' contains items without metadata 'Value', and they will be ignored.</value>
     <comment>{StrBegin="CONTAINER4005: "}</comment>
   </data>
-  <data name="LocalDaemondNotAvailable" xml:space="preserve">
-    <value>CONTAINER1012: The local daemon is not available, but pushing to a local daemon was requested. Please start the daemon and try again.</value>
+  <data name="LocalDaemonNotAvailable" xml:space="preserve">
+    <value>CONTAINER1012: The local Docker daemon is not available, but pushing to a local Docker daemon was requested. Please start the daemon and try again.</value>
     <comment>{StrBegin="CONTAINER1012: "}</comment>
-  </data>
-  <data name="MissingLayerNode" xml:space="preserve">
-    <value>CONTAINER2006: Tried to get layer information but there is no layer node?</value>
-    <comment>{StrBegin="CONTAINER2006: "}</comment>
   </data>
   <data name="MissingLinkToRegistry" xml:space="preserve">
     <value>CONTAINER2004: Unable to download layer with descriptor '{0}' from registry '{1}' because it does not exist.</value>

@@ -41,7 +41,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
             return !Log.HasLoggedErrors;
         }
         ImageReference sourceImageReference = new(SourceRegistry.Value, BaseImageName, BaseImageTag);
-        var destinationImageReferences = ImageTags.Select(t => new ImageReference(DestinationRegistry.Value, ImageName, t));
+        var destinationImageReferences = ImageTags.Select(t => new ImageReference(DestinationRegistry.Value, Repository, t));
 
         ImageBuilder? imageBuilder;
         if (SourceRegistry.Value is { } registry)
@@ -55,7 +55,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         }
         else
         {
-            throw new NotSupportedException(Resource.GetString(nameof(Strings.DontKnowHowToPullImages)));
+            throw new NotSupportedException(Resource.GetString(nameof(Strings.ImagePullNotSupported)));
         }
 
         if (imageBuilder is null)
@@ -64,7 +64,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
             return !Log.HasLoggedErrors;
         }
 
-        SafeLog("Building image '{0}' with tags {1} on top of base image {2}", ImageName, String.Join(",", ImageTags), sourceImageReference);
+        SafeLog("Building image '{0}' with tags {1} on top of base image {2}", Repository, String.Join(",", ImageTags), sourceImageReference);
 
         Layer newLayer = Layer.FromDirectory(PublishDirectory, WorkingDirectory, imageBuilder.IsWindows);
         imageBuilder.AddLayer(newLayer);
@@ -105,7 +105,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 LocalDocker localDaemon = GetLocalDaemon(msg => Log.LogMessage(msg));
                 if (!(await localDaemon.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
                 {
-                    Log.LogErrorWithCodeFromResources(nameof(Strings.LocalDaemondNotAvailable));
+                    Log.LogErrorWithCodeFromResources(nameof(Strings.LocalDaemonNotAvailable));
                     return false;
                 }
                 try
@@ -167,7 +167,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
             else
             {
                 ContainerHelpers.ParsePortError parsedErrors = (ContainerHelpers.ParsePortError)errors!;
-                
+
                 if (parsedErrors.HasFlag(ContainerHelpers.ParsePortError.MissingPortNumber))
                 {
                     Log.LogErrorWithCodeFromResources(nameof(Strings.MissingPortNumber), port.ItemSpec);

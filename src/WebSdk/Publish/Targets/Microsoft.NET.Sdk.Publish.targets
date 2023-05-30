@@ -30,7 +30,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_DotNetCLIToolTargetsDir Condition=" '$(_DotNetCLIToolTargetsDir)'=='' ">$(MSBuildThisFileDirectory)DotNetCLIToolTargets\</_DotNetCLIToolTargetsDir>
     <_PublishProfilesDir Condition=" '$(_PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</_PublishProfilesDir>
     <_ContainersTargetsDir Condition=" '$(_ContainersTargetsDir)'=='' ">$(MSBuildThisFileDirectory)..\..\..\Containers\build\</_ContainersTargetsDir>
-    
+
     <PublishIISAssets Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
              And '$(_TargetFrameworkVersionWithoutV)' != ''
              AND $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))
@@ -152,8 +152,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   Import the Containers target
   ***********************************************************************************************
  -->
-
-  <Import Project="$(_ContainersTargetsDir)Microsoft.NET.Build.Containers.targets" Condition="'$(EnableSdkContainerSupport)' == 'true' AND Exists('$(_ContainersTargetsDir)Microsoft.NET.Build.Containers.targets')" />
+  <!-- Container publishing is only supported for a single TFM at a time at this point, so only import those targets in
+       'inner' builds  -->
+  <Import Project="$(_ContainersTargetsDir)Microsoft.NET.Build.Containers.targets"
+    Condition="'$(EnableSdkContainerSupport)' == 'true'
+               AND Exists('$(_ContainersTargetsDir)Microsoft.NET.Build.Containers.targets')
+               AND '$(TargetFramework)' != ''" />
 
   <!--
   ***********************************************************************************************

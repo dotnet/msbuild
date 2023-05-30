@@ -55,7 +55,7 @@ partial class CreateNewImage
     /// The name of the output image that will be pushed to the registry.
     /// </summary>
     [Required]
-    public string ImageName { get; set; }
+    public string Repository { get; set; }
 
     /// <summary>
     /// The tag to associate with the new image.
@@ -140,7 +140,7 @@ partial class CreateNewImage
         BaseImageName = "";
         BaseImageTag = "";
         OutputRegistry = "";
-        ImageName = "";
+        Repository = "";
         ImageTags = Array.Empty<string>();
         PublishDirectory = "";
         WorkingDirectory = "";

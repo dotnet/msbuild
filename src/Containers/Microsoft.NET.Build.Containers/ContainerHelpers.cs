@@ -267,21 +267,21 @@ public static class ContainerHelpers
     /// <summary>
     /// Checks if a given container image name adheres to the image name spec. If not, and recoverable, then normalizes invalid characters.
     /// </summary>
-    internal static bool NormalizeImageName(string containerImageName,
+    internal static bool NormalizeRepository(string containerRepository,
                                          [NotNullWhen(false)] out string? normalizedImageName)
     {
-        if (IsValidImageName(containerImageName))
+        if (IsValidImageName(containerRepository))
         {
             normalizedImageName = null;
             return true;
         }
         else
         {
-            if (!Char.IsLetterOrDigit(containerImageName, 0))
+            if (!Char.IsLetterOrDigit(containerRepository, 0))
             {
                 throw new ArgumentException(Resources.Resource.GetString(nameof(Strings.InvalidImageName)));
             }
-            var loweredImageName = containerImageName.ToLowerInvariant();
+            var loweredImageName = containerRepository.ToLowerInvariant();
             normalizedImageName = imageNameCharacters.Replace(loweredImageName, "-");
             return false;
         }

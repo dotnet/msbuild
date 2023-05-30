@@ -11,7 +11,8 @@
                                  OR $(NETCoreSdkVersion.Contains('-')) == false
                                 )
                           )">true</_IsSDKContainerAllowedVersion>
-    <_ContainerIsTargetingNet8TFM>$([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '8.0'))</_ContainerIsTargetingNet8TFM>
+    <_ContainerIsTargetingNet8TFM>false</_ContainerIsTargetingNet8TFM>
+    <_ContainerIsTargetingNet8TFM Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net8.0'))">true</_ContainerIsTargetingNet8TFM>
   </PropertyGroup>
 
   <ItemGroup>
@@ -68,6 +69,9 @@
       <ContainerImageTag Condition="'$(AutoGenerateImageTag)' == 'true'">$([System.DateTime]::UtcNow.ToString('yyyyMMddhhmmss'))</ContainerImageTag>
     </PropertyGroup>
 
+    <!-- Compatibility: previous versions used ImageName, but the proper term is Repository. Keep using that if explicitly set. -->
+    <Warning Condition="'$(ContainerImageName)' != ''" Code="CONTAINER003" Text="The property 'ContainerImageName' was set but is obsolete - please use 'ContainerRepository' instead." />
+
     <!-- Container Defaults -->
     <PropertyGroup>
       <!-- An empty ContainerRegistry implies pushing to the local daemon, putting this here for documentation purposes -->
@@ -76,17 +80,19 @@
       <!-- Set which local container daemon to use. We only explicitly support Docker (or things that mimic Docker APIs and binary names) at the moment. -->
       <LocalContainerDaemon Condition="'$(LocalContainerDaemon)' == ''">Docker</LocalContainerDaemon>
 
-      <!-- Note: spaces will be replaced with '-' in ContainerImageName and ContainerImageTag -->
-      <ContainerImageName Condition="'$(ContainerImageName)' == ''">$(AssemblyName)</ContainerImageName>
+      <!-- Compatibility: previous versions used ImageName, but the proper term is Repository. Keep using that if explicitly set. -->
+      <ContainerRepository Condition="'$(ContainerImageName)' != ''">$(ContainerImageName)</ContainerRepository>
+      <!-- Note: spaces will be replaced with '-' in ContainerRepository and ContainerImageTag -->
+      <ContainerRepository Condition="'$(ContainerRepository)' == ''">$(AssemblyName)</ContainerRepository>
 
       <!-- Only default a tag name if no tag names at all are provided -->
       <ContainerImageTag Condition="'$(ContainerImageTag)' == '' and '$(ContainerImageTags)' == ''">$(Version)</ContainerImageTag>
       <ContainerImageTag Condition="'$(AutoGenerateImageTag)' == 'true' and '$(ContainerImageTags)' == ''">$([System.DateTime]::UtcNow.ToString('yyyyMMddhhmmss'))</ContainerImageTag>
 
       <!-- The Container RID should default to the RID used for the entire build (to ensure things run on the platform they are built for), but the user knows best and so should be able to set it explicitly.
-                 For builds that have a RID, we default to that RID. Otherwise, we default to the RID of the currently-executing SDK. -->
+           For builds that have a RID, we default to that RID. Otherwise, we default to the Linux RID matching the architecture of the currently-executing SDK. -->
       <ContainerRuntimeIdentifier Condition="'$(ContainerRuntimeIdentifier)' == '' and '$(IsRidAgnostic)' != 'true'">$(RuntimeIdentifier)</ContainerRuntimeIdentifier>
-      <ContainerRuntimeIdentifier Condition="'$(ContainerRuntimeIdentifier)' == '' ">$(NETCoreSdkPortableRuntimeIdentifier)</ContainerRuntimeIdentifier>
+      <ContainerRuntimeIdentifier Condition="'$(ContainerRuntimeIdentifier)' == ''">linux-$(NETCoreSdkPortableRuntimeIdentifier.Split('-')[1])</ContainerRuntimeIdentifier>
       <_ContainerIsTargetingWindows>false</_ContainerIsTargetingWindows>
       <_ContainerIsTargetingWindows Condition="$(ContainerRuntimeIdentifier.StartsWith('win'))">true</_ContainerIsTargetingWindows>
 
@@ -112,7 +118,7 @@
 
     <ParseContainerProperties FullyQualifiedBaseImageName="$(ContainerBaseImage)"
                               ContainerRegistry="$(ContainerRegistry)"
-                              ContainerImageName="$(ContainerImageName)"
+                              ContainerRepository="$(ContainerRepository)"
                               ContainerImageTag="$(ContainerImageTag)"
                               ContainerImageTags="$(ContainerImageTags)"
                               ContainerEnvironmentVariables="@(ContainerEnvironmentVariable)">
@@ -121,7 +127,7 @@
       <Output TaskParameter="ParsedContainerImage" PropertyName="ContainerBaseName" />
       <Output TaskParameter="ParsedContainerTag" PropertyName="ContainerBaseTag" />
       <Output TaskParameter="NewContainerRegistry" PropertyName="ContainerRegistry" />
-      <Output TaskParameter="NewContainerImageName" PropertyName="ContainerImageName" />
+      <Output TaskParameter="NewContainerRepository" PropertyName="ContainerRepository" />
       <Output TaskParameter="NewContainerTags" ItemName="ContainerImageTags" />
       <Output TaskParameter="NewContainerEnvironmentVariables" ItemName="ContainerEnvironmentVariables" />
     </ParseContainerProperties>
@@ -200,7 +206,7 @@
                     BaseImageTag="$(ContainerBaseTag)"
                     LocalContainerDaemon="$(LocalContainerDaemon)"
                     OutputRegistry="$(ContainerRegistry)"
-                    ImageName="$(ContainerImageName)"
+                    Repository="$(ContainerRepository)"
                     ImageTags="@(ContainerImageTags)"
                     PublishDirectory="$(PublishDir)"
                     WorkingDirectory="$(ContainerWorkingDirectory)"

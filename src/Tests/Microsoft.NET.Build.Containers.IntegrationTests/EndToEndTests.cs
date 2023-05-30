@@ -26,7 +26,7 @@ public class EndToEndTests
 
     public static string NewImageName([CallerMemberName] string callerMemberName = "")
     {
-        bool normalized = ContainerHelpers.NormalizeImageName(callerMemberName, out string? normalizedName);
+        bool normalized = ContainerHelpers.NormalizeRepository(callerMemberName, out string? normalizedName);
         if (!normalized)
         {
             return normalizedName!;
@@ -126,7 +126,8 @@ public class EndToEndTests
         }
         Directory.CreateDirectory(workingDirectory);
 
-        new DotnetCommand(_testOutput, "new", "console", "-f", tfm, "-o", "MinimalTestApp")
+        new DotnetNewCommand(_testOutput, "console", "-f", tfm, "-o", "MinimalTestApp")
+            .WithVirtualHive()        
             .WithWorkingDirectory(workingDirectory)
             .Execute()
             .Should().Pass();
@@ -173,7 +174,8 @@ public class EndToEndTests
             Assert.Fail("No nupkg found in expected package folder. You may need to rerun the build");
         }
 
-        new DotnetCommand(_testOutput, "new", "webapi", "-f", ToolsetInfo.CurrentTargetFramework)
+        new DotnetNewCommand(_testOutput, "webapi", "-f", ToolsetInfo.CurrentTargetFramework)
+            .WithVirtualHive()  
             .WithWorkingDirectory(newProjectDir.FullName)
             // do not pollute the primary/global NuGet package store with the private package(s)
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
@@ -220,7 +222,7 @@ public class EndToEndTests
             "/bl",
             $"/p:ContainerBaseImage={DockerRegistryManager.FullyQualifiedBaseImageDefault}",
             $"/p:ContainerRegistry={DockerRegistryManager.LocalRegistry}",
-            $"/p:ContainerImageName={imageName}",
+            $"/p:ContainerRepository={imageName}",
             $"/p:Version={imageTag}")
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
             .WithWorkingDirectory(newProjectDir.FullName)
@@ -325,7 +327,8 @@ public class EndToEndTests
             Assert.Fail("No nupkg found in expected package folder. You may need to rerun the build");
         }
 
-        new DotnetCommand(_testOutput, "new", "console", "-f", ToolsetInfo.CurrentTargetFramework)
+        new DotnetNewCommand(_testOutput, "console", "-f", ToolsetInfo.CurrentTargetFramework)
+            .WithVirtualHive()
             .WithWorkingDirectory(newProjectDir.FullName)
             // do not pollute the primary/global NuGet package store with the private package(s)
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
@@ -359,7 +362,7 @@ public class EndToEndTests
             "/bl",
             $"/p:ContainerBaseImage={DockerRegistryManager.FullyQualifiedBaseImageDefault}",
             $"/p:ContainerRegistry={DockerRegistryManager.LocalRegistry}",
-            $"/p:ContainerImageName={imageName}",
+            $"/p:ContainerRepository={imageName}",
             $"/p:Version={imageTag}")
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
             .WithWorkingDirectory(newProjectDir.FullName)
