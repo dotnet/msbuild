@@ -16,7 +16,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void HashTaskTest()
         {
             // This hash was pre-computed. If the implementation changes it may need to be adjusted.
-            var expectedHash = "5593e2db83ac26117cd95ed8917f09b02a02e2a0";
+            var expectedHash = "3a9e94b896536fdab1343db5038239847e2db371f27e6ac9b5e3e6ea4aa2f2bf";
 
             var actualHash = ExecuteHashTask(new ITaskItem[]
             {
@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void HashTaskLargeInputCountTest()
         {
             // This hash was pre-computed. If the implementation changes it may need to be adjusted.
-            var expectedHash = "8a996bbcb5e481981c2fba7ac408e20d0b4360a5";
+            var expectedHash = "ae8799dfc1f81c50b08d28ac138e25958947895c8563c8fce080ceb5cb44db6f";
 
             ITaskItem[] itemsToHash = new ITaskItem[1000];
             for (int i = 0; i < itemsToHash.Length; i++)
@@ -68,7 +68,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void HashTaskLargeInputSizeTest()
         {
             // This hash was pre-computed. If the implementation changes it may need to be adjusted.
-            var expectedHash = "0509142dd3d3a733f30a52a0eec37cd727d46122";
+            var expectedHash = "48a3fdf5cb1afc679497a418015edc85e571282bb70691d7a64f2ab2e32d5dbf";
 
             string[] array = new string[1000];
             for (int i = 0; i < array.Length; i++)
