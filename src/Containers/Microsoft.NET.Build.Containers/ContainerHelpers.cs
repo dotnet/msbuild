@@ -31,7 +31,7 @@ public static class ContainerHelpers
     /// DockerRegistry is the default registry used when no registry is specified.
     /// </summary>
     private const string DockerRegistry = "registry-1.docker.io";
-    private const string DockerRegistryAlias = "docker.io";
+    internal const string DockerRegistryAlias = "docker.io";
 
     /// <summary>
     /// Matches if the string is not lowercase or numeric, or ., _, or -.
@@ -196,7 +196,8 @@ public static class ContainerHelpers
                                                             [NotNullWhen(true)] out string? containerRegistry,
                                                             [NotNullWhen(true)] out string? containerName,
                                                             out string? containerTag, // tag is always optional - we can't guarantee anything here
-                                                            out string? containerDigest // digest is always optional - we can't guarantee anything here
+                                                            out string? containerDigest, // digest is always optional - we can't guarantee anything here
+                                                            out bool isRegistrySpecified
                                                             )
     {
 
@@ -208,6 +209,7 @@ public static class ContainerHelpers
             containerName = null;
             containerTag = null;
             containerDigest = null;
+            isRegistrySpecified = false;
             return false;
         }
 
@@ -228,14 +230,9 @@ public static class ContainerHelpers
 
             // safely discover the registry
             var registryPortion = nameMatch.Groups[1];
-            if (registryPortion.Success)
-            {
-                containerRegistry = registryPortion.Value;
-            }
-            else
-            {
-                containerRegistry = DockerRegistryAlias;
-            }
+            isRegistrySpecified = registryPortion.Success;
+            containerRegistry = isRegistrySpecified ? registryPortion.Value
+                                                    : DockerRegistryAlias;
 
             // direct access to the name portion is safe because the regex matched
             var imageNamePortion = nameMatch.Groups[2];
@@ -259,6 +256,7 @@ public static class ContainerHelpers
             containerName = null;
             containerTag = null;
             containerDigest = null;
+            isRegistrySpecified = false;
             return false;
         }
 
