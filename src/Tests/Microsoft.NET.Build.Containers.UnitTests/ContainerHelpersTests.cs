@@ -7,6 +7,8 @@ namespace Microsoft.NET.Build.Containers.UnitTests;
 
 public class ContainerHelpersTests
 {
+    private const string DefaultRegistry = "registry-1.docker.io";
+
     [Theory]
     // Valid Tests
     [InlineData("mcr.microsoft.com", true)]
@@ -23,22 +25,30 @@ public class ContainerHelpersTests
     }
 
     [Theory]
-    [InlineData("mcr.microsoft.com/dotnet/runtime:6.0", true, "mcr.microsoft.com", "dotnet/runtime", "6.0")]
-    [InlineData("mcr.microsoft.com/dotnet/runtime", true, "mcr.microsoft.com", "dotnet/runtime", null)]
-    [InlineData("mcr.microsoft.com/", false, null, null, null)] // no image = nothing resolves
+    [InlineData("mcr.microsoft.com/dotnet/runtime:6.0", true, "mcr.microsoft.com", "dotnet/runtime", "6.0", true)]
+    [InlineData("mcr.microsoft.com/dotnet/runtime", true, "mcr.microsoft.com", "dotnet/runtime", null, true)]
+    [InlineData("mcr.microsoft.com/", false, null, null, null, false)] // no image = nothing resolves
     // Ports tag along
-    [InlineData("mcr.microsoft.com:54/dotnet/runtime", true, "mcr.microsoft.com:54", "dotnet/runtime", null)]
+    [InlineData("mcr.microsoft.com:54/dotnet/runtime", true, "mcr.microsoft.com:54", "dotnet/runtime", null, true)]
     // Even if nonsensical
-    [InlineData("mcr.microsoft.com:0/dotnet/runtime", true, "mcr.microsoft.com:0", "dotnet/runtime", null)]
+    [InlineData("mcr.microsoft.com:0/dotnet/runtime", true, "mcr.microsoft.com:0", "dotnet/runtime", null, true)]
     // We don't allow hosts with missing ports when a port is anticipated
-    [InlineData("mcr.microsoft.com:/dotnet/runtime", false, null, null, null)]
-    [InlineData("ubuntu:jammy", true, ContainerHelpers.DefaultRegistry, "ubuntu", "jammy")]
-    public void TryParseFullyQualifiedContainerName(string fullyQualifiedName, bool expectedReturn, string expectedRegistry, string expectedImage, string expectedTag)
+    [InlineData("mcr.microsoft.com:/dotnet/runtime", false, null, null, null, false)]
+    // Use default registry when no registry specified.
+    [InlineData("ubuntu:jammy", true, DefaultRegistry, "library/ubuntu", "jammy", false)]
+    [InlineData("ubuntu/runtime:jammy", true, DefaultRegistry, "ubuntu/runtime", "jammy", false)]
+    // Alias 'docker.io' to Docker registry.
+    [InlineData("docker.io/ubuntu:jammy", true, DefaultRegistry, "library/ubuntu", "jammy", true)]
+    [InlineData("docker.io/ubuntu/runtime:jammy", true, DefaultRegistry, "ubuntu/runtime", "jammy", true)]
+    // 'localhost' registry.
+    [InlineData("localhost/ubuntu:jammy", true, "localhost", "ubuntu", "jammy", true)]
+    public void TryParseFullyQualifiedContainerName(string fullyQualifiedName, bool expectedReturn, string expectedRegistry, string expectedImage, string expectedTag, bool expectedIsRegistrySpecified)
     {
-        Assert.Equal(expectedReturn, ContainerHelpers.TryParseFullyQualifiedContainerName(fullyQualifiedName, out string? containerReg, out string? containerName, out string? containerTag, out string? containerDigest));
+        Assert.Equal(expectedReturn, ContainerHelpers.TryParseFullyQualifiedContainerName(fullyQualifiedName, out string? containerReg, out string? containerName, out string? containerTag, out string? containerDigest, out bool isRegistrySpecified));
         Assert.Equal(expectedRegistry, containerReg);
         Assert.Equal(expectedImage, containerName);
         Assert.Equal(expectedTag, containerTag);
+        Assert.Equal(expectedIsRegistrySpecified, isRegistrySpecified);
     }
 
     [Theory]

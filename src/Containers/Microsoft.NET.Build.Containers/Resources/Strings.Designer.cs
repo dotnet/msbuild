@@ -106,6 +106,15 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: '{1}/<image>'..
+        /// </summary>
+        internal static string BaseImageNameRegistryFallback {
+            get {
+                return ResourceManager.GetString("BaseImageNameRegistryFallback", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to CONTAINER1011: Couldn&apos;t find matching base image for {0} that matches RuntimeIdentifier {1}..
         /// </summary>
         internal static string BaseImageNotFound {

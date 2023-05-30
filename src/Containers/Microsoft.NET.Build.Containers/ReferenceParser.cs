@@ -67,6 +67,8 @@ internal static class ReferenceParser
     /// </summary>
     private static readonly string domainName = expression(
         domainNameComponent,
+        // Require two name domainNameComponents to prevent matching a domain when parsing the short containername: 'ubuntu/runtime'.
+        literal("."), domainNameComponent,
         optional(repeated(literal("."), domainNameComponent))
     );
 
@@ -77,7 +79,7 @@ internal static class ReferenceParser
     /// brackets (excluding zone identifiers as defined by rfc6874 or special
     /// addresses such as IPv4-Mapped).
     /// </summary>
-    private static readonly string host = $"(?:{domainName}|{ipv6address})";
+    private static readonly string host = $"(?:{domainName}|{ipv6address}|localhost)";
 
     /// <summary>
     /// allowed by the URI Host subcomponent on rfc3986 to ensure backwards
