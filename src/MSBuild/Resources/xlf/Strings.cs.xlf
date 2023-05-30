@@ -544,7 +544,7 @@
                      Example:
                        -verbosity:quiet
 
-                     Note: File loggers' verbosity is set separately by -fileloggerparameters.
+                     Note: File loggers' verbosity is set by -fileloggerparameters.
 </source>
         <target state="needs-review-translation">  -verbosity:&lt;úroveň&gt; Zobrazení daného množství informací v protokolu
                      událostí. Dostupné úrovně podrobností: q[uiet], m[inimal],
