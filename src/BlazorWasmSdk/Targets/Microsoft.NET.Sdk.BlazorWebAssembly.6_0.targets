@@ -50,9 +50,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_AggressiveAttributeTrimming Condition="'$(_AggressiveAttributeTrimming)' == ''">true</_AggressiveAttributeTrimming>
     <DebuggerSupport Condition="'$(DebuggerSupport)' == '' and '$(Configuration)' != 'Debug'">false</DebuggerSupport>
     <BlazorCacheBootResources Condition="'$(BlazorCacheBootResources)' == ''">true</BlazorCacheBootResources>
-    <WasmFingerprintDotnetJs>true</WasmFingerprintDotnetJs>
-    
+
     <_TargetingNET80OrLater>$([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '8.0'))</_TargetingNET80OrLater>
+    <WasmFingerprintDotnetJs>true</WasmFingerprintDotnetJs>
+    <WasmFingerprintDotnetJs Condition="'$(_TargetingNET80OrLater)' == 'true'">false</WasmFingerprintDotnetJs>
     <WasmEnableWebcil Condition="'$(WasmEnableWebcil)' == '' and ('$(TargetFrameworkIdentifier)' != '.NETCoreApp' or '$(_TargetingNET80OrLater)' != 'true')">false</WasmEnableWebcil>
 
     <!-- Don't generate a NETSDK1151 error if a non self-contained Exe references a Blazor Exe -->
