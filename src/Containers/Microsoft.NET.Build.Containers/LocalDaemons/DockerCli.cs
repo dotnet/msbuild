@@ -179,7 +179,7 @@ internal sealed class DockerCli : ILocalRegistry
         // Add manifest
         JsonArray tagsNode = new()
         {
-            destinationReference.RepositoryAndTag
+            destinationReference.ToString()
         };
 
         JsonNode manifestNode = new JsonArray(new JsonObject

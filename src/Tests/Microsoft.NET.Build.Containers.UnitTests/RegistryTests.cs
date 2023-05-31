@@ -30,5 +30,14 @@ namespace Microsoft.NET.Build.Containers.UnitTests
             Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(registryName));
             Assert.Equal(isECR, registry.IsGoogleArtifactRegistry);
         }
+
+        [Fact]
+        public void DockerIoAlias()
+        {
+            Registry registry = new Registry(new Uri("https://docker.io"));
+            Assert.True(registry.IsDockerHub);
+            Assert.Equal("docker.io", registry.RegistryName);
+            Assert.Equal("registry-1.docker.io", registry.BaseUri.Host);
+        }
     }
 }

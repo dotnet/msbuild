@@ -12,12 +12,7 @@ internal readonly record struct ImageReference(Registry? Registry, string Reposi
         if (Registry is {} reg) {
             return $"{reg.RegistryName}/{Repository}:{Tag}";
         } else {
-            return RepositoryAndTag;
+            return $"{Repository}:{Tag}";
         }
     }
-
-    /// <summary>
-    /// Returns the repository and tag as a formatted string. Used in cases
-    /// </summary>
-    public readonly string RepositoryAndTag => $"{Repository}:{Tag}";
 }
