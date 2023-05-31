@@ -9,7 +9,6 @@
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">full</ApplyNgenOptimization>
     <EnablePackageValidation>true</EnablePackageValidation>
-    <DefineConstants>$(DefineConstants);MSBUILD_FRAMEWORK</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

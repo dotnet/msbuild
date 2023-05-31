@@ -106,7 +106,7 @@ namespace Microsoft.Build.Framework
             info.AddValue("helpKeyword", helpKeyword);
         }
 
-        protected internal override IDictionary<string, string> FlushCustomState()
+        protected override IDictionary<string, string> FlushCustomState()
         {
             return new Dictionary<string, string>()
             {
@@ -115,7 +115,7 @@ namespace Microsoft.Build.Framework
             };
         }
 
-        protected internal override void InitializeCustomState(IDictionary<string, string> state)
+        protected override void InitializeCustomState(IDictionary<string, string> state)
         {
             errorCode = state[nameof(errorCode)];
             helpKeyword = state[nameof(helpKeyword)];

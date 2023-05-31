@@ -3,36 +3,34 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.Serialization;
-#if !MSBUILD_FRAMEWORK && !TASKHOST
-using Microsoft.Build.BackEnd;
+using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Internal;
-#else
 namespace Microsoft.Build.BackEnd;
-#endif
 
 public abstract class BuildExceptionBase : Exception
 {
     private string? _remoteTypeName;
     private string? _remoteStackTrace;
 
-    protected internal BuildExceptionBase()
+    private protected BuildExceptionBase()
         : base()
     { }
 
-    protected internal BuildExceptionBase(string message)
+    private protected BuildExceptionBase(string message)
         : base(message)
     { }
 
-    protected internal BuildExceptionBase(
+    private protected BuildExceptionBase(
         string message,
         Exception? inner)
         : base(message, inner)
     { }
 
     // This is needed as soon as we allow opt out of the non-BinaryFormatter serialization
-    protected internal BuildExceptionBase(SerializationInfo info, StreamingContext context)
+    private protected BuildExceptionBase(SerializationInfo info, StreamingContext context)
         : base(info, context)
     { }
 
@@ -40,18 +38,15 @@ public abstract class BuildExceptionBase : Exception
 
     public override string ToString() => string.IsNullOrEmpty(_remoteTypeName) ? base.ToString() : $"{_remoteTypeName}->{base.ToString()}";
 
-    protected internal virtual void InitializeCustomState(IDictionary<string, string?>? customKeyedSerializedData)
+    protected virtual void InitializeCustomState(IDictionary<string, string?>? customKeyedSerializedData)
     { /* This is it. Override for exceptions with custom state */ }
 
-    protected internal virtual IDictionary<string, string?>? FlushCustomState()
+    protected virtual IDictionary<string, string?>? FlushCustomState()
     {
         /* This is it. Override for exceptions with custom state */
         return null;
     }
 
-    // Do not remove - accessed via reflection
-    //  we cannot use strong typed method, as InvalidProjectFileException needs to be independent on the base in Microsoft.Build.Framework
-    //  (that's given by the legacy need of nuget.exe to call SolutionFile utils from Microsoft.Build without proper loading Microsoft.Build.Framework)
     private void InitializeFromRemoteState(BuildExceptionRemoteState remoteState)
     {
         _remoteTypeName = remoteState.RemoteTypeName;
@@ -63,5 +58,90 @@ public abstract class BuildExceptionBase : Exception
         {
             InitializeCustomState(remoteState.CustomKeyedSerializedData);
         }
+    }
+
+    internal static void WriteExceptionToTranslator(ITranslator translator, Exception exception)
+    {
+        BinaryWriter writer = translator.Writer;
+        writer.Write(exception.InnerException != null);
+        if (exception.InnerException != null)
+        {
+            WriteExceptionToTranslator(translator, exception.InnerException);
+        }
+
+        string serializationType = BuildExceptionSerializationHelper.GetExceptionSerializationKey(exception.GetType());
+        writer.Write(serializationType);
+        writer.Write(exception.Message);
+        writer.WriteOptionalString(exception.StackTrace);
+        writer.WriteOptionalString(exception.Source);
+        writer.WriteOptionalString(exception.HelpLink);
+        // HResult is completely protected up till net4.5
+#if NET || NET45_OR_GREATER
+        int? hresult = exception.HResult;
+#else
+            int? hresult = null;
+#endif
+        writer.WriteOptionalInt32(hresult);
+
+        IDictionary<string, string?>? customKeyedSerializedData = (exception as BuildExceptionBase)?.FlushCustomState();
+        if (customKeyedSerializedData == null)
+        {
+            writer.Write((byte)0);
+        }
+        else
+        {
+            writer.Write((byte)1);
+            writer.Write(customKeyedSerializedData.Count);
+            foreach (var pair in customKeyedSerializedData)
+            {
+                writer.Write(pair.Key);
+                writer.WriteOptionalString(pair.Value);
+            }
+        }
+
+        Debug.Assert((exception.Data?.Count ?? 0) == 0,
+            "Exception Data is not supported in BuildTransferredException");
+    }
+
+    internal static Exception ReadExceptionFromTranslator(ITranslator translator)
+    {
+        BinaryReader reader = translator.Reader;
+        Exception? innerException = null;
+        if (reader.ReadBoolean())
+        {
+            innerException = ReadExceptionFromTranslator(translator);
+        }
+
+        string serializationType = reader.ReadString();
+        string message = reader.ReadString();
+        string? deserializedStackTrace = reader.ReadOptionalString();
+        string? source = reader.ReadOptionalString();
+        string? helpLink = reader.ReadOptionalString();
+        int hResult = reader.ReadOptionalInt32();
+
+        IDictionary<string, string?>? customKeyedSerializedData = null;
+        if (reader.ReadByte() == 1)
+        {
+            int count = reader.ReadInt32();
+            customKeyedSerializedData = new Dictionary<string, string?>(count, StringComparer.CurrentCulture);
+
+            for (int i = 0; i < count; i++)
+            {
+                customKeyedSerializedData[reader.ReadString()] = reader.ReadOptionalString();
+            }
+        }
+
+        BuildExceptionBase exception = BuildExceptionSerializationHelper.CreateExceptionFactory(serializationType)(message, innerException);
+
+        exception.InitializeFromRemoteState(
+            new BuildExceptionRemoteState(
+                serializationType,
+                deserializedStackTrace,
+                source,
+                helpLink,
+                hResult,
+                customKeyedSerializedData));
+
+        return exception;
     }
 }

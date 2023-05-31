@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
