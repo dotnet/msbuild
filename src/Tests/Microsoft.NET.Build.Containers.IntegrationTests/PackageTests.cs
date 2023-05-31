@@ -114,6 +114,7 @@ public class PackageTests
               "tasks/net7.0/NuGet.Frameworks.dll",
               "tasks/net7.0/NuGet.LibraryModel.dll",
               "tasks/net7.0/NuGet.Packaging.dll",
+              "tasks/net7.0/NuGet.Packaging.Core.dll",
               "tasks/net7.0/NuGet.ProjectModel.dll",
               "tasks/net7.0/NuGet.Protocol.dll",
               "tasks/net7.0/NuGet.Versioning.dll",
