@@ -886,7 +886,7 @@ namespace Microsoft.Build.UnitTests
         /// </remarks>
         private sealed class ToolTaskThatSleeps : ToolTask
         {
-            // Windows command to sleep:
+            // Windows prompt command to sleep:
             private readonly string _windowsSleep = "/c start /wait timeout {0}";
 
             // UNIX command to sleep:
