@@ -57,12 +57,13 @@ internal sealed class Registry
 
     public Registry(Uri baseUri)
     {
+        RegistryName = DeriveRegistryName(baseUri);
         BaseUri = baseUri;
+        // "docker.io" is not a real registry. Replace the uri to refer to an actual registry.
         if (BaseUri.Host == ContainerHelpers.DockerRegistryAlias)
         {
             BaseUri = new UriBuilder(BaseUri.ToString()) { Host = DockerHubRegistry1 }.Uri;
         }
-        RegistryName = DeriveRegistryName(baseUri);
         _client = CreateClient();
     }
 
