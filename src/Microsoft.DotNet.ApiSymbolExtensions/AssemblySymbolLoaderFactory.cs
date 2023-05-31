@@ -8,18 +8,18 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
     /// </summary>
     public sealed class AssemblySymbolLoaderFactory : IAssemblySymbolLoaderFactory
     {
-        private readonly bool _includeInternals;
+        private readonly bool _includeInternalSymbols;
 
         /// <summary>
         /// Creates a new AssemblySymbolLoaderFactory
         /// </summary>
-        /// <param name="includeInternals">True to include internal API when reading assemblies from the <see cref="AssemblySymbolLoader"/> created.</param>
-        public AssemblySymbolLoaderFactory(bool includeInternals = false)
+        /// <param name="includeInternalSymbols">True to include internal API when reading assemblies from the <see cref="AssemblySymbolLoader"/> created.</param>
+        public AssemblySymbolLoaderFactory(bool includeInternalSymbols = false)
         {
-            _includeInternals = includeInternals;
+            _includeInternalSymbols = includeInternalSymbols;
         }
 
         /// <inheritdoc />
-        public IAssemblySymbolLoader Create(bool shouldResolveReferences) => new AssemblySymbolLoader(shouldResolveReferences, _includeInternals);
+        public IAssemblySymbolLoader Create(bool shouldResolveReferences) => new AssemblySymbolLoader(shouldResolveReferences, _includeInternalSymbols);
     }
 }
