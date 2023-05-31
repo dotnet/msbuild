@@ -28,6 +28,11 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Microsoft.Build.Exceptions.InvalidProjectFileException</Target>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
     <Target>T:Microsoft.Build.Experimental.ProjectCache.ProjectCacheException</Target>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
