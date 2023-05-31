@@ -101,7 +101,7 @@ public static class ContainerBuilder
                 try
                 {
                     await containerRegistry.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
-                    Console.WriteLine("Containerize: Pushed image '{0}' to local registry", destinationImageReference);
+                    Console.WriteLine("Containerize: Pushed image '{0}' to local registry", destinationImageReference.RepositoryAndTag);
                 }
                 catch (Exception ex)
                 {

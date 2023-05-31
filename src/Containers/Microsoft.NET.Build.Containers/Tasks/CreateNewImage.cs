@@ -111,7 +111,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 try
                 {
                     await localRegistry.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
-                    SafeLog("Pushed image '{0}' to local registry", destinationImageReference);
+                    SafeLog("Pushed image '{0}' to local registry", destinationImageReference.RepositoryAndTag);
                 }
                 catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
                 {
