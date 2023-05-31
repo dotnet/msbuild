@@ -838,7 +838,7 @@ namespace Microsoft.Build.UnitTests
         /// predefined amount of time. The first execution may time out, but all following ones won't. It is expected
         /// that all following executions return success.
         /// </remarks>
-        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/8750")]
+        [Theory]
         [InlineData(1, 1, 1, -1)] // Normal case, no repeat.
         [InlineData(3, 1, 1, -1)] // Repeat without timeout.
         [InlineData(3, 10000, 1, 1000)] // Repeat with timeout.
@@ -886,8 +886,8 @@ namespace Microsoft.Build.UnitTests
         /// </remarks>
         private sealed class ToolTaskThatSleeps : ToolTask
         {
-            // PowerShell command to sleep:
-            private readonly string _powerShellSleep = "-NoProfile -ExecutionPolicy RemoteSigned -Command \"Start-Sleep -Milliseconds {0}\"";
+            // Windows prompt command to sleep:
+            private readonly string _windowsSleep = "/c start /wait timeout {0}";
 
             // UNIX command to sleep:
             private readonly string _unixSleep = "-c \"sleep {0}\"";
@@ -898,8 +898,8 @@ namespace Microsoft.Build.UnitTests
             public ToolTaskThatSleeps()
                 : base()
             {
-                // Determines shell to use: PowerShell for Windows, sh for UNIX-like systems:
-                _pathToShell = NativeMethodsShared.IsUnixLike ? "/bin/sh" : FindOnPath("PowerShell.exe");
+                // Determines shell to use: cmd for Windows, sh for UNIX-like systems:
+                _pathToShell = NativeMethodsShared.IsUnixLike ? "/bin/sh" : "cmd.exe";
             }
 
             /// <summary>
@@ -940,7 +940,7 @@ namespace Microsoft.Build.UnitTests
             protected override string GenerateCommandLineCommands() =>
                 NativeMethodsShared.IsUnixLike ?
                 string.Format(_unixSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0) :
-                string.Format(_powerShellSleep, RepeatCount < 2 ? InitialDelay : FollowupDelay);
+                string.Format(_windowsSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0);
 
             /// <summary>
             /// Ensures that test parameters make sense.
