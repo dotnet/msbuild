@@ -116,7 +116,12 @@ namespace Microsoft.Build.Tasks
 
         private HashAlgorithm CreateHashAlgorithm()
         {
-            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) ? SHA256.Create() : SHA1.Create();
+            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) ? 
+                SHA256.Create() : 
+#pragma warning disable CA5350
+                // Kept for back compatibility reasons when chnange wave is opted-out
+                SHA1.Create();
+#pragma warning restore CA5350
         }
 
         /// <summary>
