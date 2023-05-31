@@ -242,6 +242,10 @@
     <value>MSB3022: Both "{0}" and "{1}" were specified as input parameters in the project file. Please choose one or the other.</value>
     <comment>{StrBegin="MSB3022: "}</comment>
   </data>
+  <!-- TODO: New error code is needed or change MSB3022 to handle both cases -->
+  <data name="Copy.IncompatibleParameters">
+    <value>Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</value>
+  </data>
   <data name="Copy.FileComment">
     <value>Copying file from "{0}" to "{1}".</value>
     <comment>LOCALIZATION: {0} and {1} are paths.</comment>

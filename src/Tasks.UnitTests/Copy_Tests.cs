@@ -172,6 +172,98 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void CopyWithNoSource()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var engine = new MockEngine(true);
+                var destinationFolder = env.CreateFolder(true);
+
+                var task = new Copy
+                {
+                    BuildEngine = engine,
+                    DestinationFolder = new TaskItem(destinationFolder.Path),
+                };
+                task.Execute().ShouldBeTrue();
+                task.CopiedFiles.ShouldNotBeNull();
+                task.CopiedFiles.Length.ShouldBe(0);
+                task.DestinationFiles.ShouldNotBeNull();
+                task.DestinationFiles.Length.ShouldBe(0);
+                task.WroteAtLeastOneFile.ShouldBeFalse();
+            }
+        }
+
+        [Fact]
+        public void CopyWithMultipleSourceTypes()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var engine = new MockEngine(true);
+                var sourceFile = env.CreateFile("source.txt");
+                var sourceFolder = env.CreateFolder(true);
+                var destinationFolder = env.CreateFolder(true);
+
+                var task = new Copy
+                {
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
+                    SourceFolders = new ITaskItem[] { new TaskItem(sourceFolder.Path) },
+                    DestinationFolder = new TaskItem(destinationFolder.Path),
+                };
+                task.Execute().ShouldBeTrue();
+                task.CopiedFiles.ShouldNotBeNull();
+                task.DestinationFiles.ShouldNotBeNull();
+                task.WroteAtLeastOneFile.ShouldBeTrue();
+            }
+        }
+
+        [Fact]
+        public void CopyWithEmptySourceFiles()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var engine = new MockEngine(true);
+                var destinationFolder = env.CreateFolder(true);
+
+                var task = new Copy
+                {
+                    BuildEngine = engine,
+                    SourceFiles = Array.Empty<ITaskItem>(),
+                    DestinationFolder = new TaskItem(destinationFolder.Path),
+                };
+                task.Execute().ShouldBeTrue();
+                task.CopiedFiles.ShouldNotBeNull();
+                task.CopiedFiles.Length.ShouldBe(0);
+                task.DestinationFiles.ShouldNotBeNull();
+                task.DestinationFiles.Length.ShouldBe(0);
+                task.WroteAtLeastOneFile.ShouldBeFalse();
+            }
+        }
+
+        [Fact]
+        public void CopyWithEmptySourceFolders()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var engine = new MockEngine(true);
+                var destinationFolder = env.CreateFolder(true);
+
+                var task = new Copy
+                {
+                    BuildEngine = engine,
+                    SourceFolders = Array.Empty<ITaskItem>(),
+                    DestinationFolder = new TaskItem(destinationFolder.Path),
+                };
+                task.Execute().ShouldBeTrue();
+                task.CopiedFiles.ShouldNotBeNull();
+                task.CopiedFiles.Length.ShouldBe(0);
+                task.DestinationFiles.ShouldNotBeNull();
+                task.DestinationFiles.Length.ShouldBe(0);
+                task.WroteAtLeastOneFile.ShouldBeFalse();
+            }
+        }
+
+        [Fact]
         public void CopyWithNoDestination()
         {
             using (var env = TestEnvironment.Create())
@@ -213,6 +305,31 @@ namespace Microsoft.Build.UnitTests
                 task.CopiedFiles.ShouldBeNull();
                 task.DestinationFiles.ShouldNotBeNull();
                 task.WroteAtLeastOneFile.ShouldBeFalse();
+            }
+        }
+
+        [Fact]
+        public void CopyWithSourceFoldersAndDestinationFiles()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var engine = new MockEngine(true);
+                var sourceFile = env.CreateFile("source.txt");
+                var sourceFolder = env.CreateFolder(true);
+
+                var task = new Copy
+                {
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
+                    SourceFolders = new ITaskItem[] { new TaskItem(sourceFolder.Path) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem("destination0.txt"), new TaskItem("destination1.txt") },
+                };
+                task.Execute().ShouldBeFalse();
+                task.CopiedFiles.ShouldBeNull();
+                task.DestinationFiles.ShouldNotBeNull();
+                task.WroteAtLeastOneFile.ShouldBeFalse();
+
+                // TODO: Add AssertLogContains for new error message.
             }
         }
 

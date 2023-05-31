@@ -81,9 +81,9 @@ namespace Microsoft.Build.Tasks
         private readonly ConcurrentDictionary<string, bool> _directoriesKnownToExist = new ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Force the copy to retry even when it hits ERROR_ACCESS_DENIED -- normally we wouldn't retry in this case since 
-        /// normally there's no point, but occasionally things get into a bad state temporarily, and retrying does actually 
-        /// succeed.  So keeping around a secret environment variable to allow forcing that behavior if necessary.  
+        /// Force the copy to retry even when it hits ERROR_ACCESS_DENIED -- normally we wouldn't retry in this case since
+        /// normally there's no point, but occasionally things get into a bad state temporarily, and retrying does actually
+        /// succeed.  So keeping around a secret environment variable to allow forcing that behavior if necessary.
         /// </summary>
         private static bool s_alwaysRetryCopy = Environment.GetEnvironmentVariable(AlwaysRetryEnvVar) != null;
 
@@ -198,7 +198,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// INTERNAL FOR UNIT-TESTING ONLY
-        /// 
+        ///
         /// We've got several environment variables that we read into statics since we don't expect them to ever
         /// reasonably change, but we need some way of refreshing their values so that we can modify them for
         /// unit testing purposes.
@@ -209,8 +209,8 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// If MSBUILDALWAYSRETRY is set, also log useful diagnostic information -- as 
-        /// a warning, so it's easily visible. 
+        /// If MSBUILDALWAYSRETRY is set, also log useful diagnostic information -- as
+        /// a warning, so it's easily visible.
         /// </summary>
         private void LogDiagnostic(string message, params object[] messageArgs)
         {
@@ -221,7 +221,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Copy one file from source to destination. Create the target directory if necessary and 
+        /// Copy one file from source to destination. Create the target directory if necessary and
         /// leave the file read-write.
         /// </summary>
         /// <returns>Return true to indicate success, return false to indicate failure and NO retry, return NULL to indicate retry.</returns>
@@ -269,7 +269,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                // It's very common for a lot of files to be copied to the same folder. 
+                // It's very common for a lot of files to be copied to the same folder.
                 // Eg., "c:\foo\a"->"c:\bar\a", "c:\foo\b"->"c:\bar\b" and so forth.
                 // We don't want to check whether this folder exists for every single file we copy. So store which we've checked.
                 _directoriesKnownToExist.TryAdd(destinationFolder, true);
@@ -400,7 +400,8 @@ namespace Microsoft.Build.Tasks
             int parallelism)
         {
             // If there are no source files then just return success.
-            if (SourceFiles == null || SourceFiles.Length == 0)
+            if ((SourceFiles == null || SourceFiles.Length == 0) &&
+                (SourceFolders == null || SourceFolders.Length == 0))
             {
                 DestinationFiles = Array.Empty<ITaskItem>();
                 CopiedFiles = Array.Empty<ITaskItem>();
@@ -412,7 +413,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            // Environment variable stomps on user-requested value if it's set. 
+            // Environment variable stomps on user-requested value if it's set.
             if (Environment.GetEnvironmentVariable(AlwaysOverwriteReadOnlyFilesEnvVar) != null)
             {
                 OverwriteReadOnlyFiles = true;
@@ -445,7 +446,7 @@ namespace Microsoft.Build.Tasks
             destinationFilesSuccessfullyCopied = new List<ITaskItem>(DestinationFiles.Length);
 
             // Set of files we actually copied and the location from which they were originally copied.  The purpose
-            // of this collection is to let us skip copying duplicate files.  We will only copy the file if it 
+            // of this collection is to let us skip copying duplicate files.  We will only copy the file if it
             // either has never been copied to this destination before (key doesn't exist) or if we have copied it but
             // from a different location (value is different.)
             // { dest -> source }
@@ -650,14 +651,6 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            // There must be a source (either files or Folders).
-            if (SourceFiles == null && SourceFolders == null)
-            {
-                // TODO: Create new error message.
-                Log.LogErrorWithCodeFromResources("Copy.NeedsDestination", "SourceFiles", "SourceFolders");
-                return false;
-            }
-
             // There must be a destination (either files or directory).
             if (DestinationFiles == null && DestinationFolder == null)
             {
@@ -675,8 +668,7 @@ namespace Microsoft.Build.Tasks
             // SourceFolders and DestinationFiles can't be used together.
             if (SourceFolders != null && DestinationFiles != null)
             {
-                // TODO: Create new error message.
-                Log.LogErrorWithCodeFromResources("Copy.NeedsDestination", "SourceFolders", "DestinationFiles");
+                Log.LogErrorWithCodeFromResources("Copy.IncompatibleParameters", "SourceFolders", "DestinationFiles");
                 return false;
             }
 
@@ -724,8 +716,8 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Initialize the destinationFolder item.
-                    // ItemSpec is unescaped, and the TaskItem constructor expects an escaped input, so we need to 
-                    // make sure to re-escape it here. 
+                    // ItemSpec is unescaped, and the TaskItem constructor expects an escaped input, so we need to
+                    // make sure to re-escape it here.
                     DestinationFiles[i] = new TaskItem(EscapingUtilities.Escape(destinationFile));
 
                     // Copy meta-data from source to destinationFolder.
@@ -836,10 +828,10 @@ namespace Microsoft.Build.Tasks
                                 // ERROR_ACCESS_DENIED can either mean there's an ACL preventing us, or the file has the readonly bit set.
                                 // In either case, that's likely not a race, and retrying won't help.
                                 // Retrying is mainly for ERROR_SHARING_VIOLATION, where someone else is using the file right now.
-                                // However, there is a limited set of circumstances where a copy failure will show up as access denied due 
-                                // to a failure to reset the readonly bit properly, in which case retrying will succeed.  This seems to be 
+                                // However, there is a limited set of circumstances where a copy failure will show up as access denied due
+                                // to a failure to reset the readonly bit properly, in which case retrying will succeed.  This seems to be
                                 // a pretty edge scenario, but since some of our internal builds appear to be hitting it, provide a secret
-                                // environment variable to allow overriding the default behavior and forcing retries in this circumstance as well. 
+                                // environment variable to allow overriding the default behavior and forcing retries in this circumstance as well.
                                 if (!s_alwaysRetryCopy)
                                 {
                                     throw;
@@ -877,7 +869,7 @@ namespace Microsoft.Build.Tasks
                             destinationFileState.Name, retries, RetryDelayMilliseconds, e.Message,
                             GetLockedFileMessage(destinationFileState.Name));
 
-                        // if we have to retry for some reason, wipe the state -- it may not be correct anymore. 
+                        // if we have to retry for some reason, wipe the state -- it may not be correct anymore.
                         destinationFileState.Reset();
 
                         Thread.Sleep(RetryDelayMilliseconds);
@@ -903,7 +895,7 @@ namespace Microsoft.Build.Tasks
                         destinationFileState.Name, retries, RetryDelayMilliseconds, String.Empty /* no details */,
                         GetLockedFileMessage(destinationFileState.Name));
 
-                    // if we have to retry for some reason, wipe the state -- it may not be correct anymore. 
+                    // if we have to retry for some reason, wipe the state -- it may not be correct anymore.
                     destinationFileState.Reset();
 
                     Thread.Sleep(RetryDelayMilliseconds);

@@ -181,6 +181,11 @@
         <target state="translated">"{0}" yolunu "{1}" yoluna kopyalamak için sabit bağlantı oluşturuluyor.</target>
         <note>LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
+      <trans-unit id="Copy.IncompatibleParameters">
+        <source>Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
+        <target state="new">Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
         <target state="translated">MSB3893: "{0}" dosyasını "{1}" yoluna kopyalama bağlantısı kullanılamadı.</target>
