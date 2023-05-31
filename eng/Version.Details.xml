@@ -125,10 +125,6 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>bf7fb2ecbf69deb6a73bb8bbca1e56e7beec8d8a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Analyzers" Version="8.0.100-1.23067.1">
-      <Uri>https://github.com/dotnet/linker</Uri>
-      <Sha>c790896f128957acd2999208f44f09ae1e826c8c</Sha>
-    </Dependency>
     <Dependency Name="System.CodeDom" Version="8.0.0-preview.6.23280.5">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>bf7fb2ecbf69deb6a73bb8bbca1e56e7beec8d8a</Sha>

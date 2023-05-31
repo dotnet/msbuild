@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool ReadyToRunUseCrossgen2 { get; set; }
 
-        public bool TrimmingEnabled { get; set; }
+        public bool RequiresILLinkPack { get; set; }
 
         public bool AotEnabled { get; set; }
 
@@ -384,7 +384,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-            if (TrimmingEnabled)
+            if (RequiresILLinkPack)
             {
                 if (!AddToolPack(ToolPackType.ILLink, _normalizedTargetFrameworkVersion, packagesToDownload, implicitPackageReferences))
                 {
@@ -710,6 +710,15 @@ namespace Microsoft.NET.Build.Tasks
                 var buildPackage = new TaskItem(buildPackageName);
                 buildPackage.SetMetadata(MetadataKeys.Version, packVersion);
                 implicitPackageReferences.Add(buildPackage);
+            }
+
+            // Before net8.0, ILLink analyzers shipped in a separate package.
+            // Add the analyzer package with version taken from KnownILLinkPack.
+            if (normalizedTargetFrameworkVersion < new Version(8, 0) && toolPackType is ToolPackType.ILLink)
+            {
+                var analyzerPackage = new TaskItem("Microsoft.NET.ILLink.Analyzers");
+                analyzerPackage.SetMetadata(MetadataKeys.Version, packVersion);
+                implicitPackageReferences.Add(analyzerPackage);
             }
 
             return true;
