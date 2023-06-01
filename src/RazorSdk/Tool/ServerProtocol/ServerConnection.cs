@@ -288,7 +288,9 @@ namespace Microsoft.NET.Sdk.Razor.Tool
 
             // The server should be in the same directory as the client
             var expectedCompilerPath = Path.Combine(clientDir, ServerName);
-            var expectedPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH") ?? "dotnet";
+
+            string fullPathToDotnet = Process.GetCurrentProcess().MainModule.FileName;
+            var expectedPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH") ?? fullPathToDotnet;
             var argumentList = new string[]
             {
                 expectedCompilerPath,
