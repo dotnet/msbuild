@@ -19,7 +19,6 @@
       "src\\Cli\\Microsoft.TemplateEngine.Cli\\Microsoft.TemplateEngine.Cli.csproj",
       "src\\Cli\\dotnet\\dotnet.csproj",
       "src\\Containers\\Microsoft.NET.Build.Containers\\Microsoft.NET.Build.Containers.csproj",
-      "src\\Containers\\containerize\\containerize.csproj",
       "src\\Containers\\packaging\\package.csproj",
       "src\\Layout\\redist\\redist.csproj",
       "src\\Layout\\tool_fsharp\\tool_fsc.csproj",
