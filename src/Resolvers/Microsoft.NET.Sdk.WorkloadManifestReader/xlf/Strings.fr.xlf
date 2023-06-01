@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="InvalidVersionForWorkload">
         <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
-        <target state="new">Error parsing version '{1}' for workload manifest ID '{0}'</target>
+        <target state="translated">Erreur lors de l’analyse de la version «{1}» pour l’ID de manifeste de charge de travail «{0}»</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
