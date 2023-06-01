@@ -278,7 +278,9 @@
                      Example:
                        -verbosity:quiet
 
-                     Note: File loggers' verbosity is set by -fileloggerparameters.
+                     Note: File loggers' verbosity
+                           is set separately by
+                           -fileloggerparameters.
 </value>
     <comment>
       LOCALIZATION: The following should not be localized:

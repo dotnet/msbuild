@@ -541,7 +541,9 @@
                      Example:
                        -verbosity:quiet
 
-                     Note: File loggers' verbosity is set by -fileloggerparameters.
+                     Note: File loggers' verbosity
+                           is set separately by
+                           -fileloggerparameters.
 </source>
         <target state="needs-review-translation">  -verbosity:&lt;層級&gt; 在事件記錄檔中顯示此數量的資訊。
                      可用的詳細程度層級為: q[uiet]、m[inimal]、

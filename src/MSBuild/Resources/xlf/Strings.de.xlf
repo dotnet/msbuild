@@ -541,7 +541,9 @@
                      Example:
                        -verbosity:quiet
 
-                     Note: File loggers' verbosity is set by -fileloggerparameters.
+                     Note: File loggers' verbosity
+                           is set separately by
+                           -fileloggerparameters.
 </source>
         <target state="needs-review-translation">  -verbosity:&lt;Grad&gt; Zeigt diesen Grad von Informationen im Ereignisprotokoll an.
                      Folgende Ausführlichkeitsgrade sind verfügbar: q[uiet], m[inimal],
