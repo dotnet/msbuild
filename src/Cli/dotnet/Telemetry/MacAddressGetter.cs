@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
         {
             var ipResult = new ProcessStartInfo
             {
-                FileName = "ip",
+                FileName = OperatingSystem.IsMacOS() ? "/sbin/ip" : "/usr/sbin/ip",
                 Arguments = "link",
                 UseShellExecute = false
             }.ExecuteAndCaptureOutput(out string ipStdOut, out string ipStdErr);
@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             {
                 var result = new ProcessStartInfo
                 {
-                    FileName = "getmac.exe",
+                    FileName = @"C:\Windows\System32\getmac.exe",
                     UseShellExecute = false
                 }.ExecuteAndCaptureOutput(out string stdOut, out string stdErr);
 
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 {
                     var ifconfigResult = new ProcessStartInfo
                     {
-                        FileName = "ifconfig",
+                        FileName = OperatingSystem.IsMacOS() ? @"/sbin/ifconfig" : "/usr/sbin/ifconfig",
                         Arguments = "-a",
                         UseShellExecute = false
                     }.ExecuteAndCaptureOutput(out string ifconfigStdOut, out string ifconfigStdErr);
