@@ -512,6 +512,62 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
+        public void NativeAot_hw_fails_with_unsupported_target_rid(string targetFramework)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && RuntimeInformation.OSArchitecture == System.Runtime.InteropServices.Architecture.X64)
+            {
+                var projectName = "HelloWorldUnsupportedTargetRid";
+                var rid = "linux-x64";
+                var unsupportedTargetRid = "linux-arm64";
+
+                var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
+                testProject.AdditionalProperties["PublishAot"] = "true";
+
+                var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                    .WithProjectChanges(project => OverrideKnownILCompilerPackRuntimeIdentifiers(project, $"{rid};"));
+
+                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                publishCommand
+                    .Execute($"/p:RuntimeIdentifier={unsupportedTargetRid}")
+                    .Should().Fail()
+                    .And.HaveStdOutContaining("error NETSDK1203:");
+            }
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
+        public void NativeAot_hw_fails_with_unsupported_host_rid(string targetFramework)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && RuntimeInformation.OSArchitecture == System.Runtime.InteropServices.Architecture.X64)
+            {
+                var projectName = "HelloWorldUnsupportedHostRid";
+                var supportedTargetRid = "linux-arm64";
+
+                var testProject = CreateHelloWorldTestProject(targetFramework, projectName, true);
+                testProject.AdditionalProperties["PublishAot"] = "true";
+
+                var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                    .WithProjectChanges(project => OverrideKnownILCompilerPackRuntimeIdentifiers(project, $"{supportedTargetRid};"));
+
+                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                publishCommand
+                    .Execute($"/p:RuntimeIdentifier={supportedTargetRid}")
+                    .Should().Fail()
+                    .And.HaveStdOutContaining("error NETSDK1204:");
+            }
+        }
+
+        private void OverrideKnownILCompilerPackRuntimeIdentifiers(XDocument project, string runtimeIdentifiers)
+        {
+            var ns = project.Root.Name.Namespace;
+            project.Root.Add(new XElement(ns + "ItemGroup",
+                new XElement(ns + "KnownILCompilerPack",
+                    new XAttribute("Update", "@(KnownILCompilerPack)"),
+                    new XElement(ns + "ILCompilerRuntimeIdentifiers", runtimeIdentifiers))));
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void Only_Aot_warnings_are_produced_if_EnableAotAnalyzer_is_set(string targetFramework)
         {
             var projectName = "WarningAppWithAotAnalyzer";
