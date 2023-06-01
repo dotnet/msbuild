@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.CommandFactory
             string command,
             IEnumerable<string> args)
         {
-            var comSpec = Environment.GetEnvironmentVariable("ComSpec") ?? "cmd.exe";
+            var comSpec = Environment.GetEnvironmentVariable("ComSpec") ?? @"C:\WINDOWS\system32\cmd.exe";
 
             // Handle the case where ComSpec is already the command
             if (command.Equals(comSpec, StringComparison.OrdinalIgnoreCase))
