@@ -141,7 +141,7 @@ stages:
 
     # Build VS bootstrapper
     # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-    - task: MicroBuildBuildVSBootstrapper@2
+    - task: MicroBuildBuildVSBootstrapper@3
       inputs:
         vsMajorVersion: $(VisualStudio.MajorVersion)
         channelName: $(VisualStudio.ChannelName)
