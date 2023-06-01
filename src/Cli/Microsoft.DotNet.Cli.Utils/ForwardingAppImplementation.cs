@@ -97,7 +97,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private string GetHostExeName()
         {
-            return $"{HostExe}{FileNameSuffixes.CurrentPlatform.Exe}";
+            // Should instead make this a full path to dotnet
+            return Process.GetCurrentProcess().MainModule.FileName;
         }
     }
 }
