@@ -17,7 +17,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   
   <PropertyGroup>
     <EmbedUntrackedSources Condition="'$(EmbedUntrackedSources)' == ''">true</EmbedUntrackedSources>
-    <GenerateResourceWarnOnBinaryFormatterUse>true</GenerateResourceWarnOnBinaryFormatterUse>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.Build.Tasks.Git\$(_SourceLinkSdkSubDir)\Microsoft.Build.Tasks.Git.targets"/>

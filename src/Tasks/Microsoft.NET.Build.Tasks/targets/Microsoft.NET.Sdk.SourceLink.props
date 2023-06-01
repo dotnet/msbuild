@@ -18,6 +18,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Suppress implicit SourceLink inclusion if any Microsoft.SourceLink package is referenced. -->
     <SuppressImplicitGitSourceLink Condition="'$(PkgMicrosoft_SourceLink_Common)' != ''">true</SuppressImplicitGitSourceLink>
+
+    <!-- Enable a warning if the user (de)serializes a resource file using BinaryFormatter. -->
+    <GenerateResourceWarnOnBinaryFormatterUse>true</GenerateResourceWarnOnBinaryFormatterUse>
   </PropertyGroup>
 
   <ImportGroup Condition="'$(SuppressImplicitGitSourceLink)' != 'true'">
