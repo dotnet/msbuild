@@ -152,13 +152,13 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                     .DefineColumn(r => r.TemplateGroupInfo.Type, LocalizableStrings.ColumnNameType, TabularOutputSettings.ColumnNames.Type, defaultColumn: false)
                     .DefineColumn(r => r.TemplateGroupInfo.Classifications, LocalizableStrings.ColumnNameTags, TabularOutputSettings.ColumnNames.Tags, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
                     .DefineColumn(r => GetPackageInfo(r.PackageName, r.PackageOwners), out object? packageColumn, LocalizableStrings.ColumnNamePackageNameAndOwners, showAlways: true)
-                    .DefineColumn(r => GetTrustedMark(r.Trusted), LocalizableStrings.ColumnNameTrusted, showAlways: true, textAlign: TextAlign.Center)
+                    .DefineColumn(r => GetReservedMark(r.Reserved), LocalizableStrings.ColumnNameTrusted, showAlways: true, textAlign: TextAlign.Center)
                     .DefineColumn(r => r.PrintableTotalDownloads, out object? downloadsColumn, LocalizableStrings.ColumnNameTotalDownloads, showAlways: true, textAlign: TextAlign.Center);
 
             Reporter.Output.WriteLine(formatter.Layout());
         }
 
-        private static string GetTrustedMark(bool trusted) => trusted ? "✓" : string.Empty;
+        private static string GetReservedMark(bool reserved) => reserved ? "✓" : string.Empty;
 
         private static string GetPackageInfo(string packageName, string packageOwners)
         {
@@ -195,7 +195,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                     t,
                     packSearchResult.PackageInfo.Name,
                     string.Join(", ", packSearchResult.PackageInfo.Owners),
-                    packSearchResult.PackageInfo.Trusted,
+                    packSearchResult.PackageInfo.Reserved,
                     packSearchResult.PackageInfo.TotalDownloads)));
             }
 
@@ -277,13 +277,13 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             private const string MinimumDownloadCount = "<1k";
             private const char ThousandsChar = 'k';
 
-            internal SearchResultTableRow(TemplateGroupTableRow templateGroupTableRow, string packageName, string packageOwners, bool trusted, long downloads = 0)
+            internal SearchResultTableRow(TemplateGroupTableRow templateGroupTableRow, string packageName, string packageOwners, bool reserved, long downloads = 0)
             {
                 TemplateGroupInfo = templateGroupTableRow;
                 PackageName = packageName;
                 PackageOwners = packageOwners;
                 TotalDownloads = downloads;
-                Trusted = trusted;
+                Reserved = reserved;
             }
 
             internal static IComparer<long> TotalDownloadsComparer { get; } = new ThousandComparer();
@@ -292,7 +292,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 
             internal string PackageOwners { get; private set; }
 
-            internal bool Trusted { get; private set; }
+            internal bool Reserved { get; private set; }
 
             internal string PrintableTotalDownloads
             {
