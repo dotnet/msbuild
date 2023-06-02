@@ -805,12 +805,10 @@ namespace Microsoft.Build.CommandLine
                             ToolsVersion = toolsVersion,
                         });
 
-                        // Console.WriteLine("{");
-                        // PrintPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
-                        // PrintItemsInJsonFormat(getItem, project);
-                        // Console.WriteLine("},");
-                        JsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
-                        JsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
+                        JsonOutputFormatter jsonOutputFormatter = new();
+                        jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
+                        jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
+                        Console.WriteLine(jsonOutputFormatter.ToString());
                     }
                     else // regular build
                     {
@@ -863,11 +861,12 @@ namespace Microsoft.Build.CommandLine
                     if ((getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0) && targets?.Length > 0 && result is not null)
                     {
                         ProjectInstance builtProject = result.ProjectStateAfterBuild;
-                        Console.WriteLine("{");
-                        PrintPropertiesInJsonFormat(getProperty, property => builtProject.GetPropertyValue(property));
-                        PrintItemInstancesInJsonFormat(getItem, builtProject);
-                        PrintTargetResultsInJsonFormat(getTargetResult, result);
-                        Console.WriteLine("},");
+
+                        JsonOutputFormatter jsonOutputFormatter = new();
+                        jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => builtProject.GetPropertyValue(property));
+                        jsonOutputFormatter.AddItemInstancesInJsonFormat(getItem, builtProject);
+                        jsonOutputFormatter.AddTargetResultsInJsonFormat(getTargetResult, result);
+                        Console.WriteLine(jsonOutputFormatter.ToString());
                     }
 
                     if (!string.IsNullOrEmpty(timerOutputFilename))
@@ -2576,6 +2575,8 @@ namespace Microsoft.Build.CommandLine
                     {
                         commandLineSwitches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Verbosity, "q", "q", true, true, true);
                     }
+
+                    targets = targets.Union(getTargetResult).ToArray();
 
                     // figure out which ToolsVersion has been set on the command line
                     toolsVersion = ProcessToolsVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ToolsVersion]);
