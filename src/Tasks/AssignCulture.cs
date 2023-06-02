@@ -99,11 +99,11 @@ namespace Microsoft.Build.Tasks
         /// The culture will only be stripped if it is a valid culture identifier.
         /// So for example,
         /// 
-        ///      MyCrazyFile.XX.txt
+        ///      MyDifferentFile.XX.txt
         /// 
         /// will result in exactly the same file name:
         /// 
-        ///      MyCrazyFile.XX.txt
+        ///      MyDifferentFile.XX.txt
         /// 
         /// because 'XX' is not a valid culture identifier.
         /// </summary>
