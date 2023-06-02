@@ -1,19 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-#if FEATURE_WIN32_REGISTRY
 
-using System;
-using System.IO;
-using System.Diagnostics;
-using System.Globalization;
 using Microsoft.Win32;
-using System.Collections;
 using System.Collections.Generic;
 
-#nullable disable
-
 namespace Microsoft.Build.Shared
-{  /// <summary>
+{
+    /// <summary>
    /// Given a registry hive and a request view open the base key for that registry location.
    /// </summary>
     internal delegate RegistryKey OpenBaseKey(RegistryHive hive, RegistryView view);
@@ -36,4 +29,3 @@ namespace Microsoft.Build.Shared
     /// <returns>A string containing the default value.</returns>
     internal delegate string GetRegistrySubKeyDefaultValue(RegistryKey baseKey, string subKey);
 }
-#endif

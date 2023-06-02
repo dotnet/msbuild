@@ -227,11 +227,19 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
                 if (string.IsNullOrEmpty(targetFrameWorkVersion) || CompareFrameworkVersions(targetFrameWorkVersion, Constants.TargetFrameworkVersion40) <= 0)
                 {
-                    hashAlg = SHA1.Create("System.Security.Cryptography.SHA1CryptoServiceProvider");
+                    hashAlg = SHA1.Create(
+#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
+                        "System.Security.Cryptography.SHA1CryptoServiceProvider"
+#endif
+                        );
                 }
                 else
                 {
-                    hashAlg = SHA256.Create("System.Security.Cryptography.SHA256CryptoServiceProvider");
+                    hashAlg = SHA256.Create(
+#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
+                        "System.Security.Cryptography.SHA256CryptoServiceProvider"
+#endif
+                        );
                 }
                 byte[] hashBytes = hashAlg.ComputeHash(s);
                 hash = Convert.ToBase64String(hashBytes);

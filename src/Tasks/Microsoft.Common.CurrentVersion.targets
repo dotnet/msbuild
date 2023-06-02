@@ -13,7 +13,6 @@ Visual Basic, and Visual C#.
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project DefaultTargets="Build" TreatAsLocalProperty="OutDir">
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="'$(MicrosoftCommonPropsHasBeenImported)' != 'true' and Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -487,6 +486,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <PublishDir Condition="'$(PublishDir)' != '' and !HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
     <PublishDir Condition="'$(PublishDir)'==''">$(OutputPath)app.publish\</PublishDir>
+  </PropertyGroup>
+
+  <!-- 
+    ClickOncePublishDir property is the output location used by all ClickOnce publish targets. This should be same as PublishDir except 
+    for a trailing slash. PublishDir when specified as a global property on the command line cannot be changed to add a trailing slash.
+  -->
+  <PropertyGroup>
+    <ClickOncePublishDir>$(PublishDir)</ClickOncePublishDir>
+    <ClickOncePublishDir Condition="!HasTrailingSlash('$(ClickOncePublishDir)')">$(ClickOncePublishDir)\</ClickOncePublishDir>
   </PropertyGroup>
 
   <!--
@@ -1780,8 +1788,24 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier$(_GlobalPropertiesToRemoveFromProjectReferences)"
-        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier;SelfContained;$(_GlobalPropertiesToRemoveFromProjectReferences)"
+        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true' and '$(EnableDynamicPlatformResolution)' != 'true'"
+        SkipNonexistentTargets="true">
+      <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkPossibilities" />
+    </MSBuild>
+    
+    <!--
+       SetPlatform negotiation requires the 'GetTargetFrameworks' MSBuild call to NOT pass global properties. This is to verify
+       whether or not the referenced project would build as the same platform as the current project by default. The above
+       MSBuild call is kept for legacy scenarios that may depend on passing %(SetConfiguration) and %(SetPlatform).
+    -->
+    <MSBuild
+        Projects="@(_MSBuildProjectReferenceExistent)"
+        Targets="GetTargetFrameworks"
+        BuildInParallel="$(BuildInParallel)"
+        ContinueOnError="!$(BuildingProject)"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier;SelfContained;Platform;Configuration;$(_GlobalPropertiesToRemoveFromProjectReferences)"
+        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true' and '$(EnableDynamicPlatformResolution)' == 'true'"
         SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkPossibilities" />
     </MSBuild>
@@ -1835,6 +1859,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                          Condition="'$(ReferringTargetFrameworkForProjectReferences)' == '' or
                                     ('$(EnableDynamicPlatformResolution)' == 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' == 'true')" />
 
+    </ItemGroup>
+
+    <!-- IsRidAgnostic metadata is used to determine whether global properties such as RuntimeIdentifier and SelfContained flow to a referenced project.
+         However, for multi-targeted projects there may be a different IsRidAgnostic value for each TargetFramework.  In that case, this task selects
+         the IsRidAgnostic value for the NearestTargetFramework for the project. -->
+    <SetRidAgnosticValueForProjects Projects="@(AnnotatedProjects)">
+      <Output ItemName="UpdatedAnnotatedProjects" TaskParameter="UpdatedProjects" />
+    </SetRidAgnosticValueForProjects>
+    
+    <ItemGroup>
+      <AnnotatedProjects Remove="@(AnnotatedProjects)" />
+      <AnnotatedProjects Include="@(UpdatedAnnotatedProjects)" />
+      <UpdatedAnnotatedProjects Remove="@(UpdatedAnnotatedProjects)" />
+
       <!-- If the NearestTargetFramework property was set and the project multi-targets, SetTargetFramework must be set. -->
       <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.NearestTargetFramework)' != '' and '%(AnnotatedProjects.HasSingleTargetFramework)' != 'true'">
         <SetTargetFramework>TargetFramework=%(AnnotatedProjects.NearestTargetFramework)</SetTargetFramework>
@@ -1848,9 +1886,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);TargetFramework</UndefineProperties>
       </AnnotatedProjects>
 
-      <!-- If the project is RID agnostic, undefine the RuntimeIdentifier property to avoid another evaluation. -->
-      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.IsRidAgnostic)' == 'true'">
-        <UndefineProperties>%(AnnotatedProjects.UndefineProperties);RuntimeIdentifier</UndefineProperties>
+      <!-- Add RuntimeIdentifier and SelfContained to the list of global properties that should not flow to the referenced project,
+           unless the project is expecting those properties to flow. -->
+      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.IsRidAgnostic)' != 'false'">
+        <UndefineProperties>%(AnnotatedProjects.UndefineProperties);RuntimeIdentifier;SelfContained</UndefineProperties>
       </AnnotatedProjects>
 
       <!--
@@ -1883,15 +1922,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
         <AdditionalPropertiesFromProject>$(_AdditionalPropertiesFromProject)</AdditionalPropertiesFromProject>
         <HasSingleTargetFramework>true</HasSingleTargetFramework>
-        <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
-        <IsRidAgnostic>false</IsRidAgnostic>
-        <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <IsRidAgnostic>@(_TargetFrameworkInfo->'%(IsRidAgnostic)')</IsRidAgnostic>
         <!-- Extract necessary information for SetPlatform negotiation -->
         <IsVcxOrNativeProj Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">true</IsVcxOrNativeProj>
+        <Platform Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">$(Platform)</Platform>
         <Platforms>$(Platforms)</Platforms>
         <!-- .vcxproj and .nativeproj contain a `ProjectConfiguration` item that have `Platform` metadata within.
              Build the `Platforms` property from that. -->
-        <Platforms Condition="'@(ProjectConfiguration)' != '' and ('$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj')">@(ProjectConfiguration->'%(Platform)'->Distinct())</Platforms>
+        <Platforms Condition="'$(UsePlatformFromProjectConfiguration)' != 'false' and '@(ProjectConfiguration)' != '' and ('$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj')">@(ProjectConfiguration->'%(Platform)'->Distinct())</Platforms>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
 
@@ -1925,6 +1963,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMonikers>$(TargetPlatformMoniker)</TargetPlatformMonikers>
         <TargetPlatformMonikers Condition="'$(TargetPlatformMoniker)' == ''">None</TargetPlatformMonikers>
         <AdditionalPropertiesFromProject>$(_AdditionalTargetFrameworkInfoProperties)</AdditionalPropertiesFromProject>
+
+        <!-- Determine whether a project is "RID agnostic" for each TargetFramework.  "RID agnostic" means that global properties such as
+             SelfContained and RuntimeIdentifier should not flow across project references.  The IsRidAgnostic metadata value is consumed in the
+             _GetProjectReferenceTargetFrameworkProperties target, where those properties are added to a project's UndefineProperties if
+             IsRidAgnostic is set.
+        
+             Generally we set the IsRidAgnostic metadata based on the IsRidAgnostic property set by the .NET SDK.  If that's not set, then the
+             fallback logic here will be that the project is RID agnostic if it doesn't have RuntimeIdentifier or RuntimeIdentifiers properties set. -->
+        <IsRidAgnostic>$(IsRidAgnostic)</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '%(IsRidAgnostic)' == '' and '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '%(IsRidAgnostic)' == ''">false</IsRidAgnostic>
+
       </_TargetFrameworkInfo>
     </ItemGroup>
 
@@ -4322,9 +4372,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                             Exclude="@(ReferenceCopyLocalPaths);@(_NETStandardLibraryNETFrameworkLib)" />
     </ItemGroup>
 
+    <ItemGroup Condition="'$(PublishSingleFile)' != 'true'">
+      <_ClickOnceSatelliteAssemblies Include="@(IntermediateSatelliteAssembliesWithTargetPath);@(ReferenceSatellitePaths)" />
+    </ItemGroup>
+
     <!-- Flag primary dependencies-certain warnings emitted during application manifest generation apply only to them. -->
     <ItemGroup>
-      <_SatelliteAssemblies Include="@(IntermediateSatelliteAssembliesWithTargetPath);@(ReferenceSatellitePaths)" />
       <_DeploymentReferencePaths Include="@(ReferenceCopyLocalPaths)"
                                  Condition="('%(Extension)' == '.dll' Or '%(Extension)' == '.exe' Or '%(Extension)' == '.md') and ('%(ReferenceCopyLocalPaths.CopyToPublishDirectory)' != 'false')">
         <IsPrimary>true</IsPrimary>
@@ -4335,7 +4388,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Include managed references in clickonce manifest only if single file publish is false -->
     <ItemGroup Condition="'$(PublishSingleFile)' != 'true'">
       <_ManifestManagedReferences Include="@(_DeploymentReferencePaths);@(ReferenceDependencyPaths);@(_SGenDllsRelatedToCurrentDll);@(SerializationAssembly);@(ReferenceCOMWrappersToCopyLocal)"
-                               Exclude="@(_SatelliteAssemblies);@(_ReferenceScatterPaths);@(_ExcludedAssembliesFromManifestGeneration)" />
+                               Exclude="@(_ClickOnceSatelliteAssemblies);@(_ReferenceScatterPaths);@(_ExcludedAssembliesFromManifestGeneration)" />
     </ItemGroup>
 
     <!-- Include the following files in clickonce manifest only if single file publish is false -->
@@ -4355,9 +4408,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce);@(_ClickOnceRuntimeCopyLocalItems)"/>
     </ItemGroup>
 
-    <!-- For single file publish, we need to include the SF bundle EXE and files excluded from the bundle EXE in the clickonce manifest -->
+    <!-- For single file publish, we need to include the SF bundle EXE, application icon file and files excluded from the bundle EXE in the clickonce manifest -->
     <ItemGroup Condition="'$(PublishSingleFile)' == 'true'">
-      <_ClickOnceFiles Include="$(PublishedSingleFilePath)"/>
+      <_ClickOnceFiles Include="$(PublishedSingleFilePath);@(_DeploymentManifestIconFile)"/>
       <_ClickOnceFiles Include="@(_FilesExcludedFromBundle)"/>
 
       <!-- Include file association icons from Content as loose files -->
@@ -4400,7 +4453,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     This is being done to avoid Windows Forms designer memory issues that can arise while operating directly on files located in Obj directory. -->
     <Copy
       SourceFiles="@(_DeploymentManifestEntryPoint)"
-      DestinationFolder="$(PublishDir)">
+      DestinationFolder="$(ClickOncePublishDir)">
 
       <Output TaskParameter="DestinationFiles" ItemName="_DeploymentClickOnceApplicationExecutable" />
     </Copy>
@@ -4426,7 +4479,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         NativeAssemblies="@(NativeReferenceFile);@(_DeploymentNativePrerequisite)"
         PublishFiles="@(PublishFile)"
         RuntimePackAssets="@(RuntimePackAsset)"
-        SatelliteAssemblies="@(_SatelliteAssemblies)"
+        SatelliteAssemblies="@(_ClickOnceSatelliteAssemblies)"
         SigningManifests="$(SignManifests)"
         TargetCulture="$(TargetCulture)"
         TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
@@ -5663,8 +5716,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="CleanPublishFolder">
 
     <RemoveDir
-        Directories="$(PublishDir)"
-        Condition="'$(PublishDir)'=='$(OutputPath)app.publish\' and Exists('$(PublishDir)')"/>
+        Directories="$(ClickOncePublishDir)"
+        Condition="'$(ClickOncePublishDir)'=='$(OutputPath)app.publish\' and Exists('$(ClickOncePublishDir)')"/>
 
   </Target>
 
@@ -5856,7 +5909,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
       <_DeploymentApplicationFolderName>Application Files\$(AssemblyName)_$(_DeploymentApplicationVersionFragment)</_DeploymentApplicationFolderName>
-      <_DeploymentApplicationDir>$(PublishDir)$(_DeploymentApplicationFolderName)\</_DeploymentApplicationDir>
+      <_DeploymentApplicationDir>$(ClickOncePublishDir)$(_DeploymentApplicationFolderName)\</_DeploymentApplicationDir>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -5962,7 +6015,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ComponentsUrl="$(_DeploymentFormattedComponentsUrl)"
         Culture="$(TargetCulture)"
         FallbackCulture="$(FallbackCulture)"
-        OutputPath="$(PublishDir)"
+        OutputPath="$(ClickOncePublishDir)"
         SupportUrl="$(_DeploymentFormattedSupportUrl)"
         Path="$(GenerateBootstrapperSdkPath)"
         VisualStudioVersion="$(VisualStudioVersion)"
@@ -5994,7 +6047,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         TargetFrameworkVersion="$(_DeploymentManifestTargetFrameworkVersion)"
         ApplicationManifest="$(_DeploymentApplicationDir)$(_DeploymentTargetApplicationManifestFileName)"
         InputManifest="$(OutDir)$(TargetDeployManifestFileName)"
-        OutputManifest="$(PublishDir)$(TargetDeployManifestFileName)">
+        OutputManifest="$(ClickOncePublishDir)$(TargetDeployManifestFileName)">
 
       <Output TaskParameter="OutputManifest" ItemName="PublishedDeployManifest"/>
 
@@ -6003,7 +6056,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <SignFile
         CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
         TimestampUrl="$(ManifestTimestampUrl)"
-        SigningTarget="$(PublishDir)$(TargetDeployManifestFileName)"
+        SigningTarget="$(ClickOncePublishDir)$(TargetDeployManifestFileName)"
         TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
         DisallowMansignTimestampFallback="$(DisallowMansignTimestampFallback)"
@@ -6012,7 +6065,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <SignFile
         CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
         TimestampUrl="$(ManifestTimestampUrl)"
-        SigningTarget="$(PublishDir)\setup.exe"
+        SigningTarget="$(ClickOncePublishDir)setup.exe"
         Condition="'$(BootstrapperEnabled)'=='true' and '$(_DeploymentSignClickOnceManifests)'=='true'" />
 
   </Target>
@@ -6111,7 +6164,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- This item represents the native manifest, example: WindowsApplication1.exe.manifest or Native.ClassLibrary1.manifest -->
     <ItemGroup>
-      <_BuiltProjectOutputGroupOutputIntermediate Include="$(OutDir)$(_DeploymentTargetApplicationManifestFileName)" Condition="'@(NativeReference)'!='' or '@(_IsolatedComReference)'!=''">
+      <_BuiltProjectOutputGroupOutputIntermediate Include="$(OutDir)$(_DeploymentTargetApplicationManifestFileName)" Condition="('@(NativeReference)'!='' or '@(_IsolatedComReference)'!='') And Exists('$(OutDir)$(_DeploymentTargetApplicationManifestFileName)')">
         <TargetPath>$(_DeploymentTargetApplicationManifestFileName)</TargetPath>
         <!-- For compatibility with 2.0 -->
         <OriginalItemSpec>$(OutDir)$(_DeploymentTargetApplicationManifestFileName)</OriginalItemSpec>
@@ -6201,7 +6254,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <SatelliteDllsProjectOutputGroupDependsOn>PrepareForBuild;PrepareResourceNames</SatelliteDllsProjectOutputGroupDependsOn>
+    <SatelliteDllsProjectOutputGroupDependsOn>$(SatelliteDllsProjectOutputGroupDependsOn);PrepareForBuild;PrepareResourceNames</SatelliteDllsProjectOutputGroupDependsOn>
   </PropertyGroup>
 
   <Target

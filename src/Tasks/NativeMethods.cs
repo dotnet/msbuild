@@ -6,7 +6,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Shared.FileSystem;
 
-#if FEATURE_COM_INTEROP
 using System.Text;
 using System.Reflection;
 using Microsoft.Build.Shared;
@@ -16,13 +15,12 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
-#endif
+using System.Runtime.Versioning;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks
 {
-#if FEATURE_COM_INTEROP
     /// <summary>
     /// The original ITypeInfo interface in the CLR has incorrect definitions for GetRefTypeOfImplType and GetRefTypeInfo.
     /// It uses ints for marshalling handles which will result in a crash on 64 bit systems. This is a temporary interface
@@ -76,7 +74,9 @@ namespace Microsoft.Build.Tasks
 
     [ComImport]
     [Guid("E5CB7A31-7512-11d2-89CE-0080C792E5D8")]
+#if !NETSTANDARD2_0_OR_GREATER // NS2.0 doesn't have COM so this can't appear in the ref assembly
     [TypeLibType(TypeLibTypeFlags.FCanCreate)]
+#endif
     [ClassInterface(ClassInterfaceType.None)]
     internal class CorMetaDataDispenser
     {
@@ -85,7 +85,9 @@ namespace Microsoft.Build.Tasks
     [ComImport]
     [Guid("809c652e-7396-11d2-9771-00a0c9b4d50c")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown /*0x0001*/)]
+#if !NETSTANDARD2_0_OR_GREATER // NS2.0 doesn't have COM so this can't appear in the ref assembly
     [TypeLibType(TypeLibTypeFlags.FRestricted /*0x0200*/)]
+#endif
     internal interface IMetaDataDispenser
     {
         [return: MarshalAs(UnmanagedType.Interface)]
@@ -479,8 +481,6 @@ namespace Microsoft.Build.Tasks
                                     | PROCESSORARCHITECTURE
                                     | RETARGETABLE
     }
-
-#endif
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     internal struct STARTUPINFO
@@ -1031,11 +1031,11 @@ namespace Microsoft.Build.Tasks
             return false;
         }
 
-#if FEATURE_COM_INTEROP
         //------------------------------------------------------------------------------
         // CreateAssemblyCache
         //------------------------------------------------------------------------------
         [DllImport("fusion.dll")]
+        [SupportedOSPlatform("windows")]
         internal static extern uint CreateAssemblyCache(out IAssemblyCache ppAsmCache, uint dwReserved);
 
         [DllImport("fusion.dll")]
@@ -1047,6 +1047,7 @@ namespace Microsoft.Build.Tasks
                 IntPtr pvReserved);
 
         [DllImport("fusion.dll")]
+        [SupportedOSPlatform("windows")]
         internal static extern int CreateAssemblyNameObject(
                 out IAssemblyName ppAssemblyNameObj,
                 [MarshalAs(UnmanagedType.LPWStr)]
@@ -1064,8 +1065,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="pcchPath">The requested maximum length of CachePath, and upon return, the actual length of CachePath.</param>
         /// 
         [DllImport("fusion.dll", CharSet = CharSet.Unicode)]
+        [SupportedOSPlatform("windows")]
         internal static extern unsafe int GetCachePath(AssemblyCacheFlags cacheFlags, [Out] char* cachePath, ref int pcchPath);
-#endif
 
         //------------------------------------------------------------------------------
         // PFXImportCertStore
@@ -1265,7 +1266,6 @@ namespace Microsoft.Build.Tasks
         }
 #endregion
 #region InternalClass
-#if FEATURE_COM_INTEROP
         /// <summary>
         /// This class is a wrapper over the native GAC enumeration API.
         /// </summary>
@@ -1503,7 +1503,6 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
         }
-#endif
 #endregion
     }
 }

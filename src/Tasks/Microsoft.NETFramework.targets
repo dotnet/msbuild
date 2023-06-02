@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.NetFramework.targets
 
@@ -12,12 +12,12 @@ these two files are used to encapsulate the multi-targeting and framework specif
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project DefaultTargets="Build">
 
     <PropertyGroup>
       <NetFrameworkTargetsPath>$(MSBuildToolsPath)\Microsoft.NETFramework.CurrentVersion.targets</NetFrameworkTargetsPath>
     </PropertyGroup>
-   <Import Project="$(NetFrameworkTargetsPath)" />
+
+  <Import Project="$(NetFrameworkTargetsPath)" />
 
 </Project>

@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Build.Execution;
-
-#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -21,11 +21,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="configuration">The configuration to use to create the node.</param>
         /// <param name="affinity">The <see cref="NodeAffinity"/> to use.</param>
+        /// <param name="numberOfNodesToCreate">Number of nodes to be reused or created.</param>
         /// <returns>Information about the node created</returns>
         /// <remarks>
         /// Throws an exception if the node could not be created.
         /// </remarks>
-        NodeInfo CreateNode(NodeConfiguration configuration, NodeAffinity affinity);
+        IList<NodeInfo> CreateNodes(NodeConfiguration configuration, NodeAffinity affinity, int numberOfNodesToCreate);
 
         /// <summary>
         /// Sends a data packet to a specific node
@@ -51,6 +52,8 @@ namespace Microsoft.Build.BackEnd
         /// The node manager contains state which is not supposed to persist between builds, make sure this is cleared.
         /// </summary>
         void ClearPerBuildState();
+
+        IEnumerable<Process> GetProcesses();
         #endregion
     }
 }

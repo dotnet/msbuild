@@ -238,6 +238,7 @@ namespace Microsoft.Build.Internal
                                 LogDriveEnumerationWarningWithTargetLoggingContext(
                                     targetLoggingContext,
                                     includeLocation,
+                                    excludeLocation,
                                     excludeFileSpecIsEmpty,
                                     disableExcludeDriveEnumerationWarning,                                
                                     fileSpec);
@@ -248,6 +249,7 @@ namespace Microsoft.Build.Internal
                             case ILoggingService loggingService:
                                 LogDriveEnumerationWarningWithLoggingService(
                                     loggingService,
+                                    includeLocation,
                                     buildEventContext,
                                     buildEventFileInfoFullPath,
                                     filespecUnescaped);
@@ -259,6 +261,8 @@ namespace Microsoft.Build.Internal
                                 LogDriveEnumerationWarningWithEvaluationLoggingContext(
                                     evaluationLoggingContext,
                                     importLocation,
+                                    includeLocation,
+                                    excludeLocation,
                                     excludeFileSpecIsEmpty,
                                     filespecUnescaped,
                                     fileSpec);
@@ -336,7 +340,7 @@ namespace Microsoft.Build.Internal
             return fileList;
         }
 
-        private static void LogDriveEnumerationWarningWithTargetLoggingContext(TargetLoggingContext targetLoggingContext, IElementLocation includeLocation, bool excludeFileSpecIsEmpty, bool disableExcludeDriveEnumerationWarning, string fileSpec)
+        private static void LogDriveEnumerationWarningWithTargetLoggingContext(TargetLoggingContext targetLoggingContext, IElementLocation includeLocation, IElementLocation excludeLocation, bool excludeFileSpecIsEmpty, bool disableExcludeDriveEnumerationWarning, string fileSpec)
         {
             // Both condition lines are necessary to skip for the first GetFileListEscaped call
             // and reach for the GetFileListUnescaped call when the wildcarded Exclude attribute results
@@ -345,13 +349,14 @@ namespace Microsoft.Build.Internal
             // Include wildcard attributes for the GetFileListEscaped calls would falsely appear
             // with the Exclude attribute in the logged warning.
             if (((!excludeFileSpecIsEmpty) && (!disableExcludeDriveEnumerationWarning)) ||
-                (includeLocation == null))
+                ((includeLocation == null) && (excludeLocation != null)))
             {
                 targetLoggingContext.LogWarning(
                         DriveEnumeratingWildcardMessageResourceName,
                         fileSpec,
                         XMakeAttributes.exclude,
-                        XMakeElements.itemGroup);
+                        XMakeElements.itemGroup,
+                        excludeLocation.LocationString);
             }
 
             // Both conditions are necessary to reach for both GetFileListEscaped calls
@@ -363,13 +368,14 @@ namespace Microsoft.Build.Internal
                     DriveEnumeratingWildcardMessageResourceName,
                     fileSpec,
                     XMakeAttributes.include,
-                    XMakeElements.itemGroup);
+                    XMakeElements.itemGroup,
+                    includeLocation.LocationString);
             }
         }
 
-        private static void LogDriveEnumerationWarningWithLoggingService(ILoggingService loggingService, BuildEventContext buildEventContext, string buildEventFileInfoFullPath, string filespecUnescaped)
+        private static void LogDriveEnumerationWarningWithLoggingService(ILoggingService loggingService, IElementLocation includeLocation, BuildEventContext buildEventContext, string buildEventFileInfoFullPath, string filespecUnescaped)
         {
-            if (buildEventContext != null)
+            if (buildEventContext != null && includeLocation != null)
             {
                 loggingService.LogWarning(
                     buildEventContext,
@@ -378,11 +384,12 @@ namespace Microsoft.Build.Internal
                     DriveEnumeratingWildcardMessageResourceName,
                     filespecUnescaped,
                     XMakeAttributes.include,
-                    XMakeElements.itemGroup);
+                    XMakeElements.itemGroup,
+                    includeLocation.LocationString);
             }
         }
 
-        private static void LogDriveEnumerationWarningWithEvaluationLoggingContext(EvaluationLoggingContext evaluationLoggingContext, IElementLocation importLocation, bool excludeFileSpecIsEmpty, string filespecUnescaped, string fileSpec)
+        private static void LogDriveEnumerationWarningWithEvaluationLoggingContext(EvaluationLoggingContext evaluationLoggingContext, IElementLocation importLocation, IElementLocation includeLocation, IElementLocation excludeLocation, bool excludeFileSpecIsEmpty, string filespecUnescaped, string fileSpec)
         {
             if (importLocation != null)
             {
@@ -390,23 +397,26 @@ namespace Microsoft.Build.Internal
                     DriveEnumeratingWildcardMessageResourceName,
                     filespecUnescaped,
                     XMakeAttributes.project,
-                    XMakeElements.import);
+                    XMakeElements.import,
+                    importLocation.LocationString);
             }
-            else if (excludeFileSpecIsEmpty)
+            else if (excludeFileSpecIsEmpty && includeLocation != null)
             {
                 evaluationLoggingContext.LogWarning(
                     DriveEnumeratingWildcardMessageResourceName,
                     fileSpec,
                     XMakeAttributes.include,
-                    XMakeElements.itemGroup);
+                    XMakeElements.itemGroup,
+                    includeLocation.LocationString);
             }
-            else
+            else if (excludeLocation != null)
             {
                 evaluationLoggingContext.LogWarning(
                     DriveEnumeratingWildcardMessageResourceName,
                     fileSpec,
                     XMakeAttributes.exclude,
-                    XMakeElements.itemGroup);
+                    XMakeElements.itemGroup,
+                    excludeLocation.LocationString);
             }
         }
 
@@ -423,21 +433,23 @@ namespace Microsoft.Build.Internal
                     DriveEnumeratingWildcardMessageResourceName,
                     filespecUnescaped,
                     XMakeAttributes.include,
-                    XMakeElements.itemGroup);
+                    XMakeElements.itemGroup,
+                    includeLocation.LocationString);
             }
 
             // The first condition is necessary to reach for both GetFileListEscaped calls
             // whenever the wildcarded Exclude attribute results in drive enumeration, and
             // the second condition is necessary to reach for the GetFileListUnescaped call
             // (also when the wildcarded Exclude attribute results in drive enumeration).
-            else if ((!excludeFileSpecIsEmpty) || (includeLocation == null))
+            else if (((!excludeFileSpecIsEmpty) || (includeLocation == null)) && (excludeLocation != null))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(
                         excludeLocation,
                         DriveEnumeratingWildcardMessageResourceName,
                         fileSpec,
                         XMakeAttributes.exclude,
-                        XMakeElements.itemGroup);
+                        XMakeElements.itemGroup,
+                        excludeLocation.LocationString);
             }
         }
 
@@ -448,7 +460,8 @@ namespace Microsoft.Build.Internal
                 DriveEnumeratingWildcardMessageResourceName,
                 filespecUnescaped,
                 XMakeAttributes.include,
-                XMakeElements.itemGroup);
+                XMakeElements.itemGroup,
+                includeLocation.LocationString);
         }
 
         private static void ThrowDriveEnumerationExceptionWithEvaluationLoggingContext(IElementLocation importLocation, IElementLocation includeLocation, IElementLocation excludeLocation, string filespecUnescaped, string fileSpec, bool excludeFileSpecIsEmpty)
@@ -460,25 +473,28 @@ namespace Microsoft.Build.Internal
                     DriveEnumeratingWildcardMessageResourceName,
                     filespecUnescaped,
                     XMakeAttributes.project,
-                    XMakeElements.import);
+                    XMakeElements.import,
+                    importLocation.LocationString);
             }
-            else if (excludeFileSpecIsEmpty)
+            else if (excludeFileSpecIsEmpty && includeLocation != null)
             {
                 ProjectErrorUtilities.ThrowInvalidProject(
                     includeLocation,
                     DriveEnumeratingWildcardMessageResourceName,
                     fileSpec,
                     XMakeAttributes.include,
-                    XMakeElements.itemGroup);
+                    XMakeElements.itemGroup,
+                    includeLocation.LocationString);
             }
-            else
+            else if (excludeLocation != null)
             {
                 ProjectErrorUtilities.ThrowInvalidProject(
                     excludeLocation,
                     DriveEnumeratingWildcardMessageResourceName,
                     fileSpec,
                     XMakeAttributes.exclude,
-                    XMakeElements.itemGroup);
+                    XMakeElements.itemGroup,
+                    excludeLocation.LocationString);
             }
         }
 

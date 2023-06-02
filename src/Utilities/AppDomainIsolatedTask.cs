@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#if FEATURE_APPDOMAIN
 using System;
 using System.Resources;
 using System.Security;
@@ -17,6 +16,9 @@ namespace Microsoft.Build.Utilities
     /// instantiated in its own app domain.
     /// </summary>
     [LoadInSeparateAppDomain]
+#if !FEATURE_APPDOMAIN
+    [Obsolete("AppDomains are no longer supported in .NET Core or .NET 5.0 or higher.")]
+#endif
     public abstract class AppDomainIsolatedTask : MarshalByRefObject, ITask
     {
         #region Constructors
@@ -114,9 +116,15 @@ namespace Microsoft.Build.Utilities
         /// lease (5 minutes I think) and task instances can expire if they take long time processing.
         /// </summary>
         [SecurityCritical]
+#pragma warning disable CS0809 // InitializeLifetimeService is not marked as obsolete in netstandard2.0
+#if !FEATURE_APPDOMAIN
+        // This Obsolete is redundant since the whole class is obsoleted, but required to guard the reference
+        // to the obsolete MarshalByRefObject.InitializeLifetimeService.
+        [Obsolete("AppDomains are no longer supported in .NET Core or .NET 5.0 or higher.")]
+#endif
         public override object InitializeLifetimeService() => null; // null means infinite lease time
+#pragma warning restore
 
         #endregion
     }
 }
-#endif

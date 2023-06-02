@@ -528,6 +528,9 @@ Microsoft.Build.Construction.ProjectUsingTaskElement.AssemblyFileLocation.get ->
 Microsoft.Build.Construction.ProjectUsingTaskElement.AssemblyName.get -> string
 Microsoft.Build.Construction.ProjectUsingTaskElement.AssemblyName.set -> void
 Microsoft.Build.Construction.ProjectUsingTaskElement.AssemblyNameLocation.get -> Microsoft.Build.Construction.ElementLocation
+Microsoft.Build.Construction.ProjectUsingTaskElement.Override.get -> string
+Microsoft.Build.Construction.ProjectUsingTaskElement.Override.set -> void
+Microsoft.Build.Construction.ProjectUsingTaskElement.OverrideLocation.get -> Microsoft.Build.Construction.ElementLocation
 Microsoft.Build.Construction.ProjectUsingTaskElement.ParameterGroup.get -> Microsoft.Build.Construction.UsingTaskParameterGroupElement
 Microsoft.Build.Construction.ProjectUsingTaskElement.Runtime.get -> string
 Microsoft.Build.Construction.ProjectUsingTaskElement.Runtime.set -> void
@@ -1031,6 +1034,8 @@ Microsoft.Build.Execution.BuildParameters.WarningsAsErrors.get -> System.Collect
 Microsoft.Build.Execution.BuildParameters.WarningsAsErrors.set -> void
 Microsoft.Build.Execution.BuildParameters.WarningsAsMessages.get -> System.Collections.Generic.ISet<string>
 Microsoft.Build.Execution.BuildParameters.WarningsAsMessages.set -> void
+Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.get -> System.Collections.Generic.ISet<string>
+Microsoft.Build.Execution.BuildParameters.WarningsNotAsErrors.set -> void
 Microsoft.Build.Execution.BuildRequestData
 Microsoft.Build.Execution.BuildRequestData.BuildRequestData(Microsoft.Build.Execution.ProjectInstance projectInstance, string[] targetsToBuild) -> void
 Microsoft.Build.Execution.BuildRequestData.BuildRequestData(Microsoft.Build.Execution.ProjectInstance projectInstance, string[] targetsToBuild, Microsoft.Build.Execution.HostServices hostServices) -> void
@@ -1330,12 +1335,9 @@ Microsoft.Build.Experimental.ProjectCache.PluginTargetResult.ResultCode.get -> M
 Microsoft.Build.Experimental.ProjectCache.PluginTargetResult.TargetName.get -> string
 Microsoft.Build.Experimental.ProjectCache.PluginTargetResult.TaskItems.get -> System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Framework.ITaskItem2>
 Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor
-Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor.EntryPoints.get -> System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint>
-Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor.GetDetailedDescription() -> string
 Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor.PluginAssemblyPath.get -> string
 Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor.PluginInstance.get -> Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase
 Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor.PluginSettings.get -> System.Collections.Generic.IReadOnlyDictionary<string, string>
-Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor.ProjectGraph.get -> Microsoft.Build.Graph.ProjectGraph
 Microsoft.Build.Experimental.ProjectCache.ProjectCacheException
 Microsoft.Build.Experimental.ProjectCache.ProjectCacheException.ErrorCode.get -> string
 Microsoft.Build.Experimental.ProjectCache.ProjectCacheException.HasBeenLoggedByProjectCache.get -> bool
@@ -1781,8 +1783,8 @@ static Microsoft.Build.Experimental.ProjectCache.CacheResult.IndicateCacheHit(Mi
 static Microsoft.Build.Experimental.ProjectCache.CacheResult.IndicateCacheHit(Microsoft.Build.Experimental.ProjectCache.ProxyTargets proxyTargets) -> Microsoft.Build.Experimental.ProjectCache.CacheResult
 static Microsoft.Build.Experimental.ProjectCache.CacheResult.IndicateCacheHit(System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.ProjectCache.PluginTargetResult> targetResults) -> Microsoft.Build.Experimental.ProjectCache.CacheResult
 static Microsoft.Build.Experimental.ProjectCache.CacheResult.IndicateNonCacheHit(Microsoft.Build.Experimental.ProjectCache.CacheResultType resultType) -> Microsoft.Build.Experimental.ProjectCache.CacheResult
-static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor.FromAssemblyPath(string pluginAssemblyPath, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings = null) -> Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor
-static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor.FromInstance(Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase pluginInstance, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings = null) -> Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor
+static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor.FromAssemblyPath(string pluginAssemblyPath, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings = null) -> Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor
+static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor.FromInstance(Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase pluginInstance, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings = null) -> Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor
 static Microsoft.Build.Globbing.CompositeGlob.Create(System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.IMSBuildGlob> globs) -> Microsoft.Build.Globbing.IMSBuildGlob
 static Microsoft.Build.Globbing.Extensions.MSBuildGlobExtensions.GetParsedGlobs(this Microsoft.Build.Globbing.IMSBuildGlob glob) -> System.Collections.Generic.IEnumerable<Microsoft.Build.Globbing.MSBuildGlob>
 static Microsoft.Build.Globbing.MSBuildGlob.Parse(string fileSpec) -> Microsoft.Build.Globbing.MSBuildGlob

@@ -129,6 +129,12 @@ namespace Microsoft.Build.BackEnd
         void Translate(ref int value);
 
         /// <summary>
+        /// Translates an <see langword="int"/> array.
+        /// </summary>
+        /// <param name="array">The array to be translated.</param>
+        void Translate(ref int[] array);
+
+        /// <summary>
         /// Translates a long.
         /// </summary>
         /// <param name="value">The value to be translated.</param>
@@ -235,7 +241,8 @@ namespace Microsoft.Build.BackEnd
         /// can you simply pass as ref Enum, because an enum instance doesn't match that function signature.
         /// Finally, converting the enum to an int assumes that we always want to transport enums as ints.  This
         /// works in all of our current cases, but certainly isn't perfectly generic.</remarks>
-        void TranslateEnum<T>(ref T value, int numericValue);
+        void TranslateEnum<T>(ref T value, int numericValue)
+            where T : struct, Enum;
 
         /// <summary>
         /// Translates a value using the .Net binary formatter.

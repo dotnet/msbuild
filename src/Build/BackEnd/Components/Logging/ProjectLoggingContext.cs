@@ -8,6 +8,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using static Microsoft.Build.Execution.ProjectPropertyInstance;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
@@ -100,7 +101,19 @@ namespace Microsoft.Build.BackEnd.Logging
                 !LoggingService.IncludeEvaluationPropertiesAndItems &&
                 (!LoggingService.RunningOnRemoteNode || LoggingService.SerializeAllProperties))
             {
-                properties = projectProperties?.GetCopyOnReadEnumerable(property => new DictionaryEntry(property.Name, property.EvaluatedValue)) ?? Enumerable.Empty<DictionaryEntry>();
+                if (projectProperties is null)
+                {
+                    properties = Enumerable.Empty<DictionaryEntry>();
+                }
+                else if (Traits.LogAllEnvironmentVariables)
+                {
+                    properties = projectProperties.GetCopyOnReadEnumerable(property => new DictionaryEntry(property.Name, property.EvaluatedValue));
+                }
+                else
+                {
+                    properties = projectProperties.Filter(p => p is not EnvironmentDerivedProjectPropertyInstance || EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(p.Name), p => new DictionaryEntry(p.Name, p.EvaluatedValue));
+                }
+
                 items = projectItems?.GetCopyOnReadEnumerable(item => new DictionaryEntry(item.ItemType, new TaskItem(item))) ?? Enumerable.Empty<DictionaryEntry>();
             }
 

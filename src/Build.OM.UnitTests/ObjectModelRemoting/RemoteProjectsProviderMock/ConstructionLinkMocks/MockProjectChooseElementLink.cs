@@ -70,4 +70,3 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         #endregion
     }
 }
-

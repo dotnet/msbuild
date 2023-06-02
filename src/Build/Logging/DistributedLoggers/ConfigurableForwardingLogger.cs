@@ -77,13 +77,12 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void InitializeForwardingTable()
         {
-            _forwardingTable = new Dictionary<string, int>(17, StringComparer.OrdinalIgnoreCase);
+            _forwardingTable = new Dictionary<string, int>(16, StringComparer.OrdinalIgnoreCase);
             _forwardingTable[BuildStartedEventDescription] = 0;
             _forwardingTable[BuildFinishedEventDescription] = 0;
             _forwardingTable[ProjectStartedEventDescription] = 0;
             _forwardingTable[ProjectFinishedEventDescription] = 0;
-            _forwardingTable[ProjectEvaluationStartedEventDescription] = 0;
-            _forwardingTable[ProjectEvaluationFinishedEventDescription] = 0;
+            _forwardingTable[ProjectEvaluationEventDescription] = 0;
             _forwardingTable[TargetStartedEventDescription] = 0;
             _forwardingTable[TargetFinishedEventDescription] = 0;
             _forwardingTable[TaskStartedEventDescription] = 0;
@@ -127,7 +126,7 @@ namespace Microsoft.Build.Logging
                     // will be set on ProjectStarted or ProjectEvaluationFinished because we don't know
                     // all of the other loggers that will be attached. So turn both on.
                     _forwardingTable[ProjectStartedEventDescription] = 1;
-                    _forwardingTable[ProjectEvaluationFinishedEventDescription] = 1;
+                    _forwardingTable[ProjectEvaluationEventDescription] = 1;
                 }
             }
         }
@@ -144,6 +143,12 @@ namespace Microsoft.Build.Logging
             {
                 _forwardingSetFromParameters = true;
                 _forwardingTable[parameterName] = 1;
+            }
+            else if (String.Equals(parameterName, ProjectEvaluationStartedEventDescription, StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(parameterName, ProjectEvaluationFinishedEventDescription, StringComparison.OrdinalIgnoreCase))
+            {
+                _forwardingSetFromParameters = true;
+                _forwardingTable[ProjectEvaluationEventDescription] = 1;
             }
 
             // If any of the following parameters are set, we will make sure we forward the events
@@ -243,8 +248,7 @@ namespace Microsoft.Build.Logging
             if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic))
             {
                 _forwardingTable[CustomEventDescription] = 1;
-                _forwardingTable[ProjectEvaluationStartedEventDescription] = 1;
-                _forwardingTable[ProjectEvaluationFinishedEventDescription] = 1;
+                _forwardingTable[ProjectEvaluationEventDescription] = 1;
             }
 
             if (_showSummary)
@@ -263,8 +267,7 @@ namespace Microsoft.Build.Logging
                 _forwardingTable[TargetFinishedEventDescription] = 1;
                 _forwardingTable[ProjectStartedEventDescription] = 1;
                 _forwardingTable[ProjectFinishedEventDescription] = 1;
-                _forwardingTable[ProjectEvaluationStartedEventDescription] = 1;
-                _forwardingTable[ProjectEvaluationFinishedEventDescription] = 1;
+                _forwardingTable[ProjectEvaluationEventDescription] = 1;
             }
 
             if (_showCommandLine)
@@ -487,12 +490,7 @@ namespace Microsoft.Build.Logging
 
         private void BuildStatusHandler(object sender, BuildStatusEventArgs e)
         {
-            if (_forwardingTable[ProjectEvaluationStartedEventDescription] == 1 && e is ProjectEvaluationStartedEventArgs)
-            {
-                ForwardToCentralLogger(e);
-            }
-
-            if (_forwardingTable[ProjectEvaluationFinishedEventDescription] == 1 && e is ProjectEvaluationFinishedEventArgs)
+            if (_forwardingTable[ProjectEvaluationEventDescription] == 1 && (e is ProjectEvaluationStartedEventArgs || e is ProjectEvaluationFinishedEventArgs))
             {
                 ForwardToCentralLogger(e);
             }
@@ -542,6 +540,7 @@ namespace Microsoft.Build.Logging
         private const string BuildFinishedEventDescription = "BUILDFINISHEDEVENT";
         private const string ProjectStartedEventDescription = "PROJECTSTARTEDEVENT";
         private const string ProjectFinishedEventDescription = "PROJECTFINISHEDEVENT";
+        private const string ProjectEvaluationEventDescription = "PROJECTEVALUATIONEVENT";
         private const string ProjectEvaluationStartedEventDescription = "PROJECTEVALUATIONSTARTEDEVENT";
         private const string ProjectEvaluationFinishedEventDescription = "PROJECTEVALUATIONFINISHEDEVENT";
         private const string TargetStartedEventDescription = "TARGETSTARTEDEVENT";

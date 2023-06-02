@@ -189,6 +189,30 @@ namespace Microsoft.Build.BackEnd
         /// Message sent back to a node informing it about the resource that were granted by the scheduler.
         /// </summary>
         ResourceResponse,
+
+        /// <summary>
+        /// Command in form of MSBuild command line for server node - MSBuild Server.
+        /// Keep this enum value constant intact as this is part of contract with dotnet CLI
+        /// </summary>
+        ServerNodeBuildCommand = 0xF0,
+
+        /// <summary>
+        /// Response from server node command
+        /// Keep this enum value constant intact as this is part of contract with dotnet CLI
+        /// </summary>
+        ServerNodeBuildResult = 0xF1,
+
+        /// <summary>
+        /// Info about server console activity. 
+        /// Keep this enum value constant intact as this is part of contract with dotnet CLI
+        /// </summary>
+        ServerNodeConsoleWrite = 0xF2,
+
+        /// <summary>
+        /// Command to cancel ongoing build. 
+        /// Keep this enum value constant intact as this is part of contract with dotnet CLI
+        /// </summary>
+        ServerNodeBuildCancel = 0xF3,
     }
     #endregion
 

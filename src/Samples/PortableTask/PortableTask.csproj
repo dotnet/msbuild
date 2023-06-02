@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <UseProductOutputPath>true</UseProductOutputPath>
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
@@ -12,7 +12,12 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" Version="15.5.180" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.5.180" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.5.180" GeneratePathProperty="true" />
   </ItemGroup>
   <Target Name="UpdateXlf" />
+
+  <!-- This is only needed for a test in the MSBuild repo; it is unrelated to the PortableTask sample itself. -->
+  <Target Name="CopyMSBuildUtilitiesToNewFolder" BeforeTargets="CopyFilesToOutputDirectory">
+    <Copy SourceFiles="$(PkgMicrosoft_Build_Utilities_Core)\lib\net46\Microsoft.Build.Utilities.Core.dll" DestinationFiles="$(OutDir)\OldMSBuild\Microsoft.Build.Utilities.Core.dll" />
+  </Target>
 </Project>

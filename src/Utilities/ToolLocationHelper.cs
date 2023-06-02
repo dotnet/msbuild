@@ -10,15 +10,15 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Shared;
-#if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
-#endif
 
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
+using System.Runtime.Versioning;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -294,7 +294,6 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public static string CurrentToolsVersion => MSBuildConstants.CurrentToolsVersion;
 
-#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Get a sorted list of AssemblyFoldersExInfo which contain information about what directories the 3rd party assemblies are registered under for use during build and design time.
         ///
@@ -317,6 +316,7 @@ namespace Microsoft.Build.Utilities
         /// On a 32 bit machine we only add in the 32 bit hive.
         /// </param>
         /// <returns>List of AssemblyFoldersExInfo</returns>
+        [SupportedOSPlatform("windows")]
         public static IList<AssemblyFoldersExInfo> GetAssemblyFoldersExInfo(string registryRoot, string targetFrameworkVersion, string registryKeySuffix, string osVersion, string platform, System.Reflection.ProcessorArchitecture targetProcessorArchitecture)
         {
             ErrorUtilities.VerifyThrowArgumentLength(registryRoot, nameof(registryRoot));
@@ -329,7 +329,6 @@ namespace Microsoft.Build.Utilities
             assemblyFolders.AddRange(assemblyFoldersEx);
             return assemblyFolders;
         }
-#endif
 
         /// <summary>
         /// Get a sorted list of AssemblyFoldersFromConfigInfo which contain information about what directories the 3rd party assemblies are registered under for use during build and design time.
@@ -1908,10 +1907,10 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetFrameworkVersion">Version being targeted</param>
         /// <param name="targetFrameworkProfile">Profile being targeted</param>
         /// <param name="targetFrameworkRootPath">Root directory which will be used to calculate the reference assembly path. The references assemblies will be
-        /// <param name="targetFrameworkFallbackSearchPaths">';' separated list of paths that are looked up if the framework cannot be found in <paramref name="targetFrameworkRootPath"/></param>
         /// generated in the following way TargetFrameworkRootPath\TargetFrameworkIdentifier\TargetFrameworkVersion\SubType\TargetFrameworkSubType.
         /// Uses the default path if this is null.
         /// </param>
+        /// <param name="targetFrameworkFallbackSearchPaths">';' separated list of paths that are looked up if the framework cannot be found in <paramref name="targetFrameworkRootPath"/></param>
         /// <exception cref="ArgumentNullException">When the frameworkName is null</exception>
         /// <returns>Collection of reference assembly locations.</returns>
         public static IList<string> GetPathToReferenceAssemblies(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile, string targetFrameworkRootPath, string targetFrameworkFallbackSearchPaths)
@@ -2470,12 +2469,10 @@ namespace Microsoft.Build.Utilities
                     var monikers = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
                     GatherSDKListFromDirectory(sdkDiskRoots, monikers);
 
-#if FEATURE_REGISTRY_SDKS
-                    if (NativeMethodsShared.IsWindows)
+                    if (NativeMethodsShared.IsWindows && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
                     {
                         GatherSDKListFromRegistry(registryRoot, monikers);
                     }
-#endif
 
                     collection = monikers.Keys.ToList();
                     s_cachedTargetPlatforms.Add(cachedTargetPlatformsKey, collection);
@@ -2672,10 +2669,10 @@ namespace Microsoft.Build.Utilities
             }
         }
 
-#if FEATURE_REGISTRY_SDKS
         /// <summary>
         /// Given a registry location enumerate the registry and find the installed SDKs.
         /// </summary>
+        [SupportedOSPlatform("windows")]
         internal static void GatherSDKsFromRegistryImpl(Dictionary<TargetPlatformSDK, TargetPlatformSDK> platformMonikers, string registryKeyRoot, RegistryView registryView, RegistryHive registryHive, GetRegistrySubKeyNames getRegistrySubKeyNames, GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue, OpenBaseKey openBaseKey, FileExists fileExists)
         {
             ErrorUtilities.VerifyThrowArgumentNull(platformMonikers, "PlatformMonikers");
@@ -2866,6 +2863,7 @@ namespace Microsoft.Build.Utilities
         ///  Gather the list of SDKs installed on the machine from the registry.
         ///  Do not parallelize the getting of these entries, order is important, we want the first ones in to win.
         /// </summary>
+        [SupportedOSPlatform("windows")]
         private static void GatherSDKListFromRegistry(string registryRoot, Dictionary<TargetPlatformSDK, TargetPlatformSDK> platformMonikers)
         {
             // Setup some delegates because the methods we call use them during unit testing.
@@ -2891,7 +2889,6 @@ namespace Microsoft.Build.Utilities
                 GatherSDKsFromRegistryImpl(platformMonikers, registryRoot, RegistryView.Default, RegistryHive.LocalMachine, getSubkeyNames, getRegistrySubKeyDefaultValue, openBaseKey, fileExists);
             }
         }
-#endif
 
         /// <summary>
         /// Get the disk locations to search for sdks under. This can be overridden by an environment variable

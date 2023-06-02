@@ -149,6 +149,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
     /// <summary>
     /// Test the GetInstalledSDKLocations task
     /// </summary>
+    [PlatformSpecific(TestPlatforms.Windows)]
     public class GetInstalledSDKLocationsTestFixture : IClassFixture<FakeSDKStructure>
     {
         private readonly string _fakeSDKStructureRoot;

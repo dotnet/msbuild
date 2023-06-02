@@ -38,11 +38,6 @@ namespace Microsoft.Build.BackEnd
         IBuildEngine10
     {
         /// <summary>
-        /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set.
-        /// </summary>
-        private static bool s_disableInprocNodeByEnvironmentVariable = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
-
-        /// <summary>
         /// Help diagnose tasks that log after they return.
         /// </summary>
         private static bool s_breakOnLogAfterTaskReturns = Environment.GetEnvironmentVariable("MSBUILDBREAKONLOGAFTERTASKRETURNS") == "1";
@@ -129,8 +124,8 @@ namespace Microsoft.Build.BackEnd
             _activeProxy = true;
             _callbackMonitor = new object();
             _disableInprocNode = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                ? s_disableInprocNodeByEnvironmentVariable || host.BuildParameters.DisableInProcNode
-                : s_disableInprocNodeByEnvironmentVariable;
+                ? Traits.Instance.InProcNodeDisabled || host.BuildParameters.DisableInProcNode
+                : Traits.Instance.InProcNodeDisabled;
             EngineServices = new EngineServicesImpl(this);
         }
 

@@ -89,25 +89,25 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that construction and serialization with a value type (integer) parameter is OK.
         /// </summary>
         [Fact]
-        public void ValueTypeParameter()
+        public void IntParameter()
         {
             TaskParameter t = new TaskParameter(1);
 
             Assert.Equal(1, t.WrappedParameter);
-            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
+            Assert.Equal(TaskParameterType.Int, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(1, t2.WrappedParameter);
-            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
+            Assert.Equal(TaskParameterType.Int, t2.ParameterType);
         }
 
         /// <summary>
         /// Verifies that construction and serialization with a parameter that is an array of value types (ints) is OK.
         /// </summary>
         [Fact]
-        public void ValueTypeArrayParameter()
+        public void IntArrayParameter()
         {
             TaskParameter t = new TaskParameter(new int[] { 2, 15 });
 
@@ -129,6 +129,69 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(2, wrappedParameter2.Length);
             Assert.Equal(2, wrappedParameter2[0]);
             Assert.Equal(15, wrappedParameter2[1]);
+        }
+
+        enum TestEnumForParameter
+        {
+            Something,
+            SomethingElse
+        }
+
+        [Fact]
+        public void EnumParameter()
+        {
+            TaskParameter t = new TaskParameter(TestEnumForParameter.SomethingElse);
+
+            Assert.Equal("SomethingElse", t.WrappedParameter);
+            Assert.Equal(TaskParameterType.String, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            Assert.Equal("SomethingElse", t2.WrappedParameter);
+            Assert.Equal(TaskParameterType.String, t2.ParameterType);
+        }
+
+        [Fact]
+        public void BoolParameter()
+        {
+            TaskParameter t = new TaskParameter(true);
+
+            Assert.Equal(true, t.WrappedParameter);
+            Assert.Equal(TaskParameterType.Bool, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            Assert.Equal(true, t2.WrappedParameter);
+            Assert.Equal(TaskParameterType.Bool, t2.ParameterType);
+        }
+
+        /// <summary>
+        /// Verifies that construction and serialization with a parameter that is an array of value types (ints) is OK.
+        /// </summary>
+        [Fact]
+        public void BoolArrayParameter()
+        {
+            TaskParameter t = new TaskParameter(new bool[] { false, true });
+
+            Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
+
+            bool[] wrappedParameter = t.WrappedParameter as bool[];
+            Assert.NotNull(wrappedParameter);
+            Assert.Equal(2, wrappedParameter.Length);
+            Assert.False(wrappedParameter[0]);
+            Assert.True(wrappedParameter[1]);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            Assert.Equal(TaskParameterType.ValueTypeArray, t2.ParameterType);
+
+            bool[] wrappedParameter2 = Assert.IsType<bool[]>(t2.WrappedParameter);
+            Assert.Equal(2, wrappedParameter2.Length);
+            Assert.False(wrappedParameter2[0]);
+            Assert.True(wrappedParameter2[1]);
         }
 
         /// <summary>

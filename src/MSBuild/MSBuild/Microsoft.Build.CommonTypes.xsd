@@ -690,21 +690,21 @@ elementFormDefault="qualified">
                             <xs:element name="IncludeAssets">
                               <xs:annotation>
                                 <xs:documentation>
-                                  <!-- _locID_text="ProjectReference_IncludeAssets" _locComment="" -->Assets to include from this reference
+                                  <!-- _locID_text="ProjectReference_IncludeAssets" _locComment="" -->Assets to include from this reference. Applies to packages referenced transitively by the reference as well.
                                 </xs:documentation>
                               </xs:annotation>
                             </xs:element>
                             <xs:element name="ExcludeAssets">
                               <xs:annotation>
                                 <xs:documentation>
-                                  <!-- _locID_text="ProjectReference_ExcludeAssets" _locComment="" -->Assets to exclude from this reference
+                                  <!-- _locID_text="ProjectReference_ExcludeAssets" _locComment="" -->Assets to exclude from this reference. Applies to packages referenced transitively by the reference as well.
                                 </xs:documentation>
                               </xs:annotation>
                             </xs:element>
                             <xs:element name="PrivateAssets">
                               <xs:annotation>
                                 <xs:documentation>
-                                  <!-- _locID_text="ProjectReference_PrivateAssets" _locComment="" -->Assets that are private in this reference
+                                  <!-- _locID_text="ProjectReference_PrivateAssets" _locComment="" -->Assets that are private in this reference. Applies to packages referenced transitively by the reference as well.
                                 </xs:documentation>
                               </xs:annotation>
                             </xs:element>
@@ -1733,6 +1733,11 @@ elementFormDefault="qualified">
       </xs:annotation>
     </xs:element>
     <xs:element name="DisableXbfGeneration" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="DisableTransitiveProjectReferences" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="DisableTransitiveProjectReferences" _locComment="" -->When true, do not discover ProjectReference items representing projects referenced by this project's ProjectReferences. Applies only to projects using the .NET SDK.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="SuppressXamlWarnings" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="XamlRootsLog" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="XamlSavedStateFilePath" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1958,7 +1963,7 @@ elementFormDefault="qualified">
         <xs:documentation><!-- _locID_text="PreserveCompilationContext" _locComment="" -->Value indicating whether reference assemblies can be used in dynamic compilation</xs:documentation>
       </xs:annotation>
     </xs:element>
-    <xs:element name="ProduceReferenceAssemblies" type="msb:boolean" substitutionGroup="msb:Property" />
+    <xs:element name="ProduceReferenceAssembly" type="msb:boolean" substitutionGroup="msb:Property" />
     <xs:element name="ProductName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ProductVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ProjectGuid" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -2356,9 +2361,14 @@ elementFormDefault="qualified">
         <xs:documentation><!-- _locID_text="PublishReadyToRun" _locComment="" -->Indicates whether the project should produce ReadyToRun images during publish.</xs:documentation>
       </xs:annotation>
     </xs:element>
+    <xs:element name="PublishAot" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PublishAot" _locComment="" -->Indicates whether the project should produce native ahead-of-time compiled images during publish.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
     <xs:element name="PublishSingleFile" type="msb:boolean" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="PublishSingleFile" _locComment="" -->Indicates whether the project should produce a self-extracting executable during publish.</xs:documentation>
+        <xs:documentation><!-- _locID_text="PublishSingleFile" _locComment="" -->Indicates whether the project should bundle all application-dependent files into a single binary during publish.</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="PublishTrimmed" type="msb:boolean" substitutionGroup="msb:Property">
@@ -2368,12 +2378,12 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="TrimmerRootAssembly" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="TrimmerRootAssembly" _locComment="" -->Indicates to the linker to explicitly keep an assembly by adding it to your csproj (use the assembly name without extension).</xs:documentation>
+        <xs:documentation><!-- _locID_text="TrimmerRootAssembly" _locComment="" -->Assemblies that should not be trimmed (specify the assembly name without extension).</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="TrimmerRootDescriptor" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="TrimmerRootDescriptor" _locComment="" -->Gives the linker a more specific list of types/methods, etc. to include. Path to an xml file.</xs:documentation>
+        <xs:documentation><!-- _locID_text="TrimmerRootDescriptor" _locComment="" -->XML files that specify assemblies, types, and their members that should not be trimmed.</xs:documentation>
       </xs:annotation>
     </xs:element>
 
@@ -6078,6 +6088,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="RetryDelayMilliseconds" />
                     <xs:attribute name="SkipUnchangedFiles" />
                     <xs:attribute name="SourceUrl" use="required" />
+                    <xs:attribute name="Timeout" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>

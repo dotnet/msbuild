@@ -366,7 +366,7 @@ namespace Microsoft.Build.Evaluation
                         // If it is not then the calling code will determine that
                         if (nestLevel == 0)
                         {
-                            if (whitespaceFound && !nonIdentifierCharacterFound && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+                            if (whitespaceFound && !nonIdentifierCharacterFound)
                             {
                                 return false;
                             }

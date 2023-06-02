@@ -8,13 +8,17 @@ The [changelog](documentation/Changelog.md) has detailed information about chang
 
 ### Build Status
 
-The current development branch is `main`. Changes in `main` will go into a future update of MSBuild, which will release with Visual Studio 17.2 and a corresponding version of the .NET Core SDK.
+The current development branch is `main`. Changes in `main` will go into a future update of MSBuild, which will release with Visual Studio 17.4 and a corresponding version of the .NET Core SDK.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=main)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=main)
 
-We have forked for MSBuild 17.1 in the branch [`vs17.1`](https://github.com/Microsoft/msbuild/tree/vs17.1). Changes to that branch need special approval.
+We have forked for MSBuild 17.3 in the branch [`vs17.3`](https://github.com/Microsoft/msbuild/tree/vs17.3). Changes to that branch need special approval.
 
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs17.1)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs17.1)
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs17.3)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs17.3)
+
+17.2 builds from the branch [`vs17.2`](https://github.com/Microsoft/msbuild/tree/vs17.2). Only high-priority bugfixes will be considered for servicing 17.2.
+
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs17.2)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs17.2)
 
 17.0 builds from the branch [`vs17.0`](https://github.com/Microsoft/msbuild/tree/vs17.0). Only high-priority bugfixes will be considered for servicing 17.0.
 
@@ -24,13 +28,9 @@ We have forked for MSBuild 17.1 in the branch [`vs17.1`](https://github.com/Micr
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.11)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs16.11)
 
-MSBuild 16.9 builds from the branch [`vs16.9`](https://github.com/dotnet/msbuild/tree/vs16.9). Only high-priority bugfixes will be considered for servicing 16.9.
+MSBuild 16.9 builds from the branch [`vs16.9`](https://github.com/dotnet/msbuild/tree/vs16.9). Only very-high-priority bugfixes will be considered for servicing 16.9.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.9)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs16.9)
-
-MSBuild 16.7 builds from the branch [`vs16.7`](https://github.com/dotnet/msbuild/tree/vs16.7). Only high-priority bugfixes will be considered for servicing 16.7.
-
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.7)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs16.7)
 
 MSBuild 15.9 builds from the branch [`vs15.9`](https://github.com/dotnet/msbuild/tree/vs15.9). Only very-high-priority bugfixes will be considered for servicing 15.9.
 

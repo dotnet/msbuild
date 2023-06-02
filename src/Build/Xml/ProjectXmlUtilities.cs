@@ -5,11 +5,25 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Construction;
+using System.IO;
+using System.Xml;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
 namespace Microsoft.Build.Internal
 {
+    /// <summary>
+    /// Exception indicating that we tried to build a type of project MSBuild did not recognize.
+    /// </summary>
+    internal sealed class UnbuildableProjectTypeException : Exception
+    {
+        internal UnbuildableProjectTypeException(string file)
+            : base(file)
+        {
+        }
+    }
+
     /// <summary>
     /// Project-related Xml utilities
     /// </summary>
@@ -68,13 +82,37 @@ namespace Microsoft.Build.Internal
         /// <returns>True when the namespace is in the MSBuild namespace or no namespace.</returns>
         internal static bool VerifyValidProjectNamespace(XmlElementWithLocation element)
         {
-            return
-                // Prefix must be empty
-                element.Prefix.Length == 0 &&
+            if (element.Prefix.Length != 0)
+            {
+                return false;
+            }
+            else if (string.Equals(element.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+            else if (string.IsNullOrEmpty(element.NamespaceURI))
+            {
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) && Path.GetExtension(element.Location.File).Equals(".dwproj", StringComparison.OrdinalIgnoreCase))
+                {
+                    bool validMSBuildProject = true;
+                    foreach (XmlNode child in element.ChildNodes)
+                    {
+                        if (child.Name.Equals("Database", StringComparison.OrdinalIgnoreCase))
+                        {
+                            validMSBuildProject = false;
+                            throw new UnbuildableProjectTypeException(element.Location.File);
+                        }
+                    }
 
-                // Namespace must equal to the MSBuild namespace or empty
-                (string.Equals(element.NamespaceURI, XMakeAttributes.defaultXmlNamespace,
-                     StringComparison.OrdinalIgnoreCase) || string.IsNullOrEmpty(element.NamespaceURI));
+                    return validMSBuildProject;
+                }
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>

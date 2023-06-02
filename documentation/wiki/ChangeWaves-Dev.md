@@ -7,13 +7,16 @@ A Change Wave is a set of risky features developed under the same opt-out flag. 
 Opt-out is a better approach for us because we'd likely get limited feedback when a feature impacts customer builds. When a feature does impact a customer negatively, it's a quick switch to disable and allows time to adapt. The key aspect to Change Waves is that it smooths the transition for customers adapting to risky changes that the MSBuild team feels strongly enough to take.
 
 ## How do They Work?
-The opt-out comes in the form of setting the environment variable `MSBuildDisableFeaturesFromVersion` to the Change Wave (or version) that contains the feature you want **disabled**. This version happens to be the version of MSBuild that the features were developed for. See the mapping of change waves to features below.
+The opt-out comes in the form of setting the environment variable `MSBUILDDISABLEFEATURESFROMVERSION` to the Change Wave (or version) that contains the feature you want **disabled**. This version happens to be the version of MSBuild that the features were developed for. See the mapping of change waves to features below.
 
 ## Choosing a Change Wave for a New Feature
 This is determined on a case by case basis and should be discussed with the MSBuild team. A safe bet would be to check our [currently active Change Waves](ChangeWaves.md#change-waves-&-associated-features) and pick the version after the latest MSBuild version. This version corresponds to the latest version of Visual Studio.
 
+### Change Wave Versioning
+Change Wave features should match the LTS version of VS they were released with. Any feature requiring a changewave during a non-LTS release of VS should use the **NEXT** version number.
+
 # Developing With Change Waves in Mind
-For the purpose of providing an example, the rest of this document assumes we're developing a feature for MSBuild version **17.4**.
+For the purpose of providing an example, the rest of this document assumes we're developing a feature for MSBuild version **17.3**.
 
 The Process:
 1. Develop your feature.
@@ -32,7 +35,7 @@ public static readonly Version Wave17_4 = new Version(17, 4);
 3. You may need to delete the lowest wave as new waves get added.
 4. Update the AllWaves array appropriately.
 ```c#
-public static readonly Version[] AllWaves = { Wave16_10, Wave17_0, Wave17_4 };
+public static readonly Version[] AllWaves = { Wave17_0, Wave17_2, Wave17_4 };
 ```
 
 ## Condition Your Feature On A Change Wave
@@ -53,7 +56,7 @@ If you need to condition a Task or Target, use the built in `AreFeaturesEnabled`
 ```
 
 ## Test Your Feature
-Create tests as you normally would. Include one test with environment variable `MSBuildDisableFeaturesFromVersion` set to `ChangeWaves.Wave17_4`. Set this like so:
+Create tests as you normally would. Include one test with environment variable `MSBUILDDISABLEFEATURESFROMVERSION` set to `ChangeWaves.Wave17_4`. Set this like so:
 ```c#
 using TestEnvironment env = TestEnvironment.Create();
 

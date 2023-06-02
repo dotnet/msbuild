@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.WorkflowBuildExtensions.targets
 
@@ -9,31 +9,30 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project>
 
-   <!--
-        With MSBuild 12, we've changed MSBuildToolsPath to for the first time point to a directory
-        outside of the .NET Framework.  As a result of this, there were several targets files, of which
-        this was one, that were being referenced as out of MSBuildToolsPath that are now no longer there.
+  <!--
+      With MSBuild 12, we've changed MSBuildToolsPath to for the first time point to a directory
+      outside of the .NET Framework.  As a result of this, there were several targets files, of which
+      this was one, that were being referenced as out of MSBuildToolsPath that are now no longer there.
 
-        Thus, we are shimming those targets files so that they do still appear in MSBuildToolsPath, so that
-        consumers of them are not broken, but since the targets files themselves are still part of .NET,
-        the shim will internally simply redirect to the real copy of the targets file in the .NET Framework.
-   -->
+      Thus, we are shimming those targets files so that they do still appear in MSBuildToolsPath, so that
+      consumers of them are not broken, but since the targets files themselves are still part of .NET,
+      the shim will internally simply redirect to the real copy of the targets file in the .NET Framework.
+  -->
 
-   <Import Project="$(MSBuildFrameworkToolsPath)\Microsoft.WorkflowBuildExtensions.targets" Condition="Exists('$(MSBuildFrameworkToolsPath)\Microsoft.WorkflowBuildExtensions.targets')" />
+  <Import Project="$(MSBuildFrameworkToolsPath)\Microsoft.WorkflowBuildExtensions.targets" Condition="Exists('$(MSBuildFrameworkToolsPath)\Microsoft.WorkflowBuildExtensions.targets')" />
 
-   <!--
-         This target in $(MSBuildFrameworkToolsPath)\Microsoft.WorkflowBuildExtensions.targets does bad
-         things to builds inside Visual Studio. Specifically, it generates files *only* when building from
-         within VS, for both real and design-time builds. This leads to all kinds of build problems.
+  <!--
+      This target in $(MSBuildFrameworkToolsPath)\Microsoft.WorkflowBuildExtensions.targets does bad
+      things to builds inside Visual Studio. Specifically, it generates files *only* when building from
+      within VS, for both real and design-time builds. This leads to all kinds of build problems.
 
-         In Dev16 we no longer need these files to exist on disk for Workflow Designer scenarios. We can't
-         modify $(MSBuildFrameworkToolsPath)\Microsoft.WorkflowBuildExtensions.targets because that would
-         break the Workflow Designer for older versions of VS. Instead, we effectively turn it off by
-         overriding it with a no-op implementation here.
-   -->
-   <Target Name="GenerateCompiledExpressionsTempFile" />
+      In Dev16 we no longer need these files to exist on disk for Workflow Designer scenarios. We can't
+      modify $(MSBuildFrameworkToolsPath)\Microsoft.WorkflowBuildExtensions.targets because that would
+      break the Workflow Designer for older versions of VS. Instead, we effectively turn it off by
+      overriding it with a no-op implementation here.
+  -->
+  <Target Name="GenerateCompiledExpressionsTempFile" />
 
 </Project>

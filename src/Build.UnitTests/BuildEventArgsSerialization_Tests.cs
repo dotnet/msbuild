@@ -24,9 +24,12 @@ namespace Microsoft.Build.UnitTests
             _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
         }
 
-        [Fact]
-        public void RoundtripBuildStartedEventArgs()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RoundtripBuildStartedEventArgs(bool serializeAllEnvironmentVariables)
         {
+            Traits.LogAllEnvironmentVariables = serializeAllEnvironmentVariables;
             var args = new BuildStartedEventArgs(
                 "Message",
                 "HelpKeyword",
@@ -41,13 +44,15 @@ namespace Microsoft.Build.UnitTests
                 null,
                 new Dictionary<string, string>
                 {
-                    { "SampleName", "SampleValue" }
+                { "SampleName", "SampleValue" }
                 });
             Roundtrip(args,
-                e => TranslationHelpers.ToString(e.BuildEnvironment),
+                e => serializeAllEnvironmentVariables ? TranslationHelpers.ToString(e.BuildEnvironment) : null,
                 e => e.HelpKeyword,
                 e => e.ThreadId.ToString(),
                 e => e.SenderName);
+
+            Traits.LogAllEnvironmentVariables = false;
         }
 
         [Fact]
@@ -171,6 +176,17 @@ namespace Microsoft.Build.UnitTests
                 e => e.TaskName,
                 e => e.LineNumber.ToString(),
                 e => e.ColumnNumber.ToString());
+        }
+
+        [Fact]
+        public void RoundtripEnvironmentVariableReadEventArgs()
+        {
+            EnvironmentVariableReadEventArgs args = new("VarName", "VarValue");
+            args.BuildEventContext = new BuildEventContext(4, 5, 6, 7);
+            Roundtrip(args,
+                e => e.Message,
+                e => e.EnvironmentVariableName,
+                e => e.BuildEventContext.ToString());
         }
 
         [Fact]

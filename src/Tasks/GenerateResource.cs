@@ -40,9 +40,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Utilities;
-#if FEATURE_COM_INTEROP
 using Microsoft.Win32;
-#endif
 
 #nullable disable
 
@@ -907,7 +905,6 @@ namespace Microsoft.Build.Tasks
             return !Log.HasLoggedErrors && outOfProcExecutionSucceeded;
         }
 
-#if FEATURE_COM_INTEROP
         private static readonly bool AllowMOTW = !NativeMethodsShared.IsWindows || (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null) is string allowUntrustedFiles && allowUntrustedFiles.Equals("true", StringComparison.OrdinalIgnoreCase));
 
         private const string CLSID_InternetSecurityManager = "7b8a2d94-0ac9-11d1-896c-00c04fb6bfc4";
@@ -919,7 +916,7 @@ namespace Microsoft.Build.Tasks
         private bool IsDangerous(String filename)
         {
             // If they are opted out, there's no work to do
-            if (AllowMOTW)
+            if (AllowMOTW || !NativeMethodsShared.IsWindows)
             {
                 return false;
             }
@@ -991,12 +988,6 @@ namespace Microsoft.Build.Tasks
 
             return dangerous;
         }
-#else
-        private bool IsDangerous(String filename)
-        {
-            return false;
-        }
-#endif
 
 #if FEATURE_APPDOMAIN
         /// <summary>

@@ -124,6 +124,161 @@ EndProject
         }
 
         /// <summary>
+        /// Build Solution with Multiple Targets (ex. Clean;Build;Custom).
+        /// </summary>
+        [Fact]
+        public void BuildProjectWithMultipleTargets()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder classLibFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "classlib"), createFolder: true);
+                TransientTestFile classLibrary = testEnvironment.CreateFile(classLibFolder, "classlib.csproj",
+                    @"<Project>
+                  <Target Name=""Build"">
+                      <Message Text=""classlib.Build""/>
+                  </Target>
+                  <Target Name=""Clean"">
+                      <Message Text=""classlib.Clean""/>
+                  </Target>
+                  <Target Name=""Custom"">
+                      <Message Text=""classlib.Custom""/>
+                  </Target>
+                  </Project>
+                    ");
+
+                TransientTestFolder simpleProjectFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "simpleProject"), createFolder: true);
+                TransientTestFile simpleProject = testEnvironment.CreateFile(simpleProjectFolder, "simpleProject.csproj",
+                    @"<Project>
+                  <Target Name=""Build"">
+                      <Message Text=""simpleProject.Build""/>
+                  </Target>
+                  <Target Name=""Clean"">
+                      <Message Text=""simpleProject.Clean""/>
+                  </Target>
+                  <Target Name=""Custom"">
+                      <Message Text=""simpleProject.Custom""/>
+                  </Target>
+                  </Project>
+                    ");
+
+                TransientTestFile solutionFile = testEnvironment.CreateFile(folder, "testFolder.sln",
+                    @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.6.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""simpleProject"", ""simpleProject\simpleProject.csproj"", ""{AA52A05F-A9C0-4C89-9933-BF976A304C91}""
+EndProject
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""classlib"", ""classlib\classlib.csproj"", ""{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}""
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AA52A05F-A9C0-4C89-9933-BF976A304C91}.Debug|x86.ActiveCfg = Debug|x86
+		{AA52A05F-A9C0-4C89-9933-BF976A304C91}.Debug|x86.Build.0 = Debug|x86
+		{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}.Debug|x86.ActiveCfg = Debug|x86
+		{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}.Debug|x86.Build.0 = Debug|x86
+	EndGlobalSection
+EndGlobal
+                ");
+
+                string output = RunnerUtilities.ExecMSBuild(solutionFile.Path + " /t:Clean;Build;Custom", out bool success);
+                success.ShouldBeTrue();
+                output.ShouldContain("classlib.Build");
+                output.ShouldContain("classlib.Clean");
+                output.ShouldContain("classlib.Custom");
+                output.ShouldContain("simpleProject.Build");
+                output.ShouldContain("simpleProject.Clean");
+                output.ShouldContain("simpleProject.Custom");
+            }
+        }
+
+
+        /// <summary>
+        /// Build Solution with Multiple Targets (ex. Clean;Build;Custom).
+        /// </summary>
+        [Fact]
+        public void BuildProjectWithMultipleTargetsInParallel()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder classLibFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "classlib"), createFolder: true);
+                TransientTestFile classLibrary = testEnvironment.CreateFile(classLibFolder, "classlib.csproj",
+                    @"<Project>
+                  <Target Name=""Build"">
+                      <Message Text=""classlib.Build""/>
+                  </Target>
+                  <Target Name=""Clean"">
+                      <Message Text=""classlib.Clean""/>
+                  </Target>
+                  <Target Name=""Custom"">
+                      <Message Text=""classlib.Custom""/>
+                  </Target>
+                  </Project>
+                    ");
+
+                TransientTestFolder simpleProjectFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "simpleProject"), createFolder: true);
+                TransientTestFile simpleProject = testEnvironment.CreateFile(simpleProjectFolder, "simpleProject.csproj",
+                    @"<Project>
+                  <Target Name=""Build"">
+                      <Message Text=""simpleProject.Build""/>
+                  </Target>
+                  <Target Name=""Clean"">
+                      <Message Text=""simpleProject.Clean""/>
+                  </Target>
+                  <Target Name=""Custom"">
+                      <Message Text=""simpleProject.Custom""/>
+                  </Target>
+                  </Project>
+                    ");
+
+                TransientTestFile solutionFile = testEnvironment.CreateFile(folder, "testFolder.sln",
+                    @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.6.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""simpleProject"", ""simpleProject\simpleProject.csproj"", ""{AA52A05F-A9C0-4C89-9933-BF976A304C91}""
+EndProject
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""classlib"", ""classlib\classlib.csproj"", ""{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}""
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AA52A05F-A9C0-4C89-9933-BF976A304C91}.Debug|x86.ActiveCfg = Debug|x86
+		{AA52A05F-A9C0-4C89-9933-BF976A304C91}.Debug|x86.Build.0 = Debug|x86
+		{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}.Debug|x86.ActiveCfg = Debug|x86
+		{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}.Debug|x86.Build.0 = Debug|x86
+	EndGlobalSection
+EndGlobal
+                ");
+
+                try
+                {
+                    Environment.SetEnvironmentVariable("MSBuildSolutionBatchTargets", "1");
+                    var output = RunnerUtilities.ExecMSBuild(solutionFile.Path + " /m /t:Clean;Build;Custom", out bool success);
+                    success.ShouldBeTrue();
+                    output.ShouldContain("classlib.Build");
+                    output.ShouldContain("classlib.Clean");
+                    output.ShouldContain("classlib.Custom");
+                    output.ShouldContain("simpleProject.Build");
+                    output.ShouldContain("simpleProject.Clean");
+                    output.ShouldContain("simpleProject.Custom");
+                }
+                finally
+                {
+                    Environment.SetEnvironmentVariable("MSBuildSolutionBatchTargets", "");
+                }
+            }
+        }
+
+        /// <summary>
         /// Verify the AddNewErrorWarningMessageElement method
         /// </summary>
         [Fact]

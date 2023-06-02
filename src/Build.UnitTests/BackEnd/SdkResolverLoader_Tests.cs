@@ -46,7 +46,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             var loader = new SdkResolverLoader();
 
-            var resolvers = loader.LoadResolvers(_loggingContext, new MockElementLocation("file"));
+            var resolvers = loader.LoadAllResolvers(_loggingContext, new MockElementLocation("file"));
 
             resolvers.Select(i => i.GetType().FullName).ShouldBe(new [] { typeof(DefaultSdkResolver).FullName });
             
@@ -88,6 +88,38 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
+        [Fact]
+        public void SdkResolverLoaderPrefersManifestFile()
+        {
+            var root = FileUtilities.GetTemporaryDirectory();
+            try
+            {
+                var testFolder = Directory.CreateDirectory(Path.Combine(root, "MyTestResolver"));
+
+                var wrongResolverDll = Path.Combine(testFolder.FullName, "MyTestResolver.dll");
+                var resolverManifest = Path.Combine(testFolder.FullName, "MyTestResolver.xml");
+                var assemblyToLoad = Path.Combine(root, "SomeOtherResolver.dll");
+
+                File.WriteAllText(wrongResolverDll, string.Empty);
+                File.WriteAllText(assemblyToLoad, string.Empty);
+
+                File.WriteAllText(resolverManifest, $@"
+                    <SdkResolver>
+                      <Path>{assemblyToLoad}</Path>
+                    </SdkResolver>");
+
+                SdkResolverLoader loader = new SdkResolverLoader();
+                var resolversFound = loader.FindPotentialSdkResolvers(root, new MockElementLocation("file"));
+
+                resolversFound.Count.ShouldBe(1);
+                resolversFound.First().ShouldBe(assemblyToLoad);
+            }
+            finally
+            {
+                FileUtilities.DeleteDirectoryNoThrow(root, true);
+            }
+        }
+
         /// <summary>
         /// Verifies that if an SDK resolver throws while creating an instance that a warning is logged.
         /// </summary>
@@ -106,7 +138,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() =>
             {
-                sdkResolverLoader.LoadResolvers(_loggingContext, ElementLocation.EmptyLocation);
+                sdkResolverLoader.LoadAllResolvers(_loggingContext, ElementLocation.EmptyLocation);
             });
 
             exception.Message.ShouldBe($"The SDK resolver type \"{nameof(MockSdkResolverThatDoesNotLoad)}\" failed to load. A8BB8B3131D3475D881ACD3AF8D75BD6");
@@ -138,7 +170,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() =>
             {
-                sdkResolverLoader.LoadResolvers(_loggingContext, ElementLocation.EmptyLocation);
+                sdkResolverLoader.LoadAllResolvers(_loggingContext, ElementLocation.EmptyLocation);
             });
 
             exception.Message.ShouldStartWith($"The SDK resolver type \"{nameof(MockSdkResolverNoPublicConstructor)}\" failed to load.");
@@ -169,7 +201,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() =>
             {
-                sdkResolverLoader.LoadResolvers(_loggingContext, ElementLocation.EmptyLocation);
+                sdkResolverLoader.LoadAllResolvers(_loggingContext, ElementLocation.EmptyLocation);
             });
 
             exception.Message.ShouldBe($"The SDK resolver assembly \"{assemblyPath}\" could not be loaded. {expectedMessage}");
@@ -204,6 +236,33 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
                 resolversFound.Count.ShouldBe(1);
                 resolversFound.First().ShouldBe(assemblyToLoad);
+            }
+        }
+
+        [Fact]
+        public void SdkResolverLoaderReadsManifestFileWithResolvableSdkPattern()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var root = env.CreateFolder().Path;
+                var resolverPath = Path.Combine(root, "MyTestResolver");
+                var resolverManifest = Path.Combine(resolverPath, "MyTestResolver.xml");
+
+                var assemblyToLoad = env.CreateFile(".dll").Path;
+
+                Directory.CreateDirectory(resolverPath);
+                File.WriteAllText(resolverManifest, $@"
+                    <SdkResolver>
+                      <ResolvableSdkPattern>1&lt;.*</ResolvableSdkPattern>
+                      <Path>{assemblyToLoad}</Path>
+                    </SdkResolver>");
+
+                SdkResolverLoader loader = new SdkResolverLoader();
+                var resolversManifestsFound = loader.FindPotentialSdkResolversManifests(root, new MockElementLocation("file"));
+
+                resolversManifestsFound.Count.ShouldBe(1);
+                resolversManifestsFound.First().Path.ShouldBe(assemblyToLoad);
+                resolversManifestsFound.First().ResolvableSdkRegex.ToString().ShouldBe("1<.*");
             }
         }
 
@@ -287,7 +346,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                             resolvers.Add(new MockSdkResolverWithAssemblyPath(resolverPath));
                         }
                     };
-                    IList<SdkResolverBase> resolvers = loader.LoadResolvers(_loggingContext, new MockElementLocation("file"));
+                    IList<SdkResolverBase> resolvers = loader.LoadAllResolvers(_loggingContext, new MockElementLocation("file"));
 
                     resolvers.Count.ShouldBe(0);
                 }

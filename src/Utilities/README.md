@@ -7,6 +7,6 @@ This package contains `Microsoft.Build.Utilities.Core.dll`, which defines helper
 * [`Logger`](https://docs.microsoft.com/dotnet/api/microsoft.build.utilities.logger), a base class for custom logging functionality.
 
 ### netstandard2.0 target
-The `netstandard2.0` target of this build is configured only to output reference assemblies; at runtime MSBuild will be `net6.0` or `net472`. Please use the `net6.0`-targeted assemblies for .NET Core 6+ scenarios.
+The `netstandard2.0` target of this build is configured only to output reference assemblies; at runtime MSBuild will be `net7.0` or `net472`. Please use the `net7.0`-targeted assemblies for .NET Core 6+ scenarios.
 
 For context, see https://github.com/dotnet/msbuild/pull/6148

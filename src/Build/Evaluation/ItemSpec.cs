@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -156,21 +157,23 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemSpecLocation">The xml location the itemspec comes from</param>
         /// <param name="projectDirectory">The directory that the project is in.</param>
         /// <param name="expandProperties">Expand properties before breaking down fragments. Defaults to true</param>
+        /// <param name="loggingContext">Context in which to log</param>
         public ItemSpec(
             string itemSpec,
             Expander<P, I> expander,
             IElementLocation itemSpecLocation,
             string projectDirectory,
-            bool expandProperties = true)
+            bool expandProperties = true,
+            LoggingContext loggingContext = null)
         {
             ItemSpecString = itemSpec;
             Expander = expander;
             ItemSpecLocation = itemSpecLocation;
 
-            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties);
+            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties, loggingContext);
         }
 
-        private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
+        private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties, LoggingContext loggingContext)
         {
             // Code corresponds to Evaluator.CreateItemsFromInclude
             var evaluatedItemspecEscaped = ItemSpecString;
@@ -186,7 +189,8 @@ namespace Microsoft.Build.Evaluation
                 evaluatedItemspecEscaped = Expander.ExpandIntoStringLeaveEscaped(
                     ItemSpecString,
                     ExpanderOptions.ExpandProperties,
-                    itemSpecLocation);
+                    itemSpecLocation,
+                    loggingContext);
             }
 
             var semicolonCount = 0;

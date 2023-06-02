@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Security;
@@ -16,7 +17,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// Type of parameter, used to figure out how to serialize it. 
+    /// Type of parameter, used to figure out how to serialize it.
     /// </summary>
     internal enum TaskParameterType
     {
@@ -36,17 +37,27 @@ namespace Microsoft.Build.BackEnd
         StringArray,
 
         /// <summary>
+        /// Parameter is <c>true</c> or <c>false</c>.
+        /// </summary>
+        Bool,
+
+        /// <summary>
+        /// Parameter is an <see langword="int"/>.
+        /// </summary>
+        Int,
+
+        /// <summary>
         /// Parameter is a value type.  Note:  Must be serializable
         /// </summary>
         ValueType,
 
         /// <summary>
-        /// Parameter is an array of value types.  Note:  Must be serializable. 
+        /// Parameter is an array of value types.  Note:  Must be serializable.
         /// </summary>
         ValueTypeArray,
 
         /// <summary>
-        /// Parameter is an ITaskItem 
+        /// Parameter is an ITaskItem
         /// </summary>
         ITaskItem,
 
@@ -56,15 +67,15 @@ namespace Microsoft.Build.BackEnd
         ITaskItemArray,
 
         /// <summary>
-        /// An invalid parameter -- the value of this parameter contains the exception 
-        /// that is thrown when trying to access it. 
+        /// An invalid parameter -- the value of this parameter contains the exception
+        /// that is thrown when trying to access it.
         /// </summary>
         Invalid
     }
 
     /// <summary>
-    /// Wrapper for task parameters, to allow proper serialization even 
-    /// in cases where the parameter is not .NET serializable. 
+    /// Wrapper for task parameters, to allow proper serialization even
+    /// in cases where the parameter is not .NET serializable.
     /// </summary>
     internal class TaskParameter :
 #if FEATURE_APPDOMAIN
@@ -103,11 +114,12 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            // It's not null or invalid, so it should be a valid parameter type. 
+            // It's not null or invalid, so it should be a valid parameter type.
             ErrorUtilities.VerifyThrow
                 (
                     TaskParameterTypeVerifier.IsValidInputParameter(wrappedParameterType) || TaskParameterTypeVerifier.IsValidOutputParameter(wrappedParameterType),
-                    "How did we manage to get a task parameter that isn't a valid parameter type?"
+                    "How did we manage to get a task parameter of type {0} that isn't a valid parameter type?",
+                    wrappedParameterType
                 );
 
             if (wrappedParameterType.IsArray)
@@ -156,6 +168,28 @@ namespace Microsoft.Build.BackEnd
                     _parameterType = TaskParameterType.ITaskItem;
                     _wrappedParameter = CreateNewTaskItemFrom((ITaskItem)wrappedParameter);
                 }
+                // Preserve enums as strings: the enum type itself may not
+                // be loaded on the other side of the serialization, but
+                // we would convert to string anyway after pulling the
+                // task output into a property or item.
+                else if (wrappedParameterType.IsEnum)
+                {
+                    _parameterType = TaskParameterType.String;
+                    _wrappedParameter = (string)Convert.ChangeType(wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
+                }
+                    // Also stringify known common value types, to avoid calling
+                    // TranslateDotNet when they'll just be stringified on the
+                    // output side
+                else if (wrappedParameterType == typeof(bool))
+                {
+                    _parameterType = TaskParameterType.Bool;
+                    _wrappedParameter = wrappedParameter;
+                }
+                else if (wrappedParameterType == typeof(int))
+                {
+                    _parameterType = TaskParameterType.Int;
+                    _wrappedParameter = wrappedParameter;
+                }
                 else if (wrappedParameterType.GetTypeInfo().IsValueType)
                 {
                     _parameterType = TaskParameterType.ValueType;
@@ -196,7 +230,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// TaskParameter's ToString should just pass through to whatever it's wrapping. 
+        /// TaskParameter's ToString should just pass through to whatever it's wrapping.
         /// </summary>
         public override string ToString()
         {
@@ -204,7 +238,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Serialize / deserialize this item. 
+        /// Serialize / deserialize this item.
         /// </summary>
         public void Translate(ITranslator translator)
         {
@@ -224,6 +258,24 @@ namespace Microsoft.Build.BackEnd
                     string[] stringArrayParam = (string[])_wrappedParameter;
                     translator.Translate(ref stringArrayParam);
                     _wrappedParameter = stringArrayParam;
+                    break;
+                case TaskParameterType.Bool:
+                    bool boolParam = _wrappedParameter switch
+                    {
+                        bool hadValue => hadValue,
+                        _ => default,
+                    };
+                    translator.Translate(ref boolParam);
+                    _wrappedParameter = boolParam;
+                    break;
+                case TaskParameterType.Int:
+                    int intParam = _wrappedParameter switch
+                    {
+                        int hadValue => hadValue,
+                        _ => default,
+                    };
+                    translator.Translate(ref intParam);
+                    _wrappedParameter = intParam;
                     break;
                 case TaskParameterType.ValueType:
                 case TaskParameterType.ValueTypeArray:
@@ -270,7 +322,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Creates a new ITaskItem with the contents of the old one. 
+        /// Creates a new ITaskItem with the contents of the old one.
         /// </summary>
         private ITaskItem CreateNewTaskItemFrom(ITaskItem copyFrom)
         {
@@ -296,10 +348,10 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                // If we don't have ITaskItem2 to fall back on, we have to make do with the fact that 
-                // CloneCustomMetadata, GetMetadata, & ItemSpec returns unescaped values, and 
-                // TaskParameterTaskItem's constructor expects escaped values, so escaping them all 
-                // is the closest approximation to correct we can get.  
+                // If we don't have ITaskItem2 to fall back on, we have to make do with the fact that
+                // CloneCustomMetadata, GetMetadata, & ItemSpec returns unescaped values, and
+                // TaskParameterTaskItem's constructor expects escaped values, so escaping them all
+                // is the closest approximation to correct we can get.
                 escapedItemSpec = EscapingUtilities.Escape(copyFrom.ItemSpec);
 
                 escapedDefiningProject = EscapingUtilities.EscapeWithCaching(copyFrom.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath));
@@ -321,7 +373,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Serialize / deserialize this item. 
+        /// Serialize / deserialize this item.
         /// </summary>
         private void TranslateITaskItemArray(ITranslator translator)
         {
@@ -358,7 +410,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Serialize / deserialize this item. 
+        /// Serialize / deserialize this item.
         /// </summary>
         private void TranslateITaskItem(ITranslator translator)
         {
@@ -402,8 +454,8 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                // We know that the ITaskItem constructor expects an escaped string, and that ITaskItem.ItemSpec 
-                // is expected to be unescaped, so make sure we give the constructor what it wants. 
+                // We know that the ITaskItem constructor expects an escaped string, and that ITaskItem.ItemSpec
+                // is expected to be unescaped, so make sure we give the constructor what it wants.
                 escapedItemSpec = EscapingUtilities.Escape(wrappedItem.ItemSpec);
                 escapedDefiningProject = EscapingUtilities.EscapeWithCaching(wrappedItem.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath));
                 wrappedMetadata = wrappedItem.CloneCustomMetadata();
@@ -486,7 +538,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Super simple ITaskItem derivative that we can use as a container for read items.  
+        /// Super simple ITaskItem derivative that we can use as a container for read items.
         /// </summary>
         private class TaskParameterTaskItem :
 #if FEATURE_APPDOMAIN
@@ -499,7 +551,7 @@ namespace Microsoft.Build.BackEnd
 #endif
         {
             /// <summary>
-            /// The item spec 
+            /// The item spec
             /// </summary>
             private string _escapedItemSpec = null;
 
@@ -740,7 +792,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Sets the exact metadata value given to the metadata name requested. 
+            /// Sets the exact metadata value given to the metadata name requested.
             /// </summary>
             void ITaskItem2.SetMetadataValueLiteral(string metadataName, string metadataValue)
             {
@@ -748,7 +800,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Returns a dictionary containing all metadata and their escaped forms.  
+            /// Returns a dictionary containing all metadata and their escaped forms.
             /// </summary>
             IDictionary ITaskItem2.CloneCustomMetadataEscaped()
             {

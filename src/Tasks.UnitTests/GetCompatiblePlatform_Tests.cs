@@ -136,6 +136,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             // It will continue and have no NearestPlatform metadata.
             TaskItem projectReference = new TaskItem("foo.bar");
             projectReference.SetMetadata("Platforms", string.Empty);
+            projectReference.SetMetadata("Platform", string.Empty);
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
@@ -200,6 +201,30 @@ namespace Microsoft.Build.Tasks.UnitTests
             // it has an invalid format. The current project's PLT should be the next priority.
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("x86");
             ((MockEngine)task.BuildEngine).AssertLogContains("MSB3983");
+        }
+
+        // When `Platform` is retrieved in "GetTargetFrameworks" and that platform matches what's currently
+        // being built, build that project _without_ a global property for Platform.
+        [Theory]
+        [InlineData("x86;AnyCPU", "x64", "x64")] // Referenced platform matches current platform, build w/o global property
+        [InlineData("x64;x86;AnyCPU", "x64", "x64")] // Referenced platform overrides 'Platforms' being an option
+        public void PlatformIsChosenAsDefault(string referencedPlatforms, string referencedPlatform, string currentPlatform)
+        {
+            TaskItem projectReference = new TaskItem("foo.bar");
+            projectReference.SetMetadata("Platforms", referencedPlatforms);
+            projectReference.SetMetadata("Platform", referencedPlatform);
+
+            GetCompatiblePlatform task = new GetCompatiblePlatform()
+            {
+                BuildEngine = new MockEngine(_output),
+                CurrentProjectPlatform = currentPlatform,
+                AnnotatedProjects = new TaskItem[] { projectReference }
+            };
+
+            task.Execute().ShouldBeTrue();
+
+            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe(string.Empty);
+            task.Log.HasLoggedErrors.ShouldBeFalse();
         }
     }
 }

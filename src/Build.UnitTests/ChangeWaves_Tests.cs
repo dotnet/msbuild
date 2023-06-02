@@ -24,7 +24,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// Performs necessary operations for setting the MSBuildDisableFeaturesFromVersion environment variable.
+        /// Performs necessary operations for setting the MSBUILDDISABLEFEATURESFROMVERSION environment variable.
         /// This is required because Change Waves is static and stale values can be seen between tests in the same assembly.
         /// </summary>
         /// <param name="wave">The version to set as the current Change Wave.</param>
@@ -41,7 +41,7 @@ namespace Microsoft.Build.Engine.UnitTests
         /// </summary>
         /// <param name="testEnvironment">The TestEnvironment being used for this test.</param>
         /// <param name="versionToCheckAgainstCurrentChangeWave">The version to compare to the current set Change Wave.</param>
-        /// <param name="currentChangeWaveShouldUltimatelyResolveTo">What the project property for the environment variable MSBuildDisableFeaturesFromVersion ultimately resolves to.</param>
+        /// <param name="currentChangeWaveShouldUltimatelyResolveTo">What the project property for the environment variable MSBUILDDISABLEFEATURESFROMVERSION ultimately resolves to.</param>
         /// <param name="warningCodesLogShouldContain">An array of warning codes that should exist in the resulting log. Ex: "MSB4271".</param>
         private void buildSimpleProjectAndValidateChangeWave(TestEnvironment testEnvironment, Version versionToCheckAgainstCurrentChangeWave, Version currentChangeWaveShouldUltimatelyResolveTo, params string[] warningCodesLogShouldContain)
         {

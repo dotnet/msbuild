@@ -302,6 +302,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-

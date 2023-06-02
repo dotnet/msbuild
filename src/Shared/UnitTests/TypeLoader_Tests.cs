@@ -6,8 +6,11 @@ using System;
 using System.IO;
 using Microsoft.Build.Shared;
 using System.Reflection;
-using Xunit;
 using Microsoft.Build.UnitTests.Shared;
+using Xunit;
+using Xunit.Abstractions;
+using Shouldly;
+using System.Linq;
 
 #nullable disable
 
@@ -18,6 +21,15 @@ namespace Microsoft.Build.UnitTests
         private static readonly string ProjectFileFolder = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "PortableTask");
         private const string ProjectFileName = "portableTaskTest.proj";
         private const string DLLFileName = "PortableTask.dll";
+        private static string PortableTaskFolderPath = Path.GetFullPath(
+                    Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "..", "..", "..", "Samples", "PortableTask"));
+
+        private readonly ITestOutputHelper _output;
+
+        public TypeLoader_Tests(ITestOutputHelper testOutputHelper)
+        {
+            _output = testOutputHelper;
+        }
 
         [Fact]
         public void Basic()
@@ -50,19 +62,18 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LoadNonExistingAssembly()
         {
-            using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))
-            {
-                string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
+            using var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder);
 
-                string dllName = "NonExistent.dll";
+            string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
 
-                bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + dllName, out successfulExit);
-                Assert.False(successfulExit);
+            string dllName = "NonExistent.dll";
 
-                string dllPath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, dllName);
-                CheckIfCorrectAssemblyLoaded(output, dllPath, false);
-            }
+            bool successfulExit;
+            string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + dllName, out successfulExit, _output);
+            successfulExit.ShouldBeFalse();
+
+            string dllPath = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, dllName);
+            CheckIfCorrectAssemblyLoaded(output, dllPath, false);
         }
 
         [Fact]
@@ -73,12 +84,34 @@ namespace Microsoft.Build.UnitTests
                 string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
 
                 bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag", out successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag", out successfulExit, _output);
                 Assert.True(successfulExit);
 
                 string dllPath = Path.Combine(dir.Path, DLLFileName);
 
                 CheckIfCorrectAssemblyLoaded(output, dllPath);
+            }
+        }
+
+        [Fact]
+        public void LoadTaskDependingOnMSBuild()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                string currentAssembly = Assembly.GetExecutingAssembly().Location;
+                string utilitiesName = "Microsoft.Build.Utilities.Core.dll";
+                string newAssemblyLocation = Path.Combine(folder.Path, Path.GetFileName(currentAssembly));
+
+                // The "first" directory is "Debug" or "Release"
+                string portableTaskPath = Path.Combine(Directory.GetDirectories(PortableTaskFolderPath).First(), "netstandard2.0", "OldMSBuild");
+                string utilities = Path.Combine(portableTaskPath, utilitiesName);
+                File.Copy(utilities, Path.Combine(folder.Path, utilitiesName));
+                File.Copy(currentAssembly, newAssemblyLocation);
+                TypeLoader typeLoader = new(TaskLoader.IsTaskClass);
+
+                // If we cannot accept MSBuild next to the task assembly we're loading, this will throw.
+                typeLoader.Load("TypeLoader_Tests", AssemblyLoadInfo.Create(null, newAssemblyLocation), useTaskHost: true);
             }
         }
 
@@ -95,7 +128,7 @@ namespace Microsoft.Build.UnitTests
                 try
                 {
                     bool successfulExit;
-                    string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + movedDLLPath, out successfulExit);
+                    string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + movedDLLPath, out successfulExit, _output);
                     Assert.True(successfulExit);
 
                     CheckIfCorrectAssemblyLoaded(output, movedDLLPath);
@@ -119,7 +152,7 @@ namespace Microsoft.Build.UnitTests
                 try
                 {
                     bool successfulExit;
-                    string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + copiedDllPath, out successfulExit);
+                    string output = RunnerUtilities.ExecMSBuild(projectFilePath + " /v:diag /p:AssemblyPath=" + copiedDllPath, out successfulExit, _output);
                     Assert.True(successfulExit);
 
                     CheckIfCorrectAssemblyLoaded(output, originalDLLPath);
@@ -301,4 +334,3 @@ namespace Microsoft.Build.UnitTests
 #endif
     }
 }
-

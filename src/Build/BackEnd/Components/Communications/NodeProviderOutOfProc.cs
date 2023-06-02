@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-
 using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Utilities;
+using System.Linq;
 
 #nullable disable
 
@@ -23,7 +24,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A mapping of all the nodes managed by this provider.
         /// </summary>
-        private Dictionary<int, NodeContext> _nodeContexts;
+        private ConcurrentDictionary<int, NodeContext> _nodeContexts;
 
         /// <summary>
         /// Constructor.
@@ -69,21 +70,25 @@ namespace Microsoft.Build.BackEnd
         internal static Handshake GetHandshake(bool enableNodeReuse, bool enableLowPriority)
         {
             CommunicationsUtilities.Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", enableNodeReuse={2}, enableLowPriority={3}", Traits.MSBuildNodeHandshakeSalt, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, enableNodeReuse, enableLowPriority);
-            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, nodeReuse: enableNodeReuse, lowPriority: enableLowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess));
+            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse: enableNodeReuse, lowPriority: enableLowPriority));
         }
 
         /// <summary>
-        /// Instantiates a new MSBuild process acting as a child node.
+        /// Instantiates a new MSBuild processes acting as a child nodes or connect to existing ones.
         /// </summary>
-        public bool CreateNode(int nodeId, INodePacketFactory factory, NodeConfiguration configuration)
+        public IList<NodeInfo> CreateNodes(int nextNodeId, INodePacketFactory factory, Func<NodeInfo, NodeConfiguration> configurationFactory, int numberOfNodesToCreate)
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
 
-            if (_nodeContexts.Count >= ComponentHost.BuildParameters.MaxNodeCount)
+            // This can run concurrently. To be properly detect internal bug when we create more nodes than allowed
+            //   we add into _nodeContexts premise of future node and verify that it will not cross limits.
+            if (_nodeContexts.Count + numberOfNodesToCreate > ComponentHost.BuildParameters.MaxNodeCount)
             {
-                ErrorUtilities.ThrowInternalError("All allowable nodes already created ({0}).", _nodeContexts.Count);
-                return false;
+                ErrorUtilities.ThrowInternalError("Exceeded max node count of '{0}', current count is '{1}' ", ComponentHost.BuildParameters.MaxNodeCount, _nodeContexts.Count);
+                return new List<NodeInfo>();
             }
+
+            ConcurrentBag<NodeInfo> nodes = new();
 
             // Start the new process.  We pass in a node mode with a node number of 1, to indicate that we
             // want to start up just a standard MSBuild out-of-proc node.
@@ -91,26 +96,32 @@ namespace Microsoft.Build.BackEnd
             // (next to msbuild.exe) is ignored.
             string commandLineArgs = $"/nologo /nodemode:1 /nodeReuse:{ComponentHost.BuildParameters.EnableNodeReuse.ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()}";
 
-            // Make it here.
-            CommunicationsUtilities.Trace("Starting to acquire a new or existing node to establish node ID {0}...", nodeId);
+            CommunicationsUtilities.Trace("Starting to acquire {1} new or existing node(s) to establish nodes from ID {0} to {2}...", nextNodeId, numberOfNodesToCreate, nextNodeId + numberOfNodesToCreate - 1);
 
-            Handshake hostHandshake = new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, nodeReuse: ComponentHost.BuildParameters.EnableNodeReuse, lowPriority: ComponentHost.BuildParameters.LowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess));
-            NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, hostHandshake, NodeContextTerminated);
+            Handshake hostHandshake = new(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse: ComponentHost.BuildParameters.EnableNodeReuse, lowPriority: ComponentHost.BuildParameters.LowPriority));
+            IList<NodeContext> nodeContexts = GetNodes(null, commandLineArgs, nextNodeId, factory, hostHandshake, NodeContextCreated, NodeContextTerminated, numberOfNodesToCreate);
 
-            if (context != null)
+            if (nodeContexts.Count > 0)
             {
-                _nodeContexts[nodeId] = context;
+                return nodeContexts
+                    .Select(nc => new NodeInfo(nc.NodeId, ProviderType))
+                    .ToList();
+            }
+
+            throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotConnectToMSBuildExe", ComponentHost.BuildParameters.NodeExeLocation));
+
+            void NodeContextCreated(NodeContext context)
+            {
+                NodeInfo nodeInfo = new NodeInfo(context.NodeId, ProviderType);
+
+                _nodeContexts[context.NodeId] = context;
 
                 // Start the asynchronous read.
                 context.BeginAsyncPacketRead();
 
                 // Configure the node.
-                context.SendData(configuration);
-
-                return true;
+                context.SendData(configurationFactory(nodeInfo));
             }
-
-            throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotConnectToMSBuildExe", ComponentHost.BuildParameters.NodeExeLocation));
         }
 
         /// <summary>
@@ -132,12 +143,7 @@ namespace Microsoft.Build.BackEnd
         public void ShutdownConnectedNodes(bool enableReuse)
         {
             // Send the build completion message to the nodes, causing them to shutdown or reset.
-            List<NodeContext> contextsToShutDown;
-
-            lock (_nodeContexts)
-            {
-                contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
-            }
+            var contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
 
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
         }
@@ -171,7 +177,7 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             this.ComponentHost = host;
-            _nodeContexts = new Dictionary<int, NodeContext>();
+            _nodeContexts = new ConcurrentDictionary<int, NodeContext>();
         }
 
         /// <summary>
@@ -197,10 +203,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void NodeContextTerminated(int nodeId)
         {
-            lock (_nodeContexts)
-            {
-                _nodeContexts.Remove(nodeId);
-            }
+            _nodeContexts.TryRemove(nodeId, out _);
+        }
+
+        public IEnumerable<Process> GetProcesses()
+        {
+            return _nodeContexts.Values.Select(context => context.Process);
         }
     }
 }

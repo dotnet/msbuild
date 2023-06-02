@@ -8,6 +8,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 using System.Reflection;
 
@@ -525,48 +526,52 @@ namespace Microsoft.Build.Shared
                 CurrentMSBuildConfigurationFile = string.Concat(currentMSBuildExePath, ".config");
                 MSBuildToolsDirectory32 = CurrentMSBuildToolsDirectory;
                 MSBuildToolsDirectory64 = CurrentMSBuildToolsDirectory;
+                MSBuildToolsDirectoryRoot = CurrentMSBuildToolsDirectory;
             }
 
             // We can't detect an environment, don't try to set other paths.
             if (mode == BuildEnvironmentMode.None || currentMSBuildExeFile == null || currentToolsDirectory == null)
                 return;
 
-            // Check to see if our current folder is 'amd64'
-            bool runningInAmd64 = string.Equals(currentToolsDirectory.Name, "amd64", StringComparison.OrdinalIgnoreCase);
-            bool runningInARM64 = string.Equals(currentToolsDirectory.Name, "arm64", StringComparison.OrdinalIgnoreCase);
-
             var msBuildExeName = currentMSBuildExeFile.Name;
-            var folderAbove = currentToolsDirectory.Parent?.FullName;
 
-            if (folderAbove != null)
+            if (mode == BuildEnvironmentMode.VisualStudio)
+            {
+                // In Visual Studio, the entry-point MSBuild.exe is often from an arch-specific subfolder
+                MSBuildToolsDirectoryRoot = NativeMethodsShared.ProcessorArchitecture switch
+                {
+                    NativeMethodsShared.ProcessorArchitectures.X86 => CurrentMSBuildToolsDirectory,
+                    NativeMethodsShared.ProcessorArchitectures.X64 or NativeMethodsShared.ProcessorArchitectures.ARM64
+                        => currentToolsDirectory.Parent?.FullName,
+                    _ => throw new InternalErrorException("Unknown processor architecture " + NativeMethodsShared.ProcessorArchitecture),
+                };
+            }
+            else
+            {
+                // In the .NET SDK, there's one copy of MSBuild.dll and it's in the root folder.
+                MSBuildToolsDirectoryRoot = CurrentMSBuildToolsDirectory;
+
+                // If we're standalone, we might not be in the SDK. Rely on folder paths at this point.
+                if (string.Equals(currentToolsDirectory.Name, "amd64", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(currentToolsDirectory.Name, "arm64", StringComparison.OrdinalIgnoreCase))
+                {
+                    MSBuildToolsDirectoryRoot = currentToolsDirectory.Parent?.FullName;
+                }
+            }
+
+            if (MSBuildToolsDirectoryRoot != null)
             {
                 // Calculate potential paths to other architecture MSBuild.exe
-                var potentialAmd64FromX86 = FileUtilities.CombinePaths(CurrentMSBuildToolsDirectory, "amd64", msBuildExeName);
-                var potentialARM64FromX86 = FileUtilities.CombinePaths(CurrentMSBuildToolsDirectory, "arm64", msBuildExeName);
-                var potentialX86FromAmd64 = Path.Combine(folderAbove, msBuildExeName);
+                var potentialAmd64FromX86 = FileUtilities.CombinePaths(MSBuildToolsDirectoryRoot, "amd64", msBuildExeName);
+                var potentialARM64FromX86 = FileUtilities.CombinePaths(MSBuildToolsDirectoryRoot, "arm64", msBuildExeName);
 
                 // Check for existence of an MSBuild file. Note this is not necessary in a VS installation where we always want to
                 // assume the correct layout.
                 var existsCheck = mode == BuildEnvironmentMode.VisualStudio ? new Func<string, bool>(_ => true) : File.Exists;
 
-                if ((runningInARM64 || runningInAmd64) && existsCheck(potentialX86FromAmd64))
-                {
-                    MSBuildToolsDirectory32 = folderAbove;
-                    MSBuildToolsDirectory64 = CurrentMSBuildToolsDirectory;
-                }
-                else if (!runningInAmd64 && !runningInARM64)
-                {
-                    MSBuildToolsDirectory32 = CurrentMSBuildToolsDirectory;
-
-                    if (existsCheck(potentialARM64FromX86) && NativeMethodsShared.ProcessorArchitecture == Framework.NativeMethods.ProcessorArchitectures.ARM64)
-                    {
-                        MSBuildToolsDirectory64 = Path.Combine(CurrentMSBuildToolsDirectory, "arm64");
-                    }
-                    else if (existsCheck(potentialAmd64FromX86))
-                    {
-                        MSBuildToolsDirectory64 = Path.Combine(CurrentMSBuildToolsDirectory, "amd64");
-                    }
-                }
+                MSBuildToolsDirectory32 = MSBuildToolsDirectoryRoot;
+                MSBuildToolsDirectory64 = existsCheck(potentialAmd64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "amd64") : CurrentMSBuildToolsDirectory;
+                MSBuildToolsDirectoryArm64 = existsCheck(potentialARM64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "arm64") : null;
             }
 
             MSBuildExtensionsPath = mode == BuildEnvironmentMode.VisualStudio
@@ -587,6 +592,11 @@ namespace Microsoft.Build.Shared
         internal bool RunningInVisualStudio { get; }
 
         /// <summary>
+        /// Path to the root of the MSBuild folder (in VS scenarios, <c>MSBuild\Current\bin</c>).
+        /// </summary>
+        internal string MSBuildToolsDirectoryRoot { get; }
+
+        /// <summary>
         /// Path to the MSBuild 32-bit tools directory.
         /// </summary>
         internal string MSBuildToolsDirectory32 { get; }
@@ -595,6 +605,12 @@ namespace Microsoft.Build.Shared
         /// Path to the MSBuild 64-bit (AMD64) tools directory.
         /// </summary>
         internal string MSBuildToolsDirectory64 { get; }
+
+        /// <summary>
+        /// Path to the ARM64 tools directory.
+        /// <see langword="null" /> if ARM64 tools are not installed.
+        /// </summary>
+        internal string MSBuildToolsDirectoryArm64 { get; }
 
         /// <summary>
         /// Path to the Sdks folder for this MSBuild instance.

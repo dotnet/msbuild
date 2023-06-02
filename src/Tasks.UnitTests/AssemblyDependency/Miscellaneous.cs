@@ -3306,7 +3306,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Single(parentReferenceFolders);
             Assert.Equal(reference2.ResolvedSearchPath, parentReferenceFolders[0]);
         }
-        
+
         /// <summary>
         /// Generate a fake reference which has been resolved from the gac. We will use it to verify the creation of the exclusion list.
         /// </summary>
@@ -3652,7 +3652,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///   References - D, version 1
         ///
         /// Both D1 and D2 are CopyLocal. This is a warning because D1 is a lower version
-        /// than both D2 so that can't unify. These means that eventually when 
+        /// than both D2 so that can't unify. These means that eventually when
         /// they're copied to the output directory they'll conflict.
         /// </summary>
         [Fact]
@@ -5982,7 +5982,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RedistListGenerateBlackListGoodListsSubsetIsSubsetOfRedist()
         {
-            string redistFile = CreateGenericRedistList(); 
+            string redistFile = CreateGenericRedistList();
             string goodSubsetFile = FileUtilities.GetTemporaryFile();
             try
             {

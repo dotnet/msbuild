@@ -45,6 +45,10 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string cacheDirectory = null;
 
+#if CLR2COMPATIBILITY
+        internal static string TempFileDirectory => Path.GetTempPath();
+#endif
+
         /// <summary>
         /// FOR UNIT TESTS ONLY
         /// Clear out the static variable used for the cache directory so that tests that
@@ -174,6 +178,8 @@ namespace Microsoft.Build.Shared
             try
             {
                 string testFilePath = Path.Combine(directory, $"MSBuild_{Guid.NewGuid().ToString("N")}_testFile.txt");
+                FileInfo file = new(testFilePath);
+                file.Directory.Create(); // If the directory already exists, this method does nothing.
                 File.WriteAllText(testFilePath, $"MSBuild process {Process.GetCurrentProcess().Id} successfully wrote to file.");
                 File.Delete(testFilePath);
                 return true;

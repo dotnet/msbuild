@@ -43,11 +43,12 @@
   <Target Name="UpdateMSBuildDepsFile" AfterTargets="Build" Condition="'$(MonoBuild)' != 'true' and ($([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1')) or '$(TargetFramework)' == 'netstandard2.0')">
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).deps.json" DestinationFiles="$(OutputPath)MSBuild.deps.json" />
   </Target>
-  <Target Name="UpdatePublishedMSBuildDepsFile" AfterTargets="Publish" Condition="'$(TargetFramework)' == 'net6.0'">
+  <Target Name="UpdatePublishedMSBuildDepsFile" AfterTargets="Publish" Condition="'$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">
     <Copy SourceFiles="$(PublishDir)$(AssemblyName).deps.json" DestinationFiles="$(PublishDir)MSBuild.deps.json" />
   </Target>
 
   <Import Project="..\Package\GetBinPaths.targets" Condition="$(TargetFramework.StartsWith('net4'))"/>
+  <Import Project="..\Package\GetBinPaths.Arm64.targets" Condition="$(TargetFramework.StartsWith('net4'))"/>
 
   <Import Project="$(RepoRoot)eng\BootStrapMSBuild.targets" />
 

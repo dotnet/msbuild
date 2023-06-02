@@ -26,6 +26,7 @@
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
     <ProjectReference Include="..\Samples\PortableTask\PortableTask.csproj" ReferenceOutputAssembly="false" Private="false" />
+    <ProjectReference Include="..\Samples\Dependency\Dependency.csproj" ReferenceOutputAssembly="false" Private="false" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -43,7 +44,6 @@
     <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\FileMatcher_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\MockEngine.cs" />
     <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
     <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs">
@@ -56,6 +56,7 @@
     <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
       <Link>TestEnvironment.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\ProcessExtensions.cs" />
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
 
     <EmbeddedResource Include="SampleResx" />
@@ -68,6 +69,12 @@
     <None Include="..\Shared\UnitTests\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup> 
+    <Content Include="TestDocuments\**"> 
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory> 
+    </Content> 
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
@@ -101,8 +108,6 @@
     <Compile Remove="ResourceHandling\GenerateResourceOutOfProc_Tests.cs" />
     <Compile Remove="ResourceHandling\ResGen_Tests.cs" />
     <Compile Remove="ResourceHandling\ResGenDependencies_Tests.cs" />
-    <Compile Remove="GetInstalledSDKLocations_Tests.cs" />
-    <Compile Remove="GetSDKReference_Tests.cs" />
     <Compile Remove="LC_Tests.cs" />
     <Compile Remove="MockTypeInfo.cs" />
     <Compile Remove="MockTypeLib.cs" />
@@ -123,7 +128,6 @@
     <Compile Remove="AssemblyDependency\VerifyTargetFrameworkHigherThanRedist.cs" />
     <Compile Remove="AssemblyDependency\WinMDTests.cs" />
     <Compile Remove="ResolveComReference_Tests.cs" />
-    <Compile Remove="ResolveSDKReference_Tests.cs" />
     <Compile Remove="SdkToolsPathUtility_Tests.cs" />
     <Compile Remove="TlbImp_Tests.cs" />
     <Compile Remove="VisualBasicParserUtilitites_Tests.cs" />

@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.VisualBasic.CurrentVersion.targets
 
@@ -14,7 +14,6 @@ this file.
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project>
 
     <PropertyGroup>

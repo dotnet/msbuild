@@ -221,6 +221,12 @@ namespace Microsoft.Build.BackEnd
                 EnqueuePacket(packet);
             }
         }
+
+        public void ClientWillDisconnect()
+        {
+            // We do not need to do anything here for InProc node.
+        }
+
         #endregion
 
         #region Internal Methods

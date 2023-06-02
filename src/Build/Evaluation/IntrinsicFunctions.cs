@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
+using System.Text;
 using System.Text.RegularExpressions;
 
 using Microsoft.Build.Framework;
@@ -27,11 +29,11 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal static class IntrinsicFunctions
     {
-#if FEATURE_WIN32_REGISTRY
+#pragma warning disable CA1416 // Platform compatibility: we'll only use this on Windows
         private static readonly object[] DefaultRegistryViews = new object[] { RegistryView.Default };
+#pragma warning restore CA1416
 
         private static readonly Lazy<Regex> RegistrySdkRegex = new Lazy<Regex>(() => new Regex(@"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$", RegexOptions.IgnoreCase));
-#endif // FEATURE_WIN32_REGISTRY
 
         private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => new NuGetFrameworkWrapper());
 
@@ -163,12 +165,20 @@ namespace Microsoft.Build.Evaluation
             return ~first;
         }
 
-#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Get the value of the registry key and value, default value is null
         /// </summary>
         internal static object GetRegistryValue(string keyName, string valueName)
         {
+#if RUNTIME_TYPE_NETCORE
+            // .NET Core MSBuild used to always return empty, so match that behavior
+            // on non-Windows (no registry), and with a changewave (in case someone
+            // had a registry property and it breaks when it lights up).
+            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            {
+                return null;
+            }
+#endif
             return Registry.GetValue(keyName, valueName, null /* null to match the $(Regsitry:XYZ@ZBC) behaviour */);
         }
 
@@ -177,11 +187,30 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static object GetRegistryValue(string keyName, string valueName, object defaultValue)
         {
+#if RUNTIME_TYPE_NETCORE
+            // .NET Core MSBuild used to always return empty, so match that behavior
+            // on non-Windows (no registry), and with a changewave (in case someone
+            // had a registry property and it breaks when it lights up).
+            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            {
+                return defaultValue;
+            }
+#endif
             return Registry.GetValue(keyName, valueName, defaultValue);
         }
 
         internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, params object[] views)
         {
+#if RUNTIME_TYPE_NETCORE
+            // .NET Core MSBuild used to always return empty, so match that behavior
+            // on non-Windows (no registry), and with a changewave (in case someone
+            // had a registry property and it breaks when it lights up).
+            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            {
+                return defaultValue;
+            }
+#endif
+
             if (views == null || views.Length == 0)
             {
                 views = DefaultRegistryViews;
@@ -195,6 +224,16 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, ArraySegment<object> views)
         {
+#if RUNTIME_TYPE_NETCORE
+            // .NET Core MSBuild used to always return empty, so match that behavior
+            // on non-Windows (no registry), and with a changewave (in case someone
+            // had a registry property and it breaks when it lights up).
+            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            {
+                return defaultValue;
+            }
+#endif
+
             // We will take on handing of default value
             // A we need to act on the null return from the GetValue call below
             // so we can keep searching other registry views
@@ -262,33 +301,6 @@ namespace Microsoft.Build.Evaluation
             return result;
         }
 
-#else // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
-
-        /// <summary>
-        /// Get the value of the registry key and value, default value is null
-        /// </summary>
-        internal static object GetRegistryValue(string keyName, string valueName)
-        {
-            return null; // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
-        }
-
-        /// <summary>
-        /// Get the value of the registry key and value
-        /// </summary>
-        internal static object GetRegistryValue(string keyName, string valueName, object defaultValue)
-        {
-            return defaultValue; // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
-        }
-
-        /// <summary>
-        /// Get the value of the registry key from one of the RegistryView's specified
-        /// </summary>
-        internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, params object[] views)
-        {
-            return defaultValue; // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
-        }
-#endif
-
         /// <summary>
         /// Given the absolute location of a file, and a disc location, returns relative file path to that disk location.
         /// Throws UriFormatException.
@@ -348,6 +360,26 @@ namespace Microsoft.Build.Evaluation
             {
                 return conditionValue;
             }
+        }
+
+        /// <summary>
+        /// Returns the string after converting all bytes to base 64 (alphanumeric characters plus '+' and '/'), ending in one or two '='.
+        /// </summary>
+        /// <param name="toEncode">String to encode in base 64.</param>
+        /// <returns>The encoded string.</returns>
+        internal static string ConvertToBase64(string toEncode)
+        {
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(toEncode));
+        }
+
+        /// <summary>
+        /// Returns the string after converting from base 64 (alphanumeric characters plus '+' and '/'), ending in one or two '='.
+        /// </summary>
+        /// <param name="toDecode">The string to decode.</param>
+        /// <returns>The decoded string.</returns>
+        internal static string ConvertFromBase64(string toDecode)
+        {
+            return Encoding.UTF8.GetString(Convert.FromBase64String(toDecode));
         }
 
         /// <summary>
@@ -574,7 +606,6 @@ namespace Microsoft.Build.Evaluation
 
 #endregion
 
-#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Following function will parse a keyName and returns the basekey for it.
         /// It will also store the subkey name in the out parameter.
@@ -582,6 +613,7 @@ namespace Microsoft.Build.Evaluation
         /// The return value shouldn't be null.
         /// Taken from: \ndp\clr\src\BCL\Microsoft\Win32\Registry.cs
         /// </summary>
+        [SupportedOSPlatform("windows")]
         private static RegistryKey GetBaseKeyFromKeyName(string keyName, RegistryView view, out string subKeyName)
         {
             if (keyName == null)
@@ -643,6 +675,5 @@ namespace Microsoft.Build.Evaluation
 
             return basekey;
         }
-#endif
     }
 }

@@ -130,6 +130,11 @@ namespace Microsoft.Build.Shared
         /// Event is a TelemetryEventArgs
         /// </summary>
         Telemetry = 18,
+
+        /// <summary>
+        /// Event is an EnvironmentVariableReadEventArgs
+        /// </summary>
+        EnvironmentVariableReadEvent = 19,
     }
     #endregion
 
@@ -323,7 +328,8 @@ namespace Microsoft.Build.Shared
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
                 if (_buildEvent is ProjectEvaluationStartedEventArgs ||
-                    _buildEvent is ProjectEvaluationFinishedEventArgs)
+                    _buildEvent is ProjectEvaluationFinishedEventArgs ||
+                    _buildEvent is EnvironmentVariableReadEventArgs)
                 {
                     // switch to serialization methods that we provide in this file
                     // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
@@ -403,6 +409,7 @@ namespace Microsoft.Build.Shared
                 else
                 {
                     _buildEvent = ReadEventFromStream(_eventType, translator);
+                    ErrorUtilities.VerifyThrow(_buildEvent is not null, "Not Supported LoggingEventType {0}", _eventType.ToString());
                 }
             }
             else
@@ -509,6 +516,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.TaskStartedEvent => new TaskStartedEventArgs(null, null, null, null, null),
                 LoggingEventType.TaskFinishedEvent => new TaskFinishedEventArgs(null, null, null, null, null, false),
                 LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
+                LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
 #if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
                 LoggingEventType.TaskParameterEvent => new TaskParameterEventArgs(0, null, null, true, default),
                 LoggingEventType.ProjectEvaluationStartedEvent => new ProjectEvaluationStartedEventArgs(),
@@ -607,6 +615,10 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.BuildErrorEvent;
             }
+            else if (eventType == typeof(EnvironmentVariableReadEventArgs))
+            {
+                return LoggingEventType.EnvironmentVariableReadEvent;
+            }
             else
             {
                 return LoggingEventType.CustomEvent;
@@ -661,10 +673,27 @@ namespace Microsoft.Build.Shared
                 case LoggingEventType.ProjectFinishedEvent:
                     WriteExternalProjectFinishedEventToStream((ExternalProjectFinishedEventArgs)buildEvent, translator);
                     break;
+                case LoggingEventType.EnvironmentVariableReadEvent:
+                    WriteEnvironmentVariableReadEventArgs((EnvironmentVariableReadEventArgs)buildEvent, translator);
+                    break;
                 default:
                     ErrorUtilities.ThrowInternalError("Not Supported LoggingEventType {0}", eventType.ToString());
                     break;
             }
+        }
+
+        /// <summary>
+        /// Serializes EnvironmentVariableRead Event argument to the stream. Does not work properly on TaskHosts due to BuildEventContext serialization not being
+        /// enabled on TaskHosts, but that shouldn't matter, as this should never be called from a TaskHost anyway.
+        /// </summary>
+        private void WriteEnvironmentVariableReadEventArgs(EnvironmentVariableReadEventArgs environmentVariableReadEventArgs, ITranslator translator)
+        {
+            string name = environmentVariableReadEventArgs.EnvironmentVariableName;
+            translator.Translate(ref name);
+            BuildEventContext context = environmentVariableReadEventArgs.BuildEventContext;
+#if !CLR2COMPATIBILITY
+            translator.Translate(ref context);
+#endif
         }
 
         /// <summary>
@@ -882,7 +911,7 @@ namespace Microsoft.Build.Shared
             // it is expensive to access a ThreadStatic field every time
             var list = reusablePropertyList;
 
-            Internal.Utilities.EnumerateProperties(properties, kvp => list.Add(kvp));
+            Internal.Utilities.EnumerateProperties(properties, list, static (list, kvp) => list.Add(kvp));
 
             BinaryWriterExtensions.Write7BitEncodedInt(writer, list.Count);
 
@@ -1001,33 +1030,33 @@ namespace Microsoft.Build.Shared
             translator.Translate(ref helpKeyword);
             translator.Translate(ref senderName);
 
-            BuildEventArgs buildEvent = null;
-            switch (eventType)
+            return eventType switch
             {
-                case LoggingEventType.TaskCommandLineEvent:
-                    buildEvent = ReadTaskCommandLineEventFromStream(translator, message, helpKeyword, senderName);
-                    break;
-                case LoggingEventType.BuildErrorEvent:
-                    buildEvent = ReadTaskBuildErrorEventFromStream(translator, message, helpKeyword, senderName);
-                    break;
-                case LoggingEventType.ProjectStartedEvent:
-                    buildEvent = ReadExternalProjectStartedEventFromStream(translator, message, helpKeyword, senderName);
-                    break;
-                case LoggingEventType.ProjectFinishedEvent:
-                    buildEvent = ReadExternalProjectFinishedEventFromStream(translator, message, helpKeyword, senderName);
-                    break;
-                case LoggingEventType.BuildMessageEvent:
-                    buildEvent = ReadBuildMessageEventFromStream(translator, message, helpKeyword, senderName);
-                    break;
-                case LoggingEventType.BuildWarningEvent:
-                    buildEvent = ReadBuildWarningEventFromStream(translator, message, helpKeyword, senderName);
-                    break;
-                default:
-                    ErrorUtilities.ThrowInternalError("Not Supported LoggingEventType {0}", eventType.ToString());
-                    break;
-            }
+                LoggingEventType.TaskCommandLineEvent => ReadTaskCommandLineEventFromStream(translator, message, helpKeyword, senderName),
+                LoggingEventType.BuildErrorEvent => ReadTaskBuildErrorEventFromStream(translator, message, helpKeyword, senderName),
+                LoggingEventType.ProjectStartedEvent => ReadExternalProjectStartedEventFromStream(translator, message, helpKeyword, senderName),
+                LoggingEventType.ProjectFinishedEvent => ReadExternalProjectFinishedEventFromStream(translator, message, helpKeyword, senderName),
+                LoggingEventType.BuildMessageEvent => ReadBuildMessageEventFromStream(translator, message, helpKeyword, senderName),
+                LoggingEventType.BuildWarningEvent => ReadBuildWarningEventFromStream(translator, message, helpKeyword, senderName),
+                LoggingEventType.EnvironmentVariableReadEvent => ReadEnvironmentVariableReadEventFromStream(translator, message, helpKeyword, senderName),
+                _ => null,
+            };
+        }
 
-            return buildEvent;
+        /// <summary>
+        /// Read and reconstruct an EnvironmentVariableReadEventArgs from the stream. This message should never be called from a TaskHost, so although the context translation does not work, that's ok.
+        /// </summary>
+        private EnvironmentVariableReadEventArgs ReadEnvironmentVariableReadEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
+        {
+            string environmentVariableName = null;
+            translator.Translate(ref environmentVariableName);
+            BuildEventContext context = null;
+#if !CLR2COMPATIBILITY
+            translator.Translate(ref context);
+#endif
+            EnvironmentVariableReadEventArgs args = new(environmentVariableName, message);
+            args.BuildEventContext = context;
+            return args;
         }
 
         /// <summary>

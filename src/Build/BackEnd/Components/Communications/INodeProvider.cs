@@ -1,7 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable disable
+using System;
+
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -57,14 +61,15 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests that a new node be created on the specified machine.
         /// </summary>
-        /// <param name="nodeId">The id to assign to the node.</param>
+        /// <param name="nextNodeId">The id to assign to the first created node. Resulting nodes ids will be in range [nextNodeId, nextNodeId + numberOfNodesToCreate - 1]</param>
         /// <param name="packetFactory">
         /// The packet factory used to create packets when data is
         /// received on this node.
         /// </param>
-        /// <param name="configuration">The configuration to use to create the remote node.</param>
-        /// <returns>True if the node was created, false otherwise.</returns>
-        bool CreateNode(int nodeId, INodePacketFactory packetFactory, NodeConfiguration configuration);
+        /// <param name="configurationFactory">NodeConfiguration factory of particular node</param>
+        /// <param name="numberOfNodesToCreate">Required number of nodes to create</param>
+        /// <returns>Array of NodeInfo of successfully created nodes</returns>
+        IList<NodeInfo> CreateNodes(int nextNodeId, INodePacketFactory packetFactory, Func<NodeInfo, NodeConfiguration> configurationFactory, int numberOfNodesToCreate);
 
         /// <summary>
         /// Sends data to a specific node.
@@ -83,6 +88,8 @@ namespace Microsoft.Build.BackEnd
         /// Shuts down all of the managed nodes.  This call will not return until all nodes are shut down.
         /// </summary>
         void ShutdownAllNodes();
+
+        IEnumerable<Process> GetProcesses();
         #endregion
     }
 }

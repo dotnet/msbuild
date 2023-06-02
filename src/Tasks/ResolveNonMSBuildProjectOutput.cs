@@ -180,4 +180,3 @@ namespace Microsoft.Build.Tasks
         #endregion
     }
 }
-

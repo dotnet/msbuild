@@ -4,7 +4,7 @@
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
-    <TargetFrameworks>$(FullFrameworkTFM);net6.0</TargetFrameworks>
+    <TargetFrameworks>$(FullFrameworkTFM);$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
     <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>
     <AssemblyName>Microsoft.Build</AssemblyName>
@@ -35,6 +35,7 @@
     <PackageReference Include="System.Text.Json" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" />
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
   </ItemGroup>
@@ -51,8 +52,6 @@
     <PackageReference Include="System.Reflection.Metadata" />
     <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Text.Encoding.CodePages" />
-    <!-- Need Win32 API on .NET Core to ping registry to determine long path support -->
-    <PackageReference Include="Microsoft.Win32.Registry" />
   </ItemGroup>
 
   <ItemGroup>
@@ -122,6 +121,10 @@
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\ProcessExtensions.cs" />
+    <Compile Include="..\Shared\PlatformNegotiation.cs">
+      <Link>PlatformNegotiation.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelper.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
@@ -144,12 +147,31 @@
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
     <Compile Include="BackEnd\BuildManager\CacheSerialization.cs" />
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
+    <Compile Include="BackEnd\Client\MSBuildClientPacketPump.cs" />
+    <Compile Include="BackEnd\Client\MSBuildClientExitType.cs" />
+    <Compile Include="BackEnd\Client\MSBuildClientExitResult.cs" />
+    <Compile Include="BackEnd\Client\MSBuildClient.cs" />
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
+    <Compile Include="BackEnd\Components\Communications\CurrentHost.cs" />
+    <Compile Include="BackEnd\Components\Communications\ServerNodeEndpointOutOfProc.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="FileSystem\*.cs" />
+    <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
+    <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
+    <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
+    <Compile Include="BackEnd\Node\ServerNamedMutex.cs" />
+    <Compile Include="BackEnd\Node\ServerNodeBuildCancel.cs" />
+    <Compile Include="BackEnd\Node\ServerNodeBuildCommand.cs" />
+    <Compile Include="BackEnd\Node\ServerNodeConsoleWrite.cs" />
+    <Compile Include="BackEnd\Node\ServerNodeBuildResult.cs" />
+    <Compile Include="BackEnd\Node\OutOfProcServerNode.cs" />
+    <Compile Include="Logging\ConsoleConfiguration.cs" />
+    <Compile Include="Logging\IConsoleConfiguration.cs" />
+    <Compile Include="Logging\InProcessConsoleConfiguration.cs" />
+    <Compile Include="Logging\TargetConsoleConfiguration.cs" />
     <Compile Include="Utilities\ImmutableCollectionsExtensions.cs" />
     <Compile Include="Utilities\NuGetFrameworkWrapper.cs" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectUsingTaskParameterElementLink.cs" />
@@ -340,6 +362,7 @@
     <Compile Include="BackEnd\Components\Communications\INodeProvider.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeEndpointInProc.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeInfo.cs" />
+    <Compile Include="BackEnd\Components\Communications\NodeLauncher.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderInProc.cs" />
     <Compile Include="BackEnd\Components\IBuildComponent.cs" />
     <Compile Include="BackEnd\Components\IBuildComponentHost.cs" />
