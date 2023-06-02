@@ -1,13 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -97,8 +96,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 GetTaskFromContent(content);
-            }
-           );
+            });
         }
         /// <summary>
         /// Read task with empty parameter.
@@ -176,8 +174,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTaskElement task = GetBasicTask();
 
                 task.SetParameter("p1", null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Set a parameter with the reserved name 'continueonerror'
@@ -190,8 +187,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTaskElement task = GetBasicTask();
 
                 task.SetParameter("ContinueOnError", "v");
-            }
-           );
+            });
         }
         /// <summary>
         /// Set a parameter with the reserved name 'condition'
@@ -204,8 +200,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTaskElement task = GetBasicTask();
 
                 task.SetParameter("Condition", "c");
-            }
-           );
+            });
         }
         /// <summary>
         /// Set a parameter using a null name
@@ -218,8 +213,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTaskElement task = GetBasicTask();
 
                 task.SetParameter(null, "v1");
-            }
-           );
+            });
         }
         /// <summary>
         /// Add a parameter to the task

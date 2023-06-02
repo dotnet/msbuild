@@ -1,19 +1,19 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Xml;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Xml;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Unittest;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 
@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
     public class BuildRequestEngine_Tests : IDisposable
     {
-        internal class MockRequestBuilder : IRequestBuilder, IBuildComponent
+        internal sealed class MockRequestBuilder : IRequestBuilder, IBuildComponent
         {
             public bool ThrowExceptionOnRequest
             {

@@ -6,7 +6,7 @@
 - `Strings.shared.resx` is a shared resource and gets embedded into all msbuild dlls
 - each neutral resource has a directory named `xlf` besides it which contains its localized strings in .xlf format
 - there is one language per xlf
-- the logical name for a resource is: `<Assembly Name>.<Neutral Resx File Name>.resources`. In the ResourceManager this appears as `<Assembly Name>.<Neutral Resx File Name>` (without the trailing `.resources`). For example, the `Microsoft.Build` assembly uses the `Microsoft.Build.Strings.resources` [logical resource name](https://github.com/dotnet/msbuild/blob/master/src/XMakeBuildEngine/Microsoft.Build.csproj#L659) (the resource file is `Strings.resx`), and its corresponding [ResourceManager](https://github.com/dotnet/msbuild/blob/master/src/XMakeBuildEngine/Resources/AssemblyResources.cs#L116) uses `Microsoft.Build.Strings`.
+- the logical name for a resource is: `<Assembly Name>.<Neutral Resx File Name>.resources`. In the ResourceManager this appears as `<Assembly Name>.<Neutral Resx File Name>` (without the trailing `.resources`). For example, the `Microsoft.Build` assembly uses the `Microsoft.Build.Strings.resources` [logical resource name](https://github.com/dotnet/msbuild/blob/cc3db358d34ad4cd1ec0c67e17582d7ca2a15040/src/Build/Microsoft.Build.csproj#L792) (the resource file is `Strings.resx`), and its corresponding [ResourceManager](https://github.com/dotnet/msbuild/blob/518c041f4511a6bc23eb40703b69a94ea46c65fd/src/Build/Resources/AssemblyResources.cs#L118) uses `Microsoft.Build.Strings`.
 
 ## How to edit a resource
 
@@ -21,8 +21,8 @@
 
 ## Process for interacting with the localization team
 
-- 3 weeks cadence for master, initiated by loc team
-- on demand for master / release branches, initiated by msbuild team
+- 3 weeks cadence for main, initiated by loc team
+- on demand for main / release branches, initiated by msbuild team
 
 ## Contributing a better translation
 

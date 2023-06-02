@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 namespace Microsoft.Build.Experimental
 {
     public enum MSBuildClientExitType
@@ -24,6 +25,14 @@ namespace Microsoft.Build.Experimental
         /// The build stopped unexpectedly, for example,
         /// because a named pipe between the server and the client was unexpectedly closed.
         /// </summary>
-        Unexpected
+        Unexpected,
+        /// <summary>
+        /// The client is not able to identify the server state.
+        /// </summary>
+        /// <remarks>
+        /// This may happen when mutex that is regulating the server state throws.
+        /// See: https://github.com/dotnet/msbuild/issues/7993.
+        /// </remarks>
+        UnknownServerState
     }
 }

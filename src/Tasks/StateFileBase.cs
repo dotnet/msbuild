@@ -1,12 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
-using Microsoft.Build.Utilities;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.BackEnd;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -99,7 +99,7 @@ namespace Microsoft.Build.Tasks
                                 retVal = constructor.Invoke(new object[] { translator }) as StateFileBase;
                             }
                         }
-                        
+
                         if (retVal == null || !requiredReturnType.IsInstanceOfType(retVal))
                         {
                             log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile,

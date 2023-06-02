@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -56,11 +56,9 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Initializes a new instance of the TargetSkippedEventArgs class.
         /// </summary>
-        public TargetSkippedEventArgs
-        (
+        public TargetSkippedEventArgs(
             string message,
-            params object[] messageArgs
-        )
+            params object[] messageArgs)
             : base(
                   subcategory: null,
                   code: null,

@@ -1,15 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.Shared;
 using System.Threading;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Collections;
-
+using Microsoft.Build.Shared;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
 #nullable disable
@@ -551,7 +550,9 @@ namespace Microsoft.Build.BackEnd
             itemsCount += allAdds?.Count ?? 0;          // Add all the additions
             itemsCount -= allRemoves?.Count ?? 0;       // Remove the removals
             if (itemsCount < 0)
+            {
                 itemsCount = 0;
+            }
 
             // We have adds and/or removes and/or modifies to incorporate.
             // We can't modify the group, because that might

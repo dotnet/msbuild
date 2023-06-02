@@ -1,11 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -60,9 +60,9 @@ namespace Microsoft.Build.Tasks
                     {
                         // There may not be an arm directory so we will fall back to the x86 tool location
                         // but if there is then we should try and use it.
-                        ProcessorArchitecture.ARM   => Path.Combine(sdkToolsPath, "arm"),
+                        ProcessorArchitecture.ARM => Path.Combine(sdkToolsPath, "arm"),
                         ProcessorArchitecture.AMD64 => Path.Combine(sdkToolsPath, "x64"),
-                        ProcessorArchitecture.IA64  => Path.Combine(sdkToolsPath, "ia64"),
+                        ProcessorArchitecture.IA64 => Path.Combine(sdkToolsPath, "ia64"),
                         _ => sdkToolsPath,
                     };
                     pathToTool = Path.Combine(processorSpecificToolDirectory, toolName);

@@ -1,10 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
-using System;
 
 #nullable disable
 
@@ -42,7 +42,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <param name="projectPath">The full path to the project file that is resolving the SDK.</param>
         /// <param name="interactive">Indicates whether or not the resolver is allowed to be interactive.</param>
         /// <param name="isRunningInVisualStudio">Indicates whether or not the resolver is running in Visual Studio.</param>
+        /// <param name="failOnUnresolvedSdk">Whether to throw an exception should the SDK fail to be resolved.</param>
         /// <returns>An <see cref="SdkResult"/> containing information about the resolved SDK. If no resolver was able to resolve it, then <see cref="Framework.SdkResult.Success"/> == false. </returns>
-        SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio);
+        SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool failOnUnresolvedSdk);
     }
 }

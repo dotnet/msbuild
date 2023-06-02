@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -234,7 +234,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             try
             {
-                return (ProjectCachePluginBase) Activator.CreateInstance(pluginType)!;
+                return (ProjectCachePluginBase)Activator.CreateInstance(pluginType)!;
             }
             catch (TargetInvocationException e) when (e.InnerException != null)
             {
@@ -268,7 +268,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             IEnumerable<Type> GetTypes<T>(Assembly assembly)
             {
                 return assembly.ExportedTypes
-                    .Select(type => new {type, info = type.GetTypeInfo()})
+                    .Select(type => new { type, info = type.GetTypeInfo() })
                     .Where(
                         t => t.info.IsClass &&
                              t.info.IsPublic &&
@@ -374,8 +374,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                             _buildManager,
                             submission.BuildRequestData.Flags,
                             submission.SubmissionId,
-                            Scheduler.InProcNodeId
-                        );
+                            Scheduler.InProcNodeId);
 
                         // If we're taking the time to evaluate, avoid having other nodes to repeat the same evaluation.
                         // Based on the assumption that ProjectInstance serialization is faster than evaluating from scratch.
@@ -542,25 +541,21 @@ namespace Microsoft.Build.Experimental.ProjectCache
             static IReadOnlyCollection<ProjectGraphEntryPoint> GenerateGraphEntryPointsFromSolutionConfigurationXml(
                 string solutionConfigurationXml,
                 string definingProjectPath,
-                Dictionary<string, string> templateGlobalProperties
-            )
+                Dictionary<string, string> templateGlobalProperties)
             {
-                // TODO: fix code clone for parsing CurrentSolutionConfiguration xml: https://github.com/dotnet/msbuild/issues/6751
-                var doc = new XmlDocument();
-                doc.LoadXml(solutionConfigurationXml);
-
-                var root = doc.DocumentElement!;
-                var projectConfigurationNodes = root.GetElementsByTagName("ProjectConfiguration");
-
-                ErrorUtilities.VerifyThrow(projectConfigurationNodes.Count > 0, "Expected at least one project in solution");
-
-                var graphEntryPoints = new List<ProjectGraphEntryPoint>(projectConfigurationNodes.Count);
-
-                foreach (XmlNode node in projectConfigurationNodes)
+                XmlNodeList? projectConfigurations = SolutionConfiguration.GetProjectConfigurations(solutionConfigurationXml);
+                if (projectConfigurations == null || projectConfigurations.Count == 0)
                 {
-                    ErrorUtilities.VerifyThrowInternalNull(node.Attributes, nameof(node.Attributes));
+                    return Array.Empty<ProjectGraphEntryPoint>();
+                }
 
-                    var buildProjectInSolution = node.Attributes!["BuildProjectInSolution"];
+                var graphEntryPoints = new List<ProjectGraphEntryPoint>(projectConfigurations.Count);
+
+                foreach (XmlElement projectConfiguration in projectConfigurations)
+                {
+                    ErrorUtilities.VerifyThrowInternalNull(projectConfiguration.Attributes, nameof(projectConfiguration.Attributes));
+
+                    var buildProjectInSolution = projectConfiguration.Attributes![SolutionConfiguration.BuildProjectInSolutionAttribute];
                     if (buildProjectInSolution is not null &&
                         string.IsNullOrWhiteSpace(buildProjectInSolution.Value) is false &&
                         bool.TryParse(buildProjectInSolution.Value, out var buildProject) &&
@@ -569,12 +564,12 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         continue;
                     }
 
-                    var projectPathAttribute = node.Attributes!["AbsolutePath"];
+                    XmlAttribute? projectPathAttribute = projectConfiguration.Attributes![SolutionConfiguration.AbsolutePathAttribute];
                     ErrorUtilities.VerifyThrow(projectPathAttribute is not null, "Expected VS to set the project path on each ProjectConfiguration element.");
 
-                    var projectPath = projectPathAttribute!.Value;
+                    string projectPath = projectPathAttribute!.Value;
 
-                    var (configuration, platform) = SolutionFile.ParseConfigurationName(node.InnerText, definingProjectPath, 0, solutionConfigurationXml);
+                    (string configuration, string platform) = SolutionFile.ParseConfigurationName(projectConfiguration.InnerText, definingProjectPath, 0, solutionConfigurationXml);
 
                     // Take the defining project global properties and override the configuration and platform.
                     // It's sufficient to only set Configuration and Platform.

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Globalization;
@@ -288,8 +288,7 @@ namespace Microsoft.Build.UnitTests
                 c.AppendFileNameIfNotNull("string with \"quotes\"");
 
                 c.ShouldBe("\"string with \\\"quotes\\\"\"");
-            }
-           );
+            });
         }
         /// <summary>
         /// Trigger escaping of literal quotes.
@@ -450,7 +449,7 @@ namespace Microsoft.Build.UnitTests
 
 
             string[] actual = c.ToString().Split(MSBuildConstants.EnvironmentNewLine, StringSplitOptions.None);
-            string[] expected = 
+            string[] expected =
             {
                 "/foo:bar",
                 "18056896847C4FFC9706F1D585C077B4",
@@ -460,7 +459,7 @@ namespace Microsoft.Build.UnitTests
             actual.ShouldBe(expected);
         }
 
-        internal class TestCommandLineBuilder : CommandLineBuilder
+        internal sealed class TestCommandLineBuilder : CommandLineBuilder
         {
             internal void TestVerifyThrow(string switchName, string parameter)
             {
@@ -484,8 +483,7 @@ namespace Microsoft.Build.UnitTests
                 TestCommandLineBuilder c = new TestCommandLineBuilder();
                 c.TestVerifyThrow("SuperSwitch", @"Parameter");
                 c.TestVerifyThrow("SuperSwitch", @"Para""meter");
-            }
-           );
+            });
         }
     }
 

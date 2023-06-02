@@ -1,10 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq.Expressions;
 using System.Text;
 
 namespace System
@@ -34,12 +31,12 @@ namespace Microsoft.NET.StringTools
     /// <remarks>
     /// This is a simple and inefficient implementation compatible with .NET Framework 3.5.
     /// </remarks>
-    internal ref struct InternableString
+    internal struct InternableString
     {
         /// <summary>
         /// Enumerator for the top-level struct. Enumerates characters of the string.
         /// </summary>
-        public ref struct Enumerator
+        public struct Enumerator
         {
             /// <summary>
             /// The InternableString being enumerated.
@@ -51,7 +48,7 @@ namespace Microsoft.NET.StringTools
             /// </summary>
             private int _charIndex;
 
-            public Enumerator(ref InternableString spanBuilder)
+            public Enumerator(InternableString spanBuilder)
             {
                 _string = spanBuilder;
                 _charIndex = -1;
@@ -127,7 +124,7 @@ namespace Microsoft.NET.StringTools
         /// <returns>The enumerator.</returns>
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(ref this);
+            return new Enumerator(this);
         }
 
         /// <summary>
@@ -203,29 +200,45 @@ namespace Microsoft.NET.StringTools
         /// <returns>A stable hashcode of the string represented by this instance.</returns>
         public override int GetHashCode()
         {
-            int hashCode = 5381;
+            uint hash = (5381 << 16) + 5381;
+            bool isOddIndex = false;
 
             if (_firstString != null)
             {
                 foreach (char ch in _firstString)
                 {
-                    unchecked
-                    {
-                        hashCode = hashCode * 33 ^ ch;
-                    }
+                    hash = HashOneCharacter(hash, ch, isOddIndex);
+                    isOddIndex = !isOddIndex;
                 }
             }
             else if (_builder != null)
             {
                 for (int i = 0; i < _builder.Length; i++)
                 {
-                    unchecked
-                    {
-                        hashCode = hashCode * 33 ^ _builder[i];
-                    }
+                    hash = HashOneCharacter(hash, _builder[i], isOddIndex);
+                    isOddIndex = !isOddIndex;
                 }
             }
-            return hashCode;
+            return (int)hash;
+        }
+
+        /// <summary>
+        /// A helper to hash one character.
+        /// </summary>
+        /// <param name="hash">The running hash code.</param>
+        /// <param name="ch">The character to hash.</param>
+        /// <param name="isOddIndex">True if the index of the character in the string is odd.</param>
+        /// <returns></returns>
+        private static uint HashOneCharacter(uint hash, char ch, bool isOddIndex)
+        {
+            if (isOddIndex)
+            {
+                // The hash code was rotated for the previous character, just xor.
+                return hash ^ ((uint)ch << 16);
+            }
+
+            uint rotatedHash = (hash << 5) | (hash >> (32 - 5));
+            return (rotatedHash + hash) ^ ch;
         }
     }
 }

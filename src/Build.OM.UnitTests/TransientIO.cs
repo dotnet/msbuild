@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
 
@@ -24,8 +24,7 @@ namespace Microsoft.Build.UnitTests
                 this.root = new DirectoryInfo(
                     this.Parent != null ?
                           this.Parent.GetAbsolutePath(this.SubFolder)
-                        : FileUtilities.GetTemporaryDirectory(true)
-                );
+                        : FileUtilities.GetTemporaryDirectory(true));
             }
 
             return this.root;
@@ -45,7 +44,11 @@ namespace Microsoft.Build.UnitTests
 
         public bool IsControled(string path)
         {
-            if (this.root == null || path == null) return false;
+            if (this.root == null || path == null)
+            {
+                return false;
+            }
+
             var tempRoot = this.RootFolder;
             path = Path.GetFullPath(path);
             return path != null && tempRoot != null
@@ -90,7 +93,7 @@ namespace Microsoft.Build.UnitTests
             var subFolder = this.GetRelativePath(path);
             if (!this.Children.TryGetValue(subFolder, out var result))
             {
-                result  = new TransientIO(this, subFolder);
+                result = new TransientIO(this, subFolder);
                 this.Children.Add(subFolder, result);
             }
 

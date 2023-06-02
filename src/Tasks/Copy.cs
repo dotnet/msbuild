@@ -1,18 +1,18 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Collections.Generic;
-using System.Threading;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks.Dataflow;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Eventing;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -58,6 +58,7 @@ namespace Microsoft.Build.Tasks
                 FileComment = Log.GetResourceMessage("Copy.FileComment");
                 HardLinkComment = Log.GetResourceMessage("Copy.HardLinkComment");
                 RetryingAsFileCopy = Log.GetResourceMessage("Copy.RetryingAsFileCopy");
+                RetryingAsSymbolicLink = Log.GetResourceMessage("Copy.RetryingAsSymbolicLink");
                 RemovingReadOnlyAttribute = Log.GetResourceMessage("Copy.RemovingReadOnlyAttribute");
                 SymbolicLinkComment = Log.GetResourceMessage("Copy.SymbolicLinkComment");
             }
@@ -68,6 +69,7 @@ namespace Microsoft.Build.Tasks
         private static string FileComment;
         private static string HardLinkComment;
         private static string RetryingAsFileCopy;
+        private static string RetryingAsSymbolicLink;
         private static string RemovingReadOnlyAttribute;
         private static string SymbolicLinkComment;
 
@@ -168,11 +170,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="sourceFile">The source file</param>
         /// <param name="destinationFile">The destination file</param>
-        private static bool IsMatchingSizeAndTimeStamp
-        (
+        private static bool IsMatchingSizeAndTimeStamp(
             FileState sourceFile,
-            FileState destinationFile
-        )
+            FileState destinationFile)
         {
             // If the destination doesn't exist, then it is not a matching file.
             if (!destinationFile.FileExists)
@@ -222,11 +222,9 @@ namespace Microsoft.Build.Tasks
         /// leave the file read-write.
         /// </summary>
         /// <returns>Return true to indicate success, return false to indicate failure and NO retry, return NULL to indicate retry.</returns>
-        private bool? CopyFileWithLogging
-        (
+        private bool? CopyFileWithLogging(
             FileState sourceFileState,      // The source file
-            FileState destinationFileState  // The destination file
-        )
+            FileState destinationFileState)  // The destination file
         {
             bool destinationFileExists = false;
 
@@ -274,20 +272,43 @@ namespace Microsoft.Build.Tasks
                 destinationFileExists = destinationFileState.FileExists;
             }
 
-            bool linkCreated = false;
+            bool symbolicLinkCreated = false;
+            bool hardLinkCreated = false;
             string errorMessage = string.Empty;
 
-            // If we want to create hard or symbolic links, then try that first
+            // Create hard links if UseHardlinksIfPossible is true
             if (UseHardlinksIfPossible)
             {
-                TryCopyViaLink(HardLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out linkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage));
-            }
-            else if (UseSymboliclinksIfPossible)
-            {
-                TryCopyViaLink(SymbolicLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out linkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeSymbolicLink(destination, source, ref errorMessage));
+                TryCopyViaLink(HardLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out hardLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage, Log));
+                if (!hardLinkCreated)
+                {
+                    if (UseSymboliclinksIfPossible)
+                    {
+                        // This is a message for fallback to SymbolicLinks if HardLinks fail when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true
+                        Log.LogMessage(MessageImportance.Normal, RetryingAsSymbolicLink, sourceFileState.Name, destinationFileState.Name, errorMessage);
+                    }
+                    else
+                    {
+                        Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.Name, destinationFileState.Name, errorMessage);
+                    }
+                }
             }
 
-            if (ErrorIfLinkFails && !linkCreated)
+            // Create symbolic link if UseSymboliclinksIfPossible is true and hard link is not created
+            if (!hardLinkCreated && UseSymboliclinksIfPossible)
+            {
+                TryCopyViaLink(SymbolicLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, ref destinationFileExists, out symbolicLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethodsShared.MakeSymbolicLink(destination, source, ref errorMessage));
+                if (!NativeMethodsShared.IsWindows)
+                {
+                    errorMessage = Log.FormatResourceString("Copy.NonWindowsLinkErrorMessage", "symlink()", errorMessage);
+                }
+                if (!symbolicLinkCreated)
+                {
+                    Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.Name, destinationFileState.Name, errorMessage);
+                }
+            }
+
+            if (ErrorIfLinkFails && !hardLinkCreated && !symbolicLinkCreated)
             {
                 Log.LogErrorWithCodeFromResources("Copy.LinkFailed", sourceFileState.Name, destinationFileState.Name);
                 return false;
@@ -295,7 +316,7 @@ namespace Microsoft.Build.Tasks
 
             // If the link was not created (either because the user didn't want one, or because it couldn't be created)
             // then let's copy the file
-            if (!linkCreated)
+            if (!hardLinkCreated && !symbolicLinkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                 string sourceFilePath = FileUtilities.GetFullPathNoThrow(sourceFileState.Name);
@@ -339,12 +360,6 @@ namespace Microsoft.Build.Tasks
             }
 
             linkCreated = createLink(sourceFileState.Name, destinationFileState.Name, errorMessage);
-
-            if (!linkCreated)
-            {
-                // This is only a message since we don't want warnings when copying to network shares etc.
-                Log.LogMessage(messageImportance, RetryingAsFileCopy, sourceFileState.Name, destinationFileState.Name, errorMessage);
-            }
         }
 
         /// <summary>
@@ -375,11 +390,9 @@ namespace Microsoft.Build.Tasks
         /// <param name="parallelism">
         /// Thread parallelism allowed during copies. 1 uses the original algorithm, >1 uses newer algorithm.
         /// </param>
-        internal bool Execute
-        (
+        internal bool Execute(
             CopyFileWithState copyFile,
-            int parallelism
-        )
+            int parallelism)
         {
             // If there are no source files then just return success.
             if (SourceFiles == null || SourceFiles.Length == 0)
@@ -653,12 +666,6 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            // First check if create hard or symbolic link option is selected. If both then return an error
-            if (UseHardlinksIfPossible & UseSymboliclinksIfPossible)
-            {
-                Log.LogErrorWithCodeFromResources("Copy.ExactlyOneTypeOfLink", "UseHardlinksIfPossible", "UseSymboliclinksIfPossible");
-                return false;
-            }
 
             if (ErrorIfLinkFails && !UseHardlinksIfPossible && !UseSymboliclinksIfPossible)
             {
@@ -730,8 +737,7 @@ namespace Microsoft.Build.Tasks
                         sourceFileState.Name,
                         destinationFileState.Name,
                         "SkipUnchangedFiles",
-                        "true"
-                    );
+                        "true");
                     MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, true);
                 }
                 // We only do the cheap check for identicalness here, we try the more expensive check

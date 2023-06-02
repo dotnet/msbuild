@@ -1,12 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
+using System.Collections;
 using System.Resources;
+#endif
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
@@ -104,7 +106,8 @@ namespace Microsoft.Build.Tasks
         {
             translator.TranslateDictionary(ref resXFiles,
                 (ITranslator translator, ref string s) => translator.Translate(ref s),
-                (ITranslator translator, ref ResXFile resx) => {
+                (ITranslator translator, ref ResXFile resx) =>
+                {
                     ResXFile temp = resx ?? new();
                     temp.Translate(translator);
                     resx = temp;
@@ -112,7 +115,8 @@ namespace Microsoft.Build.Tasks
                 count => new Dictionary<string, ResXFile>(count));
             translator.TranslateDictionary(ref portableLibraries,
                 (ITranslator translator, ref string s) => translator.Translate(ref s),
-                (ITranslator translator, ref PortableLibraryFile portableLibrary) => {
+                (ITranslator translator, ref PortableLibraryFile portableLibrary) =>
+                {
                     PortableLibraryFile temp = portableLibrary ?? new();
                     temp.Translate(translator);
                     portableLibrary = temp;
@@ -413,7 +417,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
         }
-        
+
         /// <summary>
         /// Whether this cache is dirty or not.
         /// </summary>

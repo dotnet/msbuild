@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -24,7 +24,7 @@ namespace Microsoft.Build.Tasks
     /// <comment>
     /// This task executes following steps:
     ///   (1) Filter out Framework assemblies
-    ///   (2) Filter out non-existant files
+    ///   (2) Filter out non-existent files
     ///   (3) Build list of Dependencies from built items with CopyLocal=True
     ///   (4) Build list of Prerequisites from built items with CopyLocal=False
     ///   (5) Build list of Satellites from built items based on TargetCulture
@@ -127,7 +127,7 @@ namespace Microsoft.Build.Tasks
 
         public string AssemblyName { get; set; }
 
-        public bool LauncherBasedDeployment {get; set; } = false;
+        public bool LauncherBasedDeployment { get; set; } = false;
 
         public string TargetFrameworkVersion
         {
@@ -853,7 +853,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                       fusionName = Path.GetFileNameWithoutExtension(item.ItemSpec);
+                        fusionName = Path.GetFileNameWithoutExtension(item.ItemSpec);
                     }
                 }
 
@@ -953,7 +953,11 @@ namespace Microsoft.Build.Tasks
             {
                 string targetPath = GetItemTargetPath(item);
                 Debug.Assert(!String.IsNullOrEmpty(targetPath));
-                if (String.IsNullOrEmpty(targetPath)) return;
+                if (String.IsNullOrEmpty(targetPath))
+                {
+                    return;
+                }
+
                 string key = targetPath.ToLowerInvariant();
                 Debug.Assert(!_dictionary.ContainsKey(key), String.Format(CultureInfo.CurrentCulture, "Two or more items with same '{0}' attribute detected", ItemMetadataNames.targetPath));
                 var entry = new MapEntry(item, includedByDefault);

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -23,7 +23,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ObjectModel = System.Collections.ObjectModel;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
@@ -242,7 +241,7 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">Project collection</param>
         /// <returns>A new project instance</returns>
         public ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection)
-            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: null)
+            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: null, interactive: false)
         {
         }
 
@@ -261,8 +260,9 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">Project collection</param>
         /// <param name="projectLoadSettings">Project load settings</param>
         /// <param name="evaluationContext">The context to use for evaluation.</param>
+        /// <param name="interactive">Indicates if loading the project is allowed to interact with the user.</param>
         /// <returns>A new project instance</returns>
-        private ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext)
+        private ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, bool interactive)
         {
             ErrorUtilities.VerifyThrowArgumentLength(projectFile, nameof(projectFile));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -271,7 +271,10 @@ namespace Microsoft.Build.Execution
             // passed a relative path, the caller assumes we will prepend the current directory.
             projectFile = FileUtilities.NormalizePath(projectFile);
 
-            BuildParameters buildParameters = new BuildParameters(projectCollection);
+            BuildParameters buildParameters = new BuildParameters(projectCollection)
+            {
+                Interactive = interactive
+            };
 
             BuildEventContext buildEventContext = new BuildEventContext(buildParameters.NodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
             ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, true /*Explicitly Loaded*/);
@@ -324,7 +327,7 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">Project collection</param>
         /// <returns>A new project instance</returns>
         public ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection)
-            : this(xml, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: null)
+            : this(xml, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: null, interactive: false)
         {
         }
 
@@ -352,8 +355,8 @@ namespace Microsoft.Build.Execution
 
             this.CreateEvaluatedIncludeSnapshotIfRequested(keepEvaluationCache, project.Items, projectItemToInstanceMap);
 
-            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalProperties.Count);
-            foreach (var property in project.GlobalProperties)
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalPropertiesCount);
+            foreach (var property in project.GlobalPropertiesEnumerable)
             {
                 _globalProperties.Set(ProjectPropertyInstance.Create(property.Key, property.Value));
             }
@@ -396,11 +399,18 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">Project collection</param>
         /// <param name="projectLoadSettings">Project load settings</param>
         /// <param name="evaluationContext">The context to use for evaluation.</param>
+        /// <param name="interactive">Indicates if loading the project is allowed to interact with the user.</param>
         /// <returns>A new project instance</returns>
-        private ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext)
+        private ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, bool interactive)
         {
             BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
-            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version specified */, new BuildParameters(projectCollection), projectCollection.LoggingService, buildEventContext, projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext);
+
+            BuildParameters buildParameters = new BuildParameters(projectCollection)
+            {
+                Interactive = interactive
+            };
+
+            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version specified */, buildParameters, projectCollection.LoggingService, buildEventContext, projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext);
         }
 
         /// <summary>
@@ -744,7 +754,8 @@ namespace Microsoft.Build.Execution
                 options.SubToolsetVersion,
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
-                options.EvaluationContext);
+                options.EvaluationContext,
+                options.Interactive);
         }
 
         /// <summary>
@@ -761,7 +772,8 @@ namespace Microsoft.Build.Execution
                 options.SubToolsetVersion,
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
-                options.EvaluationContext);
+                options.EvaluationContext,
+                options.Interactive);
         }
 
         /// <summary>
@@ -1681,7 +1693,9 @@ namespace Microsoft.Build.Execution
                 foreach (var item in GetItems(itemType))
                 {
                     if (string.Equals(item.EvaluatedInclude, evaluatedInclude, StringComparison.OrdinalIgnoreCase))
+                    {
                         yield return item;
+                    }
                 }
             }
             else
@@ -1689,7 +1703,9 @@ namespace Microsoft.Build.Execution
                 foreach (var item in GetItemsByEvaluatedInclude(evaluatedInclude))
                 {
                     if (string.Equals(item.ItemType, itemType, StringComparison.OrdinalIgnoreCase))
+                    {
                         yield return item;
+                    }
                 }
             }
         }
@@ -2234,8 +2250,7 @@ namespace Microsoft.Build.Execution
                 if (
                        String.Equals(toolsVersion, "2.0", StringComparison.OrdinalIgnoreCase) ||
                        String.Equals(toolsVersion, "3.0", StringComparison.OrdinalIgnoreCase) ||
-                       String.Equals(toolsVersion, "3.5", StringComparison.OrdinalIgnoreCase)
-                   )
+                       String.Equals(toolsVersion, "3.5", StringComparison.OrdinalIgnoreCase))
                 {
                     // Spawn the Orcas SolutionWrapperProject generator.  
                     loggingService.LogComment(projectBuildEventContext, MessageImportance.Low, "OldWrapperGeneratedExplicitToolsVersion", toolsVersion);
@@ -2451,8 +2466,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowInternalLength(targetName, nameof(targetName));
             ErrorUtilities.VerifyThrow(!_actualTargets.ContainsKey(targetName), "Target {0} already exists.", targetName);
 
-            ProjectTargetInstance target = new ProjectTargetInstance
-                (
+            ProjectTargetInstance target = new ProjectTargetInstance(
                 targetName,
                 condition ?? String.Empty,
                 inputs ?? String.Empty,
@@ -2473,8 +2487,7 @@ namespace Microsoft.Build.Execution
                 String.IsNullOrEmpty(afterTargets) ? null : ElementLocation.EmptyLocation,
                 new ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild>(new List<ProjectTargetInstanceChild>()),
                 new ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance>(new List<ProjectOnErrorInstance>()),
-                parentProjectSupportsReturnsAttribute
-                );
+                parentProjectSupportsReturnsAttribute);
 
             _actualTargets[targetName] = target;
 
@@ -2512,9 +2525,8 @@ namespace Microsoft.Build.Execution
         /// <param name="sdkResolverService"></param>
         /// <param name="submissionId"></param>
         /// <returns>The ProjectRootElement for the root traversal and each of the metaprojects.</returns>
-        private static ProjectInstance[] GenerateSolutionWrapper
+        private static ProjectInstance[] GenerateSolutionWrapper(
 
-            (
                 string projectFile,
                 IDictionary<string, string> globalProperties,
                 string toolsVersion,
@@ -2522,8 +2534,7 @@ namespace Microsoft.Build.Execution
                 BuildEventContext projectBuildEventContext,
                 IReadOnlyCollection<string> targetNames,
                 ISdkResolverService sdkResolverService,
-                int submissionId
-            )
+                int submissionId)
         {
             SolutionFile sp = SolutionFile.Parse(projectFile);
 
@@ -2567,8 +2578,8 @@ namespace Microsoft.Build.Execution
         /// <param name="submissionId"></param>
         /// <returns>An appropriate ProjectRootElement</returns>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static ProjectInstance[] GenerateSolutionWrapperUsingOldOM
-        (string projectFile,
+        private static ProjectInstance[] GenerateSolutionWrapperUsingOldOM(
+        string projectFile,
             IDictionary<string, string> globalProperties,
             string toolsVersion,
             ProjectRootElementCacheBase projectRootElementCache,
@@ -2600,8 +2611,7 @@ namespace Microsoft.Build.Execution
                     if (environmentVariableName != null &&
                         (!XmlUtilities.IsValidElementName(environmentVariableName)
                         || XMakeElements.ReservedItemNames.Contains(environmentVariableName)
-                        || ReservedPropertyNames.IsReservedProperty(environmentVariableName))
-                       )
+                        || ReservedPropertyNames.IsReservedProperty(environmentVariableName)))
                     {
                         if (clearedVariables == null)
                         {
@@ -2725,14 +2735,12 @@ namespace Microsoft.Build.Execution
                 toolsVersionLocation = xml.ToolsVersionLocation;
             }
 
-            var toolsVersionToUse = Utilities.GenerateToolsVersionToUse
-            (
+            var toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
                 explicitToolsVersion,
                 xml.ToolsVersion,
                 buildParameters.GetToolset,
                 buildParameters.DefaultToolsVersion,
-                out var usingDifferentToolsVersionFromProjectFile
-            );
+                out var usingDifferentToolsVersionFromProjectFile);
 
             _usingDifferentToolsVersionFromProjectFile = usingDifferentToolsVersionFromProjectFile;
 

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 #if FEATURE_SECURITY_PERMISSIONS
@@ -24,12 +24,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Basic()
         {
-            var file = FileUtilities.GetTemporaryFile();
+            // Start with a missing file.
+            var file = FileUtilities.GetTemporaryFileName();
             try
             {
-                // Start with a missing file.
-                File.Delete(file);
-
                 // Append one line to the file.
                 var a = new WriteLinesToFile
                 {
@@ -73,12 +71,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Escaping()
         {
-            var file = FileUtilities.GetTemporaryFile();
+            // Start with a missing file.
+            var file = FileUtilities.GetTemporaryFileName();
             try
             {
-                // Start with a missing file.
-                File.Delete(file);
-
                 // Append one line to the file.
                 var a = new WriteLinesToFile
                 {
@@ -120,12 +116,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ANSINonASCII()
         {
-            var file = FileUtilities.GetTemporaryFile();
+            // Start with a missing file.
+            var file = FileUtilities.GetTemporaryFileName();
             try
             {
-                // Start with a missing file.
-                File.Delete(file);
-
                 // Append one line to the file.
                 var a = new WriteLinesToFile
                 {
@@ -156,8 +150,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ReadMissing()
         {
-            var file = FileUtilities.GetTemporaryFile();
-            File.Delete(file);
+            var file = FileUtilities.GetTemporaryFileName();
 
             // Read the line from the file.
             var r = new ReadLinesFromFile
@@ -175,12 +168,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void IgnoreBlankLines()
         {
-            var file = FileUtilities.GetTemporaryFile();
+            // Start with a missing file.
+            var file = FileUtilities.GetTemporaryFileName();
             try
             {
-                // Start with a missing file.
-                File.Delete(file);
-
                 // Append one line to the file.
                 var a = new WriteLinesToFile
                 {
@@ -227,12 +218,10 @@ namespace Microsoft.Build.UnitTests
                 return; // "The security API is not the same under Unix"
             }
 
-            var file = FileUtilities.GetTemporaryFile();
+            // Start with a missing file.
+            var file = FileUtilities.GetTemporaryFileName();
             try
             {
-                // Start with a missing file.
-                File.Delete(file);
-
                 // Append one line to the file.
                 var a = new WriteLinesToFile
                 {

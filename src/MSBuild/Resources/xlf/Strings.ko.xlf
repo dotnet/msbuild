@@ -130,8 +130,17 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_35_IsolateProjectsSwitch">
-        <source>  -isolateProjects[:True|False]
+        <source>  -isolateProjects[:True|MessageUponIsolationViolation|False]
                      Causes MSBuild to build each project in isolation.
+
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
 
                      This is a more restrictive mode of MSBuild as it requires
                      that the project graph be statically discoverable at
@@ -141,16 +150,25 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -isolateProjects[:True|False]
-                     MSBuild가 격리 모드에서 각 프로젝트를 빌드하도록 합니다.
+        <target state="new">  -isolateProjects[:True|MessageUponIsolationViolation|False]
+                     Causes MSBuild to build each project in isolation.
 
-                     이 모드는 프로젝트 그래프가 평가 시간에 정적으로 
-                     검색 가능해야 하므로 더 제한적인 MSBuild 모드이나, 
-                     대규모 프로젝트를 빌드할 경우 예약을 개선하고 
-                     메모리 오버헤드를 줄일 수 있습니다.
-                     (약식: -isolate)
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
 
-                     이 플래그는 실험적이며 예상대로 작동하지 않을 수 있습니다.
+                     This is a more restrictive mode of MSBuild as it requires
+                     that the project graph be statically discoverable at
+                     evaluation time, but can improve scheduling and reduce
+                     memory overhead when building a large set of projects.
+                     (Short form: -isolate)
+
+                     This flag is experimental and may not work as intended.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -513,38 +531,40 @@
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="needs-review-translation">  -consoleLoggerParameters:&lt;parameters&gt;
-                     콘솔 로거에 대한 매개 변수입니다. (약식: -clp)
-                     사용 가능한 매개 변수는 다음과 같습니다.
-                        PerformanceSummary--작업, 대상 및 프로젝트에서 소요된 시간을 
-                            표시합니다.
-                        Summary--종료 시 오류 및 경고 요약을 표시합니다.
-                        NoSummary--종료 시 오류 및 경고 요약을 표시하지 
-                            않습니다.
-                        ErrorsOnly--오류만 표시합니다.
-                        WarningsOnly--경고만 표시합니다.
-                        NoItemAndPropertyList--각 프로젝트 빌드를 시작할 때 항목 및 속성 목록을 
-                            표시하지 않습니다.
-                        ShowCommandLine--TaskCommandLineEvent 메시지를 표시합니다.
-                        ShowTimestamp--메시지 접두사로 타임스탬프를 
-                            표시합니다.
-                        ShowEventId--시작된 이벤트 완료된 이벤트 및 메시지의 eventId를 
-                            표시합니다.
-                        ForceNoAlign--콘솔 버퍼 크기에 텍스트를 맞추지 
-                            않습니다.
-                        DisableConsoleColor--모든 로깅 메시지에 기본 콘솔 색을 
-                            사용합니다.
-                        DisableMPLogging--다중 프로세서가 아닌 모드에서 실행할 경우 
-                            출력의 다중 프로세서 로깅 스타일을 
-                            사용하지 않도록 설정합니다.
-                        EnableMPLogging--다중 프로세서가 아닌 모드에서 실행할 경우에도 
-                            다중 프로세서 로깅 스타일을 사용하도록 설정합니다.
-                            이 로깅 스타일은 기본적으로 켜집니다.
-                        ForceConsoleColor--콘솔에서 지원하지 않더라도 ANSI 콘솔 색을 
-                            사용합니다
-                        Verbosity--이 로거에 대한 -verbosity 설정을 
-                            재정의합니다.
-                     예:
+        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
+                     Parameters to console logger. (Short form: -clp)
+                     The available parameters are:
+                        PerformanceSummary--Show time spent in tasks, targets
+                            and projects.
+                        Summary--Show error and warning summary at the end.
+                        NoSummary--Don't show error and warning summary at the
+                            end.
+                        ErrorsOnly--Show only errors.
+                        WarningsOnly--Show only warnings.
+                        NoItemAndPropertyList--Don't show list of items and
+                            properties at the start of each project build.
+                        ShowCommandLine--Show TaskCommandLineEvent messages
+                        ShowTimestamp--Display the Timestamp as a prefix to any
+                            message.
+                        ShowEventId--Show eventId for started events, finished
+                            events, and messages
+                        ForceNoAlign--Does not align the text to the size of
+                            the console buffer
+                        DisableConsoleColor--Use the default console colors
+                            for all logging messages.
+                        DisableMPLogging-- Disable the multiprocessor
+                            logging style of output when running in
+                            non-multiprocessor mode.
+                        EnableMPLogging--Enable the multiprocessor logging
+                            style even when running in non-multiprocessor
+                            mode. This logging style is on by default.
+                        ForceConsoleColor--Use ANSI console colors even if
+                            console does not support it
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
+                            logger.
+                     Example:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
@@ -642,15 +662,13 @@
       <trans-unit id="HelpMessage_InputCachesFiles">
         <source>  -inputResultsCaches:&lt;cacheFile&gt;...
                      Semicolon separated list of input cache files that MSBuild
-                     will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -irc)
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     MSBuild가 빌드 결과를 읽는 소스 입력 캐시 파일의 
-                     세미콜론으로 구분된 목록입니다.
-                     이 스위치를 설정하면 격리된 빌드(-isolate)도 켜집니다.
-                     (약식: -irc)
+        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Semicolon separated list of input cache files that MSBuild
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -661,13 +679,13 @@
         <source>  -outputResultsCache:[cacheFile]
                      Output cache file where MSBuild will write the contents of
                      its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
+                     If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="translated">  -outputResultsCache:[cacheFile]
-                     MSBuild에서 빌드 마지막에 빌드 결과 캐시의
-                     콘텐츠를 쓰는 출력 캐시 파일입니다.
-                     설정하면 격리된 빌드에서도 설정됩니다(-isolate).
+        <target state="new">  -outputResultsCache:[cacheFile]
+                     Output cache file where MSBuild will write the contents of
+                     its build result caches at the end of the build.
+                     If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </target>
         <note>
@@ -1026,7 +1044,8 @@
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent
+      to Boolean.TrueString, nameof(ProjectIsolationMode.MessageUponIsolationViolation), or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>

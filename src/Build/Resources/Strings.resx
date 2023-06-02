@@ -1271,6 +1271,10 @@
     <value>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized.</value>
     <comment>{StrBegin="MSB4067: "}</comment>
   </data>
+  <data name="PropertyOutsidePropertyGroupInTarget" xml:space="preserve" Condition="$([MSBuild]::AreFeaturesEnabled('17.6'))">
+    <value>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</value>
+    <comment>{StrBegin="MSB4067: "}</comment>
+  </data>
   <data name="InvalidChildElementDueToDuplication" xml:space="preserve">
     <value>MSB4173: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is invalid because a child element with that name already exists</value>
     <comment>{StrBegin="MSB4173: "}</comment>
@@ -1305,6 +1309,10 @@
   </data>
   <data name="SDKResolverFailed" xml:space="preserve">
     <value>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</value>
+  </data>
+  <data name="FailedToResolveSDK" xml:space="preserve">
+    <value>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+  {1}</value>
   </data>
   <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
     <value>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>
@@ -1962,5 +1970,17 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </comment>
+  </data>
+   <data name="DefaultSDKResolverError" xml:space="preserve">
+    <value>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</value>
+  </data>
+  <data name="SDKResolverReturnedNull" xml:space="preserve">
+    <value>SDK resolver "{0}" returned null.</value>
+  </data>
+  <data name="TaskAssemblyLoaded" xml:space="preserve">
+    <value>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</value>
+  </data>
+  <data name="NodeReused" xml:space="preserve">
+    <value>Reusing node {0} (PID: {1}).</value>
   </data>
 </root>

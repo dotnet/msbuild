@@ -1,5 +1,5 @@
 # MSBuild Command-Line Switches
-See the [MSBuild Command-Line Reference](https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference) for more information on switches.
+See the [MSBuild Command-Line Reference](https://learn.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference) for more information on switches.
  * `MSBuild.exe -pp:<FILE>`
    * MSBuild preprocessor. Pass /pp to the command line to create a single huge XML project file with all project imports inlined in the correct order. This is useful to investigate the ordering of imports and property and target overrides during evaluation.
    * Example usage: `msbuild MyProject.csproj /pp:inlined.xml`
@@ -13,14 +13,17 @@ See the [MSBuild Command-Line Reference](https://docs.microsoft.com/visualstudio
    * Passes parameters to the file logger. If you want to attach multiple file loggers, you do so by specifying additional parameters in the switches /flp1, /flp2, /flp3, and so on.
 
 # Environment Variables
+
+ * `MSBuildDebugEngine=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
+  * Set this to cause any MSBuild invocation launched within this environment to emit binary logs and additional debugging information to `<DIRECTORY>`. Useful when debugging build or evaluation issues when you can't directly influence the MSBuild invocation, such as in Visual Studio.
  * `MSBUILDTARGETOUTPUTLOGGING=1`
-   * Set this to enable [printing all target outputs to the log](https://blogs.msdn.microsoft.com/msbuild/2010/03/31/displaying-target-output-items-using-the-console-logger).
+   * Set this to enable [printing all target outputs to the log](https://learn.microsoft.com/archive/blogs/msbuild/displaying-target-output-items-using-the-console-logger).
  * `MSBUILDLOGTASKINPUTS=1`
    * Log task inputs (not needed if there are any diagnostic loggers already).
  * `MSBUILDEMITSOLUTION=1`
    * Save the generated .proj file for the .sln that is used to build the solution.
  * `MSBUILDENABLEALLPROPERTYFUNCTIONS=1`
-   * Enable [additional property functions](https://blogs.msdn.microsoft.com/visualstudio/2010/04/02/msbuild-property-functions).
+   * Enable [additional property functions](https://devblogs.microsoft.com/visualstudio/msbuild-property-functions/).
  * `MSBUILDLOGVERBOSERARSEARCHRESULTS=1`
    * In ResolveAssemblyReference task, log verbose search results.
  * `MSBUILDLOGCODETASKFACTORYOUTPUT=1`
@@ -33,7 +36,7 @@ See the [MSBuild Command-Line Reference](https://docs.microsoft.com/visualstudio
    * Launch debugger on build start.
    * Setting the value of 2 allows for manually attaching a debugger to a process ID.
  * `MSBUILDDEBUGSCHEDULER=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
-   * Dumps scheduler state at specified directory
+   * Dumps scheduler state at specified directory (`MSBUILDDEBUGSCHEDULER` is implied by `MSBuildDebugEngine`).
 
 # TreatAsLocalProperty
 If MSBuild.exe is passed properties on the command line, such as `/p:Platform=AnyCPU` then this value overrides whatever assignments you have to that property inside property groups. For instance, `<Platform>x86</Platform>` will be ignored. To make sure your local assignment to properties overrides whatever they pass on the command line, add the following at the top of your MSBuild project file:
@@ -45,7 +48,7 @@ If MSBuild.exe is passed properties on the command line, such as `/p:Platform=An
 This will make sure that your local assignments to the `Platform` property are respected. You can specify multiple properties in `TreatAsLocalProperty` separated by semicolon.
 
 # Visual Studio Background Builds
-Set the `TRACEDESIGNTIME=true` environment variable to output design-time build logs to TEMP: read more here: https://blogs.msdn.microsoft.com/jeremykuhne/2016/06/06/vs-background-builds
+Set the `TRACEDESIGNTIME=true` environment variable to output design-time build logs to TEMP: read more here: https://learn.microsoft.com/archive/blogs/jeremykuhne/vs-background-builds
 
 # Visual Studio Design-time (IntelliSense) builds
 
@@ -56,7 +59,7 @@ Use this command-line to approximate what the design-time build does:
 ```
 
 # Extend all builds (at system-wide level)
-See https://www.simple-talk.com/dotnet/.net-tools/extending-msbuild, "Extending all builds" section. Also read about [MSBuildUserExtensionsPath](http://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/Microsoft.Common.props,33), [CustomBeforeMicrosoftCommonProps](http://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/Microsoft.Common.props,68), [CustomBeforeMicrosoftCommonTargets](http://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/bin_/amd64/Microsoft.Common.targets,71), and CustomAfterMicrosoftCommonProps/CustomAfterMicrosoftCommonTargets.
+See https://www.simple-talk.com/dotnet/.net-tools/extending-msbuild, "Extending all builds" section. Also read about [MSBuildUserExtensionsPath](https://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/Microsoft.Common.props,33), [CustomBeforeMicrosoftCommonProps](https://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/Microsoft.Common.props,68), [CustomBeforeMicrosoftCommonTargets](https://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/bin_/amd64/Microsoft.Common.targets,71), and CustomAfterMicrosoftCommonProps/CustomAfterMicrosoftCommonTargets.
 
 Example:
 Create this file (Custom.props) in `C:\Users\username\AppData\Local\Microsoft\MSBuild\Current\Microsoft.Common.targets\ImportAfter`:

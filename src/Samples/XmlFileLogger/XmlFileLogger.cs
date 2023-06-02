@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Text.RegularExpressions;
@@ -42,16 +42,16 @@ namespace Microsoft.Build.Logging.StructuredLogger
         public override void Initialize(IEventSource eventSource)
         {
             ProcessParameters();
-            
-            eventSource.BuildStarted    += (s, args) => _build = new Build(args);
-            eventSource.BuildFinished   += (o, args) => _build.CompleteBuild(args, _logFile, _errors, _warings);
 
-            eventSource.ProjectStarted  += (o, args) => TryProcessEvent(() => _build.AddProject(args));
+            eventSource.BuildStarted += (s, args) => _build = new Build(args);
+            eventSource.BuildFinished += (o, args) => _build.CompleteBuild(args, _logFile, _errors, _warings);
+
+            eventSource.ProjectStarted += (o, args) => TryProcessEvent(() => _build.AddProject(args));
             eventSource.ProjectFinished += (o, args) => TryProcessEvent(() => _build.CompleteProject(args));
-            eventSource.TargetStarted   += (o, args) => TryProcessEvent(() => _build.AddTarget(args));
-            eventSource.TargetFinished  += (o, args) => TryProcessEvent(() => _build.CompleteTarget(args));
-            eventSource.TaskStarted     += (o, args) => TryProcessEvent(() => _build.AddTask(args));
-            eventSource.TaskFinished    += (o, args) => TryProcessEvent(() => _build.CompleteTask(args));
+            eventSource.TargetStarted += (o, args) => TryProcessEvent(() => _build.AddTarget(args));
+            eventSource.TargetFinished += (o, args) => TryProcessEvent(() => _build.CompleteTarget(args));
+            eventSource.TaskStarted += (o, args) => TryProcessEvent(() => _build.AddTask(args));
+            eventSource.TaskFinished += (o, args) => TryProcessEvent(() => _build.CompleteTask(args));
 
             eventSource.TaskFinished += (o, args) => TryProcessEvent(() => _build.CompleteTask(args));
 

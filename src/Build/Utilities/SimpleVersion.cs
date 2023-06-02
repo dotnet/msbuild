@@ -1,10 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Shared;
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -22,9 +22,11 @@ namespace Microsoft.Build.Utilities
     ///
     /// Treats unspecified components as 0 (e.g. x == x.0 == x.0.0 == x.0.0.0).
     ///
-    /// Unlike System.Version, does not tolerate whitespace, and '+' is ignored as
-    /// semver metadata as described above, not tolerated as positive sign of integer
-    /// component.
+    /// Ignores leading and trailing whitespace, but does not tolerate whitespace
+    /// between components, unlike System.Version.
+    /// 
+    /// Also unlike System.Version, '+' is ignored as semver metadata as described
+    /// above, not tolerated as positive sign of integer component.
     /// </summary>
     /// <remarks>
     /// Tolerating leading 'v' allows using $(TargetFrameworkVersion) directly.
@@ -127,22 +129,23 @@ namespace Microsoft.Build.Utilities
 
         private static ReadOnlySpan<char> RemoveTrivia(string input)
         {
-            int startIndex = 0;
-            int endIndex = input.Length;
+            // Ignore leading/trailing whitespace in input.
+            ReadOnlySpan<char> span = input.AsSpan().Trim();
 
-            if (input.Length > 0 && (input[0] == 'v' || input[0] == 'V'))
+            // Ignore a leading "v".
+            if (span.Length > 0 && (span[0] == 'v' || span[0] == 'V'))
             {
-                startIndex = 1;
+                span = span.Slice(1);
             }
 
-            int separatorIndex = input.IndexOfAny(s_semverSeparators, startIndex);
-
+            // Ignore semver separator and anything after.
+            int separatorIndex = span.IndexOfAny(s_semverSeparators);
             if (separatorIndex >= 0)
             {
-                endIndex = separatorIndex;
+                span = span.Slice(0, separatorIndex);
             }
 
-            return input.AsSpan().Slice(startIndex, endIndex - startIndex);
+            return span;
         }
 
         private static bool ParseComponent(ref ReadOnlySpan<char> span, out int value)
@@ -163,12 +166,12 @@ namespace Microsoft.Build.Utilities
 
         private static int ParseComponent(ReadOnlySpan<char> span)
         {
-        #if NETFRAMEWORK
+#if NETFRAMEWORK
             // Cannot parse int from span on .NET Framework, so allocate the substring
             var spanOrString = span.ToString();
-        #else
+#else
             var spanOrString = span;
-        #endif
+#endif
 
             if (!int.TryParse(spanOrString, NumberStyles.None, CultureInfo.InvariantCulture, out int value))
             {

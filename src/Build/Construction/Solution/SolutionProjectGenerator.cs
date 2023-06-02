@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 #if FEATURE_ASPNET_COMPILER
@@ -85,8 +85,7 @@ namespace Microsoft.Build.Construction
             "ValidateSolutionConfiguration",
             "ValidateToolsVersions",
             "ValidateProjects",
-            "GetSolutionConfigurationContents"
-            );
+            "GetSolutionConfigurationContents");
 
 #if FEATURE_ASPNET_COMPILER
         /// <summary>
@@ -207,8 +206,7 @@ namespace Microsoft.Build.Construction
         /// <param name="sdkResolverService">An <see cref="ISdkResolverService"/> to use.</param>
         /// <param name="submissionId">The current build submission ID.</param>
         /// <returns>An array of ProjectInstances.  The first instance is the traversal project, the remaining are the metaprojects for each project referenced in the solution.</returns>
-        internal static ProjectInstance[] Generate
-            (
+        internal static ProjectInstance[] Generate(
             SolutionFile solution,
             IDictionary<string, string> globalProperties,
             string toolsVersionOverride,
@@ -218,8 +216,7 @@ namespace Microsoft.Build.Construction
             ISdkResolverService sdkResolverService = null,
             int submissionId = BuildEventContext.InvalidSubmissionId)
         {
-            SolutionProjectGenerator projectGenerator = new SolutionProjectGenerator
-                (
+            SolutionProjectGenerator projectGenerator = new SolutionProjectGenerator(
                 solution,
                 globalProperties,
                 toolsVersionOverride,
@@ -227,8 +224,7 @@ namespace Microsoft.Build.Construction
                 loggingService,
                 targetNames,
                 sdkResolverService,
-                submissionId
-                );
+                submissionId);
 
             return projectGenerator.Generate();
         }
@@ -243,6 +239,23 @@ namespace Microsoft.Build.Construction
             msbuildProject.AppendChild(solutionConfigurationProperties);
             solutionConfigurationProperties.Condition = GetConditionStringForConfiguration(solutionConfiguration);
 
+            string escapedSolutionConfigurationContents = GetSolutionConfiguration(solutionFile, solutionConfiguration);
+
+            solutionConfigurationProperties.AddProperty("CurrentSolutionConfigurationContents", escapedSolutionConfigurationContents);
+
+            msbuildProject.AddItem(
+                "SolutionConfiguration",
+                solutionConfiguration.FullName,
+                new Dictionary<string, string>
+                {
+                    { "Configuration", solutionConfiguration.ConfigurationName },
+                    { "Platform", solutionConfiguration.PlatformName },
+                    { "Content", escapedSolutionConfigurationContents },
+                });
+        }
+
+        internal static string GetSolutionConfiguration(SolutionFile solutionFile, SolutionConfigurationInSolution solutionConfiguration)
+        {
             var solutionConfigurationContents = new StringBuilder(1024);
             var settings = new XmlWriterSettings
             {
@@ -251,7 +264,7 @@ namespace Microsoft.Build.Construction
             };
             using (XmlWriter xw = XmlWriter.Create(solutionConfigurationContents, settings))
             {
-                // TODO: fix code clone for parsing CurrentSolutionConfiguration xml: https://github.com/dotnet/msbuild/issues/6751
+                // TODO: Consider augmenting SolutionConfiguration with this code
                 xw.WriteStartElement("SolutionConfiguration");
 
                 // add a project configuration entry for each project in the solution
@@ -296,32 +309,19 @@ namespace Microsoft.Build.Construction
                 xw.WriteEndElement(); // </SolutionConfiguration>
             }
 
-            var escapedSolutionConfigurationContents = EscapingUtilities.Escape(solutionConfigurationContents.ToString());
-
-            solutionConfigurationProperties.AddProperty("CurrentSolutionConfigurationContents", escapedSolutionConfigurationContents);
-
-            msbuildProject.AddItem(
-                "SolutionConfiguration",
-                solutionConfiguration.FullName,
-                new Dictionary<string, string>
-                {
-                    { "Configuration", solutionConfiguration.ConfigurationName },
-                    { "Platform", solutionConfiguration.PlatformName },
-                    { "Content", escapedSolutionConfigurationContents },
-                });
+            string escapedSolutionConfigurationContents = EscapingUtilities.Escape(solutionConfigurationContents.ToString());
+            return escapedSolutionConfigurationContents;
         }
 
         /// <summary>
         /// Add a new error/warning/message tag into the given target
         /// </summary>
-        internal static ProjectTaskElement AddErrorWarningMessageElement
-            (
+        internal static ProjectTaskElement AddErrorWarningMessageElement(
             ProjectTargetElement target,
             string elementType,
             bool treatAsLiteral,
             string textResourceName,
-            params object[] args
-            )
+            params object[] args)
         {
             string text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string code, out string helpKeyword, textResourceName, args);
 
@@ -409,13 +409,11 @@ namespace Microsoft.Build.Construction
         /// the Copy task to copy all these files (or at least the ones that RAR determined should
         /// be copied local) into the web project's bin directory.
         /// </summary>
-        private static void AddTasksToCopyAllDependenciesIntoBinDir
-            (
+        private static void AddTasksToCopyAllDependenciesIntoBinDir(
             ProjectTargetInstance target,
             ProjectInSolution project,
             string referenceItemName,
-            string conditionDescribingValidConfigurations
-            )
+            string conditionDescribingValidConfigurations)
         {
             string copyLocalFilesItemName = referenceItemName + "_CopyLocalFiles";
             string targetFrameworkDirectoriesName = GenerateSafePropertyName(project, "_TargetFrameworkDirectories");
@@ -459,11 +457,9 @@ namespace Microsoft.Build.Construction
             // directory.
             ProjectTaskInstance copyTask = target.AddTask("Copy", conditionDescribingValidConfigurations, null);
             copyTask.SetParameter("SourceFiles", "@(" + copyLocalFilesItemName + ")");
-            copyTask.SetParameter
-                (
+            copyTask.SetParameter(
                 "DestinationFiles",
-                String.Format(CultureInfo.InvariantCulture, @"@({0}->'{1}%(DestinationSubDirectory)%(Filename)%(Extension)')", copyLocalFilesItemName, destinationFolder)
-                );
+                String.Format(CultureInfo.InvariantCulture, @"@({0}->'{1}%(DestinationSubDirectory)%(Filename)%(Extension)')", copyLocalFilesItemName, destinationFolder));
         }
 
         /// <summary>
@@ -473,12 +469,10 @@ namespace Microsoft.Build.Construction
         /// search all *.REFRESH files and extract fully-qualified absolute paths for
         /// each of the references.
         /// </summary>
-        private static void AddTasksToResolveAutoRefreshFileReferences
-            (
+        private static void AddTasksToResolveAutoRefreshFileReferences(
             ProjectTargetInstance target,
             ProjectInSolution project,
-            string referenceItemName
-            )
+            string referenceItemName)
         {
             string webRoot = "$(" + GenerateSafePropertyName(project, "AspNetPhysicalPath") + ")";
 
@@ -505,15 +499,13 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Adds an MSBuild task to the specified target
         /// </summary>
-        private static ProjectTaskInstance AddMSBuildTaskInstance
-        (
+        private static ProjectTaskInstance AddMSBuildTaskInstance(
             ProjectTargetInstance target,
             string projectPath,
             string msbuildTargetName,
             string configurationName,
             string platformName,
-            bool specifyProjectToolsVersion
-        )
+            bool specifyProjectToolsVersion)
         {
             ProjectTaskInstance msbuildTask = target.AddTask("MSBuild", null, null);
             msbuildTask.SetParameter("Projects", EscapingUtilities.Escape(projectPath));
@@ -527,8 +519,7 @@ namespace Microsoft.Build.Construction
                 CultureInfo.InvariantCulture,
                 "Configuration={0}; Platform={1}; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)",
                 EscapingUtilities.Escape(configurationName),
-                EscapingUtilities.Escape(platformName)
-            );
+                EscapingUtilities.Escape(platformName));
 
             msbuildTask.SetParameter("Properties", additionalProperties);
             if (specifyProjectToolsVersion)
@@ -544,11 +535,9 @@ namespace Microsoft.Build.Construction
         /// that can safely be used as an XML element name, and is also unique to that project (by
         /// embedding the project's GUID into the property name.
         /// </summary>
-        private static string GenerateSafePropertyName
-            (
+        private static string GenerateSafePropertyName(
             ProjectInSolution proj,
-            string propertyName
-            )
+            string propertyName)
         {
             // XML element names cannot contain curly braces, so get rid of them from the project guid.
             string projectGuid = proj.ProjectGuid.Substring(1, proj.ProjectGuid.Length - 2);
@@ -585,15 +574,13 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Add a new error/warning/message tag into the given target
         /// </summary>
-        private static ProjectTaskInstance AddErrorWarningMessageInstance
-            (
+        private static ProjectTaskInstance AddErrorWarningMessageInstance(
             ProjectTargetInstance target,
             string condition,
             string elementType,
             bool treatAsLiteral,
             string textResourceName,
-            params object[] args
-            )
+            params object[] args)
         {
             string text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string code, out string helpKeyword, textResourceName, args);
 
@@ -627,13 +614,11 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         private static string GetConditionStringForConfiguration(SolutionConfigurationInSolution configuration)
         {
-            return string.Format
-                (
+            return string.Format(
                 CultureInfo.InvariantCulture,
                 " ('$(Configuration)' == '{0}') and ('$(Platform)' == '{1}') ",
                 EscapingUtilities.Escape(configuration.ConfigurationName),
-                EscapingUtilities.Escape(configuration.PlatformName)
-                );
+                EscapingUtilities.Escape(configuration.PlatformName));
         }
 
         /// <summary>
@@ -707,13 +692,11 @@ namespace Microsoft.Build.Construction
         private ProjectInstance[] Generate()
         {
             // Validate against our minimum for upgradable projects
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
-                (
+            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                 _solutionFile.Version >= SolutionFile.slnFileMinVersion,
                 "SubCategoryForSolutionParsingErrors",
                 new BuildEventFileInfo(_solutionFile.FullPath),
-                "SolutionParseUpgradeNeeded"
-                );
+                "SolutionParseUpgradeNeeded");
 
             // This is needed in order to make decisions about tools versions such as whether to put a 
             // ToolsVersion parameter on <MSBuild> task tags and what MSBuildToolsPath to use when 
@@ -1008,8 +991,7 @@ namespace Microsoft.Build.Construction
             traversalProject.FullPath = path;
 
             // Create the instance.  From this point forward we can evaluate conditions against the traversal project directly.
-            var traversalInstance = new ProjectInstance
-                (
+            var traversalInstance = new ProjectInstance(
                 traversalProject,
                 _globalProperties,
                 explicitToolsVersionSpecified ? wrapperProjectToolsVersion : null,
@@ -1017,8 +999,7 @@ namespace Microsoft.Build.Construction
                 _solutionFile.VisualStudioVersion,
                 new ProjectCollection(),
                 _sdkResolverService,
-                _submissionId
-                );
+                _submissionId);
 
             // Traversal meta project entire state has to be serialized as it was generated and hence
             // does not have disk representation to load project from.
@@ -1168,14 +1149,12 @@ namespace Microsoft.Build.Construction
                 {
                     if (!_solutionFile.ProjectsByGuid.TryGetValue(dependencyProjectGuid, out ProjectInSolution dependencyProject))
                     {
-                        ProjectFileErrorUtilities.ThrowInvalidProjectFile
-                            (
+                        ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                             "SubCategoryForSolutionParsingErrors",
                             new BuildEventFileInfo(traversalProject.FullPath),
                             "SolutionParseProjectDepNotFoundError",
                             projectToAdd.ProjectGuid,
-                            dependencyProjectGuid
-                            );
+                            dependencyProjectGuid);
                     }
 
                     if (WouldProjectBuild(_solutionFile, _selectedSolutionConfiguration, dependencyProject, projectConfiguration))
@@ -1240,13 +1219,11 @@ namespace Microsoft.Build.Construction
             if (project.ProjectType == SolutionProjectType.WebProject)
             {
 #if !FEATURE_ASPNET_COMPILER
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile
-                    (
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(_solutionFile.FullPath),
                     "AspNetCompiler.UnsupportedMSBuildVersion",
-                    project.ProjectName
-                    );
+                    project.ProjectName);
 #else
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, null);
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Clean");
@@ -1328,14 +1305,12 @@ namespace Microsoft.Build.Construction
             {
                 if (!_solutionFile.ProjectsByGuid.TryGetValue(dependencyProjectGuid, out ProjectInSolution dependencyProject))
                 {
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile
-                        (
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                         "SubCategoryForSolutionParsingErrors",
                         new BuildEventFileInfo(traversalProject.FullPath),
                         "SolutionParseProjectDepNotFoundError",
                         project.ProjectGuid,
-                        dependencyProjectGuid
-                        );
+                        dependencyProjectGuid);
                 }
                 else
                 {
@@ -1498,15 +1473,13 @@ namespace Microsoft.Build.Construction
                     // of referenced projects.
                     foreach (SolutionConfigurationInSolution solutionConfiguration in _solutionFile.SolutionConfigurations)
                     {
-                        AddResolveProjectReferenceTasks
-                            (
+                        AddResolveProjectReferenceTasks(
                             traversalProject,
                             newTarget,
                             project,
                             solutionConfiguration,
                             referenceItemName.ToString(),
-                            out _
-                            );
+                            out _);
                     }
                 }
 
@@ -1523,26 +1496,22 @@ namespace Microsoft.Build.Construction
                 // Add a call to the <Message> task, conditioned on having an *invalid* Configuration.  The
                 // message says that we're skipping the Venus project because it's either not enabled
                 // for precompilation, or doesn't support the given configuration.
-                AddErrorWarningMessageInstance
-                    (
+                AddErrorWarningMessageInstance(
                     newTarget,
                     "!(" + conditionDescribingValidConfigurations + ")",
                     XMakeElements.message,
                     false,
-                    "SolutionVenusProjectSkipped"
-                    );
+                    "SolutionVenusProjectSkipped");
             }
         }
 
         /// <summary>
         /// Helper method to add a call to the AspNetCompiler task into the given target.
         /// </summary>
-        private void AddTaskForAspNetCompiler
-            (
+        private void AddTaskForAspNetCompiler(
             ProjectTargetInstance target,
             ProjectInSolution project,
-            string conditionDescribingValidConfigurations
-            )
+            string conditionDescribingValidConfigurations)
         {
             // Add a call to the AspNetCompiler task, conditioned on having a valid Configuration.
             ProjectTaskInstance newTask = target.AddTask("AspNetCompiler", conditionDescribingValidConfigurations, null);
@@ -1566,15 +1535,13 @@ namespace Microsoft.Build.Construction
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile
-                    (
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                     new BuildEventFileInfo(_solutionFile.FullPath),
                     e,
                     "AspNetCompiler.InvalidTargetFrameworkMonikerFromException",
                     project.ProjectName,
                     project.TargetFrameworkMoniker,
-                    e.Message
-                    );
+                    e.Message);
             }
         }
 
@@ -1585,25 +1552,21 @@ namespace Microsoft.Build.Construction
 
             if (targetFramework.Version > _version40)
             {
-                _loggingService.LogComment
-                    (
+                _loggingService.LogComment(
                     _projectBuildEventContext,
                     MessageImportance.Low,
                     "AspNetCompiler.TargetingHigherFrameworksDefaultsTo40",
                     project.ProjectName,
-                    targetFramework.Version.ToString()
-                    );
+                    targetFramework.Version.ToString());
             }
             if (!isDotNetFramework)
             {
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile
-                    (
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(_solutionFile.FullPath),
                     "AspNetCompiler.InvalidTargetFrameworkMonikerNotDotNET",
                     project.ProjectName,
-                    project.TargetFrameworkMoniker
-                    );
+                    project.TargetFrameworkMoniker);
             }
         }
 
@@ -1618,13 +1581,11 @@ namespace Microsoft.Build.Construction
             Version aspnetCompilerVersion = shouldDefaultToVersion40 ? _version40 : _version20;
             string aspnetCompilerPath = FrameworkLocationHelper.GetPathToDotNetFramework(aspnetCompilerVersion);
 
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
-                (
+            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                 aspnetCompilerPath != null,
                 "SubCategoryForSolutionParsingErrors",
                 new BuildEventFileInfo(_solutionFile.FullPath),
-                "AspNetCompiler.20NotInstalled"
-                );
+                "AspNetCompiler.20NotInstalled");
 
             task.SetParameter("ToolPath", aspnetCompilerPath);
         }
@@ -1632,15 +1593,13 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Adds MSBuild tasks to a project target to pre-resolve its project references
         /// </summary>
-        private void AddResolveProjectReferenceTasks
-        (
+        private void AddResolveProjectReferenceTasks(
             ProjectInstance traversalProject,
             ProjectTargetInstance target,
             ProjectInSolution project,
             SolutionConfigurationInSolution solutionConfiguration,
             string outputReferenceItemName,
-            out string addedReferenceGuids
-        )
+            out string addedReferenceGuids)
         {
             var referenceGuids = new StringBuilder();
 
@@ -1668,15 +1627,13 @@ namespace Microsoft.Build.Construction
                             bool specifyProjectToolsVersion =
                                 !String.Equals(traversalProject.ToolsVersion, "2.0", StringComparison.OrdinalIgnoreCase);
 
-                            ProjectTaskInstance msbuildTask = AddMSBuildTaskInstance
-                                (
+                            ProjectTaskInstance msbuildTask = AddMSBuildTaskInstance(
                                 target,
                                 referencedProject.RelativePath,
                                 "GetTargetPath",
                                 referencedProjectConfiguration.ConfigurationName,
                                 referencedProjectConfiguration.PlatformName,
-                                specifyProjectToolsVersion
-                                );
+                                specifyProjectToolsVersion);
                             msbuildTask.AddOutputItem("TargetOutputs", outputReferenceItemNameWithSuffix, null);
                         }
 
@@ -1705,15 +1662,13 @@ namespace Microsoft.Build.Construction
         /// Add a PropertyGroup to the project for a particular Asp.Net configuration.  This PropertyGroup
         /// will have the correct values for all the Asp.Net properties for this project and this configuration.
         /// </summary>
-        private static void AddPropertyGroupForAspNetConfiguration
-            (
+        private static void AddPropertyGroupForAspNetConfiguration(
             ProjectInstance traversalProject,
             ProjectInstance metaprojectInstance,
             ProjectInSolution project,
             string configurationName,
             AspNetCompilerParameters aspNetCompilerParameters,
-            string solutionFile
-            )
+            string solutionFile)
         {
             // If the configuration doesn't match, don't add the properties.
             if (!traversalProject.EvaluateCondition(String.Format(CultureInfo.InvariantCulture, " '$(AspNetConfiguration)' == '{0}' ", EscapingUtilities.Escape(configurationName))))
@@ -1741,8 +1696,7 @@ namespace Microsoft.Build.Construction
                 // Trim the trailing slash if one exists.
                 if (
                         (aspNetPhysicalPath[aspNetPhysicalPath.Length - 1] == Path.AltDirectorySeparatorChar) ||
-                        (aspNetPhysicalPath[aspNetPhysicalPath.Length - 1] == Path.DirectorySeparatorChar)
-                    )
+                        (aspNetPhysicalPath[aspNetPhysicalPath.Length - 1] == Path.DirectorySeparatorChar))
                 {
                     aspNetPhysicalPath = aspNetPhysicalPath.Substring(0, aspNetPhysicalPath.Length - 1);
                 }
@@ -1756,16 +1710,14 @@ namespace Microsoft.Build.Construction
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
-                        (
+                    ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                         false,
                         "SubCategoryForSolutionParsingErrors",
                         new BuildEventFileInfo(solutionFile),
                         e,
                         "SolutionParseInvalidProjectFileName",
                         project.RelativePath,
-                        e.Message
-                        );
+                        e.Message);
                 }
 
                 if (!String.IsNullOrEmpty(lastFolderInPhysicalPath))
@@ -1786,11 +1738,9 @@ namespace Microsoft.Build.Construction
                         // Make sure the path we are appending to has no leading slash to prevent double slashes.
                         string publishWebsitePath = EscapingUtilities.Escape(WebProjectOverrideFolder) + Path.DirectorySeparatorChar + EscapingUtilities.Escape(lastFolderInPhysicalPath) + Path.DirectorySeparatorChar;
 
-                        metaprojectInstance.SetProperty
-                            (
+                        metaprojectInstance.SetProperty(
                             GenerateSafePropertyName(project, "AspNetTargetPath"),
-                            outDirValue + publishWebsitePath
-                            );
+                            outDirValue + publishWebsitePath);
                     }
                 }
             }
@@ -1915,57 +1865,49 @@ namespace Microsoft.Build.Construction
                         {
                             // we haven't encountered any problems accessing the project file in the past, but do not support
                             // building this project type
-                            AddErrorWarningMessageInstance
-                            (
+                            AddErrorWarningMessageInstance(
                                 newTarget,
                                 null,
                                 XMakeElements.warning,
                                 true,
                                 "SolutionParseUnknownProjectType",
-                                project.RelativePath
-                            );
+                                project.RelativePath);
                         }
                         else
                         {
                             // this project file may be of supported type, but we have encountered problems accessing it
-                            AddErrorWarningMessageInstance
-                            (
+                            AddErrorWarningMessageInstance(
                                 newTarget,
                                 null,
                                 XMakeElements.warning,
                                 true,
                                 "SolutionParseErrorReadingProject",
                                 project.RelativePath,
-                                unknownProjectTypeErrorMessage
-                            );
+                                unknownProjectTypeErrorMessage);
                         }
                     }
                     else
                     {
-                        AddErrorWarningMessageInstance
-                        (
+                        AddErrorWarningMessageInstance(
                             newTarget,
                             null,
                             XMakeElements.message,
                             true,
                             "SolutionProjectSkippedForBuilding",
                             project.ProjectName,
-                            solutionConfiguration.FullName
-                        );
+                            solutionConfiguration.FullName);
                     }
                 }
                 else
                 {
-                    AddErrorWarningMessageInstance
-                    (
+                    AddErrorWarningMessageInstance(
                         newTarget,
                         null,
                         XMakeElements.warning,
                         true,
                         "SolutionProjectConfigurationMissing",
                         project.ProjectName,
-                        solutionConfiguration.FullName
-                    );
+                        solutionConfiguration.FullName);
                 }
             }
         }
@@ -1987,30 +1929,26 @@ namespace Microsoft.Build.Construction
                     {
                         if (!projectConfiguration.IncludeInBuild)
                         {
-                            AddErrorWarningMessageInstance
-                                (
+                            AddErrorWarningMessageInstance(
                                 newTarget,
                                 condition,
                                 XMakeElements.message,
                                 true,
                                 "SolutionProjectSkippedForBuilding",
                                 project.ProjectName,
-                                solutionConfiguration.FullName
-                                );
+                                solutionConfiguration.FullName);
                         }
                     }
                     else
                     {
-                        AddErrorWarningMessageInstance
-                            (
+                        AddErrorWarningMessageInstance(
                             newTarget,
                             condition,
                             XMakeElements.warning,
                             true,
                             "SolutionProjectConfigurationMissing",
                             project.ProjectName,
-                            solutionConfiguration.FullName
-                            );
+                            solutionConfiguration.FullName);
                     }
                 }
             }
@@ -2236,15 +2174,13 @@ namespace Microsoft.Build.Construction
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e)) // We don't want any problems scanning the project file to result in aborting the build.
                     {
-                        _loggingService.LogWarning
-                            (
+                        _loggingService.LogWarning(
                             _projectBuildEventContext,
                             "SubCategoryForSolutionParsingErrors",
                             new BuildEventFileInfo(project.RelativePath),
                             "SolutionScanProjectDependenciesFailed",
                             project.RelativePath,
-                            e.Message
-                            );
+                            e.Message);
                     }
                 }
             }
@@ -2266,15 +2202,13 @@ namespace Microsoft.Build.Construction
                 }
                 else
                 {
-                    _loggingService.LogWarning
-                        (
+                    _loggingService.LogWarning(
                         _projectBuildEventContext,
                         "SubCategoryForSolutionParsingErrors",
                         new BuildEventFileInfo(_solutionFile.FullPath),
                         "SolutionParseProjectDepNotFoundError",
                         project.ProjectGuid,
-                        dependencyGuid
-                        );
+                        dependencyGuid);
                 }
             }
         }
@@ -2410,35 +2344,29 @@ namespace Microsoft.Build.Construction
 
             if (_solutionFile.SolutionConfigurations.Count > 0)
             {
-                AddErrorWarningMessageInstance
-                    (
+                AddErrorWarningMessageInstance(
                     initialTarget,
                     "('$(CurrentSolutionConfigurationContents)' == '') and ('$(SkipInvalidConfigurations)' != 'true')",
                     XMakeElements.error,
                     false /* do not treat as literal */,
                     "SolutionInvalidSolutionConfiguration",
-                    "$(Configuration)|$(Platform)"
-                    );
+                    "$(Configuration)|$(Platform)");
 
-                AddErrorWarningMessageInstance
-                    (
+                AddErrorWarningMessageInstance(
                     initialTarget,
                     "('$(CurrentSolutionConfigurationContents)' == '') and ('$(SkipInvalidConfigurations)' == 'true')",
                     XMakeElements.warning,
                     false /* do not treat as literal */,
                     "SolutionInvalidSolutionConfiguration",
-                    "$(Configuration)|$(Platform)"
-                    );
+                    "$(Configuration)|$(Platform)");
 
-                AddErrorWarningMessageInstance
-                    (
+                AddErrorWarningMessageInstance(
                     initialTarget,
                     "'$(CurrentSolutionConfigurationContents)' != ''",
                     XMakeElements.message,
                     false /* do not treat as literal */,
                     "SolutionBuildingSolutionConfiguration",
-                    "$(Configuration)|$(Platform)"
-                    );
+                    "$(Configuration)|$(Platform)");
             }
         }
 
@@ -2448,15 +2376,13 @@ namespace Microsoft.Build.Construction
         private static void AddValidateToolsVersionsTarget(ProjectInstance traversalProject)
         {
             ProjectTargetInstance validateToolsVersionsTarget = traversalProject.AddTarget("ValidateToolsVersions", null, null, null, null, null, null, null, null, false /* legacy target returns behaviour */);
-            ProjectTaskInstance toolsVersionErrorTask = AddErrorWarningMessageInstance
-                (
+            ProjectTaskInstance toolsVersionErrorTask = AddErrorWarningMessageInstance(
                 validateToolsVersionsTarget,
                 "'$(MSBuildToolsVersion)' == '2.0' and ('$(ProjectToolsVersion)' != '2.0' and '$(ProjectToolsVersion)' != '')",
                 XMakeElements.error,
                 false /* do not treat as literal */,
                 "SolutionToolsVersionDoesNotSupportProjectToolsVersion",
-                "$(MSBuildToolsVersion)"
-                );
+                "$(MSBuildToolsVersion)");
         }
 
         /// <summary> Adds the target to fetch solution configuration contents for given configuration|platform combo. </summary>

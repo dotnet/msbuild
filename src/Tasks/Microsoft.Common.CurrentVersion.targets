@@ -1631,11 +1631,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <UseDefaultPlatformLookupTables Condition="'$(UseDefaultPlatformLookupTables)' == ''">true</UseDefaultPlatformLookupTables>
   </PropertyGroup>
 
-  <!-- This target skips VS builds because they already supply Platform and
-       Configuration information. -->
+  <!-- This target skips sln-based builds because they already supply Platform and
+       Configuration information. See AssignProjectConfiguration -->
   <Target Name="_GetProjectReferencePlatformProperties"
           Condition="'$(EnableDynamicPlatformResolution)' == 'true'
-                     and '$(BuildingInsideVisualStudio)' != 'true'
+                     and '$(CurrentSolutionConfigurationContents)' == ''
                      and '@(_MSBuildProjectReferenceExistent)' != ''">
 
     <!-- Allow preset SetPlatform to override this operation -->
@@ -2464,7 +2464,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ====================================================================================================
   -->
   <Target Name="GenerateBindingRedirects"
-    Inputs="$(MSBuildAllProjects);@(AppConfigFile);$(ResolveAssemblyReferencesStateFile);$(SuggestedBindingRedirectsCacheFile)"
+    Inputs="$(MSBuildAllProjects);@(AppConfigWithTargetPath);$(ResolveAssemblyReferencesStateFile);$(SuggestedBindingRedirectsCacheFile)"
     Outputs="$(_GenerateBindingRedirectsIntermediateAppConfig)"
     Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true'"
     DependsOnTargets="_GenerateSuggestedBindingRedirectsCache">

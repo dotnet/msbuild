@@ -1,8 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
 using System.Collections;
+using System.IO;
 
 #nullable disable
 
@@ -14,7 +14,7 @@ namespace Microsoft.Build.Shared.LanguageParser
      * Given vb sources, return an enumerator that will provide tokens one at a time.
      *
      */
-    sealed internal class VisualBasicTokenizer : IEnumerable
+    internal sealed class VisualBasicTokenizer : IEnumerable
     {
         /*
             These are the tokens that are specific to the VB tokenizer.

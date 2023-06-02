@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -15,7 +15,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
     /// <summary>
     /// Class representation of an MSBuild project execution.
     /// </summary>
-    internal class Project : LogProcessNode
+    internal sealed class Project : LogProcessNode
     {
         /// <summary>
         /// The full path to the MSBuild project file for this project.
@@ -153,7 +153,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
         /// <returns>Target node</returns>
         private Target GetOrAddTargetByName(string targetName, TargetStartedEventArgs e = null)
         {
-            Target result = _targetNameToTargetMap.GetOrAdd(targetName, key=> new Target(key, e));
+            Target result = _targetNameToTargetMap.GetOrAdd(targetName, key => new Target(key, e));
 
             if (e != null)
             {

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -84,8 +84,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
                 Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties));
                 TargetEntry entry = new TargetEntry(requestEntry, this, null, lookup, null, TargetBuiltReason.None, _host, false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests a constructor with a null lookup.
@@ -99,8 +98,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
                 BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
                 TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), null, null, TargetBuiltReason.None, _host, false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests a constructor with a null host.
@@ -116,8 +114,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties));
                 TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), lookup, null, TargetBuiltReason.None, null, false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests a valid constructor call.
@@ -142,8 +139,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 TargetEntry entry = CreateStandardTargetEntry(project, "Empty");
                 Assert.Equal(TargetEntryState.Dependencies, entry.State);
                 ExecuteEntry(project, entry);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests incorrect invocation of GatherResults.
@@ -157,8 +153,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 TargetEntry entry = CreateStandardTargetEntry(project, "Empty");
                 Assert.Equal(TargetEntryState.Dependencies, entry.State);
                 entry.GatherResults();
-            }
-           );
+            });
         }
         /// <summary>
         /// Verifies that the dependencies specified for a target are returned by the GetDependencies call.
@@ -1198,7 +1193,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// The mock component host.
         /// </summary>
-        private class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
+        private sealed class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
         {
             #region IBuildComponentHost Members
 

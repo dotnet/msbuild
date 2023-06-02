@@ -1,19 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Text;
-using System.Reflection;
-using System.Globalization;
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
-using System.Runtime.Serialization;
+using System.Globalization;
 using System.IO;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Text;
 using Microsoft.Build.BackEnd;
-#if FEATURE_ASSEMBLYLOADCONTEXT
-using System.Reflection.PortableExecutable;
-using System.Reflection.Metadata;
-#endif
 
 #nullable disable
 
@@ -134,11 +130,11 @@ namespace Microsoft.Build.Shared
             if (hasAssemblyName)
             {
                 var name = info.GetString("name");
-                var publicKey = (byte[]) info.GetValue("pk", typeof(byte[]));
-                var publicKeyToken = (byte[]) info.GetValue("pkt", typeof(byte[]));
+                var publicKey = (byte[])info.GetValue("pk", typeof(byte[]));
+                var publicKeyToken = (byte[])info.GetValue("pkt", typeof(byte[]));
                 var version = (Version)info.GetValue("ver", typeof(Version));
-                var flags = (AssemblyNameFlags) info.GetInt32("flags");
-                var processorArchitecture = (ProcessorArchitecture) info.GetInt32("cpuarch");
+                var flags = (AssemblyNameFlags)info.GetInt32("flags");
+                var processorArchitecture = (ProcessorArchitecture)info.GetInt32("cpuarch");
 
                 CultureInfo cultureInfo = null;
                 var hasCultureInfo = info.GetBoolean("hasCI");
@@ -147,8 +143,8 @@ namespace Microsoft.Build.Shared
                     cultureInfo = new CultureInfo(info.GetInt32("ci"));
                 }
 
-                var hashAlgorithm = (System.Configuration.Assemblies.AssemblyHashAlgorithm) info.GetInt32("hashAlg");
-                var versionCompatibility = (AssemblyVersionCompatibility) info.GetInt32("verCompat");
+                var hashAlgorithm = (System.Configuration.Assemblies.AssemblyHashAlgorithm)info.GetInt32("hashAlg");
+                var versionCompatibility = (AssemblyVersionCompatibility)info.GetInt32("verCompat");
                 var codeBase = info.GetString("codebase");
 
                 asAssemblyName = new AssemblyName
@@ -171,7 +167,7 @@ namespace Microsoft.Build.Shared
             isSimpleName = info.GetBoolean("isSName");
             hasProcessorArchitectureInFusionName = info.GetBoolean("hasCpuArch");
             immutable = info.GetBoolean("immutable");
-            remappedFrom = (HashSet<AssemblyNameExtension>) info.GetValue("remapped", typeof(HashSet<AssemblyNameExtension>));
+            remappedFrom = (HashSet<AssemblyNameExtension>)info.GetValue("remapped", typeof(HashSet<AssemblyNameExtension>));
         }
 
         /// <summary>
@@ -956,8 +952,8 @@ namespace Microsoft.Build.Shared
                 info.AddValue("pk", asAssemblyName.GetPublicKey());
                 info.AddValue("pkt", asAssemblyName.GetPublicKeyToken());
                 info.AddValue("ver", asAssemblyName.Version);
-                info.AddValue("flags", (int) asAssemblyName.Flags);
-                info.AddValue("cpuarch", (int) asAssemblyName.ProcessorArchitecture);
+                info.AddValue("flags", (int)asAssemblyName.Flags);
+                info.AddValue("cpuarch", (int)asAssemblyName.ProcessorArchitecture);
 
                 info.AddValue("hasCI", asAssemblyName.CultureInfo != null);
                 if (asAssemblyName.CultureInfo != null)
@@ -988,7 +984,7 @@ namespace Microsoft.Build.Shared
             translator.Translate(ref isSimpleName);
             translator.Translate(ref hasProcessorArchitectureInFusionName);
             translator.Translate(ref immutable);
-            
+
             // TODO: consider some kind of protection against infinite loop during serialization, hint: pre serialize check for cycle in graph
             translator.TranslateHashSet(ref remappedFrom,
                 (ITranslator t) => new AssemblyNameExtension(t),

@@ -1,19 +1,20 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class MakeDir_Tests
+    public sealed class MakeDir_Tests
     {
         /// <summary>
         /// Make sure that attributes set on input items are forwarded to output items.
@@ -43,8 +44,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
                 Assert.Contains(
                     String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
-                    engine.Log
-                );
+                    engine.Log);
                 Assert.Equal("en-GB", t.DirectoriesCreated[0].GetMetadata("Locale"));
 
                 // Output ItemSpec should not be overwritten.
@@ -60,8 +60,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that if we fail to create a folder, we don't pass
         /// through the input.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "Under Unix all filenames are valid and this test is not useful"
+        [WindowsOnlyFact(additionalMessage: "Under Unix all filenames are valid and this test is not useful.")]
         public void SomeInputsFailToCreate()
         {
             string temp = Path.GetTempPath();
@@ -105,11 +104,9 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
-                Assert.Contains
-                (
+                Assert.Contains(
                     String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
-                    engine.Log
-                );
+                    engine.Log);
             }
             finally
             {
@@ -150,8 +147,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
                 Assert.Contains(
                     String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
-                    engine.Log
-                );
+                    engine.Log);
 
                 engine.Log = "";
                 success = t.Execute();

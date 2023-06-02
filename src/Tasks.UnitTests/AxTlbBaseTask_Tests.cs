@@ -1,19 +1,20 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Runtime.Hosting;
-using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
 {
-    sealed public class AxTlbBaseTask_Tests
+    public sealed class AxTlbBaseTask_Tests
     {
         /// <summary>
         /// Tests the /delaysign switch
@@ -40,14 +41,9 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /keycontainer: switch
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("Key container is not supported, except under Windows.")]
         public void KeyContainer()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Key container is not supported, except under Windows"
-            }
-
             var t = new ResolveComReference.TlbImp();
             t.TypeLibName = "FakeTlb.tlb";
             string badParameterValue = "badKeyContainer";
@@ -267,14 +263,9 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// Tests that strong name sign-related parameters are validated properly, causing the task
         /// to fail if they are incorrectly set up.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("Key container is not supported, except under Windows.")]
         public void TaskFailsWhenImproperlySigned()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Key container is not supported, except under Windows"
-            }
-
             var t = new ResolveComReference.TlbImp();
             t.TypeLibName = "Blah.tlb";
             string tempKeyContainer = null;
@@ -320,7 +311,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         }
     }
 
-    sealed internal class Utilities
+    internal sealed class Utilities
     {
         /// <summary>
         /// Given an instance of an AxImp task, executes that task (assuming all necessary parameters

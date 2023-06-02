@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Threading;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
@@ -20,6 +19,7 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -132,7 +132,6 @@ namespace Microsoft.Build.UnitTests
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void DoNotNormallyCopyOverReadOnlyFile()
@@ -195,7 +194,6 @@ namespace Microsoft.Build.UnitTests
         /// OverwriteReadOnlyFiles is false
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void CopyOverReadOnlyFileEnvironmentOverride()
@@ -261,7 +259,6 @@ namespace Microsoft.Build.UnitTests
         /// If MSBUILDALWAYSRETRY is set, keep retrying the copy.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void AlwaysRetryCopyEnvironmentOverride()
@@ -333,7 +330,6 @@ namespace Microsoft.Build.UnitTests
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void CopyOverReadOnlyFileParameterIsSet()
@@ -511,7 +507,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile)) // HIGHCHAR: Test reads ASCII (not ANSI).
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
@@ -576,8 +574,7 @@ namespace Microsoft.Build.UnitTests
                             sourceFile,
                             destinationFile,
                             "SkipUnchangedFiles",
-                            "true"
-                            );
+                            "true");
                     }
                     else
                     {
@@ -586,8 +583,7 @@ namespace Microsoft.Build.UnitTests
                             sourceFile,
                             destinationFile,
                             "SkipUnchangedFiles",
-                            "true"
-                            );
+                            "true");
                     }
 
                     // "Expected the destination file to contain the contents of source file."
@@ -652,16 +648,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we do not retry when the source file has a misplaced colon
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. Colon is special only on Windows.")]
         public void DoNotRetryCopyNotSupportedException()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                // Colon is special only on Windows
-                return;
-            }
-
             string sourceFile = FileUtilities.GetTemporaryFile();
             string destinationFile = "foobar:";
 
@@ -791,7 +780,6 @@ namespace Microsoft.Build.UnitTests
         /// Most important case is when destination is locked
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void DoRetryWhenDestinationLocked()
@@ -968,7 +956,9 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
@@ -998,7 +988,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class CopyMonitor
+        internal sealed class CopyMonitor
         {
             internal int copyCount;
 
@@ -1018,9 +1008,7 @@ namespace Microsoft.Build.UnitTests
         /// CopiedFiles should only include files that were successfully copied
         /// (or skipped), not files for which there was an error.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "Under Unix all filenames are valid and this test is not useful"
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. Under Unix all filenames are valid and this test is not useful.")]
         public void OutputsOnlyIncludeSuccessfulCopies()
         {
             string temp = Path.GetTempPath();
@@ -1176,8 +1164,7 @@ namespace Microsoft.Build.UnitTests
         /// Copying a file on top of itself should be a success (no-op) whether
         /// or not skipUnchangedFiles is true or false. Variation with different casing/relativeness.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "File names under Unix are case-sensitive and this test is not useful"
+        [WindowsOnlyFact(additionalMessage: "File names under Unix are case-sensitive and this test is not useful.")]
         public void CopyFileOnItself2()
         {
             string currdir = Directory.GetCurrentDirectory();
@@ -1228,7 +1215,6 @@ namespace Microsoft.Build.UnitTests
         /// or not skipUnchangedFiles is true or false. Variation with a second copy failure.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void CopyFileOnItselfAndFailACopy()
@@ -1330,7 +1316,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 if (!UseHardLinks)
                 {
@@ -1610,8 +1598,7 @@ namespace Microsoft.Build.UnitTests
         /// If the destination path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -1654,8 +1641,7 @@ namespace Microsoft.Build.UnitTests
         /// If the source path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong2()
         {
             const string sourceFile = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -1933,7 +1919,6 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogContains("MSB3027");
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
         internal virtual void ErrorIfLinkFailedCheck()
         {
             using (var env = TestEnvironment.Create())
@@ -1965,7 +1950,7 @@ namespace Microsoft.Build.UnitTests
         /// Simulates the File.Copy method without touching the disk.
         /// First copy fails as requested, subsequent copies succeed.
         /// </summary>
-        private class CopyFunctor
+        private sealed class CopyFunctor
         {
             /// <summary>
             /// Protects the counts and lists below.
@@ -2049,6 +2034,9 @@ namespace Microsoft.Build.UnitTests
 
     public class CopyHardAndSymbolicLink_Tests
     {
+        /// <summary>
+        /// Verify build sucessfully when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true 
+        /// </summary>
         [Fact]
         public void CopyWithHardAndSymbolicLinks()
         {
@@ -2075,10 +2063,9 @@ namespace Microsoft.Build.UnitTests
 
                 bool success = t.Execute();
 
-                Assert.False(success);
-
+                Assert.True(success);
                 MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
-                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.ExactlyOneTypeOfLink", "UseHardlinksIfPossible", "UseSymboliclinksIfPossible");
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
             }
             finally
             {
@@ -2184,8 +2171,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // SMB share paths only work on Windows
+        [WindowsOnlyFact(additionalMessage: "SMB share paths only work on Windows.")]
         public void CopyToDestinationFolderWithHardLinkFallbackNetwork()
         {
             // Workaround: For some reason when this test runs with all other tests we are getting
@@ -2290,8 +2276,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // Only Windows has a (small) link limit, and this tests for an HRESULT
+        [WindowsOnlyFact(additionalMessage: "Only Windows has a (small) link limit, and this tests for an HRESULT.")]
         public void CopyToDestinationFolderWithHardLinkFallbackTooManyLinks()
         {
             // Workaround: For some reason when this test runs with all other tests we are getting
@@ -2312,15 +2297,6 @@ namespace Microsoft.Build.UnitTests
 
                 Directory.CreateDirectory(destFolder);
 
-                // Exhaust the number (1024) of directory entries that can be created for a file
-                // This is 1 + (1 x hard links)
-                // We need to test the fallback code path when we're out of directory entries for a file..
-                for (int n = 0; n < 1025 /* make sure */; n++)
-                {
-                    string destLink = Path.Combine(destFolder, Path.GetFileNameWithoutExtension(sourceFile) + "." + n);
-                    string linkError = String.Empty;
-                    Tasks.NativeMethods.MakeHardLink(destLink, sourceFile, ref linkError);
-                }
 
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
@@ -2334,6 +2310,16 @@ namespace Microsoft.Build.UnitTests
                     DestinationFolder = new TaskItem(destFolder),
                     SkipUnchangedFiles = true
                 };
+
+                // Exhaust the number (1024) of directory entries that can be created for a file
+                // This is 1 + (1 x hard links)
+                // We need to test the fallback code path when we're out of directory entries for a file..
+                for (int n = 0; n < 1025 /* make sure */; n++)
+                {
+                    string destLink = Path.Combine(destFolder, Path.GetFileNameWithoutExtension(sourceFile) + "." + n);
+                    string linkError = String.Empty;
+                    Tasks.NativeMethods.MakeHardLink(destLink, sourceFile, ref linkError, t.Log);
+                }
 
                 bool success = t.Execute();
 
@@ -2376,7 +2362,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         internal override void ErrorIfLinkFailedCheck()
         {
             base.ErrorIfLinkFailedCheck();
@@ -2394,84 +2380,70 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact]
+        [RequiresSymbolicLinksFact]
         public void CopyToDestinationFolderWithSymbolicLinkCheck()
         {
-            var isPrivileged = true;
-
-            if (NativeMethodsShared.IsWindows)
+            string sourceFile = FileUtilities.GetTemporaryFile();
+            string temp = Path.GetTempPath();
+            string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
+            string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
+            try
             {
-                if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null)))
+                File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
+
+                // Don't create the dest folder, let task do that
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+
+                var me = new MockEngine(true);
+                var t = new Copy
                 {
-                    isPrivileged = false;
-                    Assert.True(true, "It seems that you don't have the permission to create symbolic links. Try to run this test again with higher privileges");
-                }
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = me,
+                    SourceFiles = sourceFiles,
+                    DestinationFolder = new TaskItem(destFolder),
+                    SkipUnchangedFiles = true,
+                    UseSymboliclinksIfPossible = true
+                };
+
+                bool success = t.Execute();
+
+                Assert.True(success); // "success"
+                Assert.True(File.Exists(destFile)); // "destination exists"
+                Assert.True((File.GetAttributes(destFile) & FileAttributes.ReparsePoint) != 0, "File was copied but is not a symlink");
+
+                MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
+
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
+
+                string destinationFileContents = File.ReadAllText(destFile);
+                Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination symbolic linked file to contain the contents of source file."
+
+                Assert.Single(t.DestinationFiles);
+                Assert.Single(t.CopiedFiles);
+                Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
+                Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
+
+                // Now we will write new content to the source file
+                // we'll then check that the destination file automatically
+                // has the same content (i.e. it's been hard linked)
+
+                File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
+
+                // Read the destination file (it should have the same modified content as the source)
+                destinationFileContents = File.ReadAllText(destFile);
+                Assert.Equal("This is another source temp file.", destinationFileContents); // "Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
+
+                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
             }
-
-            if (isPrivileged)
+            finally
             {
-                string sourceFile = FileUtilities.GetTemporaryFile();
-                string temp = Path.GetTempPath();
-                string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
-                string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
-                try
-                {
-                    File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
-
-                    // Don't create the dest folder, let task do that
-
-                    ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
-
-                    var me = new MockEngine(true);
-                    var t = new Copy
-                    {
-                        RetryDelayMilliseconds = 1,  // speed up tests!
-                        BuildEngine = me,
-                        SourceFiles = sourceFiles,
-                        DestinationFolder = new TaskItem(destFolder),
-                        SkipUnchangedFiles = true,
-                        UseSymboliclinksIfPossible = true
-                    };
-
-                    bool success = t.Execute();
-
-                    Assert.True(success); // "success"
-                    Assert.True(File.Exists(destFile)); // "destination exists"
-
-                    MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
-
-                    me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
-
-                    string destinationFileContents = File.ReadAllText(destFile);
-                    Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination symbolic linked file to contain the contents of source file."
-
-                    Assert.Single(t.DestinationFiles);
-                    Assert.Single(t.CopiedFiles);
-                    Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
-                    Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
-
-                    // Now we will write new content to the source file
-                    // we'll then check that the destination file automatically
-                    // has the same content (i.e. it's been hard linked)
-
-                    File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
-
-                    // Read the destination file (it should have the same modified content as the source)
-                    destinationFileContents = File.ReadAllText(destFile);
-                    Assert.Equal("This is another source temp file.", destinationFileContents); // "Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
-
-                    ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
-                }
-                finally
-                {
-                    File.Delete(sourceFile);
-                    File.Delete(destFile);
-                    FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
-                }
+                File.Delete(sourceFile);
+                File.Delete(destFile);
+                FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
             }
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         internal override void ErrorIfLinkFailedCheck()
         {
             base.ErrorIfLinkFailedCheck();

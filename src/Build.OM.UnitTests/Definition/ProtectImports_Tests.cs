@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>";
 
             importContents = Expand(importContents);
-            _importFilename = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile() + ".targets";
+            _importFilename = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName() + ".targets";
             File.WriteAllText(_importFilename, importContents);
         }
 
@@ -136,8 +136,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // This should throw
                 property.UnevaluatedValue = NewValue;
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests against edits into imported properties through the project.
@@ -168,8 +167,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // This should throw
                 project.RemoveProperty(property);
-            }
-           );
+            });
         }
         #endregion
 
@@ -188,8 +186,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // This should throw
                 item.ItemType = "NewItemType";
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests imported item renaming.
@@ -204,8 +201,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // This should throw
                 item.Rename("NewItemName");
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests imported item SetUnevaluatedValue.
@@ -220,8 +216,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // This should throw
                 item.UnevaluatedInclude = "NewItemName";
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests imported item removal.
@@ -236,8 +231,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // This should throw
                 project.RemoveItem(item);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests project item type change.
@@ -312,8 +306,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // This should throw
                 item.SetMetadataValue(ImportedMetadataName, "NewImportedMetadataValue");
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests setting new metadata in import.
@@ -328,8 +321,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // This should throw
                 item.SetMetadataValue("NewMetadata", "NewImportedMetadataValue");
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests setting new metadata in import.
@@ -344,8 +336,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // This should throw
                 metadata.UnevaluatedValue = NewValue;
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests removing metadata in import.
@@ -360,8 +351,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // This should throw
                 item.RemoveMetadata(ImportedMetadataName);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests setting existing metadata in import.
@@ -439,8 +429,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // This should throw
                 metadata.UnevaluatedValue = NewValue;
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests removing metadata in imported item definition.
@@ -455,8 +444,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // This should throw
                 item.RemoveMetadata(NonOverridableMetadataName);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests setting existing metadata in import.

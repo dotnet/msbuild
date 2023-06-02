@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#if FEATURE_FILE_TRACKER
 
 using System;
 using System.Collections.Generic;
@@ -8,8 +10,6 @@ using System.IO;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-#if FEATURE_FILE_TRACKER
 
 #nullable disable
 
@@ -21,6 +21,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     public class CanonicalTrackedOutputFiles
     {
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Member Data
         // The .write. tracking log files
         private ITaskItem[] _tlogFiles;
@@ -593,9 +594,10 @@ namespace Microsoft.Build.Utilities
                 // Write out the dependency information as a new tlog
                 using (StreamWriter outputs = FileUtilities.OpenWrite(firstTlog, false, System.Text.Encoding.Unicode))
                 {
-                    foreach (string rootingMarker in DependencyTable.Keys)
+                    foreach (KeyValuePair<string, Dictionary<string, DateTime>> kvp in DependencyTable)
                     {
-                        Dictionary<string, DateTime> dependencies = DependencyTable[rootingMarker];
+                        string rootingMarker = kvp.Key;
+                        Dictionary<string, DateTime> dependencies = kvp.Value;
                         outputs.WriteLine("^" + rootingMarker);
                         foreach (string file in dependencies.Keys)
                         {
@@ -753,8 +755,9 @@ namespace Microsoft.Build.Utilities
                 var dependenciesWithoutMissingFiles = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
                 int keyIndex = 0;
 
-                foreach (string file in dependencies.Keys)
+                foreach (KeyValuePair<string, DateTime> kvp in dependencies)
                 {
+                    string file = kvp.Key;
                     if (keyIndex++ > 0)
                     {
                         // Record whether or not each file exists and cache it.
@@ -771,7 +774,7 @@ namespace Microsoft.Build.Utilities
                         // Does the cached file exist?
                         if (fileExists)
                         {
-                            dependenciesWithoutMissingFiles.Add(file, dependencies[file]);
+                            dependenciesWithoutMissingFiles.Add(file, kvp.Value);
                         }
                     }
                     else
@@ -784,6 +787,7 @@ namespace Microsoft.Build.Utilities
             }
         }
         #endregion
+#pragma warning restore format
     }
 }
 

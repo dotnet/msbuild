@@ -1,9 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Reflection;
-
 using Microsoft.Build.Framework;
 
 #nullable disable
@@ -42,15 +41,24 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Creates an ITask instance and returns it.  
         /// </summary>
-        internal static ITask CreateTask(LoadedType loadedType, string taskName, string taskLocation, int taskLine, int taskColumn, LogError logError
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        internal static ITask CreateTask(
+            LoadedType loadedType,
+            string taskName,
+            string taskLocation,
+            int taskLine,
+            int taskColumn,
+            LogError logError,
 #if FEATURE_APPDOMAIN
-            , AppDomainSetup appDomainSetup
+            AppDomainSetup appDomainSetup,
+            Action<AppDomain> appDomainCreated,
 #endif
-            , bool isOutOfProc
+            bool isOutOfProc
 #if FEATURE_APPDOMAIN
             , out AppDomain taskAppDomain
 #endif
             )
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
 #if FEATURE_APPDOMAIN
             bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute;
@@ -66,14 +74,12 @@ namespace Microsoft.Build.Shared
                 {
                     if (!loadedType.IsMarshalByRef)
                     {
-                        logError
-                        (
+                        logError(
                             taskLocation,
                             taskLine,
                             taskColumn,
                             "TaskNotMarshalByRef",
-                            taskName
-                         );
+                            taskName);
 
                         return null;
                     }
@@ -112,6 +118,7 @@ namespace Microsoft.Build.Shared
 
                         // Hook up last minute dumping of any exceptions 
                         taskAppDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
+                        appDomainCreated?.Invoke(taskAppDomain);
                     }
                 }
                 else
@@ -135,15 +142,13 @@ namespace Microsoft.Build.Shared
                     // to fail here.
                     if (taskType != loadedType.Type)
                     {
-                        logError
-                        (
+                        logError(
                         taskLocation,
                         taskLine,
                         taskColumn,
                         "ConflictingTaskAssembly",
                         loadedType.Assembly.AssemblyFile,
-                        loadedType.Type.GetTypeInfo().Assembly.Location
-                        );
+                        loadedType.Type.GetTypeInfo().Assembly.Location);
 
                         taskInstanceInOtherAppDomain = null;
                     }

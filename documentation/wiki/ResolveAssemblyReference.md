@@ -13,7 +13,7 @@ https://github.com/dotnet/msbuild/blob/a936b97e30679dcea4d99c362efa6f732c9d3587/
 This is where the RAR task is invoked in the targets file.
 
 The source code for RAR is at:
-https://github.com/dotnet/msbuild/blob/master/src/Tasks/AssemblyDependency/ResolveAssemblyReference.cs
+https://github.com/dotnet/msbuild/blob/main/src/Tasks/AssemblyDependency/ResolveAssemblyReference.cs
 
 ## Inputs
 RAR is very detailed about logging its inputs:

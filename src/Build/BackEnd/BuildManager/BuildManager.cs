@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -49,7 +49,7 @@ namespace Microsoft.Build.Execution
         // TODO: Figure out a more elegant way to do this.
         //       The rationale for this is that we can detect during design-time builds in the Evaluator (which populates this) that the project cache will be used so that we don't
         //       need to evaluate the project at build time just to figure that out, which would regress perf for scenarios which don't use the project cache.
-        internal static ConcurrentDictionary<ProjectCacheDescriptor, ProjectCacheDescriptor> ProjectCacheDescriptors { get; } = new (ProjectCacheDescriptorEqualityComparer.Instance);
+        internal static ConcurrentDictionary<ProjectCacheDescriptor, ProjectCacheDescriptor> ProjectCacheDescriptors { get; } = new(ProjectCacheDescriptorEqualityComparer.Instance);
 
         /// <summary>
         /// The object used for thread-safe synchronization of static members.
@@ -251,6 +251,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private DateTime _instantiationTimeUtc;
 
+        /// <summary>
+        /// Messages to be logged
+        /// </summary>
         private IEnumerable<DeferredBuildMessage> _deferredBuildMessages;
 
         /// <summary>
@@ -400,10 +403,20 @@ namespace Microsoft.Build.Execution
 
             public string Text { get; }
 
+            public string FilePath { get; }
+
             public DeferredBuildMessage(string text, MessageImportance importance)
             {
                 Importance = importance;
                 Text = text;
+                FilePath = null;
+            }
+
+            public DeferredBuildMessage(string text, MessageImportance importance, string filePath)
+            {
+                Importance = importance;
+                Text = text;
+                FilePath = filePath;
             }
         }
 
@@ -529,9 +542,14 @@ namespace Microsoft.Build.Execution
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
 
-                if (_buildParameters.UsesCachedResults())
+                if (_buildParameters.UsesCachedResults() && parameters.ProjectIsolationMode == ProjectIsolationMode.False)
                 {
-                    _buildParameters.IsolateProjects = true;
+                    // If input or output caches are used and the project isolation mode is set to
+                    // ProjectIsolationMode.False, then set it to ProjectIsolationMode.True. The explicit
+                    // condition on ProjectIsolationMode is necessary to ensure that, if we're using input
+                    // or output caches and ProjectIsolationMode is set to ProjectIsolationMode.MessageUponIsolationViolation,
+                    // ProjectIsolationMode isn't changed to ProjectIsolationMode.True.
+                    _buildParameters.ProjectIsolationMode = ProjectIsolationMode.True;
                 }
 
                 if (_buildParameters.UsesOutputCache() && string.IsNullOrWhiteSpace(_buildParameters.OutputResultsCacheFile))
@@ -544,6 +562,7 @@ namespace Microsoft.Build.Execution
 
                 var loggingService = InitializeLoggingService();
 
+                // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
                 InitializeCaches();
@@ -929,10 +948,7 @@ namespace Microsoft.Build.Execution
                 // but the top level exception handler there should catch everything and have forwarded it to the
                 // OnThreadException method in this class already.
                 _workQueue.Complete();
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-                {
-                    _workQueue.Completion.Wait();
-                }
+                _workQueue.Completion.Wait();
 
                 Task projectCacheDispose = _projectCacheService.DisposeAsync().AsTask();
 
@@ -982,10 +998,10 @@ namespace Microsoft.Build.Execution
 
                 if (e is AggregateException ae && ae.InnerExceptions.Count == 1)
                 {
-                    e = ae.InnerExceptions.First();
+                    ExceptionDispatchInfo.Capture(ae.InnerExceptions[0]).Throw();
                 }
 
-                throw e;
+                throw;
             }
             finally
             {
@@ -1059,8 +1075,11 @@ namespace Microsoft.Build.Execution
 
             void SerializeCaches()
             {
-                var errorMessage = CacheSerialization.SerializeCaches(_configCache, _resultsCache, _buildParameters.OutputResultsCacheFile);
-
+                string errorMessage = CacheSerialization.SerializeCaches(
+                    _configCache,
+                    _resultsCache,
+                    _buildParameters.OutputResultsCacheFile,
+                    _buildParameters.ProjectIsolationMode);
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
                     LogErrorAndShutdown(errorMessage);
@@ -1392,10 +1411,10 @@ namespace Microsoft.Build.Execution
                 config.GlobalProperties,
                 config.ExplicitToolsVersionSpecified ? config.ToolsVersion : null,
                 _buildParameters,
-                ((IBuildComponentHost) this).LoggingService,
+                ((IBuildComponentHost)this).LoggingService,
                 request.BuildEventContext,
                 false /* loaded by solution parser*/,
-                config.TargetNames,
+                config.RequestedTargets,
                 SdkResolverService,
                 request.SubmissionId);
 
@@ -1410,7 +1429,8 @@ namespace Microsoft.Build.Execution
                 // metaproject as well.
                 var newConfig = new BuildRequestConfiguration(
                     GetNewConfigurationId(),
-                    instances[i]) { ExplicitlyLoaded = config.ExplicitlyLoaded };
+                    instances[i])
+                { ExplicitlyLoaded = config.ExplicitlyLoaded };
                 if (_configCache.GetMatchingConfiguration(newConfig) == null)
                 {
                     _configCache.AddConfiguration(newConfig);
@@ -1629,7 +1649,7 @@ namespace Microsoft.Build.Execution
             // this has to be called out of the lock (_syncLock)
             // because processing events can callback to 'this' instance and cause deadlock
             Debug.Assert(!Monitor.IsEntered(_syncLock));
-            ((LoggingService) ((IBuildComponentHost) this).LoggingService).WaitForLoggingToProcessEvents();
+            ((LoggingService)((IBuildComponentHost)this).LoggingService).WaitForLoggingToProcessEvents();
         }
 
         /// <summary>
@@ -1765,7 +1785,7 @@ namespace Microsoft.Build.Execution
                             }
                         }
 
-                        BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] {submission.BuildRequest});
+                        BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] { submission.BuildRequest });
 
                         HandleNewRequest(Scheduler.VirtualNode, blocker);
                     }
@@ -1871,8 +1891,7 @@ namespace Microsoft.Build.Execution
 
             if (submission.BuildRequestData.GraphBuildOptions.Build)
             {
-                // Kick off project cache initialization frontloading
-                Task.Run(() => _projectCacheService.InitializePluginsForGraph(projectGraph, _executionCancellationTokenSource.Token));
+                _projectCacheService.InitializePluginsForGraph(projectGraph, _executionCancellationTokenSource.Token);
 
                 var targetListTask = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
 
@@ -1911,8 +1930,7 @@ namespace Microsoft.Build.Execution
         private Dictionary<ProjectGraphNode, BuildResult> BuildGraph(
             ProjectGraph projectGraph,
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode,
-            GraphBuildRequestData graphBuildRequestData
-        )
+            GraphBuildRequestData graphBuildRequestData)
         {
             var waitHandle = new AutoResetEvent(true);
             var graphBuildStateLock = new object();
@@ -2335,23 +2353,17 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void HandleResult(int node, BuildResult result)
         {
-            // Update cache with the default and initial targets, as needed.
+            // Update cache with the default, initial, and project targets, as needed.
             BuildRequestConfiguration configuration = _configCache[result.ConfigurationId];
             if (result.DefaultTargets != null)
             {
-                // If the result has Default and Initial targets, we populate the configuration cache with them if it
+                // If the result has Default, Initial, and project targets, we populate the configuration cache with them if it
                 // doesn't already have entries.  This can happen if we created a configuration based on a request from
                 // an external node, but hadn't yet received a result since we may not have loaded the Project locally
-                // and thus wouldn't know what the default and initial targets were.
-                if (configuration.ProjectDefaultTargets == null)
-                {
-                    configuration.ProjectDefaultTargets = result.DefaultTargets;
-                }
-
-                if (configuration.ProjectInitialTargets == null)
-                {
-                    configuration.ProjectInitialTargets = result.InitialTargets;
-                }
+                // and thus wouldn't know what the default, initial, and project targets were.
+                configuration.ProjectDefaultTargets ??= result.DefaultTargets;
+                configuration.ProjectInitialTargets ??= result.InitialTargets;
+                configuration.ProjectTargets ??= result.ProjectTargets;
             }
 
             IEnumerable<ScheduleResponse> response = _scheduler.ReportResult(node, result);
@@ -2681,8 +2693,7 @@ namespace Microsoft.Build.Execution
                 ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent(BuildComponentType.LoggingService) as ILoggingService;
                 var remoteLoggers = new List<LoggerDescription>(loggingService.LoggerDescriptions);
 
-                _nodeConfiguration = new NodeConfiguration
-                (
+                _nodeConfiguration = new NodeConfiguration(
                 -1, /* must be assigned by the NodeManager */
                 _buildParameters,
                 remoteLoggers.ToArray()
@@ -2693,8 +2704,7 @@ namespace Microsoft.Build.Execution
                     loggingService.IncludeEvaluationMetaprojects,
                     loggingService.IncludeEvaluationProfile,
                     loggingService.IncludeEvaluationPropertiesAndItems,
-                    loggingService.IncludeTaskInputs)
-                );
+                    loggingService.IncludeTaskInputs));
             }
 
             return _nodeConfiguration;
@@ -2763,14 +2773,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnLoggingThreadException(Exception e)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-            {
-                _workQueue.Post(() => OnThreadException(e));
-            }
-            else
-            {
-                OnThreadException(e);
-            }
+            _workQueue.Post(() => OnThreadException(e));
         }
 
         /// <summary>
@@ -2778,16 +2781,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnProjectFinished(object sender, ProjectFinishedEventArgs e)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-            {
-                _workQueue.Post(() => OnProjectFinishedBody(e));
-            }
-            else
-            {
-                OnProjectFinishedBody(e);
-            }
-
-            void OnProjectFinishedBody(ProjectFinishedEventArgs e)
+            _workQueue.Post(() =>
             {
                 lock (_syncLock)
                 {
@@ -2804,7 +2798,7 @@ namespace Microsoft.Build.Execution
                         }
                     }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -2812,16 +2806,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnProjectStarted(object sender, ProjectStartedEventArgs e)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-            {
-                _workQueue.Post(() => OnProjectStartedBody(e));
-            }
-            else
-            {
-                OnProjectStartedBody(e);
-            }
-
-            void OnProjectStartedBody(ProjectStartedEventArgs e)
+            _workQueue.Post(() =>
             {
                 lock (_syncLock)
                 {
@@ -2830,7 +2815,7 @@ namespace Microsoft.Build.Execution
                         _projectStartedEvents[e.BuildEventContext.SubmissionId] = e;
                     }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -2912,6 +2897,12 @@ namespace Microsoft.Build.Execution
             foreach (var message in deferredBuildMessages)
             {
                 loggingService.LogCommentFromText(BuildEventContext.Invalid, message.Importance, message.Text);
+
+                // If message includes a file path, include that file
+                if (message.FilePath is not null)
+                {
+                    loggingService.LogIncludeFile(BuildEventContext.Invalid, message.FilePath);
+                }
             }
         }
 
@@ -3122,7 +3113,7 @@ namespace Microsoft.Build.Execution
             public string Parameters
             {
                 get => String.Empty;
-                set{ }
+                set { }
             }
 
             /// <summary>

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -8,6 +8,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -51,7 +52,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Tests fix for https://github.com/dotnet/msbuild/issues/1479.
         /// </summary>
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsWindows))]
+        [WindowsOnlyFact]
         public void AssemblyAttributesLocation()
         {
             var expectedCompileItems = "a.cs;" + Path.Combine("obj", "Debug", ".NETFramework,Version=v4.8.AssemblyAttributes.cs");
@@ -78,6 +79,30 @@ namespace Microsoft.Build.Tasks.UnitTests
             var logger = new MockLogger(_output);
             bool result = project.Build(logger);
             Assert.True(result, "Output:" + Environment.NewLine + logger.FullLog);
+        }
+
+        /// <summary>
+        /// Test for https://github.com/dotnet/msbuild/issues/8153
+        /// </summary>
+        [Fact]
+        public void IsWellKnownAttributeValuePreserved()
+        {
+            ObjectModelHelpers.DeleteTempProjectDirectory();
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("Myapp.proj", @"
+                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                  <Target Name =`Repro`>
+                    <CreateItem Include=`*.txt` AdditionalMetadata=`MyProperty=Identity`>
+                      <Output TaskParameter=`Include` ItemName=`TestItem`/>
+                    </CreateItem>
+                    <Error Text=`@(TestItem)` Condition=""'%(MyProperty)' != 'Identity' ""/>
+                  </Target>
+                </Project>
+                ");
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("Foo.txt", "foo");
+            MockLogger logger = new MockLogger(_output);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("Myapp.proj", logger);
         }
     }
 }

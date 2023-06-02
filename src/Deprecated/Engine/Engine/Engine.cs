@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.IO;
@@ -325,7 +329,7 @@ namespace Microsoft.Build.BuildEngine
             // Get a list of properties which should be serialized
             if (!String.IsNullOrEmpty(forwardPropertiesFromChild))
             {
-                propertyListToSerialize = forwardPropertiesFromChild.Split(new char[]{';'}, StringSplitOptions.RemoveEmptyEntries);
+                propertyListToSerialize = forwardPropertiesFromChild.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             }
         }
 
@@ -1134,7 +1138,7 @@ namespace Microsoft.Build.BuildEngine
                 localForwardingLogger.BuildEventRedirector = newRedirector;
                 localForwardingLogger.Parameters = forwardingLogger.LoggerSwitchParameters;
                 localForwardingLogger.Verbosity = forwardingLogger.Verbosity;
-                localForwardingLogger.NodeId= nodeId;
+                localForwardingLogger.NodeId = nodeId;
                 // Convert the path to the logger DLL to full path before passing it to the node provider
                 forwardingLogger.ConvertPathsToFullPaths();
             }
@@ -1374,7 +1378,7 @@ namespace Microsoft.Build.BuildEngine
             UnloadProject(project, true /* Unload all versions */);
         }
 
-        internal void UnloadProject(Project project, bool unloadAllVersions )
+        internal void UnloadProject(Project project, bool unloadAllVersions)
         {
             if (project.FullFileName.Length > 0)
             {
@@ -1570,7 +1574,7 @@ namespace Microsoft.Build.BuildEngine
             IDictionary targetOutputs   // can be null if outputs are not needed
         )
         {
-          return BuildProject(project, targetNames, targetOutputs, BuildSettings.None);
+            return BuildProject(project, targetNames, targetOutputs, BuildSettings.None);
         }
 
         /// <summary>
@@ -1614,7 +1618,7 @@ namespace Microsoft.Build.BuildEngine
             BuildResult buildResult = null;
             bool continueExecution = true;
             lastLoopActivity = DateTime.Now.Ticks;
-            int loopTimeout= Introspector.initialLoopTimeout;   // Inactivity timeout which triggers deadlock check
+            int loopTimeout = Introspector.initialLoopTimeout;   // Inactivity timeout which triggers deadlock check
             int loopTimeoutRemaining = Introspector.initialLoopTimeout;
             int flushTimeout = EngineLoggingServices.flushTimeoutInMS; // Timeout with which the log is flushed
             bool forceFlush = false;
@@ -1735,9 +1739,13 @@ namespace Microsoft.Build.BuildEngine
                     if (Engine.debugMode)
                     {
                         if (taskExecutionContext.BuildContext.BuildRequest != null)
+                        {
                             Console.WriteLine("NodeId: " + NodeId + " Got output update " + taskExecutionContext.ParentProject.FullFileName + " HandleId: " + taskExecutionContext.BuildContext.BuildRequest.HandleId + " Time: " + DateTime.Now.ToLongTimeString() + ":" + DateTime.Now.Millisecond);
+                        }
                         else
+                        {
                             Console.WriteLine("NodeId: " + NodeId + " Got output update " + taskExecutionContext.ParentProject.FullFileName + " HandleId: None Time: " + DateTime.Now.ToLongTimeString() + ":" + DateTime.Now.Millisecond);
+                        }
                     }
 
                     // In inproc scenario we may receive a task done notification for a build context
@@ -1752,9 +1760,13 @@ namespace Microsoft.Build.BuildEngine
                         if (Engine.debugMode)
                         {
                             if (taskExecutionContext.BuildContext.BuildRequest != null)
+                            {
                                 Console.WriteLine("Ignoring task output notification. NodeId: " + NodeId + " Got output update " + taskExecutionContext.ParentProject.FullFileName + " HandleId: " + taskExecutionContext.BuildContext.BuildRequest.HandleId);
+                            }
                             else
+                            {
                                 Console.WriteLine("Ignoring task output notification. NodeId: " + NodeId + " Got output update " + taskExecutionContext.ParentProject.FullFileName);
+                            }
                         }
                     }
 
@@ -1788,7 +1800,7 @@ namespace Microsoft.Build.BuildEngine
                     }
                 }
 
-                if (ExternalLoggingServices != null && ( ExternalLoggingServices.NeedsFlush(lastLoopActivity) || forceFlush ))
+                if (ExternalLoggingServices != null && (ExternalLoggingServices.NeedsFlush(lastLoopActivity) || forceFlush))
                 {
                     if (ExternalLoggingServices.ProcessPostedLoggingEvents())
                     {
@@ -1984,7 +1996,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void BuildProjectInternalContinue(BuildRequest buildRequest, ProjectBuildState buildContext, TaskExecutionContext taskExecutionContext, Project project)
         {
-            if (buildRequest != null && ProfileBuild )
+            if (buildRequest != null && ProfileBuild)
             {
                 buildRequest.ProcessingStartTime = DateTime.Now.Ticks;
             }
@@ -2107,7 +2119,7 @@ namespace Microsoft.Build.BuildEngine
             string targetName
             )
         {
-            return this.BuildProjectFile(projectFile, new string[] {targetName}, this.GlobalProperties,
+            return this.BuildProjectFile(projectFile, new string[] { targetName }, this.GlobalProperties,
                 null, BuildSettings.None);
         }
 
@@ -2231,7 +2243,7 @@ namespace Microsoft.Build.BuildEngine
             return PostProjectEvaluationRequests
                 (null, new string[] { projectFile }, new string[][] { targetNames },
                  new BuildPropertyGroup[] { globalProperties }, new IDictionary[] { targetOutputs }, buildFlags,
-                 new string[] {toolsVersion});
+                 new string[] { toolsVersion });
         }
 
         /// <summary>
@@ -2253,7 +2265,7 @@ namespace Microsoft.Build.BuildEngine
             BuildPropertyGroup[] globalPropertiesPerProject,
             IDictionary[] targetOutputsPerProject,
             BuildSettings buildFlags,
-            string [] toolsVersions
+            string[] toolsVersions
         )
         {
             // Verify the arguments to the API
@@ -2266,7 +2278,7 @@ namespace Microsoft.Build.BuildEngine
             // Verify the entries in the project file array
             for (int i = 0; i < projectFiles.Length; i++)
             {
-                error.VerifyThrowArgumentNull(projectFiles[i], "projectFiles[" + i +"]");
+                error.VerifyThrowArgumentNull(projectFiles[i], "projectFiles[" + i + "]");
                 error.VerifyThrowArgument(projectFiles[i].Length > 0, "projectFilesEmptyElement", i);
             }
 
@@ -2283,7 +2295,7 @@ namespace Microsoft.Build.BuildEngine
             BuildPropertyGroup[] globalPropertiesPerProject,
             IDictionary[] targetOutputsPerProject,
             BuildSettings buildFlags,
-            string [] toolVersions
+            string[] toolVersions
         )
         {
             string currentDirectory = Environment.CurrentDirectory;
@@ -2424,7 +2436,7 @@ namespace Microsoft.Build.BuildEngine
                 globalProperties = new BuildPropertyGroup();
             }
 
-            BuildRequest buildRequest =  new BuildRequest(EngineCallback.invalidEngineHandle, projectFile, targetNames, globalProperties, toolsVersion, -1, true, false);
+            BuildRequest buildRequest = new BuildRequest(EngineCallback.invalidEngineHandle, projectFile, targetNames, globalProperties, toolsVersion, -1, true, false);
             buildRequest.ParentBuildEventContext = buildEventContext;
             // Set the project object to the passed in project
             buildRequest.ProjectToBuild = project;
@@ -2600,7 +2612,7 @@ namespace Microsoft.Build.BuildEngine
                         {
                             IncrementProjectsInProgress();
                         }
-                       Router.PostBuildRequest(buildRequest, evaluationNode);
+                        Router.PostBuildRequest(buildRequest, evaluationNode);
                     }
                 }
             }
@@ -2704,7 +2716,7 @@ namespace Microsoft.Build.BuildEngine
             string projectFullPath,
             BuildPropertyGroup globalPropertiesToUse,
             string toolsVersion,
-            string [] targetNames,
+            string[] targetNames,
             BuildEventContext buildEventContext,
             bool toolsVersionPeekedFromProjectFile
             )
@@ -2717,7 +2729,7 @@ namespace Microsoft.Build.BuildEngine
             // and load the contents from the project file.
             if (returnProject == null)
             {
-                #if DEBUG
+#if DEBUG
                 if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDASSERTONLOADMULTIPLECOPIESOFPROJECT")))
                 {
                     if (this.projectsLoadedByHost.Contains(projectFullPath))
@@ -2758,7 +2770,7 @@ namespace Microsoft.Build.BuildEngine
                         }
                     }
                 }
-                #endif
+#endif
 
                 // Check if the project has been previously unloaded due to a user request during the current build
                 // In this case reloaded a project is an error because we can't ensure a consistent state of the reloaded project
@@ -2794,7 +2806,7 @@ namespace Microsoft.Build.BuildEngine
                     string errorCode;
                     string helpKeyword;
                     string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "UnrecognizedToolsVersion", toolsVersion);
-                    throw new InvalidProjectFileException(projectFullPath,fileInfo.Line,fileInfo.Column,fileInfo.EndLine, fileInfo.EndColumn,message, null, errorCode,helpKeyword);
+                    throw new InvalidProjectFileException(projectFullPath, fileInfo.Line, fileInfo.Column, fileInfo.EndLine, fileInfo.EndColumn, message, null, errorCode, helpKeyword);
                 }
 
                 // We're only building this project ... it is not loaded by a host, and we
@@ -2891,7 +2903,7 @@ namespace Microsoft.Build.BuildEngine
                 string childProjectFullPath = Path.GetFullPath(childProjectFile);
 
                 // Find out if there's a project already loaded with the same full path.
-                Project loadedProjectWithSameFullPath = (Project) this.projectsLoadedByHost[childProjectFullPath];
+                Project loadedProjectWithSameFullPath = (Project)this.projectsLoadedByHost[childProjectFullPath];
 
                 // Then ... if there is a loaded project with the same full path, merge in its global properties.
                 // This way, we honor whatever settings the IDE has requested for this project (e.g. Configuration=Release, or whatever).
@@ -2906,8 +2918,8 @@ namespace Microsoft.Build.BuildEngine
             {
                 foreach (DictionaryEntry newGlobalProperty in globalPropertiesPassedIntoTask)
                 {
-                    finalGlobalProperties.SetProperty((string) newGlobalProperty.Key,
-                        (string) newGlobalProperty.Value);
+                    finalGlobalProperties.SetProperty((string)newGlobalProperty.Key,
+                        (string)newGlobalProperty.Value);
                 }
             }
 
@@ -2955,9 +2967,9 @@ namespace Microsoft.Build.BuildEngine
         internal NodeStatus RequestStatus(int requestId)
         {
             // Find out the list of the inprogress waiting targets
-            List<BuildRequest []> outstandingRequests = new List<BuildRequest []>();
-            int [] handleIds = NodeManager.TaskExecutionModule.GetWaitingTaskData(outstandingRequests);
-            Target [] waitingTargets = EngineCallback.GetListOfTargets(handleIds);
+            List<BuildRequest[]> outstandingRequests = new List<BuildRequest[]>();
+            int[] handleIds = NodeManager.TaskExecutionModule.GetWaitingTaskData(outstandingRequests);
+            Target[] waitingTargets = EngineCallback.GetListOfTargets(handleIds);
 
             // Find out the list of targets waiting due to dependency or onerror call but not actively in progress
             List<Project> inProgressProject = cacheOfBuildingProjects.GetInProgressProjects();

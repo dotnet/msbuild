@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if !DEBUG
 using Microsoft.Build.UnitTests;
@@ -9,6 +9,7 @@ using System.IO;
 using Xunit;
 #endif
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.Engine.OM.UnitTests
 {
@@ -23,8 +24,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests
         // This NuGet version cannot locate other assemblies when parsing solutions at restore time. This includes localized strings required in debug mode.
         // NuGet version 4.1.0 was somewhat arbitrarily chosen. 3.5 breaks with an unrelated error, and 4.8.2 does not fail when a new dependency is introduced. This is a safe middle point.
 #if !DEBUG
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
-        [Fact]
+        [WindowsFullFrameworkOnlyFact]
         public void TestOldNuget()
         {
             string msbuildExePath = Path.GetDirectoryName(RunnerUtilities.PathToCurrentlyRunningMsBuildExe)!;

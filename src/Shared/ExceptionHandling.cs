@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
 
@@ -43,13 +43,30 @@ namespace Microsoft.Build.Shared
         private static string GetDebugDumpPath()
         {
             string debugPath =
-// Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+
+                /* Unmerged change from project 'Microsoft.Build.Engine.OM.UnitTests (net7.0)'
+                Before:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                After:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                */
+                /* Unmerged change from project 'Microsoft.Build.Engine.OM.UnitTests (net472)'
+                Before:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                After:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                */
+                /* Unmerged change from project 'MSBuildTaskHost'
+                Before:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                After:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                */
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
 #if CLR2COMPATIBILITY || MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-                        Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+                Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #else
-                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                    ? DebugUtils.DebugPath
-                    : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+                DebugUtils.DebugPath;
 #endif
 
             return !string.IsNullOrEmpty(debugPath)
@@ -199,8 +216,7 @@ namespace Microsoft.Build.Shared
             if
             (
                 IsXmlException(e)
-                || !NotExpectedException(e)
-            )
+                || !NotExpectedException(e))
             {
                 return false;
             }
@@ -234,9 +250,7 @@ namespace Microsoft.Build.Shared
                 || e is TargetException                 // thrown when an attempt is made to invoke a non-static method on a null object.  This may occur because the caller does not
                                                         //     have access to the member, or because the target does not define the member, and so on.
                 || e is MissingFieldException           // thrown when code in a dependent assembly attempts to access a missing field in an assembly that was modified.
-                || !NotExpectedException(e)             // Reflection can throw IO exceptions if the assembly cannot be opened
-
-            )
+                || !NotExpectedException(e))             // Reflection can throw IO exceptions if the assembly cannot be opened
             {
                 return false;
             }
@@ -254,8 +268,7 @@ namespace Microsoft.Build.Shared
             if
             (
                 e is SerializationException ||
-                !NotExpectedReflectionException(e)
-            )
+                !NotExpectedReflectionException(e))
             {
                 return false;
             }

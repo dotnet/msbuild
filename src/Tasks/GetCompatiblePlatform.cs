@@ -1,11 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-using System;
-using System.Collections.Generic;
 
 namespace Microsoft.Build.Tasks
 {
@@ -51,7 +50,7 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
-            
+
             AssignedProjectsWithPlatform = new ITaskItem[AnnotatedProjects.Length];
             for (int i = 0; i < AnnotatedProjects.Length; i++)
             {
@@ -60,8 +59,9 @@ namespace Microsoft.Build.Tasks
                 string referencedProjectPlatform = AssignedProjectsWithPlatform[i].GetMetadata("Platform");
                 string projectReferencePlatformsMetadata = AssignedProjectsWithPlatform[i].GetMetadata("Platforms");
                 string projectReferenceLookupTableMetadata = AssignedProjectsWithPlatform[i].GetMetadata("PlatformLookupTable");
+                string projectReferenceOverridePlatformNegotiationMetadata = AssignedProjectsWithPlatform[i].GetMetadata("OverridePlatformNegotiationValue");
 
-                string? buildProjectReferenceAs = PlatformNegotiation.GetNearestPlatform(referencedProjectPlatform, projectReferencePlatformsMetadata, projectReferenceLookupTableMetadata, PlatformLookupTable, AssignedProjectsWithPlatform[i].ItemSpec, CurrentProjectPlatform, Log);
+                string? buildProjectReferenceAs = PlatformNegotiation.GetNearestPlatform(projectReferenceOverridePlatformNegotiationMetadata, referencedProjectPlatform, projectReferencePlatformsMetadata, projectReferenceLookupTableMetadata, PlatformLookupTable, AssignedProjectsWithPlatform[i].ItemSpec, CurrentProjectPlatform, Log);
 
                 AssignedProjectsWithPlatform[i].SetMetadata("NearestPlatform", buildProjectReferenceAs);
                 Log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.DisplayChosenPlatform", AssignedProjectsWithPlatform[i].ItemSpec, buildProjectReferenceAs);

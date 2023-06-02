@@ -1,12 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
 using System.Globalization;
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -212,7 +212,7 @@ namespace Microsoft.Build.Execution
 
         private bool _interactive;
 
-        private bool _isolateProjects;
+        private ProjectIsolationMode _projectIsolationMode;
 
         private string[] _inputResultsCacheFiles;
 
@@ -298,7 +298,7 @@ namespace Microsoft.Build.Execution
             WarningsAsMessages = other.WarningsAsMessages == null ? null : new HashSet<string>(other.WarningsAsMessages, StringComparer.OrdinalIgnoreCase);
             _projectLoadSettings = other._projectLoadSettings;
             _interactive = other._interactive;
-            _isolateProjects = other._isolateProjects;
+            _projectIsolationMode = other.ProjectIsolationMode;
             _inputResultsCacheFiles = other._inputResultsCacheFiles;
             _outputResultsCacheFile = other._outputResultsCacheFile;
             DiscardBuildResults = other.DiscardBuildResults;
@@ -413,7 +413,7 @@ namespace Microsoft.Build.Execution
             get
             {
                 return new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(_environmentProperties,
-                    instance => ((IProperty) instance).EvaluatedValueEscaped);
+                    instance => ((IProperty)instance).EvaluatedValueEscaped);
             }
         }
 
@@ -448,7 +448,7 @@ namespace Microsoft.Build.Execution
             get
             {
                 return new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(_globalProperties,
-                    instance => ((IProperty) instance).EvaluatedValueEscaped);
+                    instance => ((IProperty)instance).EvaluatedValueEscaped);
             }
 
             set
@@ -630,8 +630,16 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Gets the startup directory.
+        /// It is current directory from which MSBuild command line was recently invoked.
+        /// It is communicated to working nodes as part of NodeConfiguration deserialization once the node manager acquires a particular node.
+        /// This deserialization assign this value to static backing field making it accessible from rest of build thread.
+        /// In MSBuild server node, this value is set once <see cref="ServerNodeBuildCommand"></see> is received.
         /// </summary>
-        internal static string StartupDirectory => s_startupDirectory;
+        internal static string StartupDirectory
+        {
+            get { return s_startupDirectory; }
+            set { s_startupDirectory = value; }
+        }
 
         /// <summary>
         /// Indicates whether the build plan is enabled or not.
@@ -752,17 +760,26 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether projects should build in isolation.
+        /// Gets or sets a value indicating the isolation mode to use.
         /// </summary>
+        /// <remarks>
+        /// Kept for API backwards compatibility.
+        /// </remarks>
         public bool IsolateProjects
         {
-            get => _isolateProjects;
-            set => _isolateProjects = value;
+            get => ProjectIsolationMode == ProjectIsolationMode.True;
+            set => ProjectIsolationMode = value ? ProjectIsolationMode.True : ProjectIsolationMode.False;
         }
 
         /// <summary>
+        /// Gets or sets a value indicating the isolation mode to use.
+        /// </summary>
+        public ProjectIsolationMode ProjectIsolationMode { get => _projectIsolationMode; set => _projectIsolationMode = value; }
+
+        /// <summary>
         /// Input cache files that MSBuild will use to read build results from.
-        /// Setting this also turns on isolated builds.
+        /// If the isolation mode is set to <see cref="ProjectIsolationMode.False"/>,
+        /// this sets the isolation mode to <see cref="ProjectIsolationMode.True"/>.
         /// </summary>
         public string[] InputResultsCacheFiles
         {
@@ -772,7 +789,8 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Output cache file where MSBuild will write the contents of its build result caches during EndBuild.
-        /// Setting this also turns on isolated builds.
+        /// If the isolation mode is set to <see cref="ProjectIsolationMode.False"/>,
+        /// this sets the isolation mode to <see cref="ProjectIsolationMode.True"/>.
         /// </summary>
         public string OutputResultsCacheFile
         {
@@ -820,7 +838,7 @@ namespace Microsoft.Build.Execution
 
         internal bool UsesInputCaches() => InputResultsCacheFiles != null;
 
-        internal bool SkippedResultsDoNotCauseCacheMiss() => IsolateProjects;
+        internal bool SkippedResultsDoNotCauseCacheMiss() => ProjectIsolationMode == ProjectIsolationMode.True;
 
         /// <summary>
         /// Implementation of the serialization mechanism.
@@ -851,9 +869,9 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _shutdownInProcNodeOnBuildFinish);
             translator.Translate(ref _logTaskInputs);
             translator.Translate(ref _logInitialPropertiesAndItems);
-            translator.TranslateEnum(ref _projectLoadSettings, (int) _projectLoadSettings);
+            translator.TranslateEnum(ref _projectLoadSettings, (int)_projectLoadSettings);
             translator.Translate(ref _interactive);
-            translator.Translate(ref _isolateProjects);
+            translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.
@@ -863,7 +881,7 @@ namespace Microsoft.Build.Execution
             // LowPriority is passed as an argument to new nodes, so it doesn't need to be transmitted here.
         }
 
-#region INodePacketTranslatable Members
+        #region INodePacketTranslatable Members
 
         /// <summary>
         /// The class factory for deserialization.
@@ -873,7 +891,7 @@ namespace Microsoft.Build.Execution
             return new BuildParameters(translator);
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Gets the value of a boolean environment setting which is not expected to change.

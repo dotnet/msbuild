@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Reflection;
@@ -72,7 +76,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     return this.loggerClassName + ":" + this.loggerAssembly.AssemblyFile;
                 }
-                else if ( !string.IsNullOrEmpty(this.loggerClassName) )
+                else if (!string.IsNullOrEmpty(this.loggerClassName))
                 {
                     return this.loggerClassName;
                 }
@@ -229,7 +233,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (loggerAssembly.AssemblyFile != null)
             {
-                loggerAssembly = 
+                loggerAssembly =
                     new AssemblyLoadInfo(loggerAssembly.AssemblyName, Path.GetFullPath(loggerAssembly.AssemblyFile));
             }
         }
@@ -239,7 +243,7 @@ namespace Microsoft.Build.BuildEngine
         #region Data
         private string loggerClassName;
         private string loggerSwitchParameters;
-        private AssemblyLoadInfo loggerAssembly; 
+        private AssemblyLoadInfo loggerAssembly;
         private LoggerVerbosity verbosity;
         private int loggerId;
         #endregion
@@ -305,7 +309,7 @@ namespace Microsoft.Build.BuildEngine
         internal void CreateFromStream(BinaryReader reader)
         {
             #region LoggerClassName
-            if (reader.ReadByte() ==0)
+            if (reader.ReadByte() == 0)
             {
                 loggerClassName = null;
             }

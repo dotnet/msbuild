@@ -1,15 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
-
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -629,6 +628,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         public ICollection<string> GetWarningsAsMessages(BuildEventContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void LogIncludeFile(BuildEventContext buildEventContext, string filePath)
         {
             throw new NotImplementedException();
         }

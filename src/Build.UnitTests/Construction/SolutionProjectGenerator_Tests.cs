@@ -1,34 +1,30 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-using LoggingService = Microsoft.Build.BackEnd.Logging.LoggingService;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
-
-using Project = Microsoft.Build.Evaluation.Project;
-using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
-using Toolset = Microsoft.Build.Evaluation.Toolset;
-
-using InternalUtilities = Microsoft.Build.Internal.Utilities;
-
-using XMakeElements = Microsoft.Build.Shared.XMakeElements;
-using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using FrameworkLocationHelper = Microsoft.Build.Shared.FrameworkLocationHelper;
+using Microsoft.Build.UnitTests.Shared;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Shouldly;
-using Microsoft.Build.UnitTests.Shared;
+using FrameworkLocationHelper = Microsoft.Build.Shared.FrameworkLocationHelper;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using InternalUtilities = Microsoft.Build.Internal.Utilities;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
+using LoggingService = Microsoft.Build.BackEnd.Logging.LoggingService;
+using Project = Microsoft.Build.Evaluation.Project;
+using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
+using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
+using Toolset = Microsoft.Build.Evaluation.Toolset;
+using XMakeElements = Microsoft.Build.Shared.XMakeElements;
 
 #nullable disable
 
@@ -336,7 +332,6 @@ EndGlobal
         /// on the Solution File Format Version.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EmitToolsVersionAttributeToInMemoryProject9()
@@ -372,7 +367,6 @@ EndGlobal
         /// on the Solution File Format Version.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EmitToolsVersionAttributeToInMemoryProject10()
@@ -485,7 +479,6 @@ EndGlobal
         /// Test to make sure that even if the solution version corresponds to an existing sub-toolset version,
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SolutionBasedSubToolsetVersionOverriddenByEnvironment()
         {
             Environment.SetEnvironmentVariable("VisualStudioVersion", "ABC");
@@ -765,8 +758,7 @@ EndGlobal
 
                 SolutionFile sp = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
-            }
-           );
+            });
         }
         /// <summary>
         /// Blob should contain dependency info
@@ -1209,7 +1201,6 @@ EndGlobal
         /// The repro below has one of each case. WebProjects can't build so they are set as SkipNonexistentProjects='Build'
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void Regress751742_SkipNonexistentProjects()
@@ -1504,46 +1495,38 @@ EndGlobal
             ProjectTargetInstance publishTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase)).First().Value;
 
             // Check that the appropriate target is being passed to the child projects
-            Assert.Null(buildTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Targets"));
+            Assert.Null(buildTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Targets"));
 
-            Assert.Equal("Clean", cleanTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Targets"));
+            Assert.Equal("Clean", cleanTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Targets"));
 
-            Assert.Equal("Rebuild", rebuildTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Targets"));
+            Assert.Equal("Rebuild", rebuildTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Targets"));
 
-            Assert.Equal("Publish", publishTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Targets"));
+            Assert.Equal("Publish", publishTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Targets"));
 
             // Check that the child projects in question are the members of the "ProjectReference" item group
-            Assert.Equal("@(ProjectReference)", buildTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Projects"));
+            Assert.Equal("@(ProjectReference)", buildTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Projects"));
 
-            Assert.Equal("@(ProjectReference->Reverse())", cleanTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Projects"));
+            Assert.Equal("@(ProjectReference->Reverse())", cleanTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Projects"));
 
-            Assert.Equal("@(ProjectReference)", rebuildTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Projects"));
+            Assert.Equal("@(ProjectReference)", rebuildTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Projects"));
 
-            Assert.Equal("@(ProjectReference)", publishTarget.Tasks.Where
-                (
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
-                ).First().GetParameter("Projects"));
+            Assert.Equal("@(ProjectReference)", publishTarget.Tasks.Where(
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                .First().GetParameter("Projects"));
 
             // We should have only the four standard targets plus the two validation targets (ValidateSolutionConfiguration and ValidateToolsVersions).
         }
@@ -1620,7 +1603,6 @@ EndGlobal
         /// Tests the algorithm for choosing default Venus configuration values for solutions
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void TestVenusConfigurationDefaults()
@@ -1651,7 +1633,6 @@ EndGlobal
         /// Tests that the correct value for TargetFrameworkVersion gets set when creating Venus solutions
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void VenusSolutionDefaultTargetFrameworkVersion()
@@ -1691,7 +1672,6 @@ EndGlobal
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void TestTargetFrameworkPaths0()
@@ -1717,7 +1697,6 @@ EndGlobal
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void TestTargetFrameworkPaths1()
@@ -1744,7 +1723,6 @@ EndGlobal
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void TestTargetFrameworkPaths2()
@@ -1944,11 +1922,9 @@ EndGlobal
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSkipInvalidConfigurationsCase()
         {
-            string tmpFileName = FileUtilities.GetTemporaryFile();
-            File.Delete(tmpFileName);
+            string tmpFileName = FileUtilities.GetTemporaryFileName();
             string projectFilePath = tmpFileName + ".sln";
 
             string solutionContents =
@@ -2024,8 +2000,7 @@ EndGlobal
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/515")]
         public void BadFrameworkMonkierExpectBuildToFail()
         {
-            string tmpFileName = FileUtilities.GetTemporaryFile();
-            File.Delete(tmpFileName);
+            string tmpFileName = FileUtilities.GetTemporaryFileName();
             string projectFilePath = tmpFileName + ".sln";
 
             string solutionFileContents =
@@ -2112,8 +2087,7 @@ EndGlobal
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/515")]
         public void BadFrameworkMonkierExpectBuildToFail2()
         {
-            string tmpFileName = FileUtilities.GetTemporaryFile();
-            File.Delete(tmpFileName);
+            string tmpFileName = FileUtilities.GetTemporaryFileName();
             string projectFilePath = tmpFileName + ".sln";
 
             string solutionFileContents =
@@ -2200,8 +2174,7 @@ EndGlobal
         [Fact]
         public void TestTargetFrameworkVersionGreaterThan4()
         {
-            string tmpFileName = FileUtilities.GetTemporaryFile();
-            File.Delete(tmpFileName);
+            string tmpFileName = FileUtilities.GetTemporaryFileName();
             string projectFilePath = tmpFileName + ".sln";
 
             string solutionFileContents =
@@ -2255,13 +2228,16 @@ EndGlobal
                 ProjectCollection collection = new ProjectCollection();
                 collection.RegisterLogger(logger);
 
+#pragma warning disable format
 #if !FEATURE_ASPNET_COMPILER
-                Assert.Throws<InvalidProjectFileException>(() => {
+                Assert.Throws<InvalidProjectFileException>(() =>
+                {
 #endif
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
+                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
 #if !FEATURE_ASPNET_COMPILER
                 });
 #endif
+#pragma warning restore format
 
 #if FEATURE_ASPNET_COMPILER
                 Version ver = new Version("4.34");
@@ -2281,8 +2257,8 @@ EndGlobal
         [Fact]
         public void CustomTargetNamesAreInInMetaproj()
         {
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper
-            (@"
+            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(
+            @"
                 Microsoft Visual Studio Solution File, Format Version 14.00
                 # Visual Studio 2015
                 Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
@@ -2331,8 +2307,8 @@ EndGlobal
         [InlineData(true)]
         public void IllegalUserTargetNamesDoNotThrow(bool forceCaseDifference)
         {
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper
-            (@"
+            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(
+            @"
                 Microsoft Visual Studio Solution File, Format Version 14.00
                 # Visual Studio 2015
                 Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""

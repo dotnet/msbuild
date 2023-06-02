@@ -172,6 +172,7 @@
     <Compile Include="DistributedLoggerRecord.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="LiveLogger\*.cs" />
     <Compile Include="InitializationException.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -241,12 +242,9 @@
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
   </ItemGroup>
 
-  <Target Name="CopyXsds"
-          BeforeTargets="AfterBuild">
-    <Copy SourceFiles="@(XsdsForVS)"
-          DestinationFiles="@(XsdsForVS->'$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'xsd'))%(RecursiveDir)%(Filename)%(Extension)')"
-          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
-          />
+  <!-- Xsds are not TF or arch-specific so copy once them in the outer build -->
+  <Target Name="CopyXsds" BeforeTargets="Build" Condition="'$(IsInnerBuild)' != 'true'">
+    <Copy SourceFiles="@(XsdsForVS)" DestinationFiles="@(XsdsForVS-&gt;'$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'xsd'))%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="$(SkipCopyUnchangedFiles)" />
   </Target>
 
   <!-- Include MSBuild.deps.json and MSBuild.runtimeconfig.json in ContentWithTargetPath so they will be copied to the output folder of projects
@@ -267,10 +265,7 @@
        in resolving references using them instead of the correct build-time references.
        Instead, add them just afterward, before assigning target paths/copying to
        the bin folder. -->
-  <Target Name="AddRefAssemblies"
-          DependsOnTargets="ResolveAssemblyReferences"
-          BeforeTargets="AssignTargetPaths"
-          Condition="'$(MonoBuild)' != 'true'">
+  <Target Name="AddRefAssemblies" DependsOnTargets="ResolveAssemblyReferences" BeforeTargets="AssignTargetPaths" Condition="'$(MonoBuild)' != 'true'">
     <ItemGroup>
       <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.3\build\netstandard2.0\ref\netstandard.dll" Link="ref\netstandard.dll" CopyToOutputDirectory="PreserveNewest" />
       <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.3\build\netstandard2.0\ref\mscorlib.dll" Link="ref\mscorlib.dll" CopyToOutputDirectory="PreserveNewest" />
@@ -351,7 +346,7 @@
     </Task>
   </UsingTask>
 
-  <Target Name="ValidateMSBuildPackageDependencyVersions" BeforeTargets="AfterBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" >
+  <Target Name="ValidateMSBuildPackageDependencyVersions" BeforeTargets="AfterBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <ValidateMSBuildPackageDependencyVersions AppConfig="@(AppConfigWithTargetPath)" AssemblyPath="$(OutputPath)" />
   </Target>
 

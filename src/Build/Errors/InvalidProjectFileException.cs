@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Runtime.Serialization;
@@ -107,7 +107,7 @@ namespace Microsoft.Build.Exceptions
 #if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
-        override public void GetObjectData(SerializationInfo info, StreamingContext context)
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
 
@@ -139,8 +139,7 @@ namespace Microsoft.Build.Exceptions
         /// <param name="errorSubcategory">Error sub-category that describes the error (can be null).</param>
         /// <param name="errorCode">The error code (can be null).</param>
         /// <param name="helpKeyword">The F1-help keyword for the host IDE (can be null).</param>
-        public InvalidProjectFileException
-        (
+        public InvalidProjectFileException(
             string projectFile,
             int lineNumber,
             int columnNumber,
@@ -149,8 +148,7 @@ namespace Microsoft.Build.Exceptions
             string message,
             string errorSubcategory,
             string errorCode,
-            string helpKeyword
-        ) :
+            string helpKeyword) :
             this(projectFile, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, errorSubcategory, errorCode, helpKeyword, null)
         {
         }
@@ -169,8 +167,7 @@ namespace Microsoft.Build.Exceptions
         /// <param name="errorCode">The error code (can be null).</param>
         /// <param name="helpKeyword">The F1-help keyword for the host IDE (can be null).</param>
         /// <param name="innerException">Any inner exception. May be null.</param>
-        internal InvalidProjectFileException
-        (
+        internal InvalidProjectFileException(
             string projectFile,
             int lineNumber,
             int columnNumber,
@@ -180,8 +177,7 @@ namespace Microsoft.Build.Exceptions
             string errorSubcategory,
             string errorCode,
             string helpKeyword,
-            Exception innerException
-        ) : base(message, innerException)
+            Exception innerException) : base(message, innerException)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
             ErrorUtilities.VerifyThrowArgumentLength(message, nameof(message));

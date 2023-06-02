@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -26,14 +26,20 @@ namespace Microsoft.Build.Tasks
         #region fields
 
         /// <summary>
+        /// Platform aliases
+        /// </summary>
+        private static readonly Dictionary<string, string> PlatformAliases = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "UAP", "Windows" }
+        };
+
+        /// <summary>
         /// Regex for breaking up the sdk reference include into pieces.
         /// Example: XNA, Version=8.0
         /// </summary>
-        private static readonly Regex s_sdkReferenceFormat = new Regex
-        (
+        private static readonly Regex s_sdkReferenceFormat = new Regex(
              @"(?<SDKSIMPLENAME>^[^,]*),\s*Version=(?<SDKVERSION>.*)",
-            RegexOptions.IgnoreCase
-        );
+            RegexOptions.IgnoreCase);
 
         /// <summary>
         /// SimpleName group
@@ -1031,11 +1037,11 @@ namespace Microsoft.Build.Tasks
                 {
                     if (_sdkManifest.FrameworkIdentities != null)
                     {
-                        foreach (string key in _sdkManifest.FrameworkIdentities.Keys)
+                        foreach (KeyValuePair<string, string> kvp in _sdkManifest.FrameworkIdentities)
                         {
-                            if (!FrameworkIdentitiesFromManifest.ContainsKey(key))
+                            if (!FrameworkIdentitiesFromManifest.ContainsKey(kvp.Key))
                             {
-                                FrameworkIdentitiesFromManifest.Add(key, _sdkManifest.FrameworkIdentities[key]);
+                                FrameworkIdentitiesFromManifest.Add(kvp.Key, kvp.Value);
                             }
                         }
                     }
@@ -1048,11 +1054,11 @@ namespace Microsoft.Build.Tasks
                 {
                     if (_sdkManifest.AppxLocations != null)
                     {
-                        foreach (string key in _sdkManifest.AppxLocations.Keys)
+                        foreach (KeyValuePair<string, string> kvp in _sdkManifest.AppxLocations)
                         {
-                            if (!AppxLocationsFromManifest.ContainsKey(key))
+                            if (!AppxLocationsFromManifest.ContainsKey(kvp.Key))
                             {
-                                AppxLocationsFromManifest.Add(key, _sdkManifest.AppxLocations[key]);
+                                AppxLocationsFromManifest.Add(kvp.Key, kvp.Value);
                             }
                         }
                     }
@@ -1251,7 +1257,7 @@ namespace Microsoft.Build.Tasks
                     AddResolutionWarning("ResolveSDKReference.MaxPlatformVersionNotSpecified", projectName, DisplayName, Version, targetPlatformIdentifier, targetPlatformVersionFromItem.ToString(), targetPlatformIdentifier, targetPlatformVersion.ToString());
                 }
 
-                if (!String.IsNullOrEmpty(TargetPlatform) && !String.Equals(targetPlatformIdentifier, TargetPlatform))
+                if (!String.IsNullOrEmpty(TargetPlatform) && !String.Equals(targetPlatformIdentifier, TargetPlatform) && (!PlatformAliases.TryGetValue(TargetPlatform, out string platform) || !String.Equals(targetPlatformIdentifier, platform, StringComparison.OrdinalIgnoreCase)))
                 {
                     AddResolutionErrorOrWarning("ResolveSDKReference.TargetPlatformIdentifierDoesNotMatch", projectName, DisplayName, Version, targetPlatformIdentifier, TargetPlatform);
                 }

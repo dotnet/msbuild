@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
@@ -76,8 +76,7 @@ namespace Microsoft.Build.Tasks
             var singleProject = new List<ITaskItem>(1) { null };
 
             // Build the specified targets in the current project.
-            return MSBuild.ExecuteTargets
-                (
+            return MSBuild.ExecuteTargets(
                 singleProject,  // project = null (current project)
                 null,           // propertiesTable = null
                 null,           // undefineProperties
@@ -88,8 +87,7 @@ namespace Microsoft.Build.Tasks
                 Log,
                 _targetOutputs,
                 false,
-                null            // toolsVersion = null
-                );
+                null);            // toolsVersion = null
         }
 
         #endregion

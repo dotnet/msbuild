@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#if FEATURE_FILE_TRACKER
 
 using System;
 using System.Collections;
@@ -8,8 +10,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-#if FEATURE_FILE_TRACKER
 
 #nullable disable
 
@@ -29,7 +29,7 @@ namespace Microsoft.Build.Utilities
         /// The dictionary that maps the root of the tlog filenames to the dependencytable built from their content
         /// </summary>
         internal static Dictionary<string, DependencyTableCacheEntry> DependencyTable { get; } = new Dictionary<string, DependencyTableCacheEntry>(StringComparer.OrdinalIgnoreCase);
-
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Methods
         /// <summary>
         /// Determine if a cache entry is up to date
@@ -227,6 +227,7 @@ namespace Microsoft.Build.Utilities
 
         #endregion
     }
+#pragma warning restore format
 
     /// <summary>
     /// A cache entry
@@ -270,3 +271,4 @@ namespace Microsoft.Build.Utilities
 }
 
 #endif
+

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -7,8 +7,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Versioning;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -17,7 +17,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A reference to an assembly along with information about resolution.
     /// </summary>
-    sealed internal class Reference
+    internal sealed class Reference
     {
         /// <summary>
         /// dictionary where ITaskItem.ItemSpec (a string) is the key and ITaskItem is the value.
@@ -421,7 +421,7 @@ namespace Microsoft.Build.Tasks
         internal void AddRelatedFileExtension(string filenameExtension)
         {
 #if DEBUG
-            Debug.Assert(filenameExtension[0]=='.', "Expected extension to start with '.'");
+            Debug.Assert(filenameExtension[0] == '.', "Expected extension to start with '.'");
 #endif
             _relatedFileExtensions.Add(filenameExtension);
         }
@@ -877,12 +877,10 @@ namespace Microsoft.Build.Tasks
         /// <param name="sourceItem">The source item.</param>
         /// <param name="wantSpecificVersionValue">Whether the version needs to match exactly or loosely.</param>
         /// <param name="executableExtension">The filename extension that the resulting assembly must have.</param>
-        internal void MakePrimaryAssemblyReference
-        (
+        internal void MakePrimaryAssemblyReference(
             ITaskItem sourceItem,
             bool wantSpecificVersionValue,
-            string executableExtension
-        )
+            string executableExtension)
         {
             CopyLocal = CopyLocalState.Undecided;
 
@@ -926,14 +924,11 @@ namespace Microsoft.Build.Tasks
                 {
                     if
                     (
-                        String.Compare
-                        (
+                        String.Compare(
                             frameworkPath, 0,
                             fullPath, 0,
                             frameworkPath.Length,
-                            StringComparison.OrdinalIgnoreCase
-                        ) == 0
-                    )
+                            StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         return true;
                     }
@@ -955,8 +950,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="copyLocalDependenciesWhenParentReferenceInGac">if set to true, copy local dependencies when only parent reference in gac.</param>
         /// <param name="doNotCopyLocalIfInGac">If set to true, do not copy local a reference that exists in the GAC (legacy behavior).</param>
         /// <param name="referenceTable">The reference table.</param>
-        internal void SetFinalCopyLocalState
-        (
+        internal void SetFinalCopyLocalState(
             AssemblyNameExtension assemblyName,
             string[] frameworkPaths,
             ProcessorArchitecture targetProcessorArchitecture,
@@ -966,9 +960,14 @@ namespace Microsoft.Build.Tasks
             GetAssemblyPathInGac getAssemblyPathInGac,
             bool copyLocalDependenciesWhenParentReferenceInGac,
             bool doNotCopyLocalIfInGac,
-            ReferenceTable referenceTable
-        )
+            ReferenceTable referenceTable)
         {
+            if (IsBadImage)
+            {
+                CopyLocal = CopyLocalState.NoBecauseBadImage;
+                return;
+            }
+
             // If this item was unresolvable, then copy-local is false.
             if (IsUnresolvable)
             {
@@ -993,12 +992,10 @@ namespace Microsoft.Build.Tasks
             if (IsPrimary)
             {
                 bool found;
-                bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool
-                    (
+                bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool(
                         PrimarySourceItem,
                         ItemMetadataNames.privateMetadata,
-                        out found
-                    );
+                        out found);
 
                 if (found)
                 {
@@ -1017,12 +1014,10 @@ namespace Microsoft.Build.Tasks
                 foreach (ITaskItem item in _sourceItems.Values)
                 {
                     bool found;
-                    bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool
-                        (
+                    bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool(
                             item,
                             ItemMetadataNames.privateMetadata,
-                            out found
-                        );
+                            out found);
 
                     if (found)
                     {

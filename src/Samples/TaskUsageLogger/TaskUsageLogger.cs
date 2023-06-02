@@ -1,15 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Globalization;
-using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Reflection;
-
+using System.Text.RegularExpressions;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -413,7 +412,7 @@ namespace TaskUsageLogger
         /// Store data about a particular task invocation
         /// </summary>
         [DebuggerDisplay("{TaskName} {TargetName} {TaskAssembly}")]
-        private class TaskData
+        private sealed class TaskData
         {
             public string TaskName;
             public string TargetName;
@@ -443,7 +442,7 @@ namespace TaskUsageLogger
         /// Store data about a particular task registration
         /// </summary>
         [DebuggerDisplay("{TaskName} {TaskAssembly} {FilePath}")]
-        private class UsingTaskData
+        private sealed class UsingTaskData
         {
             public string TaskName;
             public string TaskAssembly;

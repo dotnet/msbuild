@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -83,6 +83,18 @@ namespace Microsoft.Build.Shared
             }
 
             return temporaryDirectory;
+        }
+
+        /// <summary>
+        /// Generates a unique temporary file name with a given extension in the temporary folder.
+        /// File is guaranteed to be unique.
+        /// Extension may have an initial period.
+        /// File will NOT be created.
+        /// May throw IOException.
+        /// </summary>
+        internal static string GetTemporaryFileName()
+        {
+            return GetTemporaryFileName(".tmp");
         }
 
         /// <summary>
@@ -198,7 +210,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        public class TempWorkingDirectory : IDisposable
+        public sealed class TempWorkingDirectory : IDisposable
         {
             public string Path { get; }
 

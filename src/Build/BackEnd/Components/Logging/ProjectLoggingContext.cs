@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -41,8 +41,7 @@ namespace Microsoft.Build.BackEnd.Logging
             requestEntry.RequestConfiguration.Project.ItemsToBuildWith,
             requestEntry.Request.ParentBuildEventContext,
             requestEntry.RequestConfiguration.Project.EvaluationId,
-            requestEntry.Request.ProjectContextId
-            )
+            requestEntry.Request.ProjectContextId)
         {
         }
 
@@ -67,8 +66,7 @@ namespace Microsoft.Build.BackEnd.Logging
             projectItems: null,
             request.ParentBuildEventContext,
             evaluationId,
-            request.ProjectContextId
-            )
+            request.ProjectContextId)
         {
         }
 
@@ -137,8 +135,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 properties = projectPropertiesToSerialize.Select((ProjectPropertyInstance property) => new DictionaryEntry(property.Name, property.EvaluatedValue));
             }
 
-            this.BuildEventContext = LoggingService.LogProjectStarted
-                (
+            this.BuildEventContext = LoggingService.LogProjectStarted(
                 nodeLoggingContext.BuildEventContext,
                 submissionId,
                 configurationId,
@@ -148,8 +145,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 properties,
                 items,
                 evaluationId,
-                projectContextId
-                );
+                projectContextId);
 
             // No need to log a redundant message in the common case
             if (toolsVersion != "Current")

@@ -1,10 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Xml;
 using System.Diagnostics;
+using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Construction
                     _expressedAsAttribute = value;
                     Parent?.AddToXml(this);
                     MarkDirty("Set express as attribute: {0}", value.ToString());
-                }                
+                }
             }
         }
 
@@ -210,7 +210,7 @@ namespace Microsoft.Build.Construction
         public ProjectElement PreviousSibling
         {
             [DebuggerStepThrough]
-            get => Link != null? Link.PreviousSibling : _previousSibling;
+            get => Link != null ? Link.PreviousSibling : _previousSibling;
             [DebuggerStepThrough]
             internal set => _previousSibling = value;
         }
@@ -291,10 +291,10 @@ namespace Microsoft.Build.Construction
         /// In the case of an unsaved edit, the location only
         /// contains the path to the file that the element originates from.
         /// </summary>
-        public ElementLocation Location => Link != null ? Link.Location :  XmlElement.Location;
+        public ElementLocation Location => Link != null ? Link.Location : XmlElement.Location;
 
         /// <inheritdoc/>
-        public string ElementName => Link != null? Link.ElementName : XmlElement.Name;
+        public string ElementName => Link != null ? Link.ElementName : XmlElement.Name;
 
         // Using ILinkedXml to share single field for either Linked (external) and local (XML backed) nodes.
         private ILinkedXml _xmlSource;
@@ -331,7 +331,7 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return (XmlDocumentWithLocation) XmlElement?.OwnerDocument;
+                return (XmlDocumentWithLocation)XmlElement?.OwnerDocument;
             }
         }
 
@@ -544,7 +544,11 @@ namespace Microsoft.Build.Construction
 
         internal string GetAttributeValue(string attributeName, ref string cache)
         {
-            if (cache != null) return cache;
+            if (cache != null)
+            {
+                return cache;
+            }
+
             var value = GetAttributeValue(attributeName, false);
             if (Link == null)
             {

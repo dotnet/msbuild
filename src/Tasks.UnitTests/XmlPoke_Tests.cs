@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class XmlPoke_Tests
+    public sealed class XmlPoke_Tests
     {
         private const string XmlNamespaceUsedByTests = "http://nsurl";
 
@@ -60,7 +60,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PokeNoNamespace()
         {
             const string query = "//variable/@Name";
@@ -142,7 +141,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileNoNs, out xmlInputPath);
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 4; i++)
             {
                 XmlPoke p = new XmlPoke();
                 p.BuildEngine = engine;
@@ -157,13 +156,8 @@ namespace Microsoft.Build.UnitTests
                     p.Query = "//variable/@Name";
                 }
 
-                if ((i & 4) == 4)
-                {
-                    p.Value = new TaskItem("Mert");
-                }
-
-                // "Expecting argumentnullexception for the first 7 tests"
-                if (i < 7)
+                // "Expecting argumentnullexception for the first 3 tests"
+                if (i < 3)
                 {
                     Should.Throw<ArgumentNullException>(() => p.Execute());
                 }
@@ -171,6 +165,33 @@ namespace Microsoft.Build.UnitTests
                 {
                     Should.NotThrow(() => p.Execute());
                 }
+            }
+        }
+
+        [Fact]
+        // https://github.com/dotnet/msbuild/issues/5814
+        public void XmlPokeWithEmptyValue()
+        {
+            string xmlInputPath;
+            string query = "//class/variable/@Name";
+            Prepare(_xmlFileNoNs, out xmlInputPath);
+            string projectContents = $"""
+                <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                <Target Name='Poke'>
+                    <XmlPoke Value='' Query='{query}' XmlInputPath='{xmlInputPath}'/>
+                </Target>
+                </Project>
+                """;
+
+            ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
+
+            string result = File.ReadAllText(xmlInputPath);
+            XmlDocument xmlDocument = new XmlDocument();
+            xmlDocument.LoadXml(result);
+            List<XmlAttribute> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlAttribute>().ToList();
+            foreach (var node in nodes)
+            {
+                node.Value.ShouldBe(string.Empty);
             }
         }
 
@@ -249,7 +270,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PokeElement()
         {
             const string query = "//variable/.";

@@ -1,17 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Collections;
-
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
+using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
-using System.Linq;
 
 #nullable disable
 
@@ -42,8 +40,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 verbosity,
                 new WriteHandler(Console.Out.Write),
                 new ColorSetter(SetColor),
-                new ColorResetter(ResetColor)
-            )
+                new ColorResetter(ResetColor))
         {
             // do nothing
         }
@@ -55,13 +52,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="write"></param>
         /// <param name="colorSet"></param>
         /// <param name="colorReset"></param>
-        public SerialConsoleLogger
-        (
+        public SerialConsoleLogger(
             LoggerVerbosity verbosity,
             WriteHandler write,
             ColorSetter colorSet,
-            ColorResetter colorReset
-        )
+            ColorResetter colorReset)
         {
             InitializeConsoleMethods(verbosity, write, colorSet, colorReset);
         }
@@ -192,7 +187,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void ShowErrorWarningSummary()
         {
-            if (warningCount == 0 && errorCount == 0) return;
+            if (warningCount == 0 && errorCount == 0)
+            {
+                return;
+            }
 
             // Make some effort to distinguish the summary from the previous output
             WriteNewLine();
@@ -793,12 +791,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="condition"></param>
         /// <param name="unformattedMessage"></param>
         /// <param name="args"></param>
-        private void VerifyStack
-            (
+        private void VerifyStack(
             bool condition,
             string unformattedMessage,
-            params object[] args
-            )
+            params object[] args)
         {
             if (!condition && !ignoreLoggerErrors)
             {
@@ -836,16 +832,14 @@ namespace Microsoft.Build.BackEnd.Logging
             /// <param name="targets">targets to execute, in the case of a project frame</param>
             /// <param name="fileOfTarget">the file name where the target is defined</param>
             /// <param name="parent">parent project file</param>
-            internal Frame
-                (
+            internal Frame(
                 FrameType t,
                 bool d,
                 int indent,
                 string s,
                 string targets,
                 string fileOfTarget,
-                string parent
-                )
+                string parent)
             {
                 type = t;
                 displayed = d;

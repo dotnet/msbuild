@@ -1,13 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Shared;
-using System.Diagnostics;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -94,11 +94,9 @@ namespace Microsoft.Build.Execution
         /// All parameters are in the unevaluated state.
         /// Locations other than the main location may be null.
         /// </summary>
-        internal ProjectTaskInstance
-            (
+        internal ProjectTaskInstance(
             ProjectTaskElement element,
-            IList<ProjectTaskInstanceChild> outputs
-            )
+            IList<ProjectTaskInstanceChild> outputs)
         {
             ErrorUtilities.VerifyThrowInternalNull(element, nameof(element));
             ErrorUtilities.VerifyThrowInternalNull(outputs, nameof(outputs));
@@ -133,8 +131,7 @@ namespace Microsoft.Build.Execution
             string condition,
             string continueOnError,
             string msbuildRuntime,
-            string msbuildArchitecture
-        ) : this(
+            string msbuildArchitecture) : this(
             name,
             condition,
             continueOnError,
@@ -150,8 +147,7 @@ namespace Microsoft.Build.Execution
         {
         }
 
-        internal ProjectTaskInstance
-            (
+        internal ProjectTaskInstance(
             string name,
             string condition,
             string continueOnError,
@@ -388,7 +384,7 @@ namespace Microsoft.Build.Execution
 
             if (translator.Mode == TranslationDirection.ReadFromStream && localParameters != null)
             {
-                _parameters = (CopyOnWriteDictionary<(string, ElementLocation)>) localParameters;
+                _parameters = (CopyOnWriteDictionary<(string, ElementLocation)>)localParameters;
             }
         }
 
@@ -419,7 +415,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        internal new static ProjectTaskInstance FactoryForDeserialization(ITranslator translator)
+        internal static new ProjectTaskInstance FactoryForDeserialization(ITranslator translator)
         {
             return translator.FactoryForDeserializingTypeWithName<ProjectTaskInstance>();
         }

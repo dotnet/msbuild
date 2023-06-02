@@ -1,11 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Shared;
 using System.Threading;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Shared;
 
 #if RUNTIME_TYPE_NETCORE || MONO
 using System.IO;
@@ -40,8 +40,7 @@ namespace Microsoft.Build.CommandLine
 #else
             string[] commandLine,
 #endif
-            CancellationToken cancellationToken
-            )
+            CancellationToken cancellationToken)
         {
             string msbuildLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 
@@ -71,11 +70,12 @@ namespace Microsoft.Build.CommandLine
             string msbuildLocation,
             CancellationToken cancellationToken)
         {
-            MSBuildClient msbuildClient = new MSBuildClient(commandLine, msbuildLocation); 
+            MSBuildClient msbuildClient = new MSBuildClient(commandLine, msbuildLocation);
             MSBuildClientExitResult exitResult = msbuildClient.Execute(cancellationToken);
 
             if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy ||
                 exitResult.MSBuildClientExitType == MSBuildClientExitType.UnableToConnect ||
+                exitResult.MSBuildClientExitType == MSBuildClientExitType.UnknownServerState ||
                 exitResult.MSBuildClientExitType == MSBuildClientExitType.LaunchError)
             {
                 if (KnownTelemetry.PartialBuildTelemetry != null)

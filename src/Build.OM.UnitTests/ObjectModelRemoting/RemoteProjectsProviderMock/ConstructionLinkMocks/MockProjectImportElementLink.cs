@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
 
@@ -9,7 +9,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Construction;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectImportElementLinkRemoter : MockProjectElementLinkRemoter
+    internal sealed class MockProjectImportElementLinkRemoter : MockProjectElementLinkRemoter
     {
         public ProjectImportElement ImportElementXml => (ProjectImportElement)Source;
 
@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public MockProjectElementLinkRemoter OriginalElement => this.Export(ImportElementXml.OriginalElement);
     }
 
-    internal class MockProjectImportElementLink : ProjectImportElementLink, ILinkMock, IProjectElementLinkHelper
+    internal sealed class MockProjectImportElementLink : ProjectImportElementLink, ILinkMock, IProjectElementLinkHelper
     {
         public MockProjectImportElementLink(MockProjectImportElementLinkRemoter proxy, IImportHolder holder)
         {
