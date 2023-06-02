@@ -1171,7 +1171,8 @@
   </data>
 
   <data name="GenerateResource.MimeTypeNotSupportedOnCore">
-    <value>Resource \"{0}\" in \"{1}\"uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</value>
+    <value>MSB3826: Resource \"{0}\" in \"{1}\"uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</value>
+    <comment>{StrBegin="MSB3826: "}</comment>
   </data>
 
   <!--
