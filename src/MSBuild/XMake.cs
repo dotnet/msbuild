@@ -805,10 +805,12 @@ namespace Microsoft.Build.CommandLine
                             ToolsVersion = toolsVersion,
                         });
 
-                        Console.WriteLine("{");
-                        PrintPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
-                        PrintItemsInJsonFormat(getItem, project);
-                        Console.WriteLine("},");
+                        // Console.WriteLine("{");
+                        // PrintPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
+                        // PrintItemsInJsonFormat(getItem, project);
+                        // Console.WriteLine("},");
+                        JsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
+                        JsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
                     }
                     else // regular build
                     {
