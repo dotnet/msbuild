@@ -43,9 +43,9 @@ internal class ContainerizeCommand : RootCommand
                 IsRequired = false
             };
 
-    internal Option<string> ImageNameOption { get; } = new Option<string>(
-            name: "--imagename",
-            description: "The name of the output image that will be pushed to the registry.")
+    internal Option<string> RepositoryOption { get; } = new Option<string>(
+            name: "--repository",
+            description: "The name of the output container repository that will be pushed to the registry.")
             {
                 IsRequired = true
             };
@@ -168,13 +168,13 @@ internal class ContainerizeCommand : RootCommand
 
 
     internal ContainerizeCommand() : base("Containerize an application without Docker.")
-    { 
+    {
         this.AddArgument(PublishDirectoryArgument);
         this.AddOption(BaseRegistryOption);
         this.AddOption(BaseImageNameOption);
         this.AddOption(BaseImageTagOption);
         this.AddOption(OutputRegistryOption);
-        this.AddOption(ImageNameOption);
+        this.AddOption(RepositoryOption);
         this.AddOption(ImageTagsOption);
         this.AddOption(WorkingDirectoryOption);
         this.AddOption(EntrypointOption);
@@ -194,7 +194,7 @@ internal class ContainerizeCommand : RootCommand
             string _baseName = context.ParseResult.GetValue(BaseImageNameOption)!;
             string _baseTag = context.ParseResult.GetValue(BaseImageTagOption)!;
             string? _outputReg = context.ParseResult.GetValue(OutputRegistryOption);
-            string _name = context.ParseResult.GetValue(ImageNameOption)!;
+            string _name = context.ParseResult.GetValue(RepositoryOption)!;
             string[] _tags = context.ParseResult.GetValue(ImageTagsOption)!;
             string _workingDir = context.ParseResult.GetValue(WorkingDirectoryOption)!;
             string[] _entrypoint = context.ParseResult.GetValue(EntrypointOption)!;

@@ -92,7 +92,7 @@
         <target state="needs-review-translation">CONTAINER1010: ローカル Docker デーモンからのイメージのプルはサポートされていません。</target>
         <note>{StrBegin="CONTAINER1010: "}</note>
       </trans-unit>
-      <trans-unit id="InvalidContainerImageName">
+      <trans-unit id="InvalidContainerRepository">
         <source>CONTAINER2014: Invalid {0}: {1}.</source>
         <target state="translated">CONTAINER2014: 無効な {0}: {1}。</target>
         <note>{StrBegin="CONTAINER2014: "}</note>

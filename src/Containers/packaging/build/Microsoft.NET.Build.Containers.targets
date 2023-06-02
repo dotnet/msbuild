@@ -69,6 +69,9 @@
       <ContainerImageTag Condition="'$(AutoGenerateImageTag)' == 'true'">$([System.DateTime]::UtcNow.ToString('yyyyMMddhhmmss'))</ContainerImageTag>
     </PropertyGroup>
 
+    <!-- Compatibility: previous versions used ImageName, but the proper term is Repository. Keep using that if explicitly set. -->
+    <Warning Condition="'$(ContainerImageName)' != ''" Code="CONTAINER003" Text="The property 'ContainerImageName' was set but is obsolete - please use 'ContainerRepository' instead." />
+
     <!-- Container Defaults -->
     <PropertyGroup>
       <!-- An empty ContainerRegistry implies pushing to the local registry, putting this here for documentation purposes -->
@@ -77,8 +80,10 @@
       <!-- Set which local container registry to use. We only explicitly support Docker (or things that mimic Docker APIs and binary names) at the moment. -->
       <LocalRegistry Condition="'$(LocalRegistry)' == ''">Docker</LocalRegistry>
 
-      <!-- Note: spaces will be replaced with '-' in ContainerImageName and ContainerImageTag -->
-      <ContainerImageName Condition="'$(ContainerImageName)' == ''">$(AssemblyName)</ContainerImageName>
+      <!-- Compatibility: previous versions used ImageName, but the proper term is Repository. Keep using that if explicitly set. -->
+      <ContainerRepository Condition="'$(ContainerImageName)' != ''">$(ContainerImageName)</ContainerRepository>
+      <!-- Note: spaces will be replaced with '-' in ContainerRepository and ContainerImageTag -->
+      <ContainerRepository Condition="'$(ContainerRepository)' == ''">$(AssemblyName)</ContainerRepository>
 
       <!-- Only default a tag name if no tag names at all are provided -->
       <ContainerImageTag Condition="'$(ContainerImageTag)' == '' and '$(ContainerImageTags)' == ''">$(Version)</ContainerImageTag>
@@ -113,7 +118,7 @@
 
     <ParseContainerProperties FullyQualifiedBaseImageName="$(ContainerBaseImage)"
                               ContainerRegistry="$(ContainerRegistry)"
-                              ContainerImageName="$(ContainerImageName)"
+                              ContainerRepository="$(ContainerRepository)"
                               ContainerImageTag="$(ContainerImageTag)"
                               ContainerImageTags="$(ContainerImageTags)"
                               ContainerEnvironmentVariables="@(ContainerEnvironmentVariable)">
@@ -122,7 +127,7 @@
       <Output TaskParameter="ParsedContainerImage" PropertyName="ContainerBaseName" />
       <Output TaskParameter="ParsedContainerTag" PropertyName="ContainerBaseTag" />
       <Output TaskParameter="NewContainerRegistry" PropertyName="ContainerRegistry" />
-      <Output TaskParameter="NewContainerImageName" PropertyName="ContainerImageName" />
+      <Output TaskParameter="NewContainerRepository" PropertyName="ContainerRepository" />
       <Output TaskParameter="NewContainerTags" ItemName="ContainerImageTags" />
       <Output TaskParameter="NewContainerEnvironmentVariables" ItemName="ContainerEnvironmentVariables" />
     </ParseContainerProperties>
@@ -201,7 +206,7 @@
                     BaseImageTag="$(ContainerBaseTag)"
                     LocalRegistry="$(LocalRegistry)"
                     OutputRegistry="$(ContainerRegistry)"
-                    ImageName="$(ContainerImageName)"
+                    Repository="$(ContainerRepository)"
                     ImageTags="@(ContainerImageTags)"
                     PublishDirectory="$(PublishDir)"
                     WorkingDirectory="$(ContainerWorkingDirectory)"

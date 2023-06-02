@@ -209,7 +209,8 @@
     <MSBuild
       Targets="Publish"
       Projects="$(RepoRoot)/src/Containers/containerize/containerize.csproj"
-      Properties="Configuration=$(Configuration);PublishDir=$(OutputPath)/Containers/containerize" />
+      Properties="Configuration=$(Configuration);PublishDir=$(OutputPath)/Containers/containerize"
+      Condition="'$(DotNetBuildFromSource)' != 'true'" />
   </Target>
 
   <Target Name="GenerateCliRuntimeConfigurationFiles"

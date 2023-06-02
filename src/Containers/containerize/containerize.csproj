@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
     <StrongNameKeyId>MicrosoftShared</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
+    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,5 +24,10 @@
       <ContainerizeFiles Include="$(ArtifactsBinDir)containerize\$(Configuration)\$(SdkTargetFramework)\**\*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(ContainerizeFiles)" DestinationFiles="@(ContainerizeFiles->'$(ArtifactsTmpDir)Container\containerize\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <!-- Copy to *.csproj for using in sanity checks integration tests. -->
+  <Target Name="CopyCsprojToTestExecutionDirectory" AfterTargets="Build">
+    <Copy SourceFiles="$(MSBuildThisFileFullPath)" DestinationFiles="$(ArtifactsTmpDir)Container\ProjectFiles\$(MSBuildThisFileName).csproj" />
   </Target>
 </Project>

@@ -31,6 +31,21 @@ public class TargetsTests
         }
     }
 
+    [Fact]
+    public void CanDeferToContainerImageNameWhenPresent() {
+        var customImageName = "my-container-app";
+        var (project, logger, d) = ProjectInitializer.InitProject(new()
+        {
+            [ContainerImageName] = customImageName
+        });
+        using var _ = d;
+        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        instance.Build(new[] { ComputeContainerConfig }, new []{ logger });
+        logger.Warnings.Should().HaveCount(1, "a warning for the use of the old ContainerImageName property should have been created");
+        logger.Warnings[0].Code.Should().Be(KnownStrings.ErrorCodes.CONTAINER003);
+        Assert.Equal(customImageName, instance.GetPropertyValue(ContainerRepository));
+    }
+
     [InlineData("WebApplication44", "webapplication44", true)]
     [InlineData("friendly-suspicious-alligator", "friendly-suspicious-alligator", true)]
     [InlineData("*friendly-suspicious-alligator", "", false)]
@@ -39,14 +54,14 @@ public class TargetsTests
     [Theory]
     public void CanNormalizeInputContainerNames(string projectName, string expectedContainerImageName, bool shouldPass)
     {
-        var (project, _, d) = ProjectInitializer.InitProject(new()
+        var (project, logger, d) = ProjectInitializer.InitProject(new()
         {
             [AssemblyName] = projectName
         }, projectName: $"{nameof(CanNormalizeInputContainerNames)}_{projectName}_{expectedContainerImageName}_{shouldPass}");
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
-        instance.Build(new[] { ComputeContainerConfig }, null, null, out var outputs).Should().Be(shouldPass, "Build should have succeeded");
-        Assert.Equal(expectedContainerImageName, instance.GetPropertyValue(ContainerImageName));
+        instance.Build(new[] { ComputeContainerConfig }, new [] { logger }, null, out var outputs).Should().Be(shouldPass, "Build should have succeeded");
+        Assert.Equal(expectedContainerImageName, instance.GetPropertyValue(ContainerRepository));
     }
 
     [InlineData("7.0.100", true)]
@@ -58,16 +73,25 @@ public class TargetsTests
     [Theory]
     public void CanWarnOnInvalidSDKVersions(string sdkVersion, bool isAllowed)
     {
-        var (project, _, d) = ProjectInitializer.InitProject(new()
+        var (project, logger, d) = ProjectInitializer.InitProject(new()
         {
             ["NETCoreSdkVersion"] = sdkVersion,
             ["PublishProfile"] = "DefaultContainer"
         }, projectName: $"{nameof(CanWarnOnInvalidSDKVersions)}_{sdkVersion}_{isAllowed}");
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        instance.Build(new[]{"_ContainerVerifySDKVersion"}, new[] { logger }, null, out var outputs).Should().Be(isAllowed);
         var derivedIsAllowed = Boolean.Parse(project.GetProperty("_IsSDKContainerAllowedVersion").EvaluatedValue);
-        // var buildResult = instance.Build(new[]{"_ContainerVerifySDKVersion"}, null, null, out var outputs);
-        derivedIsAllowed.Should().Be(isAllowed, $"SDK version {(isAllowed ? "should" : "should not")} have been allowed ");
+        if (isAllowed)
+        {
+            logger.Errors.Should().HaveCount(0, "an error should not have been created");
+            derivedIsAllowed.Should().Be(true, "SDK version {0} should have been allowed", sdkVersion);
+        }
+        else
+        {
+            logger.Errors.Should().HaveCount(1, "an error should have been created").And.Satisfy(error => error.Code == KnownStrings.ErrorCodes.CONTAINER002);
+            derivedIsAllowed.Should().Be(false, "SDK version {0} should not have been allowed", sdkVersion);
+        }
     }
 
     [InlineData(true)]
@@ -75,13 +99,13 @@ public class TargetsTests
     [Theory]
     public void GetsConventionalLabelsByDefault(bool shouldEvaluateLabels)
     {
-        var (project, _, d) = ProjectInitializer.InitProject(new()
+        var (project, logger, d) = ProjectInitializer.InitProject(new()
         {
             [ContainerGenerateLabels] = shouldEvaluateLabels.ToString()
         }, projectName: $"{nameof(GetsConventionalLabelsByDefault)}_{shouldEvaluateLabels}");
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
-        instance.Build(new[] { ComputeContainerConfig }, null, null, out var outputs).Should().BeTrue("Build should have succeeded");
+        instance.Build(new[] { ComputeContainerConfig }, new [] { logger }, null, out var outputs).Should().BeTrue("Build should have succeeded");
         if (shouldEvaluateLabels)
         {
             instance.GetItems(ContainerLabel).Should().NotBeEmpty("Should have evaluated some labels by default");
@@ -110,7 +134,7 @@ public class TargetsTests
         }, projectName: $"{nameof(ShouldNotIncludeSourceControlLabelsUnlessUserOptsIn)}_{includeSourceControl}");
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
-        instance.Build(new[] { ComputeContainerConfig }, null, null, out var outputs).Should().BeTrue("Build should have succeeded but failed due to {0}", String.Join("\n", logger.AllMessages));
+        instance.Build(new[] { ComputeContainerConfig }, new [] { logger }, null, out var outputs).Should().BeTrue("Build should have succeeded but failed due to {0}", String.Join("\n", logger.AllMessages));
         var labels = instance.GetItems(ContainerLabel);
         if (includeSourceControl)
         {
@@ -156,7 +180,7 @@ public class TargetsTests
         }, projectName: $"{nameof(CanComputeTagsForSupportedSDKVersions)}_{sdkVersion}_{tfm}_{expectedTag}");
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
-        instance.Build(new[]{"_ComputeContainerBaseImageTag"}, null, null, out var outputs).Should().BeTrue(String.Join(Environment.NewLine, logger.Errors));
+        instance.Build(new[]{"_ComputeContainerBaseImageTag"}, new [] { logger }, null, out var outputs).Should().BeTrue(String.Join(Environment.NewLine, logger.Errors));
         var computedTag = instance.GetProperty("_ContainerBaseImageTag").EvaluatedValue;
         computedTag.Should().Be(expectedTag);
     }
@@ -176,10 +200,10 @@ public class TargetsTests
             ["TargetFrameworkVersion"] = tfm,
             ["TargetFramework"] = "net" + tfm.TrimStart('v'),
             ["ContainerRuntimeIdentifier"] = rid
-        }, projectName: $"{nameof(CanComputeTagsForSupportedSDKVersions)}_{tfm}_{rid}_{expectedUser}");
+        }, projectName: $"{nameof(CanComputeContainerUser)}_{tfm}_{rid}_{expectedUser}");
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
-        instance.Build(new[]{ComputeContainerConfig}, null, null, out var outputs).Should().BeTrue(String.Join(Environment.NewLine, logger.Errors));
+        instance.Build(new[]{ComputeContainerConfig}, new [] { logger }, null, out var outputs).Should().BeTrue(String.Join(Environment.NewLine, logger.Errors));
         var computedTag = instance.GetProperty("ContainerUser")?.EvaluatedValue;
         computedTag.Should().Be(expectedUser);
     }
