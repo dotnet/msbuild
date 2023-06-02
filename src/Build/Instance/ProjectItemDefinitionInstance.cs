@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -20,7 +21,7 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_itemType} #Metadata={MetadataCount}")]
-    public class ProjectItemDefinitionInstance : IKeyed, IMetadataTable, IItemDefinition<ProjectMetadataInstance>, ITranslatable
+    public class ProjectItemDefinitionInstance : IKeyed, IMetadataTable, IItemDefinition<ProjectMetadataInstance>, ITranslatable, IItemTypeDefinition
     {
         /// <summary>
         /// Item type, for example "Compile", that this item definition applies to
@@ -58,11 +59,9 @@ namespace Microsoft.Build.Execution
             if (itemDefinition.MetadataCount > 0)
             {
                 _metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
-            }
 
-            foreach (ProjectMetadata originalMetadata in itemDefinition.Metadata)
-            {
-                _metadata.Set(new ProjectMetadataInstance(originalMetadata));
+                IEnumerable<ProjectMetadataInstance> projectMetadataInstances = itemDefinition.Metadata.Select(originalMetadata => new ProjectMetadataInstance(originalMetadata));
+                _metadata.ImportProperties(projectMetadataInstances);
             }
         }
 
@@ -235,5 +234,7 @@ namespace Microsoft.Build.Execution
 
             return instance;
         }
+
+        string IItemTypeDefinition.ItemType => _itemType;
     }
 }

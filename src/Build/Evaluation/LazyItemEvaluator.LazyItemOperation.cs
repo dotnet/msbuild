@@ -72,16 +72,16 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Produce the items to operate on. For example, create new ones or select existing ones
             /// </summary>
-            protected virtual ImmutableList<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected virtual ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 return listBuilder.Select(itemData => itemData.Item)
-                                  .ToImmutableList();
+                                  .ToImmutableArray();
             }
 
             // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/dotnet/msbuild/issues/2328
-            protected virtual void MutateItems(ImmutableList<I> items) { }
+            protected virtual void MutateItems(ImmutableArray<I> items) { }
 
-            protected virtual void SaveItems(ImmutableList<I> items, OrderedItemDataCollection.Builder listBuilder) { }
+            protected virtual void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder) { }
 
             private IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
             {
@@ -174,9 +174,9 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableList<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
+            protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableArray<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
             {
-                if (metadata.Count > 0)
+                if (metadata.Length > 0)
                 {
                     ////////////////////////////////////////////////////
                     // UNDONE: Implement batching here.
@@ -242,7 +242,7 @@ namespace Microsoft.Build.Evaluation
                         _expander.Metadata = metadataTable;
 
                         // Also keep a list of everything so we can get the predecessor objects correct.
-                        List<Pair<ProjectMetadataElement, string>> metadataList = new List<Pair<ProjectMetadataElement, string>>(metadata.Count);
+                        List<Pair<ProjectMetadataElement, string>> metadataList = new(metadata.Length);
 
                         foreach (var metadataElement in metadata)
                         {
@@ -282,7 +282,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            private static IEnumerable<string> GetMetadataValuesAndConditions(ImmutableList<ProjectMetadataElement> metadata)
+            private static IEnumerable<string> GetMetadataValuesAndConditions(ImmutableArray<ProjectMetadataElement> metadata)
             {
                 foreach (var metadataElement in metadata)
                 {
@@ -291,7 +291,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected bool NeedToExpandMetadataForEachItem(ImmutableList<ProjectMetadataElement> metadata, out ItemsAndMetadataPair itemsAndMetadataFound)
+            protected bool NeedToExpandMetadataForEachItem(ImmutableArray<ProjectMetadataElement> metadata, out ItemsAndMetadataPair itemsAndMetadataFound)
             {
                 itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetMetadataValuesAndConditions(metadata));
 

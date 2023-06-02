@@ -35,26 +35,13 @@ namespace Microsoft.Build.Tasks
             _getAssemblyPathInGac = getAssemblyPathInGac;
         }
 
-        /// <summary>
-        /// Resolve a reference to a specific file name.
-        /// </summary>
-        /// <param name="assemblyName">The assembly name object of the assembly.</param>
-        /// <param name="sdkName"></param>
-        /// <param name="rawFileNameCandidate">The reference's 'include' treated as a raw file name.</param>
-        /// <param name="isPrimaryProjectReference">Whether or not this reference was directly from the project file (and therefore not a dependency)</param>
-        /// <param name="wantSpecificVersion">Whether an exact version match is requested.</param>
-        /// <param name="executableExtensions">Allowed executable extensions.</param>
-        /// <param name="hintPath">The item's hintpath value.</param>
-        /// <param name="assemblyFolderKey">Like "hklm\Vendor RegKey" as provided to a reference by the &lt;AssemblyFolderKey&gt; on the reference in the project.</param>
-        /// <param name="assembliesConsideredAndRejected">Receives the list of locations that this function tried to find the assembly. May be "null".</param>
-        /// <param name="foundPath">The path where the file was found.</param>
-        /// <param name="userRequestedSpecificFile">Whether or not the user wanted a specific file (for example, HintPath is a request for a specific file)</param>
-        /// <returns>True if the file was resolved.</returns>
+        /// <inheritdoc/>
         public override bool Resolve(
             AssemblyNameExtension assemblyName,
             string sdkName,
             string rawFileNameCandidate,
             bool isPrimaryProjectReference,
+            bool isImmutableFrameworkReference,
             bool wantSpecificVersion,
             string[] executableExtensions,
             string hintPath,

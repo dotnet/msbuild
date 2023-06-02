@@ -221,10 +221,6 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
-            // This test seems to be flaky, lets enable better logging to investigate it next time
-            // TODO: delete after investigated its flakiness
-            _env.WithTransientDebugEngineForNewProcesses(true);
-
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
 
             // Start a server node and find its PID.
