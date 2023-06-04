@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 using Microsoft.Build.BackEnd.Logging;
@@ -19,8 +19,7 @@ namespace Microsoft.Build.Evaluation
 {
     internal static class ConditionEvaluator
     {
-        private static readonly Lazy<Regex> s_singlePropertyRegex = new Lazy<Regex>(
-            () => new Regex(@"^\$\(([^\$\(\)]*)\)$", RegexOptions.Compiled));
+        private static readonly char[] InvalidPropertyNameCharacters = { '$', '(', ')' };
 
         /// <summary>
         /// Update our table which keeps track of all the properties that are referenced
@@ -59,9 +58,7 @@ namespace Microsoft.Build.Evaluation
                     var lastPiece = pieceSeparator < 0;
                     var pieceEnd = lastPiece ? leftValue.Length : pieceSeparator;
 
-                    var singlePropertyMatch = s_singlePropertyRegex.Value.Match(leftValue, pieceStart, pieceEnd - pieceStart);
-
-                    if (singlePropertyMatch.Success)
+                    if (TryGetSingleProperty(leftValue, pieceStart, pieceEnd - pieceStart, out string? propertyName))
                     {
                         // Find the first vertical bar on the right-hand-side expression.
                         var indexOfVerticalBar = rightValueExpanded.IndexOf('|');
@@ -85,9 +82,6 @@ namespace Microsoft.Build.Evaluation
                             rightValueExpandedPiece = rightValueExpanded.Substring(0, indexOfVerticalBar);
                             rightValueExpanded = rightValueExpanded.Substring(indexOfVerticalBar + 1);
                         }
-
-                        // Capture the property name out of the regular expression.
-                        var propertyName = singlePropertyMatch.Groups[1].ToString();
 
                         // Get the string collection for this property name, if one already exists.
                         // If not already in the table, add a new entry for it.
@@ -113,6 +107,24 @@ namespace Microsoft.Build.Evaluation
                     pieceStart = pieceSeparator + 1;
                 }
             }
+        }
+
+        // Internal for testing purposes
+        internal static bool TryGetSingleProperty(string input, int beginning, int length, [NotNullWhen(returnValue: true)] out string? propertyName)
+        {
+            // This code is simulating the regex pattern: ^\$\(([^\$\(\)]*)\)$
+            if (input.Length < beginning + 3 ||
+                input[beginning] != '$' ||
+                input[beginning + 1] != '(' ||
+                input[beginning + length - 1] != ')' ||
+                input.IndexOfAny(InvalidPropertyNameCharacters, beginning + 2, length - 3) != -1)
+            {
+                propertyName = null;
+                return false;
+            }
+
+            propertyName = input.Substring(beginning + 2, length - 3);
+            return true;
         }
 
         // Implements a pool of expression trees for each condition.
