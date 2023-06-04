@@ -12,8 +12,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.CodeAnalysis.Collections;
 
-#nullable disable
-
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
@@ -21,7 +19,7 @@ namespace Microsoft.Build.Evaluation
         private class IncludeOperation : LazyItemOperation
         {
             private readonly int _elementOrder;
-            private readonly string _rootDirectory;
+            private readonly string? _rootDirectory;
             private readonly ImmutableSegmentedList<string> _excludes;
             private readonly ImmutableArray<ProjectMetadataElement> _metadata;
 
@@ -39,7 +37,7 @@ namespace Microsoft.Build.Evaluation
             {
                 var itemsToAdd = ImmutableArray.CreateBuilder<I>();
 
-                Lazy<Func<string, bool>> excludeTester = null;
+                Lazy<Func<string, bool>>? excludeTester = null;
                 ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
                 if (_excludes != null)
                 {
@@ -57,7 +55,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                ISet<string> excludePatternsForGlobs = null;
+                ISet<string>? excludePatternsForGlobs = null;
 
                 foreach (var fragment in _itemSpec.Fragments)
                 {
@@ -170,7 +168,7 @@ namespace Microsoft.Build.Evaluation
         private class IncludeOperationBuilder : OperationBuilderWithMetadata
         {
             public int ElementOrder { get; set; }
-            public string RootDirectory { get; set; }
+            public string? RootDirectory { get; set; }
 
             public ImmutableSegmentedList<string>.Builder Excludes { get; } = ImmutableSegmentedList.CreateBuilder<string>();
 
