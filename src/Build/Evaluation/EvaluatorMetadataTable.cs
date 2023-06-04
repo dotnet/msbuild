@@ -28,11 +28,17 @@ namespace Microsoft.Build.Evaluation
         private string _implicitItemType;
 
         /// <summary>
+        /// The expected number of metadata entries in this table.
+        /// </summary>
+        private readonly int _capacity;
+
+        /// <summary>
         /// Creates a new table using the specified item type.
         /// </summary>
-        public EvaluatorMetadataTable(string implicitItemType)
+        public EvaluatorMetadataTable(string implicitItemType, int capacity = 0)
         {
             _implicitItemType = implicitItemType;
+            _capacity = capacity;
         }
 
         /// <summary>
@@ -90,7 +96,7 @@ namespace Microsoft.Build.Evaluation
         {
             if (_metadata == null)
             {
-                _metadata = new Dictionary<string, EvaluatorMetadata>(MSBuildNameIgnoreCaseComparer.Default);
+                _metadata = new Dictionary<string, EvaluatorMetadata>(_capacity, MSBuildNameIgnoreCaseComparer.Default);
             }
 
             _metadata[xml.Name] = new EvaluatorMetadata(xml, evaluatedValueEscaped);
