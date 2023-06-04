@@ -7,18 +7,16 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-#nullable disable
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
+using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.Evaluation
 {
-    using Microsoft.Build.BackEnd.Logging;
-    using Microsoft.Build.Shared;
-    using Microsoft.Build.Shared.FileSystem;
-    using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
-    using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-    using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-    using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-
     internal static class ConditionEvaluator
     {
         private static readonly Lazy<Regex> s_singlePropertyRegex = new Lazy<Regex>(
@@ -92,11 +90,8 @@ namespace Microsoft.Build.Evaluation
                         var propertyName = singlePropertyMatch.Groups[1].ToString();
 
                         // Get the string collection for this property name, if one already exists.
-                        List<string> conditionedPropertyValues;
-
-                        // If this property is not already represented in the table, add a new entry
-                        // for it.
-                        if (!conditionedPropertiesTable.TryGetValue(propertyName, out conditionedPropertyValues))
+                        // If not already in the table, add a new entry for it.
+                        if (!conditionedPropertiesTable.TryGetValue(propertyName, out List<string>? conditionedPropertyValues))
                         {
                             conditionedPropertyValues = new List<string>();
                             conditionedPropertiesTable[propertyName] = conditionedPropertyValues;
@@ -130,11 +125,11 @@ namespace Microsoft.Build.Evaluation
             private readonly ConcurrentDictionary<string, ConcurrentStack<GenericExpressionNode>> _conditionPools;
             private int _mOptimisticSize;
 
-            public int OptimisticSize => _mOptimisticSize;
+            public readonly int OptimisticSize => _mOptimisticSize;
 
             public ExpressionTreeForCurrentOptionsWithSize(ConcurrentDictionary<string, ConcurrentStack<GenericExpressionNode>> conditionPools)
             {
-                this._conditionPools = conditionPools;
+                _conditionPools = conditionPools;
                 _mOptimisticSize = conditionPools.Count;
             }
 
@@ -176,8 +171,8 @@ namespace Microsoft.Build.Evaluation
             ILoggingService loggingServices,
             BuildEventContext buildEventContext,
             IFileSystem fileSystem,
-            ProjectRootElementCacheBase projectRootElementCache = null,
-            LoggingContext loggingContext = null)
+            ProjectRootElementCacheBase? projectRootElementCache = null,
+            LoggingContext? loggingContext = null)
             where P : class, IProperty
             where I : class, IItem
         {
@@ -186,7 +181,7 @@ namespace Microsoft.Build.Evaluation
                 options,
                 expander,
                 expanderOptions,
-                null /* do not collect conditioned properties */,
+                conditionedPropertiesTable: null /* do not collect conditioned properties */,
                 evaluationDirectory,
                 elementLocation,
                 loggingServices,
@@ -208,14 +203,14 @@ namespace Microsoft.Build.Evaluation
             ParserOptions options,
             Expander<P, I> expander,
             ExpanderOptions expanderOptions,
-            Dictionary<string, List<string>> conditionedPropertiesTable,
+            Dictionary<string, List<string>>? conditionedPropertiesTable,
             string evaluationDirectory,
             ElementLocation elementLocation,
             ILoggingService loggingServices,
             BuildEventContext buildEventContext,
             IFileSystem fileSystem,
-            ProjectRootElementCacheBase projectRootElementCache = null,
-            LoggingContext loggingContext = null)
+            ProjectRootElementCacheBase? projectRootElementCache = null,
+            LoggingContext? loggingContext = null)
             where P : class, IProperty
             where I : class, IItem
         {
@@ -343,13 +338,13 @@ namespace Microsoft.Build.Evaluation
             ///     If this is null, as it is for command line builds, conditioned properties
             ///     are not recorded.
             /// </summary>
-            Dictionary<string, List<string>> ConditionedPropertiesInProject { get; }
+            Dictionary<string, List<string>>? ConditionedPropertiesInProject { get; }
 
             /// <summary>
             ///     May return null if the expression would expand to non-empty and it broke out early.
             ///     Otherwise, returns the correctly expanded expression.
             /// </summary>
-            string ExpandIntoStringBreakEarly(string expression, LoggingContext loggingContext = null);
+            string ExpandIntoStringBreakEarly(string expression, LoggingContext? loggingContext = null);
 
             /// <summary>
             ///     Expands the specified expression into a list of TaskItem's.
@@ -359,12 +354,12 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             ///     Expands the specified expression into a string.
             /// </summary>
-            string ExpandIntoString(string expression, LoggingContext loggingContext = null);
+            string ExpandIntoString(string expression, LoggingContext? loggingContext = null);
 
             /// <summary>
             ///     PRE cache
             /// </summary>
-            ProjectRootElementCacheBase LoadedProjectsCache { get; }
+            ProjectRootElementCacheBase? LoadedProjectsCache { get; }
 
             IFileSystem FileSystem { get; }
         }
@@ -398,22 +393,22 @@ namespace Microsoft.Build.Evaluation
             /// If this is null, as it is for command line builds, conditioned properties
             /// are not recorded.
             /// </summary>
-            public Dictionary<string, List<string>> ConditionedPropertiesInProject { get; }
+            public Dictionary<string, List<string>>? ConditionedPropertiesInProject { get; }
 
             /// <summary>
             /// PRE collection. 
             /// </summary>
-            public ProjectRootElementCacheBase LoadedProjectsCache { get; }
+            public ProjectRootElementCacheBase? LoadedProjectsCache { get; }
 
             internal ConditionEvaluationState(
                 string condition,
                 Expander<P, I> expander,
                 ExpanderOptions expanderOptions,
-                Dictionary<string, List<string>> conditionedPropertiesInProject,
+                Dictionary<string, List<string>>? conditionedPropertiesInProject,
                 string evaluationDirectory,
                 ElementLocation elementLocation,
                 IFileSystem fileSystem,
-                ProjectRootElementCacheBase projectRootElementCache = null)
+                ProjectRootElementCacheBase? projectRootElementCache = null)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(condition, nameof(condition));
                 ErrorUtilities.VerifyThrowArgumentNull(expander, nameof(expander));
@@ -434,7 +429,7 @@ namespace Microsoft.Build.Evaluation
             /// May return null if the expression would expand to non-empty and it broke out early.
             /// Otherwise, returns the correctly expanded expression.
             /// </summary>
-            public string ExpandIntoStringBreakEarly(string expression, LoggingContext loggingContext = null)
+            public string ExpandIntoStringBreakEarly(string expression, LoggingContext? loggingContext = null)
             {
                 var originalValue = _expander.WarnForUninitializedProperties;
 
@@ -467,7 +462,7 @@ namespace Microsoft.Build.Evaluation
             /// <param name="expression">The expression to expand.</param>
             /// <param name="loggingContext"></param>
             /// <returns>The expanded string.</returns>
-            public string ExpandIntoString(string expression, LoggingContext loggingContext = null)
+            public string ExpandIntoString(string expression, LoggingContext? loggingContext = null)
             {
                 var originalValue = _expander.WarnForUninitializedProperties;
 
