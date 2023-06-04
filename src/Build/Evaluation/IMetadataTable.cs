@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable disable
-
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -21,12 +19,12 @@ namespace Microsoft.Build.Evaluation
         /// If item type is null, it is ignored.
         /// If no value is available, returns empty string.
         /// </summary>
-        string GetEscapedValue(string itemType, string name);
+        string GetEscapedValue(string? itemType, string name);
 
         /// <summary>
         /// Returns the value if it exists, null otherwise.
         /// If item type is null, it is ignored.
         /// </summary>
-        string GetEscapedValueIfPresent(string itemType, string name);
+        string? GetEscapedValueIfPresent(string? itemType, string name);
     }
 }

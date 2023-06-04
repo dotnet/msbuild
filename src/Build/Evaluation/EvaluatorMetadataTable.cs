@@ -8,8 +8,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using EscapingUtilities = Microsoft.Build.Shared.EscapingUtilities;
 
-#nullable disable
-
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -22,7 +20,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The actual metadata dictionary.
         /// </summary>
-        private Dictionary<string, EvaluatorMetadata> _metadata;
+        private Dictionary<string, EvaluatorMetadata>? _metadata;
 
         /// <summary>
         /// The type of item the metadata should be considered to apply to.
@@ -56,7 +54,7 @@ namespace Microsoft.Build.Evaluation
         /// Retrieves any value we have in our metadata table for the metadata name and item type specified.
         /// If no value is available, returns empty string.
         /// </summary>
-        public string GetEscapedValue(string itemType, string name)
+        public string GetEscapedValue(string? itemType, string name)
         {
             return GetEscapedValueIfPresent(itemType, name) ?? String.Empty;
         }
@@ -65,21 +63,18 @@ namespace Microsoft.Build.Evaluation
         /// Retrieves any value we have in our metadata table for the metadata name and item type specified.
         /// If no value is available, returns null.
         /// </summary>
-        public string GetEscapedValueIfPresent(string itemType, string name)
+        public string? GetEscapedValueIfPresent(string? itemType, string name)
         {
             if (_metadata == null)
             {
                 return null;
             }
 
-            string value = null;
+            string? value = null;
 
             if (itemType == null || String.Equals(_implicitItemType, itemType, StringComparison.OrdinalIgnoreCase))
             {
-                EvaluatorMetadata metadatum;
-                _metadata.TryGetValue(name, out metadatum);
-
-                if (metadatum != null)
+                if (_metadata.TryGetValue(name, out EvaluatorMetadata? metadatum))
                 {
                     value = metadatum.EvaluatedValueEscaped;
                 }
