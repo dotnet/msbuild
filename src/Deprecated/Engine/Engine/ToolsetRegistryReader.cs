@@ -61,7 +61,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                string[] toolsVersionNames = new string[] { };
+                string[] toolsVersionNames = System.Array.Empty<string>();
                 try
                 {
                     toolsVersionNames = msbuildRegistryWrapper.OpenSubKey("ToolsVersions").GetSubKeyNames();

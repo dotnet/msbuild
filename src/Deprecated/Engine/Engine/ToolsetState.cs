@@ -184,7 +184,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     this.defaultTaskRegistry = new TaskRegistry();
 
-                    string[] defaultTasksFiles = { };
+                    string[] defaultTasksFiles = Array.Empty<string>();
 
                     try
                     {

@@ -509,7 +509,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 return workerThread.GetWaitingTasksData(outstandingRequests);
             }
-            return new int[0];
+            return Array.Empty<int>();
         }
 
         internal void Shutdown()

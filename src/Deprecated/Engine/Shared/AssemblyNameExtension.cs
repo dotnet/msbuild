@@ -434,11 +434,11 @@ namespace Microsoft.Build.BuildEngine.Shared
             // Some assemblies (real case was interop assembly) may have null PKTs.
             if (aPKT == null)
             {
-                aPKT = new byte[0];
+                aPKT = Array.Empty<byte>();
             }
             if (bPKT == null)
             {
-                bPKT = new byte[0];
+                bPKT = Array.Empty<byte>();
             }
 
             if (aPKT.Length != bPKT.Length)

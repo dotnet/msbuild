@@ -184,7 +184,7 @@ namespace Microsoft.Build.BuildEngine
             catch (Exception e)
             {
                 ReportUnhandledError(e);
-                return new CacheEntry[0];
+                return Array.Empty<CacheEntry>();
             }
         }
 
