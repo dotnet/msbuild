@@ -35,7 +35,7 @@ namespace Microsoft.Build.Evaluation
 
             protected override ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                var itemsToAdd = ImmutableArray.CreateBuilder<I>();
+                ImmutableArray<I>.Builder? itemsToAdd = null;
 
                 Lazy<Func<string, bool>>? excludeTester = null;
                 ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
@@ -71,6 +71,7 @@ namespace Microsoft.Build.Evaluation
                             isTransformExpression: out _,
                             elementLocation: _itemElement.IncludeLocation);
 
+                        itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
                         itemsToAdd.AddRange(
                             excludeTester != null
                                 ? itemsFromExpression.Where(item => !excludeTester.Value(item.EvaluatedInclude))
@@ -82,8 +83,8 @@ namespace Microsoft.Build.Evaluation
 
                         if (excludeTester?.Value(EscapingUtilities.UnescapeAll(value)) != true)
                         {
-                            var item = _itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath);
-                            itemsToAdd.Add(item);
+                            itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
+                            itemsToAdd.Add(_itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath));
                         }
                     }
                     else if (fragment is GlobFragment globFragment)
@@ -125,6 +126,7 @@ namespace Microsoft.Build.Evaluation
 
                             foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                             {
+                                itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
                                 itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
                             }
                         }
@@ -135,7 +137,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                return itemsToAdd.ToImmutable();
+                return itemsToAdd?.ToImmutable() ?? ImmutableArray<I>.Empty;
             }
 
             private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableList<string>.Builder excludePatterns)
