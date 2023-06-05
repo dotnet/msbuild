@@ -83,8 +83,11 @@ namespace Microsoft.Build.Construction
         private const string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
 
         private const char CommentStartChar = '#';
+
         #endregion
+
         #region Member data
+
         private string _solutionFile;                 // Could be absolute or relative path to the .SLN file.
         private string _solutionFilterFile;          // Could be absolute or relative path to the .SLNF file.
         private HashSet<string> _solutionFilter;     // The project files to include in loading the solution.
@@ -313,7 +316,7 @@ namespace Microsoft.Build.Construction
 
                     if (line.Trim().StartsWith(slnFileHeaderNoVersion, StringComparison.Ordinal))
                     {
-                        // Found it.  Validate the version.
+                        // Found it. Validate the version.
                         string fileVersionFromHeader = line.Substring(slnFileHeaderNoVersion.Length);
 
                         if (!System.Version.TryParse(fileVersionFromHeader, out Version version))
@@ -341,7 +344,7 @@ namespace Microsoft.Build.Construction
                     }
                     else if (line.Trim().StartsWith(slnFileVSVLinePrefix, StringComparison.Ordinal))
                     {
-                        Version visualStudioVersion = ParseVisualStudioVersion(line);
+                        Version visualStudioVersion = ParseVisualStudioVersion(line.AsSpan());
                         if (visualStudioVersion != null)
                         {
                             visualStudioMajorVersion = visualStudioVersion.Major;
@@ -532,7 +535,7 @@ namespace Microsoft.Build.Construction
                 }
                 else if (str.StartsWith("VisualStudioVersion", StringComparison.Ordinal))
                 {
-                    _currentVisualStudioVersion = ParseVisualStudioVersion(str);
+                    _currentVisualStudioVersion = ParseVisualStudioVersion(str.AsSpan());
                 }
                 else
                 {
@@ -651,10 +654,7 @@ namespace Microsoft.Build.Construction
         /// This method searches the first two lines of the solution file opened by the specified
         /// StreamReader for the solution file header.  An exception is thrown if it is not found.
         /// 
-        /// The solution file header looks like this:
-        /// 
-        ///     Microsoft Visual Studio Solution File, Format Version 9.00
-        /// 
+        /// The solution file header has form <c>Microsoft Visual Studio Solution File, Format Version 9.00</c>.
         /// </summary>
         private void ParseFileHeader()
         {
@@ -666,14 +666,16 @@ namespace Microsoft.Build.Construction
             for (int i = 1; i <= 2; i++)
             {
                 string str = ReadLine();
+
                 if (str == null)
                 {
+                    // EOF
                     break;
                 }
 
                 if (str.StartsWith(slnFileHeaderNoVersion, StringComparison.Ordinal))
                 {
-                    // Found it.  Validate the version.
+                    // Found it. Validate the version.
                     ValidateSolutionFileVersion(str.Substring(slnFileHeaderNoVersion.Length));
                     return;
                 }
@@ -681,54 +683,59 @@ namespace Microsoft.Build.Construction
 
             // Didn't find the header on either the first or second line, so the solution file
             // is invalid.
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false, "SubCategoryForSolutionParsingErrors",
-                new BuildEventFileInfo(FullPath), "SolutionParseNoHeaderError");
+            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                "SubCategoryForSolutionParsingErrors",
+                new BuildEventFileInfo(FullPath),
+                "SolutionParseNoHeaderError");
         }
 
         /// <summary>
-        /// This method parses the Visual Studio version in Dev 12 solution files
-        /// The version line looks like this:
-        /// 
-        /// VisualStudioVersion = 12.0.20311.0 VSPRO_PLATFORM
-        /// 
-        /// If such a line is found, the version is stored in this.currentVisualStudioVersion
+        /// Parses a <c>VisualStudioVersion</c> line. The caller must ensure to pass such a line.
         /// </summary>
-        private static Version ParseVisualStudioVersion(string str)
+        /// <remarks>
+        /// These lines have form <c>VisualStudioVersion = 12.0.20311.0 VSPRO_PLATFORM</c>. This method
+        /// attempts to parse the numeric version, ignoring any textual suffix. If parsing fails,
+        /// returns <see langword="null"/>.
+        /// </remarks>
+        private static Version ParseVisualStudioVersion(ReadOnlySpan<char> line)
         {
-            Version currentVisualStudioVersion = null;
-            char[] delimiterChars = { ' ', '=' };
-            string[] words = str.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);
-
-            if (words.Length >= 2)
+            if (TryParseNameValue(line, allowEmpty: false, out _, out ReadOnlySpan<char> value))
             {
-                string versionStr = words[1];
-                if (!System.Version.TryParse(versionStr, out currentVisualStudioVersion))
+                int spaceIndex = value.IndexOf(' ');
+
+                if (spaceIndex != -1)
                 {
-                    currentVisualStudioVersion = null;
+                    // Exclude any textual suffix.
+                    value = value.Slice(0, spaceIndex);
+                }
+
+                if (System.Version.TryParse(value.ToString(), out Version version))
+                {
+                    return version;
                 }
             }
 
-            return currentVisualStudioVersion;
+            return null;
         }
+
         /// <summary>
-        /// This method extracts the whole part of the version number from the specified line
-        /// containing the solution file format header, and throws an exception if the version number
-        /// is outside of the valid range.
-        /// 
-        /// The solution file header looks like this:
-        /// 
-        ///     Microsoft Visual Studio Solution File, Format Version 9.00
-        /// 
+        /// Parses the solution file version, assigns it to <see cref="Version"/>, and validates the version
+        /// is within the supported range.
         /// </summary>
-        /// <param name="versionString"></param>
+        /// <remarks>
+        /// Throws if the <paramref name="versionString"/> cannot be parsed, or if the version is too low.
+        /// If the version is too high, adds a comment to <see cref="SolutionParserComments"/>.
+        /// </remarks>
         private void ValidateSolutionFileVersion(string versionString)
         {
             ErrorUtilities.VerifyThrow(versionString != null, "ValidateSolutionFileVersion() got a null line!");
 
             if (!System.Version.TryParse(versionString, out Version version))
             {
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false, "SubCategoryForSolutionParsingErrors",
-                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseVersionMismatchError",
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
+                    "SolutionParseVersionMismatchError",
                     slnFileMinUpgradableVersion, slnFileMaxVersion);
             }
 
@@ -741,6 +748,7 @@ namespace Microsoft.Build.Construction
                 new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
                 "SolutionParseVersionMismatchError",
                 slnFileMinUpgradableVersion, slnFileMaxVersion);
+
             // If the solution file version is greater than the maximum one we will create a comment rather than warn
             // as users such as blend opening a dev10 project cannot do anything about it.
             if (Version > slnFileMaxVersion)
@@ -1369,59 +1377,57 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ParseSolutionConfigurations()
         {
-            var nameValueSeparators = '=';
-
             do
             {
                 string str = ReadLine();
 
-                if ((str == null) || (str == "EndGlobalSection"))
+                // Ignore EOF, empty line, end section and comment.
+                if (str is null or { Length: 0 } or "EndGlobalSection" || str[0] == CommentStartChar)
                 {
                     break;
                 }
 
-                // Ignore empty line or comment
-                if (String.IsNullOrWhiteSpace(str) || str[0] == CommentStartChar)
-                {
-                    continue;
-                }
-
-                string[] configurationNames = str.Split(nameValueSeparators);
-
-                // There should be exactly one '=' character, separating two names. 
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(configurationNames.Length == 2, "SubCategoryForSolutionParsingErrors",
-                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseInvalidSolutionConfigurationEntry", str);
-
-                string fullConfigurationName = configurationNames[0].Trim();
+                // Parse the name/value pair.
+                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                    TryParseNameValue(str.AsSpan(), allowEmpty: true, out ReadOnlySpan<char> name, out ReadOnlySpan<char> value),
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
+                    "SolutionParseInvalidSolutionConfigurationEntry",
+                    str);
 
                 // Fixing bug 555577: Solution file can have description information, in which case we ignore.
-                if (String.Equals(fullConfigurationName, "DESCRIPTION", StringComparison.OrdinalIgnoreCase))
+                if (name.Equals("DESCRIPTION".AsSpan(), StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
-                // Both names must be identical
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(fullConfigurationName == configurationNames[1].Trim(), "SubCategoryForSolutionParsingErrors",
-                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseInvalidSolutionConfigurationEntry", str);
+                // The name must equal the value. i.e. "Debug|Any CPU" == "Debug|Any CPU".
+                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                    name.Equals(value, StringComparison.Ordinal),
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
+                    "SolutionParseInvalidSolutionConfigurationEntry",
+                    str);
 
-                var (configuration, platform) = ParseConfigurationName(fullConfigurationName, FullPath, _currentLineNumber, str);
+                var (configuration, platform) = ParseConfigurationName(name, FullPath, _currentLineNumber, str);
 
                 _solutionConfigurations.Add(new SolutionConfigurationInSolution(configuration, platform));
-            } while (true);
+            }
+            while (true);
         }
 
-        internal static (string Configuration, string Platform) ParseConfigurationName(string fullConfigurationName, string projectPath, int lineNumber, string containingString)
+        internal static (string Configuration, string Platform) ParseConfigurationName(ReadOnlySpan<char> fullConfigurationName, string projectPath, int lineNumber, string containingString)
         {
-            string[] configurationPlatformParts = fullConfigurationName.Split(SolutionConfigurationInSolution.ConfigurationPlatformSeparatorArray);
+            if (!TryParseConfigurationPlatform(fullConfigurationName, isPlatformRequired: true, out ReadOnlySpan<char> configuration, out ReadOnlySpan<char> platform))
+            {
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(projectPath, lineNumber, 0),
+                    "SolutionParseInvalidSolutionConfigurationEntry",
+                    containingString);
+            }
 
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                configurationPlatformParts.Length == 2,
-                "SubCategoryForSolutionParsingErrors",
-                new BuildEventFileInfo(projectPath, lineNumber, 0),
-                "SolutionParseInvalidSolutionConfigurationEntry",
-                containingString);
-
-            return (configurationPlatformParts[0], configurationPlatformParts[1]);
+            return (configuration.ToString(), platform.ToString());
         }
 
         /// <summary>
@@ -1429,7 +1435,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         /// <remarks>
         /// A sample (incomplete) section:
-        /// 
+        /// <code>
         /// GlobalSection(ProjectConfigurationPlatforms) = postSolution
         /// 	{6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
         /// 	{6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -1442,35 +1448,35 @@ namespace Microsoft.Build.Construction
         /// 	{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Release|Win32.ActiveCfg = Release|Win32
         /// 	{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Release|Win32.Build.0 = Release|Win32
         /// EndGlobalSection
+        /// </code>
         /// </remarks>
-        /// <returns>An unprocessed hashtable of entries in this section</returns>
+        /// <returns>An unprocessed dictionary of entries in this section.</returns>
         internal Dictionary<string, string> ParseProjectConfigurations()
         {
-            var rawProjectConfigurationsEntries = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> rawProjectConfigurationsEntries = new(StringComparer.OrdinalIgnoreCase);
 
             do
             {
                 string str = ReadLine();
 
-                if ((str == null) || (str == "EndGlobalSection"))
+                // Ignore EOF, empty line, end section and comment.
+                if (str is null or { Length: 0 } or "EndGlobalSection" || str[0] == CommentStartChar)
                 {
                     break;
                 }
 
-                // Ignore empty line or comment
-                if (String.IsNullOrWhiteSpace(str) || str[0] == CommentStartChar)
+                if (!TryParseNameValue(str.AsSpan(), allowEmpty: true, out ReadOnlySpan<char> name, out ReadOnlySpan<char> value))
                 {
-                    continue;
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                        "SubCategoryForSolutionParsingErrors",
+                        new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
+                        "SolutionParseInvalidProjectSolutionConfigurationEntry",
+                        str);
                 }
 
-                string[] nameValue = str.Split('=');
-
-                // There should be exactly one '=' character, separating the name and value. 
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(nameValue.Length == 2, "SubCategoryForSolutionParsingErrors",
-                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseInvalidProjectSolutionConfigurationEntry", str);
-
-                rawProjectConfigurationsEntries[nameValue[0].Trim()] = nameValue[1].Trim();
-            } while (true);
+                rawProjectConfigurationsEntries[name.ToString()] = value.ToString();
+            }
+            while (true);
 
             return rawProjectConfigurationsEntries;
         }
@@ -1511,16 +1517,19 @@ namespace Microsoft.Build.Construction
 
                         if (rawProjectConfigurationsEntries.TryGetValue(entryNameActiveConfig, out string configurationPlatform))
                         {
-                            string[] configurationPlatformParts = configurationPlatform.Split(SolutionConfigurationInSolution.ConfigurationPlatformSeparatorArray);
-
-                            // Project configuration may not necessarily contain the platform part. Some project support only the configuration part.
-                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(configurationPlatformParts.Length <= 2, "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(FullPath), "SolutionParseInvalidProjectSolutionConfigurationEntry",
-                                $"{entryNameActiveConfig} = {configurationPlatform}");
+                            // Project configuration may not necessarily contain the platform part. Some projects support only the configuration part.
+                            if (!TryParseConfigurationPlatform(configurationPlatform.AsSpan(), isPlatformRequired: false, out ReadOnlySpan<char> configuration, out ReadOnlySpan<char> platform))
+                            {
+                                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                                    "SubCategoryForSolutionParsingErrors",
+                                    new BuildEventFileInfo(FullPath),
+                                    "SolutionParseInvalidProjectSolutionConfigurationEntry",
+                                    $"{entryNameActiveConfig} = {configurationPlatform}");
+                            }
 
                             var projectConfiguration = new ProjectConfigurationInSolution(
-                                configurationPlatformParts[0],
-                                (configurationPlatformParts.Length > 1) ? configurationPlatformParts[1] : string.Empty,
+                                configuration.ToString(),
+                                platform.ToString(),
                                 rawProjectConfigurationsEntries.ContainsKey(entryNameBuild));
 
                             project.SetProjectConfiguration(solutionConfiguration.FullName, projectConfiguration);
@@ -1631,6 +1640,65 @@ namespace Microsoft.Build.Construction
             }
 
             return null;
+        }
+
+        internal static bool TryParseNameValue(ReadOnlySpan<char> input, bool allowEmpty, out ReadOnlySpan<char> name, out ReadOnlySpan<char> value)
+        {
+            int equalsIndex = input.IndexOf('=');
+
+            if (equalsIndex == -1)
+            {
+                name = default;
+                value = default;
+                return false;
+            }
+
+            name = input.Slice(0, equalsIndex).Trim();
+            value = input.Slice(equalsIndex + 1).Trim();
+
+            if (value.IndexOf('=') != -1 || (!allowEmpty && (name.Length == 0 || value.Length == 0)))
+            {
+                name = default;
+                value = default;
+                return false;
+            }
+
+            return true;
+        }
+
+        internal static bool TryParseConfigurationPlatform(ReadOnlySpan<char> input, bool isPlatformRequired, out ReadOnlySpan<char> configuration, out ReadOnlySpan<char> platform)
+        {
+            // TODO consider pooling return values as they're likely to come from a very small set
+
+            int pipeIndex = input.IndexOf(SolutionConfigurationInSolution.ConfigurationPlatformSeparator);
+
+            if (pipeIndex == -1)
+            {
+                if (isPlatformRequired)
+                {
+                    configuration = default;
+                    platform = default;
+                    return false;
+                }
+                else
+                {
+                    configuration = input;
+                    platform = ReadOnlySpan<char>.Empty;
+                    return true;
+                }
+            }
+
+            configuration = input.Slice(0, pipeIndex);
+            platform = input.Slice(pipeIndex + 1);
+
+            if (platform.IndexOf(SolutionConfigurationInSolution.ConfigurationPlatformSeparator) != -1)
+            {
+                configuration = default;
+                platform = default;
+                return false;
+            }
+
+            return true;
         }
 
         #endregion

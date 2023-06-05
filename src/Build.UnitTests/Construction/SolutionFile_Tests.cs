@@ -2355,5 +2355,92 @@ EndGlobal
             solution.ProjectsInOrder[0].AbsolutePath.ShouldBe(Path.GetFullPath(Path.Combine(Path.GetDirectoryName(solution.FullPath)!, expectedRelativePath)));
             solution.ProjectsInOrder[0].ProjectGuid.ShouldBe("{0ABED153-9451-483C-8140-9E8D7306B216}");
         }
+
+        [Theory]
+        [InlineData("A=B", true, true, "A", "B")]
+        [InlineData("A = B", true, true, "A", "B")]
+        [InlineData("A =B", true, true, "A", "B")]
+        [InlineData("A= B", true, true, "A", "B")]
+        [InlineData(" A=B ", true, true, "A", "B")]
+        //// invalid patterns
+        [InlineData("A=B=C", true, false, null, null)]
+        [InlineData("A=B=", true, false, null, null)]
+        [InlineData("A==", true, false, null, null)]
+        [InlineData("==", true, false, null, null)]
+        [InlineData("ABC", true, false, null, null)]
+        //// empty value
+        [InlineData("ABC=", true, true, "ABC", "")]
+        [InlineData("ABC= ", true, true, "ABC", "")]
+        [InlineData("ABC=", false, false, null, null)]
+        [InlineData("ABC= ", false, false, null, null)]
+        //// empty name
+        [InlineData("=ABC", true, true, "", "ABC")]
+        [InlineData(" =ABC", true, true, "", "ABC")]
+        [InlineData("=ABC", false, false, null, null)]
+        [InlineData(" =ABC", false, false, null, null)]
+        public void TryParseNameValue(string input, bool allowEmpty, bool expectedSuccess, string expectedName, string expectedValue)
+        {
+            bool actualSuccess = SolutionFile.TryParseNameValue(input.AsSpan(), allowEmpty, out ReadOnlySpan<char> actualName, out ReadOnlySpan<char> actualValue);
+
+            Assert.Equal(expectedSuccess, actualSuccess);
+
+            if (expectedSuccess)
+            {
+                Assert.Equal(expectedName, actualName.ToString());
+                Assert.Equal(expectedValue, actualValue.ToString());
+            }
+        }
+
+        [Theory]
+        [InlineData("A|B", true, "A", "B")]
+        [InlineData(" A | B ", true, " A ", " B ")]
+        [InlineData("A|", true, "A", "")]
+        [InlineData("|B", true, "", "B")]
+        [InlineData("AB", false, null, null)]
+        [InlineData("A|B|C", false, null, null)]
+        public void ParseConfigurationName(string input, bool expectedSuccess, string expectedConfiguration, string expectedPlatform)
+        {
+            if (expectedSuccess)
+            {
+                (string actualConfiguration, string actualPlatform) = SolutionFile.ParseConfigurationName(input.AsSpan(), "path", 0, "containing string");
+
+                Assert.Equal(expectedConfiguration, actualConfiguration);
+                Assert.Equal(expectedPlatform, actualPlatform);
+            }
+            else
+            {
+                Assert.ThrowsAny<Exception>(() => SolutionFile.ParseConfigurationName(input.AsSpan(), "path", 0, "containing string"));
+            }
+        }
+
+        [Theory]
+        //// platform required
+        [InlineData("A|B", true, true, "A", "B")]
+        [InlineData(" A | B ", true, true, " A ", " B ")]
+        [InlineData("A|", true, true, "A", "")]
+        [InlineData("|B", true, true, "", "B")]
+        //// platform required -- invalid
+        [InlineData("AB", true, false, null, null)]
+        [InlineData("A|B|C", true, false, null, null)]
+        //// platform optional
+        [InlineData("A|B", false, true, "A", "B")]
+        [InlineData(" A | B ", false, true, " A ", " B ")]
+        [InlineData("A|", false, true, "A", "")]
+        [InlineData("|B", false, true, "", "B")]
+        [InlineData("AB", false, true, "AB", "")]
+        //// platform optional -- invalid
+        [InlineData("A|B|C", false, false, null, null)]
+        public void TryParseConfigurationPlatform(string input, bool isPlatformRequired, bool expectedSuccess, string expectedConfiguration, string expectedPlatform)
+        {
+            bool actualSuccess = SolutionFile.TryParseConfigurationPlatform(input.AsSpan(), isPlatformRequired, out ReadOnlySpan<char> actualConfiguration, out ReadOnlySpan<char> actualPlatform);
+
+            Assert.Equal(expectedSuccess, actualSuccess);
+
+            if (expectedSuccess)
+            {
+                Assert.Equal(expectedConfiguration, actualConfiguration.ToString());
+                Assert.Equal(expectedPlatform, actualPlatform.ToString());
+            }
+        }
     }
 }
