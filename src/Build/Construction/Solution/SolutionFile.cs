@@ -459,7 +459,6 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Reads a line from the StreamReader, trimming leading and trailing whitespace.
         /// </summary>
-        /// <returns></returns>
         private string ReadLine()
         {
             ErrorUtilities.VerifyThrow(SolutionReader != null, "ParseFileHeader(): reader is null!");
@@ -1395,9 +1394,9 @@ namespace Microsoft.Build.Construction
             proj.RelativePath = relativePath;
             proj.ProjectGuid = projectGuid;
 
-            // If the project name is empty (as in some bad solutions) set it to some generated generic value.  
-            // This allows us to at least generate reasonable target names etc. instead of crashing. 
-            if (String.IsNullOrEmpty(proj.ProjectName))
+            // If the project name is empty (as in some bad solutions) set it to some generated generic value.
+            // This allows us to at least generate reasonable target names etc. instead of crashing.
+            if (string.IsNullOrEmpty(proj.ProjectName))
             {
                 proj.ProjectName = "EmptyProjectName." + Guid.NewGuid();
             }
@@ -1406,32 +1405,32 @@ namespace Microsoft.Build.Construction
             ValidateProjectRelativePath(proj);
 
             // Figure out what type of project this is.
-            if ((String.Equals(projectTypeGuid, vbProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
-                (String.Equals(projectTypeGuid, csProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
-                (String.Equals(projectTypeGuid, cpsProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
-                (String.Equals(projectTypeGuid, cpsCsProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
-                (String.Equals(projectTypeGuid, cpsVbProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
-                (String.Equals(projectTypeGuid, cpsFsProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
-                (String.Equals(projectTypeGuid, fsProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
-                (String.Equals(projectTypeGuid, dbProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
-                (String.Equals(projectTypeGuid, vjProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
-                (String.Equals(projectTypeGuid, synProjectGuid, StringComparison.OrdinalIgnoreCase)))
+            if (string.Equals(projectTypeGuid, vbProjectGuid, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(projectTypeGuid, csProjectGuid, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(projectTypeGuid, cpsProjectGuid, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(projectTypeGuid, cpsCsProjectGuid, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(projectTypeGuid, cpsVbProjectGuid, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(projectTypeGuid, cpsFsProjectGuid, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(projectTypeGuid, fsProjectGuid, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(projectTypeGuid, dbProjectGuid, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(projectTypeGuid, vjProjectGuid, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(projectTypeGuid, synProjectGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.KnownToBeMSBuildFormat;
             }
-            else if (String.Equals(projectTypeGuid, sharedProjectGuid, StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(projectTypeGuid, sharedProjectGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.SharedProject;
             }
-            else if (String.Equals(projectTypeGuid, solutionFolderGuid, StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(projectTypeGuid, solutionFolderGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.SolutionFolder;
             }
             // MSBuild format VC projects have the same project type guid as old style VC projects.
             // If it's not an old-style VC project, we'll assume it's MSBuild format
-            else if (String.Equals(projectTypeGuid, vcProjectGuid, StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(projectTypeGuid, vcProjectGuid, StringComparison.OrdinalIgnoreCase))
             {
-                if (String.Equals(proj.Extension, ".vcproj", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(proj.Extension, ".vcproj", StringComparison.OrdinalIgnoreCase))
                 {
                     if (!_parsingForConversionOnly)
                     {
@@ -1445,12 +1444,12 @@ namespace Microsoft.Build.Construction
                     proj.ProjectType = SolutionProjectType.KnownToBeMSBuildFormat;
                 }
             }
-            else if (String.Equals(projectTypeGuid, webProjectGuid, StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(projectTypeGuid, webProjectGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.WebProject;
                 ContainsWebProjects = true;
             }
-            else if (String.Equals(projectTypeGuid, wdProjectGuid, StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(projectTypeGuid, wdProjectGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.WebDeploymentProject;
                 ContainsWebDeploymentProjects = true;

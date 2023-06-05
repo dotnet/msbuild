@@ -37,7 +37,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             p.ParseFirstProjectLine(
                 "Project(\"{Project GUID}\") = \"Project name\", \"Relative path to project file\", \"Unique name-GUID\"".AsSpan(),
-                 proj);
+                proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("Project name");
             proj.RelativePath.ShouldBe("Relative path to project file");
@@ -61,9 +61,10 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 p.ParseFirstProjectLine(
                     "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"Project name.vcproj\", \"Relative path\\to\\Project name.vcproj\", \"Unique name-GUID\"".AsSpan(),
-                     proj);
+                    proj);
             });
         }
+
         /// <summary>
         /// Test that the first project line of a project with the C++ project guid and an
         /// arbitrary extension is seen as valid -- we assume that all C++ projects except
@@ -78,7 +79,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             p.ParseFirstProjectLine(
                 "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"Project name.myvctype\", \"Relative path\\to\\Project name.myvctype\", \"Unique name-GUID\"".AsSpan(),
-                 proj);
+                proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.KnownToBeMSBuildFormat);
             proj.ProjectName.ShouldBe("Project name.myvctype");
             proj.RelativePath.ShouldBe("Relative path\\to\\Project name.myvctype");
@@ -97,7 +98,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             p.ParseFirstProjectLine(
                 "Project(\" {Project GUID} \")  = \" Project name \",  \" Relative path to project file \"    , \" Unique name-GUID \"".AsSpan(),
-                 proj);
+                proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("Project name");
             proj.RelativePath.ShouldBe("Relative path to project file");
@@ -117,7 +118,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             p.ParseFirstProjectLine(
                 "Project(\"{Project GUID}\") = \"\", \"src\\.proj\", \"Unique name-GUID\"".AsSpan(),
-                 proj);
+                proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldStartWith("EmptyProjectName");
             proj.RelativePath.ShouldBe("src\\.proj");
@@ -168,9 +169,9 @@ namespace Microsoft.Build.UnitTests.Construction
                 solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"someproj.etp");
                 solution.ProjectsInOrder[1].RelativePath.ShouldBe(@"ClassLibrary2.csproj");
             }
-            // Delete the files created during the test
             finally
             {
+                // Delete the files created during the test
                 File.Delete(proj1Path);
             }
         }
@@ -236,16 +237,15 @@ namespace Microsoft.Build.UnitTests.Construction
                             EndProjectSection
                         EndProject";
 
-
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
                 ProjectInSolution project = solution.ProjectsByGuid["{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}"];
                 ProjectInSolution project2 = solution.ProjectsByGuid["{CCCCCCCC-9925-4D57-9DAF-E0A9D936ABDB}"];
                 project.CanBeMSBuildProjectFile(out _).ShouldBeFalse();
                 project2.CanBeMSBuildProjectFile(out _).ShouldBeTrue();
             }
-            // Delete the files created during the test
             finally
             {
+                // Delete the files created during the test
                 File.Delete(proj1Path);
                 File.Delete(proj2Path);
             }
@@ -359,9 +359,9 @@ namespace Microsoft.Build.UnitTests.Construction
                 solution.ProjectsInOrder[1].RelativePath.ShouldBe(@"someproj2.etp");
                 solution.ProjectsInOrder[2].RelativePath.ShouldBe(@"ClassLibrary1.csproj");
             }
-            // Delete the files created during the test
             finally
             {
+                // Delete the files created during the test
                 File.Delete(proj1Path);
                 File.Delete(proj2Path);
             }
@@ -680,7 +680,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             p.ParseFirstProjectLine(
                 "Project(\"{Project GUID}\")  = \"MyProject,(=IsGreat)\",  \"Relative path to project file\"    , \"Unique name-GUID\"".AsSpan(),
-                 proj);
+                proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("MyProject,(=IsGreat)");
             proj.RelativePath.ShouldBe("Relative path to project file");
@@ -725,11 +725,15 @@ namespace Microsoft.Build.UnitTests.Construction
             solutionFileContents = solutionFileContents.Replace('\'', '"');
             StreamReader sr = StreamHelpers.StringToStreamReader(solutionFileContents);
 
-            SolutionFile sp = new SolutionFile();
-            sp.SolutionFileDirectory = Path.GetTempPath();
-            sp.SolutionReader = sr;
-            sp.FullPath = FileUtilities.GetTemporaryFileName(".sln");
+            SolutionFile sp = new()
+            {
+                SolutionFileDirectory = Path.GetTempPath(),
+                SolutionReader = sr,
+                FullPath = FileUtilities.GetTemporaryFileName(".sln")
+            };
+
             sp.ParseSolution();
+
             // Clean up the temporary file that got created with this call
             return sp;
         }
