@@ -284,8 +284,20 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrowInternalRooted(solutionFile);
 
             // Open the file
-            using FileStream fileStream = File.OpenRead(solutionFile);
-            using StreamReader reader = new(fileStream, Encoding.GetEncoding(0)); // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
+            using FileStream fileStream = new(
+                solutionFile,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                bufferSize: 256,
+                FileOptions.SequentialScan);
+
+            using StreamReader reader = new(
+                fileStream,
+                Encoding.GetEncoding(0), // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
+                detectEncodingFromByteOrderMarks: true,
+                bufferSize: 256, // The default buffer size is much larger than we need. We will only read a few lines from the file.
+                leaveOpen: true); // We explicitly close the stream so don't need the reader to do it.
 
             GetSolutionFileAndVisualStudioMajorVersions(reader, solutionFile, out solutionVersion, out visualStudioMajorVersion);
         }
