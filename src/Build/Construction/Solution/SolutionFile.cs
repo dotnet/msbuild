@@ -12,6 +12,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml;
+
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
@@ -270,11 +272,12 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Given a solution file, parses the header and returns the major version numbers of the solution file
-        /// and the visual studio. 
-        /// Throws InvalidProjectFileException if the solution header is invalid, or if the version is less than 
-        /// our minimum version. 
+        /// Parses the header of the specified solution file, returning some version number data.
         /// </summary>
+        /// <param name="solutionFile">The full path of the solution file.</param>
+        /// <param name="solutionVersion">The returned solution file format version (major version only).</param>
+        /// <param name="visualStudioMajorVersion">The returned Visual Studio version (major version only).</param>
+        /// <exception cref="InvalidProjectFileException">The solution header is invalid, or the version is less than our minimum required version.</exception>
         internal static void GetSolutionFileAndVisualStudioMajorVersions(string solutionFile, out int solutionVersion, out int visualStudioMajorVersion)
         {
             ErrorUtilities.VerifyThrow(!String.IsNullOrEmpty(solutionFile), "null solution file passed to GetSolutionFileMajorVersion!");
@@ -288,11 +291,13 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Given a solution file, parses the header and returns the major version numbers of the solution file
-        /// and the visual studio. 
-        /// Throws InvalidProjectFileException if the solution header is invalid, or if the version is less than 
-        /// our minimum version. 
+        /// Parses the header of the specified solution file, returning some version number data.
         /// </summary>
+        /// <param name="reader">To read the content of the solution file.</param>
+        /// <param name="solutionFile">The full path of the solution file.</param>
+        /// <param name="solutionVersion">The returned solution file format version (major version only).</param>
+        /// <param name="visualStudioMajorVersion">The returned Visual Studio version (major version only).</param>
+        /// <exception cref="InvalidProjectFileException">The solution header is invalid, or the version is less than our minimum required version.</exception>
         internal static void GetSolutionFileAndVisualStudioMajorVersions(TextReader reader, string solutionFile, out int solutionVersion, out int visualStudioMajorVersion)
         {
             ErrorUtilities.VerifyThrow(!String.IsNullOrEmpty(solutionFile), "null solution file passed to GetSolutionFileMajorVersion!");
@@ -1269,13 +1274,14 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Parse the first line of a Project section of a solution file. This line should look like:
-        ///
-        ///  Project("{Project type GUID}") = "Project name", "Relative path to project file", "{Project GUID}"
-        /// 
+        /// Parse the first line of a <c>Project</c> section of a solution file.
         /// </summary>
-        /// <param name="firstLine"></param>
-        /// <param name="proj"></param>
+        /// <remarks>
+        /// This line should look like:
+        /// <code>
+        /// Project("{Project type GUID}") = "Project name", "Relative path to project file", "{Project GUID}"
+        /// </code>
+        /// </remarks>
         internal void ParseFirstProjectLine(
             string firstLine,
             ProjectInSolution proj)
