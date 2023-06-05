@@ -803,7 +803,7 @@ namespace Microsoft.Build.Construction
             while ((line = ReadLine()) != null)
             {
                 // If we see an "EndProject", well ... that's the end of this project!
-                if (line == "EndProject")
+                if (string.Equals(line, "EndProject", StringComparison.Ordinal))
                 {
                     break;
                 }
