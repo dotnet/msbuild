@@ -322,23 +322,25 @@ namespace Microsoft.Build.Construction
                         if (!System.Version.TryParse(fileVersionFromHeader, out Version version))
                         {
                             ProjectFileErrorUtilities.ThrowInvalidProjectFile(
-                                    "SubCategoryForSolutionParsingErrors",
-                                    new BuildEventFileInfo(solutionFile),
-                                    "SolutionParseVersionMismatchError",
-                                    slnFileMinUpgradableVersion,
-                                    slnFileMaxVersion);
-                        }
-
-                        solutionVersion = version.Major;
-
-                        // Validate against our min & max
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                                solutionVersion >= slnFileMinUpgradableVersion,
                                 "SubCategoryForSolutionParsingErrors",
                                 new BuildEventFileInfo(solutionFile),
                                 "SolutionParseVersionMismatchError",
                                 slnFileMinUpgradableVersion,
                                 slnFileMaxVersion);
+                        }
+
+                        solutionVersion = version.Major;
+
+                        // Validate against our min & max
+                        if (solutionVersion < slnFileMinUpgradableVersion)
+                        {
+                            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                                "SubCategoryForSolutionParsingErrors",
+                                new BuildEventFileInfo(solutionFile),
+                                "SolutionParseVersionMismatchError",
+                                slnFileMinUpgradableVersion,
+                                slnFileMaxVersion);
+                        }
 
                         validVersionFound = true;
                     }
@@ -641,12 +643,14 @@ namespace Microsoft.Build.Construction
 
                 bool didntAlreadyExist = !uniqueNameExists && projectsByOriginalName.Add(proj.GetOriginalProjectName());
 
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                    didntAlreadyExist,
-                    "SubCategoryForSolutionParsingErrors",
-                    new BuildEventFileInfo(FullPath),
-                    "SolutionParseDuplicateProject",
-                    uniqueNameExists ? uniqueName : proj.ProjectName);
+                if (!didntAlreadyExist)
+                {
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                        "SubCategoryForSolutionParsingErrors",
+                        new BuildEventFileInfo(FullPath),
+                        "SolutionParseDuplicateProject",
+                        uniqueNameExists ? uniqueName : proj.ProjectName);
+                }
             }
         } // ParseSolutionFile()
 
@@ -742,12 +746,14 @@ namespace Microsoft.Build.Construction
             Version = version.Major;
 
             // Validate against our min & max
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                Version >= slnFileMinUpgradableVersion,
-                "SubCategoryForSolutionParsingErrors",
-                new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
-                "SolutionParseVersionMismatchError",
-                slnFileMinUpgradableVersion, slnFileMaxVersion);
+            if (Version < slnFileMinUpgradableVersion)
+            {
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
+                    "SolutionParseVersionMismatchError",
+                    slnFileMinUpgradableVersion, slnFileMaxVersion);
+            }
 
             // If the solution file version is greater than the maximum one we will create a comment rather than warn
             // as users such as blend opening a dev10 project cannot do anything about it.
@@ -804,8 +810,15 @@ namespace Microsoft.Build.Construction
                         // This should be a dependency.  The GUID identifying the parent project should
                         // be both the property name and the property value.
                         Match match = s_crackPropertyLine.Value.Match(line);
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
-                            new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseProjectDepGuidError", proj.ProjectName);
+
+                        if (!match.Success)
+                        {
+                            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                                "SubCategoryForSolutionParsingErrors",
+                                new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
+                                "SolutionParseProjectDepGuidError",
+                                proj.ProjectName);
+                        }
 
                         string referenceGuid = match.Groups["PROPERTYNAME"].Value.Trim();
                         proj.AddDependency(referenceGuid);
@@ -822,8 +835,15 @@ namespace Microsoft.Build.Construction
                     while ((line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false))
                     {
                         Match match = s_crackPropertyLine.Value.Match(line);
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
-                            new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseWebProjectPropertiesError", proj.ProjectName);
+
+                        if (!match.Success)
+                        {
+                            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                                "SubCategoryForSolutionParsingErrors",
+                                new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
+                                "SolutionParseWebProjectPropertiesError",
+                                proj.ProjectName);
+                        }
 
                         string propertyName = match.Groups["PROPERTYNAME"].Value.Trim();
                         string propertyValue = match.Groups["PROPERTYVALUE"].Value.Trim();
@@ -848,8 +868,14 @@ namespace Microsoft.Build.Construction
                 }
             }
 
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(line != null, "SubCategoryForSolutionParsingErrors",
-                new BuildEventFileInfo(FullPath), "SolutionParseProjectEofError", proj.ProjectName);
+            if (line is null)
+            {
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(FullPath),
+                    "SolutionParseProjectEofError",
+                    proj.ProjectName);
+            }
 
             // Add the project to the collection
             AddProjectToSolution(proj);
@@ -1031,18 +1057,25 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrow(proj.RelativePath != null, "Project relative path cannot be null.");
 
             // Verify the relative path does not contain invalid characters
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj.RelativePath.IndexOfAny(Path.GetInvalidPathChars()) == -1,
-              "SubCategoryForSolutionParsingErrors",
-              new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
-              "SolutionParseInvalidProjectFileNameCharacters",
-              proj.ProjectName, proj.RelativePath);
+            if (proj.RelativePath.IndexOfAny(Path.GetInvalidPathChars()) != -1)
+            {
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
+                    "SolutionParseInvalidProjectFileNameCharacters",
+                    proj.ProjectName,
+                    proj.RelativePath);
+            }
 
             // Verify the relative path is not empty string
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj.RelativePath.Length > 0,
-                  "SubCategoryForSolutionParsingErrors",
-                  new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
-                  "SolutionParseInvalidProjectFileNameEmpty",
-                  proj.ProjectName);
+            if (proj.RelativePath.Length == 0)
+            {
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
+                    "SolutionParseInvalidProjectFileNameEmpty",
+                    proj.ProjectName);
+            }
         }
 
         /// <summary>
@@ -1249,8 +1282,14 @@ namespace Microsoft.Build.Construction
             ProjectInSolution proj)
         {
             Match match = s_crackProjectLine.Value.Match(firstLine);
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
-                new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseProjectError");
+
+            if (!match.Success)
+            {
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
+                    "SolutionParseProjectError");
+            }
 
             string projectTypeGuid = match.Groups["PROJECTTYPEGUID"].Value.Trim();
             proj.ProjectName = match.Groups["PROJECTNAME"].Value.Trim();
@@ -1344,16 +1383,29 @@ namespace Microsoft.Build.Construction
                 }
 
                 Match match = s_crackPropertyLine.Value.Match(str);
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
-                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseNestedProjectError");
+
+                if (!match.Success)
+                {
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                        "SubCategoryForSolutionParsingErrors",
+                        new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
+                        "SolutionParseNestedProjectError");
+                }
 
                 string projectGuid = match.Groups["PROPERTYNAME"].Value.Trim();
                 string parentProjectGuid = match.Groups["PROPERTYVALUE"].Value.Trim();
 
                 if (!_projects.TryGetValue(projectGuid, out ProjectInSolution proj))
                 {
-                    ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null, "SubCategoryForSolutionParsingErrors",
-                       new BuildEventFileInfo(FullPath, _currentLineNumber, 0), "SolutionParseNestedProjectUndefinedError", projectGuid, parentProjectGuid);
+                    if (proj is null)
+                    {
+                        ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                            "SubCategoryForSolutionParsingErrors",
+                            new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
+                            "SolutionParseNestedProjectUndefinedError",
+                            projectGuid,
+                            parentProjectGuid);
+                    }
                 }
 
                 proj.ParentProjectGuid = parentProjectGuid;
@@ -1384,12 +1436,14 @@ namespace Microsoft.Build.Construction
                 }
 
                 // Parse the name/value pair.
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                    TryParseNameValue(str.AsSpan(), allowEmpty: true, out ReadOnlySpan<char> name, out ReadOnlySpan<char> value),
-                    "SubCategoryForSolutionParsingErrors",
-                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
-                    "SolutionParseInvalidSolutionConfigurationEntry",
-                    str);
+                if (!TryParseNameValue(str.AsSpan(), allowEmpty: true, out ReadOnlySpan<char> name, out ReadOnlySpan<char> value))
+                {
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                        "SubCategoryForSolutionParsingErrors",
+                        new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
+                        "SolutionParseInvalidSolutionConfigurationEntry",
+                        str);
+                }
 
                 // Fixing bug 555577: Solution file can have description information, in which case we ignore.
                 if (name.Equals("DESCRIPTION".AsSpan(), StringComparison.OrdinalIgnoreCase))
@@ -1398,12 +1452,14 @@ namespace Microsoft.Build.Construction
                 }
 
                 // The name must equal the value. i.e. "Debug|Any CPU" == "Debug|Any CPU".
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                    name.Equals(value, StringComparison.Ordinal),
-                    "SubCategoryForSolutionParsingErrors",
-                    new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
-                    "SolutionParseInvalidSolutionConfigurationEntry",
-                    str);
+                if (!name.Equals(value, StringComparison.Ordinal))
+                {
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                        "SubCategoryForSolutionParsingErrors",
+                        new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
+                        "SolutionParseInvalidSolutionConfigurationEntry",
+                        str);
+                }
 
                 var (configuration, platform) = ParseConfigurationName(name, FullPath, _currentLineNumber, str);
 
