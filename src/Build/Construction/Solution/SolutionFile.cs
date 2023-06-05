@@ -325,10 +325,12 @@ namespace Microsoft.Build.Construction
                     break;
                 }
 
-                if (line.Trim().StartsWith(slnFileHeaderNoVersion, StringComparison.Ordinal))
+                ReadOnlySpan<char> lineSpan = line.AsSpan().Trim();
+
+                if (lineSpan.StartsWith(slnFileHeaderNoVersion.AsSpan(), StringComparison.Ordinal))
                 {
                     // Found it. Validate the version.
-                    string fileVersionFromHeader = line.Substring(slnFileHeaderNoVersion.Length);
+                    string fileVersionFromHeader = lineSpan.Slice(slnFileHeaderNoVersion.Length).ToString();
 
                     if (!System.Version.TryParse(fileVersionFromHeader, out Version version))
                     {
@@ -355,7 +357,7 @@ namespace Microsoft.Build.Construction
 
                     validVersionFound = true;
                 }
-                else if (line.Trim().StartsWith(slnFileVSVLinePrefix, StringComparison.Ordinal))
+                else if (lineSpan.StartsWith(slnFileVSVLinePrefix.AsSpan(), StringComparison.Ordinal))
                 {
                     Version visualStudioVersion = ParseVisualStudioVersion(line.AsSpan());
                     if (visualStudioVersion != null)
