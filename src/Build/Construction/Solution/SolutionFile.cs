@@ -38,13 +38,13 @@ namespace Microsoft.Build.Construction
         private static readonly Lazy<Regex> s_crackProjectLine = new Lazy<Regex>(
             () => new Regex(
                 "^" // Beginning of line
-                + "Project\\(\"(?<PROJECTTYPEGUID>.*)\"\\)"
+                + "Project\\(\"(?<PROJECTTYPEGUID>[^\"]*)\"\\)"
                 + "\\s*=\\s*" // Any amount of whitespace plus "=" plus any amount of whitespace
-                + "\"(?<PROJECTNAME>.*)\""
+                + "\"(?<PROJECTNAME>[^\"]*)\""
                 + "\\s*,\\s*" // Any amount of whitespace plus "," plus any amount of whitespace
-                + "\"(?<RELATIVEPATH>.*)\""
+                + "\"(?<RELATIVEPATH>[^\"]*)\""
                 + "\\s*,\\s*" // Any amount of whitespace plus "," plus any amount of whitespace
-                + "\"(?<PROJECTGUID>.*)\""
+                + "\"(?<PROJECTGUID>[^\"]*)\""
                 + "$", // End-of-line
                 RegexOptions.Compiled));
 
