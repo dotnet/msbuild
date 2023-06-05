@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-
-#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -24,6 +23,7 @@ namespace Microsoft.Build.Shared
         /// <param name="projectFile">The invalid project file.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
+        [DoesNotReturn]
         internal static void ThrowInvalidProjectFile(
             BuildEventFileInfo projectFile,
             string resourceName,
@@ -43,6 +43,7 @@ namespace Microsoft.Build.Shared
         /// <param name="innerException">Any inner exception. May be null.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
+        [DoesNotReturn]
         internal static void ThrowInvalidProjectFile(
             BuildEventFileInfo projectFile,
             Exception innerException,
@@ -64,7 +65,7 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
         internal static void VerifyThrowInvalidProjectFile(
-            bool condition,
+            [DoesNotReturnIf(false)] bool condition,
             BuildEventFileInfo projectFile,
             string resourceName,
             params object[] args)
@@ -83,8 +84,9 @@ namespace Microsoft.Build.Shared
         /// <param name="projectFile">The invalid project file.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
+        [DoesNotReturn]
         internal static void ThrowInvalidProjectFile(
-            string errorSubCategoryResourceName,
+            string? errorSubCategoryResourceName,
             BuildEventFileInfo projectFile,
             string resourceName,
             params object[] args)
@@ -105,8 +107,8 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
         internal static void VerifyThrowInvalidProjectFile(
-            bool condition,
-            string errorSubCategoryResourceName,
+            [DoesNotReturnIf(false)] bool condition,
+            string? errorSubCategoryResourceName,
             BuildEventFileInfo projectFile,
             string resourceName,
             params object[] args)
@@ -128,10 +130,10 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
         internal static void VerifyThrowInvalidProjectFile(
-            bool condition,
-            string errorSubCategoryResourceName,
+            [DoesNotReturnIf(false)] bool condition,
+            string? errorSubCategoryResourceName,
             BuildEventFileInfo projectFile,
-            Exception innerException,
+            Exception? innerException,
             string resourceName,
             params object[] args)
         {
@@ -147,10 +149,10 @@ namespace Microsoft.Build.Shared
 #endif
             if (!condition)
             {
-                string errorSubCategory = errorSubCategoryResourceName is null ? null : AssemblyResources.GetString(errorSubCategoryResourceName);
+                string? errorSubCategory = errorSubCategoryResourceName is null ? null : AssemblyResources.GetString(errorSubCategoryResourceName);
                 string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, resourceName, args);
 
-                throw new InvalidProjectFileException(projectFile.File, projectFile.Line, projectFile.Column, projectFile.EndLine, projectFile.EndColumn, message, errorSubCategory, errorCode, helpKeyword, innerException);
+                throw new InvalidProjectFileException(projectFile!.File, projectFile.Line, projectFile.Column, projectFile.EndLine, projectFile.EndColumn, message, errorSubCategory, errorCode, helpKeyword, innerException);
             }
         }
     }
