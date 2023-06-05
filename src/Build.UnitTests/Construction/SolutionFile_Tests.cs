@@ -2474,7 +2474,7 @@ EndGlobal
             12,
             17)]
         [InlineData(
-            // Leading blank line
+            //// Leading blank line
             """
 
             Microsoft Visual Studio Solution File, Format Version 12.00
@@ -2486,7 +2486,7 @@ EndGlobal
             12,
             17)]
         [InlineData(
-            // Lines indented
+            //// Lines indented
             """
                     Microsoft Visual Studio Solution File, Format Version 12.00
                     # Visual Studio Version 17
@@ -2497,7 +2497,7 @@ EndGlobal
             12,
             17)]
         [InlineData(
-            // Version is too early
+            //// Version is too early
             """
             Microsoft Visual Studio Solution File, Format Version 6.00
                 Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'

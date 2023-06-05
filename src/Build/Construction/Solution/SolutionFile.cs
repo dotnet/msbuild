@@ -88,7 +88,7 @@ namespace Microsoft.Build.Construction
 
         #region Member data
 
-        private string _solutionFile;                 // Could be absolute or relative path to the .SLN file.
+        private string _solutionFile;                // Could be absolute or relative path to the .SLN file.
         private string _solutionFilterFile;          // Could be absolute or relative path to the .SLNF file.
         private HashSet<string> _solutionFilter;     // The project files to include in loading the solution.
         private bool _parsingForConversionOnly;      // Are we parsing this solution to get project reference data during
@@ -374,9 +374,9 @@ namespace Microsoft.Build.Construction
 
             // Didn't find the header in lines 1-4, so the solution file is invalid.
             ProjectFileErrorUtilities.ThrowInvalidProjectFile(
-                    "SubCategoryForSolutionParsingErrors",
-                    new BuildEventFileInfo(solutionFile),
-                    "SolutionParseNoHeaderError");
+                "SubCategoryForSolutionParsingErrors",
+                new BuildEventFileInfo(solutionFile),
+                "SolutionParseNoHeaderError");
         }
 
         private void ParseSolutionFilter(string solutionFilterFile)
@@ -771,34 +771,34 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// 
         /// This method processes a "Project" section in the solution file opened by the specified
         /// StreamReader, and returns a populated ProjectInSolution instance, if successful.
         /// An exception is thrown if the solution file is invalid.
         ///
         /// The format of the parts of a Project section that we care about is as follows:
-        ///
+        /// <code>
         ///  Project("{Project type GUID}") = "Project name", "Relative path to project file", "{Project GUID}"
         ///      ProjectSection(ProjectDependencies) = postProject
         ///          {Parent project unique name} = {Parent project unique name}
         ///          ...
         ///      EndProjectSection
         ///  EndProject
-        /// 
+        /// </code>
         /// </summary>
         private void ParseProject(string firstLine)
         {
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(firstLine), "ParseProject() got a null firstLine!");
             ErrorUtilities.VerifyThrow(SolutionReader != null, "ParseProject() got a null reader!");
 
-            var proj = new ProjectInSolution(this);
+            ProjectInSolution proj = new(this);
 
             // Extract the important information from the first line.
             ParseFirstProjectLine(firstLine, proj);
 
-            // Search for project dependencies.  Keeping reading lines until we either 1.) reach
-            // the end of the file, 2.) see "ProjectSection(ProjectDependencies)" at the beginning
-            // of the line, or 3.) see "EndProject" at the beginning of the line.
+            // Search for project dependencies. Keeping reading lines until we either:
+            // 1. reach the end of the file,
+            // 2. see "ProjectSection(ProjectDependencies)" at the beginning of the line, or
+            // 3. see "EndProject" at the beginning of the line.
             string line;
             while ((line = ReadLine()) != null)
             {
@@ -812,7 +812,7 @@ namespace Microsoft.Build.Construction
                     // We have a ProjectDependencies section.  Each subsequent line should identify
                     // a dependency.
                     line = ReadLine();
-                    while ((line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false))
+                    while (line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false)
                     {
                         // This should be a dependency.  The GUID identifying the parent project should
                         // be both the property name and the property value.
@@ -839,7 +839,7 @@ namespace Microsoft.Build.Construction
                     // projects, and contains properties that we'll need in order to call the 
                     // AspNetCompiler task.
                     line = ReadLine();
-                    while ((line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false))
+                    while (line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false)
                     {
                         Match match = s_crackPropertyLine.Value.Match(line);
 
@@ -1416,19 +1416,21 @@ namespace Microsoft.Build.Construction
                 }
 
                 proj.ParentProjectGuid = parentProjectGuid;
-            } while (true);
+            }
+            while (true);
         }
 
         /// <summary>
-        /// Read solution configuration section. 
+        /// Read solution configuration section.
         /// </summary>
         /// <remarks>
         /// A sample section:
-        /// 
+        /// <code>
         /// GlobalSection(SolutionConfigurationPlatforms) = preSolution
         ///     Debug|Any CPU = Debug|Any CPU
         ///     Release|Any CPU = Release|Any CPU
         /// EndGlobalSection
+        /// </code>
         /// </remarks>
         internal void ParseSolutionConfigurations()
         {
