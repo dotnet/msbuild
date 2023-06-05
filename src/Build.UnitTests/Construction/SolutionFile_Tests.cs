@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests.Construction
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine(
-                "Project(\"{Project GUID}\") = \"Project name\", \"Relative path to project file\", \"Unique name-GUID\"",
+                "Project(\"{Project GUID}\") = \"Project name\", \"Relative path to project file\", \"Unique name-GUID\"".AsSpan(),
                  proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("Project name");
@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ProjectInSolution proj = new ProjectInSolution(p);
 
                 p.ParseFirstProjectLine(
-                    "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"Project name.vcproj\", \"Relative path\\to\\Project name.vcproj\", \"Unique name-GUID\"",
+                    "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"Project name.vcproj\", \"Relative path\\to\\Project name.vcproj\", \"Unique name-GUID\"".AsSpan(),
                      proj);
             });
         }
@@ -77,7 +77,7 @@ namespace Microsoft.Build.UnitTests.Construction
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine(
-                "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"Project name.myvctype\", \"Relative path\\to\\Project name.myvctype\", \"Unique name-GUID\"",
+                "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"Project name.myvctype\", \"Relative path\\to\\Project name.myvctype\", \"Unique name-GUID\"".AsSpan(),
                  proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.KnownToBeMSBuildFormat);
             proj.ProjectName.ShouldBe("Project name.myvctype");
@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests.Construction
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine(
-                "Project(\" {Project GUID} \")  = \" Project name \",  \" Relative path to project file \"    , \" Unique name-GUID \"",
+                "Project(\" {Project GUID} \")  = \" Project name \",  \" Relative path to project file \"    , \" Unique name-GUID \"".AsSpan(),
                  proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("Project name");
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.Construction
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine(
-                "Project(\"{Project GUID}\") = \"\", \"src\\.proj\", \"Unique name-GUID\"",
+                "Project(\"{Project GUID}\") = \"\", \"src\\.proj\", \"Unique name-GUID\"".AsSpan(),
                  proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldStartWith("EmptyProjectName");
@@ -679,7 +679,7 @@ namespace Microsoft.Build.UnitTests.Construction
             ProjectInSolution proj = new ProjectInSolution(p);
 
             p.ParseFirstProjectLine(
-                "Project(\"{Project GUID}\")  = \"MyProject,(=IsGreat)\",  \"Relative path to project file\"    , \"Unique name-GUID\"",
+                "Project(\"{Project GUID}\")  = \"MyProject,(=IsGreat)\",  \"Relative path to project file\"    , \"Unique name-GUID\"".AsSpan(),
                  proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("MyProject,(=IsGreat)");
@@ -705,7 +705,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ProjectInSolution proj = new ProjectInSolution(p);
 
                 p.ParseFirstProjectLine(
-                    "Project(\"{Project GUID}\")  = \"ProjectInSubdirectory\",  \"RelativePath\\project file\"    , \"Unique name-GUID\"",
+                    "Project(\"{Project GUID}\")  = \"ProjectInSubdirectory\",  \"RelativePath\\project file\"    , \"Unique name-GUID\"".AsSpan(),
                     proj);
                 proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
                 proj.ProjectName.ShouldBe("ProjectInSubdirectory");
@@ -2547,6 +2547,144 @@ EndGlobal
                         solutionPath,
                         out int actualSolutionVersion,
                         out int actualVisualStudioMajorVersion));
+            }
+        }
+
+        [Theory]
+        [InlineData(
+            "Common case",
+            """
+            Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "src\Build\Microsoft.Build.csproj", "{69BE05E2-CBDA-4D27-9733-44E12B0F5627}"
+            """,
+            true, "{9A19103F-16F7-4668-BE54-9A1E7A4F7556}", "Microsoft.Build", @"src\Build\Microsoft.Build.csproj", "{69BE05E2-CBDA-4D27-9733-44E12B0F5627}")]
+        [InlineData(
+            "Tabs as white space",
+            """
+            Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}")	=	"Microsoft.Build",	"src\Build\Microsoft.Build.csproj",	"{69BE05E2-CBDA-4D27-9733-44E12B0F5627}"
+            """,
+            true, "{9A19103F-16F7-4668-BE54-9A1E7A4F7556}", "Microsoft.Build", @"src\Build\Microsoft.Build.csproj", "{69BE05E2-CBDA-4D27-9733-44E12B0F5627}")]
+        [InlineData(
+            "No white space between values",
+            """
+            Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}")="Microsoft.Build","src\Build\Microsoft.Build.csproj","{69BE05E2-CBDA-4D27-9733-44E12B0F5627}"
+            """,
+            true, "{9A19103F-16F7-4668-BE54-9A1E7A4F7556}", "Microsoft.Build", @"src\Build\Microsoft.Build.csproj", "{69BE05E2-CBDA-4D27-9733-44E12B0F5627}")]
+        [InlineData(
+            "Empty values -- while this looks invalid, this has historically been supported, though likely nothing good could come from it",
+            """
+            Project("") = "", "", ""
+            """,
+            true, "", "", "", "")]
+        [InlineData(
+            "Completely invalid data",
+            """
+            Abracadabra
+            """,
+            false, null, null, null, null)]
+        [InlineData(
+            "Empty string",
+            "", false, null, null, null, null)]
+        [InlineData(
+            "Leading space fails parsing",
+            """
+                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "src\Build\Microsoft.Build.csproj", "{69BE05E2-CBDA-4D27-9733-44E12B0F5627}"
+            """,
+            false, null, null, null, null)]
+        [InlineData(
+            "Trailing space fails parsing",
+            """
+            Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "src\Build\Microsoft.Build.csproj", "{69BE05E2-CBDA-4D27-9733-44E12B0F5627}"    
+            """,
+            false, null, null, null, null)]
+        [InlineData(
+            "Ends prematurely 1",
+            """
+            Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "src\Build\Microsoft.Build.csproj", "{69BE05E2-CBDA-4D27-
+            """,
+            false, null, null, null, null)]
+        [InlineData(
+            "Ends prematurely 2",
+            """
+            Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "src\Build\Microsoft.Buil
+            """,
+            false, null, null, null, null)]
+        [InlineData(
+            "Ends prematurely 3",
+            """
+            Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "
+            """,
+            false, null, null, null, null)]
+        [InlineData(
+            "Ends prematurely 4",
+            """
+            Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build",
+            """,
+            false, null, null, null, null)]
+        [InlineData(
+            "Ends prematurely 5",
+            """
+            Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "
+            """,
+            false, null, null, null, null)]
+        [InlineData(
+            "Ends prematurely 6",
+            """
+            Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") =
+            """,
+            false, null, null, null, null)]
+        [InlineData(
+            "Ends prematurely 7",
+            """
+            Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}")
+            """,
+            false, null, null, null, null)]
+        [InlineData(
+            "Ends prematurely 8",
+            """
+            Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"
+            """,
+            false, null, null, null, null)]
+        [InlineData(
+            "Ends prematurely 9",
+            """
+            Project("{9A19103F-16F7-4668-BE54
+            """,
+            false, null, null, null, null)]
+        [InlineData(
+            "Ends prematurely 10",
+            """
+            Project("
+            """,
+            false, null, null, null, null)]
+        [InlineData(
+            "Ends prematurely 11",
+            """
+            Project(
+            """,
+            false, null, null, null, null)]
+        [InlineData(
+            "Ends prematurely 12",
+            """
+            Proje
+            """,
+            false, null, null, null, null)]
+        public void ParseFirstProjectLine(string description, string line, bool expectedSuccess, string expectedProjectTypeGuid, string expectedProjectName, string expectedRElativePath, string expectedProjectGuid)
+        {
+            _ = description;
+
+            bool actualSuccess = SolutionFile.TryParseFirstProjectLine(line.AsSpan(), out string actualProjectTypeGuid, out string actualProjectName, out string actualRelativePath, out string actualProjectGuid);
+
+            if (expectedSuccess)
+            {
+                Assert.True(actualSuccess);
+                Assert.Equal(expectedProjectTypeGuid, actualProjectTypeGuid);
+                Assert.Equal(expectedProjectName, actualProjectName);
+                Assert.Equal(expectedRElativePath, actualRelativePath);
+                Assert.Equal(expectedProjectGuid, actualProjectGuid);
+            }
+            else
+            {
+                Assert.False(actualSuccess);
             }
         }
     }

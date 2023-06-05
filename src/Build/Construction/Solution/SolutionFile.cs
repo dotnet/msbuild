@@ -470,6 +470,20 @@ namespace Microsoft.Build.Construction
             return line?.Trim();
         }
 
+        private bool TryReadLine(out ReadOnlySpan<char> span)
+        {
+            string line = SolutionReader.ReadLine();
+
+            if (line is null)
+            {
+                span = default;
+                return false;
+            }
+
+            span = line.AsSpan().Trim();
+            return true;
+        }
+
         /// <summary>
         /// This method takes a path to a solution file, parses the projects and project dependencies
         /// in the solution file, and creates internal data structures representing the projects within
@@ -532,28 +546,27 @@ namespace Microsoft.Build.Construction
 
             ParseFileHeader();
 
-            string str;
-            while ((str = ReadLine()) != null)
+            while (TryReadLine(out ReadOnlySpan<char> line))
             {
-                if (str.StartsWith("Project(", StringComparison.Ordinal))
+                if (line.StartsWith("Project(".AsSpan(), StringComparison.Ordinal))
                 {
-                    ParseProject(str);
+                    ParseProject(line);
                 }
-                else if (str.StartsWith("GlobalSection(NestedProjects)", StringComparison.Ordinal))
+                else if (line.StartsWith("GlobalSection(NestedProjects)".AsSpan(), StringComparison.Ordinal))
                 {
                     ParseNestedProjects();
                 }
-                else if (str.StartsWith("GlobalSection(SolutionConfigurationPlatforms)", StringComparison.Ordinal))
+                else if (line.StartsWith("GlobalSection(SolutionConfigurationPlatforms)".AsSpan(), StringComparison.Ordinal))
                 {
                     ParseSolutionConfigurations();
                 }
-                else if (str.StartsWith("GlobalSection(ProjectConfigurationPlatforms)", StringComparison.Ordinal))
+                else if (line.StartsWith("GlobalSection(ProjectConfigurationPlatforms)".AsSpan(), StringComparison.Ordinal))
                 {
                     rawProjectConfigurationsEntries = ParseProjectConfigurations();
                 }
-                else if (str.StartsWith("VisualStudioVersion", StringComparison.Ordinal))
+                else if (line.StartsWith("VisualStudioVersion".AsSpan(), StringComparison.Ordinal))
                 {
-                    _currentVisualStudioVersion = ParseVisualStudioVersion(str.AsSpan());
+                    _currentVisualStudioVersion = ParseVisualStudioVersion(line);
                 }
                 else
                 {
@@ -794,9 +807,9 @@ namespace Microsoft.Build.Construction
         ///  EndProject
         /// </code>
         /// </summary>
-        private void ParseProject(string firstLine)
+        private void ParseProject(ReadOnlySpan<char> firstLine)
         {
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(firstLine), "ParseProject() got a null firstLine!");
+            ErrorUtilities.VerifyThrow(!firstLine.IsEmpty, "ParseProject() got an empty firstLine!");
             ErrorUtilities.VerifyThrow(SolutionReader != null, "ParseProject() got a null reader!");
 
             ProjectInSolution proj = new(this);
@@ -877,7 +890,7 @@ namespace Microsoft.Build.Construction
                     SolutionParserWarnings.Add(warning);
 
                     // The line with new project is already read and we can't go one line back - we have no choice but to recursively parse spotted project
-                    ParseProject(line);
+                    ParseProject(line.AsSpan());
 
                     // We're not waiting for the EndProject for malformed project, so we carry on
                     break;
@@ -1285,6 +1298,79 @@ namespace Microsoft.Build.Construction
             }
         }
 
+        internal static bool TryParseFirstProjectLine(ReadOnlySpan<char> line, out string projectTypeGuid, out string projectName, out string relativePath, out string projectGuid)
+        {
+            //// Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "src\Build\Microsoft.Build.csproj", "{69BE05E2-CBDA-4D27-9733-44E12B0F5627}"
+
+            if (!TrySkip("Project(", ref line) ||
+                !TryReadQuotedString(ref line, out projectTypeGuid) ||
+                !TrySkip(")", ref line) ||
+                !TrySkipDelimiter('=', ref line) ||
+                !TryReadQuotedString(ref line, out projectName) ||
+                !TrySkipDelimiter(',', ref line) ||
+                !TryReadQuotedString(ref line, out relativePath) ||
+                !TrySkipDelimiter(',', ref line) ||
+                !TryReadQuotedString(ref line, out projectGuid) ||
+                !line.IsEmpty)
+            {
+                projectTypeGuid = null;
+                projectName = null;
+                relativePath = null;
+                projectGuid = null;
+                return false;
+            }
+
+            return true;
+
+            bool TryReadQuotedString(ref ReadOnlySpan<char> line, out string value)
+            {
+                if (line.Length == 0 ||
+                    line[0] != '"')
+                {
+                    value = null;
+                    return false;
+                }
+
+                line = line.Slice(1);
+
+                int quoteIndex = line.IndexOf('"');
+
+                if (quoteIndex == -1)
+                {
+                    value = null;
+                    return false;
+                }
+
+                value = line.Slice(0, quoteIndex).ToString();
+                line = line.Slice(quoteIndex + 1);
+                return true;
+            }
+
+            bool TrySkip(string value, ref ReadOnlySpan<char> line)
+            {
+                if (!line.StartsWith(value.AsSpan()))
+                {
+                    return false;
+                }
+
+                line = line.Slice(value.Length);
+                return true;
+            }
+
+            bool TrySkipDelimiter(char delimiter, ref ReadOnlySpan<char> line)
+            {
+                line = line.TrimStart();
+
+                if (line.Length == 0 || line[0] != delimiter)
+                {
+                    return false;
+                }
+
+                line = line.Slice(1).TrimStart();
+                return true;
+            }
+        }
+
         /// <summary>
         /// Parse the first line of a <c>Project</c> section of a solution file.
         /// </summary>
@@ -1292,15 +1378,12 @@ namespace Microsoft.Build.Construction
         /// This line should look like:
         /// <code>
         /// Project("{Project type GUID}") = "Project name", "Relative path to project file", "{Project GUID}"
+        /// Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "src\Build\Microsoft.Build.csproj", "{69BE05E2-CBDA-4D27-9733-44E12B0F5627}"
         /// </code>
         /// </remarks>
-        internal void ParseFirstProjectLine(
-            string firstLine,
-            ProjectInSolution proj)
+        internal void ParseFirstProjectLine(ReadOnlySpan<char> firstLine, ProjectInSolution proj)
         {
-            Match match = s_crackProjectLine.Value.Match(firstLine);
-
-            if (!match.Success)
+            if (!TryParseFirstProjectLine(firstLine, out string projectTypeGuid, out string projectName, out string relativePath, out string projectGuid))
             {
                 ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                     "SubCategoryForSolutionParsingErrors",
@@ -1308,10 +1391,9 @@ namespace Microsoft.Build.Construction
                     "SolutionParseProjectError");
             }
 
-            string projectTypeGuid = match.Groups["PROJECTTYPEGUID"].Value.Trim();
-            proj.ProjectName = match.Groups["PROJECTNAME"].Value.Trim();
-            proj.RelativePath = match.Groups["RELATIVEPATH"].Value.Trim();
-            proj.ProjectGuid = match.Groups["PROJECTGUID"].Value.Trim();
+            proj.ProjectName = projectName;
+            proj.RelativePath = relativePath;
+            proj.ProjectGuid = projectGuid;
 
             // If the project name is empty (as in some bad solutions) set it to some generated generic value.  
             // This allows us to at least generate reasonable target names etc. instead of crashing. 
