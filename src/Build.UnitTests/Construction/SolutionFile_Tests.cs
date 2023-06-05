@@ -1479,8 +1479,8 @@ EndGlobal
             solution.ProjectsInOrder[0].GetUniqueProjectName().ShouldBe(@"C:\WebSites\WebApplication3\");
 
             Hashtable aspNetCompilerParameters = solution.ProjectsInOrder[0].AspNetConfigurations;
-            AspNetCompilerParameters debugAspNetCompilerParameters = (AspNetCompilerParameters)aspNetCompilerParameters["Debug"];
-            AspNetCompilerParameters releaseAspNetCompilerParameters = (AspNetCompilerParameters)aspNetCompilerParameters["Release"];
+            AspNetCompilerParameters debugAspNetCompilerParameters = (AspNetCompilerParameters)aspNetCompilerParameters["Debug"]!;
+            AspNetCompilerParameters releaseAspNetCompilerParameters = (AspNetCompilerParameters)aspNetCompilerParameters["Release"]!;
 
             debugAspNetCompilerParameters.aspNetVirtualPath.ShouldBe(@"/publishfirst");
             debugAspNetCompilerParameters.aspNetPhysicalPath.ShouldBe(@"..\rajeev\temp\websites\myfirstwebsite\");
@@ -2361,30 +2361,42 @@ EndGlobal
         }
 
         [Theory]
-        [InlineData("A=B", true, true, "A", "B")]
-        [InlineData("A = B", true, true, "A", "B")]
-        [InlineData("A =B", true, true, "A", "B")]
-        [InlineData("A= B", true, true, "A", "B")]
-        [InlineData(" A=B ", true, true, "A", "B")]
+        [InlineData("A=B", true, false, true, "A", "B")]
+        [InlineData("A = B", true, false, true, "A", "B")]
+        [InlineData("A =B", true, false, true, "A", "B")]
+        [InlineData("A= B", true, false, true, "A", "B")]
+        [InlineData(" A=B ", true, false, true, "A", "B")]
+        [InlineData("A=B=C", true, true, true, "A", "B=C")]
+        [InlineData("A = B = C", true, true, true, "A", "B = C")]
+        [InlineData("A==", true, true, true, "A", "=")]
+        [InlineData("==", true, true, true, "", "=")]
+        [InlineData("=", true, true, true, "", "")]
+        [InlineData("A\t=\tB", true, true, true, "A", "B")]
+        [InlineData("\"A\" = \"B\"", true, true, true, "\"A\"", "\"B\"")]
+        [InlineData("\" A \" = \" B \"", true, true, true, "\" A \"", "\" B \"")]
         //// invalid patterns
-        [InlineData("A=B=C", true, false, null, null)]
-        [InlineData("A=B=", true, false, null, null)]
-        [InlineData("A==", true, false, null, null)]
-        [InlineData("==", true, false, null, null)]
-        [InlineData("ABC", true, false, null, null)]
+        [InlineData("=", false, false, false, null, null)]
+        [InlineData("A=B=C", true, false, false, null, null)]
+        [InlineData("A=B=", true, false, false, null, null)]
+        [InlineData("A==", true, false, false, null, null)]
+        [InlineData("==", true, false, false, null, null)]
+        [InlineData("ABC", true, false, false, null, null)]
+        [InlineData("", true, false, false, null, null)]
         //// empty value
-        [InlineData("ABC=", true, true, "ABC", "")]
-        [InlineData("ABC= ", true, true, "ABC", "")]
-        [InlineData("ABC=", false, false, null, null)]
-        [InlineData("ABC= ", false, false, null, null)]
+        [InlineData("ABC=", true, false, true, "ABC", "")]
+        [InlineData("ABC= ", true, false, true, "ABC", "")]
+        [InlineData("ABC = ", true, false, true, "ABC", "")]
+        [InlineData("ABC=", false, false, false, null, null)]
+        [InlineData("ABC= ", false, false, false, null, null)]
         //// empty name
-        [InlineData("=ABC", true, true, "", "ABC")]
-        [InlineData(" =ABC", true, true, "", "ABC")]
-        [InlineData("=ABC", false, false, null, null)]
-        [InlineData(" =ABC", false, false, null, null)]
-        public void TryParseNameValue(string input, bool allowEmpty, bool expectedSuccess, string expectedName, string expectedValue)
+        [InlineData("=ABC", true, false, true, "", "ABC")]
+        [InlineData("= ABC", true, false, true, "", "ABC")]
+        [InlineData(" =ABC", true, false, true, "", "ABC")]
+        [InlineData("=ABC", false, false, false, null, null)]
+        [InlineData(" =ABC", false, false, false, null, null)]
+        public void TryParseNameValue(string input, bool allowEmpty, bool allowEqualsInValue, bool expectedSuccess, string expectedName, string expectedValue)
         {
-            bool actualSuccess = SolutionFile.TryParseNameValue(input.AsSpan(), allowEmpty, out ReadOnlySpan<char> actualName, out ReadOnlySpan<char> actualValue);
+            bool actualSuccess = SolutionFile.TryParseNameValue(input.AsSpan(), allowEmpty, allowEqualsInValue, out ReadOnlySpan<char> actualName, out ReadOnlySpan<char> actualValue);
 
             Assert.Equal(expectedSuccess, actualSuccess);
 
@@ -2406,14 +2418,14 @@ EndGlobal
         {
             if (expectedSuccess)
             {
-                (string actualConfiguration, string actualPlatform) = SolutionFile.ParseConfigurationName(input.AsSpan(), "path", 0, "containing string");
+                (string actualConfiguration, string actualPlatform) = SolutionFile.ParseConfigurationName(input.AsSpan(), "path", 0, "containing string".AsSpan());
 
                 Assert.Equal(expectedConfiguration, actualConfiguration);
                 Assert.Equal(expectedPlatform, actualPlatform);
             }
             else
             {
-                Assert.ThrowsAny<Exception>(() => SolutionFile.ParseConfigurationName(input.AsSpan(), "path", 0, "containing string"));
+                Assert.ThrowsAny<Exception>(() => SolutionFile.ParseConfigurationName(input.AsSpan(), "path", 0, "containing string".AsSpan()));
             }
         }
 
@@ -2672,7 +2684,7 @@ EndGlobal
             Proje
             """,
             false, null, null, null, null)]
-        public void ParseFirstProjectLine(string description, string line, bool expectedSuccess, string expectedProjectTypeGuid, string expectedProjectName, string expectedRElativePath, string expectedProjectGuid)
+        public void TryParseFirstProjectLine(string description, string line, bool expectedSuccess, string expectedProjectTypeGuid, string expectedProjectName, string expectedRElativePath, string expectedProjectGuid)
         {
             _ = description;
 

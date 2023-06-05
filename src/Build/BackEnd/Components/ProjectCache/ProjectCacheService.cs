@@ -569,7 +569,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                     string projectPath = projectPathAttribute!.Value;
 
-                    (string configuration, string platform) = SolutionFile.ParseConfigurationName(projectConfiguration.InnerText.AsSpan(), definingProjectPath, 0, solutionConfigurationXml);
+                    (string configuration, string platform) = SolutionFile.ParseConfigurationName(projectConfiguration.InnerText.AsSpan(), definingProjectPath, 0, solutionConfigurationXml.AsSpan());
 
                     // Take the defining project global properties and override the configuration and platform.
                     // It's sufficient to only set Configuration and Platform.

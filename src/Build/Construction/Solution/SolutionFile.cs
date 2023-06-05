@@ -10,12 +10,12 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Xml;
 
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+
 using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using ExceptionUtilities = Microsoft.Build.Shared.ExceptionHandling;
@@ -34,35 +34,6 @@ namespace Microsoft.Build.Construction
     public sealed class SolutionFile
     {
         #region Solution specific constants
-
-        // An example of a project line looks like this:
-        //  Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1\ClassLibrary1.csproj", "{05A5AD00-71B5-4612-AF2F-9EA9121C4111}"
-        private static readonly Lazy<Regex> s_crackProjectLine = new Lazy<Regex>(
-            () => new Regex(
-                "^" // Beginning of line
-                + "Project\\(\"(?<PROJECTTYPEGUID>[^\"]*)\"\\)"
-                + "\\s*=\\s*" // Any amount of whitespace plus "=" plus any amount of whitespace
-                + "\"(?<PROJECTNAME>[^\"]*)\""
-                + "\\s*,\\s*" // Any amount of whitespace plus "," plus any amount of whitespace
-                + "\"(?<RELATIVEPATH>[^\"]*)\""
-                + "\\s*,\\s*" // Any amount of whitespace plus "," plus any amount of whitespace
-                + "\"(?<PROJECTGUID>[^\"]*)\""
-                + "$", // End-of-line
-                RegexOptions.Compiled));
-
-        // An example of a property line looks like this:
-        //      AspNetCompiler.VirtualPath = "/webprecompile"
-        // Because website projects now include the target framework moniker as
-        // one of their properties, <PROPERTYVALUE> may now have '=' in it. 
-
-        private static readonly Lazy<Regex> s_crackPropertyLine = new Lazy<Regex>(
-            () => new Regex(
-                "^" // Beginning of line
-                + "(?<PROPERTYNAME>[^=]*)"
-                + "\\s*=\\s*" // Any amount of whitespace plus "=" plus any amount of whitespace
-                + "(?<PROPERTYVALUE>.*)"
-                + "$", // End-of-line
-                RegexOptions.Compiled));
 
         internal const int slnFileMinUpgradableVersion = 7; // Minimum version for MSBuild to give a nice message
         internal const int slnFileMinVersion = 9; // Minimum version for MSBuild to actually do anything useful
@@ -456,19 +427,6 @@ namespace Microsoft.Build.Construction
             _solutionConfigurations.Add(new SolutionConfigurationInSolution(configurationName, platformName));
         }
 
-        /// <summary>
-        /// Reads a line from the StreamReader, trimming leading and trailing whitespace.
-        /// </summary>
-        private string ReadLine()
-        {
-            ErrorUtilities.VerifyThrow(SolutionReader != null, "ParseFileHeader(): reader is null!");
-
-            string line = SolutionReader.ReadLine();
-            _currentLineNumber++;
-
-            return line?.Trim();
-        }
-
         private bool TryReadLine(out ReadOnlySpan<char> span)
         {
             string line = SolutionReader.ReadLine();
@@ -697,18 +655,16 @@ namespace Microsoft.Build.Construction
             // Read the file header.  This can be on either of the first two lines.
             for (int i = 1; i <= 2; i++)
             {
-                string str = ReadLine();
-
-                if (str == null)
+                if (!TryReadLine(out ReadOnlySpan<char> line))
                 {
                     // EOF
                     break;
                 }
 
-                if (str.StartsWith(slnFileHeaderNoVersion, StringComparison.Ordinal))
+                if (line.StartsWith(slnFileHeaderNoVersion.AsSpan(), StringComparison.Ordinal))
                 {
                     // Found it. Validate the version.
-                    ValidateSolutionFileVersion(str.Substring(slnFileHeaderNoVersion.Length));
+                    ValidateSolutionFileVersion(line.Slice(slnFileHeaderNoVersion.Length));
                     return;
                 }
             }
@@ -731,7 +687,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         private static Version ParseVisualStudioVersion(ReadOnlySpan<char> line)
         {
-            if (TryParseNameValue(line, allowEmpty: false, out _, out ReadOnlySpan<char> value))
+            if (TryParseNameValue(line, allowEmpty: false, allowEqualsInValue: false, out _, out ReadOnlySpan<char> value))
             {
                 int spaceIndex = value.IndexOf(' ');
 
@@ -758,17 +714,16 @@ namespace Microsoft.Build.Construction
         /// Throws if the <paramref name="versionString"/> cannot be parsed, or if the version is too low.
         /// If the version is too high, adds a comment to <see cref="SolutionParserComments"/>.
         /// </remarks>
-        private void ValidateSolutionFileVersion(string versionString)
+        private void ValidateSolutionFileVersion(ReadOnlySpan<char> versionString)
         {
-            ErrorUtilities.VerifyThrow(versionString != null, "ValidateSolutionFileVersion() got a null line!");
-
-            if (!System.Version.TryParse(versionString, out Version version))
+            if (!System.Version.TryParse(versionString.ToString(), out Version version))
             {
                 ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
                     "SolutionParseVersionMismatchError",
-                    slnFileMinUpgradableVersion, slnFileMaxVersion);
+                    slnFileMinUpgradableVersion,
+                    slnFileMaxVersion);
             }
 
             Version = version.Major;
@@ -820,26 +775,23 @@ namespace Microsoft.Build.Construction
             // 1. reach the end of the file,
             // 2. see "ProjectSection(ProjectDependencies)" at the beginning of the line, or
             // 3. see "EndProject" at the beginning of the line.
-            string line;
-            while ((line = ReadLine()) != null)
+            while (TryReadLine(out ReadOnlySpan<char> line))
             {
                 // If we see an "EndProject", well ... that's the end of this project!
-                if (string.Equals(line, "EndProject", StringComparison.Ordinal))
+                if (line.Equals("EndProject".AsSpan(), StringComparison.Ordinal))
                 {
                     break;
                 }
-                else if (line.StartsWith("ProjectSection(ProjectDependencies)", StringComparison.Ordinal))
+                else if (line.StartsWith("ProjectSection(ProjectDependencies)".AsSpan(), StringComparison.Ordinal))
                 {
                     // We have a ProjectDependencies section.  Each subsequent line should identify
                     // a dependency.
-                    line = ReadLine();
-                    while (line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false)
+                    line = ReadRequiredLine();
+                    while (!line.StartsWith("EndProjectSection".AsSpan(), StringComparison.Ordinal))
                     {
                         // This should be a dependency.  The GUID identifying the parent project should
                         // be both the property name and the property value.
-                        Match match = s_crackPropertyLine.Value.Match(line);
-
-                        if (!match.Success)
+                        if (!TryParseNameValue(line, allowEmpty: true, allowEqualsInValue: true, out ReadOnlySpan<char> propertyName, out ReadOnlySpan<char> propertyValue))
                         {
                             ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                                 "SubCategoryForSolutionParsingErrors",
@@ -848,23 +800,20 @@ namespace Microsoft.Build.Construction
                                 proj.ProjectName);
                         }
 
-                        string referenceGuid = match.Groups["PROPERTYNAME"].Value.Trim();
-                        proj.AddDependency(referenceGuid);
+                        proj.AddDependency(referencedProjectGuid: propertyName.ToString());
 
-                        line = ReadLine();
+                        line = ReadRequiredLine();
                     }
                 }
-                else if (line.StartsWith("ProjectSection(WebsiteProperties)", StringComparison.Ordinal))
+                else if (line.StartsWith("ProjectSection(WebsiteProperties)".AsSpan(), StringComparison.Ordinal))
                 {
                     // We have a WebsiteProperties section.  This section is present only in Venus
                     // projects, and contains properties that we'll need in order to call the 
                     // AspNetCompiler task.
-                    line = ReadLine();
-                    while (line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false)
+                    line = ReadRequiredLine();
+                    while (!line.StartsWith("EndProjectSection".AsSpan(), StringComparison.Ordinal))
                     {
-                        Match match = s_crackPropertyLine.Value.Match(line);
-
-                        if (!match.Success)
+                        if (!TryParseNameValue(line, allowEmpty: true, allowEqualsInValue: true, out ReadOnlySpan<char> propertyName, out ReadOnlySpan<char> propertyValue))
                         {
                             ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                                 "SubCategoryForSolutionParsingErrors",
@@ -873,15 +822,13 @@ namespace Microsoft.Build.Construction
                                 proj.ProjectName);
                         }
 
-                        string propertyName = match.Groups["PROPERTYNAME"].Value.Trim();
-                        string propertyValue = match.Groups["PROPERTYVALUE"].Value.Trim();
+                        // TODO: Convert ParseAspNetCompilerProperty to work with ReadOnlySpan<char>
+                        ParseAspNetCompilerProperty(proj, propertyName.ToString(), propertyValue.ToString());
 
-                        ParseAspNetCompilerProperty(proj, propertyName, propertyValue);
-
-                        line = ReadLine();
+                        line = ReadRequiredLine();
                     }
                 }
-                else if (line.StartsWith("Project(", StringComparison.Ordinal))
+                else if (line.StartsWith("Project(".AsSpan(), StringComparison.Ordinal))
                 {
                     // Another Project spotted instead of EndProject for the current one - solution file is malformed
                     string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out _, out _, "Shared.InvalidProjectFile",
@@ -889,21 +836,13 @@ namespace Microsoft.Build.Construction
                     SolutionParserWarnings.Add(warning);
 
                     // The line with new project is already read and we can't go one line back - we have no choice but to recursively parse spotted project
-                    ParseProject(line.AsSpan());
+                    ParseProject(firstLine: line);
 
                     // We're not waiting for the EndProject for malformed project, so we carry on
                     break;
                 }
             }
 
-            if (line is null)
-            {
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
-                    "SubCategoryForSolutionParsingErrors",
-                    new BuildEventFileInfo(FullPath),
-                    "SolutionParseProjectEofError",
-                    proj.ProjectName);
-            }
 
             // Add the project to the collection
             AddProjectToSolution(proj);
@@ -912,6 +851,20 @@ namespace Microsoft.Build.Construction
             if (IsEtpProjectFile(proj.RelativePath))
             {
                 ParseEtpProject(proj);
+            }
+
+            ReadOnlySpan<char> ReadRequiredLine()
+            {
+                if (!TryReadLine(out ReadOnlySpan<char> line))
+                {
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                        "SubCategoryForSolutionParsingErrors",
+                        new BuildEventFileInfo(FullPath),
+                        "SolutionParseProjectEofError",
+                        proj.ProjectName);
+                }
+
+                return line;
             }
         } // ParseProject()
 
@@ -1301,14 +1254,14 @@ namespace Microsoft.Build.Construction
         {
             //// Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "src\Build\Microsoft.Build.csproj", "{69BE05E2-CBDA-4D27-9733-44E12B0F5627}"
 
-            if (!TrySkip("Project(", ref line) ||
+            if (!TrySkip(ref line, "Project(") ||
                 !TryReadQuotedString(ref line, out projectTypeGuid) ||
-                !TrySkip(")", ref line) ||
-                !TrySkipDelimiter('=', ref line) ||
+                !TrySkip(ref line, ")") ||
+                !TrySkipDelimiter(ref line, '=') ||
                 !TryReadQuotedString(ref line, out projectName) ||
-                !TrySkipDelimiter(',', ref line) ||
+                !TrySkipDelimiter(ref line, ',') ||
                 !TryReadQuotedString(ref line, out relativePath) ||
-                !TrySkipDelimiter(',', ref line) ||
+                !TrySkipDelimiter(ref line, ',') ||
                 !TryReadQuotedString(ref line, out projectGuid) ||
                 !line.IsEmpty)
             {
@@ -1321,7 +1274,7 @@ namespace Microsoft.Build.Construction
 
             return true;
 
-            bool TryReadQuotedString(ref ReadOnlySpan<char> line, out string value)
+            static bool TryReadQuotedString(ref ReadOnlySpan<char> line, out string value)
             {
                 if (line.Length == 0 ||
                     line[0] != '"')
@@ -1340,12 +1293,12 @@ namespace Microsoft.Build.Construction
                     return false;
                 }
 
-                value = line.Slice(0, quoteIndex).ToString();
+                value = line.Slice(0, quoteIndex).Trim().ToString();
                 line = line.Slice(quoteIndex + 1);
                 return true;
             }
 
-            bool TrySkip(string value, ref ReadOnlySpan<char> line)
+            static bool TrySkip(ref ReadOnlySpan<char> line, string value)
             {
                 if (!line.StartsWith(value.AsSpan()))
                 {
@@ -1356,7 +1309,7 @@ namespace Microsoft.Build.Construction
                 return true;
             }
 
-            bool TrySkipDelimiter(char delimiter, ref ReadOnlySpan<char> line)
+            static bool TrySkipDelimiter(ref ReadOnlySpan<char> line, char delimiter)
             {
                 line = line.TrimStart();
 
@@ -1466,19 +1419,20 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal void ParseNestedProjects()
         {
-            do
+            while (TryReadLine(out ReadOnlySpan<char> line))
             {
-                string str = ReadLine();
-
-                // Ignore EOF, empty line, end section and comment.
-                if (str is null or { Length: 0 } or "EndGlobalSection" || str[0] == CommentStartChar)
+                if (line.Equals("EndGlobalSection".AsSpan(), StringComparison.Ordinal))
                 {
                     break;
                 }
 
-                Match match = s_crackPropertyLine.Value.Match(str);
+                if (line.Length == 0 || line[0] == CommentStartChar)
+                {
+                    // Skip blank and comment lines.
+                    continue;
+                }
 
-                if (!match.Success)
+                if (!TryParseNameValue(line, allowEmpty: true, allowEqualsInValue: true, out ReadOnlySpan<char> propertyName, out ReadOnlySpan<char> propertyValue))
                 {
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                         "SubCategoryForSolutionParsingErrors",
@@ -1486,8 +1440,8 @@ namespace Microsoft.Build.Construction
                         "SolutionParseNestedProjectError");
                 }
 
-                string projectGuid = match.Groups["PROPERTYNAME"].Value.Trim();
-                string parentProjectGuid = match.Groups["PROPERTYVALUE"].Value.Trim();
+                string projectGuid = propertyName.ToString();
+                string parentProjectGuid = propertyValue.ToString();
 
                 if (!_projects.TryGetValue(projectGuid, out ProjectInSolution proj))
                 {
@@ -1504,7 +1458,6 @@ namespace Microsoft.Build.Construction
 
                 proj.ParentProjectGuid = parentProjectGuid;
             }
-            while (true);
         }
 
         /// <summary>
@@ -1521,24 +1474,27 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ParseSolutionConfigurations()
         {
-            do
+            while (TryReadLine(out ReadOnlySpan<char> line))
             {
-                string str = ReadLine();
-
-                // Ignore EOF, empty line, end section and comment.
-                if (str is null or { Length: 0 } or "EndGlobalSection" || str[0] == CommentStartChar)
+                if (line.Equals("EndGlobalSection".AsSpan(), StringComparison.Ordinal))
                 {
                     break;
                 }
 
+                if (line.Length == 0 || line[0] == CommentStartChar)
+                {
+                    // Skip blank and comment lines.
+                    continue;
+                }
+
                 // Parse the name/value pair.
-                if (!TryParseNameValue(str.AsSpan(), allowEmpty: true, out ReadOnlySpan<char> name, out ReadOnlySpan<char> value))
+                if (!TryParseNameValue(line, allowEmpty: true, allowEqualsInValue: false, out ReadOnlySpan<char> name, out ReadOnlySpan<char> value))
                 {
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                         "SubCategoryForSolutionParsingErrors",
                         new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
                         "SolutionParseInvalidSolutionConfigurationEntry",
-                        str);
+                        line.ToString());
                 }
 
                 // Fixing bug 555577: Solution file can have description information, in which case we ignore.
@@ -1554,17 +1510,16 @@ namespace Microsoft.Build.Construction
                         "SubCategoryForSolutionParsingErrors",
                         new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
                         "SolutionParseInvalidSolutionConfigurationEntry",
-                        str);
+                        line.ToString());
                 }
 
-                var (configuration, platform) = ParseConfigurationName(name, FullPath, _currentLineNumber, str);
+                var (configuration, platform) = ParseConfigurationName(name, FullPath, _currentLineNumber, line);
 
                 _solutionConfigurations.Add(new SolutionConfigurationInSolution(configuration, platform));
             }
-            while (true);
         }
 
-        internal static (string Configuration, string Platform) ParseConfigurationName(ReadOnlySpan<char> fullConfigurationName, string projectPath, int lineNumber, string containingString)
+        internal static (string Configuration, string Platform) ParseConfigurationName(ReadOnlySpan<char> fullConfigurationName, string projectPath, int lineNumber, ReadOnlySpan<char> containingString)
         {
             if (!TryParseConfigurationPlatform(fullConfigurationName, isPlatformRequired: true, out ReadOnlySpan<char> configuration, out ReadOnlySpan<char> platform))
             {
@@ -1572,7 +1527,7 @@ namespace Microsoft.Build.Construction
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(projectPath, lineNumber, 0),
                     "SolutionParseInvalidSolutionConfigurationEntry",
-                    containingString);
+                    containingString.ToString());
             }
 
             return (configuration.ToString(), platform.ToString());
@@ -1603,28 +1558,30 @@ namespace Microsoft.Build.Construction
         {
             Dictionary<string, string> rawProjectConfigurationsEntries = new(StringComparer.OrdinalIgnoreCase);
 
-            do
+            while (TryReadLine(out ReadOnlySpan<char> line))
             {
-                string str = ReadLine();
-
-                // Ignore EOF, empty line, end section and comment.
-                if (str is null or { Length: 0 } or "EndGlobalSection" || str[0] == CommentStartChar)
+                if (line.Equals("EndGlobalSection".AsSpan(), StringComparison.Ordinal))
                 {
                     break;
                 }
 
-                if (!TryParseNameValue(str.AsSpan(), allowEmpty: true, out ReadOnlySpan<char> name, out ReadOnlySpan<char> value))
+                if (line.Length == 0 || line[0] == CommentStartChar)
+                {
+                    // Skip blank and comment lines.
+                    continue;
+                }
+
+                if (!TryParseNameValue(line, allowEmpty: true, allowEqualsInValue: false, out ReadOnlySpan<char> name, out ReadOnlySpan<char> value))
                 {
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                         "SubCategoryForSolutionParsingErrors",
                         new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
                         "SolutionParseInvalidProjectSolutionConfigurationEntry",
-                        str);
+                        line.ToString());
                 }
 
                 rawProjectConfigurationsEntries[name.ToString()] = value.ToString();
             }
-            while (true);
 
             return rawProjectConfigurationsEntries;
         }
@@ -1790,7 +1747,7 @@ namespace Microsoft.Build.Construction
             return null;
         }
 
-        internal static bool TryParseNameValue(ReadOnlySpan<char> input, bool allowEmpty, out ReadOnlySpan<char> name, out ReadOnlySpan<char> value)
+        internal static bool TryParseNameValue(ReadOnlySpan<char> input, bool allowEmpty, bool allowEqualsInValue, out ReadOnlySpan<char> name, out ReadOnlySpan<char> value)
         {
             int equalsIndex = input.IndexOf('=');
 
@@ -1804,7 +1761,8 @@ namespace Microsoft.Build.Construction
             name = input.Slice(0, equalsIndex).Trim();
             value = input.Slice(equalsIndex + 1).Trim();
 
-            if (value.IndexOf('=') != -1 || (!allowEmpty && (name.Length == 0 || value.Length == 0)))
+            if ((!allowEqualsInValue && value.IndexOf('=') != -1) ||
+                (!allowEmpty && (name.Length == 0 || value.Length == 0)))
             {
                 name = default;
                 value = default;
