@@ -444,7 +444,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// This method takes a path to a solution file, parses the projects and project dependencies
         /// in the solution file, and creates internal data structures representing the projects within
-        /// the SLN.  Used for conversion, which means it allows situations that we refuse to actually build. 
+        /// the SLN.  Used for conversion, which means it allows situations that we refuse to actually build.
         /// </summary>
         internal void ParseSolutionFileForConversion()
         {
@@ -735,7 +735,8 @@ namespace Microsoft.Build.Construction
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(FullPath, _currentLineNumber, 0),
                     "SolutionParseVersionMismatchError",
-                    slnFileMinUpgradableVersion, slnFileMaxVersion);
+                    slnFileMinUpgradableVersion,
+                    slnFileMaxVersion);
             }
 
             // If the solution file version is greater than the maximum one we will create a comment rather than warn
@@ -808,7 +809,7 @@ namespace Microsoft.Build.Construction
                 else if (line.StartsWith("ProjectSection(WebsiteProperties)".AsSpan(), StringComparison.Ordinal))
                 {
                     // We have a WebsiteProperties section.  This section is present only in Venus
-                    // projects, and contains properties that we'll need in order to call the 
+                    // projects, and contains properties that we'll need in order to call the
                     // AspNetCompiler task.
                     line = ReadRequiredLine();
                     while (!line.StartsWith("EndProjectSection".AsSpan(), StringComparison.Ordinal))
@@ -830,24 +831,23 @@ namespace Microsoft.Build.Construction
                 }
                 else if (line.StartsWith("Project(".AsSpan(), StringComparison.Ordinal))
                 {
-                    // Another Project spotted instead of EndProject for the current one - solution file is malformed
+                    // Another Project spotted instead of EndProject for the current one - solution file is malformed.
                     string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out _, out _, "Shared.InvalidProjectFile",
                         _solutionFile, proj.ProjectName);
                     SolutionParserWarnings.Add(warning);
 
-                    // The line with new project is already read and we can't go one line back - we have no choice but to recursively parse spotted project
+                    // The line with new project is already read and we can't go one line back - we have no choice but to recursively parse spotted project.
                     ParseProject(firstLine: line);
 
-                    // We're not waiting for the EndProject for malformed project, so we carry on
+                    // We're not waiting for the EndProject for malformed project, so we carry on.
                     break;
                 }
             }
 
-
-            // Add the project to the collection
+            // Add the project to the collection.
             AddProjectToSolution(proj);
-            // If the project is an etp project then parse the etp project file 
-            // to get the projects contained in it.
+
+            // If the project is an etp project then parse the etp project file to get the projects contained in it.
             if (IsEtpProjectFile(proj.RelativePath))
             {
                 ParseEtpProject(proj);
@@ -1415,7 +1415,7 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// Read nested projects section.
-        /// This is required to find a unique name for each project's target
+        /// This is required to find a unique name for each project's target.
         /// </summary>
         internal void ParseNestedProjects()
         {
@@ -1609,16 +1609,14 @@ namespace Microsoft.Build.Construction
                     {
                         // The "ActiveCfg" entry defines the active project configuration in the given solution configuration
                         // This entry must be present for every possible solution configuration/project combination.
-                        string entryNameActiveConfig = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.ActiveCfg",
-                            project.ProjectGuid, solutionConfiguration.FullName);
+                        string entryNameActiveConfig = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.ActiveCfg", project.ProjectGuid, solutionConfiguration.FullName);
 
                         // The "Build.0" entry tells us whether to build the project configuration in the given solution configuration.
-                        // Technically, it specifies a configuration name of its own which seems to be a remnant of an initial, 
-                        // more flexible design of solution configurations (as well as the '.0' suffix - no higher values are ever used). 
-                        // The configuration name is not used, and the whole entry means "build the project configuration" 
+                        // Technically, it specifies a configuration name of its own which seems to be a remnant of an initial,
+                        // more flexible design of solution configurations (as well as the '.0' suffix - no higher values are ever used).
+                        // The configuration name is not used, and the whole entry means "build the project configuration"
                         // if it's present in the solution file, and "don't build" if it's not.
-                        string entryNameBuild = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.Build.0",
-                            project.ProjectGuid, solutionConfiguration.FullName);
+                        string entryNameBuild = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.Build.0", project.ProjectGuid, solutionConfiguration.FullName);
 
                         if (rawProjectConfigurationsEntries.TryGetValue(entryNameActiveConfig, out string configurationPlatform))
                         {
