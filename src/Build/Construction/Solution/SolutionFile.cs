@@ -359,10 +359,9 @@ namespace Microsoft.Build.Construction
                 }
                 else if (lineSpan.StartsWith(slnFileVSVLinePrefix.AsSpan(), StringComparison.Ordinal))
                 {
-                    Version visualStudioVersion = ParseVisualStudioVersion(line.AsSpan());
-                    if (visualStudioVersion != null)
+                    if (ParseVisualStudioVersion(line.AsSpan()) is { Major: int major })
                     {
-                        visualStudioMajorVersion = visualStudioVersion.Major;
+                        visualStudioMajorVersion = major;
                     }
                 }
             }
@@ -403,7 +402,7 @@ namespace Microsoft.Build.Construction
                     _solutionFilter.Add(FileUtilities.FixFilePath(project.GetString()));
                 }
             }
-            catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
+            catch (Exception e) when (e is JsonException or KeyNotFoundException or InvalidOperationException)
             {
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                     false, /* Just throw the exception */
@@ -425,7 +424,7 @@ namespace Microsoft.Build.Construction
                 solution = text.RootElement.GetProperty("solution");
                 return FileUtilities.GetFullPath(solution.GetProperty("path").GetString(), Path.GetDirectoryName(solutionFilterFile));
             }
-            catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
+            catch (Exception e) when (e is JsonException or KeyNotFoundException or InvalidOperationException)
             {
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                     false, /* Just throw the exception */
@@ -1378,15 +1377,11 @@ namespace Microsoft.Build.Construction
             do
             {
                 string str = ReadLine();
-                if ((str == null) || (str == "EndGlobalSection"))
+
+                // Ignore EOF, empty line, end section and comment.
+                if (str is null or { Length: 0 } or "EndGlobalSection" || str[0] == CommentStartChar)
                 {
                     break;
-                }
-
-                // Ignore empty line or comment
-                if (String.IsNullOrWhiteSpace(str) || str[0] == CommentStartChar)
-                {
-                    continue;
                 }
 
                 Match match = s_crackPropertyLine.Value.Match(str);

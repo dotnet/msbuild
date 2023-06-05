@@ -391,7 +391,7 @@ namespace Microsoft.Build.Construction
             if (_uniqueProjectName == null)
             {
                 // EtpSubProject and Venus projects have names that are already unique.  No need to prepend the SLN folder.
-                if ((ProjectType == SolutionProjectType.WebProject) || (ProjectType == SolutionProjectType.EtpSubProject))
+                if (ProjectType is SolutionProjectType.WebProject or SolutionProjectType.EtpSubProject)
                 {
                     _uniqueProjectName = CleanseProjectName(ProjectName);
                 }
@@ -430,7 +430,7 @@ namespace Microsoft.Build.Construction
             if (_originalProjectName == null)
             {
                 // EtpSubProject and Venus projects have names that are already unique.  No need to prepend the SLN folder.
-                if ((ProjectType == SolutionProjectType.WebProject) || (ProjectType == SolutionProjectType.EtpSubProject))
+                if (ProjectType is SolutionProjectType.WebProject or SolutionProjectType.EtpSubProject)
                 {
                     _originalProjectName = ProjectName;
                 }
