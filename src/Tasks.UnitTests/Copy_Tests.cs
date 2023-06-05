@@ -16,7 +16,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+
 using Shouldly;
+
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
@@ -27,6 +29,13 @@ namespace Microsoft.Build.UnitTests
 {
     public class Copy_Tests : IDisposable
     {
+        public static IEnumerable<object[]> GetDestinationExists() =>
+            new List<object[]>
+            {
+                new object[] { true },
+                new object[] { false },
+            };
+
         /// <summary>
         /// Gets data for testing with combinations of isUseHardLinks and isUseSymbolicLinks.
         /// Index 0 is the value for isUseHardLinks.
@@ -147,13 +156,14 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        public void CopyWithSourceFilesToDestinationFolder()
+        [Theory]
+        [MemberData(nameof(GetDestinationExists))]
+        public void CopyWithSourceFilesToDestinationFolder(bool isDestinationExists)
         {
             using (var env = TestEnvironment.Create())
             {
                 var sourceFile = env.CreateFile("source.txt");
-                var destinationFolder = env.CreateFolder(true);
+                var destinationFolder = env.CreateFolder(isDestinationExists);
 
                 var task = new Copy
                 {
@@ -167,6 +177,35 @@ namespace Microsoft.Build.UnitTests
                 task.CopiedFiles.Length.ShouldBe(1);
                 task.DestinationFiles.ShouldNotBeNull();
                 task.DestinationFiles.Length.ShouldBe(1);
+                task.WroteAtLeastOneFile.ShouldBeTrue();
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(GetDestinationExists))]
+        public void CopyWithSourceFoldersToDestinationFolder(bool isDestinationExists)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var sourceFolder = env.DefaultTestDirectory.CreateDirectory("source");
+                sourceFolder.CreateFile("source.txt");
+                var aDirectory = sourceFolder.CreateDirectory("a");
+                aDirectory.CreateFile("a.txt");
+                sourceFolder.CreateDirectory("b");
+                var destinationFolder = env.CreateFolder(isDestinationExists);
+
+                var task = new Copy
+                {
+                    BuildEngine = new MockEngine(true),
+                    SourceFolders = new ITaskItem[] { new TaskItem(sourceFolder.Path) },
+                    DestinationFolder = new TaskItem(destinationFolder.Path),
+                    RetryDelayMilliseconds = 1,
+                };
+                task.Execute().ShouldBeTrue();
+                task.CopiedFiles.ShouldNotBeNull();
+                task.CopiedFiles.Length.ShouldBe(2);
+                task.DestinationFiles.ShouldNotBeNull();
+                task.DestinationFiles.Length.ShouldBe(2);
                 task.WroteAtLeastOneFile.ShouldBeTrue();
             }
         }
@@ -193,15 +232,20 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        public void CopyWithMultipleSourceTypes()
+        [Theory]
+        [MemberData(nameof(GetDestinationExists))]
+        public void CopyWithMultipleSourceTypes(bool isDestinationExists)
         {
             using (var env = TestEnvironment.Create())
             {
                 var engine = new MockEngine(true);
                 var sourceFile = env.CreateFile("source.txt");
-                var sourceFolder = env.CreateFolder(true);
-                var destinationFolder = env.CreateFolder(true);
+                var sourceFolder = env.DefaultTestDirectory.CreateDirectory("source");
+                sourceFolder.CreateFile("source.txt");
+                var aDirectory = sourceFolder.CreateDirectory("a");
+                aDirectory.CreateFile("a.txt");
+                sourceFolder.CreateDirectory("b");
+                var destinationFolder = env.CreateFolder(isDestinationExists);
 
                 var task = new Copy
                 {
@@ -212,7 +256,9 @@ namespace Microsoft.Build.UnitTests
                 };
                 task.Execute().ShouldBeTrue();
                 task.CopiedFiles.ShouldNotBeNull();
+                task.CopiedFiles.Length.ShouldBe(3);
                 task.DestinationFiles.ShouldNotBeNull();
+                task.DestinationFiles.Length.ShouldBe(3);
                 task.WroteAtLeastOneFile.ShouldBeTrue();
             }
         }
@@ -325,11 +371,10 @@ namespace Microsoft.Build.UnitTests
                     DestinationFiles = new ITaskItem[] { new TaskItem("destination0.txt"), new TaskItem("destination1.txt") },
                 };
                 task.Execute().ShouldBeFalse();
+                engine.AssertLogContains("MSB3894"); // Copy.IncompatibleParameters
                 task.CopiedFiles.ShouldBeNull();
                 task.DestinationFiles.ShouldNotBeNull();
                 task.WroteAtLeastOneFile.ShouldBeFalse();
-
-                // TODO: Add AssertLogContains for new error message.
             }
         }
 
@@ -2194,6 +2239,30 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// If the DestinationFolder parameter is given invalid path characters, make sure the task exits gracefully.
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void ExitGracefullyOnInvalidPathCharactersInDestinationFolder(bool isUseHardLinks, bool isUseSymbolicLinks)
+        {
+            var t = new Copy
+            {
+                RetryDelayMilliseconds = 1,  // speed up tests!
+                BuildEngine = new MockEngine(_testOutputHelper),
+                SourceFiles = new ITaskItem[] { new TaskItem("foo") },
+                DestinationFolder = new TaskItem("here | there"),
+                UseHardlinksIfPossible = isUseHardLinks,
+                UseSymboliclinksIfPossible = isUseSymbolicLinks,
+            };
+
+            bool result = t.Execute();
+
+            // Expect for there to have been no copies.
+            Assert.False(result);
+            ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
+        }
+
+        /// <summary>
         /// Verifies that we error for retries less than 0
         /// </summary>
         [Fact]
@@ -2446,8 +2515,6 @@ namespace Microsoft.Build.UnitTests
 
                 t.Execute().ShouldBeFalse();
                 engine.AssertLogContains("MSB3893");
-
-                // TODO: Add test for MSB3892 when ErrorIfLinkFails && !UseHardlinksIfPossible && !UseSymboliclinksIfPossible
             }
         }
 

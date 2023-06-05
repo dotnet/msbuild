@@ -690,39 +690,128 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Set up our list of destination files.
+        /// For SourceFiles: Apply DestinationFolder to each SourceFiles item to create a DestinationFiles item.
+        /// For SourceFolders: With each SourceFolders item, get the files in the represented directory. Create both SourceFiles and DestinationFiles items.
         /// </summary>
         /// <returns>False if an error occurred, implying aborting the overall copy operation.</returns>
         private bool InitializeDestinationFiles()
         {
-            if (DestinationFiles == null)
+            bool isSuccess = true;
+
+            try
             {
                 // If the caller passed in DestinationFolder, convert it to DestinationFiles
-                DestinationFiles = new ITaskItem[SourceFiles.Length];
-
-                for (int i = 0; i < SourceFiles.Length; ++i)
+                if (DestinationFiles == null && SourceFiles != null)
                 {
-                    // Build the correct path.
-                    string destinationFile;
-                    try
-                    {
-                        destinationFile = Path.Combine(DestinationFolder.ItemSpec, Path.GetFileName(SourceFiles[i].ItemSpec));
-                    }
-                    catch (ArgumentException e)
-                    {
-                        Log.LogErrorWithCodeFromResources("Copy.Error", SourceFiles[i].ItemSpec, DestinationFolder.ItemSpec, e.Message);
-                        // Clear the outputs.
-                        DestinationFiles = Array.Empty<ITaskItem>();
-                        return false;
-                    }
+                    DestinationFiles = new ITaskItem[SourceFiles.Length];
 
-                    // Initialize the destinationFolder item.
-                    // ItemSpec is unescaped, and the TaskItem constructor expects an escaped input, so we need to
-                    // make sure to re-escape it here.
-                    DestinationFiles[i] = new TaskItem(EscapingUtilities.Escape(destinationFile));
+                    for (int i = 0; i < SourceFiles.Length; ++i)
+                    {
+                        // Build the correct path.
+                        if (!TryPathOperation(
+                                () => Path.Combine(DestinationFolder.ItemSpec, Path.GetFileName(SourceFiles[i].ItemSpec)),
+                                SourceFiles[i].ItemSpec,
+                                DestinationFolder.ItemSpec,
+                                out string destinationFile))
+                        {
+                            isSuccess = false;
+                            break;
+                        }
 
-                    // Copy meta-data from source to destinationFolder.
-                    SourceFiles[i].CopyMetadataTo(DestinationFiles[i]);
+                        // Initialize the destinationFolder item.
+                        // ItemSpec is unescaped, and the TaskItem constructor expects an escaped input, so we need to
+                        // make sure to re-escape it here.
+                        DestinationFiles[i] = new TaskItem(EscapingUtilities.Escape(destinationFile));
+
+                        // Copy meta-data from source to destinationFolder.
+                        SourceFiles[i].CopyMetadataTo(DestinationFiles[i]);
+                    }
                 }
+
+                if (isSuccess && SourceFolders != null && SourceFolders.Length > 0)
+                {
+                    var sourceFiles = SourceFiles != null ? new List<ITaskItem>(SourceFiles) : new List<ITaskItem>();
+                    var destinationFiles = DestinationFiles != null ? new List<ITaskItem>(DestinationFiles) : new List<ITaskItem>();
+
+                    foreach (ITaskItem sourceFolder in SourceFolders)
+                    {
+                        string src = FileUtilities.NormalizePath(sourceFolder.ItemSpec);
+                        string srcName = Path.GetFileName(src);
+
+                        // TODO: Add check for *DriveEnumeratingWildcard action after calling GetFiles
+                        string[] filesInFolder;
+                        FileMatcher.SearchAction action = FileMatcher.SearchAction.None;
+                        (filesInFolder, action, _) = FileMatcher.Default.GetFiles(src, "**");
+
+                        foreach (string file in filesInFolder)
+                        {
+                            if (!TryPathOperation(
+                                    () => Path.Combine(src, file),
+                                    sourceFolder.ItemSpec,
+                                    DestinationFolder.ItemSpec,
+                                    out string sourceFile))
+                            {
+                                isSuccess = false;
+                                break;
+                            }
+
+                            if (!TryPathOperation(
+                                    () => Path.Combine(DestinationFolder.ItemSpec, srcName, file),
+                                    sourceFolder.ItemSpec,
+                                    DestinationFolder.ItemSpec,
+                                    out string destinationFile))
+                            {
+                                isSuccess = false;
+                                break;
+                            }
+
+
+                            var item = new TaskItem(EscapingUtilities.Escape(sourceFile));
+                            sourceFolder.CopyMetadataTo(item);
+                            sourceFiles.Add(item);
+
+                            item = new TaskItem(EscapingUtilities.Escape(destinationFile));
+                            sourceFolder.CopyMetadataTo(item);
+                            destinationFiles.Add(item);
+                        }
+                    }
+
+                    SourceFiles = sourceFiles.ToArray();
+                    DestinationFiles = destinationFiles.ToArray();
+                }
+            }
+            finally
+            {
+                if (!isSuccess)
+                {
+                    // Clear the outputs.
+                    DestinationFiles = Array.Empty<ITaskItem>();
+                }
+            }
+
+            return isSuccess;
+        }
+
+        /// <summary>
+        /// Tries the path operation. Logs a 'Copy.Error' if an exception is thrown.
+        /// </summary>
+        /// <param name="operation">The operation.</param>
+        /// <param name="src">The source to use for the log message.</param>
+        /// <param name="dest">The destination to use for the log message.</param>
+        /// <param name="resultPathOperation">The result of the path operation.</param>
+        /// <returns></returns>
+        private bool TryPathOperation(Func<string> operation, string src, string dest, out string resultPathOperation)
+        {
+            resultPathOperation = string.Empty;
+
+            try
+            {
+                resultPathOperation = operation();
+            }
+            catch (ArgumentException e)
+            {
+                Log.LogErrorWithCodeFromResources("Copy.Error", src, dest, e.Message);
+                return false;
             }
 
             return true;
