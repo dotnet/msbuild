@@ -116,7 +116,7 @@ namespace Microsoft.Build.Construction
         // cached default platform name for GetDefaultPlatformName
         private string _defaultPlatformName;
 
-        // VisualStudionVersion specified in Dev12+ solutions
+        // VisualStudioVersion specified in Dev12+ solutions
         private Version _currentVisualStudioVersion;
         private int _currentLineNumber;
 
