@@ -41,14 +41,8 @@ namespace Microsoft.DotNet.Watcher.Tools
 
                 workspace.WorkspaceFailed += (_sender, diag) =>
                 {
-                    if (diag.Diagnostic.Kind == WorkspaceDiagnosticKind.Warning)
-                    {
-                        reporter.Verbose($"MSBuildWorkspace warning: {diag.Diagnostic}");
-                    }
-                    else
-                    {
-                        taskCompletionSource.TrySetException(new ApplicationException($"Failed to create MSBuildWorkspace: {diag.Diagnostic}"));
-                    }
+                    // Errors reported here are not fatal, an exception would be thrown for fatal issues.
+                    reporter.Verbose($"MSBuildWorkspace warning: {diag.Diagnostic}");
                 };
 
                 await workspace.OpenProjectAsync(projectPath, cancellationToken: cancellationToken);
