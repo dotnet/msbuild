@@ -10,6 +10,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -835,6 +836,47 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Assert.Throws<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
                 logger.AssertLogContains(@"MSB4226: The imported project """ + Path.Combine("$(UndefinedProperty)", "filenotfound.props")
                                             + @""" was not found. Also, tried to find");
+            }
+            finally
+            {
+                FileUtilities.DeleteNoThrow(mainProjectPath);
+                FileUtilities.DeleteDirectoryNoThrow(extnDir1, true);
+            }
+        }
+        /// <summary>
+        ///  https://github.com/dotnet/msbuild/issues/8762
+        /// </summary>
+        /// <param name="projectValue">imported project value expression</param>
+        [WindowsFullFrameworkOnlyTheory]
+        [InlineData("")]
+        [InlineData("|")]
+        public void FallbackImportWithInvalidProjectValue(string projectValue)
+        {
+            string mainTargetsFileContent = $"""
+                <Project>
+                    <PropertyGroup>
+                    <VSToolsPath>{projectValue}</VSToolsPath>
+                </PropertyGroup>
+                <Import Project="$(VSToolsPath)"/>
+                </Project>
+                """;
+
+            string extnDir1 = null;
+            string mainProjectPath = null;
+
+            try
+            {
+                // The path to "extensions1" fallback should exist, but the file doesn't need to
+                extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("file.props"), string.Empty);
+
+                mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", mainTargetsFileContent);
+                var projectCollection = GetProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+                projectCollection.ResetToolsetsForTests(WriteConfigFileAndGetReader("VSToolsPath", @"$(FallbackExpandDir1)\Microsoft\VisualStudio\v99"));
+                var logger = new MockLogger();
+                projectCollection.RegisterLogger(logger);
+
+                Assert.Throws<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
+                logger.AssertLogContains("MSB4020");
             }
             finally
             {
