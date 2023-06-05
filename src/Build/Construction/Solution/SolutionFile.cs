@@ -84,13 +84,6 @@ namespace Microsoft.Build.Construction
 
         private const char CommentStartChar = '#';
 
-        /// <summary>
-        /// Cache the return value of this method, as each invocation returns a new instance.
-        /// The method has to defend against code changing the values within the array, but we don't.
-        /// By caching it we avoid a per-call allocation.
-        /// </summary>
-        private static readonly char[] s_invalidPathChars = Path.GetInvalidPathChars();
-
         #endregion
 
         #region Member data
@@ -119,6 +112,13 @@ namespace Microsoft.Build.Construction
         // VisualStudioVersion specified in Dev12+ solutions
         private Version _currentVisualStudioVersion;
         private int _currentLineNumber;
+
+        /// <summary>
+        /// Cache the return value of this method, as each invocation returns a new instance.
+        /// The method has to defend against code changing the values within the array, but we don't.
+        /// By caching it we avoid a per-call allocation.
+        /// </summary>
+        private static readonly char[] s_invalidPathChars = Path.GetInvalidPathChars();
 
         // TODO: Unify to NativeMethodsShared.OSUsesCaseSensitive paths when possible.
         private static readonly StringComparer s_pathComparer = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
