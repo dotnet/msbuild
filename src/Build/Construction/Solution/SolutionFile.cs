@@ -164,20 +164,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Returns Visual Studio major version
         /// </summary>
-        internal int VisualStudioVersion
-        {
-            get
-            {
-                if (_currentVisualStudioVersion != null)
-                {
-                    return _currentVisualStudioVersion.Major;
-                }
-                else
-                {
-                    return Version - 1;
-                }
-            }
-        }
+        internal int VisualStudioVersion => _currentVisualStudioVersion?.Major ?? Version - 1;
 
         /// <summary>
         /// Returns true if the solution contains any web projects
