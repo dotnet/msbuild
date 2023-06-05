@@ -212,6 +212,11 @@
         <target state="translated">CONTAINER1006: Muitas tentativas, parando.</target>
         <note>{StrBegin="CONTAINER1006: "}</note>
       </trans-unit>
+      <trans-unit id="UnknownAppCommandInstruction">
+        <source>CONTAINER2006: Unknown AppCommandInstruction '{0}'. Valid instructions are {1}.</source>
+        <target state="new">CONTAINER2006: Unknown AppCommandInstruction '{0}'. Valid instructions are {1}.</target>
+        <note>{StrBegin="CONTAINER2006: "}</note>
+      </trans-unit>
       <trans-unit id="UnknownLocalRegistryType">
         <source>CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry types are {1}.</source>
         <target state="new">CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry types are {1}.</target>

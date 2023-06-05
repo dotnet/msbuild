@@ -283,6 +283,10 @@
     <value>CONTAINER1006: Too many retries, stopping.</value>
     <comment>{StrBegin="CONTAINER1006: "}</comment>
   </data>
+  <data name="UnknownAppCommandInstruction" xml:space="preserve">
+    <value>CONTAINER2006: Unknown AppCommandInstruction '{0}'. Valid instructions are {1}.</value>
+    <comment>{StrBegin="CONTAINER2006: "}</comment>
+  </data>
   <data name="UnknownLocalRegistryType" xml:space="preserve">
     <value>CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry types are {1}.</value>
     <comment>{StrBegin="CONTAINER2002: "}</comment>

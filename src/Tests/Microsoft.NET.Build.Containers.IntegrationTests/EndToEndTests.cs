@@ -57,7 +57,7 @@ public class EndToEndTests
 
         imageBuilder.AddLayer(l);
 
-        imageBuilder.SetEntryPoint(new[] { "/app/MinimalTestApp" });
+        imageBuilder.SetEntrypointAndCmd(new[] { "/app/MinimalTestApp" }, Array.Empty<string>());
 
         BuiltImage builtImage = imageBuilder.Build();
 
@@ -99,7 +99,7 @@ public class EndToEndTests
 
         imageBuilder.AddLayer(l);
 
-        imageBuilder.SetEntryPoint(new[] { "/app/MinimalTestApp" });
+        imageBuilder.SetEntrypointAndCmd(new[] { "/app/MinimalTestApp" }, Array.Empty<string>());
 
         BuiltImage builtImage = imageBuilder.Build();
 
@@ -419,7 +419,7 @@ public class EndToEndTests
         imageBuilder.SetWorkingDirectory(workingDir);
 
         string[] entryPoint = DecideEntrypoint(rid, "MinimalTestApp", workingDir);
-        imageBuilder.SetEntryPoint(entryPoint);
+        imageBuilder.SetEntrypointAndCmd(entryPoint, Array.Empty<string>());
 
         BuiltImage builtImage = imageBuilder.Build();
 

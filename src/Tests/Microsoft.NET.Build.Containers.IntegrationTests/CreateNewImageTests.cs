@@ -264,6 +264,6 @@ public class CreateNewImageTests
             ToolsetUtils.GetRuntimeGraphFilePath(),
             cancellationToken: default).ConfigureAwait(false);
 
-        Assert.Equal(RootlessUser, imageBuilder.BaseImageConfig.User);
+        Assert.Equal(RootlessUser, imageBuilder.BaseImageConfig.GetUser());
     }
 }
