@@ -2508,6 +2508,21 @@ EndGlobal
             false,
             0,
             0)]
+        [InlineData(
+            //// Too many blank lines at the start
+            """
+
+
+
+
+            Microsoft Visual Studio Solution File, Format Version 12.00
+            # Visual Studio Version 17
+            VisualStudioVersion = 17.0.31903.59
+            MinimumVisualStudioVersion = 17.0.31903.59
+            """,
+            false,
+            0,
+            0)]
         public void GetSolutionFileAndVisualStudioMajorVersions(string content, bool expectedSuccess, int expectedSolutionVersion, int expectedVisualStudioMajorVersion)
         {
             string solutionPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
