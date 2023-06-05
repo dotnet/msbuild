@@ -1221,22 +1221,18 @@ namespace Microsoft.Build.Construction
                     proj.TargetFrameworkMoniker = Shared.EscapingUtilities.UnescapeAll(targetFrameworkMoniker);
                 }
             }
-        }
 
-        /// <summary>
-        /// Strips a single pair of leading/trailing double-quotes from a string.
-        /// </summary>
-        private static string TrimQuotes(
-            string property)
-        {
-            // If the incoming string starts and ends with a double-quote, strip the double-quotes.
-            if (!string.IsNullOrEmpty(property) && (property[0] == '"') && (property[property.Length - 1] == '"'))
+            static string TrimQuotes(string property)
             {
-                return property.Substring(1, property.Length - 2);
-            }
-            else
-            {
-                return property;
+                // If the incoming string starts and ends with a double-quote, strip the double-quotes.
+                if (!string.IsNullOrEmpty(property) && (property[0] == '"') && (property[property.Length - 1] == '"'))
+                {
+                    return property.Substring(1, property.Length - 2);
+                }
+                else
+                {
+                    return property;
+                }
             }
         }
 
