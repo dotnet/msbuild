@@ -2442,5 +2442,97 @@ EndGlobal
                 Assert.Equal(expectedPlatform, actualPlatform.ToString());
             }
         }
+
+        [Theory]
+        [InlineData("", false, -1, -1)]
+        [InlineData(
+            """
+            Microsoft Visual Studio Solution File, Format Version 8.00
+                Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                    ProjectSection(ProjectDependencies) = postProject
+                    EndProjectSection
+                EndProject";
+            """,
+            true,
+            8,
+            0)]
+        [InlineData(
+            """
+            Microsoft Visual Studio Solution File, Format Version 8.00
+            """,
+            true,
+            8,
+            0)]
+        [InlineData(
+            """
+            Microsoft Visual Studio Solution File, Format Version 12.00
+            # Visual Studio Version 17
+            VisualStudioVersion = 17.0.31903.59
+            MinimumVisualStudioVersion = 17.0.31903.59
+            """,
+            true,
+            12,
+            17)]
+        [InlineData(
+            // Leading blank line
+            """
+
+            Microsoft Visual Studio Solution File, Format Version 12.00
+            # Visual Studio Version 17
+            VisualStudioVersion = 17.0.31903.59
+            MinimumVisualStudioVersion = 17.0.31903.59
+            """,
+            true,
+            12,
+            17)]
+        [InlineData(
+            // Lines indented
+            """
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 17
+                    VisualStudioVersion = 17.0.31903.59
+                    MinimumVisualStudioVersion = 17.0.31903.59
+            """,
+            true,
+            12,
+            17)]
+        [InlineData(
+            // Version is too early
+            """
+            Microsoft Visual Studio Solution File, Format Version 6.00
+                Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                    ProjectSection(ProjectDependencies) = postProject
+                    EndProjectSection
+                EndProject";
+            """,
+            false,
+            0,
+            0)]
+        public void GetSolutionFileAndVisualStudioMajorVersions(string content, bool expectedSuccess, int expectedSolutionVersion, int expectedVisualStudioMajorVersion)
+        {
+            string solutionPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
+            StringReader reader = new(content);
+
+            if (expectedSuccess)
+            {
+                SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(
+                    reader,
+                    solutionPath,
+                    out int actualSolutionVersion,
+                    out int actualVisualStudioMajorVersion);
+
+                Assert.Equal(expectedSolutionVersion, actualSolutionVersion);
+                Assert.Equal(expectedVisualStudioMajorVersion, actualVisualStudioMajorVersion);
+            }
+            else
+            {
+                Assert.Throws<InvalidProjectFileException>(() =>
+                    SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(
+                        reader,
+                        solutionPath,
+                        out int actualSolutionVersion,
+                        out int actualVisualStudioMajorVersion));
+            }
+        }
     }
 }

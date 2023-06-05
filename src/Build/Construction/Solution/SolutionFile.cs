@@ -287,77 +287,82 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrow(!String.IsNullOrEmpty(solutionFile), "null solution file passed to GetSolutionFileMajorVersion!");
             ErrorUtilities.VerifyThrowInternalRooted(solutionFile);
 
+            // Open the file
+            using FileStream fileStream = File.OpenRead(solutionFile);
+            using StreamReader reader = new(fileStream, Encoding.GetEncoding(0)); // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
+
+            GetSolutionFileAndVisualStudioMajorVersions(reader, solutionFile, out solutionVersion, out visualStudioMajorVersion);
+        }
+
+        /// <summary>
+        /// Given a solution file, parses the header and returns the major version numbers of the solution file
+        /// and the visual studio. 
+        /// Throws InvalidProjectFileException if the solution header is invalid, or if the version is less than 
+        /// our minimum version. 
+        /// </summary>
+        internal static void GetSolutionFileAndVisualStudioMajorVersions(TextReader reader, string solutionFile, out int solutionVersion, out int visualStudioMajorVersion)
+        {
+            ErrorUtilities.VerifyThrow(!String.IsNullOrEmpty(solutionFile), "null solution file passed to GetSolutionFileMajorVersion!");
+            ErrorUtilities.VerifyThrowInternalRooted(solutionFile);
+
             const string slnFileHeaderNoVersion = "Microsoft Visual Studio Solution File, Format Version ";
             const string slnFileVSVLinePrefix = "VisualStudioVersion";
-            FileStream fileStream = null;
-            StreamReader reader = null;
+
             bool validVersionFound = false;
 
             solutionVersion = 0;
             visualStudioMajorVersion = 0;
 
-            try
+            // Read first 4 lines of the solution file. 
+            // The header is expected to be in line 1 or 2
+            // VisualStudioVersion is expected to be in line 3 or 4.
+            for (int i = 0; i < 4; i++)
             {
-                // Open the file
-                fileStream = File.OpenRead(solutionFile);
-                reader = new StreamReader(fileStream, Encoding.GetEncoding(0)); // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
+                string line = reader.ReadLine();
 
-                // Read first 4 lines of the solution file. 
-                // The header is expected to be in line 1 or 2
-                // VisualStudioVersion is expected to be in line 3 or 4.
-                for (int i = 0; i < 4; i++)
+                if (line == null)
                 {
-                    string line = reader.ReadLine();
+                    break;
+                }
 
-                    if (line == null)
+                if (line.Trim().StartsWith(slnFileHeaderNoVersion, StringComparison.Ordinal))
+                {
+                    // Found it. Validate the version.
+                    string fileVersionFromHeader = line.Substring(slnFileHeaderNoVersion.Length);
+
+                    if (!System.Version.TryParse(fileVersionFromHeader, out Version version))
                     {
-                        break;
+                        ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                            "SubCategoryForSolutionParsingErrors",
+                            new BuildEventFileInfo(solutionFile),
+                            "SolutionParseVersionMismatchError",
+                            slnFileMinUpgradableVersion,
+                            slnFileMaxVersion);
                     }
 
-                    if (line.Trim().StartsWith(slnFileHeaderNoVersion, StringComparison.Ordinal))
+                    solutionVersion = version.Major;
+
+                    // Validate against our min & max
+                    if (solutionVersion < slnFileMinUpgradableVersion)
                     {
-                        // Found it. Validate the version.
-                        string fileVersionFromHeader = line.Substring(slnFileHeaderNoVersion.Length);
-
-                        if (!System.Version.TryParse(fileVersionFromHeader, out Version version))
-                        {
-                            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
-                                "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(solutionFile),
-                                "SolutionParseVersionMismatchError",
-                                slnFileMinUpgradableVersion,
-                                slnFileMaxVersion);
-                        }
-
-                        solutionVersion = version.Major;
-
-                        // Validate against our min & max
-                        if (solutionVersion < slnFileMinUpgradableVersion)
-                        {
-                            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
-                                "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(solutionFile),
-                                "SolutionParseVersionMismatchError",
-                                slnFileMinUpgradableVersion,
-                                slnFileMaxVersion);
-                        }
-
-                        validVersionFound = true;
+                        ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                            "SubCategoryForSolutionParsingErrors",
+                            new BuildEventFileInfo(solutionFile),
+                            "SolutionParseVersionMismatchError",
+                            slnFileMinUpgradableVersion,
+                            slnFileMaxVersion);
                     }
-                    else if (line.Trim().StartsWith(slnFileVSVLinePrefix, StringComparison.Ordinal))
+
+                    validVersionFound = true;
+                }
+                else if (line.Trim().StartsWith(slnFileVSVLinePrefix, StringComparison.Ordinal))
+                {
+                    Version visualStudioVersion = ParseVisualStudioVersion(line.AsSpan());
+                    if (visualStudioVersion != null)
                     {
-                        Version visualStudioVersion = ParseVisualStudioVersion(line.AsSpan());
-                        if (visualStudioVersion != null)
-                        {
-                            visualStudioMajorVersion = visualStudioVersion.Major;
-                        }
+                        visualStudioMajorVersion = visualStudioVersion.Major;
                     }
                 }
-            }
-            finally
-            {
-                fileStream?.Dispose();
-                reader?.Dispose();
             }
 
             if (validVersionFound)
