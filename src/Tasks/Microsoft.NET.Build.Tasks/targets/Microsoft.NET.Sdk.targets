@@ -87,6 +87,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PredefinedCulturesOnly Condition="'$(PredefinedCulturesOnly)' == '' and '$(InvariantGlobalization)' == 'true'">true</PredefinedCulturesOnly>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(GenerateResourceWarnOnBinaryFormatterUse)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '8.0'))">
+    <GenerateResourceWarnOnBinaryFormatterUse>true</GenerateResourceWarnOnBinaryFormatterUse>
+  </PropertyGroup>
+
   <!-- Set the IsRidAgnostic property if this project should NOT accept global RuntimeIdentifier and SelfContained
        property values from referencing projects. -->
   <PropertyGroup Condition="'$(IsRidAgnostic)' == ''">

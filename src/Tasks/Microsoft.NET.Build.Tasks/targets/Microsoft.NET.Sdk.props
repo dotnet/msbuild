@@ -94,10 +94,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <GenerateResourceWarnOnBinaryFormatterUse>true</GenerateResourceWarnOnBinaryFormatterUse>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <DebugType Condition=" '$(DebugType)' == '' ">portable</DebugType>
 
     <!-- This will turn off the base UWP-specific 'ResolveNuGetPackages' target -->
