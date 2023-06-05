@@ -486,6 +486,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Condition="'$(ServerGarbageCollection)' != ''"
                                     Value="$(ServerGarbageCollection)" />
 
+    <RuntimeHostConfigurationOption Include="System.GC.DynamicAdaptationMode"
+                                    Condition="'$(GCDynamicAdaptationMode)' != ''"
+                                    Value="$(GCDynamicAdaptationMode)" />
+    
     <RuntimeHostConfigurationOption Include="System.GC.RetainVM"
                                     Condition="'$(RetainVMGarbageCollection)' != ''"
                                     Value="$(RetainVMGarbageCollection)" />
