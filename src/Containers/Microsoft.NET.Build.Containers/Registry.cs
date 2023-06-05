@@ -19,6 +19,8 @@ internal sealed class Registry
     private const string DockerManifestV2 = "application/vnd.docker.distribution.manifest.v2+json";
     private const string DockerManifestListV2 = "application/vnd.docker.distribution.manifest.list.v2+json";
     private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
+    private const string DockerHubRegistry1 = "registry-1.docker.io";
+    private const string DockerHubRegistry2 = "registry.hub.docker.com";
 
     /// <summary>
     /// Whether we should upload blobs via chunked upload (enabled by default, but disabled for certain registries in conjunction with the explicit support check below).
@@ -55,8 +57,13 @@ internal sealed class Registry
 
     public Registry(Uri baseUri)
     {
-        BaseUri = baseUri;
         RegistryName = DeriveRegistryName(baseUri);
+        BaseUri = baseUri;
+        // "docker.io" is not a real registry. Replace the uri to refer to an actual registry.
+        if (BaseUri.Host == ContainerHelpers.DockerRegistryAlias)
+        {
+            BaseUri = new UriBuilder(BaseUri.ToString()) { Host = DockerHubRegistry1 }.Uri;
+        }
         _client = CreateClient();
     }
 
@@ -118,7 +125,9 @@ internal sealed class Registry
     /// <summary>
     /// Check to see if the registry is Docker Hub, which uses two well-known domains.
     /// </summary>
-    public bool IsDockerHub => RegistryName.Equals("registry-1.docker.io", StringComparison.Ordinal) || RegistryName.Equals("registry.hub.docker.com", StringComparison.Ordinal);
+    public bool IsDockerHub => RegistryName.Equals(ContainerHelpers.DockerRegistryAlias, StringComparison.Ordinal)
+                            || RegistryName.Equals(DockerHubRegistry1, StringComparison.Ordinal)
+                            || RegistryName.Equals(DockerHubRegistry2, StringComparison.Ordinal);
 
     /// <summary>
     /// Check to see if the registry is for Google Artifact Registry.

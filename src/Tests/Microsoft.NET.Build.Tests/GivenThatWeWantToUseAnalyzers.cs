@@ -42,6 +42,7 @@ namespace Microsoft.NET.Build.Tests
                 });
 
             VerifyRequestDelegateGeneratorIsUsed(asset, isEnabled);
+            VerifyInterceptorsFeatureEnabled(asset, isEnabled);
         }
 
         [Fact]
@@ -57,6 +58,7 @@ namespace Microsoft.NET.Build.Tests
                 });
 
             VerifyRequestDelegateGeneratorIsUsed(asset, expectEnabled: true);
+            VerifyInterceptorsFeatureEnabled(asset, expectEnabled: true);
         }
 
         private void VerifyRequestDelegateGeneratorIsUsed(TestAsset asset, bool? expectEnabled)
@@ -76,6 +78,25 @@ namespace Microsoft.NET.Build.Tests
             var analyzers = command.GetValues();
 
             Assert.Equal(expectEnabled ?? false, analyzers.Any(analyzer => analyzer.Contains("Microsoft.AspNetCore.Http.RequestDelegateGenerator.dll")));
+        }
+
+        private void VerifyInterceptorsFeatureEnabled(TestAsset asset, bool? expectEnabled)
+        {
+            var command = new GetValuesCommand(
+                Log,
+                asset.Path,
+                ToolsetInfo.CurrentTargetFramework,
+                "Features",
+                GetValuesCommand.ValueType.Property);
+
+            command
+                .WithWorkingDirectory(asset.Path)
+                .Execute()
+                .Should().Pass();
+
+            var features = command.GetValues();
+
+            Assert.Equal(expectEnabled ?? false, features.Any(feature => feature.Contains("InterceptorsPreview")));
         }
 
         [Theory]

@@ -16,5 +16,5 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Enable EventSource support because it is disabled by default in aot'd apps. -->
     <EventSourceSupport Condition="'$(EventSourceSupport)' == ''">true</EventSourceSupport>
   </PropertyGroup>
-  
+
 </Project>
