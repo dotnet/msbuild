@@ -109,7 +109,7 @@
       </trans-unit>
       <trans-unit id="SpecifiedWorkloadSetNotFound">
         <source>Specified workload set was not found: {0}</source>
-        <target state="new">Specified workload set was not found: {0}</target>
+        <target state="translated">找不到指定的工作負載集: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
