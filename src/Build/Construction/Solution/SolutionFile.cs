@@ -120,9 +120,8 @@ namespace Microsoft.Build.Construction
         private Version _currentVisualStudioVersion;
         private int _currentLineNumber;
 
-        // TODO: Unify to NativeMethodsShared.OSUsesCaseSensitive paths
-        // when possible.
-        private static StringComparer _pathComparer = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+        // TODO: Unify to NativeMethodsShared.OSUsesCaseSensitive paths when possible.
+        private static readonly StringComparer s_pathComparer = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
             ? StringComparer.Ordinal
             : StringComparer.OrdinalIgnoreCase;
 
@@ -390,7 +389,7 @@ namespace Microsoft.Build.Construction
 
                 SolutionFileDirectory = Path.GetDirectoryName(_solutionFile);
 
-                _solutionFilter = new HashSet<string>(_pathComparer);
+                _solutionFilter = new HashSet<string>(s_pathComparer);
                 foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
                 {
                     _solutionFilter.Add(FileUtilities.FixFilePath(project.GetString()));
@@ -548,7 +547,7 @@ namespace Microsoft.Build.Construction
 
             if (_solutionFilter != null)
             {
-                HashSet<string> projectPaths = new HashSet<string>(_projectsInOrder.Count, _pathComparer);
+                HashSet<string> projectPaths = new HashSet<string>(_projectsInOrder.Count, s_pathComparer);
                 foreach (ProjectInSolution project in _projectsInOrder)
                 {
                     projectPaths.Add(FileUtilities.FixFilePath(project.RelativePath));
