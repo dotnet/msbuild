@@ -2553,7 +2553,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 catch (ArgumentException)
                 {
-                    // https://github.com/dotnet/msbuild/issues/8762 In NET Framework, Path.* function wil throw exceptions if the path contains invalid characters.
+                    // https://github.com/dotnet/msbuild/issues/8762 In NET Framework, Path.* function will throw exceptions if the path contains invalid characters.
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.Location, "InvalidAttributeValue", importExpandedWithDefaultPath, XMakeAttributes.project, XMakeElements.import);
                     return;
                 }

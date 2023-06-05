@@ -844,7 +844,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
         /// <summary>
-        ///  https://github.com/dotnet/msbuild/issues/8762
+        /// Fall-back search path on a property that is not valid. https://github.com/dotnet/msbuild/issues/8762
         /// </summary>
         /// <param name="projectValue">imported project value expression</param>
         [WindowsFullFrameworkOnlyTheory]
