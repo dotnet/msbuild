@@ -2551,10 +2551,10 @@ namespace Microsoft.Build.Evaluation
                 {
                     relativeProjectPath = FileUtilities.MakeRelative(extensionsPathPropValue, importExpandedWithDefaultPath);
                 }
-                catch (ArgumentException)
+                catch (ArgumentException ex)
                 {
                     // https://github.com/dotnet/msbuild/issues/8762 In NET Framework, Path.* function will throw exceptions if the path contains invalid characters.
-                    ProjectErrorUtilities.ThrowInvalidProject(importElement.Location, "InvalidAttributeValue", importExpandedWithDefaultPath, XMakeAttributes.project, XMakeElements.import);
+                    ProjectErrorUtilities.ThrowInvalidProject(importElement.Location, "InvalidAttributeValueWithException", importExpandedWithDefaultPath, XMakeAttributes.project, XMakeElements.import, ex.Message);
                     return;
                 }
             }

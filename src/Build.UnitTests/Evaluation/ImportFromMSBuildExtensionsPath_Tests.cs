@@ -876,7 +876,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 projectCollection.RegisterLogger(logger);
 
                 Assert.Throws<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
-                logger.AssertLogContains("MSB4020");
+                logger.AssertLogContains("MSB4102");
             }
             finally
             {
