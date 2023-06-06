@@ -17,6 +17,11 @@
         <target state="translated">CONTAINER2009: {0} を解析できませんでした: {1}</target>
         <note>{StrBegin="CONTAINER2009: "}</note>
       </trans-unit>
+      <trans-unit id="BaseImageNameRegistryFallback">
+        <source>CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: '{1}/&lt;image&gt;'.</source>
+        <target state="new">CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: '{1}/&lt;image&gt;'.</target>
+        <note>{StrBegin="CONTAINER2020: "}</note>
+      </trans-unit>
       <trans-unit id="BaseImageNameWithSpaces">
         <source>CONTAINER2013: {0} had spaces in it, replacing with dashes.</source>
         <target state="translated">CONTAINER2013: {0} にスペースが含まれており、ダッシュに置き換えています。</target>

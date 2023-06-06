@@ -4,7 +4,7 @@
           Condition="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../')) != ''" />
   <PropertyGroup>
 
-  <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
 
   </PropertyGroup>
 </Project>

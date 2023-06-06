@@ -133,6 +133,10 @@
     <value>CONTAINER2013: {0} had spaces in it, replacing with dashes.</value>
     <comment>{StrBegin="CONTAINER2013: "}</comment>
   </data>
+  <data name="BaseImageNameRegistryFallback" xml:space="preserve">
+    <value>CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: '{1}/&lt;image&gt;'.</value>
+    <comment>{StrBegin="CONTAINER2020: "}</comment>
+  </data>
   <data name="BaseImageNotFound" xml:space="preserve">
     <value>CONTAINER1011: Couldn't find matching base image for {0} that matches RuntimeIdentifier {1}.</value>
     <comment>{StrBegin="CONTAINER1011: "}</comment>

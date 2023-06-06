@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Microsoft.DotNet.ApiCompatibility;
 using Microsoft.DotNet.ApiCompatibility.Logging;
@@ -25,19 +26,13 @@ namespace Microsoft.DotNet.PackageValidation
             Package leftPackage,
             Package? rightPackage = null)
         {
+            Debug.Assert(leftContentItems.Count > 0);
+            Debug.Assert(rightContentItems.Count > 0);
+
             // Don't enqueue duplicate items (if no right package is supplied and items match)
-            if (rightPackage == null && ContentItemCollectionEquals(leftContentItems, rightContentItems))
+            if (rightPackage is null && ContentItemCollectionEquals(leftContentItems, rightContentItems))
             {
                 return;
-            }
-
-            MetadataInformation[] left = new MetadataInformation[leftContentItems.Count];
-            for (int leftIndex = 0; leftIndex < leftContentItems.Count; leftIndex++)
-            {
-                left[leftIndex] = GetMetadataInformation(log,
-                    leftPackage,
-                    leftContentItems[leftIndex],
-                    options.IsBaselineComparison ? Resources.Baseline + " " + leftContentItems[leftIndex].Path : null);
             }
 
             MetadataInformation[] right = new MetadataInformation[rightContentItems.Count];
@@ -48,28 +43,46 @@ namespace Microsoft.DotNet.PackageValidation
                     rightContentItems[rightIndex]);
             }
 
+            MetadataInformation[] left = new MetadataInformation[leftContentItems.Count];
+            for (int leftIndex = 0; leftIndex < leftContentItems.Count; leftIndex++)
+            {
+                left[leftIndex] = GetMetadataInformation(log,
+                    leftPackage,
+                    leftContentItems[leftIndex],
+                    displayString: options.IsBaselineComparison ? Resources.Baseline + " " + leftContentItems[leftIndex].Path : null,
+                    // Use the assembly references from the right package if the left package doesn't provide them.
+                    assemblyReferences: rightPackage is not null ? right[right.Length > leftIndex ? leftIndex : 0].References : null);
+            }
+
             apiCompatRunner.EnqueueWorkItem(new ApiCompatRunnerWorkItem(left, options, right));
         }
 
         private static MetadataInformation GetMetadataInformation(ISuppressableLog log,
             Package package,
             ContentItem item,
-            string? displayString = null)
+            string? displayString = null,
+            IEnumerable<string>? assemblyReferences = null)
         {
             displayString ??= item.Path;
-            string[]? assemblyReferences = null;
 
             if (item.Properties.TryGetValue("tfm", out object? tfmObj))
             {
                 string targetFramework = ((NuGetFramework)tfmObj).GetShortFolderName();
 
-                if (package.AssemblyReferences != null && !package.AssemblyReferences.TryGetValue(targetFramework, out assemblyReferences))
+                if (package.AssemblyReferences != null)
                 {
-                    log.LogWarning(new Suppression(DiagnosticIds.SearchDirectoriesNotFoundForTfm) { Target = displayString },
-                        DiagnosticIds.SearchDirectoriesNotFoundForTfm,
-                        string.Format(Resources.MissingSearchDirectory,
-                            targetFramework,
-                            displayString));
+                    if (package.AssemblyReferences.TryGetValue(targetFramework, out string[]? assemblyReferencesRaw))
+                    {
+                        assemblyReferences = assemblyReferencesRaw;
+                    }
+                    else
+                    {
+                        log.LogWarning(new Suppression(DiagnosticIds.SearchDirectoriesNotFoundForTfm) { Target = displayString },
+                           DiagnosticIds.SearchDirectoriesNotFoundForTfm,
+                           string.Format(Resources.MissingSearchDirectory,
+                               targetFramework,
+                               displayString));
+                    }
                 }
             }
 

@@ -399,6 +399,8 @@
   "${OutputPath}\\wwwroot\\_framework\\icudt_CJK.dat.gz",
   "${OutputPath}\\wwwroot\\_framework\\icudt_EFIGS.dat",
   "${OutputPath}\\wwwroot\\_framework\\icudt_EFIGS.dat.gz",
+  "${OutputPath}\\wwwroot\\_framework\\icudt_hybrid.dat",
+  "${OutputPath}\\wwwroot\\_framework\\icudt_hybrid.dat.gz",
   "${OutputPath}\\wwwroot\\_framework\\icudt_no_CJK.dat",
   "${OutputPath}\\wwwroot\\_framework\\icudt_no_CJK.dat.gz",
   "${OutputPath}\\wwwroot\\_framework\\mscorlib.wasm",

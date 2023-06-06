@@ -11,6 +11,7 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.DependencyModel;
@@ -486,14 +487,27 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testAsset);
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}")
-                .Should().Pass()
-                // trim analysis warnings are enabled
-                .And.HaveStdOutMatching("warning IL2075.*Program.IL_2075")
-                .And.HaveStdOutMatching("warning IL2026.*Program.IL_2026.*Testing analysis warning IL2026")
-                .And.HaveStdOutMatching("warning IL2043.*Program.IL_2043.get")
-                .And.HaveStdOutMatching("warning IL2046.*Program.Derived.IL_2046")
-                .And.HaveStdOutMatching("warning IL2093.*Program.Derived.IL_2093");
+            // Minimal verbosity prevents desktop MSBuild.exe from duplicating the warnings in the warning summary
+            var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/v:m");
+            result.Should().Pass();
+            // trim analysis warnings are enabled
+            var expectedWarnings = new List<string> {
+                // ILLink warnings
+                "Trim analysis warning IL2075.*Program.IL_2075",
+                "Trim analysis warning IL2026.*Program.IL_2026.*Testing analysis warning IL2026",
+                "Trim analysis warning IL2043.*Program.IL_2043.get",
+                "Trim analysis warning IL2026.*Program.Base.IL_2046",
+                "Trim analysis warning IL2046.*Program.Derived.IL_2046",
+                "Trim analysis warning IL2093.*Program.Derived.IL_2093",
+                // analyzer warnings
+                "warning IL2075.*Type.GetMethod",
+                "warning IL2026.*Program.IL_2026.*Testing analysis warning IL2026",
+                "warning IL2043.*Program.IL_2043.get",
+                "warning IL2026.*Program.Base.IL_2046",
+                "warning IL2046.*Program.Derived.IL_2046",
+                "warning IL2093.*Program.Derived.IL_2093"
+            };
+            ValidateWarningsOnHelloWorldApp(publishCommand, result, expectedWarnings, targetFramework, rid, useRegex: true);
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
@@ -553,9 +567,19 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testAsset);
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}")
-                .Should().Pass()
-                .And.HaveStdOutMatching("warning IL2026.*Program.IL_2026.*Testing analysis warning IL2026");
+            // Minimal verbosity prevents desktop MSBuild.exe from duplicating the warnings in the warning summary
+            var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/v:m");
+            result.Should().Pass();
+            var expectedWarnings = new List<string> {
+                // analyzer warnings
+                "warning IL2075.*Type.GetMethod",
+                "warning IL2026.*Program.IL_2026.*Testing analysis warning IL2026",
+                "warning IL2043.*Program.IL_2043.get",
+                "warning IL2026.*Program.Base.IL_2046",
+                "warning IL2046.*Program.Derived.IL_2046",
+                "warning IL2093.*Program.Derived.IL_2093"
+            };
+            ValidateWarningsOnHelloWorldApp(publishCommand, result, expectedWarnings, targetFramework, rid, useRegex: true);
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
@@ -674,7 +698,7 @@ namespace Microsoft.NET.Publish.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             // Please keep list below sorted and de-duplicated
-            var expectedOutput = new List<string> {
+            var expectedWarnings = new List<string> {
                 "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.ComActivator.GetClassFactoryForTypeInternal(ComActivationContextInternal*",
                 "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.ComponentActivator.GetFunctionPointer(IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr",
                 "ILLink : Trim analysis warning IL2026: System.ComponentModel.Design.DesigntimeLicenseContextSerializer.DeserializeUsingBinaryFormatter(DesigntimeLicenseContextSerializer.StreamWrapper, String, RuntimeLicenseContext",
@@ -686,13 +710,13 @@ namespace Microsoft.NET.Publish.Tests
             switch (targetFramework)
             {
                 case "net6.0":
-                    expectedOutput.AddRange(new string[] {
+                    expectedWarnings.AddRange(new string[] {
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
                 });
                     break;
                 case "net7.0":
                 case "net8.0":
-                    expectedOutput.AddRange(new string[] {
+                    expectedWarnings.AddRange(new string[] {
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssemblyInContextWhenSupported(IntPtr, IntPtr",
                 });
@@ -705,9 +729,11 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:TrimMode=copyused", "/p:TrimmerSingleWarn=false");
+            var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:TrimMode=copyused", "/p:TrimmerSingleWarn=false", "/p:EnableTrimAnalyzer=false",
+                // Minimal verbosity prevents desktop MSBuild.exe from duplicating the warnings in the warning summary
+                "/v:m");
             result.Should().Pass();
-            ValidateWarningsOnHelloWorldApp(publishCommand, result, expectedOutput.ToArray(), targetFramework, rid);
+            ValidateWarningsOnHelloWorldApp(publishCommand, result, expectedWarnings, targetFramework, rid);
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
@@ -718,7 +744,7 @@ namespace Microsoft.NET.Publish.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             // Please keep list below sorted and de-duplicated
-            var expectedOutput = new List<string> {
+            var expectedWarnings = new List<string> {
                 "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.ComponentActivator.GetFunctionPointer(IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr",
                 "ILLink : Trim analysis warning IL2026: System.ComponentModel.Design.DesigntimeLicenseContextSerializer.DeserializeUsingBinaryFormatter(DesigntimeLicenseContextSerializer.StreamWrapper, String, RuntimeLicenseContext",
                 "ILLink : Trim analysis warning IL2026: System.ComponentModel.Design.DesigntimeLicenseContextSerializer.SerializeWithBinaryFormatter(Stream, String, DesigntimeLicenseContext",
@@ -734,15 +760,14 @@ namespace Microsoft.NET.Publish.Tests
             switch (targetFramework)
             {
                 case "net6.0":
-                    expectedOutput.AddRange(new string[] {
+                    expectedWarnings.AddRange(new string[] {
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
                     "ILLink : Trim analysis warning IL2055: System.Runtime.Serialization.ClassDataContract.UnadaptedClassType.get",
                     "ILLink : Trim analysis warning IL2067: System.Runtime.Serialization.SurrogateDataContract.GetUninitializedObject(Type"
                 });
                     break;
                 case "net7.0":
-                case "net8.0":
-                    expectedOutput.AddRange(new string[] {
+                    expectedWarnings.AddRange(new string[] {
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.ComActivator.GetClassFactoryForTypeInternal(ComActivationContextInternal*",
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
                     "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssemblyInContextWhenSupported(IntPtr, IntPtr",
@@ -756,6 +781,29 @@ namespace Microsoft.NET.Publish.Tests
                     "ILLink : Trim analysis warning IL2045: System.Runtime.InteropServices.ComAwareEventInfo.GetDataForComInvocation(EventInfo, Guid&, Int32&"
                 });
                     break;
+                case "net8.0":
+                    expectedWarnings.AddRange(new string[] {
+                    "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.ComActivator.GetClassFactoryForTypeInternal(ComActivationContextInternal*",
+                    "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr, IntPtr",
+                    "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssemblyInContextWhenSupported(IntPtr, IntPtr",
+                    "ILLink : Trim analysis warning IL2026: System.Linq.Queryable: Using member 'System.Linq.EnumerableRewriter.s_seqMethods' which has 'RequiresUnreferencedCodeAttribute'",
+                    "ILLink : Trim analysis warning IL2026: System.Transactions.DtcProxyShim.DtcProxyShimFactory.ConnectToProxyCore(String, Guid, Object, Boolean&, Byte[]&, ResourceManagerShim&",
+                    "ILLink : Trim analysis warning IL2045: System.Runtime.InteropServices.Marshal.GenerateProgIdForType(Type",
+                    "ILLink : Trim analysis warning IL2045: System.Runtime.InteropServices.Marshal.GenerateProgIdForType(Type",
+                    "ILLink : Trim analysis warning IL2045: System.Runtime.InteropServices.ComAwareEventInfo.GetDataForComInvocation(EventInfo, Guid&, Int32&",
+                    "ILLink : Trim analysis warning IL2045: System.Runtime.InteropServices.ComAwareEventInfo.GetDataForComInvocation(EventInfo, Guid&, Int32&",
+                    "ILLink : Trim analysis warning IL2045: System.Runtime.InteropServices.ComAwareEventInfo.GetDataForComInvocation(EventInfo, Guid&, Int32&",
+                    "ILLink : Trim analysis warning IL2045: System.Runtime.InteropServices.ComAwareEventInfo.GetDataForComInvocation(EventInfo, Guid&, Int32&",
+                    "ILLink : Trim analysis warning IL2045: System.Runtime.InteropServices.ComAwareEventInfo.GetDataForComInvocation(EventInfo, Guid&, Int32&",
+                    "ILLink : Trim analysis warning IL2112: System.Data.Common.DbConnectionStringBuilder.System.ComponentModel.ICustomTypeDescriptor.GetConverter(",
+                    "ILLink : Trim analysis warning IL2112: System.Data.Common.DbConnectionStringBuilder.System.ComponentModel.ICustomTypeDescriptor.GetDefaultEvent(",
+                    "ILLink : Trim analysis warning IL2112: System.Data.Common.DbConnectionStringBuilder.System.ComponentModel.ICustomTypeDescriptor.GetDefaultProperty(",
+                    "ILLink : Trim analysis warning IL2112: System.Data.Common.DbConnectionStringBuilder.System.ComponentModel.ICustomTypeDescriptor.GetEditor(Type",
+                    "ILLink : Trim analysis warning IL2112: System.Data.Common.DbConnectionStringBuilder.System.ComponentModel.ICustomTypeDescriptor.GetEvents(Attribute[]",
+                    "ILLink : Trim analysis warning IL2112: System.Data.Common.DbConnectionStringBuilder.System.ComponentModel.ICustomTypeDescriptor.GetProperties(Attribute[]",
+                    "ILLink : Trim analysis warning IL2112: System.Data.Common.DbConnectionStringBuilder.System.ComponentModel.ICustomTypeDescriptor.GetProperties("
+                });
+                    break;
                 default:
                     throw new InvalidOperationException();
             }
@@ -765,9 +813,11 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true",
-                "/p:TrimMode=copy", "/p:_TrimmerDefaultAction=copy", "/p:TrimmerSingleWarn=false");
+                "/p:TrimMode=copy", "/p:_TrimmerDefaultAction=copy", "/p:TrimmerSingleWarn=false", "/p:EnableTrimAnalyzer=false",
+                // Minimal verbosity prevents desktop MSBuild.exe from duplicating the warnings in the warning summary
+                "/v:m");
             result.Should().Pass();
-            ValidateWarningsOnHelloWorldApp(publishCommand, result, expectedOutput.ToArray(), targetFramework, rid);
+            ValidateWarningsOnHelloWorldApp(publishCommand, result, expectedWarnings, targetFramework, rid);
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
@@ -783,7 +833,7 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:TrimmerSingleWarn=false");
             result.Should().Pass();
-            ValidateWarningsOnHelloWorldApp(publishCommand, result, Array.Empty<string>(), targetFramework, rid);
+            ValidateWarningsOnHelloWorldApp(publishCommand, result, new List<string>(), targetFramework, rid);
         }
 
         [RequiresMSBuildVersionFact("17.0.0.32901")]
@@ -800,14 +850,34 @@ namespace Microsoft.NET.Publish.Tests
             var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:TrimmerSingleWarn=false",
                 "/p:TrimMode=link");
             result.Should().Pass();
-            ValidateWarningsOnHelloWorldApp(publishCommand, result, Array.Empty<string>(), targetFramework, rid);
+            ValidateWarningsOnHelloWorldApp(publishCommand, result, new List<string>(), targetFramework, rid);
         }
 
-        private void ValidateWarningsOnHelloWorldApp(PublishCommand publishCommand, CommandResult result, string[] expectedOutput, string targetFramework, string rid)
+        private void ValidateWarningsOnHelloWorldApp(PublishCommand publishCommand, CommandResult result, List<string> expectedWarnings, string targetFramework, string rid, bool useRegex = false)
         {
             // This checks that there are no unexpected warnings, but does not cause failures for missing expected warnings.
             var warnings = result.StdOut.Split('\n', '\r').Where(line => line.Contains("warning IL"));
-            var extraWarnings = warnings.Where(warning => !expectedOutput.Any(expected => warning.Contains(expected)));
+
+            // This should also detect unexpected duplicates of expected warnings.
+            // Each expected warning string/regex matches at most one warning.
+            List<string> extraWarnings = new();
+            foreach (var warning in warnings) {
+                bool expected = false;
+                for (int i = 0; i < expectedWarnings.Count; i++)
+                {
+                    if ((useRegex && Regex.IsMatch(warning, expectedWarnings[i])) ||
+                        (!useRegex && warning.Contains(expectedWarnings[i])))
+                    {
+                        expectedWarnings.RemoveAt(i);
+                        expected = true;
+                        break;
+                    }
+                }
+
+                if (!expected) {
+                    extraWarnings.Add(warning);
+                }
+            }
 
             StringBuilder errorMessage = new StringBuilder();
 

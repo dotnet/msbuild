@@ -50,9 +50,9 @@ namespace Microsoft.DotNet.GenAPI.Task
         public string[]? ExcludeAttributesFiles { get; set; }
 
         /// <summary>
-        /// Include internal API's. Default is false.
+        /// If true, includes both internal and public API.
         /// </summary>
-        public bool IncludeVisibleOutsideOfAssembly { get; set; }
+        public bool RespectInternals { get; set; }
 
         /// <summary>
         /// Includes assembly attributes which are values that provide information about an assembly.
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.GenAPI.Task
                 ExceptionMessage,
                 ExcludeApiFiles,
                 ExcludeAttributesFiles,
-                IncludeVisibleOutsideOfAssembly,
+                RespectInternals,
                 IncludeAssemblyAttributes
             ));
         }

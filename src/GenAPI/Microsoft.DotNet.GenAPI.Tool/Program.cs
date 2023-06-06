@@ -56,8 +56,8 @@ namespace Microsoft.DotNet.GenAPI.Tool
             Option<string?> exceptionMessageOption = new("--exception-message",
                 "If specified - method bodies should throw PlatformNotSupportedException, else `throw null`.");
 
-            Option<bool> includeVisibleOutsideOfAssemblyOption = new("--include-visible-outside",
-                "Include internal API's. Default is false.");
+            Option<bool> respectInternalsOption = new("--respect-internals",
+                "If true, includes both internal and public API.");
 
             Option<bool> includeAssemblyAttributesOption = new("--include-assembly-attributes",
                 "Includes assembly attributes which are values that provide information about an assembly. Default is false.");
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.GenAPI.Tool
             rootCommand.AddGlobalOption(outputPathOption);
             rootCommand.AddGlobalOption(headerFileOption);
             rootCommand.AddGlobalOption(exceptionMessageOption);
-            rootCommand.AddGlobalOption(includeVisibleOutsideOfAssemblyOption);
+            rootCommand.AddGlobalOption(respectInternalsOption);
             rootCommand.AddGlobalOption(includeAssemblyAttributesOption);
 
             rootCommand.SetHandler((InvocationContext context) =>
@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.GenAPI.Tool
                     context.ParseResult.GetValue(exceptionMessageOption),
                     context.ParseResult.GetValue(excludeApiFilesOption),
                     context.ParseResult.GetValue(excludeAttributesFilesOption),
-                    context.ParseResult.GetValue(includeVisibleOutsideOfAssemblyOption),
+                    context.ParseResult.GetValue(respectInternalsOption),
                     context.ParseResult.GetValue(includeAssemblyAttributesOption)
                 ));
             });

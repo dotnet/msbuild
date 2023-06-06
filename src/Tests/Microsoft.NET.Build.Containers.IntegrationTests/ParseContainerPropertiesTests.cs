@@ -39,14 +39,14 @@ public class ParseContainerPropertiesTests
     public void SpacesGetReplacedWithDashes()
     {
          var (project, _, d) = ProjectInitializer.InitProject(new () {
-            [ContainerBaseImage] = "mcr microsoft com/dotnet runtime:7.0",
+            [ContainerBaseImage] = "mcr.microsoft.com/dotnet runtime:7.0",
             [ContainerRegistry] = "localhost:5010"
         });
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
         Assert.True(instance.Build(new[]{ComputeContainerConfig}, null, null, out var outputs));
 
-        Assert.Equal("mcr-microsoft-com",instance.GetPropertyValue(ContainerBaseRegistry));
+        Assert.Equal("mcr.microsoft.com",instance.GetPropertyValue(ContainerBaseRegistry));
         Assert.Equal("dotnet-runtime", instance.GetPropertyValue(ContainerBaseName));
         Assert.Equal("7.0", instance.GetPropertyValue(ContainerBaseTag));
     }

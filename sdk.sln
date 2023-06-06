@@ -139,6 +139,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk", "Sdk", "{0C6854E8-01E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{9446E46C-61A6-4DC0-975F-CF22B8A596A5}"
 	ProjectSection(SolutionItems) = preProject
+		src\WebSdk\ProjectSystem\Targets\Microsoft.NET.Sdk.Web.BeforeCommon.targets = src\WebSdk\ProjectSystem\Targets\Microsoft.NET.Sdk.Web.BeforeCommon.targets
 		src\WebSdk\ProjectSystem\Targets\Microsoft.NET.Sdk.Web.DefaultItems.props = src\WebSdk\ProjectSystem\Targets\Microsoft.NET.Sdk.Web.DefaultItems.props
 		src\WebSdk\ProjectSystem\Targets\Microsoft.NET.Sdk.Web.ProjectSystem.props = src\WebSdk\ProjectSystem\Targets\Microsoft.NET.Sdk.Web.ProjectSystem.props
 		src\WebSdk\ProjectSystem\Targets\Microsoft.NET.Sdk.Web.ProjectSystem.targets = src\WebSdk\ProjectSystem\Targets\Microsoft.NET.Sdk.Web.ProjectSystem.targets
@@ -236,6 +237,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transforms", "Transforms", 
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets (2)", "Targets (2)", "{6FBE1C01-77B7-41B9-ADD6-84B072526DCA}"
+	ProjectSection(SolutionItems) = preProject
+		src\WebSdk\Web\Targets\Sdk.Browser.props = src\WebSdk\Web\Targets\Sdk.Browser.props
+		src\WebSdk\Web\Targets\Sdk.Browser.targets = src\WebSdk\Web\Targets\Sdk.Browser.targets
+		src\WebSdk\Web\Targets\Sdk.Server.props = src\WebSdk\Web\Targets\Sdk.Server.props
+		src\WebSdk\Web\Targets\Sdk.Server.targets = src\WebSdk\Web\Targets\Sdk.Server.targets
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks (2)", "Tasks (2)", "{02EA412D-60F9-41E2-A1D9-D1569BB8FC79}"
 EndProject

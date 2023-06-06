@@ -1,0 +1,20 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Web.BeforeCommon.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Default settings for aot'd apps that need to be defaulted before Microsoft.NET.Sdk.targets is imported. -->
+  <PropertyGroup Condition="'$(PublishAot)' == 'true'">
+    <!-- Enable EventSource support because it is disabled by default in aot'd apps. -->
+    <EventSourceSupport Condition="'$(EventSourceSupport)' == ''">true</EventSourceSupport>
+  </PropertyGroup>
+
+</Project>
