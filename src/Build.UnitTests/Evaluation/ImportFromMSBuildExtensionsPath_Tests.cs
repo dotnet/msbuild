@@ -861,17 +861,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 </Project>
                 """;
 
-            string extnDir1 = null;
             string mainProjectPath = null;
 
             try
             {
-                // The path to "extensions1" fallback should exist, but the file doesn't need to
-                extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("file.props"), string.Empty);
-
                 mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", mainTargetsFileContent);
-                var projectCollection = GetProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
-                projectCollection.ResetToolsetsForTests(WriteConfigFileAndGetReader("VSToolsPath", @"$(FallbackExpandDir1)\Microsoft\VisualStudio\v99"));
+                var projectCollection = GetProjectCollection();
+                projectCollection.ResetToolsetsForTests(WriteConfigFileAndGetReader("VSToolsPath", "temp"));
                 var logger = new MockLogger();
                 projectCollection.RegisterLogger(logger);
 
@@ -881,7 +877,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             finally
             {
                 FileUtilities.DeleteNoThrow(mainProjectPath);
-                FileUtilities.DeleteDirectoryNoThrow(extnDir1, true);
             }
         }
 
