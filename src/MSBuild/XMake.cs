@@ -1447,6 +1447,9 @@ namespace Microsoft.Build.CommandLine
                             BuildRequestData buildRequest = null;
                             if (!restoreOnly)
                             {
+                                // By default, the project state is thrown out after a build. The ProvideProjectStateAfterBuild flag adds the project state after build
+                                // to the BuildResult passed back at the end of the build. This can then be used to find the value of properties, items, etc. after the
+                                // build is complete.
                                 BuildRequestDataFlags flags = BuildRequestDataFlags.None;
                                 if (saveProject)
                                 {
