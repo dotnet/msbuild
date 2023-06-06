@@ -19,8 +19,6 @@ namespace Microsoft.Build.Tasks
     /// 
     /// This is an on-disk serialization format, don't change field names or types or use readonly.
     /// </remarks>
-    /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
-    [Serializable]
     internal sealed class ResolveComReferenceCache : StateFileBase, ITranslatable
     {
         /// <summary>
