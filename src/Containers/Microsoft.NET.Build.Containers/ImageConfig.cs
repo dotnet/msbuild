@@ -58,9 +58,8 @@ internal sealed class ImageConfig
     }
 
     // Return values from the base image config.
-    internal bool HasEntrypoint => _config["config"]?["Entrypoint"] is not null;
     internal string? GetUser() => _config["config"]?["User"]?.ToString();
-    private string[]? GetEntrypoint() => _config["config"]?["Entrypoint"]?.AsArray()?.Select(node => node!.GetValue<string>())?.ToArray();
+    internal string[]? GetEntrypoint() => _config["config"]?["Entrypoint"]?.AsArray()?.Select(node => node!.GetValue<string>())?.ToArray();
     private string[]? GetCmd() => _config["config"]?["Entrypoint"]?.AsArray()?.Select(node => node!.GetValue<string>())?.ToArray();
     private List<HistoryEntry> GetHistory() => _config["history"]?.AsArray().Select(node => node.Deserialize<HistoryEntry>()!).ToList() ?? new List<HistoryEntry>();
     private string GetOs() => _config["os"]?.ToString() ?? throw new ArgumentException("Base image configuration should contain an 'os' property.");

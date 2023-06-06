@@ -68,7 +68,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
             Entrypoint.Select(i => i.ItemSpec).ToArray(), EntrypointArgs.Select(i => i.ItemSpec).ToArray(),
             Cmd.Select(i => i.ItemSpec).ToArray(),
             AppCommand.Select(i => i.ItemSpec).ToArray(), AppCommandArgs.Select(i => i.ItemSpec).ToArray(), AppCommandInstruction,
-            baseImageHasEntrypoint: imageBuilder.BaseImageConfig.HasEntrypoint
+            baseImageEntrypoint: imageBuilder.BaseImageConfig.GetEntrypoint()
         );
 
         SafeLog("Building image '{0}' with tags {1} on top of base image {2}", ImageName, String.Join(",", ImageTags), sourceImageReference);
@@ -259,7 +259,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         string[] entryPoint, string[] entryPointArgs,
         string[] cmd,
         string[] appCommand, string[] appCommandArgs, string appCommandInstruction,
-        bool baseImageHasEntrypoint)
+        string[]? baseImageEntrypoint)
     {
         bool setsEntrypoint = entryPoint.Length > 0;
         bool setsCmd = cmd.Length > 0;
@@ -301,15 +301,17 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 }
                 else
                 {
-                    // error: You have specified an Entrypoint with ContainerAppCommandArgs. Set 'ContainerAppCommandInstruction' to 'Cmd' to add the application start command.
-                    //        Otherwise, use 'ContainerEntrypointArgs' or 'ContainerCmd' to specify the arguments instead of 'ContainerAppCommandArgs'.
+                    // error: You have specified a ContainerEntrypoint with ContainerAppCommandArgs. Set 'ContainerAppCommandInstruction' to 'Cmd' to add the ContainerAppCommand that starts the application.
+                    //        Alternatively, use 'ContainerEntrypointArgs' or 'ContainerCmd' to specify the arguments instead of 'ContainerAppCommandArgs'.
                     appCommandInstruction = KnownAppCommandInstructions.Cmd;
                 }
             }
             else
             {
-                // Preserve the base image entrypoint.
-                appCommandInstruction = baseImageHasEntrypoint ? KnownAppCommandInstructions.Cmd : KnownAppCommandInstructions.Entrypoint;
+                bool baseImageHasEntrypoint = baseImageEntrypoint?.Length > 0;
+                bool entryPointIsDotnet = baseImageEntrypoint?.Length == 1 && (baseImageEntrypoint[0] == "dotnet" || baseImageEntrypoint[0] == "/usr/bin/dotnet");
+                bool preserveEntrypoint = baseImageHasEntrypoint && !entryPointIsDotnet;
+                appCommandInstruction = preserveEntrypoint ? KnownAppCommandInstructions.Cmd : KnownAppCommandInstructions.Entrypoint;
             }
         }
 
