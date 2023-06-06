@@ -187,26 +187,42 @@ namespace Microsoft.Build.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                var sourceFolder = env.DefaultTestDirectory.CreateDirectory("source");
-                sourceFolder.CreateFile("source.txt");
-                var aDirectory = sourceFolder.CreateDirectory("a");
-                aDirectory.CreateFile("a.txt");
-                sourceFolder.CreateDirectory("b");
+                var s0Folder = env.DefaultTestDirectory.CreateDirectory("source0");
+                s0Folder.CreateFile("00.txt");
+                s0Folder.CreateFile("01.txt");
+                var s0AFolder = s0Folder.CreateDirectory("a");
+                s0AFolder.CreateFile("a0.txt");
+                s0AFolder.CreateFile("a1.txt");
+                _ = s0Folder.CreateDirectory("b");
+                var s0CFolder = s0Folder.CreateDirectory("c");
+                s0CFolder.CreateFile("c0.txt");
+
+                var s1Folder = env.DefaultTestDirectory.CreateDirectory("source1");
+                s1Folder.CreateFile("10.txt");
+                s1Folder.CreateFile("11.txt");
+                var s1AFolder = s1Folder.CreateDirectory("a");
+                s1AFolder.CreateFile("a0.txt");
+                s1AFolder.CreateFile("a1.txt");
+                var s1BFolder = s1Folder.CreateDirectory("b");
+                s1BFolder.CreateFile("b0.txt");
+
                 var destinationFolder = env.CreateFolder(isDestinationExists);
 
                 var task = new Copy
                 {
                     BuildEngine = new MockEngine(true),
-                    SourceFolders = new ITaskItem[] { new TaskItem(sourceFolder.Path) },
+                    SourceFolders = new ITaskItem[] { new TaskItem(s0Folder.Path), new TaskItem(s1Folder.Path) },
                     DestinationFolder = new TaskItem(destinationFolder.Path),
                     RetryDelayMilliseconds = 1,
                 };
                 task.Execute().ShouldBeTrue();
                 task.CopiedFiles.ShouldNotBeNull();
-                task.CopiedFiles.Length.ShouldBe(2);
+                task.CopiedFiles.Length.ShouldBe(10);
                 task.DestinationFiles.ShouldNotBeNull();
-                task.DestinationFiles.Length.ShouldBe(2);
+                task.DestinationFiles.Length.ShouldBe(10);
                 task.WroteAtLeastOneFile.ShouldBeTrue();
+                Directory.Exists(Path.Combine(destinationFolder.Path, "source0")).ShouldBeTrue();
+                Directory.Exists(Path.Combine(destinationFolder.Path, "source1")).ShouldBeTrue();
             }
         }
 
