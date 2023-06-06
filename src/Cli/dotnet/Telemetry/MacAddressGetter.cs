@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             {
                 var result = new ProcessStartInfo
                 {
-                    FileName = @"C:\Windows\System32\getmac.exe",
+                    FileName = @$"{Environment.GetEnvironmentVariable("SYSTEMROOT")}\System32\getmac.exe",
                     UseShellExecute = false
                 }.ExecuteAndCaptureOutput(out string stdOut, out string stdErr);
 
