@@ -52,7 +52,7 @@
     <MicrosoftExtensionsDependencyModelVersion>7.0.0</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftIORedistVersion>6.0.0</MicrosoftIORedistVersion>
     <MicrosoftNetCompilersToolsetVersion>4.7.0-2.23276.4</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.7.0-preview.2.50</NuGetBuildTasksVersion>
+    <NuGetBuildTasksVersion>6.7.0-preview.2.51</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemTextJsonVersion>7.0.0</SystemTextJsonVersion>
     <SystemThreadingTasksDataflowVersion>7.0.0</SystemThreadingTasksDataflowVersion>
