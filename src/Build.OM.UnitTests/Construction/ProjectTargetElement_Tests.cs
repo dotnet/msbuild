@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadNoTarget()
         {
             ProjectRootElement project = ProjectRootElement.Create();
-            Assert.Null(project.Targets.GetEnumerator().Current);
+            Assert.Empty(project.Targets);
         }
 
         /// <summary>
