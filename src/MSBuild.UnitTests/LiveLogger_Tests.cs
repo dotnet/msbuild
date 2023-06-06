@@ -4,35 +4,60 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Net.NetworkInformation;
+using System.Globalization;
+using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging.LiveLogger;
-using Shouldly;
+
+using VerifyTests;
+using VerifyXunit;
 using Xunit;
+
+using static VerifyXunit.Verifier;
 
 namespace Microsoft.Build.UnitTests
 {
+    [UsesVerify]
     public class LiveLogger_Tests : IEventSource, IDisposable
     {
         private const int _nodeCount = 8;
-        private const int _terminalWidth = 80;
-        private const int _terminalHeight = 40;
         private const string _eventSender = "Test";
-        private const string _projectFile = @"C:\src\project.proj";
+        private readonly string _projectFile = NativeMethods.IsUnixLike ? "/src/project.proj" : @"C:\src\project.proj";
 
-        private readonly MockTerminal _mockTerminal;
+        private StringWriter _outputWriter = new();
+
+        private readonly Terminal _mockTerminal;
         private readonly LiveLogger _liveLogger;
 
         private readonly DateTime _buildStartTime = new DateTime(2023, 3, 30, 16, 30, 0);
         private readonly DateTime _buildFinishTime = new DateTime(2023, 3, 30, 16, 30, 5);
 
+        private VerifySettings _settings = new();
+
+        private static Regex s_elapsedTime = new($@"\(\d+{Regex.Escape(CultureInfo.CurrentUICulture.NumberFormat.NumberDecimalSeparator)}\ds\)", RegexOptions.Compiled);
+
         public LiveLogger_Tests()
         {
-            _mockTerminal = new MockTerminal(_terminalWidth, _terminalHeight);
+            _mockTerminal = new Terminal(_outputWriter);
             _liveLogger = new LiveLogger(_mockTerminal);
 
             _liveLogger.Initialize(this, _nodeCount);
+
+            UseProjectRelativeDirectory("Snapshots");
+
+            // Scrub timestamps on intermediate execution lines,
+            // which are subject to the vagaries of the test machine
+            // and OS scheduler.
+            _settings.AddScrubber(static lineBuilder =>
+            {
+                string line = lineBuilder.ToString();
+                lineBuilder.Clear();
+                lineBuilder.Append(s_elapsedTime.Replace(line, "(0.0s)"));
+            });
         }
 
         #region IEventSource implementation
@@ -173,6 +198,8 @@ namespace Microsoft.Build.UnitTests
 
             additionalCallbacks();
 
+            Thread.Sleep(1_000);
+
             TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "Task", succeeded));
             TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile, "Build", succeeded));
 
@@ -181,50 +208,42 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void PrintsBuildSummary_Succeeded()
+        public Task PrintsBuildSummary_Succeeded()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () => { });
-            _mockTerminal.GetLastLine().WithoutAnsiCodes().ShouldBe("Build succeeded in 5.0s");
+
+            return Verify(_outputWriter.ToString(), _settings);
         }
 
         [Fact]
-        public void PrintBuildSummary_SucceededWithWarnings()
+        public Task PrintBuildSummary_SucceededWithWarnings()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning!"));
             });
-            _mockTerminal.GetLastLine().WithoutAnsiCodes().ShouldBe("Build succeeded with warnings in 5.0s");
+
+            return Verify(_outputWriter.ToString(), _settings);
         }
 
         [Fact]
-        public void PrintBuildSummary_Failed()
+        public Task PrintBuildSummary_Failed()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () => { });
-            _mockTerminal.GetLastLine().WithoutAnsiCodes().ShouldBe("Build failed in 5.0s");
+            return Verify(_outputWriter.ToString(), _settings);
         }
 
         [Fact]
-        public void PrintBuildSummary_FailedWithErrors()
+        public Task PrintBuildSummary_FailedWithErrors()
         {
-            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
-            {
-                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
-            });
-            _mockTerminal.GetLastLine().WithoutAnsiCodes().ShouldBe("Build failed with errors in 5.0s");
+           InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
+           {
+               ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
+           });
+
+           return Verify(_outputWriter.ToString(), _settings);
         }
 
         #endregion
-
-    }
-
-    internal static class StringVT100Extensions
-    {
-        private static Regex s_removeAnsiCodes = new Regex("\\x1b\\[[0-9;]*[mGKHF]");
-
-        public static string WithoutAnsiCodes(this string text)
-        {
-            return s_removeAnsiCodes.Replace(text, string.Empty);
-        }
     }
 }

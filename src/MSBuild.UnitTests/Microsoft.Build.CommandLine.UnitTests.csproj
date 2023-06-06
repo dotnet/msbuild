@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Shouldly" />
     <PackageReference Include="System.Net.Http" />
+    <PackageReference Include="Verify.Xunit" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,9 +45,6 @@
     <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />
     <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" />
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
-
-    <Compile Remove="LiveLogger_Tests.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'" />
-    <Compile Remove="MockTerminal.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'" />
 
     <EmbeddedResource Include="..\MSBuild\MSBuild\Microsoft.Build.Core.xsd">
       <Link>Microsoft.Build.Core.xsd</Link>
