@@ -92,7 +92,7 @@ namespace Microsoft.Build.Shared
                 path,
                 pattern,
                 projectDirectory,
-                stripProjectDirectory).ToArray(),
+                stripProjectDirectory),
             fileEntryExpansionCache)
         {
         }
