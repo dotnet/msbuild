@@ -29,7 +29,7 @@
                           OutputItemType="ContainerLibraryOutput"/>
 
         <ProjectReference Include="../../Cli/Microsoft.DotNet.Cli.Utils/Microsoft.DotNet.Cli.Utils.csproj"
-                          SetTargetFramework="TargetFramework=$(TargetFramework)"
+                          SetTargetFramework="TargetFramework=$(ResolverTargetFramework)"
                           OutputItemType="DotNetCliUtilsLibraryOutput"/>
 
         <ProjectReference Include="../Microsoft.NET.Build.Containers/Microsoft.NET.Build.Containers.csproj"
