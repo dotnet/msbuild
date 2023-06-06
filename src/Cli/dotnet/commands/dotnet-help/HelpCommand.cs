@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Help
             {
                 psInfo = new ProcessStartInfo
                 {
-                    FileName = @"C:\WINDOWS\system32\cmd.exe",
+                    FileName = @$"{Environment.GetEnvironmentVariable("SYSTEMROOT")}\system32\cmd.exe",
                     Arguments = $"/c start {docUrl}"
                 };
             }
