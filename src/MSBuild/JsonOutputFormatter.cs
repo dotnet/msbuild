@@ -3,7 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -13,13 +14,12 @@ namespace Microsoft.Build.CommandLine
 {
     internal class JsonOutputFormatter
     {
-        private JsonDictionary dictionary = new();
+        private static readonly JsonSerializerOptions Options = new() { AllowTrailingCommas = true, WriteIndented = true };
+        private readonly JsonNode _topLevelNode = new JsonObject();
 
         public override string ToString()
         {
-            StringBuilder sb = new();
-            dictionary.ToString(sb, 0);
-            return sb.ToString();
+            return _topLevelNode.ToJsonString(Options);
         }
 
         internal void AddPropertiesInJsonFormat(string[] propertyNames, Func<string, string> getProperty)
@@ -29,13 +29,13 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            JsonDictionary dict = new();
+            JsonNode propertiesNode = new JsonObject();
             foreach (string property in propertyNames)
             {
-                dict.Add(property, new JsonString(getProperty(property)));
+                propertiesNode[property] = getProperty(property);
             }
 
-            dictionary.Add("Properties", dict);
+            _topLevelNode["Properties"] = propertiesNode;
         }
 
         internal void AddItemInstancesInJsonFormat(string[] itemNames, ProjectInstance project)
@@ -45,30 +45,30 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            JsonDictionary dict = new();
+            JsonNode itemsNode = new JsonObject();
             foreach (string itemName in itemNames)
             {
                 JsonArray itemArray = new();
                 foreach (ProjectItemInstance item in project.GetItems(itemName))
                 {
-                    JsonDictionary itemDictionary = new();
+                    JsonObject jsonItem = new();
                     foreach (ProjectMetadataInstance metadatum in item.Metadata)
                     {
-                        itemDictionary.Add(metadatum.Name, new JsonString(metadatum.EvaluatedValue));
+                        jsonItem[metadatum.Name] = metadatum.EvaluatedValue;
                     }
 
                     foreach (string metadatumName in FileUtilities.ItemSpecModifiers.All)
                     {
-                        itemDictionary.Add(metadatumName, new JsonString(item.GetMetadataValue(metadatumName)));
+                        jsonItem[metadatumName] = item.GetMetadataValue(metadatumName);
                     }
 
-                    itemArray.Add(itemDictionary);
+                    itemArray.Add(jsonItem);
                 }
 
-                dict.Add(itemName, itemArray);
+                itemsNode[itemName] = itemArray;
             }
 
-            dictionary.Add("Items", dict);
+            _topLevelNode["Items"] = itemsNode;
         }
 
         internal void AddItemsInJsonFormat(string[] itemNames, Project project)
@@ -78,30 +78,30 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            JsonDictionary dict = new();
+            JsonObject itemsNode = new();
             foreach (string itemName in itemNames)
             {
                 JsonArray itemArray = new();
                 foreach (ProjectItem item in project.GetItems(itemName))
                 {
-                    JsonDictionary itemDictionary = new();
+                    JsonObject jsonItem = new();
                     foreach (ProjectMetadata metadatum in item.Metadata)
                     {
-                        itemDictionary.Add(metadatum.Name, new JsonString(metadatum.EvaluatedValue));
+                        jsonItem[metadatum.Name] = metadatum.EvaluatedValue;
                     }
 
                     foreach (string metadatumName in FileUtilities.ItemSpecModifiers.All)
                     {
-                        itemDictionary.Add(metadatumName, new JsonString(item.GetMetadataValue(metadatumName)));
+                        jsonItem[metadatumName] = item.GetMetadataValue(metadatumName);
                     }
 
-                    itemArray.Add(itemDictionary);
+                    itemArray.Add(jsonItem);
                 }
 
-                dict.Add(itemName, itemArray);
+                itemsNode[itemName] = itemArray;
             }
 
-            dictionary.Add("Items", dict);
+            _topLevelNode["Items"] = itemsNode;
         }
 
         internal void AddTargetResultsInJsonFormat(string[] targetNames, BuildResult result)
@@ -111,106 +111,29 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            JsonDictionary dict = new();
+            JsonObject targetResultsNode = new();
             foreach (string targetName in targetNames)
             {
                 TargetResult targetResult = result.ResultsByTarget[targetName];
-                JsonDictionary targetResultsDictionary = new();
-                targetResultsDictionary.Add("Result", new JsonString(targetResult.ResultCode.ToString()));
+                JsonObject targetResults = new();
+                targetResults["Result"] = targetResult.ResultCode.ToString();
                 JsonArray outputArray = new();
                 foreach (ITaskItem item in targetResult.Items)
                 {
-                    JsonDictionary itemDict = new();
+                    JsonObject jsonItem = new();
                     foreach (KeyValuePair<string, string> metadatum in item.EnumerateMetadata())
                     {
-                        itemDict.Add(metadatum.Key, new JsonString(metadatum.Value));
+                        jsonItem[metadatum.Key] = metadatum.Value;
                     }
 
-                    outputArray.Add(itemDict);
+                    outputArray.Add(jsonItem);
                 }
 
-                targetResultsDictionary.Add("Items", outputArray);
-                dict.Add(targetName, targetResultsDictionary);
+                targetResults["Items"] = outputArray;
+                targetResultsNode[targetName] = targetResults;
             }
 
-            dictionary.Add("Target Results", dict);
-        }
-    }
-
-    internal interface IJsonObject
-    {
-        public void ToString(StringBuilder sb, int indent);
-    }
-
-    internal class JsonString : IJsonObject
-    {
-        private string str;
-
-        internal JsonString(string s)
-        {
-            str = s;
-        }
-
-        public void ToString(StringBuilder sb, int indent)
-        {
-            sb.AppendLine($"\"{str}\",");
-        }
-    }
-
-    internal class JsonArray : IJsonObject
-    {
-        private List<JsonDictionary> objects;
-        internal JsonArray()
-        {
-            objects = new();
-        }
-
-        public void ToString(StringBuilder sb, int indent)
-        {
-            sb.AppendLine();
-            sb.AppendLine(new string('\t', indent) + '[');
-            foreach (JsonDictionary obj in objects)
-            {
-                obj.ToString(sb, indent + 1);
-            }
-
-            sb.AppendLine(new string('\t', indent) + ']' + ',');
-        }
-
-        internal void Add(JsonDictionary obj)
-        {
-            objects.Add(obj);
-        }
-    }
-
-    internal class JsonDictionary : IJsonObject
-    {
-        private Dictionary<string, IJsonObject> dict;
-        internal JsonDictionary()
-        {
-            dict = new();
-        }
-
-        public void ToString(StringBuilder sb, int indent)
-        {
-            sb.AppendLine(new string('\t', indent) + '{');
-            foreach (KeyValuePair<string, IJsonObject> kvp in dict)
-            {
-                sb.Append(new string('\t', indent + 1) + $"\"{kvp.Key}\": ");
-                if (kvp.Value is JsonDictionary)
-                {
-                    sb.AppendLine();
-                }
-
-                kvp.Value.ToString(sb, indent + 1);
-            }
-
-            sb.AppendLine(new string('\t', indent) + "},");
-        }
-
-        internal void Add(string name, IJsonObject value)
-        {
-            dict[name] = value;
+            _topLevelNode["Target Results"] = targetResultsNode;
         }
     }
 }
