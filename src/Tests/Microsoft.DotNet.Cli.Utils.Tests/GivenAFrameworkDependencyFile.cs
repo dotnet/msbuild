@@ -19,8 +19,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             _testRuntimeGraph = new List<RuntimeFallbacks>
             {
                 new RuntimeFallbacks("win-x64", new [] { "win", "any", "base" }),
-                new RuntimeFallbacks("win8", new [] { "win7", "win", "any", "base" }),
-                new RuntimeFallbacks($"{ToolsetInfo.LatestWinRuntimeIdentifier}", new [] { "win", "any", "base" }),
+                new RuntimeFallbacks(ToolsetInfo.LatestWinRuntimeIdentifier, new [] { "win7", "win", "any", "base" }),
+                new RuntimeFallbacks(ToolsetInfo.LatestWinRuntimeIdentifier, new [] { "win", "any", "base" }),
                 new RuntimeFallbacks("win", new [] { "any", "base" }),
             };
         }
