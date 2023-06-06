@@ -103,7 +103,7 @@ partial class CreateNewImage
     public ITaskItem[] AppCommandArgs { get; set; }
 
     /// <summary>
-    /// The Dockerfile instruction used for AppCommand. Can be set to 'Cmd', 'Entrypoint', 'None' (not used), '' (default).
+    /// The Dockerfile instruction used for AppCommand. Can be set to 'Cmd', 'Entrypoint', 'None', '' (default).
     /// </summary>
     public string AppCommandInstruction { get; set; }
 

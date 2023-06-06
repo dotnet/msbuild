@@ -446,15 +446,6 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("TooManyRetries", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to CONTAINER2006: Unknown AppCommandInstruction &apos;{0}&apos;. Valid instructions are {1}..
-        /// </summary>
-        internal static string UnknownAppCommandInstruction {
-            get {
-                return ResourceManager.GetString("UnknownAppCommandInstruction", resourceCulture);
-            }
-        }
 
         /// <summary>
         ///   Looks up a localized string similar to CONTAINER2002: Unknown local registry type &apos;{0}&apos;. Valid local container registry types are {1}..
@@ -480,6 +471,60 @@ namespace Microsoft.NET.Build.Containers.Resources {
         internal static string UnrecognizedMediaType {
             get {
                 return ResourceManager.GetString("UnrecognizedMediaType", resourceCulture);
+            }
+        }
+
+        internal static string UnknownAppCommandInstruction {
+            get {
+                return ResourceManager.GetString("UnknownAppCommandInstruction", resourceCulture);
+            }
+        }
+
+        internal static string CmdSetNoAppCommandInstruction {
+            get {
+                return ResourceManager.GetString("CmdSetNoAppCommandInstruction", resourceCulture);
+            }
+        }
+
+        internal static string EntrypointAndAppCommandArgsSetNoAppCommandInstruction {
+            get {
+                return ResourceManager.GetString("EntrypointAndAppCommandArgsSetNoAppCommandInstruction", resourceCulture);
+            }
+        }
+
+        internal static string EntrypointArgsSetNoEntrypoint {
+            get {
+                return ResourceManager.GetString("EntrypointArgsSetNoEntrypoint", resourceCulture);
+            }
+        }
+
+        internal static string AppCommandArgsSetNoAppCommand {
+            get {
+                return ResourceManager.GetString("AppCommandArgsSetNoAppCommand", resourceCulture);
+            }
+        }
+
+        internal static string AppCommandArgsSetNotUsed {
+            get {
+                return ResourceManager.GetString("AppCommandArgsSetNotUsed", resourceCulture);
+            }
+        }
+
+        internal static string CmdConflictAppCommand {
+            get {
+                return ResourceManager.GetString("CmdConflictAppCommand", resourceCulture);
+            }
+        }
+
+        internal static string EntrypointConflictAppCommand {
+            get {
+                return ResourceManager.GetString("EntrypointConflictAppCommand", resourceCulture);
+            }
+        }
+
+        internal static string EntrypointArgsSetPreferAppCommandArgs {
+            get {
+                return ResourceManager.GetString("EntrypointArgsSetPreferAppCommandArgs", resourceCulture);
             }
         }
     }
