@@ -738,10 +738,7 @@ namespace Microsoft.Build.Tasks
                         string src = FileUtilities.NormalizePath(sourceFolder.ItemSpec);
                         string srcName = Path.GetFileName(src);
 
-                        // TODO: Add check for *DriveEnumeratingWildcard action after calling GetFiles
-                        string[] filesInFolder;
-                        FileMatcher.SearchAction action = FileMatcher.SearchAction.None;
-                        (filesInFolder, action, _) = FileMatcher.Default.GetFiles(src, "**");
+                        (string[] filesInFolder, _, _) = FileMatcher.Default.GetFiles(src, "**");
 
                         foreach (string file in filesInFolder)
                         {
