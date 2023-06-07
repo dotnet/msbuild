@@ -1170,6 +1170,10 @@
     <comment>{StrBegin="MSB3825: "}</comment>
   </data>
 
+  <data name="GenerateResource.MimeTypeNotSupportedOnCore">
+    <value>MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</value>
+    <comment>{StrBegin="MSB3826: "}</comment>
+  </data>
 
   <!--
         The GetAssemblyIdentity message bucket is: MSB3441 - MSB3450
@@ -1744,7 +1748,7 @@
   <data name="ResolveAssemblyReference.TargetFrameworkSubsetLogHeader">
     <value>TargetFramework Profile List Information:</value>
   </data>
-  <data name="ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader">
+  <data name="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
     <value>TargetFramework Profile List Paths:</value>
   </data>
   <data name="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">

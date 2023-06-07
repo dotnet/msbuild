@@ -66,8 +66,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private readonly ConcurrentDictionary<AssemblyNameExtension, AssemblyNameExtension> _remappingCache = new ConcurrentDictionary<AssemblyNameExtension, AssemblyNameExtension>(AssemblyNameComparer.GenericComparerConsiderRetargetable);
 
-        // List of cached BlackList RedistList objects, the key is a semi-colon delimited list of data file paths
-        private readonly ConcurrentDictionary<string, Dictionary<string, string>> _cachedBlackList = new ConcurrentDictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+        // List of cached DenyList RedistList objects, the key is a semi-colon delimited list of data file paths
+        private readonly ConcurrentDictionary<string, Dictionary<string, string>> _cachedDenyList = new ConcurrentDictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
 
         /***************Fields which are only set in the constructor and should not be modified by the class. **********************/
         // Array of errors encountered while reading files.
@@ -500,27 +500,27 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// This method will take a list of AssemblyTableInfo and generate a black list by subtracting the
-        /// assemblies listed in the WhiteList from the RedistList.
+        /// This method will take a list of AssemblyTableInfo and generate a deny list by subtracting the
+        /// assemblies listed in the AllowList from the RedistList.
         ///
         /// 1) If there are assemblies in the redist list and one or more client subset files are read in with matching names then
-        ///    the subtraction will take place. If there were no matching redist lists read in the black list will be empty.
+        ///    the subtraction will take place. If there were no matching redist lists read in the deny list will be empty.
         ///
-        /// 2) If the subset has a matching name but there are no files inside of it then the black list will contain ALL files in the redist list.
+        /// 2) If the subset has a matching name but there are no files inside of it then the deny list will contain ALL files in the redist list.
         ///
-        /// 3) If the redist list assembly has a null or empty redist name or the subset list has a null or empty subset name they will not be used for black list generation.
+        /// 3) If the redist list assembly has a null or empty redist name or the subset list has a null or empty subset name they will not be used for deny list generation.
         ///
-        /// When generating the blacklist, we will first see if the black list is in the appdomain wide cache
-        /// so that we do not regenerate one for multiple calls using the same whiteListAssemblyTableInfo.
+        /// When generating the denylist, we will first see if the deny list is in the appdomain wide cache
+        /// so that we do not regenerate one for multiple calls using the same allowListAssemblyTableInfo.
         ///
         /// </summary>
-        /// <param name="whiteListAssemblyTableInfo">List of paths to white list xml files</param>
-        /// <param name="whiteListErrors">List of white listed errors</param>
-        /// <param name="whiteListErrorFileNames">List of white listed error file names</param>
-        /// <returns>A dictionary containing the full assembly names of black listed assemblies as the key, and null as the value.
+        /// <param name="allowListAssemblyTableInfo">List of paths to allow list xml files</param>
+        /// <param name="allowListErrors">List of allow listed errors</param>
+        /// <param name="allowListErrorFileNames">List of allow listed error file names</param>
+        /// <returns>A dictionary containing the full assembly names of deny listed assemblies as the key, and null as the value.
         ///          If there is no assemblies in the redist list null is returned.
         /// </returns>
-        internal Dictionary<string, string> GenerateBlackList(AssemblyTableInfo[] whiteListAssemblyTableInfo, List<Exception> whiteListErrors, List<string> whiteListErrorFileNames)
+        internal Dictionary<string, string> GenerateDenyList(AssemblyTableInfo[] allowListAssemblyTableInfo, List<Exception> allowListErrors, List<string> allowListErrorFileNames)
         {
             // Return null if there are no assemblies in the redist list.
             if (_assemblyList.Count == 0)
@@ -528,44 +528,44 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
 
-            // Sort so that the same set of whiteListAssemblyTableInfo will generate the same key for the cache
-            Array.Sort(whiteListAssemblyTableInfo);
+            // Sort so that the same set of allowListAssemblyTableInfo will generate the same key for the cache
+            Array.Sort(allowListAssemblyTableInfo);
 
-            var keyBuilder = whiteListAssemblyTableInfo.Length > 0 ? new StringBuilder(whiteListAssemblyTableInfo[0].Descriptor) : new StringBuilder();
+            var keyBuilder = allowListAssemblyTableInfo.Length > 0 ? new StringBuilder(allowListAssemblyTableInfo[0].Descriptor) : new StringBuilder();
 
-            // Concatenate the paths to the whitelist xml files together to get the key into the blacklist cache.
-            for (int i = 1; i < whiteListAssemblyTableInfo.Length; ++i)
+            // Concatenate the paths to the allowlist xml files together to get the key into the denylist cache.
+            for (int i = 1; i < allowListAssemblyTableInfo.Length; ++i)
             {
                 keyBuilder.Append(';');
-                keyBuilder.Append(whiteListAssemblyTableInfo[i].Descriptor);
+                keyBuilder.Append(allowListAssemblyTableInfo[i].Descriptor);
             }
 
             string key = keyBuilder.ToString();
 
-            if (!_cachedBlackList.TryGetValue(key, out Dictionary<string, string> returnTable))
+            if (!_cachedDenyList.TryGetValue(key, out Dictionary<string, string> returnTable))
             {
-                var whiteListAssemblies = new List<AssemblyEntry>();
+                var allowListAssemblies = new List<AssemblyEntry>();
 
                 // Unique list of redist names in the subset files read in. We use this to make sure we are subtracting from the correct framework list.
                 var uniqueClientListNames = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
-                // Get the assembly entries for the white list
-                foreach (AssemblyTableInfo info in whiteListAssemblyTableInfo)
+                // Get the assembly entries for the allow list
+                foreach (AssemblyTableInfo info in allowListAssemblyTableInfo)
                 {
-                    var whiteListAssembliesReadIn = new List<AssemblyEntry>();
+                    var allowListAssembliesReadIn = new List<AssemblyEntry>();
 
                     // Need to know how many errors are in the list before the read file call so that if the redist name is null due to an error
                     // we do not get a "redist name is null or empty" error when in actual fact it was a file not found error.
-                    int errorsBeforeReadCall = whiteListErrors.Count;
+                    int errorsBeforeReadCall = allowListErrors.Count;
 
                     // Read in the subset list file. 
-                    string redistName = ReadFile(info, whiteListAssembliesReadIn, whiteListErrors, whiteListErrorFileNames, null);
+                    string redistName = ReadFile(info, allowListAssembliesReadIn, allowListErrors, allowListErrorFileNames, null);
 
                     // Get the client subset name which has been read in.
                     if (!String.IsNullOrEmpty(redistName))
                     {
-                        // Populate the list of assemblies which are to be used as white list assemblies.
-                        whiteListAssemblies.AddRange(whiteListAssembliesReadIn);
+                        // Populate the list of assemblies which are to be used as allow list assemblies.
+                        allowListAssemblies.AddRange(allowListAssembliesReadIn);
 
                         // We may have the same redist name for multiple files, we only want to get the set of unique names.
                         if (!uniqueClientListNames.ContainsKey(redistName))
@@ -577,22 +577,22 @@ namespace Microsoft.Build.Tasks
                     {
                         // There are no extra errors reading in the subset list file which would have caused the redist list name to be null or empty.
                         // This means the redist name read in must be null or empty
-                        if (whiteListErrors.Count == errorsBeforeReadCall)
+                        if (allowListErrors.Count == errorsBeforeReadCall)
                         {
-                            // The whiteList errors passes back problems reading the redist file through the use of an array containing exceptions
-                            whiteListErrors.Add(new Exception(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.NoSubSetRedistListName", info.Path)));
-                            whiteListErrorFileNames.Add(info.Path);
+                            // The allowList errors passes back problems reading the redist file through the use of an array containing exceptions
+                            allowListErrors.Add(new Exception(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.NoSubSetRedistListName", info.Path)));
+                            allowListErrorFileNames.Add(info.Path);
                         }
                     }
                 }
 
                 // Dont care about the case of the assembly name
-                var blackList = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                var denyList = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
                 // Do we have any subset names?
                 bool uniqueClientNamesExist = uniqueClientListNames.Count > 0;
 
-                // Fill the hashtable with the entries, if there are no white list assemblies the black list will contain all assemblies in the redist list
+                // Fill the hashtable with the entries, if there are no allow list assemblies the deny list will contain all assemblies in the redist list
                 foreach (AssemblyEntry entry in _assemblyList)
                 {
                     string entryFullName = entry.FullName;
@@ -605,32 +605,32 @@ namespace Microsoft.Build.Tasks
 
                     string hashKey = entryFullName + "," + redistName;
 
-                    // If there were no subset list names read in we cannot generate a black list. (warnings will be logged as part of the reading of the subset list).
+                    // If there were no subset list names read in we cannot generate a deny list. (warnings will be logged as part of the reading of the subset list).
                     if (uniqueClientNamesExist)
                     {
-                        if (!blackList.ContainsKey(hashKey) && uniqueClientListNames.ContainsKey(redistName))
+                        if (!denyList.ContainsKey(hashKey) && uniqueClientListNames.ContainsKey(redistName))
                         {
-                            blackList[hashKey] = entryFullName;
+                            denyList[hashKey] = entryFullName;
                         }
                     }
                 }
 
-                // Go through each of the white list assemblies and remove it from the black list. Do this based on the assembly name and the redist name
-                foreach (AssemblyEntry whiteListEntry in whiteListAssemblies)
+                // Go through each of the allow list assemblies and remove it from the deny list. Do this based on the assembly name and the redist name
+                foreach (AssemblyEntry allowListEntry in allowListAssemblies)
                 {
-                    blackList.Remove(whiteListEntry.FullName + "," + whiteListEntry.RedistName);
+                    denyList.Remove(allowListEntry.FullName + "," + allowListEntry.RedistName);
                 }
 
                 // The output dictionary needs to be just the full names and not the names + redist name
-                var blackListOfAssemblyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                foreach (string name in blackList.Values)
+                var denyListOfAssemblyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (string name in denyList.Values)
                 {
-                    blackListOfAssemblyNames[name] = null;
+                    denyListOfAssemblyNames[name] = null;
                 }
 
-                _cachedBlackList.TryAdd(key, blackListOfAssemblyNames);
+                _cachedDenyList.TryAdd(key, denyListOfAssemblyNames);
 
-                return blackListOfAssemblyNames;
+                return denyListOfAssemblyNames;
             }
 
             return returnTable;
@@ -929,7 +929,7 @@ namespace Microsoft.Build.Tasks
     }
 
     /// <summary>
-    /// Internal class representing a redist list or whitelist and its corresponding framework directory.
+    /// Internal class representing a redist list or allowlist and its corresponding framework directory.
     /// </summary>
     internal class AssemblyTableInfo : IComparable
     {
@@ -955,7 +955,7 @@ namespace Microsoft.Build.Tasks
     }
 
     /// <summary>
-    /// Provide a mechanism to determine where the subset white lists are located by searching the target framework folders
+    /// Provide a mechanism to determine where the subset allow lists are located by searching the target framework folders
     /// for a list of provided subset list names.
     /// </summary>
     internal class SubsetListFinder

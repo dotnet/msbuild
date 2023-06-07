@@ -100,15 +100,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// - The AutoUnify flag is set to 'true'.
         /// - Version 1.0.0.0 of UnifyMe exists.
         /// - Version 2.0.0.0 of UnifyMe exists.
-        ///   - DependsOnUnified 2.0.0.0 is on the black list. 
+        ///   - DependsOnUnified 2.0.0.0 is on the deny list. 
         /// Expected:
         /// - There should be exactly one UnifyMe dependency returned and it should be version 1.0.0.0.
         /// Rationale:
         /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly 
-        /// dependency seen. However if the higher assembly is a dependency of an assembly in the black list it should not be considered during unification.
+        /// dependency seen. However if the higher assembly is a dependency of an assembly in the deny list it should not be considered during unification.
         /// </summary>
         [Fact]
-        public void ExistsWithPrimaryReferenceOnBlackList()
+        public void ExistsWithPrimaryReferenceOnDenyList()
         {
             string implicitRedistListContents =
                 "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
@@ -178,16 +178,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// - The AutoUnify flag is set to 'true'.
         /// - Version 1.0.0.0 of UnifyMe exists.
         /// - Version 2.0.0.0 of UnifyMe exists.
-        /// - UnifyMe 2.0.0.0 is on the black list
+        /// - UnifyMe 2.0.0.0 is on the deny list
         /// Expected:
         /// - There should be exactly one UnifyMe dependency returned and it should be version 1.0.0.0.
-        ///  Also there should be a warning about the primary reference DependsOnUnified 2.0.0.0 having a dependency which was in the black list.
+        ///  Also there should be a warning about the primary reference DependsOnUnified 2.0.0.0 having a dependency which was in the deny list.
         /// Rationale:
         /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly 
-        /// dependency seen. However if the higher assembly is a dependency of an assembly in the black list it should not be considered during unification.
+        /// dependency seen. However if the higher assembly is a dependency of an assembly in the deny list it should not be considered during unification.
         /// </summary>
         [Fact]
-        public void ExistsPromotedDependencyInTheBlackList()
+        public void ExistsPromotedDependencyInTheDenyList()
         {
             string implicitRedistListContents =
                 "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
@@ -258,14 +258,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// - The AutoUnify flag is set to 'true'.
         /// - Version 1.0.0.0 of UnifyMe exists.
         /// - Version 2.0.0.0 of UnifyMe exists.
-        ///   - UnifyMe 2.0.0.0 is on the black list because it is higher than what is in the redist list, 1.0.0.0 is also in a black list because it is not in the subset but is in the redist list.
+        ///   - UnifyMe 2.0.0.0 is on the deny list because it is higher than what is in the redist list, 1.0.0.0 is also in a deny list because it is not in the subset but is in the redist list.
         /// Expected:
         /// - There should be no UnifyMe dependency returned 
-        /// There should be a warning indicating the primary reference DependsOnUnified 1.0.0.0 has a dependency that in the black list
-        /// There should be a warning indicating the primary reference DependsOnUnified 2.0.0.0 has a dependency that in the black list
+        /// There should be a warning indicating the primary reference DependsOnUnified 1.0.0.0 has a dependency that in the deny list
+        /// There should be a warning indicating the primary reference DependsOnUnified 2.0.0.0 has a dependency that in the deny list
         /// </summary>
         [Fact]
-        public void ExistsWithBothDependentReferenceOnBlackList()
+        public void ExistsWithBothDependentReferenceOnDenyList()
         {
             string implicitRedistListContents =
                 "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
@@ -333,7 +333,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// - Version 1.0.0.0 of UnifyMe exists.
         /// - Version 2.0.0.0 of UnifyMe exists.
         /// - Version 3.0.0.0 of UnifyMe exists.
-        /// - Version 3.0.0.0 of DependsOn is on black list
+        /// - Version 3.0.0.0 of DependsOn is on deny list
         /// Expected:
         /// - There should be exactly one UnifyMe dependency returned and it should be version 2.0.0.0.
         /// - There should be messages saying that 2.0.0.0 was unified from 1.0.0.0.
@@ -341,7 +341,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// AutoUnify works even when unifying multiple prior versions.
         /// </summary>
         [Fact]
-        public void MultipleUnifiedFromNamesMiddlePrimaryOnBlackList()
+        public void MultipleUnifiedFromNamesMiddlePrimaryOnDenyList()
         {
             string implicitRedistListContents =
                 "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +

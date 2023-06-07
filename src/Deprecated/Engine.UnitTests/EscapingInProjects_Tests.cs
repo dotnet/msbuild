@@ -752,13 +752,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
         /// <summary>
         /// Build a .SLN file using MSBuild.  The .SLN and the projects contained within
-        /// have all sorts of crazy characters in their name (courtesy of DanMose who apparently
+        /// have all sorts of different characters in their name (courtesy of DanMose who apparently
         /// just ran his fingers up and down the on the upper row of his keyboard :) ).  There
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
         /// <owner>RGoel</owner>
         [Test]
-        public void SolutionWithLotsaCrazyCharacters()
+        public void SolutionWithLotsaDifferentCharacters()
         {
             if (ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35) == null)
             {

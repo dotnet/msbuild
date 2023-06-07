@@ -883,7 +883,7 @@ namespace System.Deployment.Internal.CodeSigning
                 // Try RFC3161 first
                 XmlElement signatureValueNode = licenseDom.SelectSingleNode("r:license/r:issuer/ds:Signature/ds:SignatureValue", nsm) as XmlElement;
                 string signatureValue = signatureValueNode.InnerText;
-                timestamp = ObtainRFC3161Timestamp(timeStampUrl, signatureValue, useSha256);
+                timestamp = ObtainRFC3161Timestamp(timeStampUrl, signatureValue, true);
             }
             // Catch CryptographicException to ensure fallback to old code (non-RFC3161)
             catch (CryptographicException)

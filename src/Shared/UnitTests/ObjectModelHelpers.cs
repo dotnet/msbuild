@@ -499,7 +499,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Parses the crazy string passed into AssertItemsMatch and returns a list of ITaskItems.
+        /// Parses the string passed into AssertItemsMatch and returns a list of ITaskItems.
         /// </summary>
         /// <param name="expectedItemsString"></param>
         /// <returns></returns>
@@ -1346,7 +1346,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private static void BuildProjectWithNewOM(string content, ref MockLogger logger, out bool result, bool allowTaskCrash, Dictionary<string, string> globalProperties = null)
         {
-            // Replace the crazy quotes with real ones
+            // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
 
             Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, toolsVersion: null);
@@ -1372,7 +1372,7 @@ namespace Microsoft.Build.UnitTests
 
         public static BuildResult BuildProjectContentUsingBuildManager(string content, MockLogger logger, BuildParameters parameters = null)
         {
-            // Replace the crazy quotes with real ones
+            // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
 
             using (var env = TestEnvironment.Create())
@@ -1426,7 +1426,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify that a drive enumerating wildcard warning is logged or exception is thrown. 
+        /// Verify that a drive enumerating wildcard warning is logged or exception is thrown.
         /// </summary>
         internal static void CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(string content, string failOnDriveEnumerationEnvVar, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
         {
