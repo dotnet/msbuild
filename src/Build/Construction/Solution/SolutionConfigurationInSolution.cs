@@ -18,6 +18,8 @@ namespace Microsoft.Build.Construction
 
         private static ImmutableDictionary<Key, string> _fullNameByKey = ImmutableDictionary<Key, string>.Empty;
 
+        private string? _fullName;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -25,7 +27,6 @@ namespace Microsoft.Build.Construction
         {
             ConfigurationName = configurationName;
             PlatformName = platformName;
-            FullName = ComputeFullName(configurationName, platformName);
         }
 
         /// <summary>
@@ -41,7 +42,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// The full name of this configuration - e.g. "Debug|Any CPU"
         /// </summary>
-        public string FullName { get; }
+        public string FullName => _fullName ??= ComputeFullName(ConfigurationName, PlatformName);
 
         /// <summary>
         /// Given a configuration name and a platform name, compute the full name

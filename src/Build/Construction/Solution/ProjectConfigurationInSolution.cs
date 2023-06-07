@@ -3,8 +3,6 @@
 
 using System;
 
-#nullable disable
-
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -12,6 +10,8 @@ namespace Microsoft.Build.Construction
     /// </summary>
     public sealed class ProjectConfigurationInSolution
     {
+        private string? _fullName;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ProjectConfigurationInSolution"/> class.
         /// </summary>
@@ -20,7 +20,6 @@ namespace Microsoft.Build.Construction
             ConfigurationName = configurationName;
             PlatformName = RemoveSpaceFromAnyCpuPlatform(platformName);
             IncludeInBuild = includeInBuild;
-            FullName = SolutionConfigurationInSolution.ComputeFullName(ConfigurationName, PlatformName);
         }
 
         /// <summary>
@@ -36,7 +35,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// The full name of this configuration - e.g. "Debug|Any CPU"
         /// </summary>
-        public string FullName { get; }
+        public string FullName => _fullName ??= SolutionConfigurationInSolution.ComputeFullName(ConfigurationName, PlatformName);
 
         /// <summary>
         /// True if this project configuration should be built as part of its parent solution configuration
