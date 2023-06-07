@@ -27,7 +27,7 @@ namespace Microsoft.Build.Shared
         internal static void ThrowInvalidProjectFile(
             BuildEventFileInfo projectFile,
             string resourceName,
-            params object[] args)
+            params object?[]? args)
         {
             ThrowInvalidProjectFile(null, projectFile, resourceName, args);
         }
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Shared
             BuildEventFileInfo projectFile,
             Exception innerException,
             string resourceName,
-            params object[] args)
+            params object?[]? args)
         {
             VerifyThrowInvalidProjectFile(false, null, projectFile, innerException, resourceName, args);
         }
@@ -68,7 +68,7 @@ namespace Microsoft.Build.Shared
             [DoesNotReturnIf(false)] bool condition,
             BuildEventFileInfo projectFile,
             string resourceName,
-            params object[] args)
+            params object?[]? args)
         {
             VerifyThrowInvalidProjectFile(condition, null, projectFile, resourceName, args);
         }
@@ -89,7 +89,7 @@ namespace Microsoft.Build.Shared
             string? errorSubCategoryResourceName,
             BuildEventFileInfo projectFile,
             string resourceName,
-            params object[] args)
+            params object?[]? args)
         {
             VerifyThrowInvalidProjectFile(false, errorSubCategoryResourceName, projectFile, null, resourceName, args);
         }
@@ -111,7 +111,7 @@ namespace Microsoft.Build.Shared
             string? errorSubCategoryResourceName,
             BuildEventFileInfo projectFile,
             string resourceName,
-            params object[] args)
+            params object?[]? args)
         {
             VerifyThrowInvalidProjectFile(condition, errorSubCategoryResourceName, projectFile, null, resourceName, args);
         }
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Shared
             BuildEventFileInfo projectFile,
             Exception? innerException,
             string resourceName,
-            params object[] args)
+            params object?[]? args)
         {
             ErrorUtilities.VerifyThrow(projectFile != null, "Must specify the invalid project file. If project file is not available, use VerifyThrowInvalidProject() and pass in the XML node instead.");
 

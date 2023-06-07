@@ -5,8 +5,6 @@ using System;
 using System.Xml;
 using Microsoft.Build.Construction;
 
-#nullable disable
-
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -27,7 +25,7 @@ namespace Microsoft.Build.Shared
         /// IF AN IELEMENTLOCATION IS AVAILABLE, USE THE OVERLOAD ACCEPTING THAT INSTEAD.
         /// </summary>
         /// <param name="file"></param>
-        internal BuildEventFileInfo(string file)
+        internal BuildEventFileInfo(string? file)
             : this(file, 0, 0, 0, 0)
         {
             // do nothing
@@ -52,7 +50,7 @@ namespace Microsoft.Build.Shared
         /// <param name="file"></param>
         /// <param name="line">Set to zero if not available.</param>
         /// <param name="column">Set to zero if not available.</param>
-        internal BuildEventFileInfo(string file, int line, int column)
+        internal BuildEventFileInfo(string? file, int line, int column)
             : this(file, line, column, 0, 0)
         {
             // do nothing
@@ -68,10 +66,10 @@ namespace Microsoft.Build.Shared
         /// <param name="column">Set to zero if not available.</param>
         /// <param name="endLine">Set to zero if not available.</param>
         /// <param name="endColumn">Set to zero if not available.</param>
-        internal BuildEventFileInfo(string file, int line, int column, int endLine, int endColumn)
+        internal BuildEventFileInfo(string? file, int line, int column, int endLine, int endColumn)
         {
             // Projects that don't have a filename when the are built should use an empty string instead.
-            _file = file ?? String.Empty;
+            _file = file ?? string.Empty;
             _line = line;
             _column = column;
             _endLine = endLine;
@@ -84,8 +82,8 @@ namespace Microsoft.Build.Shared
         /// <param name="e"></param>
         internal BuildEventFileInfo(XmlException e)
         {
-            ErrorUtilities.VerifyThrow(e != null, "Need exception context.");
-            _file = (e.SourceUri.Length == 0) ? String.Empty : new Uri(e.SourceUri).LocalPath;
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
+            _file = e.SourceUri is null or { Length: 0 } ? string.Empty : new Uri(e.SourceUri).LocalPath;
             _line = e.LineNumber;
             _column = e.LinePosition;
             _endLine = 0;
