@@ -4516,6 +4516,9 @@ namespace Microsoft.Build.Evaluation
                 return true;
             }
 
+            /// <summary>
+            /// Try to convert value to int.
+            /// </summary>
             private static bool TryConvertToInt(object value, out int arg0)
             {
                 switch (value)
@@ -4534,6 +4537,9 @@ namespace Microsoft.Build.Evaluation
                 return false;
             }
 
+            /// <summary>
+            /// Try to convert value to double.
+            /// </summary>
             private static bool TryConvertToDouble(object value, out double arg)
             {
                 if (value is double unboxed)
