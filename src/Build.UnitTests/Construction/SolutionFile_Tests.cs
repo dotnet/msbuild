@@ -5,8 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.Serialization;
 using System.Text;
 
 using Microsoft.Build.Construction;
@@ -17,8 +15,6 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-
-#nullable disable
 
 namespace Microsoft.Build.UnitTests.Construction
 {
@@ -146,35 +142,38 @@ namespace Microsoft.Build.UnitTests.Construction
             try
             {
                 // Create the first .etp project file
-                string etpProjContent = @"<?xml version=""1.0""?>
-                <EFPROJECT>
-                    <GENERAL>
-                        <BANNER>Microsoft Visual Studio Application Template File</BANNER>
-                        <VERSION>1.00</VERSION>
-                        <Views>
-                            <ProjectExplorer>
-                                <File>ClassLibrary2.csproj</File>
-                            </ProjectExplorer>
-                        </Views>
-                        <References>
-                            <Reference>
-                                <FILE>ClassLibrary2.csproj</FILE>
-                                <GUIDPROJECTID>{73D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FE}</GUIDPROJECTID>
-                            </Reference>
-                        </References>
-                    </GENERAL>
-                </EFPROJECT>";
+                string etpProjContent = """
+                    <?xml version="1.0"?>
+                    <EFPROJECT>
+                        <GENERAL>
+                            <BANNER>Microsoft Visual Studio Application Template File</BANNER>
+                            <VERSION>1.00</VERSION>
+                            <Views>
+                                <ProjectExplorer>
+                                    <File>ClassLibrary2.csproj</File>
+                                </ProjectExplorer>
+                            </Views>
+                            <References>
+                                <Reference>
+                                    <FILE>ClassLibrary2.csproj</FILE>
+                                    <GUIDPROJECTID>{73D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FE}</GUIDPROJECTID>
+                                </Reference>
+                            </References>
+                        </GENERAL>
+                    </EFPROJECT>
+                    """;
 
                 File.WriteAllText(proj1Path, etpProjContent);
 
                 // Create the SolutionFile object
                 string solutionFileContents =
-                    @"
+                    """
                     Microsoft Visual Studio Solution File, Format Version 8.00
-                        Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-                            ProjectSection(ProjectDependencies) = postProject
-                            EndProjectSection
-                        EndProject";
+                    Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                        ProjectSection(ProjectDependencies) = postProject
+                        EndProjectSection
+                    EndProject
+                    """;
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
                 // Project should get added to the solution
                 solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"someproj.etp");
@@ -237,16 +236,17 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 // Create the SolutionFile object
                 string solutionFileContents =
-                    @"
+                    """
                     Microsoft Visual Studio Solution File, Format Version 8.00
-                        Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-                            ProjectSection(ProjectDependencies) = postProject
-                            EndProjectSection
-                        EndProject
-                        Project('{NNNNNNNN-9925-4D57-9DAF-E0A9D936ABDB}') = 'someproja', 'someproja.proj', '{CCCCCCCC-9925-4D57-9DAF-E0A9D936ABDB}'
-                            ProjectSection(ProjectDependencies) = postProject
-                            EndProjectSection
-                        EndProject";
+                    Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                        ProjectSection(ProjectDependencies) = postProject
+                        EndProjectSection
+                    EndProject
+                    Project('{NNNNNNNN-9925-4D57-9DAF-E0A9D936ABDB}') = 'someproja', 'someproja.proj', '{CCCCCCCC-9925-4D57-9DAF-E0A9D936ABDB}'
+                        ProjectSection(ProjectDependencies) = postProject
+                        EndProjectSection
+                    EndProject
+                    """;
 
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
                 ProjectInSolution project = solution.ProjectsByGuid["{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}"];
@@ -270,19 +270,25 @@ namespace Microsoft.Build.UnitTests.Construction
         {
             using (var env = TestEnvironment.Create())
             {
-                string rptprojProjContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
-                    <Project xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" ToolsVersion=""2.0"">
-                      <DataSources />
-                      <Reports />
-                    </Project>";
-                string dwprojProjContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
-                    <Project xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:ddl2=""http://schemas.microsoft.com/analysisservices/2003/engine/2"" xmlns:ddl2_2=""http://schemas.microsoft.com/analysisservices/2003/engine/2/2"" xmlns:ddl100_100=""http://schemas.microsoft.com/analysisservices/2008/engine/100/100"" xmlns:ddl200=""http://schemas.microsoft.com/analysisservices/2010/engine/200"" xmlns:ddl200_200=""http://schemas.microsoft.com/analysisservices/2010/engine/200/200"" xmlns:dwd=""http://schemas.microsoft.com/DataWarehouse/Designer/1.0"">
-                      <ProductVersion />
-                      <SchemaVersion />
-                      <State />
-                      <Database />
-                      <Cubes />
-                    </Project>";
+                string rptprojProjContent =
+                    """
+                    <?xml version="1.0" encoding="utf-8"?>
+                    <Project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ToolsVersion="2.0">
+                        <DataSources />
+                        <Reports />
+                    </Project>
+                    """;
+                string dwprojProjContent =
+                    """
+                    <?xml version="1.0" encoding="utf-8"?>
+                    <Project xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ddl2="http://schemas.microsoft.com/analysisservices/2003/engine/2" xmlns:ddl2_2="http://schemas.microsoft.com/analysisservices/2003/engine/2/2" xmlns:ddl100_100="http://schemas.microsoft.com/analysisservices/2008/engine/100/100" xmlns:ddl200="http://schemas.microsoft.com/analysisservices/2010/engine/200" xmlns:ddl200_200="http://schemas.microsoft.com/analysisservices/2010/engine/200/200" xmlns:dwd="http://schemas.microsoft.com/DataWarehouse/Designer/1.0">
+                        <ProductVersion />
+                        <SchemaVersion />
+                        <State />
+                        <Database />
+                        <Cubes />
+                    </Project>
+                    """;
 
                 string rptprojPath = env.CreateFile(".rptproj").Path;
                 File.WriteAllText(rptprojPath, rptprojProjContent);
@@ -322,47 +328,55 @@ namespace Microsoft.Build.UnitTests.Construction
             try
             {
                 // Create the first .etp project file
-                string etpProjContent = @"<?xml version=""1.0""?>
-                <EFPROJECT>
-                    <GENERAL>
-                        <BANNER>Microsoft Visual Studio Application Template File</BANNER>
-                        <VERSION>1.00</VERSION>
-                        <References>
-                            <Reference>
-                                <FILE>someproj2.etp</FILE>
-                                <GUIDPROJECTID>{73D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FE}</GUIDPROJECTID>
-                            </Reference>
-                        </References>
-                    </GENERAL>
-                </EFPROJECT>";
+                string etpProjContent =
+                    """
+                    <?xml version="1.0"?>
+                    <EFPROJECT>
+                        <GENERAL>
+                            <BANNER>Microsoft Visual Studio Application Template File</BANNER>
+                            <VERSION>1.00</VERSION>
+                            <References>
+                                <Reference>
+                                    <FILE>someproj2.etp</FILE>
+                                    <GUIDPROJECTID>{73D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FE}</GUIDPROJECTID>
+                                </Reference>
+                            </References>
+                        </GENERAL>
+                    </EFPROJECT>
+                    """;
 
                 File.WriteAllText(proj1Path, etpProjContent);
 
                 // Create the second .etp project file
-                etpProjContent = @"<?xml version=""1.0""?>
-                <EFPROJECT>
-                    <GENERAL>
-                        <BANNER>Microsoft Visual Studio Application Template File</BANNER>
-                        <VERSION>1.00</VERSION>
-                        <References>
-                            <Reference>
-                                <FILE>ClassLibrary1.csproj</FILE>
-                                <GUIDPROJECTID>{83D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FF}</GUIDPROJECTID>
-                            </Reference>
-                        </References>
-                    </GENERAL>
-                </EFPROJECT>";
+                etpProjContent =
+                    """
+                    <?xml version="1.0"?>
+                    <EFPROJECT>
+                        <GENERAL>
+                            <BANNER>Microsoft Visual Studio Application Template File</BANNER>
+                            <VERSION>1.00</VERSION>
+                            <References>
+                                <Reference>
+                                    <FILE>ClassLibrary1.csproj</FILE>
+                                    <GUIDPROJECTID>{83D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FF}</GUIDPROJECTID>
+                                </Reference>
+                            </References>
+                        </GENERAL>
+                    </EFPROJECT>
+                    """;
 
                 File.WriteAllText(proj2Path, etpProjContent);
 
                 // Create the SolutionFile object
                 string solutionFileContents =
-                    @"
+                    """
+
                     Microsoft Visual Studio Solution File, Format Version 8.00
-                        Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-                            ProjectSection(ProjectDependencies) = postProject
-                            EndProjectSection
-                        EndProject";
+                    Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                        ProjectSection(ProjectDependencies) = postProject
+                        EndProjectSection
+                    EndProject
+                    """;
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
                 // Project should get added to the solution
@@ -378,130 +392,97 @@ namespace Microsoft.Build.UnitTests.Construction
             }
         }
 
-        [Fact]
-        public void TestVSAndSolutionVersionParsing()
-        {
-            // Create the SolutionFile object
-            string solutionFileContentsPriorToDev12 =
-                @"
-                    Microsoft Visual Studio Solution File, Format Version 11.00
-                        Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-                            ProjectSection(ProjectDependencies) = postProject
-                            EndProjectSection
-                        EndProject";
-
-            SolutionFile solutionPriorToDev12 = ParseSolutionHelper(solutionFileContentsPriorToDev12);
-
-            solutionPriorToDev12.Version.ShouldBe(11);
-            solutionPriorToDev12.VisualStudioVersion.ShouldBe(10);
-
-            // Create the SolutionFile object
-            string solutionFileContentsDev12 =
-                @"
-                    Microsoft Visual Studio Solution File, Format Version 11.00
-                        VisualStudioVersion = 12.0.20311.0 VSPRO_PLATFORM
-                        MinimumVisualStudioVersion = 10.0.40219.1
-                        Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-                            ProjectSection(ProjectDependencies) = postProject
-                            EndProjectSection
-                        EndProject";
-
-            SolutionFile solutionDev12 = ParseSolutionHelper(solutionFileContentsDev12);
-
-            solutionDev12.Version.ShouldBe(11);
-            solutionDev12.VisualStudioVersion.ShouldBe(12);
-
-            // Test parsing of corrupted VisualStudioVersion lines
-
+        [Theory]
+        [InlineData(
+            """
+            Microsoft Visual Studio Solution File, Format Version 11.00
+            Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                ProjectSection(ProjectDependencies) = postProject
+                EndProjectSection
+            EndProject
+            """, 11, 10)]
+        [InlineData(
+            """
+            Microsoft Visual Studio Solution File, Format Version 11.00
+            VisualStudioVersion = 12.0.20311.0 VSPRO_PLATFORM
+            MinimumVisualStudioVersion = 10.0.40219.1
+            Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                ProjectSection(ProjectDependencies) = postProject
+                EndProjectSection
+            EndProject
+            """, 11, 12)]
+        [InlineData(
             // Version number deleted
-            string solutionFileContentsDev12Corrupted1 =
-                @"
-                    Microsoft Visual Studio Solution File, Format Version 11.00
-                        VisualStudioVersion = VSPRO_PLATFORM
-                        MinimumVisualStudioVersion = 10.0.40219.1
-                        Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-                            ProjectSection(ProjectDependencies) = postProject
-                            EndProjectSection
-                        EndProject";
-
-            SolutionFile solutionDev12Corrupted1 = ParseSolutionHelper(solutionFileContentsDev12Corrupted1);
-            solutionDev12Corrupted1.Version.ShouldBe(11);
-            solutionDev12Corrupted1.VisualStudioVersion.ShouldBe(10);
-
+            """
+            Microsoft Visual Studio Solution File, Format Version 11.00
+            VisualStudioVersion = VSPRO_PLATFORM
+            MinimumVisualStudioVersion = 10.0.40219.1
+            Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                ProjectSection(ProjectDependencies) = postProject
+                EndProjectSection
+            EndProject
+            """, 11, 10)]
+        [InlineData(
             // Remove version number and VSPRO_PLATFORM tag
-            string solutionFileContentsDev12Corrupted2 =
-               @"
-                    Microsoft Visual Studio Solution File, Format Version 11.00
-                        VisualStudioVersion = 
-                        MinimumVisualStudioVersion = 10.0.40219.1
-                        Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-                            ProjectSection(ProjectDependencies) = postProject
-                            EndProjectSection
-                        EndProject";
-
-            SolutionFile solutionDev12Corrupted2 = ParseSolutionHelper(solutionFileContentsDev12Corrupted2);
-            solutionDev12Corrupted2.Version.ShouldBe(11);
-            solutionDev12Corrupted2.VisualStudioVersion.ShouldBe(10);
-
+            """
+            Microsoft Visual Studio Solution File, Format Version 11.00
+            VisualStudioVersion = 
+            MinimumVisualStudioVersion = 10.0.40219.1
+            Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                ProjectSection(ProjectDependencies) = postProject
+                EndProjectSection
+            EndProject
+            """, 11, 10)]
+        [InlineData(
             // Switch positions between VSPRO_PLATFORM tag and version number
-            string solutionFileContentsDev12Corrupted3 =
-               @"
-                    Microsoft Visual Studio Solution File, Format Version 11.00
-                        VisualStudioVersion = VSPRO_PLATFORM 12.0.20311.0
-                        MinimumVisualStudioVersion = 10.0.40219.1
-                        Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-                            ProjectSection(ProjectDependencies) = postProject
-                            EndProjectSection
-                        EndProject";
-
-            SolutionFile solutionDev12Corrupted3 = ParseSolutionHelper(solutionFileContentsDev12Corrupted3);
-            solutionDev12Corrupted3.Version.ShouldBe(11);
-            solutionDev12Corrupted3.VisualStudioVersion.ShouldBe(10);
-
+            """
+            Microsoft Visual Studio Solution File, Format Version 11.00
+            VisualStudioVersion = VSPRO_PLATFORM 12.0.20311.0
+            MinimumVisualStudioVersion = 10.0.40219.1
+            Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                ProjectSection(ProjectDependencies) = postProject
+                EndProjectSection
+            EndProject
+            """, 11, 10)]
+        [InlineData(
             // Add a number of spaces before version number and glue it together with VSPRO_PLATFORM
-            string solutionFileContentsDev12Corrupted4 =
-               @"
-                    Microsoft Visual Studio Solution File, Format Version 11.00
-                        VisualStudioVersion =                   12.0.20311.0VSPRO_PLATFORM
-                        MinimumVisualStudioVersion = 10.0.40219.1
-                        Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-                            ProjectSection(ProjectDependencies) = postProject
-                            EndProjectSection
-                        EndProject";
-
-            SolutionFile solutionDev12Corrupted4 = ParseSolutionHelper(solutionFileContentsDev12Corrupted4);
-            solutionDev12Corrupted4.Version.ShouldBe(11);
-            solutionDev12Corrupted4.VisualStudioVersion.ShouldBe(10);
-
+            """
+            Microsoft Visual Studio Solution File, Format Version 11.00
+            VisualStudioVersion =                   12.0.20311.0VSPRO_PLATFORM
+            MinimumVisualStudioVersion = 10.0.40219.1
+            Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                ProjectSection(ProjectDependencies) = postProject
+                EndProjectSection
+            EndProject
+            """, 11, 10)]
+        [InlineData(
             // Corrupted version number
-            string solutionFileContentsDev12Corrupted5 =
-               @"
-                    Microsoft Visual Studio Solution File, Format Version 11.00
-                        VisualStudioVersion = ...12..0,.20311.0 VSPRO_PLATFORM
-                        MinimumVisualStudioVersion = 10.0.40219.1
-                        Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-                            ProjectSection(ProjectDependencies) = postProject
-                            EndProjectSection
-                        EndProject";
-
-            SolutionFile solutionDev12Corrupted5 = ParseSolutionHelper(solutionFileContentsDev12Corrupted5);
-            solutionDev12Corrupted5.Version.ShouldBe(11);
-            solutionDev12Corrupted5.VisualStudioVersion.ShouldBe(10);
-
+            """
+            Microsoft Visual Studio Solution File, Format Version 11.00
+            VisualStudioVersion = ...12..0,.20311.0 VSPRO_PLATFORM
+            MinimumVisualStudioVersion = 10.0.40219.1
+            Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                ProjectSection(ProjectDependencies) = postProject
+                EndProjectSection
+            EndProject
+            """, 11, 10)]
+        [InlineData(
             // Add a number of spaces before version number
-            string solutionFileContentsDev12Corrupted6 =
-               @"
-                    Microsoft Visual Studio Solution File, Format Version 11.00
-                        VisualStudioVersion =                   12.0.20311.0 VSPRO_PLATFORM
-                        MinimumVisualStudioVersion = 10.0.40219.1
-                        Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-                            ProjectSection(ProjectDependencies) = postProject
-                            EndProjectSection
-                        EndProject";
+            """
+            Microsoft Visual Studio Solution File, Format Version 11.00
+            VisualStudioVersion =                   12.0.20311.0 VSPRO_PLATFORM
+            MinimumVisualStudioVersion = 10.0.40219.1
+            Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                ProjectSection(ProjectDependencies) = postProject
+                EndProjectSection
+            EndProject
+            """, 11, 12)]
+        public void TestVSAndSolutionVersionParsing(string solutionFileContent, int expectedFileFormatVersion, int expectedVisualStudioVersion)
+        {
+            SolutionFile solutionFile = ParseSolutionHelper(solutionFileContent);
 
-            SolutionFile solutionDev12Corrupted6 = ParseSolutionHelper(solutionFileContentsDev12Corrupted6);
-            solutionDev12Corrupted6.Version.ShouldBe(11);
-            solutionDev12Corrupted6.VisualStudioVersion.ShouldBe(12);
+            solutionFile.Version.ShouldBe(expectedFileFormatVersion);
+            solutionFile.VisualStudioVersion.ShouldBe(expectedVisualStudioVersion);
         }
 
         /// <summary>
@@ -518,53 +499,62 @@ namespace Microsoft.Build.UnitTests.Construction
             try
             {
                 // Create the first .etp project file
-                string etpProjContent = @"<?xml version=""1.0""?>
-                <EFPROJECT>
-                    <GENERAL>
-                        <BANNER>Microsoft Visual Studio Application Template File</BANNER>
-                        <VERSION>1.00</VERSION>
-                        <References>
-                            <Reference>
-                                <FILE>someproj2.etp</FILE>
-                                <GUIDPROJECTID>{73D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FE}</GUIDPROJECTID>
-                            </Reference>
-                        </References>
-                    </GENERAL>
-                </EFPROJECT>";
+                string etpProjContent =
+                    """
+                    <?xml version="1.0"?>
+                    <EFPROJECT>
+                        <GENERAL>
+                            <BANNER>Microsoft Visual Studio Application Template File</BANNER>
+                            <VERSION>1.00</VERSION>
+                            <References>
+                                <Reference>
+                                    <FILE>someproj2.etp</FILE>
+                                    <GUIDPROJECTID>{73D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FE}</GUIDPROJECTID>
+                                </Reference>
+                            </References>
+                        </GENERAL>
+                    </EFPROJECT>
+                    """;
 
                 File.WriteAllText(proj1Path, etpProjContent);
 
                 // Create the second .etp project file
-                etpProjContent = @"<?xml version=""1.0""?>
-                <EFPROJECT>
-                    <GENERAL>
-                        <BANNER>Microsoft Visual Studio Application Template File</BANNER>
-                        <VERSION>1.00</VERSION>
-                        <References>
-                            <Reference>
-                                <FILE>ETPProjUpgradeTest\someproj3.etp</FILE>
-                                <GUIDPROJECTID>{83D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FF}</GUIDPROJECTID>
-                            </Reference>
-                        </References>
-                    </GENERAL>
-                </EFPROJECT>";
+                etpProjContent =
+                    """
+                    <?xml version="1.0"?>
+                    <EFPROJECT>
+                        <GENERAL>
+                            <BANNER>Microsoft Visual Studio Application Template File</BANNER>
+                            <VERSION>1.00</VERSION>
+                            <References>
+                                <Reference>
+                                    <FILE>ETPProjUpgradeTest\someproj3.etp</FILE>
+                                    <GUIDPROJECTID>{83D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FF}</GUIDPROJECTID>
+                                </Reference>
+                            </References>
+                        </GENERAL>
+                    </EFPROJECT>
+                    """;
 
                 File.WriteAllText(proj2Path, etpProjContent);
 
                 // Create the third .etp project file
-                etpProjContent = @"<?xml version=""1.0""?>
-                <EFPROJECT>
-                    <GENERAL>
-                        <BANNER>Microsoft Visual Studio Application Template File</BANNER>
-                        <VERSION>1.00</VERSION>
-                        <References>
-                            <Reference>
-                                <FILE>" + Path.Combine("..", "SomeFolder", "ClassLibrary1.csproj") + @"</FILE>
-                                <GUIDPROJECTID>{83D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FF}</GUIDPROJECTID>
-                            </Reference>
-                        </References>
-                    </GENERAL>
-                </EFPROJECT>";
+                etpProjContent =
+                    $$"""
+                    <?xml version="1.0"?>
+                    <EFPROJECT>
+                        <GENERAL>
+                            <BANNER>Microsoft Visual Studio Application Template File</BANNER>
+                            <VERSION>1.00</VERSION>
+                            <References>
+                                <Reference>
+                                    <FILE>{{Path.Combine("..", "SomeFolder", "ClassLibrary1.csproj")}}</FILE>
+                                    <GUIDPROJECTID>{83D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FF}</GUIDPROJECTID>
+                                </Reference>
+                            </References>
+                        </GENERAL>
+                    </EFPROJECT>
+                    """;
 
                 // Create the directory for the third project
                 Directory.CreateDirectory(Path.Combine(FileUtilities.TempFileDirectory, "ETPProjUpgradeTest"));
@@ -572,12 +562,13 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 // Create the SolutionFile object
                 string solutionFileContents =
-                    @"
+                    """
                     Microsoft Visual Studio Solution File, Format Version 8.00
-                        Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-                            ProjectSection(ProjectDependencies) = postProject
-                            EndProjectSection
-                        EndProject";
+                    Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                        ProjectSection(ProjectDependencies) = postProject
+                        EndProjectSection
+                    EndProject
+                    """;
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
                 // Project should get added to the solution
@@ -607,39 +598,40 @@ namespace Microsoft.Build.UnitTests.Construction
             {
                 // Create the .etp project file
                 // Note the </EFPROJECT> is missing
-                string etpProjContent = @"<?xml version=""1.0""?>
-                <EFPROJECT>
-                    <GENERAL>
-                        <BANNER>Microsoft Visual Studio Application Template File</BANNER>
-                        <VERSION>1.00</VERSION>
-                        <Views>
-                            <ProjectExplorer>
-                                <File>ClassLibrary2\ClassLibrary2.csproj</File>
-                            </ProjectExplorer>
-                        </Views>
-                        <References>
-                            <Reference>
-                                <FILE>ClassLibrary2\ClassLibrary2.csproj</FILE>
-                                <GUIDPROJECTID>{73D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FE}</GUIDPROJECTID>
-                            </Reference>
-                        </References>
-                    </GENERAL>
-                ";
+                string etpProjContent =
+                    """
+                    <?xml version="1.0"?>
+                    <EFPROJECT>
+                        <GENERAL>
+                            <BANNER>Microsoft Visual Studio Application Template File</BANNER>
+                            <VERSION>1.00</VERSION>
+                            <Views>
+                                <ProjectExplorer>
+                                    <File>ClassLibrary2\ClassLibrary2.csproj</File>
+                                </ProjectExplorer>
+                            </Views>
+                            <References>
+                                <Reference>
+                                    <FILE>ClassLibrary2\ClassLibrary2.csproj</FILE>
+                                    <GUIDPROJECTID>{73D0F4CE-D9D3-4E8B-81E4-B26FBF4CC2FE}</GUIDPROJECTID>
+                                </Reference>
+                            </References>
+                        </GENERAL>
+                    """;
 
                 File.WriteAllText(proj1Path, etpProjContent);
 
                 // Create the SolutionFile object
                 string solutionFileContents =
-                    @"
+                    """
                     Microsoft Visual Studio Solution File, Format Version 8.00
-                        Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-                            ProjectSection(ProjectDependencies) = postProject
-                            EndProjectSection
-                        EndProject";
+                    Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                        ProjectSection(ProjectDependencies) = postProject
+                        EndProjectSection
+                    EndProject
+                    """;
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
-                string errCode;
-                ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out _, "Shared.InvalidProjectFile",
-                   "someproj.etp", String.Empty);
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errCode, out _, "Shared.InvalidProjectFile", "someproj.etp", string.Empty);
                 foreach (string warningString in solution.SolutionParserWarnings)
                 {
                     TestOutputHelper.WriteLine(warningString);
@@ -663,18 +655,18 @@ namespace Microsoft.Build.UnitTests.Construction
             string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
             // Create the solution file
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 8.00
-                    Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
-                        ProjectSection(ProjectDependencies) = postProject
-                        EndProjectSection
-                    EndProject";
+                Project('{FE3BBBB6-72D5-11D2-9ACE-00C04F79A2A4}') = 'someproj', 'someproj.etp', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
+                    ProjectSection(ProjectDependencies) = postProject
+                    EndProjectSection
+                EndProject
+                """;
             // Delete the someproj.etp file if it exists
             File.Delete(proj1Path);
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
-            string errCode;
-            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
-                  "someproj.etp", String.Empty);
+            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errCode, out _, "Shared.ProjectFileCouldNotBeLoaded", "someproj.etp", string.Empty);
             solution.SolutionParserErrorCodes[0].ShouldContain(errCode);
         }
 
@@ -779,14 +771,15 @@ namespace Microsoft.Build.UnitTests.Construction
             Should.Throw<InvalidProjectFileException>(() =>
             {
                 string solutionFileContents =
-                    @"
-                Microsoft Visual Studio Solution File, Format Version a.b
-                # Visual Studio 2005
-                ";
+                    """
+                    Microsoft Visual Studio Solution File, Format Version a.b
+                    # Visual Studio 2005
+                    """;
 
                 ParseSolutionHelper(solutionFileContents);
             });
         }
+
         /// <summary>
         /// Expected version numbers less than 7 to cause an invalid project file exception.
         /// </summary>
@@ -796,26 +789,28 @@ namespace Microsoft.Build.UnitTests.Construction
             Should.Throw<InvalidProjectFileException>(() =>
             {
                 string solutionFileContents =
-                    @"
-                Microsoft Visual Studio Solution File, Format Version 6.0
-                # Visual Studio 2005
-                ";
+                    """
+                    Microsoft Visual Studio Solution File, Format Version 6.0
+                    # Visual Studio 2005
+                    """;
 
                 ParseSolutionHelper(solutionFileContents);
             });
         }
+
         /// <summary>
         /// Ensure that an unsupported version greater than the current maximum (10) in the .SLN file results in a
-        /// comment indicating we will try and continue
+        /// comment indicating we will try and continue.
         /// </summary>
         [Fact]
         public void UnsupportedVersion()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 999.0
                 # Visual Studio 2005
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
             solution.SolutionParserComments.ShouldHaveSingleItem(); // "Expected the solution parser to contain one comment"
@@ -826,10 +821,11 @@ namespace Microsoft.Build.UnitTests.Construction
         public void Version9()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.0
                 # Visual Studio 2005
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
@@ -840,10 +836,11 @@ namespace Microsoft.Build.UnitTests.Construction
         public void Version10()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 10.0
                 # Visual Studio 2005
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
@@ -858,7 +855,8 @@ namespace Microsoft.Build.UnitTests.Construction
         public void ParseSolutionFileWithDescriptionInformation()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'AnyProject', 'AnyProject\AnyProject.csproj', '{2CAB0FBD-15D8-458B-8E63-1B5B840E9798}'
@@ -879,7 +877,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
             try
             {
                 ParseSolutionHelper(solutionFileContents);
@@ -983,7 +981,8 @@ namespace Microsoft.Build.UnitTests.Construction
         public void SolutionFolders()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{34E0D07D-CF8F-459D-9449-C4188D8C5564}'
@@ -1024,7 +1023,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4} = {2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
@@ -1069,7 +1068,8 @@ namespace Microsoft.Build.UnitTests.Construction
         public void ParseSolutionConfigurationWithEmptyLines()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{34E0D07D-CF8F-459D-9449-C4188D8C5564}'
@@ -1086,20 +1086,20 @@ namespace Microsoft.Build.UnitTests.Construction
                     GlobalSection(SolutionConfigurationPlatforms) = preSolution
 
                         Debug|Any CPU = Debug|Any CPU
-                        
+
                         Release|Any CPU = Release|Any CPU
- 
-    
+
+
                     EndGlobalSection
                     GlobalSection(ProjectConfigurationPlatforms) = postSolution
 
                         {34E0D07D-CF8F-459D-9449-C4188D8C5564}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
                         {34E0D07D-CF8F-459D-9449-C4188D8C5564}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                        
+
                         {34E0D07D-CF8F-459D-9449-C4188D8C5564}.Release|Any CPU.ActiveCfg = Release|Any CPU
                         {34E0D07D-CF8F-459D-9449-C4188D8C5564}.Release|Any CPU.Build.0 = Release|Any CPU
- 
-  
+
+
                         {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
                         {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|Any CPU.Build.0 = Debug|Any CPU
                         {A5EE8128-B08E-4533-86C5-E46714981680}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -1108,21 +1108,21 @@ namespace Microsoft.Build.UnitTests.Construction
                         {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
                         {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
                         {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}.Release|Any CPU.Build.0 = Release|Any CPU
-    
+
                     EndGlobalSection
                     GlobalSection(SolutionProperties) = preSolution
                         HideSolutionNode = FALSE
                     EndGlobalSection
                     GlobalSection(NestedProjects) = preSolution
-                        
+
                         {A5EE8128-B08E-4533-86C5-E46714981680} = {E0F97730-25D2-418A-A7BD-02CAFDC6E470}
                         {2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B} = {E0F97730-25D2-418A-A7BD-02CAFDC6E470}
                         {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4} = {2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}
-                        
+
 
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             ParseSolutionHelper(solutionFileContents);
         }
@@ -1135,7 +1135,8 @@ namespace Microsoft.Build.UnitTests.Construction
         public void MissingNestedProject()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'MySlnFolder', 'MySlnFolder', '{E0F97730-25D2-418A-A7BD-02CAFDC6E470}'
@@ -1169,7 +1170,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         {2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B} = {E0F97730-25D2-418A-A7BD-02CAFDC6E470}
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(() =>
             {
@@ -1188,7 +1189,8 @@ namespace Microsoft.Build.UnitTests.Construction
         public void IncorrectlyNestedProjectErrorContainsProjectNameAndGuid()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'SolutionFolder', 'SolutionFolder', '{5EE89BD0-04E3-4600-9CF2-D083A77A9448}'
@@ -1215,7 +1217,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         SolutionGuid = {AF600A67-B616-453E-9B27-4407D654F66E}
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(() => ParseSolutionHelper(solutionFileContents));
 
@@ -1232,116 +1234,117 @@ namespace Microsoft.Build.UnitTests.Construction
         public void BuildableProjects()
         {
             string solutionFileContents =
-                @"
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21119.0
-MinimumVisualStudioVersion = 10.0.40219.1
-Project('{D954291E-2A0B-460D-934E-DC6B0785DB48}') = 'HubApp2', 'HubApp2\HubApp2.scproj', '{892B5932-9AA8-46F9-A857-8967DCDBE4F5}'
-EndProject
-Project('{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}') = 'HubApp2.Store', 'HubApp2\Store\HubApp2.Store.vcxproj', '{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}'
-EndProject
-Project('{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}') = 'Shared', 'HubApp2\Shared\Shared.vcxitems', '{FF6AEDF3-950A-46DD-910B-52BC69B9C99A}'
-EndProject
-Project('{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}') = 'HubApp2.Phone', 'HubApp2\Phone\HubApp2.Phone.vcxproj', '{024E8607-06B0-440D-8741-5A888DC4B176}'
-EndProject
-Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'MySlnFolder', 'MySlnFolder', '{E0F97730-25D2-418A-A7BD-02CAFDC6E470}'
-EndProject
-Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{A5EE8128-B08E-4533-86C5-E46714981680}'
-EndProject
-Global
-    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-        Debug|Any CPU = Debug|Any CPU
-        Debug|ARM = Debug|ARM
-        Debug|Mixed Platforms = Debug|Mixed Platforms
-        Debug|Win32 = Debug|Win32
-        Debug|x64 = Debug|x64
-        Debug|x86 = Debug|x86
-        Release|Any CPU = Release|Any CPU
-        Release|ARM = Release|ARM
-        Release|Mixed Platforms = Release|Mixed Platforms
-        Release|Win32 = Release|Win32
-        Release|x64 = Release|x64
-        Release|x86 = Release|x86
-    EndGlobalSection
-    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Any CPU.ActiveCfg = Debug|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|ARM.ActiveCfg = Debug|ARM
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|ARM.Build.0 = Debug|ARM
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|ARM.Deploy.0 = Debug|ARM
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Mixed Platforms.Deploy.0 = Debug|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Win32.ActiveCfg = Debug|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Win32.Build.0 = Debug|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Win32.Deploy.0 = Debug|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x64.ActiveCfg = Debug|x64
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x64.Build.0 = Debug|x64
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x64.Deploy.0 = Debug|x64
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x86.ActiveCfg = Debug|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x86.Build.0 = Debug|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x86.Deploy.0 = Debug|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Any CPU.ActiveCfg = Release|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|ARM.ActiveCfg = Release|ARM
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|ARM.Build.0 = Release|ARM
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|ARM.Deploy.0 = Release|ARM
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Mixed Platforms.Build.0 = Release|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Mixed Platforms.Deploy.0 = Release|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Win32.ActiveCfg = Release|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Win32.Build.0 = Release|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Win32.Deploy.0 = Release|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x64.ActiveCfg = Release|x64
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x64.Build.0 = Release|x64
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x64.Deploy.0 = Release|x64
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x86.ActiveCfg = Release|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x86.Build.0 = Release|Win32
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x86.Deploy.0 = Release|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Any CPU.ActiveCfg = Debug|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|ARM.ActiveCfg = Debug|ARM
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|ARM.Build.0 = Debug|ARM
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|ARM.Deploy.0 = Debug|ARM
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Mixed Platforms.Deploy.0 = Debug|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Win32.ActiveCfg = Debug|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Win32.Build.0 = Debug|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Win32.Deploy.0 = Debug|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x64.ActiveCfg = Debug|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x86.ActiveCfg = Debug|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x86.Build.0 = Debug|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x86.Deploy.0 = Debug|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Any CPU.ActiveCfg = Release|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|ARM.ActiveCfg = Release|ARM
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|ARM.Build.0 = Release|ARM
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|ARM.Deploy.0 = Release|ARM
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Mixed Platforms.Build.0 = Release|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Mixed Platforms.Deploy.0 = Release|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Win32.ActiveCfg = Release|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Win32.Build.0 = Release|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Win32.Deploy.0 = Release|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|x64.ActiveCfg = Release|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|x86.ActiveCfg = Release|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|x86.Build.0 = Release|Win32
-        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|x86.Deploy.0 = Release|Win32
-        {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|x86.ActiveCfg = Debug|Win32
-        {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|x86.Build.0 = Debug|Win32
-        {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|x86.Deploy.0 = Debug|Win32
-        {A5EE8128-B08E-4533-86C5-E46714981680}.Release|x86.ActiveCfg = Release|Win32
-        {A5EE8128-B08E-4533-86C5-E46714981680}.Release|x86.Build.0 = Release|Win32
-        {A5EE8128-B08E-4533-86C5-E46714981680}.Release|x86.Deploy.0 = Release|Win32
-    EndGlobalSection
-    GlobalSection(SolutionProperties) = preSolution
-        HideSolutionNode = FALSE
-    EndGlobalSection
-    GlobalSection(NestedProjects) = preSolution
-        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8} = {892B5932-9AA8-46F9-A857-8967DCDBE4F5}
-        {FF6AEDF3-950A-46DD-910B-52BC69B9C99A} = {892B5932-9AA8-46F9-A857-8967DCDBE4F5}
-        {024E8607-06B0-440D-8741-5A888DC4B176} = {892B5932-9AA8-46F9-A857-8967DCDBE4F5}
-    EndGlobalSection
-EndGlobal
-                ";
+                """
+
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio 2013
+                VisualStudioVersion = 12.0.21119.0
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project('{D954291E-2A0B-460D-934E-DC6B0785DB48}') = 'HubApp2', 'HubApp2\HubApp2.scproj', '{892B5932-9AA8-46F9-A857-8967DCDBE4F5}'
+                EndProject
+                Project('{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}') = 'HubApp2.Store', 'HubApp2\Store\HubApp2.Store.vcxproj', '{A5526AEA-E0A2-496D-94B7-2BBE835C83F8}'
+                EndProject
+                Project('{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}') = 'Shared', 'HubApp2\Shared\Shared.vcxitems', '{FF6AEDF3-950A-46DD-910B-52BC69B9C99A}'
+                EndProject
+                Project('{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}') = 'HubApp2.Phone', 'HubApp2\Phone\HubApp2.Phone.vcxproj', '{024E8607-06B0-440D-8741-5A888DC4B176}'
+                EndProject
+                Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'MySlnFolder', 'MySlnFolder', '{E0F97730-25D2-418A-A7BD-02CAFDC6E470}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{A5EE8128-B08E-4533-86C5-E46714981680}'
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                        Debug|ARM = Debug|ARM
+                        Debug|Mixed Platforms = Debug|Mixed Platforms
+                        Debug|Win32 = Debug|Win32
+                        Debug|x64 = Debug|x64
+                        Debug|x86 = Debug|x86
+                        Release|Any CPU = Release|Any CPU
+                        Release|ARM = Release|ARM
+                        Release|Mixed Platforms = Release|Mixed Platforms
+                        Release|Win32 = Release|Win32
+                        Release|x64 = Release|x64
+                        Release|x86 = Release|x86
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Any CPU.ActiveCfg = Debug|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|ARM.ActiveCfg = Debug|ARM
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|ARM.Build.0 = Debug|ARM
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|ARM.Deploy.0 = Debug|ARM
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Mixed Platforms.Deploy.0 = Debug|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Win32.ActiveCfg = Debug|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Win32.Build.0 = Debug|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|Win32.Deploy.0 = Debug|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x64.ActiveCfg = Debug|x64
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x64.Build.0 = Debug|x64
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x64.Deploy.0 = Debug|x64
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x86.ActiveCfg = Debug|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x86.Build.0 = Debug|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Debug|x86.Deploy.0 = Debug|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Any CPU.ActiveCfg = Release|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|ARM.ActiveCfg = Release|ARM
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|ARM.Build.0 = Release|ARM
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|ARM.Deploy.0 = Release|ARM
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Mixed Platforms.Build.0 = Release|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Mixed Platforms.Deploy.0 = Release|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Win32.ActiveCfg = Release|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Win32.Build.0 = Release|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|Win32.Deploy.0 = Release|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x64.ActiveCfg = Release|x64
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x64.Build.0 = Release|x64
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x64.Deploy.0 = Release|x64
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x86.ActiveCfg = Release|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x86.Build.0 = Release|Win32
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8}.Release|x86.Deploy.0 = Release|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Any CPU.ActiveCfg = Debug|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|ARM.ActiveCfg = Debug|ARM
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|ARM.Build.0 = Debug|ARM
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|ARM.Deploy.0 = Debug|ARM
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Mixed Platforms.Deploy.0 = Debug|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Win32.ActiveCfg = Debug|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Win32.Build.0 = Debug|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|Win32.Deploy.0 = Debug|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x64.ActiveCfg = Debug|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x86.ActiveCfg = Debug|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x86.Build.0 = Debug|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Debug|x86.Deploy.0 = Debug|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Any CPU.ActiveCfg = Release|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|ARM.ActiveCfg = Release|ARM
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|ARM.Build.0 = Release|ARM
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|ARM.Deploy.0 = Release|ARM
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Mixed Platforms.Build.0 = Release|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Mixed Platforms.Deploy.0 = Release|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Win32.ActiveCfg = Release|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Win32.Build.0 = Release|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|Win32.Deploy.0 = Release|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|x64.ActiveCfg = Release|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|x86.ActiveCfg = Release|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|x86.Build.0 = Release|Win32
+                        {024E8607-06B0-440D-8741-5A888DC4B176}.Release|x86.Deploy.0 = Release|Win32
+                        {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|x86.ActiveCfg = Debug|Win32
+                        {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|x86.Build.0 = Debug|Win32
+                        {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|x86.Deploy.0 = Debug|Win32
+                        {A5EE8128-B08E-4533-86C5-E46714981680}.Release|x86.ActiveCfg = Release|Win32
+                        {A5EE8128-B08E-4533-86C5-E46714981680}.Release|x86.Build.0 = Release|Win32
+                        {A5EE8128-B08E-4533-86C5-E46714981680}.Release|x86.Deploy.0 = Release|Win32
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                    GlobalSection(NestedProjects) = preSolution
+                        {A5526AEA-E0A2-496D-94B7-2BBE835C83F8} = {892B5932-9AA8-46F9-A857-8967DCDBE4F5}
+                        {FF6AEDF3-950A-46DD-910B-52BC69B9C99A} = {892B5932-9AA8-46F9-A857-8967DCDBE4F5}
+                        {024E8607-06B0-440D-8741-5A888DC4B176} = {892B5932-9AA8-46F9-A857-8967DCDBE4F5}
+                    EndGlobalSection
+                EndGlobal
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
@@ -1382,7 +1385,8 @@ EndGlobal
         public void SolutionDependencies()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{05A5AD00-71B5-4612-AF2F-9EA9121C4111}'
@@ -1421,7 +1425,7 @@ EndGlobal
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
@@ -1457,7 +1461,8 @@ EndGlobal
         public void VenusProject()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project(`{E24C65DC-7377-472B-9ABA-BC803B73C61A}`) = `C:\WebSites\WebApplication3\`, `C:\WebSites\WebApplication3\`, `{464FD0B9-E335-4677-BE1E-6B2F982F4D86}`
@@ -1496,7 +1501,7 @@ EndGlobal
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents.Replace('`', '"'));
 
@@ -1552,7 +1557,8 @@ EndGlobal
         public void VenusProjectInASolutionFolder()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{E24C65DC-7377-472B-9ABA-BC803B73C61A}') = 'C:\WebSites\WebApplication3\', 'C:\WebSites\WebApplication3\', '{464FD0B9-E335-4677-BE1E-6B2F982F4D86}'
@@ -1579,7 +1585,7 @@ EndGlobal
                         {947DB39C-77BA-4F7F-A667-0BCD59CE853F} = {092FE6E5-71F8-43F7-9C92-30E3124B8A22}
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
@@ -1603,7 +1609,8 @@ EndGlobal
         public void ParseSolutionConfigurations()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
@@ -1648,13 +1655,14 @@ EndGlobal
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
             solution.SolutionConfigurations.Count.ShouldBe(7);
 
-            List<string> configurationNames = new List<string>(6);
+            List<string> configurationNames = new(solution.SolutionConfigurations.Count);
+
             foreach (SolutionConfigurationInSolution configuration in solution.SolutionConfigurations)
             {
                 configurationNames.Add(configuration.FullName);
@@ -1678,7 +1686,8 @@ EndGlobal
         public void ParseSolutionConfigurationsNoMixedPlatform()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
@@ -1708,13 +1717,14 @@ EndGlobal
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
             solution.SolutionConfigurations.Count.ShouldBe(6);
 
-            List<string> configurationNames = new List<string>(6);
+            List<string> configurationNames = new(solution.SolutionConfigurations.Count);
+
             foreach (SolutionConfigurationInSolution configuration in solution.SolutionConfigurations)
             {
                 configurationNames.Add(configuration.FullName);
@@ -1741,22 +1751,24 @@ EndGlobal
             Should.Throw<InvalidProjectFileException>(() =>
             {
                 string solutionFileContents =
-                    @"
-                Microsoft Visual Studio Solution File, Format Version 9.00
-                # Visual Studio 2005
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|Any=CPU = Debug|Any=CPU
-                        Release|Any CPU = Release|Any CPU
-                    EndGlobalSection
-                EndGlobal
-                ";
+                    """
+
+                    Microsoft Visual Studio Solution File, Format Version 9.00
+                    # Visual Studio 2005
+                    Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|Any=CPU = Debug|Any=CPU
+                            Release|Any CPU = Release|Any CPU
+                        EndGlobalSection
+                    EndGlobal
+                    """;
 
                 ParseSolutionHelper(solutionFileContents);
             });
         }
+
         /// <summary>
         /// Test some invalid cases for solution configuration parsing
         /// There can be only one '=' character in a sln cfg entry, separating two identical names
@@ -1767,22 +1779,24 @@ EndGlobal
             Should.Throw<InvalidProjectFileException>(() =>
             {
                 string solutionFileContents =
-                    @"
-                Microsoft Visual Studio Solution File, Format Version 9.00
-                # Visual Studio 2005
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|Any CPU = Something|Else
-                        Release|Any CPU = Release|Any CPU
-                    EndGlobalSection
-                EndGlobal
-                ";
+                    """
+
+                    Microsoft Visual Studio Solution File, Format Version 9.00
+                    # Visual Studio 2005
+                    Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|Any CPU = Something|Else
+                            Release|Any CPU = Release|Any CPU
+                        EndGlobalSection
+                    EndGlobal
+                    """;
 
                 ParseSolutionHelper(solutionFileContents);
             });
         }
+
         /// <summary>
         /// Test some invalid cases for solution configuration parsing
         /// Solution configurations must include the platform part
@@ -1793,18 +1807,19 @@ EndGlobal
             Should.Throw<InvalidProjectFileException>(() =>
             {
                 string solutionFileContents =
-                    @"
-                Microsoft Visual Studio Solution File, Format Version 9.00
-                # Visual Studio 2005
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug = Debug
-                        Release|Any CPU = Release|Any CPU
-                    EndGlobalSection
-                EndGlobal
-                ";
+                    """
+
+                    Microsoft Visual Studio Solution File, Format Version 9.00
+                    # Visual Studio 2005
+                    Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug = Debug
+                            Release|Any CPU = Release|Any CPU
+                        EndGlobalSection
+                    EndGlobal
+                    """;
 
                 ParseSolutionHelper(solutionFileContents);
             });
@@ -1820,7 +1835,8 @@ EndGlobal
         public void ParseAllProjectsContainedInInvalidSolutionEvenWhenMissingEndProject()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary', 'ClassLibrary\ClassLibrary.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
@@ -1847,7 +1863,7 @@ EndGlobal
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
@@ -1872,7 +1888,8 @@ EndGlobal
         public void ParseProjectConfigurationsInSolutionConfigurations1()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
@@ -1914,7 +1931,7 @@ EndGlobal
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
@@ -1970,7 +1987,8 @@ EndGlobal
         public void ParseProjectConfigurationsInSolutionConfigurations2()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{E24C65DC-7377-472B-9ABA-BC803B73C61A}') = 'C:\solutions\WebSite1\', '..\WebSite1\', '{E8E75132-67E4-4D6F-9CAE-8DA4C883F418}'
@@ -1999,7 +2017,7 @@ EndGlobal
                         {25FD9E7C-F37E-48E0-9A7C-607FE4AACCC0} = {D2633E4D-46FF-4C4E-8340-4BC7CDF78615}
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
@@ -2026,7 +2044,9 @@ EndGlobal
         [Fact]
         public void ParseSolutionFileContainingProjectsWithParentSlnFolder()
         {
-            string solutionFileContents = @"
+            string solutionFileContents =
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'MySlnFolder', 'MySlnFolder', '{E0F97730-25D2-418A-A7BD-02CAFDC6E470}'
@@ -2041,10 +2061,10 @@ EndGlobal
                         Release|Any CPU = Release|Any CPU
                     EndGlobalSection
                     GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		        {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		        {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
-		        {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		        {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
                     EndGlobalSection
                     GlobalSection(SolutionProperties) = preSolution
                         HideSolutionNode = FALSE
@@ -2054,7 +2074,7 @@ EndGlobal
                         {ED30D4A3-1214-410B-82BB-B61E5A9D05CA} = {E0F97730-25D2-418A-A7BD-02CAFDC6E470}
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
@@ -2069,60 +2089,65 @@ EndGlobal
         }
 
         [Theory]
-        [InlineData(@"
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                # Visual Studio 15
-                VisualStudioVersion = 15.0.27130.2010
-                MinimumVisualStudioVersion = 10.0.40219.1
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
-                EndProject
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
-                EndProject
-                Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Release|Any CPU = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(SolutionProperties) = preSolution
-		                HideSolutionNode = FALSE
-	                EndGlobalSection
-	                GlobalSection(ExtensibilityGlobals) = postSolution
-		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
-	                EndGlobalSection
-                EndGlobal
-                ")]
-        [InlineData(@"
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                # Visual Studio 15
-                VisualStudioVersion = 15.0.27130.2010
-                MinimumVisualStudioVersion = 10.0.40219.1
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
-                EndProject
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
-                EndProject
-                Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Release|Any CPU = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(SolutionProperties) = preSolution
-		                HideSolutionNode = FALSE
-	                EndGlobalSection
-	                GlobalSection(ExtensibilityGlobals) = postSolution
-		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
-	                EndGlobalSection
-                EndGlobal
-                ")]
+        [InlineData(
+            """
+
+            Microsoft Visual Studio Solution File, Format Version 12.00
+            # Visual Studio 15
+            VisualStudioVersion = 15.0.27130.2010
+            MinimumVisualStudioVersion = 10.0.40219.1
+            Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
+            EndProject
+            Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
+            EndProject
+            Global
+                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                    Release|Any CPU = Release|Any CPU
+                EndGlobalSection
+                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                    {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                    {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+                    {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                    {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+                EndGlobalSection
+                GlobalSection(SolutionProperties) = preSolution
+                    HideSolutionNode = FALSE
+                EndGlobalSection
+                GlobalSection(ExtensibilityGlobals) = postSolution
+                    SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
+                EndGlobalSection
+            EndGlobal
+            """)]
+        [InlineData(
+            """
+
+            Microsoft Visual Studio Solution File, Format Version 12.00
+            # Visual Studio 15
+            VisualStudioVersion = 15.0.27130.2010
+            MinimumVisualStudioVersion = 10.0.40219.1
+            Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
+            EndProject
+            Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
+            EndProject
+            Global
+                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                    Release|Any CPU = Release|Any CPU
+                EndGlobalSection
+                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                    {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                    {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+                    {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                    {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+                EndGlobalSection
+                GlobalSection(SolutionProperties) = preSolution
+                    HideSolutionNode = FALSE
+                EndGlobalSection
+                GlobalSection(ExtensibilityGlobals) = postSolution
+                    SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
+                EndGlobalSection
+            EndGlobal
+
+            """)]
         public void ParseSolutionFileContainingProjectsWithSimilarNames_TwoProjects(string solutionFileContents)
         {
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
@@ -2138,68 +2163,73 @@ EndGlobal
         }
 
         [Theory]
-        [InlineData(@"
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                # Visual Studio 15
-                VisualStudioVersion = 15.0.27130.2010
-                MinimumVisualStudioVersion = 10.0.40219.1
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
-                EndProject
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With.Dots', 'Project_Named_With.Dots.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
-                EndProject
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
-                EndProject
-                Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Release|Any CPU = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(SolutionProperties) = preSolution
-		                HideSolutionNode = FALSE
-	                EndGlobalSection
-	                GlobalSection(ExtensibilityGlobals) = postSolution
-		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
-	                EndGlobalSection
-                EndGlobal
-                ")]
-        [InlineData(@"
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                # Visual Studio 15
-                VisualStudioVersion = 15.0.27130.2010
-                MinimumVisualStudioVersion = 10.0.40219.1
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
-                EndProject
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
-                EndProject
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With.Dots', 'Project_Named_With.Dots.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
-                EndProject
-                Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Release|Any CPU = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(SolutionProperties) = preSolution
-		                HideSolutionNode = FALSE
-	                EndGlobalSection
-	                GlobalSection(ExtensibilityGlobals) = postSolution
-		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
-	                EndGlobalSection
-                EndGlobal
-                ")]
+        [InlineData(
+            """
+
+            Microsoft Visual Studio Solution File, Format Version 12.00
+            # Visual Studio 15
+            VisualStudioVersion = 15.0.27130.2010
+            MinimumVisualStudioVersion = 10.0.40219.1
+            Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
+            EndProject
+            Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With.Dots', 'Project_Named_With.Dots.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+            EndProject
+            Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
+            EndProject
+            Global
+                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                    Release|Any CPU = Release|Any CPU
+                EndGlobalSection
+                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                    {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                    {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+                    {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                    {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+                    {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                    {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+                EndGlobalSection
+                GlobalSection(SolutionProperties) = preSolution
+                    HideSolutionNode = FALSE
+                EndGlobalSection
+                GlobalSection(ExtensibilityGlobals) = postSolution
+                    SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
+                EndGlobalSection
+            EndGlobal
+            """)]
+        [InlineData(
+            """
+
+            Microsoft Visual Studio Solution File, Format Version 12.00
+            # Visual Studio 15
+            VisualStudioVersion = 15.0.27130.2010
+            MinimumVisualStudioVersion = 10.0.40219.1
+            Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}'
+            EndProject
+            Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}'
+            EndProject
+            Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With.Dots', 'Project_Named_With.Dots.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+            EndProject
+            Global
+                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                    Release|Any CPU = Release|Any CPU
+                EndGlobalSection
+                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                    {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                    {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+                    {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                    {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+                    {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                    {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+                EndGlobalSection
+                GlobalSection(SolutionProperties) = preSolution
+                    HideSolutionNode = FALSE
+                EndGlobalSection
+                GlobalSection(ExtensibilityGlobals) = postSolution
+                    SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
+                EndGlobalSection
+            EndGlobal
+
+            """)]
         public void ParseSolutionFileContainingProjectsWithSimilarNames_ThreeProjects(string solutionFileContents)
         {
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
@@ -2225,7 +2255,8 @@ EndGlobal
         public void ParseSolutionFileContainingProjectsWithSimilarNames_ThreeProjects_OneNormalizedDuplicated()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 15
                 VisualStudioVersion = 15.0.27130.2010
@@ -2237,28 +2268,28 @@ EndGlobal
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project.Named.With.Dots', 'Project.Named.With.Dots.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
                 EndProject
                 Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Release|Any CPU = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(SolutionProperties) = preSolution
-		                HideSolutionNode = FALSE
-	                EndGlobalSection
-	                GlobalSection(ExtensibilityGlobals) = postSolution
-		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
-	                EndGlobalSection
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+                        {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                    GlobalSection(ExtensibilityGlobals) = postSolution
+                        SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
+                    EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            Action parseSolution = () => ParseSolutionHelper(solutionFileContents);
-            var exception = Should.Throw<InvalidProjectFileException>(parseSolution);
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(
+                () => ParseSolutionHelper(solutionFileContents));
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out _, out _, "SolutionParseDuplicateProject", "Project.Named.With.Dots");
 
@@ -2269,7 +2300,8 @@ EndGlobal
         public void ParseSolutionFileContainingProjectsWithSimilarNames_ThreeProjects_OneDuplicated()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 15
                 VisualStudioVersion = 15.0.27130.2010
@@ -2281,28 +2313,28 @@ EndGlobal
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
                 EndProject
                 Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Release|Any CPU = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(SolutionProperties) = preSolution
-		                HideSolutionNode = FALSE
-	                EndGlobalSection
-	                GlobalSection(ExtensibilityGlobals) = postSolution
-		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
-	                EndGlobalSection
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+                        {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                    GlobalSection(ExtensibilityGlobals) = postSolution
+                        SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
+                    EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            Action parseSolution = () => ParseSolutionHelper(solutionFileContents);
-            var exception = Should.Throw<InvalidProjectFileException>(parseSolution);
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(
+                () => ParseSolutionHelper(solutionFileContents));
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out _, out _, "SolutionParseDuplicateProject", "Project_Named_With_Dots");
 
@@ -2313,7 +2345,8 @@ EndGlobal
         public void ParseSolutionFileContainingProjectsWithSimilarNames_FourProjects_OneDuplicated()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 15
                 VisualStudioVersion = 15.0.27130.2010
@@ -2327,28 +2360,28 @@ EndGlobal
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Project_Named_With_Dots', 'Project_Named_With_Dots.csproj', '{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}'
                 EndProject
                 Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Release|Any CPU = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(SolutionProperties) = preSolution
-		                HideSolutionNode = FALSE
-	                EndGlobalSection
-	                GlobalSection(ExtensibilityGlobals) = postSolution
-		                SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
-	                EndGlobalSection
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {FC2889D9-6050-4D2E-B022-979CCFEEAAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+                        {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {ED30D4A3-1214-410B-82BB-B61E5A9D05CA}.Release|Any CPU.Build.0 = Release|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                    GlobalSection(ExtensibilityGlobals) = postSolution
+                        SolutionGuid = {C038ED6B-BFC1-4E50-AE2E-7993F6883D7F}
+                    EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            Action parseSolution = () => ParseSolutionHelper(solutionFileContents);
-            var exception = Should.Throw<InvalidProjectFileException>(parseSolution);
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(
+                () => ParseSolutionHelper(solutionFileContents));
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out _, out _, "SolutionParseDuplicateProject", "Project_Named_With_Dots");
 
@@ -2362,7 +2395,8 @@ EndGlobal
         public void ParseSolutionWithParentedPaths()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{749ABBD6-B803-4DA5-8209-498127164114}')  = 'ProjectA',  '..\ProjectA\ProjectA.csproj', '{0ABED153-9451-483C-8140-9E8D7306B216}'
@@ -2382,7 +2416,7 @@ EndGlobal
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
             string expectedRelativePath = Path.Combine("..", "ProjectA", "ProjectA.csproj");
@@ -2724,7 +2758,7 @@ EndGlobal
 
             StringPool pool = new();
 
-            bool actualSuccess = SolutionFile.TryParseFirstProjectLine(line.AsSpan(), pool, out string actualProjectTypeGuid, out string actualProjectName, out string actualRelativePath, out string actualProjectGuid);
+            bool actualSuccess = SolutionFile.TryParseFirstProjectLine(line.AsSpan(), pool, out string? actualProjectTypeGuid, out string? actualProjectName, out string? actualRelativePath, out string? actualProjectGuid);
 
             if (expectedSuccess)
             {
