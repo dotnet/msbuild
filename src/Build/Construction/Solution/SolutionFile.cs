@@ -1666,6 +1666,10 @@ namespace Microsoft.Build.Construction
             // parts of the entry name string. This could lead to ambiguous results if we tried to parse
             // the entry name instead of constructing it and looking it up. Although it's pretty unlikely that
             // this would ever be a problem, it's safer to do it the same way VS IDE does it.
+
+            Dictionary<string, string> activeConfigSuffixes = new(StringComparer.Ordinal);
+            Dictionary<string, string> build0Suffixes = new(StringComparer.Ordinal);
+
             foreach (ProjectInSolution project in _projectsInOrder!)
             {
                 // Solution folders don't have configurations
@@ -1675,14 +1679,14 @@ namespace Microsoft.Build.Construction
                     {
                         // The "ActiveCfg" entry defines the active project configuration in the given solution configuration
                         // This entry must be present for every possible solution configuration/project combination.
-                        ProjectConfigurationKey activeConfigKey = new(project.ProjectGuid, $"{solutionConfiguration.FullName}.ActiveCfg");
+                        ProjectConfigurationKey activeConfigKey = new(project.ProjectGuid, GetSuffix(activeConfigSuffixes, solutionConfiguration.FullName, ".ActiveCfg"));
 
                         // The "Build.0" entry tells us whether to build the project configuration in the given solution configuration.
                         // Technically, it specifies a configuration name of its own which seems to be a remnant of an initial,
                         // more flexible design of solution configurations (as well as the '.0' suffix - no higher values are ever used).
                         // The configuration name is not used, and the whole entry means "build the project configuration"
                         // if it's present in the solution file, and "don't build" if it's not.
-                        ProjectConfigurationKey buildKey = new(project.ProjectGuid, $"{solutionConfiguration.FullName}.Build.0");
+                        ProjectConfigurationKey buildKey = new(project.ProjectGuid, GetSuffix(build0Suffixes, solutionConfiguration.FullName, ".Build.0"));
 
                         if (rawProjectConfigurationsEntries.TryGetValue(activeConfigKey, out string? configurationPlatform))
                         {
@@ -1705,6 +1709,16 @@ namespace Microsoft.Build.Construction
                         }
                     }
                 }
+            }
+
+            static string GetSuffix(Dictionary<string, string> cache, string head, string tail)
+            {
+                if (!cache.TryGetValue(head, out string? value))
+                {
+                    value = cache[head] = head + tail;
+                }
+
+                return value;
             }
         }
 
