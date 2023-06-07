@@ -93,22 +93,23 @@ internal sealed class StreamLineSpanReader
                 }
 
                 // Check whether we've found a full line of text yet.
-                int lineEndOffset = Array.IndexOf(_chars, '\n', _lineStartOffset, _charOffset - _lineStartOffset);
+                int charsRemaining = _charOffset - _lineStartOffset;
+                int lineEndOffset = _chars.AsSpan(_lineStartOffset, charsRemaining).IndexOf('\n');
 
                 if (lineEndOffset == -1 && completed && _bytesUntil == 0)
                 {
-                    // We read the last line
-                    lineEndOffset = _charOffset;
+                    // This is the last line of the file, so read all remaining characters.
+                    lineEndOffset = charsRemaining;
                 }
 
                 if (lineEndOffset != -1)
                 {
                     // We found a line!
-                    line = _chars.AsSpan().Slice(_lineStartOffset, lineEndOffset - _lineStartOffset);
+                    line = _chars.AsSpan(_lineStartOffset, lineEndOffset);
                     line = line.Trim('\r');
 
                     // Prepare for the next line.
-                    _lineStartOffset = lineEndOffset + 1;
+                    _lineStartOffset += lineEndOffset + 1;
 
                     return true;
                 }
