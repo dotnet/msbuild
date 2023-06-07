@@ -23,6 +23,20 @@ using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtiliti
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using VisualStudioConstants = Microsoft.Build.Shared.VisualStudioConstants;
 
+// Suppress some style rules to reduce the amount of noise in this file. These can be removed in future when the issues are fixed.
+#pragma warning disable SA1201 // Elements should appear in the correct order
+#pragma warning disable SA1202 // Elements should be ordered by access
+#pragma warning disable SA1204 // Static elements should appear before instance elements
+#pragma warning disable SA1303 // Const field names should begin with upper-case letter
+#pragma warning disable SA1308 // Variable names should not be prefixed
+#pragma warning disable SA1311 // Static readonly fields should begin with upper-case letter
+#pragma warning disable SA1611 // Element parameters should be documented
+#pragma warning disable SA1623 // Property summary documentation should match accessors
+#pragma warning disable IDE0022 // Use expression body for method
+#pragma warning disable IDE0046 // Convert to conditional expression
+#pragma warning disable IDE0058 // Expression value is never used
+#pragma warning disable IDE0130 // Namespace does not match folder structure
+#pragma warning disable IDE1006 // Naming Styles
 
 namespace Microsoft.Build.Construction
 {
@@ -243,7 +257,7 @@ namespace Microsoft.Build.Construction
         /// <exception cref="InvalidProjectFileException">The solution header is invalid, or the version is less than our minimum required version.</exception>
         internal static void GetSolutionFileAndVisualStudioMajorVersions(string solutionFile, out int solutionVersion, out int visualStudioMajorVersion)
         {
-            ErrorUtilities.VerifyThrow(!String.IsNullOrEmpty(solutionFile), "null solution file passed to GetSolutionFileMajorVersion!");
+            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(solutionFile), "null solution file passed to GetSolutionFileMajorVersion!");
             ErrorUtilities.VerifyThrowInternalRooted(solutionFile);
 
             // Open the file
@@ -275,7 +289,7 @@ namespace Microsoft.Build.Construction
         /// <exception cref="InvalidProjectFileException">The solution header is invalid, or the version is less than our minimum required version.</exception>
         internal static void GetSolutionFileAndVisualStudioMajorVersions(TextReader reader, string solutionFile, out int solutionVersion, out int visualStudioMajorVersion)
         {
-            ErrorUtilities.VerifyThrow(!String.IsNullOrEmpty(solutionFile), "null solution file passed to GetSolutionFileMajorVersion!");
+            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(solutionFile), "null solution file passed to GetSolutionFileMajorVersion!");
             ErrorUtilities.VerifyThrowInternalRooted(solutionFile);
 
             const string slnFileHeaderNoVersion = "Microsoft Visual Studio Solution File, Format Version ";
@@ -529,11 +543,13 @@ namespace Microsoft.Build.Construction
 
             if (_solutionFilter != null)
             {
-                HashSet<string> projectPaths = new HashSet<string>(_projectsInOrder.Count, s_pathComparer);
+                HashSet<string> projectPaths = new(_projectsInOrder.Count, s_pathComparer);
+
                 foreach (ProjectInSolution project in _projectsInOrder)
                 {
                     projectPaths.Add(FileUtilities.FixFilePath(project.RelativePath));
                 }
+
                 foreach (string project in _solutionFilter)
                 {
                     if (!projectPaths.Contains(project))
@@ -580,7 +596,7 @@ namespace Microsoft.Build.Construction
                                     continue;
                                 }
 
-                                if (String.Equals(otherProj.ProjectName, proj.ProjectName, StringComparison.OrdinalIgnoreCase))
+                                if (string.Equals(otherProj.ProjectName, proj.ProjectName, StringComparison.OrdinalIgnoreCase))
                                 {
                                     uniqueName = $"{uniqueName}:{uri.Port}";
                                     proj.UpdateUniqueProjectName(uniqueName);
@@ -787,7 +803,7 @@ namespace Microsoft.Build.Construction
                     {
                         // This should be a dependency.  The GUID identifying the parent project should
                         // be both the property name and the property value.
-                        if (!TryParseNameValue(line, allowEmpty: true, allowEqualsInValue: true, out ReadOnlySpan<char> propertyName, out ReadOnlySpan<char> propertyValue))
+                        if (!TryParseNameValue(line, allowEmpty: true, allowEqualsInValue: true, out ReadOnlySpan<char> propertyName, out _))
                         {
                             ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                                 "SubCategoryForSolutionParsingErrors",
@@ -940,7 +956,7 @@ namespace Microsoft.Build.Construction
                         // a guid it loads well in Everett and p2p references to/from this project
                         // are preserved. So we should make sure that we don’t error in this 
                         // situation while upgrading.
-                        proj.ProjectGuid = projGuidNode?.InnerText ?? String.Empty;
+                        proj.ProjectGuid = projGuidNode?.InnerText ?? string.Empty;
 
                         // Add the recently created proj to the collection of projects
                         AddProjectToSolution(proj);
@@ -1007,7 +1023,7 @@ namespace Microsoft.Build.Construction
         /// <param name="proj">proj</param>
         private void AddProjectToSolution(ProjectInSolution proj)
         {
-            if (!String.IsNullOrEmpty(proj.ProjectGuid))
+            if (!string.IsNullOrEmpty(proj.ProjectGuid))
             {
                 _projects![proj.ProjectGuid] = proj;
             }
@@ -1122,16 +1138,16 @@ namespace Microsoft.Build.Construction
                     // If it didn't exist, create a new one.
                     aspNetCompilerParameters = new AspNetCompilerParameters
                     {
-                        aspNetVirtualPath = String.Empty,
-                        aspNetPhysicalPath = String.Empty,
-                        aspNetTargetPath = String.Empty,
-                        aspNetForce = String.Empty,
-                        aspNetUpdateable = String.Empty,
-                        aspNetDebug = String.Empty,
-                        aspNetKeyFile = String.Empty,
-                        aspNetKeyContainer = String.Empty,
-                        aspNetDelaySign = String.Empty,
-                        aspNetAPTCA = String.Empty,
+                        aspNetVirtualPath = string.Empty,
+                        aspNetPhysicalPath = string.Empty,
+                        aspNetTargetPath = string.Empty,
+                        aspNetForce = string.Empty,
+                        aspNetUpdateable = string.Empty,
+                        aspNetDebug = string.Empty,
+                        aspNetKeyFile = string.Empty,
+                        aspNetKeyContainer = string.Empty,
+                        aspNetDelaySign = string.Empty,
+                        aspNetAPTCA = string.Empty,
                         aspNetFixedNames = String.Empty
                     };
                 }
@@ -1211,7 +1227,8 @@ namespace Microsoft.Build.Construction
                                 int indexOfClosingBrace = projectReferenceEntry.IndexOf('}', indexOfOpeningBrace);
                                 if (indexOfClosingBrace != -1)
                                 {
-                                    string referencedProjectGuid = projectReferenceEntry.Substring(indexOfOpeningBrace,
+                                    string referencedProjectGuid = projectReferenceEntry.Substring(
+                                        indexOfOpeningBrace,
                                         indexOfClosingBrace - indexOfOpeningBrace + 1);
 
                                     proj.AddDependency(referencedProjectGuid);
@@ -1221,13 +1238,13 @@ namespace Microsoft.Build.Construction
                         }
                     }
                 }
-                else if (String.Equals(propertyName, "TargetFrameworkMoniker", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(propertyName, "TargetFrameworkMoniker", StringComparison.OrdinalIgnoreCase))
                 {
                     // Website project need to back support 3.5 msbuild parser for the Blend (it is not move to .Net4.0 yet.)
                     // However, 3.5 version of Solution parser can't handle a equal sign in the value.  
                     // The "=" in targetframeworkMoniker was escaped to "%3D" for Orcas
                     string targetFrameworkMoniker = TrimQuotes(propertyValue);
-                    proj.TargetFrameworkMoniker = Shared.EscapingUtilities.UnescapeAll(targetFrameworkMoniker);
+                    proj.TargetFrameworkMoniker = EscapingUtilities.UnescapeAll(targetFrameworkMoniker);
                 }
             }
 
