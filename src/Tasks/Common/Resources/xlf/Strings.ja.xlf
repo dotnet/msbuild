@@ -97,6 +97,11 @@
         <target state="translated">NETSDK1001: 可能性のあるターゲット フレームワークを少なくとも 1 つ指定する必要があります。</target>
         <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
+      <trans-unit id="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework">
+        <source>NETSDK1080: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</source>
+        <target state="new">NETSDK1080: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</target>
+        <note>{StrBegin="NETSDK1080: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</note>
+      </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
         <target state="translated">NETSDK1092: リソースの追加にはビルドが Windows 上で実行されることが要求されるため、CLSIDMap を COM ホストに埋め込むことはできません (Nano Server を除く)。</target>
