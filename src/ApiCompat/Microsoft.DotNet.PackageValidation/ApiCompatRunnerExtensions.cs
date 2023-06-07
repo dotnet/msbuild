@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.PackageValidation
                     leftContentItems[leftIndex],
                     displayString: options.IsBaselineComparison ? Resources.Baseline + " " + leftContentItems[leftIndex].Path : null,
                     // Use the assembly references from the right package if the left package doesn't provide them.
-                    assemblyReferences: rightPackage is not null ? right[right.Length > leftIndex ? leftIndex : 0].References : null);
+                    assemblyReferences: leftPackage.AssemblyReferences is null && rightPackage is not null ? right[0].References : null);
             }
 
             apiCompatRunner.EnqueueWorkItem(new ApiCompatRunnerWorkItem(left, options, right));
@@ -65,24 +65,19 @@ namespace Microsoft.DotNet.PackageValidation
         {
             displayString ??= item.Path;
 
-            if (item.Properties.TryGetValue("tfm", out object? tfmObj))
+            if (package.AssemblyReferences is not null && package.AssemblyReferences.Count > 0 && item.Properties.TryGetValue("tfm", out object? tfmObj))
             {
-                string targetFramework = ((NuGetFramework)tfmObj).GetShortFolderName();
+                // Retrieve the content item's target framework
+                NuGetFramework nuGetFramework = (NuGetFramework)tfmObj;
 
-                if (package.AssemblyReferences != null)
+                // See if the package's assembly reference entries have the same target framework.
+                if (!package.AssemblyReferences.TryGetValue(nuGetFramework, out assemblyReferences))
                 {
-                    if (package.AssemblyReferences.TryGetValue(targetFramework, out string[]? assemblyReferencesRaw))
-                    {
-                        assemblyReferences = assemblyReferencesRaw;
-                    }
-                    else
-                    {
-                        log.LogWarning(new Suppression(DiagnosticIds.SearchDirectoriesNotFoundForTfm) { Target = displayString },
-                           DiagnosticIds.SearchDirectoriesNotFoundForTfm,
-                           string.Format(Resources.MissingSearchDirectory,
-                               targetFramework,
-                               displayString));
-                    }
+                    log.LogWarning(new Suppression(DiagnosticIds.SearchDirectoriesNotFoundForTfm) { Target = displayString },
+                        DiagnosticIds.SearchDirectoriesNotFoundForTfm,
+                        string.Format(Resources.MissingSearchDirectory,
+                            nuGetFramework.GetShortFolderName(),
+                            displayString));
                 }
             }
 
