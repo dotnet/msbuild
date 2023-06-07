@@ -884,7 +884,7 @@ You may need to build the project on another operating system or architecture, o
     <comment>{StrBegin="NETSDK1194: "}{Locked="--output"}</comment>
   </data>
   <data name="ILLinkNoValidRuntimePackageError" xml:space="preserve">
-    <value>NETSDK1195: Unable to optimize assemblies for size: a valid runtime package was not found. Either set the PublishTrimmed property to false, or use a supported target framework when publishing.</value>
+    <value>NETSDK1195: Trimming, or code compatibility analysis for trimming, single-file deployment, or ahead-of-time compilation is not supported for the target framework. For more information, see https://aka.ms/netsdk1195</value>
     <comment>{StrBegin="NETSDK1195: "}</comment>
   </data>
   <data name="AotNotSupported" xml:space="preserve">
