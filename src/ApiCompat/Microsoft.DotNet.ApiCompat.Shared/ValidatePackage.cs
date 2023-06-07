@@ -7,6 +7,7 @@ using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiCompatibility.Rules;
 using Microsoft.DotNet.PackageValidation;
 using Microsoft.DotNet.PackageValidation.Validators;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ApiCompat
 {
@@ -28,8 +29,8 @@ namespace Microsoft.DotNet.ApiCompat
             bool enableStrictModeForBaselineValidation,
             string? baselinePackagePath,
             string? runtimeGraph,
-            Dictionary<string, string[]>? packageAssemblyReferences,
-            Dictionary<string, string[]>? baselinePackageAssemblyReferences)
+            Dictionary<NuGetFramework, IEnumerable<string>>? packageAssemblyReferences,
+            Dictionary<NuGetFramework, IEnumerable<string>>? baselinePackageAssemblyReferences)
         {
             // Initialize the service provider
             ApiCompatServiceProvider serviceProvider = new(logFactory,

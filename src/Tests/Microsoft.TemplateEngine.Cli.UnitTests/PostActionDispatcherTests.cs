@@ -25,7 +25,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(virtualize: true);
             var postActionProcessor = new CaptureMePostAction(expectedResult: true);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), postActionProcessor);
-            var postAction = new MockPostAction();
+            var postAction = new MockPostAction(default, default, default, default, default!);
             MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction });
             MockCreationEffects creationEffects = new MockCreationEffects();
             var templateCreationResult = new TemplateCreationResult(
@@ -56,7 +56,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(virtualize: true);
             var postActionProcessor = new CaptureMePostAction(expectedResult: true);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), postActionProcessor);
-            var postAction = new MockPostAction();
+            var postAction = new MockPostAction(default, default, default, default, default!);
 
             MockCreationEffects creationEffects = new MockCreationEffects();
             var templateCreationResult = new TemplateCreationResult(
@@ -82,7 +82,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(virtualize: true);
             var postActionProcessor = new CaptureMePostAction(expectedResult: false);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), postActionProcessor);
-            var postAction = new MockPostAction();
+            var postAction = new MockPostAction(default, default, default, default, default!);
             MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction });
             MockCreationEffects creationEffects = new MockCreationEffects();
             var templateCreationResult = new TemplateCreationResult(
@@ -112,7 +112,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(virtualize: true);
             var postActionProcessor = new CaptureMePostAction(expectedResult: false);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), postActionProcessor);
-            var postAction = new MockPostAction();
+            var postAction = new MockPostAction(default, default, default, default, default!);
 
             MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction });
             MockCreationEffects creationEffects = new MockCreationEffects();
@@ -139,7 +139,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(virtualize: true);
             var postActionProcessor = new CaptureMePostAction(expectedResult: false);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), postActionProcessor);
-            var postAction = new MockPostAction
+            var postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = Guid.NewGuid(),
             };
@@ -168,7 +168,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(virtualize: true);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), new ThrowExceptionPostAction());
-            var postAction = new MockPostAction();
+            var postAction = new MockPostAction(default, default, default, default, default!);
 
             MockCreationResult creationResult = new MockCreationResult(new List<IPostAction>() { postAction });
             MockCreationEffects creationEffects = new MockCreationEffects();
@@ -200,12 +200,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), trueProcessor);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), falseProcessor);
 
-            var postAction1 = new MockPostAction
+            var postAction1 = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = falseProcessorGuid,
                 ContinueOnError = true
             };
-            var postAction2 = new MockPostAction
+            var postAction2 = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = trueProcessorGuid,
                 ContinueOnError = true
@@ -248,12 +248,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), trueProcessor);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), falseProcessor);
 
-            var postAction1 = new MockPostAction
+            var postAction1 = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = falseProcessorGuid,
                 ContinueOnError = false
             };
-            var postAction2 = new MockPostAction
+            var postAction2 = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = trueProcessorGuid,
                 ContinueOnError = false
@@ -287,7 +287,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(virtualize: true);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), new ProcessStartPostActionProcessor());
-            var postAction = new MockPostAction
+            var postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = ProcessStartPostActionProcessor.ActionProcessorId,
                 //the post action will fail, but that is OK for test purpose
@@ -319,7 +319,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(virtualize: true);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), new ProcessStartPostActionProcessor());
-            var postAction = new MockPostAction
+            var postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = ProcessStartPostActionProcessor.ActionProcessorId,
                 //the post action will fail, but that is OK for test purpose
@@ -350,7 +350,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(virtualize: true);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), new ProcessStartPostActionProcessor());
-            var postAction = new MockPostAction
+            var postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = ProcessStartPostActionProcessor.ActionProcessorId,
                 //the post action will fail, but that is OK for test purpose
@@ -383,7 +383,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(virtualize: true);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), new ProcessStartPostActionProcessor());
-            var postAction = new MockPostAction
+            var postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = ProcessStartPostActionProcessor.ActionProcessorId,
                 //the post action will fail, but that is OK for test purpose
@@ -414,7 +414,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             var engineEnvironmentSettings = _environmentSettingsHelper.CreateEnvironment(virtualize: true);
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), new ProcessStartPostActionProcessor());
-            var postAction = new MockPostAction
+            var postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = ProcessStartPostActionProcessor.ActionProcessorId,
                 //the post action will fail, but that is OK for test purpose
@@ -453,7 +453,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), postActionProcessor);
 
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), new ProcessStartPostActionProcessor());
-            var postAction1 = new MockPostAction
+            var postAction1 = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = ProcessStartPostActionProcessor.ActionProcessorId,
                 //the post action will fail, but that is OK for test purpose
@@ -462,7 +462,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 ContinueOnError = true
             };
 
-            var postAction2 = new MockPostAction
+            var postAction2 = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = Guid.Empty, //CaptureMePostAction
                 ContinueOnError = true
@@ -496,7 +496,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), postActionProcessor);
 
             engineEnvironmentSettings.Components.AddComponent(typeof(IPostActionProcessor), new ProcessStartPostActionProcessor());
-            var postAction1 = new MockPostAction
+            var postAction1 = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = ProcessStartPostActionProcessor.ActionProcessorId,
                 //the post action will fail, but that is OK for test purpose
@@ -505,7 +505,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 ContinueOnError = true
             };
 
-            var postAction2 = new MockPostAction
+            var postAction2 = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = Guid.Empty, //CaptureMePostAction
                 ContinueOnError = true

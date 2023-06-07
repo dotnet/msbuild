@@ -58,6 +58,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableConfigurationBindingGenerator Condition="'$(EnableConfigurationBindingGenerator)' == ''">true</EnableConfigurationBindingGenerator>
   </PropertyGroup>
 
+  <!-- Enable the interceptors compiler feature by default for projects that use the RequestDelegateGenerator. -->
+  <PropertyGroup Condition="'$(EnableRequestDelegateGenerator)' == 'true'">
+    <Features>$(Features);InterceptorsPreview</Features>
+  </PropertyGroup>
+
   <!--
     Newer versions of Visual Studio ship the designtime related properties in a targets file and all future design time only elements should be added there. If that file does not
     exist, it falls back to the default set of values defined here.

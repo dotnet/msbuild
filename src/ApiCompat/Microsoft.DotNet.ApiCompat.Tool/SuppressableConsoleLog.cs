@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
         private readonly ISuppressionEngine _suppressionEngine;
 
         /// <inheritdoc />
-        public bool HasLoggedSuppressions { get; private set; }
+        public bool HasLoggedErrorSuppressions { get; private set; }
 
         public SuppressableConsoleLog(ISuppressionEngine suppressionEngine,
             MessageImportance messageImportance)
@@ -30,9 +30,9 @@ namespace Microsoft.DotNet.ApiCompat.Tool
         {
             if (_suppressionEngine.IsErrorSuppressed(suppression))
                 return false;
-            
-            HasLoggedSuppressions = true;
-            base.LogError(code, message);
+
+            HasLoggedErrorSuppressions = true;
+            LogError(code, message);
             
             return true;
         }
@@ -43,8 +43,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             if (_suppressionEngine.IsErrorSuppressed(suppression))
                 return false;
             
-            HasLoggedSuppressions = true;
-            base.LogWarning(code, message);
+            LogWarning(code, message);
             
             return true;
         }

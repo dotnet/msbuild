@@ -60,7 +60,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
 
         if (imageBuilder is null)
         {
-            Log.LogErrorWithCodeFromResources(nameof(Strings.BaseImageNotFound), sourceImageReference.RepositoryAndTag, ContainerRuntimeIdentifier);
+            Log.LogErrorWithCodeFromResources(nameof(Strings.BaseImageNotFound), sourceImageReference, ContainerRuntimeIdentifier);
             return !Log.HasLoggedErrors;
         }
 
@@ -111,7 +111,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 try
                 {
                     await localRegistry.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
-                    SafeLog("Pushed container '{0}' to local registry", destinationImageReference.RepositoryAndTag);
+                    SafeLog("Pushed image '{0}' to local registry", destinationImageReference.RepositoryAndTag);
                 }
                 catch (AggregateException ex) when (ex.InnerException is DockerLoadException dle)
                 {
@@ -130,7 +130,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                             destinationImageReference,
                             message => SafeLog(message),
                             cancellationToken).ConfigureAwait(false);
-                        SafeLog("Pushed container '{0}' to registry '{1}'", destinationImageReference.RepositoryAndTag, OutputRegistry);
+                        SafeLog("Pushed image '{0}' to registry '{1}'", destinationImageReference, OutputRegistry);
                     }
                 }
                 catch (ContainerHttpException e)
