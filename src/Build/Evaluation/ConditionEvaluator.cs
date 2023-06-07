@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 using Microsoft.Build.BackEnd.Logging;
@@ -19,8 +18,6 @@ namespace Microsoft.Build.Evaluation
 {
     internal static class ConditionEvaluator
     {
-        private static readonly char[] InvalidPropertyNameCharacters = { '$', '(', ')' };
-
         /// <summary>
         /// Update our table which keeps track of all the properties that are referenced
         /// inside of a condition and the string values that they are being tested against.
@@ -58,7 +55,7 @@ namespace Microsoft.Build.Evaluation
                     var lastPiece = pieceSeparator < 0;
                     var pieceEnd = lastPiece ? leftValue.Length : pieceSeparator;
 
-                    if (TryGetSingleProperty(leftValue, pieceStart, pieceEnd - pieceStart, out string? propertyName))
+                    if (TryGetSingleProperty(leftValue.AsSpan(), pieceStart, pieceEnd - pieceStart, out ReadOnlySpan<char> propertyName))
                     {
                         // Find the first vertical bar on the right-hand-side expression.
                         var indexOfVerticalBar = rightValueExpanded.IndexOf('|');
@@ -85,10 +82,11 @@ namespace Microsoft.Build.Evaluation
 
                         // Get the string collection for this property name, if one already exists.
                         // If not already in the table, add a new entry for it.
-                        if (!conditionedPropertiesTable.TryGetValue(propertyName, out List<string>? conditionedPropertyValues))
+                        string propertyNameString = propertyName.ToString();
+                        if (!conditionedPropertiesTable.TryGetValue(propertyNameString, out List<string>? conditionedPropertyValues))
                         {
                             conditionedPropertyValues = new List<string>();
-                            conditionedPropertiesTable[propertyName] = conditionedPropertyValues;
+                            conditionedPropertiesTable[propertyNameString] = conditionedPropertyValues;
                         }
 
                         // If the "rightValueExpanded" is not already in the string collection
@@ -110,21 +108,29 @@ namespace Microsoft.Build.Evaluation
         }
 
         // Internal for testing purposes
-        internal static bool TryGetSingleProperty(string input, int beginning, int length, [NotNullWhen(returnValue: true)] out string? propertyName)
+        internal static bool TryGetSingleProperty(ReadOnlySpan<char> input, int beginning, int length, out ReadOnlySpan<char> propertyName)
         {
             // This code is simulating the regex pattern: ^\$\(([^\$\(\)]*)\)$
             if (input.Length < beginning + 3 ||
                 input[beginning] != '$' ||
                 input[beginning + 1] != '(' ||
                 input[beginning + length - 1] != ')' ||
-                input.IndexOfAny(InvalidPropertyNameCharacters, beginning + 2, length - 3) != -1)
+                ContainsInvalidCharacter(input.Slice(beginning + 2, length - 3)))
             {
                 propertyName = null;
                 return false;
             }
 
-            propertyName = input.Substring(beginning + 2, length - 3);
+            propertyName = input.Slice(beginning + 2, length - 3);
             return true;
+
+            static bool ContainsInvalidCharacter(ReadOnlySpan<char> span)
+            {
+                return
+                    span.IndexOf('$') != -1 ||
+                    span.IndexOf('(') != -1 ||
+                    span.IndexOf(')') != -1;
+            }
         }
 
         // Implements a pool of expression trees for each condition.

@@ -4491,17 +4491,17 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [InlineData("aaa$(Hello)bbb", 3, 8, "Hello")]
         public void TryGetSingleProperty(string input, int start, int length, string expected)
         {
-            bool result = ConditionEvaluator.TryGetSingleProperty(input, start, length, out string actual);
+            bool result = ConditionEvaluator.TryGetSingleProperty(input.AsSpan(), start, length, out ReadOnlySpan<char> actual);
 
             if (expected is null)
             {
                 Assert.False(result);
-                Assert.Null(actual);
+                Assert.True(actual.IsEmpty);
             }
             else
             {
                 Assert.True(result);
-                Assert.Equal(expected, actual);
+                Assert.Equal(expected, actual.ToString());
             }
         }
 
