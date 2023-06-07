@@ -34,8 +34,9 @@ namespace Microsoft.Build.Graph
         private const string PlatformLookupTableMetadataName = "PlatformLookupTable";
         private const string PlatformMetadataName = "Platform";
         private const string PlatformsMetadataName = "Platforms";
-        private const string EnableDynamicPlatformResolutionMetadataName = "EnableDynamicPlatformResolution";
+        private const string EnableDynamicPlatformResolutionPropertyName = "EnableDynamicPlatformResolution";
         private const string OverridePlatformNegotiationValue = "OverridePlatformNegotiationValue";
+        private const string ShouldUnsetParentConfigurationAndPlatformPropertyName = "ShouldUnsetParentConfigurationAndPlatform";
         private const string ProjectMetadataName = "Project";
         private const string ConfigurationMetadataName = "Configuration";
 
@@ -120,7 +121,7 @@ namespace Microsoft.Build.Graph
                 }
 
                 string projectReferenceFullPath = projectReferenceItem.GetMetadataValue(FullPathMetadataName);
-                bool enableDynamicPlatformResolution = ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName));
+                bool enableDynamicPlatformResolution = ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionPropertyName));
 
                 PropertyDictionary<ProjectPropertyInstance> referenceGlobalProperties = GetGlobalPropertiesForItem(
                     projectReferenceItem,
@@ -153,8 +154,13 @@ namespace Microsoft.Build.Graph
                     }
                     else
                     {
-                        referenceGlobalProperties.Remove(ConfigurationMetadataName);
-                        referenceGlobalProperties.Remove(PlatformMetadataName);
+                        // Note: ShouldUnsetParentConfigurationAndPlatform defaults to true in the AssignProjectConfiguration target when building a solution, so check that it's not false instead of checking that it's true.
+                        bool shouldUnsetParentConfigurationAndPlatform = !ConversionUtilities.ValidBooleanFalse(requesterInstance.GetPropertyValue(ShouldUnsetParentConfigurationAndPlatformPropertyName));
+                        if (shouldUnsetParentConfigurationAndPlatform)
+                        {
+                            referenceGlobalProperties.Remove(ConfigurationMetadataName);
+                            referenceGlobalProperties.Remove(PlatformMetadataName);
+                        }
                     }
                 }
 
