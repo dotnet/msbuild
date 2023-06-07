@@ -723,8 +723,6 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Helper method to create a SolutionFile object, and call it to parse the SLN file
         /// represented by the string contents passed in.
         /// </summary>
-        /// <param name="solutionFileContents"></param>
-        /// <returns></returns>
         internal static SolutionFile ParseSolutionHelper(string solutionFileContents)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
@@ -735,14 +733,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Encoding encoding = Encoding.UTF8;
 #endif
 
-            MemoryStream stream = new();
-            StreamWriter writer = new(stream, encoding);
-
-            writer.Write(solutionFileContents);
-            writer.Flush();
-            stream.Seek(0, SeekOrigin.Begin);
-
-            ////StreamReader sr = StreamHelpers.StringToStreamReader(solutionFileContents);
+            MemoryStream stream = new(encoding.GetBytes(solutionFileContents));
 
             SolutionFile sp = new()
             {
@@ -761,41 +752,66 @@ namespace Microsoft.Build.UnitTests.Construction
             return sp;
         }
 
-        /// <summary>
-        /// Ensure that a bogus version stamp in the .SLN file results in an
-        /// InvalidProjectFileException.
-        /// </summary>
-        [Fact]
-        public void BadVersionStamp()
+        [Theory]
+        [InlineData(
+            "Invalid file format version",
+            """
+            Microsoft Visual Studio Solution File, Format Version a.b
+            # Visual Studio 2005
+            """)]
+        [InlineData(
+            "Version number less than 7",
+            """
+            Microsoft Visual Studio Solution File, Format Version 6.0
+            # Visual Studio 2005
+            """)]
+        [InlineData(
+            "Multiple = characters in solution configuration entry",
+            """
+            Microsoft Visual Studio Solution File, Format Version 9.00
+            # Visual Studio 2005
+            Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+            EndProject
+            Global
+                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                    Debug|Any=CPU = Debug|Any=CPU
+                    Release|Any CPU = Release|Any CPU
+                EndGlobalSection
+            EndGlobal
+            """)]
+        [InlineData(
+            "Solution configuration name doesn't match value",
+            """
+            Microsoft Visual Studio Solution File, Format Version 9.00
+            # Visual Studio 2005
+            Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+            EndProject
+            Global
+                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                    Debug|Any CPU = Something|Else
+                    Release|Any CPU = Release|Any CPU
+                EndGlobalSection
+            EndGlobal
+            """)]
+        [InlineData(
+            "Solution configuration doesn't include platform",
+            """
+            Microsoft Visual Studio Solution File, Format Version 9.00
+            # Visual Studio 2005
+            Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+            EndProject
+            Global
+                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                    Debug = Debug
+                    Release|Any CPU = Release|Any CPU
+                EndGlobalSection
+            EndGlobal
+            """)]
+        public void ParsingInvalidSolutionThrowsException(string description, string solutionFileContent)
         {
-            Should.Throw<InvalidProjectFileException>(() =>
-            {
-                string solutionFileContents =
-                    """
-                    Microsoft Visual Studio Solution File, Format Version a.b
-                    # Visual Studio 2005
-                    """;
+            _ = description;
 
-                ParseSolutionHelper(solutionFileContents);
-            });
-        }
-
-        /// <summary>
-        /// Expected version numbers less than 7 to cause an invalid project file exception.
-        /// </summary>
-        [Fact]
-        public void VersionTooLow()
-        {
-            Should.Throw<InvalidProjectFileException>(() =>
-            {
-                string solutionFileContents =
-                    """
-                    Microsoft Visual Studio Solution File, Format Version 6.0
-                    # Visual Studio 2005
-                    """;
-
-                ParseSolutionHelper(solutionFileContents);
-            });
+            Should.Throw<InvalidProjectFileException>(() => ParseSolutionHelper(solutionFileContent));
         }
 
         /// <summary>
@@ -1172,10 +1188,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(() =>
-            {
-                ParseSolutionHelper(solutionFileContents);
-            });
+            InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(
+                () => ParseSolutionHelper(solutionFileContents));
 
             e.ErrorCode.ShouldBe("MSB5023");
             e.Message.ShouldContain("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}");
@@ -1219,7 +1233,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(() => ParseSolutionHelper(solutionFileContents));
+            InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(
+                () => ParseSolutionHelper(solutionFileContents));
 
             e.ErrorCode.ShouldBe("MSB5009");
             e.Message.ShouldContain("{1484A47E-F4C5-4700-B13F-A2BDB6ADD35E}");
@@ -1739,90 +1754,6 @@ namespace Microsoft.Build.UnitTests.Construction
 
             solution.GetDefaultConfigurationName().ShouldBe("Debug"); // "Default solution configuration"
             solution.GetDefaultPlatformName().ShouldBe("Any CPU"); // "Default solution platform"
-        }
-
-        /// <summary>
-        /// Test some invalid cases for solution configuration parsing.
-        /// There can be only one '=' character in a sln cfg entry, separating two identical names
-        /// </summary>
-        [Fact]
-        public void ParseInvalidSolutionConfigurations1()
-        {
-            Should.Throw<InvalidProjectFileException>(() =>
-            {
-                string solutionFileContents =
-                    """
-
-                    Microsoft Visual Studio Solution File, Format Version 9.00
-                    # Visual Studio 2005
-                    Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
-                    EndProject
-                    Global
-                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                            Debug|Any=CPU = Debug|Any=CPU
-                            Release|Any CPU = Release|Any CPU
-                        EndGlobalSection
-                    EndGlobal
-                    """;
-
-                ParseSolutionHelper(solutionFileContents);
-            });
-        }
-
-        /// <summary>
-        /// Test some invalid cases for solution configuration parsing
-        /// There can be only one '=' character in a sln cfg entry, separating two identical names
-        /// </summary>
-        [Fact]
-        public void ParseInvalidSolutionConfigurations2()
-        {
-            Should.Throw<InvalidProjectFileException>(() =>
-            {
-                string solutionFileContents =
-                    """
-
-                    Microsoft Visual Studio Solution File, Format Version 9.00
-                    # Visual Studio 2005
-                    Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
-                    EndProject
-                    Global
-                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                            Debug|Any CPU = Something|Else
-                            Release|Any CPU = Release|Any CPU
-                        EndGlobalSection
-                    EndGlobal
-                    """;
-
-                ParseSolutionHelper(solutionFileContents);
-            });
-        }
-
-        /// <summary>
-        /// Test some invalid cases for solution configuration parsing
-        /// Solution configurations must include the platform part
-        /// </summary>
-        [Fact]
-        public void ParseInvalidSolutionConfigurations3()
-        {
-            Should.Throw<InvalidProjectFileException>(() =>
-            {
-                string solutionFileContents =
-                    """
-
-                    Microsoft Visual Studio Solution File, Format Version 9.00
-                    # Visual Studio 2005
-                    Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
-                    EndProject
-                    Global
-                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                            Debug = Debug
-                            Release|Any CPU = Release|Any CPU
-                        EndGlobalSection
-                    EndGlobal
-                    """;
-
-                ParseSolutionHelper(solutionFileContents);
-            });
         }
 
         /// <summary>
