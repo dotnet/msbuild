@@ -92,7 +92,7 @@
         <target state="needs-review-translation">CONTAINER1010: ściąganie obrazów z lokalnego demona platformy Docker nie jest obsługiwane.</target>
         <note>{StrBegin="CONTAINER1010: "}</note>
       </trans-unit>
-      <trans-unit id="InvalidContainerImageName">
+      <trans-unit id="InvalidContainerRepository">
         <source>CONTAINER2014: Invalid {0}: {1}.</source>
         <target state="translated">CONTAINER2014: Nieprawidłowy element {0}: {1}.</target>
         <note>{StrBegin="CONTAINER2014: "}</note>

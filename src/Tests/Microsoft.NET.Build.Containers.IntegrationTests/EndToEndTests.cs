@@ -26,7 +26,7 @@ public class EndToEndTests
 
     public static string NewImageName([CallerMemberName] string callerMemberName = "")
     {
-        bool normalized = ContainerHelpers.NormalizeImageName(callerMemberName, out string? normalizedName);
+        bool normalized = ContainerHelpers.NormalizeRepository(callerMemberName, out string? normalizedName);
         if (!normalized)
         {
             return normalizedName!;
@@ -228,7 +228,7 @@ public class EndToEndTests
             "/p:runtimeidentifier=linux-x64",
             $"/p:ContainerBaseImage={DockerRegistryManager.FullyQualifiedBaseImageAspNet}",
             $"/p:ContainerRegistry={DockerRegistryManager.LocalRegistry}",
-            $"/p:ContainerImageName={imageName}",
+            $"/p:ContainerRepository={imageName}",
             $"/p:Version={imageTag}",
             $"/p:RuntimeFrameworkVersion=8.0.0-preview.3.23174.8")
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
@@ -366,7 +366,7 @@ public class EndToEndTests
             "/p:runtimeidentifier=linux-x64",
             $"/p:ContainerBaseImage={DockerRegistryManager.FullyQualifiedBaseImageAspNet}",
             $"/p:ContainerRegistry={DockerRegistryManager.LocalRegistry}",
-            $"/p:ContainerImageName={imageName}",
+            $"/p:ContainerRepository={imageName}",
             $"/p:RuntimeFrameworkVersion=8.0.0-preview.3.23174.8",
             $"/p:Version={imageTag}")
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)

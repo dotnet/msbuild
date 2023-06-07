@@ -62,6 +62,11 @@
         <target state="translated">Недопустимая версия: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="new">Error parsing version '{1}' for workload manifest ID '{0}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">Не найдена зависимость манифеста рабочей нагрузки "{0}", необходимая для манифеста "{1}" [{2}]</target>
@@ -100,6 +105,11 @@
       <trans-unit id="SpecifiedManifestNotFound">
         <source>Specified workload manifest was not found: {0}</source>
         <target state="translated">Указанный манифест рабочей нагрузки не найден: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedWorkloadSetNotFound">
+        <source>Specified workload set was not found: {0}</source>
+        <target state="new">Specified workload set was not found: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">

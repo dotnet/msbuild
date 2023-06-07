@@ -23,10 +23,10 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
     public string ContainerRegistry { get; set; }
 
     /// <summary>
-    /// The image name for the container to be created.
+    /// The name of the container to be created.
     /// </summary>
     [Required]
-    public string ContainerImageName { get; set; }
+    public string ContainerRepository { get; set; }
 
     /// <summary>
     /// The tag for the container to be created.
@@ -55,7 +55,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
     public string NewContainerRegistry { get; private set; }
 
     [Output]
-    public string NewContainerImageName { get; private set; }
+    public string NewContainerRepository { get; private set; }
 
     [Output]
     public string[] NewContainerTags { get; private set; }
@@ -67,7 +67,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
     {
         FullyQualifiedBaseImageName = "";
         ContainerRegistry = "";
-        ContainerImageName = "";
+        ContainerRepository = "";
         ContainerImageTag = "";
         ContainerImageTags = Array.Empty<string>();
         ContainerEnvironmentVariables = Array.Empty<ITaskItem>();
@@ -75,7 +75,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
         ParsedContainerImage = "";
         ParsedContainerTag = "";
         NewContainerRegistry = "";
-        NewContainerImageName = "";
+        NewContainerRepository = "";
         NewContainerTags = Array.Empty<string>();
         NewContainerEnvironmentVariables = Array.Empty<ITaskItem>();
 
@@ -149,20 +149,20 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
 
         try
         {
-            if (!ContainerHelpers.NormalizeImageName(ContainerImageName, out var normalizedImageName))
+            if (!ContainerHelpers.NormalizeRepository(ContainerRepository, out var normalizedRepository))
             {
-                Log.LogMessageFromResources(nameof(Strings.NormalizedContainerName), nameof(ContainerImageName), normalizedImageName);
-                NewContainerImageName = normalizedImageName!; // known to be not null due to output of NormalizeImageName
+                Log.LogMessageFromResources(nameof(Strings.NormalizedContainerName), nameof(ContainerRepository), normalizedRepository);
+                NewContainerRepository = normalizedRepository!; // known to be not null due to output of NormalizeImageName
             }
             else
             {
                 // name was valid already
-                NewContainerImageName = ContainerImageName;
+                NewContainerRepository = ContainerRepository;
             }
         }
         catch (ArgumentException)
         {
-            Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidContainerImageName), nameof(ContainerImageName), ContainerImageName);
+            Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidContainerRepository), nameof(ContainerRepository), ContainerRepository);
             return !Log.HasLoggedErrors;
         }
 
@@ -178,7 +178,7 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
             Log.LogMessage(MessageImportance.Low, "Host: {0}", ParsedContainerRegistry);
             Log.LogMessage(MessageImportance.Low, "Image: {0}", ParsedContainerImage);
             Log.LogMessage(MessageImportance.Low, "Tag: {0}", ParsedContainerTag);
-            Log.LogMessage(MessageImportance.Low, "Image Name: {0}", NewContainerImageName);
+            Log.LogMessage(MessageImportance.Low, "Image Name: {0}", NewContainerRepository);
             Log.LogMessage(MessageImportance.Low, "Image Tags: {0}", String.Join(", ", NewContainerTags));
         }
 

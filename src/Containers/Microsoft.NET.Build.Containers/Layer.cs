@@ -137,7 +137,8 @@ internal record struct Layer
 
             fs.Position = 0;
 
-            SHA256.HashData(fs, hash);
+            int bW = SHA256.HashData(fs, hash);
+            Debug.Assert(bW == hash.Length);
 
             // Writes a tar entry corresponding to the file system item.
             static void WriteTarEntryForFile(TarWriter writer, FileSystemInfo file, string containerPath, IEnumerable<KeyValuePair<string, string>> entryAttributes)

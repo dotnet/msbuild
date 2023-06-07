@@ -28,12 +28,15 @@
                           SetTargetFramework="TargetFramework=$(TargetFramework)"
                           OutputItemType="ContainerLibraryOutput"/>
 
+        <ProjectReference Include="../../Cli/Microsoft.DotNet.Cli.Utils/Microsoft.DotNet.Cli.Utils.csproj"
+                          SetTargetFramework="TargetFramework=$(ResolverTargetFramework)"
+                          OutputItemType="DotNetCliUtilsLibraryOutput"/>
+
         <ProjectReference Include="../Microsoft.NET.Build.Containers/Microsoft.NET.Build.Containers.csproj"
                           SetTargetFramework="TargetFramework=$(VSCompatTargetFramework)"
                           OutputItemType="ContainerLibraryOutputNet472" Condition="'$(DotNetBuildFromSource)' != 'true'" />
 
-        <ProjectReference Include="../containerize/containerize.csproj" PrivateAssets="all" IncludeAssets="runtime" ReferenceOutputAssembly="true" />
-        <PackageReference Include="System.CommandLine" PrivateAssets="all" IncludeAssets="runtime" Version="$(SystemCommandLineVersion)"/>
+        <ProjectReference Include="../containerize/containerize.csproj" PrivateAssets="all" IncludeAssets="runtime" ReferenceOutputAssembly="true" Condition="'$(DotNetBuildFromSource)' != 'true'" />
     </ItemGroup>
 
     <Target Name="PreparePackageReleaseNotesFromFile" BeforeTargets="GenerateNuspec">
@@ -48,18 +51,12 @@
             <Output TaskParameter="TargetOutputs" ItemName="_AllNet472ContainerTaskDependencies" />
         </MSBuild>
         <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">
-          <NecessaryNet472ContainerTaskDependencies
-            Include="@(_AllNet472ContainerTaskDependencies)"
-            Condition="(
-                        $([MSBuild]::ValueOrDefault('%(_AllNet472ContainerTaskDependencies.NuGetPackageId)', '').Contains('NuGet')) or
-                        $([MSBuild]::ValueOrDefault('%(_AllNet472ContainerTaskDependencies.NuGetPackageId)', '').Contains('Newtonsoft'))
-                       ) and
-                       %(_AllNet472ContainerTaskDependencies.NuGetIsFrameworkReference) != true" />
-        </ItemGroup>
-        <ItemGroup>
-            <!-- root folder -->
-            <Content Include="README.md" Pack="true" PackagePath="" />
-
+            <NecessaryNet472ContainerTaskDependencies Include="@(_AllNet472ContainerTaskDependencies)" Condition="(
+                                $([MSBuild]::ValueOrDefault('%(_AllNet472ContainerTaskDependencies.NuGetPackageId)', '').Contains('NuGet')) or
+                                $([MSBuild]::ValueOrDefault('%(_AllNet472ContainerTaskDependencies.NuGetPackageId)', '').Contains('Newtonsoft'))
+                            ) and
+                            %(_AllNet472ContainerTaskDependencies.NuGetIsFrameworkReference) != true" />
+            
             <!-- containerize folder -->
             <Content Include="$(OutDir)containerize.dll" Pack="true" PackagePath="containerize/" />
             <Content Include="$(OutDir)containerize.runtimeconfig.json" Pack="true" PackagePath="containerize/" />
@@ -70,24 +67,36 @@
             <Content Include="$(OutDir)Valleysoft.DockerCredsProvider.dll" Pack="true" PackagePath="containerize/" />
             <Content Include="@(ContainerLibraryOutput)" Pack="true" PackagePath="containerize/" />
 
+            <!-- net472 tasks -->
+            <!-- dependencies -->
+            <Content Include="@(NecessaryNet472ContainerTaskDependencies)" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)/" />
+            <!-- actual DLL  -->
+            <Content Include="@(ContainerLibraryOutputNet472)" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)/" />
+        </ItemGroup>
+        <MSBuild Projects="../Microsoft.NET.Build.Containers/Microsoft.NET.Build.Containers.csproj" Properties="TargetFramework=$(TargetFramework)" Targets="ResolveAssemblyReferences">
+            <Output TaskParameter="TargetOutputs" ItemName="_AllNetContainerTaskDependencies" />
+        </MSBuild>
+        <ItemGroup>
+             <NecessaryNetContainerTaskDependencies Include="@(_AllNetContainerTaskDependencies)" Condition="(
+                                $([MSBuild]::ValueOrDefault('%(_AllNetContainerTaskDependencies.NuGetPackageId)', '').Contains('NuGet')) or
+                                $([MSBuild]::ValueOrDefault('%(_AllNetContainerTaskDependencies.NuGetPackageId)', '').Contains('Newtonsoft')) or
+                                $([MSBuild]::ValueOrDefault('%(_AllNetContainerTaskDependencies.NuGetPackageId)', '').Contains('Valleysoft'))
+                            ) and
+                            %(_AllNetContainerTaskDependencies.NuGetIsFrameworkReference) != true" />
+
+            <!-- root folder -->
+            <Content Include="README.md" Pack="true" PackagePath="" />
+
             <!-- tasks folder -->
             <!-- net7.0 tasks -->
             <!-- dependencies -->
-            <Content Include="$(OutDir)Valleysoft.DockerCredsProvider.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
-            <Content Include="$(OutDir)NuGet.*.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
-            <Content Include="$(OutDir)Newtonsoft.Json.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
-            <Content Include="$(OutDir)Microsoft.DotNet.Cli.Utils.dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
+            <Content Include="@(NecessaryNetContainerTaskDependencies)" Pack="true" PackagePath="tasks/$(TargetFramework)/" />
+            <Content Include="@(DotNetCliUtilsLibraryOutput)" Pack="true" PackagePath="tasks/$(TargetFramework)/" />
+
             <!-- runtime deps json -->
             <Content Include="$(ArtifactsDir)bin/Microsoft.NET.Build.Containers/$(Configuration)/$(TargetFramework)/Microsoft.NET.Build.Containers.deps.json" Pack="true" PackagePath="tasks/$(TargetFramework)" />
             <!-- actual DLL  -->
             <Content Include="@(ContainerLibraryOutput)" Pack="true" PackagePath="tasks/$(TargetFramework)/" />
-
-            <!-- net472 tasks -->
-            <!-- dependencies -->
-            <Content Include="@(NecessaryNet472ContainerTaskDependencies)" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)/" Condition="'$(DotNetBuildFromSource)' != 'true'" />
-            <!-- runtime deps json isn't valid for netfx -->
-            <!-- actual DLL  -->
-            <Content Include="@(ContainerLibraryOutputNet472)" Pack="true" PackagePath="tasks/$(VSCompatTargetFramework)/" Condition="'$(DotNetBuildFromSource)' != 'true'" />
 
             <!-- build folder -->
             <Content Include="build/**" Pack="true" PackagePath="build/" />

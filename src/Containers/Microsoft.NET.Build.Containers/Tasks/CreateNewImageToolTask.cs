@@ -86,9 +86,9 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
         {
             throw new InvalidOperationException(Resource.FormatString(nameof(Strings.RequiredPropertyNotSetOrEmpty), nameof(BaseImageName)));
         }
-        if (string.IsNullOrWhiteSpace(ImageName))
+        if (string.IsNullOrWhiteSpace(Repository))
         {
-            throw new InvalidOperationException(Resource.FormatString(nameof(Strings.RequiredPropertyNotSetOrEmpty), nameof(ImageName)));
+            throw new InvalidOperationException(Resource.FormatString(nameof(Strings.RequiredPropertyNotSetOrEmpty), nameof(Repository)));
         }
         if (string.IsNullOrWhiteSpace(WorkingDirectory))
         {
@@ -110,7 +110,7 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
         builder.AppendFileNameIfNotNull(PublishDirectory.TrimEnd(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }));
         builder.AppendSwitchIfNotNull("--baseregistry ", BaseRegistry);
         builder.AppendSwitchIfNotNull("--baseimagename ", BaseImageName);
-        builder.AppendSwitchIfNotNull("--imagename ", ImageName);
+        builder.AppendSwitchIfNotNull("--repository ", Repository);
         builder.AppendSwitchIfNotNull("--workingdirectory ", WorkingDirectory);
         ITaskItem[] sanitizedEntryPoints = Entrypoint.Where(e => !string.IsNullOrWhiteSpace(e.ItemSpec)).ToArray();
         builder.AppendSwitchIfNotNull("--entrypoint ", sanitizedEntryPoints, delimiter: " ");
