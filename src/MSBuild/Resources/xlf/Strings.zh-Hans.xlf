@@ -545,11 +545,15 @@
                            is set separately by
                            -fileloggerparameters.
 </source>
-        <target state="needs-review-translation">  -verbosity:&lt;level&gt; 在事件日志中显示此级别的信息量。
-           可用的详细程度有: q[uiet]、 m[inimal]、
-           n[ormal]、d[etailed] 和 diag[nostic]。(缩写: -v)
-           示例:
+        <target state="new">  -verbosity:&lt;level&gt; Display this amount of information in the event log.
+                     The available verbosity levels are: q[uiet], m[inimal],
+                     n[ormal], d[etailed], and diag[nostic]. (Short form: -v)
+                     Example:
                        -verbosity:quiet
+
+                     Note: File loggers' verbosity
+                           is set separately by
+                           -fileloggerparameters.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
