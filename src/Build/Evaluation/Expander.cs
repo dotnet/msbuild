@@ -4526,7 +4526,7 @@ namespace Microsoft.Build.Evaluation
                     case int i:
                         arg0 = i;
                         return true;
-                    case string s when int.TryParse(s, out arg0):
+                    case string s when int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture.NumberFormat, out arg0):
                         return true;
                 }
 
@@ -4541,7 +4541,7 @@ namespace Microsoft.Build.Evaluation
                     arg = unboxed;
                     return true;
                 }
-                else if (value is string str && double.TryParse(str, out arg))
+                else if (value is string str && double.TryParse(str, NumberStyles.Number | NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out arg))
                 {
                     return true;
                 }
