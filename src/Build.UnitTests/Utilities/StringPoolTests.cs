@@ -16,8 +16,8 @@ public class StringPoolTests
 
         string str = "Hello, Hello!";
 
-        ReadOnlySpan<char> span1 = str.AsSpan().Slice(0, 5);
-        ReadOnlySpan<char> span2 = str.AsSpan().Slice(7, 5);
+        ReadOnlySpan<char> span1 = str.AsSpan(0, 5);
+        ReadOnlySpan<char> span2 = str.AsSpan(7, 5);
 
         Assert.Equal("Hello", span1.ToString());
         Assert.Equal("Hello", span2.ToString());
@@ -36,25 +36,25 @@ public class StringPoolTests
     {
         StringPool pool = new();
 
-        Assert.Equal("", pool.Intern("hello".AsSpan().Slice(0, 0)));
-        Assert.Equal("", pool.Intern("hello".AsSpan().Slice(1, 0)));
+        Assert.Equal("", pool.Intern("hello".AsSpan(0, 0)));
+        Assert.Equal("", pool.Intern("hello".AsSpan(1, 0)));
     }
 
     [Fact]
     public void InternalEquals()
     {
-        Assert.True(StringPool.InternalEquals("Help", "ZHelpZ".AsSpan().Slice(1, 4)));
-        Assert.True(StringPool.InternalEquals("Help", "HelpZ".AsSpan().Slice(0, 4)));
-        Assert.True(StringPool.InternalEquals("Help", "ZHelp".AsSpan().Slice(1, 4)));
+        Assert.True(StringPool.InternalEquals("Help", "ZHelpZ".AsSpan(1, 4)));
+        Assert.True(StringPool.InternalEquals("Help", "HelpZ".AsSpan(0, 4)));
+        Assert.True(StringPool.InternalEquals("Help", "ZHelp".AsSpan(1, 4)));
 
-        Assert.True(StringPool.InternalEquals("Hello!", "ZHello!Z".AsSpan().Slice(1, 6)));
-        Assert.True(StringPool.InternalEquals("Hello!!", "ZHello!!Z".AsSpan().Slice(1, 7)));
-        Assert.True(StringPool.InternalEquals("Hello", "ZHelloZ".AsSpan().Slice(1, 5)));
+        Assert.True(StringPool.InternalEquals("Hello!", "ZHello!Z".AsSpan(1, 6)));
+        Assert.True(StringPool.InternalEquals("Hello!!", "ZHello!!Z".AsSpan(1, 7)));
+        Assert.True(StringPool.InternalEquals("Hello", "ZHelloZ".AsSpan(1, 5)));
 
-        Assert.False(StringPool.InternalEquals("Hello", "Hello".AsSpan().Slice(0, 4)));
-        Assert.False(StringPool.InternalEquals("Hello", "HELLO".AsSpan().Slice(0, 5)));
-        Assert.False(StringPool.InternalEquals("Hello", "ZHell0Z".AsSpan().Slice(1, 5)));
-        Assert.False(StringPool.InternalEquals("Hello", "ZHel1oZ".AsSpan().Slice(1, 5)));
+        Assert.False(StringPool.InternalEquals("Hello", "Hello".AsSpan(0, 4)));
+        Assert.False(StringPool.InternalEquals("Hello", "HELLO".AsSpan(0, 5)));
+        Assert.False(StringPool.InternalEquals("Hello", "ZHell0Z".AsSpan(1, 5)));
+        Assert.False(StringPool.InternalEquals("Hello", "ZHel1oZ".AsSpan(1, 5)));
 
         const string str = "ABCDEFGHIJKLMNOP";
 
@@ -68,7 +68,7 @@ public class StringPoolTests
                 Assert.True(
                     StringPool.InternalEquals(
                         str.Substring(start, length),
-                        str.AsSpan().Slice(start, length)),
+                        str.AsSpan(start, length)),
                     $"Different hash codes at start={start}, length={length}");
             }
         }
@@ -107,7 +107,7 @@ public class StringPoolTests
             for (int length = 0; length <= str.Length - start; length++)
             {
                 if (StringPool.InternalGetHashCode(str.Substring(start, length).AsSpan()) !=
-                    StringPool.InternalGetHashCode(str.AsSpan().Slice(start, length)))
+                    StringPool.InternalGetHashCode(str.AsSpan(start, length)))
                 {
                     Assert.True(false, $"Different hash codes at start={start}, length={length}");
                 }
