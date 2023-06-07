@@ -13,6 +13,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <!-- Default the check to true, but allow developers to turn the warning off. -->
     <CheckEolTargetFramework Condition="'$(CheckEolTargetFramework)' == ''">true</CheckEolTargetFramework>
+    <CheckEolWorkloads Condition="'$(CheckEolWorkloads)' == ''">true</CheckEolWorkloads>
   </PropertyGroup>
 
   <!--
@@ -27,5 +28,11 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'@(_EolNetCoreTargetFrameworkVersions->AnyHaveMetadataValue('Identity', '$(_TargetFrameworkVersionWithoutV)'))' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(CheckEolTargetFramework)' == 'true'">
     <NETSdkWarning ResourceName="TargetFrameworkIsEol"
                    FormatArguments="$(TargetFramework.ToLowerInvariant());https://aka.ms/dotnet-core-support" />
+  </Target>
+
+  <Target Name="_CheckForEolWorkloads" AfterTargets="_CheckForUnsupportedNETCoreVersion"
+          Condition="'@(EolWorkload)' != '' and '$(CheckEolWorkloads)' == 'true'">
+    <NETSdkWarning ResourceName="WorkloadIsEol"
+                   FormatArguments="%(EolWorkload.Identity);$([MSBuild]::ValueOrDefault('%(EolWorkload.Url)', 'https://aka.ms/dotnet-core-support'))" />
   </Target>
 </Project>
