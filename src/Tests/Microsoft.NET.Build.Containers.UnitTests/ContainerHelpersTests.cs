@@ -7,7 +7,7 @@ namespace Microsoft.NET.Build.Containers.UnitTests;
 
 public class ContainerHelpersTests
 {
-    private const string DefaultRegistry = "registry-1.docker.io";
+    private const string DefaultRegistry = "docker.io";
 
     [Theory]
     // Valid Tests

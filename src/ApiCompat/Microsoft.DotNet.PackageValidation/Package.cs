@@ -208,7 +208,7 @@ namespace Microsoft.DotNet.PackageValidation
         }
 
         /// <summary>
-        /// Finds the best compile time assset for a specific framework.
+        /// Finds the best compile time asset for a specific framework.
         /// </summary>
         /// <param name="framework">The framework where the package needs to be installed.</param>
         /// <returns>A ContentItem representing the best compile time asset.</returns>

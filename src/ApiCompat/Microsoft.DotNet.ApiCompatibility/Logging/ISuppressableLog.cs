@@ -11,9 +11,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
     public interface ISuppressableLog : ILog
     {
         /// <summary>
-        /// Reports whether the logger emitted a compatibility suppression.
+        /// Reports whether the logger emitted an error suppression.
         /// </summary>
-        bool HasLoggedSuppressions { get; }
+        bool HasLoggedErrorSuppressions { get; }
 
         /// <summary>
         /// Log an error based on a passed in suppression, code and message.

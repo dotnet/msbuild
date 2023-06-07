@@ -56,7 +56,7 @@ public static class ContainerBuilder
         }
         if (imageBuilder is null)
         {
-            Console.WriteLine(Resource.GetString(nameof(Strings.BaseImageNotFound)), sourceImageReference.RepositoryAndTag, containerRuntimeIdentifier);
+            Console.WriteLine(Resource.GetString(nameof(Strings.BaseImageNotFound)), sourceImageReference, containerRuntimeIdentifier);
             return 1;
         }
         Console.WriteLine("Containerize: building image '{0}' with tags {1} on top of base image {2}", imageName, string.Join(",", imageName), sourceImageReference);
@@ -91,7 +91,7 @@ public static class ContainerBuilder
         {
             if (isLocalPush)
             {
-                ILocalRegistry containerRegistry = GetLocalRegistry(localRegistry,Console.WriteLine);
+                ILocalRegistry containerRegistry = GetLocalRegistry(localRegistry, Console.WriteLine);
                 if (!(await containerRegistry.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
                 {
                     Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.LocalRegistryNotAvailable)));
@@ -101,7 +101,7 @@ public static class ContainerBuilder
                 try
                 {
                     await containerRegistry.LoadAsync(builtImage, sourceImageReference, destinationImageReference, cancellationToken).ConfigureAwait(false);
-                    Console.WriteLine("Containerize: Pushed container '{0}' to local registry", destinationImageReference.RepositoryAndTag);
+                    Console.WriteLine("Containerize: Pushed image '{0}' to local registry", destinationImageReference.RepositoryAndTag);
                 }
                 catch (Exception ex)
                 {
@@ -121,7 +121,7 @@ public static class ContainerBuilder
                             destinationImageReference,
                             message => Console.WriteLine($"Containerize: {message}"),
                             cancellationToken)).ConfigureAwait(false);
-                        Console.WriteLine($"Containerize: Pushed container '{destinationImageReference.RepositoryAndTag}' to registry '{outputRegistry}'");
+                        Console.WriteLine($"Containerize: Pushed image '{destinationImageReference}' to registry '{outputRegistry}'");
                     }
                 }
                 catch (Exception e)
