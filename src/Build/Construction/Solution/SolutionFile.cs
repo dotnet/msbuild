@@ -4,17 +4,16 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using System.Text.Json;
 using System.Xml;
-
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 
 using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
@@ -164,7 +163,6 @@ namespace Microsoft.Build.Construction
         /// This is the read/write accessor for the solution file which we will parse.  This
         /// must be set before calling any other methods on this class.
         /// </summary>
-        /// <value></value>
         internal string FullPath
         {
             get => _solutionFile;
@@ -192,18 +190,11 @@ namespace Microsoft.Build.Construction
             }
         }
 
-        internal string SolutionFileDirectory
-        {
-            get;
-            // This setter is only used by the unit tests
-            set;
-        }
+        // Setter only used by the unit tests
+        internal string SolutionFileDirectory { get; set; }
 
-        /// <summary>
-        /// For unit-testing only.
-        /// </summary>
-        /// <value></value>
-        internal StreamReader SolutionReader { get; set; }
+        // Setter only used by the unit tests
+        internal StreamLineSpanReader SolutionReader { get; set; }
 
         /// <summary>
         /// The list of all full solution configurations (configuration + platform) in this solution
@@ -429,16 +420,16 @@ namespace Microsoft.Build.Construction
 
         private bool TryReadLine(out ReadOnlySpan<char> span)
         {
-            string line = SolutionReader.ReadLine();
-
-            if (line is null)
+            // TODO avoid TextReader.ReadLine as it will always allocate a string. instead, use Decoder.Convert
+            // with shared byte[] and char[] buffers, then put a span on top of them. can do this in an efficient
+            // manner.
+            if (SolutionReader.TryReadLine(out span))
             {
-                span = default;
-                return false;
+                span = span.Trim();
+                return true;
             }
 
-            span = line.AsSpan().Trim();
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -462,24 +453,24 @@ namespace Microsoft.Build.Construction
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(_solutionFile), "ParseSolutionFile() got a null solution file!");
             ErrorUtilities.VerifyThrowInternalRooted(_solutionFile);
 
-            FileStream fileStream = null;
             SolutionReader = null;
 
             try
             {
-                // Open the file
-                fileStream = File.OpenRead(_solutionFile);
-                SolutionReader = new StreamReader(fileStream, Encoding.GetEncoding(0)); // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
+                // Open the file.
+                using FileStream fileStream = File.OpenRead(_solutionFile);
+
+                SolutionReader = new StreamLineSpanReader(
+                    fileStream,
+                    Encoding.GetEncoding(0), // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
+                    byteBufferSize: 1024,
+                    charBufferSize: 1024);
+
                 ParseSolution();
             }
             catch (Exception e) when (ExceptionUtilities.IsIoRelatedException(e))
             {
                 ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(_solutionFile), "InvalidProjectFile", e.Message);
-            }
-            finally
-            {
-                fileStream?.Dispose();
-                SolutionReader?.Dispose();
             }
         }
 
@@ -499,7 +490,7 @@ namespace Microsoft.Build.Construction
             _defaultPlatformName = null;
 
             // the raw list of project configurations in solution configurations, to be processed after it's fully read in.
-            Dictionary<string, string> rawProjectConfigurationsEntries = null;
+            Dictionary<ProjectConfigurationKey, string> rawProjectConfigurationsEntries = null;
 
             ParseFileHeader();
 
@@ -1255,6 +1246,7 @@ namespace Microsoft.Build.Construction
             //// Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "src\Build\Microsoft.Build.csproj", "{69BE05E2-CBDA-4D27-9733-44E12B0F5627}"
 
             if (!TrySkip(ref line, "Project(") ||
+                // TODO use pool here
                 !TryReadQuotedString(ref line, out projectTypeGuid) ||
                 !TrySkip(ref line, ")") ||
                 !TrySkipDelimiter(ref line, '=') ||
@@ -1262,6 +1254,7 @@ namespace Microsoft.Build.Construction
                 !TrySkipDelimiter(ref line, ',') ||
                 !TryReadQuotedString(ref line, out relativePath) ||
                 !TrySkipDelimiter(ref line, ',') ||
+                // TODO use pool here
                 !TryReadQuotedString(ref line, out projectGuid) ||
                 !line.IsEmpty)
             {
@@ -1440,6 +1433,7 @@ namespace Microsoft.Build.Construction
                         "SolutionParseNestedProjectError");
                 }
 
+                // TODO use pool here
                 string projectGuid = propertyName.ToString();
                 string parentProjectGuid = propertyValue.ToString();
 
@@ -1513,7 +1507,7 @@ namespace Microsoft.Build.Construction
                         line.ToString());
                 }
 
-                var (configuration, platform) = ParseConfigurationName(name, FullPath, _currentLineNumber, line);
+                (string configuration, string platform) = ParseConfigurationName(name, FullPath, _currentLineNumber, line);
 
                 _solutionConfigurations.Add(new SolutionConfigurationInSolution(configuration, platform));
             }
@@ -1530,7 +1524,38 @@ namespace Microsoft.Build.Construction
                     containingString.ToString());
             }
 
+            // TODO use pool here
             return (configuration.ToString(), platform.ToString());
+        }
+
+        internal readonly struct ProjectConfigurationKey : IEquatable<ProjectConfigurationKey>
+        {
+            public string ProjectGuid { get; }
+
+            public string Suffix { get; }
+
+            public ProjectConfigurationKey(string projectGuid, string suffix)
+            {
+                ProjectGuid = projectGuid;
+                Suffix = suffix;
+            }
+
+            public override int GetHashCode()
+            {
+                return StringComparer.OrdinalIgnoreCase.GetHashCode(ProjectGuid)
+                     ^ StringComparer.Ordinal.GetHashCode(Suffix);
+            }
+
+            public bool Equals(ProjectConfigurationKey other)
+            {
+                return
+                    string.Equals(ProjectGuid, other.ProjectGuid, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(Suffix, other.Suffix, StringComparison.Ordinal);
+            }
+
+            public override bool Equals(object obj) => obj is ProjectConfigurationKey key && Equals(key);
+
+            public override string ToString() => $"{ProjectGuid}.{Suffix}";
         }
 
         /// <summary>
@@ -1554,9 +1579,12 @@ namespace Microsoft.Build.Construction
         /// </code>
         /// </remarks>
         /// <returns>An unprocessed dictionary of entries in this section.</returns>
-        internal Dictionary<string, string> ParseProjectConfigurations()
+        internal Dictionary<ProjectConfigurationKey, string> ParseProjectConfigurations()
         {
-            Dictionary<string, string> rawProjectConfigurationsEntries = new(StringComparer.OrdinalIgnoreCase);
+            Dictionary<ProjectConfigurationKey, string> rawProjectConfigurationsEntries = new();
+
+            // TODO use pool in other places too, during parsing?
+            StringPool pool = new();
 
             while (TryReadLine(out ReadOnlySpan<char> line))
             {
@@ -1580,7 +1608,15 @@ namespace Microsoft.Build.Construction
                         line.ToString());
                 }
 
-                rawProjectConfigurationsEntries[name.ToString()] = value.ToString();
+                int periodIndex = name.IndexOf('.');
+
+                if (periodIndex != -1)
+                {
+                    ReadOnlySpan<char> guid = name.Slice(0, periodIndex);
+                    ReadOnlySpan<char> suffix = name.Slice(periodIndex + 1);
+
+                    rawProjectConfigurationsEntries[new(pool.Intern(guid), pool.Intern(suffix))] = value.ToString();
+                }
             }
 
             return rawProjectConfigurationsEntries;
@@ -1591,7 +1627,7 @@ namespace Microsoft.Build.Construction
         /// solution section data. 
         /// </summary>
         /// <param name="rawProjectConfigurationsEntries">Cached data from the project configuration section</param>
-        internal void ProcessProjectConfigurationSection(Dictionary<string, string> rawProjectConfigurationsEntries)
+        internal void ProcessProjectConfigurationSection(Dictionary<ProjectConfigurationKey, string> rawProjectConfigurationsEntries)
         {
             // Instead of parsing the data line by line, we parse it project by project, constructing the 
             // entry name (e.g. "{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Release|Any CPU.ActiveCfg") and retrieving its 
@@ -1609,16 +1645,18 @@ namespace Microsoft.Build.Construction
                     {
                         // The "ActiveCfg" entry defines the active project configuration in the given solution configuration
                         // This entry must be present for every possible solution configuration/project combination.
-                        string entryNameActiveConfig = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.ActiveCfg", project.ProjectGuid, solutionConfiguration.FullName);
+                        ProjectConfigurationKey activeConfigKey = new(project.ProjectGuid, $"{solutionConfiguration.FullName}.ActiveCfg");
+                        ////string entryNameActiveConfig = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.ActiveCfg", project.ProjectGuid, solutionConfiguration.FullName);
 
                         // The "Build.0" entry tells us whether to build the project configuration in the given solution configuration.
                         // Technically, it specifies a configuration name of its own which seems to be a remnant of an initial,
                         // more flexible design of solution configurations (as well as the '.0' suffix - no higher values are ever used).
                         // The configuration name is not used, and the whole entry means "build the project configuration"
                         // if it's present in the solution file, and "don't build" if it's not.
-                        string entryNameBuild = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.Build.0", project.ProjectGuid, solutionConfiguration.FullName);
+                        ////string entryNameBuild = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.Build.0", project.ProjectGuid, solutionConfiguration.FullName);
+                        ProjectConfigurationKey buildKey = new(project.ProjectGuid, $"{solutionConfiguration.FullName}.Build.0");
 
-                        if (rawProjectConfigurationsEntries.TryGetValue(entryNameActiveConfig, out string configurationPlatform))
+                        if (rawProjectConfigurationsEntries.TryGetValue(activeConfigKey, out string configurationPlatform))
                         {
                             // Project configuration may not necessarily contain the platform part. Some projects support only the configuration part.
                             if (!TryParseConfigurationPlatform(configurationPlatform.AsSpan(), isPlatformRequired: false, out ReadOnlySpan<char> configuration, out ReadOnlySpan<char> platform))
@@ -1627,13 +1665,13 @@ namespace Microsoft.Build.Construction
                                     "SubCategoryForSolutionParsingErrors",
                                     new BuildEventFileInfo(FullPath),
                                     "SolutionParseInvalidProjectSolutionConfigurationEntry",
-                                    $"{entryNameActiveConfig} = {configurationPlatform}");
+                                    $"{activeConfigKey} = {configurationPlatform}");
                             }
 
-                            var projectConfiguration = new ProjectConfigurationInSolution(
+                            ProjectConfigurationInSolution projectConfiguration = new(
                                 configuration.ToString(),
                                 platform.ToString(),
-                                rawProjectConfigurationsEntries.ContainsKey(entryNameBuild));
+                                includeInBuild: rawProjectConfigurationsEntries.ContainsKey(buildKey));
 
                             project.SetProjectConfiguration(solutionConfiguration.FullName, projectConfiguration);
                         }
@@ -1717,8 +1755,6 @@ namespace Microsoft.Build.Construction
         /// This method takes a string representing one of the project's unique names (guid), and
         /// returns the corresponding "friendly" name for this project.
         /// </summary>
-        /// <param name="projectGuid"></param>
-        /// <returns></returns>
         internal string GetProjectUniqueNameByGuid(string projectGuid)
         {
             if (_projects.TryGetValue(projectGuid, out ProjectInSolution proj))
@@ -1733,8 +1769,6 @@ namespace Microsoft.Build.Construction
         /// This method takes a string representing one of the project's unique names (guid), and
         /// returns the corresponding relative path to this project.
         /// </summary>
-        /// <param name="projectGuid"></param>
-        /// <returns></returns>
         internal string GetProjectRelativePathByGuid(string projectGuid)
         {
             if (_projects.TryGetValue(projectGuid, out ProjectInSolution proj))

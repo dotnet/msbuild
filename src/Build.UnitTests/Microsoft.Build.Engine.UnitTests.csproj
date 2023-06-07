@@ -19,7 +19,7 @@
     <PackageReference Include="Shouldly" />
     <PackageReference Include="System.Net.Http" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
-    <PackageReference Include="NuGet.Frameworks" >
+    <PackageReference Include="NuGet.Frameworks">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
 
@@ -78,9 +78,6 @@
     </Compile>
     <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" />
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\StreamHelpers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\UnitTests\EngineTestEnvironment.cs">

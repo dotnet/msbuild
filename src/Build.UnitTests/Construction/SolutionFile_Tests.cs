@@ -5,6 +5,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.ConstrainedExecution;
+using System.Runtime.Serialization;
+using System.Text;
+
 using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
@@ -723,12 +727,30 @@ namespace Microsoft.Build.UnitTests.Construction
         internal static SolutionFile ParseSolutionHelper(string solutionFileContents)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
-            StreamReader sr = StreamHelpers.StringToStreamReader(solutionFileContents);
+
+#if FEATURE_ENCODING_DEFAULT
+            Encoding encoding = Encoding.Default;
+#else
+            Encoding encoding = Encoding.UTF8;
+#endif
+
+            MemoryStream stream = new();
+            StreamWriter writer = new(stream, encoding);
+
+            writer.Write(solutionFileContents);
+            writer.Flush();
+            stream.Seek(0, SeekOrigin.Begin);
+
+            ////StreamReader sr = StreamHelpers.StringToStreamReader(solutionFileContents);
 
             SolutionFile sp = new()
             {
                 SolutionFileDirectory = Path.GetTempPath(),
-                SolutionReader = sr,
+                SolutionReader = new(
+                    stream,
+                    encoding,
+                    byteBufferSize: 1024,
+                    charBufferSize: 1024),
                 FullPath = FileUtilities.GetTemporaryFileName(".sln")
             };
 
@@ -866,7 +888,8 @@ namespace Microsoft.Build.UnitTests.Construction
         public void BasicSolution()
         {
             string solutionFileContents =
-                @"
+                """
+
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{F184B08F-C81C-45F6-A57F-5ABD9991F28F}') = 'ConsoleApplication1', 'ConsoleApplication1\ConsoleApplication1.vbproj', '{AB3413A6-D689-486D-B7F0-A095371B3F13}'
@@ -904,7 +927,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
