@@ -91,7 +91,9 @@ namespace Microsoft.Build.Construction
         internal static readonly string[] projectNamesToDisambiguate = { "Build", "Rebuild", "Clean", "Publish" };
 
         #endregion
+
         #region Member data
+
         private string _relativePath;         // Relative from .SLN file.  For example, "WindowsApplication1\WindowsApplication1.csproj"
         private string _absolutePath;         // Absolute path to the project file
         private readonly List<string> _dependencies;     // A list of strings representing the Guids of the dependent projects.
@@ -99,6 +101,7 @@ namespace Microsoft.Build.Construction
         private Hashtable _aspNetConfigurations; // Lazily allocated collection, as this is rarely populated or read
         private string _uniqueProjectName;    // For example, "MySlnFolder\MySubSlnFolder\Windows_Application1"
         private string _originalProjectName;    // For example, "MySlnFolder\MySubSlnFolder\Windows.Application1"
+        private List<string> _projectReferences;
 
         /// <summary>
         /// The project configuration in given solution configuration
@@ -236,7 +239,7 @@ namespace Microsoft.Build.Construction
         /// either specified as Dependencies above, or as ProjectReferences in the
         /// project file, which the solution doesn't have insight into. 
         /// </summary>
-        internal List<string> ProjectReferences { get; } = new List<string>();
+        internal List<string> ProjectReferences => _projectReferences ??= new();
 
         internal SolutionFile ParentSolution { get; set; }
 
