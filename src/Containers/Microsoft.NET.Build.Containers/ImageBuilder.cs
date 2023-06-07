@@ -92,11 +92,6 @@ internal sealed class ImageBuilder
     internal void SetEntrypointAndCmd(string[] entrypoint, string[] cmd) => _baseImageConfig.SetEntrypointAndCmd(entrypoint, cmd);
 
     /// <summary>
-    /// Sets the CMD for the image, preserving the base ENTRYPOINT.
-    /// </summary>
-    internal void SetCmd(string[] cmd) => _baseImageConfig.SetCmd(cmd);
-
-    /// <summary>
     /// Sets the USER for the image.
     /// </summary>
     internal void SetUser(string user) => _baseImageConfig.SetUser(user);

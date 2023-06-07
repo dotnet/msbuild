@@ -70,15 +70,8 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         imageBuilder.AddLayer(newLayer);
         imageBuilder.SetWorkingDirectory(WorkingDirectory);
 
-        (string[]? entrypoint, string[] cmd) = DetermineEntrypointAndCmd(baseImageEntrypoint: imageBuilder.BaseImageConfig.GetEntrypoint());
-        if (entrypoint is not null)
-        {
-            imageBuilder.SetEntrypointAndCmd(entrypoint, cmd);
-        }
-        else
-        {
-            imageBuilder.SetCmd(cmd);
-        }
+        (string[] entrypoint, string[] cmd) = DetermineEntrypointAndCmd(baseImageEntrypoint: imageBuilder.BaseImageConfig.GetEntrypoint());
+        imageBuilder.SetEntrypointAndCmd(entrypoint, cmd);
 
         foreach (ITaskItem label in Labels)
         {
@@ -250,49 +243,41 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         _cancellationTokenSource.Dispose();
     }
 
-    internal (string[]? entryPoint, string[] cmd) DetermineEntrypointAndCmd(string[]? baseImageEntrypoint)
+    internal (string[] entrypoint, string[] cmd) DetermineEntrypointAndCmd(string[]? baseImageEntrypoint)
     {
-        string[] entryPoint = Entrypoint.Select(i => i.ItemSpec).ToArray();
-        string[] entryPointArgs = EntrypointArgs.Select(i => i.ItemSpec).ToArray();
+        string[] entrypoint = Entrypoint.Select(i => i.ItemSpec).ToArray();
+        string[] entrypointArgs = EntrypointArgs.Select(i => i.ItemSpec).ToArray();
         string[] cmd = Cmd.Select(i => i.ItemSpec).ToArray();
         string[] appCommand = AppCommand.Select(i => i.ItemSpec).ToArray();
         string[] appCommandArgs = AppCommandArgs.Select(i => i.ItemSpec).ToArray();
         string appCommandInstruction = AppCommandInstruction;
 
-        bool setsEntrypoint = entryPoint.Length > 0;
+        bool setsEntrypoint = entrypoint.Length > 0 || entrypointArgs.Length > 0;
         bool setsCmd = cmd.Length > 0;
+
+        baseImageEntrypoint ??= Array.Empty<string>();
+        // Some (Microsoft) base images set 'dotnet' as the ENTRYPOINT. We mustn't use it.
+        if (baseImageEntrypoint.Length == 1 && (baseImageEntrypoint[0] == "dotnet" || baseImageEntrypoint[0] == "/usr/bin/dotnet"))
+        {
+            baseImageEntrypoint = Array.Empty<string>();
+        }
 
         if (string.IsNullOrEmpty(appCommandInstruction))
         {
-            if (setsCmd && setsEntrypoint)
-            {
-                // Both are specified, don't emit the AppCommand.
-                appCommandInstruction = KnownAppCommandInstructions.None;
-            }
-            else if (setsCmd)
-            {
-                // error: A ContainerCmd was specified. 'ContainerAppCommandInstruction' must be set to 'Entrypoint' to add an entrypoint that starts the application, or 'None' use the base image entrypoint (if set).
-                Log.LogErrorWithCodeFromResources(nameof(Strings.CmdSetNoAppCommandInstruction), string.Join(",", KnownAppCommandInstructions.SupportedAppCommandInstructions));
-                return (null, Array.Empty<string>());
-            }
-            else if (setsEntrypoint)
+            if (setsEntrypoint)
             {
                 // Backwards-compatibility: before 'AppCommand'/'Cmd' was added, only 'Entrypoint' was available.
-                if (appCommandArgs.Length == 0)
+                if (!setsCmd && appCommandArgs.Length == 0 && entrypoint.Length == 0)
                 {
-                    // When Entrypoint is empty, it was initialized to the proper value for starting the application.
-                    // AppCommand is initialized to that value. Swap the properties.
-                    if (entryPoint.Length == 0)
-                    {
-                        entryPoint = appCommand;
-                        appCommand = Array.Empty<string>();
-                    }
+                    // Copy over the values for starting the application from AppCommand.
+                    entrypoint = appCommand;
+                    appCommand = Array.Empty<string>();
 
                     // Use EntrypointArgs as cmd.
-                    cmd = entryPointArgs;
-                    entryPointArgs = Array.Empty<string>();
+                    cmd = entrypointArgs;
+                    entrypointArgs = Array.Empty<string>();
 
-                    if (entryPoint.Length == 0 && entryPointArgs.Length > 0)
+                    if (entrypointArgs.Length > 0)
                     {
                         // Log warning: Instead of ContainerEntrypointArgs, use ContainerAppCommandArgs for arguments that must always be set, or ContainerCmd for default arguments that the user override when creating the container.
                         Log.LogWarningWithCodeFromResources(nameof(Strings.EntrypointArgsSetPreferAppCommandArgs));
@@ -302,58 +287,54 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 }
                 else
                 {
-                    // error: ContainerEntrypoint and ContainerAppCommandArgs are specified. Set 'ContainerAppCommandInstruction' to 'Cmd' to add the ContainerAppCommand that starts the application.
-                    //        Alternatively, use 'ContainerEntrypointArgs' or 'ContainerCmd' to specify the arguments instead of 'ContainerAppCommandArgs'.
-                    Log.LogErrorWithCodeFromResources(nameof(Strings.EntrypointAndAppCommandArgsSetNoAppCommandInstruction), string.Join(",", KnownAppCommandInstructions.SupportedAppCommandInstructions));
-                    return (null, Array.Empty<string>());
+                    // There's an Entrypoint. Use Cmd for the AppCommand.
+                    appCommandInstruction = KnownAppCommandInstructions.Cmd;
                 }
             }
             else
             {
-                bool baseImageHasEntrypoint = baseImageEntrypoint?.Length > 0;
-                bool entryPointIsDotnet = baseImageEntrypoint?.Length == 1 && (baseImageEntrypoint[0] == "dotnet" || baseImageEntrypoint[0] == "/usr/bin/dotnet");
-                bool preserveEntrypoint = baseImageHasEntrypoint && !entryPointIsDotnet;
-                appCommandInstruction = preserveEntrypoint ? KnownAppCommandInstructions.Cmd : KnownAppCommandInstructions.Entrypoint;
+                // Default to use an Entrypoint.
+                // If the base image defines an ENTRYPOINT, print a warning.
+                if (baseImageEntrypoint.Length > 0)
+                {
+                    Log.LogWarningWithCodeFromResources(nameof(Strings.BaseEntrypointOverwritten));
+                }
+                appCommandInstruction = KnownAppCommandInstructions.Entrypoint;
             }
         }
 
-        if (entryPointArgs.Length > 0 && entryPoint.Length == 0)
+        if (entrypointArgs.Length > 0 && entrypoint.Length == 0)
         {
             Log.LogErrorWithCodeFromResources(nameof(Strings.EntrypointArgsSetNoEntrypoint));
-            return (null, Array.Empty<string>());
+            return (Array.Empty<string>(), Array.Empty<string>());
         }
 
         if (appCommandArgs.Length > 0 && appCommand.Length == 0)
         {
             Log.LogErrorWithCodeFromResources(nameof(Strings.AppCommandArgsSetNoAppCommand));
-            return (null, Array.Empty<string>());
+            return (Array.Empty<string>(), Array.Empty<string>());
         }
 
         switch (appCommandInstruction)
         {
             case KnownAppCommandInstructions.None:
-                if (appCommandArgs.Length > 0)
+                if (appCommand.Length > 0 || appCommandArgs.Length > 0)
                 {
-                    Log.LogErrorWithCodeFromResources(nameof(Strings.AppCommandArgsSetNotUsed), appCommandInstruction);
-                    return (null, Array.Empty<string>());
+                    Log.LogErrorWithCodeFromResources(nameof(Strings.AppCommandSetNotUsed), appCommandInstruction);
+                    return (Array.Empty<string>(), Array.Empty<string>());
                 }
                 break;
             case KnownAppCommandInstructions.Cmd:
-                if (setsCmd)
-                {
-                    Log.LogErrorWithCodeFromResources(nameof(Strings.CmdConflictAppCommand), appCommandInstruction);
-                    return (null, Array.Empty<string>());
-                }
-                cmd = appCommand.Concat(appCommandArgs).ToArray();
+                cmd = appCommand.Concat(appCommandArgs).Concat(cmd).ToArray();
                 break;
             case KnownAppCommandInstructions.Entrypoint:
                 if (setsEntrypoint)
                 {
                     Log.LogErrorWithCodeFromResources(nameof(Strings.EntrypointConflictAppCommand), appCommandInstruction);
-                    return (null, Array.Empty<string>());
+                    return (Array.Empty<string>(), Array.Empty<string>());
                 }
-                entryPoint = appCommand;
-                entryPointArgs = appCommandArgs;
+                entrypoint = appCommand;
+                entrypointArgs = appCommandArgs;
                 break;
             default:
                 throw new NotSupportedException(
@@ -363,7 +344,6 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                         string.Join(",", KnownAppCommandInstructions.SupportedAppCommandInstructions)));
         }
 
-        return (entryPoint.Length > 0 ? entryPoint.Concat(entryPointArgs).ToArray() : null /* base image entrypoint */,
-                cmd);
+        return (entrypoint.Length > 0 ? entrypoint.Concat(entrypointArgs).ToArray() : baseImageEntrypoint, cmd);
     }
 }

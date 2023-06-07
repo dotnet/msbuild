@@ -480,9 +480,9 @@ namespace Microsoft.NET.Build.Containers.Resources {
             }
         }
 
-        internal static string CmdSetNoAppCommandInstruction {
+        internal static string BaseEntrypointOverwritten {
             get {
-                return ResourceManager.GetString("CmdSetNoAppCommandInstruction", resourceCulture);
+                return ResourceManager.GetString("BaseEntrypointOverwritten", resourceCulture);
             }
         }
 
@@ -504,15 +504,15 @@ namespace Microsoft.NET.Build.Containers.Resources {
             }
         }
 
-        internal static string AppCommandArgsSetNotUsed {
+        internal static string AppCommandSetNotUsed {
             get {
-                return ResourceManager.GetString("AppCommandArgsSetNotUsed", resourceCulture);
+                return ResourceManager.GetString("AppCommandSetNotUsed", resourceCulture);
             }
         }
 
-        internal static string CmdConflictAppCommand {
+        internal static string EntrypointSetNoAppCommandInstruction {
             get {
-                return ResourceManager.GetString("CmdConflictAppCommand", resourceCulture);
+                return ResourceManager.GetString("EntrypointSetNoAppCommandInstruction", resourceCulture);
             }
         }
 

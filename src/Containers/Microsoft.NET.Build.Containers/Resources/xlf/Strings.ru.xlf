@@ -17,10 +17,15 @@
         <target state="new">CONTAINER2025: ContainerAppCommandArgs are provided without specifying a ContainerAppCommand.</target>
         <note>{StrBegin="CONTAINER2025: "}</note>
       </trans-unit>
-      <trans-unit id="AppCommandArgsSetNotUsed">
-        <source>CONTAINER2026: ContainerAppCommandArgs can not be combined with ContainerAppCommandInstruction '{0}'.</source>
-        <target state="new">CONTAINER2026: ContainerAppCommandArgs can not be combined with ContainerAppCommandInstruction '{0}'.</target>
+      <trans-unit id="AppCommandSetNotUsed">
+        <source>CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is '{0}'.</source>
+        <target state="new">CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is '{0}'.</target>
         <note>{StrBegin="CONTAINER2026: "}</note>
+      </trans-unit>
+      <trans-unit id="BaseEntrypointOverwritten">
+        <source>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'Cmd'.</source>
+        <target state="new">CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'Cmd'.</target>
+        <note>{StrBegin="CONTAINER2022: "}</note>
       </trans-unit>
       <trans-unit id="BaseImageNameParsingFailed">
         <source>CONTAINER2009: Could not parse {0}: {1}</source>
@@ -46,16 +51,6 @@
         <source>CONTAINER1001: Failed to upload blob to {0}; received {1} with detail {2}.</source>
         <target state="translated">CONTAINER1001: не удалось отправить BLOB-объект в {0}; получено {1} со сведениями {2}.</target>
         <note>{StrBegin="CONTAINER1001: "}</note>
-      </trans-unit>
-      <trans-unit id="CmdConflictAppCommand">
-        <source>CONTAINER2027: ContainerCmd can not be combined with ContainerAppCommandInstruction '{0}'.</source>
-        <target state="new">CONTAINER2027: ContainerCmd can not be combined with ContainerAppCommandInstruction '{0}'.</target>
-        <note>{StrBegin="CONTAINER2027: "}</note>
-      </trans-unit>
-      <trans-unit id="CmdSetNoAppCommandInstruction">
-        <source>CONTAINER2022: A ContainerCmd was provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
-        <target state="new">CONTAINER2022: A ContainerCmd was provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</target>
-        <note>{StrBegin="CONTAINER2022: "}</note>
       </trans-unit>
       <trans-unit id="CouldntDeserializeJsonToken">
         <source>CONTAINER1007: Could not deserialize token from JSON.</source>
@@ -96,6 +91,11 @@
         <source>CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
         <target state="new">CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</target>
         <note>{StrBegin="CONTAINER2023: "}</note>
+      </trans-unit>
+      <trans-unit id="EntrypointSetNoAppCommandInstruction">
+        <source>CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
+        <target state="new">CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</target>
+        <note>{StrBegin="CONTAINER2027: "}</note>
       </trans-unit>
       <trans-unit id="EntrypointArgsSetNoEntrypoint">
         <source>CONTAINER2024: ContainerEntrypointArgs are provided without specifying a ContainerEntrypoint.</source>

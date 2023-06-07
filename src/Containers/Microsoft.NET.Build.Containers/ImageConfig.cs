@@ -207,11 +207,6 @@ internal sealed class ImageConfig
         _newCmd = cmd;
     }
 
-    internal void SetCmd(string[] cmd)
-    {
-        _newCmd = cmd;
-    }
-
     internal void AddLayer(Layer l)
     {
         _rootFsLayers.Add(l.Descriptor.UncompressedDigest!);
