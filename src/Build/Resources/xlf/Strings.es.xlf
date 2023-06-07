@@ -92,6 +92,11 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="DefaultSDKResolverError">
+        <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
+        <target state="new">MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: Se intentaron crear varias invalidaciones de la misma tarea: {0}</target>
@@ -122,6 +127,13 @@
         <target state="translated">MSB4258: Error al escribir el archivo de caché de resultados de salida en la ruta de acceso "{0}": {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToResolveSDK">
+        <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+  {1}</source>
+        <target state="new">Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+  {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: Espacio inesperado en la posición "{1}" de la condición "{0}". ¿Olvidó quitar un espacio?</target>
@@ -141,6 +153,11 @@
         <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
         <target state="translated">Los objetos EvaluationContext creados con SharingPolicy.Isolated no admiten que se les pase un sistema de archivos MSBuildFileSystemBase.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ItemReferencingSelfInTarget">
+        <source>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</source>
+        <target state="new">MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</target>
+        <note>{StrBegin="MSB4120: "}</note>
       </trans-unit>
       <trans-unit id="KillingProcessWithPid">
         <source>Killing process with pid = {0}.</source>
@@ -177,6 +194,11 @@
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
         <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
         <target state="translated">MSB4270: No se encontró ningún complemento de caché de proyectos en el ensamblado "{0}". Se esperaba uno.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NodeReused">
+        <source>Reusing node {0} (PID: {1}).</source>
+        <target state="new">Reusing node {0} (PID: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -328,6 +350,11 @@
         <target state="translated">Valor inicial de la propiedad: $({0})="{1}" Origen: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="PropertyOutsidePropertyGroupInTarget">
+        <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
+        <target state="new">MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</target>
+        <note>{StrBegin="MSB4067: "}</note>
+      </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
         <target state="translated">MSB4274: Al deshabilitar el nodo InProc, se degrada el rendimiento cuando use los complementos de caché de proyectos que emiten solicitudes de compilación de proxy.</target>
@@ -341,6 +368,11 @@
       <trans-unit id="SDKResolverFailed">
         <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
         <target state="translated">Error en el solucionador del SDK "{0}" al intentar resolver el SDK "{1}". Excepción: "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverReturnedNull">
+        <source>SDK resolver "{0}" returned null.</source>
+        <target state="new">SDK resolver "{0}" returned null.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -392,6 +424,11 @@
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
         <target state="translated">La tarea "{0}" solicitó {1} núcleos, adquirió {2} núcleos y ahora retiene un total de {3} núcleos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskAssemblyLoaded">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
+        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
