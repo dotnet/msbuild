@@ -96,6 +96,7 @@ namespace Microsoft.Build.Construction
         private string _absolutePath;         // Absolute path to the project file
         private readonly List<string> _dependencies;     // A list of strings representing the Guids of the dependent projects.
         private IReadOnlyList<string> _dependenciesAsReadonly;
+        private Hashtable _aspNetConfigurations; // Lazily allocated collection, as this is rarely populated or read
         private string _uniqueProjectName;    // For example, "MySlnFolder\MySubSlnFolder\Windows_Application1"
         private string _originalProjectName;    // For example, "MySlnFolder\MySubSlnFolder\Windows.Application1"
 
@@ -124,9 +125,6 @@ namespace Microsoft.Build.Construction
 
             // default to .NET Framework 3.5 if this is an old solution that doesn't explicitly say.
             TargetFrameworkMoniker = ".NETFramework,Version=v3.5";
-
-            // This hashtable stores a AspNetCompilerParameters struct for each configuration name supported.
-            AspNetConfigurations = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
             _projectConfigurations = new Dictionary<string, ProjectConfigurationInSolution>(StringComparer.OrdinalIgnoreCase);
         }
@@ -243,7 +241,12 @@ namespace Microsoft.Build.Construction
         internal SolutionFile ParentSolution { get; set; }
 
         // Key is configuration name, value is [struct] AspNetCompilerParameters
-        internal Hashtable AspNetConfigurations { get; set; }
+        // This hashtable stores a AspNetCompilerParameters struct for each configuration name supported.
+        internal Hashtable AspNetConfigurations
+        {
+            get => _aspNetConfigurations ??= new Hashtable(StringComparer.OrdinalIgnoreCase);
+            set => _aspNetConfigurations = value;
+        }
 
         internal string TargetFrameworkMoniker { get; set; }
 
