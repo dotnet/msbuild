@@ -548,11 +548,15 @@
                            is set separately by
                            -fileloggerparameters.
 </source>
-        <target state="needs-review-translation">  -verbosity:&lt;úroveň&gt; Zobrazení daného množství informací v protokolu
-                     událostí. Dostupné úrovně podrobností: q[uiet], m[inimal],
-                     n[ormal], d[etailed] a diag[nostic]. (Krátký tvar: -v)
-                     Příklad:
+        <target state="new">  -verbosity:&lt;level&gt; Display this amount of information in the event log.
+                     The available verbosity levels are: q[uiet], m[inimal],
+                     n[ormal], d[etailed], and diag[nostic]. (Short form: -v)
+                     Example:
                        -verbosity:quiet
+
+                     Note: File loggers' verbosity
+                           is set separately by
+                           -fileloggerparameters.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
