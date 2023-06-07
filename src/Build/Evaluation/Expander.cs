@@ -4515,6 +4515,9 @@ namespace Microsoft.Build.Evaluation
                 return true;
             }
 
+            /// <summary>
+            /// Try to convert value to int.
+            /// </summary>
             internal static bool TryConvertToInt(object value, out int arg)
             {
                 switch (value)
@@ -4549,6 +4552,9 @@ namespace Microsoft.Build.Evaluation
                 return false;
             }
 
+            /// <summary>
+            /// Try to convert value to long.
+            /// </summary>
             internal static bool TryConvertToLong(object value, out long arg)
             {
                 switch (value)
@@ -4578,6 +4584,9 @@ namespace Microsoft.Build.Evaluation
                 return false;
             }
 
+            /// <summary>
+            /// Try to convert value to double.
+            /// </summary>
             internal static bool TryConvertToDouble(object value, out double arg)
             {
                 switch (value)
