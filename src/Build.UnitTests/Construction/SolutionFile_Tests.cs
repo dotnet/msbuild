@@ -12,6 +12,8 @@ using System.Text;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -38,10 +40,11 @@ namespace Microsoft.Build.UnitTests.Construction
             SolutionFile p = new SolutionFile();
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
+            StringPool pool = new();
 
             p.ParseFirstProjectLine(
                 "Project(\"{Project GUID}\") = \"Project name\", \"Relative path to project file\", \"Unique name-GUID\"".AsSpan(),
-                proj);
+                proj, pool);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("Project name");
             proj.RelativePath.ShouldBe("Relative path to project file");
@@ -62,10 +65,11 @@ namespace Microsoft.Build.UnitTests.Construction
                 SolutionFile p = new SolutionFile();
                 p.FullPath = "c:\\foo.sln";
                 ProjectInSolution proj = new ProjectInSolution(p);
+                StringPool pool = new();
 
                 p.ParseFirstProjectLine(
                     "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"Project name.vcproj\", \"Relative path\\to\\Project name.vcproj\", \"Unique name-GUID\"".AsSpan(),
-                    proj);
+                    proj, pool);
             });
         }
 
@@ -80,10 +84,11 @@ namespace Microsoft.Build.UnitTests.Construction
             SolutionFile p = new SolutionFile();
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
+            StringPool pool = new();
 
             p.ParseFirstProjectLine(
                 "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"Project name.myvctype\", \"Relative path\\to\\Project name.myvctype\", \"Unique name-GUID\"".AsSpan(),
-                proj);
+                proj, pool);
             proj.ProjectType.ShouldBe(SolutionProjectType.KnownToBeMSBuildFormat);
             proj.ProjectName.ShouldBe("Project name.myvctype");
             proj.RelativePath.ShouldBe("Relative path\\to\\Project name.myvctype");
@@ -99,10 +104,11 @@ namespace Microsoft.Build.UnitTests.Construction
             SolutionFile p = new SolutionFile();
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
+            StringPool pool = new();
 
             p.ParseFirstProjectLine(
                 "Project(\" {Project GUID} \")  = \" Project name \",  \" Relative path to project file \"    , \" Unique name-GUID \"".AsSpan(),
-                proj);
+                proj, pool);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("Project name");
             proj.RelativePath.ShouldBe("Relative path to project file");
@@ -119,10 +125,11 @@ namespace Microsoft.Build.UnitTests.Construction
             SolutionFile p = new SolutionFile();
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
+            StringPool pool = new();
 
             p.ParseFirstProjectLine(
                 "Project(\"{Project GUID}\") = \"\", \"src\\.proj\", \"Unique name-GUID\"".AsSpan(),
-                proj);
+                proj, pool);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldStartWith("EmptyProjectName");
             proj.RelativePath.ShouldBe("src\\.proj");
@@ -681,10 +688,11 @@ namespace Microsoft.Build.UnitTests.Construction
             SolutionFile p = new SolutionFile();
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
+            StringPool pool = new();
 
             p.ParseFirstProjectLine(
                 "Project(\"{Project GUID}\")  = \"MyProject,(=IsGreat)\",  \"Relative path to project file\"    , \"Unique name-GUID\"".AsSpan(),
-                proj);
+                proj, pool);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("MyProject,(=IsGreat)");
             proj.RelativePath.ShouldBe("Relative path to project file");
@@ -707,10 +715,11 @@ namespace Microsoft.Build.UnitTests.Construction
                 p.FullPath = Path.Combine(solutionFolder.Path, "RelativePath", "project file");
                 p.SolutionFileDirectory = Path.GetFullPath(solutionFolder.Path);
                 ProjectInSolution proj = new ProjectInSolution(p);
+                StringPool pool = new();
 
                 p.ParseFirstProjectLine(
                     "Project(\"{Project GUID}\")  = \"ProjectInSubdirectory\",  \"RelativePath\\project file\"    , \"Unique name-GUID\"".AsSpan(),
-                    proj);
+                    proj, pool);
                 proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
                 proj.ProjectName.ShouldBe("ProjectInSubdirectory");
                 proj.RelativePath.ShouldBe(Path.Combine("RelativePath", "project file"));
@@ -2439,16 +2448,18 @@ EndGlobal
         [InlineData("A|B|C", false, null, null)]
         public void ParseConfigurationName(string input, bool expectedSuccess, string expectedConfiguration, string expectedPlatform)
         {
+            StringPool pool = new();
+
             if (expectedSuccess)
             {
-                (string actualConfiguration, string actualPlatform) = SolutionFile.ParseConfigurationName(input.AsSpan(), "path", 0, "containing string".AsSpan());
+                (string actualConfiguration, string actualPlatform) = SolutionFile.ParseConfigurationName(input.AsSpan(), "path", 0, "containing string".AsSpan(), pool);
 
                 Assert.Equal(expectedConfiguration, actualConfiguration);
                 Assert.Equal(expectedPlatform, actualPlatform);
             }
             else
             {
-                Assert.ThrowsAny<Exception>(() => SolutionFile.ParseConfigurationName(input.AsSpan(), "path", 0, "containing string".AsSpan()));
+                Assert.ThrowsAny<Exception>(() => SolutionFile.ParseConfigurationName(input.AsSpan(), "path", 0, "containing string".AsSpan(), pool));
             }
         }
 
@@ -2711,7 +2722,9 @@ EndGlobal
         {
             _ = description;
 
-            bool actualSuccess = SolutionFile.TryParseFirstProjectLine(line.AsSpan(), out string actualProjectTypeGuid, out string actualProjectName, out string actualRelativePath, out string actualProjectGuid);
+            StringPool pool = new();
+
+            bool actualSuccess = SolutionFile.TryParseFirstProjectLine(line.AsSpan(), pool, out string actualProjectTypeGuid, out string actualProjectName, out string actualRelativePath, out string actualProjectGuid);
 
             if (expectedSuccess)
             {

@@ -21,6 +21,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {
@@ -549,6 +550,8 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     return Array.Empty<ProjectGraphEntryPoint>();
                 }
 
+                StringPool pool = new();
+
                 var graphEntryPoints = new List<ProjectGraphEntryPoint>(projectConfigurations.Count);
 
                 foreach (XmlElement projectConfiguration in projectConfigurations)
@@ -569,7 +572,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                     string projectPath = projectPathAttribute!.Value;
 
-                    (string configuration, string platform) = SolutionFile.ParseConfigurationName(projectConfiguration.InnerText.AsSpan(), definingProjectPath, 0, solutionConfigurationXml.AsSpan());
+                    (string configuration, string platform) = SolutionFile.ParseConfigurationName(projectConfiguration.InnerText.AsSpan(), definingProjectPath, 0, solutionConfigurationXml.AsSpan(), pool);
 
                     // Take the defining project global properties and override the configuration and platform.
                     // It's sufficient to only set Configuration and Platform.

@@ -490,6 +490,9 @@ namespace Microsoft.Build.Construction
             _defaultConfigurationName = null;
             _defaultPlatformName = null;
 
+            // Pool strings as we parse them, de-duplicating them in memory.
+            StringPool pool = new();
+
             // the raw list of project configurations in solution configurations, to be processed after it's fully read in.
             Dictionary<ProjectConfigurationKey, string>? rawProjectConfigurationsEntries = null;
 
@@ -499,19 +502,19 @@ namespace Microsoft.Build.Construction
             {
                 if (line.StartsWith("Project(".AsSpan(), StringComparison.Ordinal))
                 {
-                    ParseProject(line);
+                    ParseProject(line, pool);
                 }
                 else if (line.StartsWith("GlobalSection(NestedProjects)".AsSpan(), StringComparison.Ordinal))
                 {
-                    ParseNestedProjects();
+                    ParseNestedProjects(pool);
                 }
                 else if (line.StartsWith("GlobalSection(SolutionConfigurationPlatforms)".AsSpan(), StringComparison.Ordinal))
                 {
-                    ParseSolutionConfigurations();
+                    ParseSolutionConfigurations(pool);
                 }
                 else if (line.StartsWith("GlobalSection(ProjectConfigurationPlatforms)".AsSpan(), StringComparison.Ordinal))
                 {
-                    rawProjectConfigurationsEntries = ParseProjectConfigurations();
+                    rawProjectConfigurationsEntries = ParseProjectConfigurations(pool);
                 }
                 else if (line.StartsWith("VisualStudioVersion".AsSpan(), StringComparison.Ordinal))
                 {
@@ -548,7 +551,7 @@ namespace Microsoft.Build.Construction
 
             if (rawProjectConfigurationsEntries != null)
             {
-                ProcessProjectConfigurationSection(rawProjectConfigurationsEntries);
+                ProcessProjectConfigurationSection(rawProjectConfigurationsEntries, pool);
             }
 
             // Cache the unique name of each project, and check that we don't have any duplicates.
@@ -754,7 +757,7 @@ namespace Microsoft.Build.Construction
         ///  EndProject
         /// </code>
         /// </summary>
-        private void ParseProject(ReadOnlySpan<char> firstLine)
+        private void ParseProject(ReadOnlySpan<char> firstLine, StringPool pool)
         {
             ErrorUtilities.VerifyThrow(!firstLine.IsEmpty, "ParseProject() got an empty firstLine!");
             ErrorUtilities.VerifyThrow(SolutionReader != null, "ParseProject() got a null reader!");
@@ -762,7 +765,7 @@ namespace Microsoft.Build.Construction
             ProjectInSolution proj = new(this);
 
             // Extract the important information from the first line.
-            ParseFirstProjectLine(firstLine, proj);
+            ParseFirstProjectLine(firstLine, proj, pool);
 
             // Search for project dependencies. Keeping reading lines until we either:
             // 1. reach the end of the file,
@@ -793,7 +796,7 @@ namespace Microsoft.Build.Construction
                                 proj.ProjectName);
                         }
 
-                        proj.AddDependency(referencedProjectGuid: propertyName.ToString());
+                        proj.AddDependency(referencedProjectGuid: pool.Intern(propertyName));
 
                         line = ReadRequiredLine();
                     }
@@ -829,7 +832,7 @@ namespace Microsoft.Build.Construction
                     SolutionParserWarnings.Add(warning);
 
                     // The line with new project is already read and we can't go one line back - we have no choice but to recursively parse spotted project.
-                    ParseProject(firstLine: line);
+                    ParseProject(firstLine: line, pool);
 
                     // We're not waiting for the EndProject for malformed project, so we carry on.
                     break;
@@ -1244,6 +1247,7 @@ namespace Microsoft.Build.Construction
 
         internal static bool TryParseFirstProjectLine(
             ReadOnlySpan<char> line,
+            StringPool pool,
             [NotNullWhen(returnValue: true)] out string? projectTypeGuid,
             [NotNullWhen(returnValue: true)] out string? projectName,
             [NotNullWhen(returnValue: true)] out string? relativePath,
@@ -1252,16 +1256,14 @@ namespace Microsoft.Build.Construction
             //// Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "src\Build\Microsoft.Build.csproj", "{69BE05E2-CBDA-4D27-9733-44E12B0F5627}"
 
             if (!TrySkip(ref line, "Project(") ||
-                // TODO use pool here
-                !TryReadQuotedString(ref line, out projectTypeGuid) ||
+                !TryReadQuotedString(ref line, out projectTypeGuid, pool) ||
                 !TrySkip(ref line, ")") ||
                 !TrySkipDelimiter(ref line, '=') ||
                 !TryReadQuotedString(ref line, out projectName) ||
                 !TrySkipDelimiter(ref line, ',') ||
                 !TryReadQuotedString(ref line, out relativePath) ||
                 !TrySkipDelimiter(ref line, ',') ||
-                // TODO use pool here
-                !TryReadQuotedString(ref line, out projectGuid) ||
+                !TryReadQuotedString(ref line, out projectGuid, pool) ||
                 !line.IsEmpty)
             {
                 projectTypeGuid = null;
@@ -1275,7 +1277,8 @@ namespace Microsoft.Build.Construction
 
             static bool TryReadQuotedString(
                 ref ReadOnlySpan<char> line,
-                [NotNullWhen(returnValue: true)] out string? value)
+                [NotNullWhen(returnValue: true)] out string? value,
+                StringPool? pool = null)
             {
                 if (line.Length == 0 ||
                     line[0] != '"')
@@ -1294,7 +1297,9 @@ namespace Microsoft.Build.Construction
                     return false;
                 }
 
-                value = line.Slice(0, quoteIndex).Trim().ToString();
+                ReadOnlySpan<char> valueSpan = line.Slice(0, quoteIndex).Trim();
+
+                value = pool?.Intern(valueSpan) ?? valueSpan.ToString();
                 line = line.Slice(quoteIndex + 1);
                 return true;
             }
@@ -1334,9 +1339,9 @@ namespace Microsoft.Build.Construction
         /// Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build", "src\Build\Microsoft.Build.csproj", "{69BE05E2-CBDA-4D27-9733-44E12B0F5627}"
         /// </code>
         /// </remarks>
-        internal void ParseFirstProjectLine(ReadOnlySpan<char> firstLine, ProjectInSolution proj)
+        internal void ParseFirstProjectLine(ReadOnlySpan<char> firstLine, ProjectInSolution proj, StringPool pool)
         {
-            if (!TryParseFirstProjectLine(firstLine, out string projectTypeGuid, out string projectName, out string relativePath, out string projectGuid))
+            if (!TryParseFirstProjectLine(firstLine, pool, out string? projectTypeGuid, out string? projectName, out string? relativePath, out string? projectGuid))
             {
                 ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                     "SubCategoryForSolutionParsingErrors",
@@ -1418,7 +1423,7 @@ namespace Microsoft.Build.Construction
         /// Read nested projects section.
         /// This is required to find a unique name for each project's target.
         /// </summary>
-        internal void ParseNestedProjects()
+        internal void ParseNestedProjects(StringPool pool)
         {
             while (TryReadLine(out ReadOnlySpan<char> line))
             {
@@ -1441,9 +1446,8 @@ namespace Microsoft.Build.Construction
                         "SolutionParseNestedProjectError");
                 }
 
-                // TODO use pool here
-                string projectGuid = propertyName.ToString();
-                string parentProjectGuid = propertyValue.ToString();
+                string projectGuid = pool.Intern(propertyName);
+                string parentProjectGuid = pool.Intern(propertyValue);
 
                 if (!_projects!.TryGetValue(projectGuid, out ProjectInSolution? proj))
                 {
@@ -1474,7 +1478,7 @@ namespace Microsoft.Build.Construction
         /// EndGlobalSection
         /// </code>
         /// </remarks>
-        internal void ParseSolutionConfigurations()
+        internal void ParseSolutionConfigurations(StringPool pool)
         {
             while (TryReadLine(out ReadOnlySpan<char> line))
             {
@@ -1515,13 +1519,13 @@ namespace Microsoft.Build.Construction
                         line.ToString());
                 }
 
-                (string configuration, string platform) = ParseConfigurationName(name, FullPath, _currentLineNumber, line);
+                (string configuration, string platform) = ParseConfigurationName(name, FullPath, _currentLineNumber, line, pool);
 
                 _solutionConfigurations!.Add(new SolutionConfigurationInSolution(configuration, platform));
             }
         }
 
-        internal static (string Configuration, string Platform) ParseConfigurationName(ReadOnlySpan<char> fullConfigurationName, string projectPath, int lineNumber, ReadOnlySpan<char> containingString)
+        internal static (string Configuration, string Platform) ParseConfigurationName(ReadOnlySpan<char> fullConfigurationName, string? projectPath, int lineNumber, ReadOnlySpan<char> containingString, StringPool pool)
         {
             if (!TryParseConfigurationPlatform(fullConfigurationName, isPlatformRequired: true, out ReadOnlySpan<char> configuration, out ReadOnlySpan<char> platform))
             {
@@ -1532,8 +1536,7 @@ namespace Microsoft.Build.Construction
                     containingString.ToString());
             }
 
-            // TODO use pool here
-            return (configuration.ToString(), platform.ToString());
+            return (pool.Intern(configuration), pool.Intern(platform));
         }
 
         internal readonly struct ProjectConfigurationKey : IEquatable<ProjectConfigurationKey>
@@ -1587,12 +1590,9 @@ namespace Microsoft.Build.Construction
         /// </code>
         /// </remarks>
         /// <returns>An unprocessed dictionary of entries in this section.</returns>
-        internal Dictionary<ProjectConfigurationKey, string> ParseProjectConfigurations()
+        internal Dictionary<ProjectConfigurationKey, string> ParseProjectConfigurations(StringPool pool)
         {
             Dictionary<ProjectConfigurationKey, string> rawProjectConfigurationsEntries = new();
-
-            // TODO use pool in other places too, during parsing?
-            StringPool pool = new();
 
             while (TryReadLine(out ReadOnlySpan<char> line))
             {
@@ -1622,8 +1622,9 @@ namespace Microsoft.Build.Construction
                 {
                     ReadOnlySpan<char> guid = name.Slice(0, periodIndex);
                     ReadOnlySpan<char> suffix = name.Slice(periodIndex + 1);
+                    ProjectConfigurationKey key = new(pool.Intern(guid), pool.Intern(suffix));
 
-                    rawProjectConfigurationsEntries[new(pool.Intern(guid), pool.Intern(suffix))] = value.ToString();
+                    rawProjectConfigurationsEntries[key] = pool.Intern(value);
                 }
             }
 
@@ -1631,17 +1632,18 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Read the project configuration information for every project in the solution, using pre-cached 
-        /// solution section data. 
+        /// Read the project configuration information for every project in the solution, using pre-cached
+        /// solution section data.
         /// </summary>
         /// <param name="rawProjectConfigurationsEntries">Cached data from the project configuration section</param>
-        internal void ProcessProjectConfigurationSection(Dictionary<ProjectConfigurationKey, string> rawProjectConfigurationsEntries)
+        /// <param name="pool">Allows efficient deduplication of repeated strings.</param>
+        internal void ProcessProjectConfigurationSection(Dictionary<ProjectConfigurationKey, string> rawProjectConfigurationsEntries, StringPool pool)
         {
-            // Instead of parsing the data line by line, we parse it project by project, constructing the 
-            // entry name (e.g. "{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Release|Any CPU.ActiveCfg") and retrieving its 
+            // Instead of parsing the data line by line, we parse it project by project, constructing the
+            // entry name (e.g. "{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Release|Any CPU.ActiveCfg") and retrieving its
             // value from the raw data. The reason for this is that the IDE does it this way, and as the result
             // the '.' character is allowed in configuration names although it technically separates different
-            // parts of the entry name string. This could lead to ambiguous results if we tried to parse 
+            // parts of the entry name string. This could lead to ambiguous results if we tried to parse
             // the entry name instead of constructing it and looking it up. Although it's pretty unlikely that
             // this would ever be a problem, it's safer to do it the same way VS IDE does it.
             foreach (ProjectInSolution project in _projectsInOrder!)
@@ -1677,8 +1679,8 @@ namespace Microsoft.Build.Construction
                             }
 
                             ProjectConfigurationInSolution projectConfiguration = new(
-                                configuration.ToString(),
-                                platform.ToString(),
+                                pool.Intern(configuration),
+                                pool.Intern(platform),
                                 includeInBuild: rawProjectConfigurationsEntries.ContainsKey(buildKey));
 
                             project.SetProjectConfiguration(solutionConfiguration.FullName, projectConfiguration);
