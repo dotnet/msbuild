@@ -435,9 +435,6 @@ namespace Microsoft.Build.Construction
 
         private bool TryReadLine(out ReadOnlySpan<char> span)
         {
-            // TODO avoid TextReader.ReadLine as it will always allocate a string. instead, use Decoder.Convert
-            // with shared byte[] and char[] buffers, then put a span on top of them. can do this in an efficient
-            // manner.
             if (SolutionReader!.TryReadLine(out span))
             {
                 span = span.Trim();
@@ -632,7 +629,7 @@ namespace Microsoft.Build.Construction
 
                 bool uniqueNameExists = projectsByUniqueName.ContainsKey(uniqueName);
 
-                // Add the unique name (if it does not exist) to the hash table 
+                // Add the unique name (if it does not exist) to the dictionary 
                 if (!uniqueNameExists)
                 {
                     projectsByUniqueName.Add(uniqueName, proj);
@@ -930,7 +927,7 @@ namespace Microsoft.Build.Construction
                 // Find the /EFPROJECT/GENERAL/References/Reference node
                 // Note that this is case sensitive
                 XmlNodeList? referenceNodes = etpProjectDocument.DocumentElement!.SelectNodes("/EFPROJECT/GENERAL/References/Reference");
-                // Do the right thing for each <REference> element
+                // Do the right thing for each <Reference> element
                 foreach (XmlNode referenceNode in referenceNodes!)
                 {
                     // Get the relative path to the project file
@@ -1208,7 +1205,7 @@ namespace Microsoft.Build.Construction
             }
             else
             {
-                // ProjectReferences = "{FD705688-88D1-4C22-9BFF-86235D89C2FC}|CSClassLibrary1.dll;{F0726D09-042B-4A7A-8A01-6BED2422BD5D}|VCClassLibrary1.dll;" 
+                // ProjectReferences = "{FD705688-88D1-4C22-9BFF-86235D89C2FC}|CSClassLibrary1.dll;{F0726D09-042B-4A7A-8A01-6BED2422BD5D}|VCClassLibrary1.dll;"
                 if (string.Equals(propertyName, "ProjectReferences", StringComparison.OrdinalIgnoreCase))
                 {
                     string[] projectReferenceEntries = propertyValue.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
@@ -1217,7 +1214,7 @@ namespace Microsoft.Build.Construction
                     {
                         int indexOfBar = projectReferenceEntry.IndexOf('|');
 
-                        // indexOfBar could be -1 if we had semicolons in the file names, so skip entries that 
+                        // indexOfBar could be -1 if we had semicolons in the file names, so skip entries that
                         // don't contain a guid. File names may not contain the '|' character
                         if (indexOfBar != -1)
                         {
@@ -1240,9 +1237,9 @@ namespace Microsoft.Build.Construction
                 }
                 else if (string.Equals(propertyName, "TargetFrameworkMoniker", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Website project need to back support 3.5 msbuild parser for the Blend (it is not move to .Net4.0 yet.)
-                    // However, 3.5 version of Solution parser can't handle a equal sign in the value.  
-                    // The "=" in targetframeworkMoniker was escaped to "%3D" for Orcas
+                    // Website project need to back support 3.5 MSBuild parser for the Blend (it is not move to .Net4.0 yet.)
+                    // However, 3.5 version of Solution parser can't handle a equal sign in the value.
+                    // The "=" in TargetFrameworkMoniker was escaped to "%3D" for Orcas
                     string targetFrameworkMoniker = TrimQuotes(propertyValue);
                     proj.TargetFrameworkMoniker = EscapingUtilities.UnescapeAll(targetFrameworkMoniker);
                 }
@@ -1624,6 +1621,12 @@ namespace Microsoft.Build.Construction
                     continue;
                 }
 
+                // {69BE05E2-CBDA-4D27-9733-44E12B0F5627}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   ^^^^^^^^^^^^^
+                //                           NAME                                       VALUE
+                // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^^^^^^^^
+                //                  GUID                           SUFFIX
+
                 if (!TryParseNameValue(line, allowEmpty: true, allowEqualsInValue: false, out ReadOnlySpan<char> name, out ReadOnlySpan<char> value))
                 {
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile(
@@ -1673,14 +1676,12 @@ namespace Microsoft.Build.Construction
                         // The "ActiveCfg" entry defines the active project configuration in the given solution configuration
                         // This entry must be present for every possible solution configuration/project combination.
                         ProjectConfigurationKey activeConfigKey = new(project.ProjectGuid, $"{solutionConfiguration.FullName}.ActiveCfg");
-                        ////string entryNameActiveConfig = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.ActiveCfg", project.ProjectGuid, solutionConfiguration.FullName);
 
                         // The "Build.0" entry tells us whether to build the project configuration in the given solution configuration.
                         // Technically, it specifies a configuration name of its own which seems to be a remnant of an initial,
                         // more flexible design of solution configurations (as well as the '.0' suffix - no higher values are ever used).
                         // The configuration name is not used, and the whole entry means "build the project configuration"
                         // if it's present in the solution file, and "don't build" if it's not.
-                        ////string entryNameBuild = string.Format(CultureInfo.InvariantCulture, "{0}.{1}.Build.0", project.ProjectGuid, solutionConfiguration.FullName);
                         ProjectConfigurationKey buildKey = new(project.ProjectGuid, $"{solutionConfiguration.FullName}.Build.0");
 
                         if (rawProjectConfigurationsEntries.TryGetValue(activeConfigKey, out string? configurationPlatform))
@@ -1833,8 +1834,7 @@ namespace Microsoft.Build.Construction
 
         internal static bool TryParseConfigurationPlatform(ReadOnlySpan<char> input, bool isPlatformRequired, out ReadOnlySpan<char> configuration, out ReadOnlySpan<char> platform)
         {
-            // TODO consider pooling return values as they're likely to come from a very small set
-
+            // "Debug|AnyCPU"
             int pipeIndex = input.IndexOf(SolutionConfigurationInSolution.ConfigurationPlatformSeparator);
 
             if (pipeIndex == -1)

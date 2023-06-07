@@ -13,7 +13,7 @@ namespace Microsoft.Build.Construction
     public sealed class ProjectConfigurationInSolution
     {
         /// <summary>
-        /// Constructor
+        /// Initializes a new instance of the <see cref="ProjectConfigurationInSolution"/> class.
         /// </summary>
         internal ProjectConfigurationInSolution(string configurationName, string platformName, bool includeInBuild)
         {
