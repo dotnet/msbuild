@@ -90,11 +90,6 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static readonly string[] projectNamesToDisambiguate = { "Build", "Rebuild", "Clean", "Publish" };
 
-        /// <summary>
-        /// Character that will be used to replace 'unclean' ones.
-        /// </summary>
-        private const char cleanCharacter = '_';
-
         #endregion
         #region Member data
         private string _relativePath;         // Relative from .SLN file.  For example, "WindowsApplication1\WindowsApplication1.csproj"
@@ -486,25 +481,28 @@ namespace Microsoft.Build.Construction
         /// </summary>
         /// <param name="projectName">The name to be cleansed</param>
         /// <returns>string</returns>
-        private static string CleanseProjectName(string projectName)
+        internal static string CleanseProjectName(string projectName)
         {
             ErrorUtilities.VerifyThrow(projectName != null, "Null strings not allowed.");
 
             // If there are no special chars, just return the original string immediately.
             // Don't even instantiate the StringBuilder.
             int indexOfChar = projectName.IndexOfAny(s_charsToCleanse);
+
             if (indexOfChar == -1)
             {
+                // No illegal character exists in the name, so return the input unchanged.
                 return projectName;
             }
 
             // This is where we're going to work on the final string to return to the caller.
-            var cleanProjectName = new StringBuilder(projectName);
+            StringBuilder cleanProjectName = new(projectName);
 
-            // Replace each unclean character with a clean one            
-            foreach (char uncleanChar in s_charsToCleanse)
+            while (indexOfChar != -1)
             {
-                cleanProjectName.Replace(uncleanChar, cleanCharacter);
+                cleanProjectName[indexOfChar] = '_';
+
+                indexOfChar = projectName.IndexOfAny(s_charsToCleanse, indexOfChar + 1);
             }
 
             return cleanProjectName.ToString();
