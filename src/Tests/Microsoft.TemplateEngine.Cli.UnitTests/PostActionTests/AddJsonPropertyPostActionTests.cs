@@ -29,7 +29,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
 
             string parentPropertyPath = "property1:propertyX:property2";
 
-            IPostAction postAction = new MockPostAction
+            IPostAction postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = AddJsonPropertyPostActionProcessor.ActionProcessorId,
                 Args = new Dictionary<string, string>
@@ -70,7 +70,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
 
             string jsonFilePath = CreateJsonFile(targetBasePath, "json.json", originalJsonContent);
 
-            IPostAction postAction = new MockPostAction
+            IPostAction postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = AddJsonPropertyPostActionProcessor.ActionProcessorId,
                 Args = new Dictionary<string, string>
@@ -104,7 +104,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
 
             CreateJsonFile(targetBasePath, "file.json", testCase.OriginalJsonContent);
 
-            IPostAction postAction = new MockPostAction
+            IPostAction postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = AddJsonPropertyPostActionProcessor.ActionProcessorId,
                 Args = testCase.PostActionArgs
@@ -143,7 +143,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
 
             string jsonFilePath = CreateJsonFile(targetBasePath, jsonFileName, testCase.OriginalJsonContent);
 
-            IPostAction postAction = new MockPostAction
+            IPostAction postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = AddJsonPropertyPostActionProcessor.ActionProcessorId,
                 Args = testCase.PostActionArgs
@@ -179,7 +179,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
     public record ModifyJsonPostActionTestCase<TState>(
         string TestCaseDescription,
         string OriginalJsonContent,
-        Dictionary<string, string?> PostActionArgs,
+        Dictionary<string, string> PostActionArgs,
         Action<TState> AssertionCallback)
     {
         private static readonly ModifyJsonPostActionTestCase<JsonNode>[] _successTestCases =
@@ -187,7 +187,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
             new(
                 "Can add simple property",
                 @"{""person"":{""name"":""bob""}}",
-                new Dictionary<string, string?>
+                new Dictionary<string, string>
                 {
                     ["jsonFileName"] = "jsonfile.json",
                     ["parentPropertyPath"] = "person",
@@ -203,7 +203,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
             new(
                 "Can add complex property",
                 @"{""person"":{""name"":""bob""}}",
-                new Dictionary<string, string?>
+                new Dictionary<string, string>
                 {
                     ["jsonFileName"] = "jsonfile.json",
                     ["parentPropertyPath"] = "person",
@@ -219,10 +219,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
             new(
                 "Can add property to document root",
                 @"{""firstProperty"": ""foo""}",
-                new Dictionary<string, string?>
+                new Dictionary<string, string>
                 {
                     ["jsonFileName"] = "jsonfile.json",
-                    ["parentPropertyPath"] = null,
+                    ["parentPropertyPath"] = null!,
                     ["newJsonPropertyName"] = "secondProperty",
                     ["newJsonPropertyValue"] = "bar"
                 },
@@ -235,7 +235,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
             new(
                 "Can add property to sub-property",
                 @"{""rootProperty"": {""subProperty1"": {""subProperty2"":{""subProperty3"":{""name"":""test""}}}}}",
-                new Dictionary<string, string?>
+                new Dictionary<string, string>
                 {
                     ["jsonFileName"] = "jsonfile.json",
                     ["parentPropertyPath"] = "rootProperty:subProperty1:subProperty2:subProperty3",
@@ -253,7 +253,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
             new(
                 "JsonFileName argument not configured",
                 @"{}",
-                new Dictionary<string, string?>
+                new Dictionary<string, string>
                 {
                     ["parentPropertyPath"] = "person",
                     ["newJsonPropertyName"] = "lastName",
@@ -267,7 +267,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
             new(
                 "NewJsonPropertyName argument not configured",
                 @"{}",
-                new Dictionary<string, string?>
+                new Dictionary<string, string>
                 {
                     ["jsonFileName"] = "file.json",
                     ["parentPropertyPath"] = "person",
@@ -281,7 +281,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.PostActionTests
             new(
                 "NewJsonPropertyValue argument not configured",
                 @"{}",
-                new Dictionary<string, string?>()
+                new Dictionary<string, string>()
                 {
                     ["jsonFileName"] = "file.json",
                     ["parentPropertyPath"] = "person",
