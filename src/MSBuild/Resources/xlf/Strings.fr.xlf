@@ -545,11 +545,15 @@
                            is set separately by
                            -fileloggerparameters.
 </source>
-        <target state="needs-review-translation">  -verbosity:&lt;niveau&gt; Volume d'inform. affiché dans le journal des événements
-         Les niveaux de détail disponibles sont : q[uiet], m[inimal],
-         n[ormal], d[etailed] et diag[nostic]. (Forme abrégée : -v)
-         Exemple :
-           -verbosity:quiet
+        <target state="new">  -verbosity:&lt;level&gt; Display this amount of information in the event log.
+                     The available verbosity levels are: q[uiet], m[inimal],
+                     n[ormal], d[etailed], and diag[nostic]. (Short form: -v)
+                     Example:
+                       -verbosity:quiet
+
+                     Note: File loggers' verbosity
+                           is set separately by
+                           -fileloggerparameters.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:

@@ -546,11 +546,15 @@ arquivo de resposta.
                            is set separately by
                            -fileloggerparameters.
 </source>
-        <target state="needs-review-translation">  -verbosity:&lt;level&gt; Exibir este volume de informações no log de eventos.
-                     Os níveis de detalhamento disponíveis são: q[uiet], m[inimal],
-                     n[ormal], d[etailed] e diag[nostic]. (Forma abreviada: -v)
-                     Exemplo:
+        <target state="new">  -verbosity:&lt;level&gt; Display this amount of information in the event log.
+                     The available verbosity levels are: q[uiet], m[inimal],
+                     n[ormal], d[etailed], and diag[nostic]. (Short form: -v)
+                     Example:
                        -verbosity:quiet
+
+                     Note: File loggers' verbosity
+                           is set separately by
+                           -fileloggerparameters.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
