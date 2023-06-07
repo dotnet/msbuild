@@ -540,8 +540,12 @@
                      n[ormal], d[etailed], and diag[nostic]. (Short form: -v)
                      Example:
                        -verbosity:quiet
+
+                     Note: File loggers' verbosity
+                           is set separately by
+                           -fileloggerparameters.
 </source>
-        <target state="translated">  -verbosity:&lt;düzey&gt; Olay günlüğünde bu miktarda bilgi görüntüler.
+        <target state="needs-review-translation">  -verbosity:&lt;düzey&gt; Olay günlüğünde bu miktarda bilgi görüntüler.
                      Kullanılabilen ayrıntı düzeyleri: q[uiet], m[inimal],
                      n[ormal], d[etailed] ve diag[nostic]. (Kısa biçim: -v)
                      Örnek:

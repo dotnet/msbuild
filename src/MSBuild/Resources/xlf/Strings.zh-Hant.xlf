@@ -540,8 +540,12 @@
                      n[ormal], d[etailed], and diag[nostic]. (Short form: -v)
                      Example:
                        -verbosity:quiet
+
+                     Note: File loggers' verbosity
+                           is set separately by
+                           -fileloggerparameters.
 </source>
-        <target state="translated">  -verbosity:&lt;層級&gt; 在事件記錄檔中顯示此數量的資訊。
+        <target state="needs-review-translation">  -verbosity:&lt;層級&gt; 在事件記錄檔中顯示此數量的資訊。
                      可用的詳細程度層級為: q[uiet]、m[inimal]、
                      n[ormal]、d[etailed] 和 diag[nostic]。(簡短形式: -v)
                      範例:
