@@ -544,8 +544,12 @@
                      n[ormal], d[etailed], and diag[nostic]. (Short form: -v)
                      Example:
                        -verbosity:quiet
+
+                     Note: File loggers' verbosity
+                           is set separately by
+                           -fileloggerparameters.
 </source>
-        <target state="translated">  -verbosity:&lt;nivel&gt; Muestra en el registro de eventos la cantidad de información especificada.
+        <target state="needs-review-translation">  -verbosity:&lt;nivel&gt; Muestra en el registro de eventos la cantidad de información especificada.
                      Los niveles de detalle disponibles son: q[uiet], m[inimal],
                      n[ormal], d[etailed] y diag[nostic]. (Forma corta: -v)
                      Ejemplo:

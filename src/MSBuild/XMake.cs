@@ -3343,13 +3343,9 @@ namespace Microsoft.Build.CommandLine
             out ProfilerLogger profilerLogger,
             out bool enableProfiler)
         {
-            var loggers = new List<ILogger>();
-
-            // if verbosity level is not specified, let the presence or absence of the binary logger switch
-            // dictate the output verbosity but not the verbosity passed to other loggers
+            // if verbosity level is not specified, use the default
             originalVerbosity = LoggerVerbosity.Normal;
-            verbosity = LoggerVerbosity.Normal;
-            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref verbosity);
+            verbosity = originalVerbosity;
 
             if (verbositySwitchParameters.Length > 0)
             {
@@ -3357,11 +3353,15 @@ namespace Microsoft.Build.CommandLine
                 originalVerbosity = ProcessVerbositySwitch(verbositySwitchParameters[verbositySwitchParameters.Length - 1]);
                 verbosity = originalVerbosity;
             }
+            var loggers = new List<ILogger>();
 
-            ProcessLoggerSwitch(loggerSwitchParameters, loggers, originalVerbosity);
+            var outVerbosity = verbosity;
+            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref outVerbosity);
+
+            ProcessLoggerSwitch(loggerSwitchParameters, loggers, verbosity);
 
             // Add any loggers which have been specified on the commandline
-            distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, originalVerbosity);
+            distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
             // Choose default console logger
             if (liveLoggerOptIn)
@@ -3370,12 +3370,14 @@ namespace Microsoft.Build.CommandLine
             }
             else
             {
-                ProcessConsoleLoggerSwitch(noConsoleLogger, consoleLoggerParameters, distributedLoggerRecords, originalVerbosity, cpuCount, loggers);
+                ProcessConsoleLoggerSwitch(noConsoleLogger, consoleLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
             }
 
             ProcessDistributedFileLogger(distributedFileLogger, fileLoggerParameters, distributedLoggerRecords, loggers, cpuCount);
 
-            ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, originalVerbosity, cpuCount, loggers);
+            ProcessFileLoggers(groupedFileLoggerParameters, distributedLoggerRecords, verbosity, cpuCount, loggers);
+
+            verbosity = outVerbosity;
 
             profilerLogger = ProcessProfileEvaluationSwitch(profileEvaluationParameters, loggers, out enableProfiler);
 

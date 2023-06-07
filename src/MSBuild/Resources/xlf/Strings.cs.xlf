@@ -543,8 +543,12 @@
                      n[ormal], d[etailed], and diag[nostic]. (Short form: -v)
                      Example:
                        -verbosity:quiet
+
+                     Note: File loggers' verbosity
+                           is set separately by
+                           -fileloggerparameters.
 </source>
-        <target state="translated">  -verbosity:&lt;úroveň&gt; Zobrazení daného množství informací v protokolu
+        <target state="needs-review-translation">  -verbosity:&lt;úroveň&gt; Zobrazení daného množství informací v protokolu
                      událostí. Dostupné úrovně podrobností: q[uiet], m[inimal],
                      n[ormal], d[etailed] a diag[nostic]. (Krátký tvar: -v)
                      Příklad:

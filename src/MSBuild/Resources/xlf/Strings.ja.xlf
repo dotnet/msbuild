@@ -540,8 +540,12 @@
                      n[ormal], d[etailed], and diag[nostic]. (Short form: -v)
                      Example:
                        -verbosity:quiet
+
+                     Note: File loggers' verbosity
+                           is set separately by
+                           -fileloggerparameters.
 </source>
-        <target state="translated">  -verbosity:&lt;level&gt; イベント ログに表示する情報量です。
+        <target state="needs-review-translation">  -verbosity:&lt;level&gt; イベント ログに表示する情報量です。
                      利用可能な詳細レベル: q[uiet]、m[inimal]、
                      n[ormal]、d[etailed]、diag[nostic]。(短縮形: -v)
                      例:

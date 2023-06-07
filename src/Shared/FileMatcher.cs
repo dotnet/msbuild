@@ -92,7 +92,7 @@ namespace Microsoft.Build.Shared
                 path,
                 pattern,
                 projectDirectory,
-                stripProjectDirectory).ToArray(),
+                stripProjectDirectory),
             fileEntryExpansionCache)
         {
         }
@@ -135,8 +135,8 @@ namespace Microsoft.Build.Shared
                         ? allEntriesForPath.Where(o => IsFileNameMatch(o, pattern))
                         : allEntriesForPath;
                     return stripProjectDirectory
-                        ? RemoveProjectDirectory(filteredEntriesForPath, directory).ToArray()
-                        : filteredEntriesForPath.ToArray();
+                        ? RemoveProjectDirectory(filteredEntriesForPath, directory).ToList()
+                        : filteredEntriesForPath.ToList();
                 };
         }
 
@@ -252,7 +252,7 @@ namespace Microsoft.Build.Shared
                         ? fileSystem.EnumerateFileSystemEntries(path, pattern)
                             .Where(o => IsFileNameMatch(o, pattern))
                         : fileSystem.EnumerateFileSystemEntries(path, pattern))
-                        .ToArray();
+                        .ToList();
                 }
                 // for OS security
                 catch (UnauthorizedAccessException)
@@ -349,7 +349,7 @@ namespace Microsoft.Build.Shared
                     files = RemoveInitialDotSlash(files);
                 }
 
-                return files.ToArray();
+                return files.ToList();
             }
             catch (System.Security.SecurityException)
             {
@@ -405,7 +405,7 @@ namespace Microsoft.Build.Shared
                     directories = RemoveInitialDotSlash(directories);
                 }
 
-                return directories.ToArray();
+                return directories.ToList();
             }
             catch (System.Security.SecurityException)
             {
@@ -501,7 +501,7 @@ namespace Microsoft.Build.Shared
                     }
                     else
                     {
-                        // getFileSystemEntries(...) returns an empty enumerable if longPath doesn't exist.
+                        // getFileSystemEntries(...) returns an empty list if longPath doesn't exist.
                         IReadOnlyList<string> entries = getFileSystemEntries(FileSystemEntity.FilesAndDirectories, longPath, parts[i], null, false);
 
                         if (0 == entries.Count)
