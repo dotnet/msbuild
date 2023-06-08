@@ -847,7 +847,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Fall-back search path on a property that is not valid. https://github.com/dotnet/msbuild/issues/8762
         /// </summary>
         /// <param name="projectValue">imported project value expression</param>
-        [WindowsFullFrameworkOnlyTheory]
+        [Theory]
         [InlineData("")]
         [InlineData("|")]
         public void FallbackImportWithInvalidProjectValue(string projectValue)
@@ -861,22 +861,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 </Project>
                 """;
 
-            string mainProjectPath = null;
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            string mainProjectPath = testEnvironment.CreateTestProjectWithFiles("main.proj", mainTargetsFileContent).ProjectFile;
+            var projectCollection = GetProjectCollection();
+            projectCollection.ResetToolsetsForTests(WriteConfigFileAndGetReader("VSToolsPath", "temp"));
+            var logger = new MockLogger();
+            projectCollection.RegisterLogger(logger);
+            Assert.Throws<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
 
-            try
+            if (string.IsNullOrEmpty(projectValue))
             {
-                mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", mainTargetsFileContent);
-                var projectCollection = GetProjectCollection();
-                projectCollection.ResetToolsetsForTests(WriteConfigFileAndGetReader("VSToolsPath", "temp"));
-                var logger = new MockLogger();
-                projectCollection.RegisterLogger(logger);
-
-                Assert.Throws<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
                 logger.AssertLogContains("MSB4102");
             }
-            finally
+            else
             {
-                FileUtilities.DeleteNoThrow(mainProjectPath);
+#if NETFRAMEWORK
+                logger.AssertLogContains("MSB4102");
+#endif
             }
         }
 
