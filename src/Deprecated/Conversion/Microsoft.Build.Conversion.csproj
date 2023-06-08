@@ -36,7 +36,6 @@
     <!-- Assemblies Files we depend on -->
     <Reference Include="System.Configuration" />
     <ProjectReference Include="..\..\Build\Microsoft.Build.csproj" />
-    <ProjectReference Include="..\Engine\Microsoft.Build.Engine.csproj" />
   </ItemGroup>
 
   <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="! $([MSBuild]::IsOSPlatform('windows'))" />
