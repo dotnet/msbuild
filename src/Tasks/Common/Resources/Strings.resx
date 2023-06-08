@@ -233,6 +233,10 @@
     <value>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier. You must either specify a RuntimeIdentifier or set SelfContained to false.</value>
     <comment>{StrBegin="NETSDK1031: "}</comment>
   </data>
+  <data name="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework" xml:space="preserve">
+    <value>NETSDK1080: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</value>
+    <comment>{StrBegin="NETSDK1080: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</comment>
+  </data>
   <data name="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget" xml:space="preserve">
     <value>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</value>
     <comment>{StrBegin="NETSDK1032: "}</comment>
@@ -869,7 +873,7 @@ You may need to build the project on another operating system or architecture, o
   </data>
   <data name="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed" xml:space="preserve">
     <value>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</value>
-      <comment>{StrBegin="NETSDK1191: "}</comment>
+    <comment>{StrBegin="NETSDK1191: "}</comment>
   </data>
   <data name="Net7NotCompatibleWithDev173" xml:space="preserve">
     <value>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</value>
