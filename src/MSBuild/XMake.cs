@@ -1496,7 +1496,7 @@ namespace Microsoft.Build.CommandLine
                         }
                         finally
                         {
-                            buildManager.EndBuild();
+                            buildManager.EndBuild(saveProject);
                         }
                     }
                     catch (Exception ex)

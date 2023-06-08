@@ -334,13 +334,13 @@ namespace Microsoft.Build.Execution
             Idle,
 
             /// <summary>
-            /// This is the state the BuildManager is in after <see cref="BeginBuild(BuildParameters)"/> has been called but before <see cref="EndBuild"/> has been called.
-            /// <see cref="BuildManager.PendBuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.BuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.PendBuildRequest(GraphBuildRequestData)"/>, <see cref="BuildManager.BuildRequest(GraphBuildRequestData)"/>, and <see cref="BuildManager.EndBuild"/> may be called in this state.
+            /// This is the state the BuildManager is in after <see cref="BeginBuild(BuildParameters)"/> has been called but before <see cref="EndBuild()"/> has been called.
+            /// <see cref="BuildManager.PendBuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.BuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.PendBuildRequest(GraphBuildRequestData)"/>, <see cref="BuildManager.BuildRequest(GraphBuildRequestData)"/>, and <see cref="BuildManager.EndBuild()"/> may be called in this state.
             /// </summary>
             Building,
 
             /// <summary>
-            /// This is the state the BuildManager is in after <see cref="BuildManager.EndBuild"/> has been called but before all existing submissions have completed.
+            /// This is the state the BuildManager is in after <see cref="BuildManager.EndBuild()"/> has been called but before all existing submissions have completed.
             /// </summary>
             WaitingForBuildToComplete
         }
@@ -910,6 +910,18 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if there is no build in progress.</exception>
         public void EndBuild()
         {
+            EndBuild(false);
+        }
+
+        /// <summary>
+        /// Signals that no more build requests are expected (or allowed) and the BuildManager may clean up.
+        /// </summary>
+        /// <remarks>
+        /// This call blocks until all currently pending requests are complete.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">Thrown if there is no build in progress.</exception>
+        public void EndBuild(bool skipLoggingBuildFinished)
+        {
             lock (_syncLock)
             {
                 ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
@@ -1018,7 +1030,10 @@ namespace Microsoft.Build.Execution
                             _overallBuildSuccess = false;
                         }
 
-                        loggingService.LogBuildFinished(_overallBuildSuccess);
+                        if (!skipLoggingBuildFinished)
+                        {
+                            loggingService.LogBuildFinished(_overallBuildSuccess);
+                        }
 
                         if (_buildTelemetry != null)
                         {
