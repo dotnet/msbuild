@@ -128,7 +128,7 @@ namespace Microsoft.Build.Execution
         /// Cache of tasks already found using exact matching,
         /// keyed by the task identity requested.
         /// </summary>
-        private Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord> _cachedTaskRecordsWithExactMatch;
+        private readonly Lazy<Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>> _cachedTaskRecordsWithExactMatch = new(() => new(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact));
 
         /// <summary>
         /// Cache of tasks already found using fuzzy matching,
@@ -144,7 +144,7 @@ namespace Microsoft.Build.Execution
         /// Task name may be qualified or not.
         /// This field may be null.
         /// </summary>
-        private Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> _taskRegistrations;
+        private ConcurrentDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> _taskRegistrations;
 
         /// <summary>
         /// The cache to load the *.tasks files into
@@ -485,7 +485,7 @@ namespace Microsoft.Build.Execution
             {
                 if (exactMatchRequired)
                 {
-                    if (_cachedTaskRecordsWithExactMatch != null && _cachedTaskRecordsWithExactMatch.TryGetValue(taskIdentity, out taskRecord))
+                    if (_cachedTaskRecordsWithExactMatch.IsValueCreated && _cachedTaskRecordsWithExactMatch.Value.TryGetValue(taskIdentity, out taskRecord))
                     {
                         retrievedFromCache = true;
                         return taskRecord;
@@ -556,8 +556,7 @@ namespace Microsoft.Build.Execution
             // Cache the result, even if it is null.  We should never again do the work we just did, for this task name.
             if (exactMatchRequired)
             {
-                _cachedTaskRecordsWithExactMatch ??= new Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
-                _cachedTaskRecordsWithExactMatch[taskIdentity] = taskRecord;
+                _cachedTaskRecordsWithExactMatch.Value[taskIdentity] = taskRecord;
             }
             else
             {
@@ -667,13 +666,9 @@ namespace Microsoft.Build.Execution
 
             // since more than one task can have the same name, we want to keep track of all assemblies that are declared to
             // contain tasks with a given name...
-            List<RegisteredTaskRecord> registeredTaskEntries;
             RegisteredTaskIdentity taskIdentity = new RegisteredTaskIdentity(taskName, taskFactoryParameters);
-            if (!_taskRegistrations.TryGetValue(taskIdentity, out registeredTaskEntries))
-            {
-                registeredTaskEntries = new List<RegisteredTaskRecord>();
-                _taskRegistrations[taskIdentity] = registeredTaskEntries;
-            }
+            List<RegisteredTaskRecord> registeredTaskEntries =
+                _taskRegistrations.GetOrAdd(taskIdentity, new List<RegisteredTaskRecord>());
 
             RegisteredTaskRecord newRecord = new RegisteredTaskRecord(taskName, assemblyLoadInfo, taskFactory, taskFactoryParameters, inlineTaskRecord);
 
@@ -706,14 +701,17 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            registeredTaskEntries.Add(newRecord);
+            lock (registeredTaskEntries)
+            {
+                registeredTaskEntries.Add(newRecord);
+            }
         }
 
-        private static Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> CreateRegisteredTaskDictionary(int? capacity = null)
+        private static ConcurrentDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> CreateRegisteredTaskDictionary(int? capacity = null)
         {
             return capacity != null
-                ? new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(capacity.Value, RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact)
-                : new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                ? new ConcurrentDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(Environment.ProcessorCount, capacity.Value, RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact)
+                : new ConcurrentDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
         }
 
         /// <summary>
@@ -1791,7 +1789,7 @@ namespace Microsoft.Build.Execution
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
-                _taskRegistrations = (Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>)copy;
+                _taskRegistrations = (ConcurrentDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>)copy;
             }
         }
 
