@@ -130,8 +130,17 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_35_IsolateProjectsSwitch">
-        <source>  -isolateProjects[:True|False]
+        <source>  -isolateProjects[:True|MessageUponIsolationViolation|False]
                      Causes MSBuild to build each project in isolation.
+
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
 
                      This is a more restrictive mode of MSBuild as it requires
                      that the project graph be statically discoverable at
@@ -141,16 +150,25 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -isolateProjects[:True|False]
-                     MSBuild tarafından her projenin yalıtılmış olarak oluşturulmasına yol açar.
+        <target state="new">  -isolateProjects[:True|MessageUponIsolationViolation|False]
+                     Causes MSBuild to build each project in isolation.
 
-                     Bu mod, değerlendirme sırasında proje grafiğinin
-                     istatistiksel olarak keşfedilebilmesini gerektirdiğinden
-                     nispeten daha kısıtlayıcı bir MSBuild modudur, ancak çok sayıda
-                     proje oluşturulurken zamanlamayı geliştirebilir ve bellek ek yükünü azaltabilir.
-                     (Kısa biçim: -isolate)
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
 
-                     Bu bayrak deneme amaçlıdır ve amaçlandığı gibi çalışmayabilir.
+                     This is a more restrictive mode of MSBuild as it requires
+                     that the project graph be statically discoverable at
+                     evaluation time, but can improve scheduling and reduce
+                     memory overhead when building a large set of projects.
+                     (Short form: -isolate)
+
+                     This flag is experimental and may not work as intended.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -513,39 +531,41 @@
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="needs-review-translation">  -consoleLoggerParameters:&lt;parametreler&gt;
-                     Konsol günlükçüsü için parametreler. (Kısa biçim: -clp)
-                     Kullanılabilir parametreler:
-                        PerformanceSummary--Görevlerde, hedeflerde ve 
-                            projelerde harcanan süreyi göster.
-                        Summary--Sonda hata ve uyarı özetini göster.
-                        NoSummary--Sonda hata ve uyarı özetini gösterme.
-                        ErrorsOnly--Yalnızca hataları göster.
-                        WarningsOnly--Yalnızca uyarıları göster.
-                        NoItemAndPropertyList--Her proje derlemesinin
-                            başında öğe ve özelliklerin listesini gösterme. 
-                        ShowCommandLine--TaskCommandLineEvent iletilerini 
-                            göster.
-                        ShowTimestamp--Tüm iletilerde önek olarak Zaman
-                            Damgasını göster.
-                        ShowEventId--Başlatılan olaylar, bitirilen olaylar ve 
-                            iletiler için eventId'yi göster.
-                        ForceNoAlign--Metni konsol arabelleğinin boyutuna göre
-                            ayarlama.
-                        DisableConsoleColor--Tüm günlük iletileri için
-                            varsayılan konsol renklerini kullan.
-                        DisableMPLogging--Çoklu işlemci olmayan modda 
-                            çalışırken çıkışta çok işlemcili günlük stilini 
-                            devre dışı bırak.
-                        EnableMPLogging--Çok işlemci olmayan modda çalışırken 
-                            bile çok işlemcili günlük stilini etkinleştir. Bu 
-                            günlük stili varsayılan olarak açıktır.
-                        ForceConsoleColor--Konsol desteklemese bile ANSI
-                            konsol renklerini kullan
-                                                Verbosity--Bu günlükçü için /verbosity ayarını
-                            geçersiz kılar.
-                     Örnek:
-                        /consoleloggerparameters:PerformanceSummary;NoSummary;
+        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
+                     Parameters to console logger. (Short form: -clp)
+                     The available parameters are:
+                        PerformanceSummary--Show time spent in tasks, targets
+                            and projects.
+                        Summary--Show error and warning summary at the end.
+                        NoSummary--Don't show error and warning summary at the
+                            end.
+                        ErrorsOnly--Show only errors.
+                        WarningsOnly--Show only warnings.
+                        NoItemAndPropertyList--Don't show list of items and
+                            properties at the start of each project build.
+                        ShowCommandLine--Show TaskCommandLineEvent messages
+                        ShowTimestamp--Display the Timestamp as a prefix to any
+                            message.
+                        ShowEventId--Show eventId for started events, finished
+                            events, and messages
+                        ForceNoAlign--Does not align the text to the size of
+                            the console buffer
+                        DisableConsoleColor--Use the default console colors
+                            for all logging messages.
+                        DisableMPLogging-- Disable the multiprocessor
+                            logging style of output when running in
+                            non-multiprocessor mode.
+                        EnableMPLogging--Enable the multiprocessor logging
+                            style even when running in non-multiprocessor
+                            mode. This logging style is on by default.
+                        ForceConsoleColor--Use ANSI console colors even if
+                            console does not support it
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
+                            logger.
+                     Example:
+                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
         <note>
@@ -642,15 +662,13 @@
       <trans-unit id="HelpMessage_InputCachesFiles">
         <source>  -inputResultsCaches:&lt;cacheFile&gt;...
                      Semicolon separated list of input cache files that MSBuild
-                     will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -irc)
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="translated">  -inputResultsCaches:&lt;önbellekDosyası&gt;...
-                     MSBuild'in derleme sonuçlarını okuyacağı giriş
-                     önbellek dosyalarının noktalı virgülle ayrılmış listesi.
-                     Ayarlandığında yalıtılmış derlemeler de açılır (-isolate).
-                     (kısa biçim: -irc)
+        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Semicolon separated list of input cache files that MSBuild
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -661,14 +679,14 @@
         <source>  -outputResultsCache:[cacheFile]
                      Output cache file where MSBuild will write the contents of
                      its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
+                     If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="translated">  -outputResultsCache:[önbellekDosyası]
-                     MSBuild’in derleme sonunda derleme sonucu önbelleklerinin
-                     içeriğini yazacağı çıkış önbellek dosyası.
-                     Bu açıldığında yalıtılmış derlemeler (-isolate) de açılır.
-                     (kısa biçim: -orc)
+        <target state="new">  -outputResultsCache:[cacheFile]
+                     Output cache file where MSBuild will write the contents of
+                     its build result caches at the end of the build.
+                     If -isolateProjects is set to False, this sets it to True.
+                     (short form: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -1030,7 +1048,8 @@
         <note>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent
+      to Boolean.TrueString, nameof(ProjectIsolationMode.MessageUponIsolationViolation), or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>

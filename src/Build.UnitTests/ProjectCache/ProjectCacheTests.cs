@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -138,8 +138,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                                         {CacheHitByTargetResult, "true"}
                                     })
                             },
-                            BuildResultCode.Success
-                            )
+                            BuildResultCode.Success)
                     });
             }
 
@@ -186,7 +185,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         CacheResultType.CacheNotApplicable => 'N',
                         CacheResultType.None => 'E',
                         _ => throw new ArgumentOutOfRangeException()
-                        };
+                    };
                 }
             }
         }
@@ -347,7 +346,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     },
                     new Dictionary<int, CacheResult>
                     {
-                        {1, GraphCacheResponse.SuccessfulProxyTargetResult()}
+                        {1, GraphCacheResponse.SuccessfulProxyTargetResult() }
                     });
 
                 yield return new GraphCacheResponse(
@@ -357,7 +356,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     },
                     new Dictionary<int, CacheResult>
                     {
-                        {1, GraphCacheResponse.SuccessfulTargetResult(1, "1.proj")}
+                        {1, GraphCacheResponse.SuccessfulTargetResult(1, "1.proj") }
                     });
 
                 yield return new GraphCacheResponse(
@@ -373,7 +372,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     },
                     new Dictionary<int, CacheResult>
                     {
-                        {2, GraphCacheResponse.SuccessfulProxyTargetResult()}
+                        {2, GraphCacheResponse.SuccessfulProxyTargetResult() }
                     });
 
                 yield return new GraphCacheResponse(
@@ -383,7 +382,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     },
                     new Dictionary<int, CacheResult>
                     {
-                        {2, GraphCacheResponse.SuccessfulTargetResult(2, "2.proj")}
+                        {2, GraphCacheResponse.SuccessfulTargetResult(2, "2.proj") }
                     });
 
                 yield return new GraphCacheResponse(
@@ -393,8 +392,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     },
                     new Dictionary<int, CacheResult>
                     {
-                        {1, GraphCacheResponse.SuccessfulProxyTargetResult()},
-                        {2, GraphCacheResponse.SuccessfulTargetResult(2, "2.proj")}
+                        {1, GraphCacheResponse.SuccessfulProxyTargetResult() },
+                        {2, GraphCacheResponse.SuccessfulTargetResult(2, "2.proj") }
                     });
 
                 yield return new GraphCacheResponse(
@@ -543,8 +542,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         private (MockLogger logger, ProjectGraph projectGraph, Dictionary<ProjectGraphNode, BuildResult> nodesToBuildResults) BuildGraphVsScenario(
             GraphCacheResponse testData,
             BuildParameters? buildParameters = null,
-            bool assertBuildResults = true
-        )
+            bool assertBuildResults = true)
         {
             var nodesToBuildResults = new Dictionary<ProjectGraphNode, BuildResult>();
             MockLogger logger;
@@ -733,8 +731,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 },
                 new Dictionary<int, CacheResult>
                 {
-                    {1, GraphCacheResponse.SuccessfulProxyTargetResult()},
-                    {2, GraphCacheResponse.SuccessfulProxyTargetResult()}
+                    {1, GraphCacheResponse.SuccessfulProxyTargetResult() },
+                    {2, GraphCacheResponse.SuccessfulProxyTargetResult() }
                 });
 
             var graph = testData.CreateGraph(_env);
@@ -910,8 +908,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 new Dictionary<int, int[]?>
                 {
                     {1, new[] {2, 3}}
-                }
-                );
+                });
 
             var graph = testData.CreateGraph(_env);
 
@@ -942,8 +939,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 new Dictionary<int, int[]?>
                 {
                     {1, new[] {2, 3}}
-                }
-                );
+                });
 
             var graph = testData.CreateGraph(_env);
 
@@ -985,12 +981,10 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                                                 {"File", "Invalid file"}
                                             })
                                     },
-                                    BuildResultCode.Success
-                                    )
+                                    BuildResultCode.Success)
                             })
                     }
-                }
-                );
+                });
 
             var graph = testData.CreateGraph(_env);
             var mockCache = new InstanceMockCache(testData);
@@ -1035,7 +1029,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 ");
             var mockCache = new InstanceMockCache();
 
-            var buildParameters =  new BuildParameters
+            var buildParameters = new BuildParameters
             {
                 ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(mockCache),
             };
@@ -1047,7 +1041,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 logger = buildSession.Logger;
                 graphResult = buildSession.BuildGraph(graph);
             }
-            
+
             graphResult.ShouldHaveSucceeded();
         }
 
@@ -1243,8 +1237,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 <Target Name=`Build`>
     <Message Text=`Hello World` Importance=`High` />
 </Target>
-"
-                );
+");
 
             var buildSession = new Helpers.BuildManagerSession(
                 _env,
@@ -1360,15 +1353,14 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [InlineData(true, true)]
         public void CacheShouldBeQueriedInParallelDuringGraphBuilds(bool useSynchronousLogging, bool disableInprocNode)
         {
-            var referenceNumbers = new []{2, 3, 4};
+            var referenceNumbers = new[] { 2, 3, 4 };
 
             var testData = new GraphCacheResponse(
                 new Dictionary<int, int[]?>
                 {
                     {1, referenceNumbers}
                 },
-                referenceNumbers.ToDictionary(k => k, k => GraphCacheResponse.SuccessfulProxyTargetResult())
-            );
+                referenceNumbers.ToDictionary(k => k, k => GraphCacheResponse.SuccessfulProxyTargetResult()));
 
             var graph = testData.CreateGraph(_env);
 
@@ -1460,8 +1452,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     {
                         {1, referenceNumbers}
                     },
-                    referenceNumbers.ToDictionary(k => k, k => GraphCacheResponse.SuccessfulProxyTargetResult())
-                );
+                    referenceNumbers.ToDictionary(k => k, k => GraphCacheResponse.SuccessfulProxyTargetResult()));
 
                 var graph = testData.CreateGraph(_env);
 
@@ -1524,8 +1515,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 {
                     {1, referenceNumbers}
                 },
-                referenceNumbers.ToDictionary(k => k, k => GraphCacheResponse.SuccessfulProxyTargetResult())
-            );
+                referenceNumbers.ToDictionary(k => k, k => GraphCacheResponse.SuccessfulProxyTargetResult()));
 
             var graph = testData.CreateGraph(_env);
             var cache = new InstanceMockCache(testData, TimeSpan.FromMilliseconds(50));
@@ -1608,7 +1598,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                                 Interlocked.Increment(ref cacheHitCount);
                                 return Task.FromResult(
                                     CacheResult.IndicateCacheHit(
-                                        new ProxyTargets(new Dictionary<string, string> {{proxyTarget, cacheHitTarget}})));
+                                        new ProxyTargets(new Dictionary<string, string> { { proxyTarget, cacheHitTarget } })));
                             }
                         }
                     }),
@@ -1653,7 +1643,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         {
             foreach (var enumValue in Enum.GetValues(typeof(ErrorLocations)))
             {
-                var typedValue = (ErrorLocations) enumValue;
+                var typedValue = (ErrorLocations)enumValue;
                 if (errorLocations.HasFlag(typedValue))
                 {
                     var exceptionLocation = typedValue.ToString();

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 
@@ -24,7 +24,7 @@ namespace Microsoft.Build.Framework
         /// An explicit version of this class. Must be incremented whenever new members are added. Derived classes should override
         /// the property to return the version actually being implemented.
         /// </summary>
-        public virtual int Version => Version1; // Not updated since we have not shipped 17.0 yet
+        public virtual int Version => Version1; // Not updated since we have not shipped 17.0 yet. This comment is meant to bypass RequiredVersionBumps check in build.ps1 for PR #8336. If the changes in the file are cosmetic, change PR# in this comment to silence the build error on CI build.
 
         /// <summary>
         /// Returns <see langword="true"/> if the given message importance is not guaranteed to be ignored by registered loggers.

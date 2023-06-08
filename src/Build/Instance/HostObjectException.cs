@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 
@@ -21,10 +21,8 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates an instance of this exception using the given message.
         /// </summary>
-        internal HostObjectException
-        (
-            string message
-        ) :
+        internal HostObjectException(
+            string message) :
             base(ErrorMessagePrefix + message)
         {
         }
@@ -34,13 +32,11 @@ namespace Microsoft.Build.Execution
         /// Adds the inner exception's details to the exception message because most bug reporters don't bother
         /// to provide the inner exception details which is typically what we care about.
         /// </summary>
-        internal HostObjectException
-        (
+        internal HostObjectException(
             string projectFile,
             string targetName,
             string taskName,
-            Exception innerException
-        ) :
+            Exception innerException) :
             base(ErrorMessagePrefix
                 + string.Format(ErrorMessageProjectTargetTask, projectFile, targetName, taskName)
                 + (innerException == null ? string.Empty : ("\n=============\n" + innerException.ToString() + "\n\n")),
@@ -51,13 +47,11 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates an instance of this exception using projectFile, targetName, taskName and message.
         /// </summary>
-        internal HostObjectException
-        (
+        internal HostObjectException(
             string projectFile,
             string targetName,
             string taskName,
-            string message
-        ) :
+            string message) :
             base(ErrorMessagePrefix
                 + string.Format(ErrorMessageProjectTargetTask, projectFile, targetName, taskName) + message)
         {

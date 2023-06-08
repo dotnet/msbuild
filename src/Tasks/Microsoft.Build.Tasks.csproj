@@ -16,6 +16,7 @@
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which implements the commonly used tasks of MSBuild.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">full</ApplyNgenOptimization>
+    <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
 
   <ItemGroup>
@@ -100,6 +101,9 @@
     </Compile>
     <Compile Include="..\Shared\StrongNameHelpers.cs">
       <Link>StrongNameHelpers.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\SolutionConfiguration.cs">
+      <Link>SolutionConfiguration.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>TaskLoggingHelperExtension.cs</Link>
@@ -506,6 +510,7 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResolveSDKReference.cs" />
+    <Compile Include="RequiresFramework35SP1Assembly.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactory.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCodeType.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCompilers.cs" />
@@ -626,9 +631,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResolveNativeReference.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="RequiresFramework35SP1Assembly.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="StrongNameException.cs">

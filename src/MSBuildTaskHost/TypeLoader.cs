@@ -1,10 +1,10 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Build.Framework;
 
@@ -129,12 +129,10 @@ namespace Microsoft.Build.Shared
         /// found will be returned.
         /// The unusued bool is to match the signature of the Shared copy of TypeLoader.
         /// </summary>
-        internal LoadedType Load
-        (
+        internal LoadedType Load(
             string typeName,
             AssemblyLoadInfo assembly,
-            bool _
-        )
+            bool _)
         {
             return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly);
         }
@@ -145,11 +143,9 @@ namespace Microsoft.Build.Shared
         /// found will be returned.
         /// </summary>
         /// <returns>The loaded type, or null if the type was not found.</returns>
-        internal LoadedType ReflectionOnlyLoad
-        (
+        internal LoadedType ReflectionOnlyLoad(
             string typeName,
-            AssemblyLoadInfo assembly
-        )
+            AssemblyLoadInfo assembly)
         {
             return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly);
         }

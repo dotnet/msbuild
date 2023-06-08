@@ -1,16 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-
-using ResGen = Microsoft.Build.Tasks.GenerateResource.ResGen;
 using Xunit;
+using ResGen = Microsoft.Build.Tasks.GenerateResource.ResGen;
 
 #nullable disable
 
@@ -25,7 +24,6 @@ namespace Microsoft.Build.UnitTests
         ///  - Verify that OutputFiles defaults appropriately
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void InputFiles()
         {
             ResGen t = new ResGen();
@@ -87,7 +85,6 @@ namespace Microsoft.Build.UnitTests
         ///  - Verify that if OutputFiles are set explicitly, they map and show up on the command line as expected
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void OutputFiles()
         {
             ResGen t = new ResGen();
@@ -104,15 +101,13 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(differentLengthInput, t.InputFiles); // "New InputFiles value should be set"
             Assert.Equal(differentLengthOutput, t.OutputFiles); // "New OutputFiles value should be set"
 
-            ExecuteTaskAndVerifyLogContainsErrorFromResource
-                (
+            ExecuteTaskAndVerifyLogContainsErrorFromResource(
                 t,
                 "General.TwoVectorsMustHaveSameLength",
                 differentLengthInput.Length,
                 differentLengthOutput.Length,
                 "InputFiles",
-                "OutputFiles"
-                );
+                "OutputFiles");
 
             // If only OutputFiles is set, then the task should return -- as far as
             // it's concerned, no work needs to be done.
@@ -166,7 +161,6 @@ namespace Microsoft.Build.UnitTests
         /// Tests ResGen's /publicClass switch
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PublicClass()
         {
             ResGen t = new ResGen();
@@ -187,7 +181,6 @@ namespace Microsoft.Build.UnitTests
         /// Tests the /r: parameter (passing in reference assemblies)
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void References()
         {
             ResGen t = new ResGen();
@@ -292,13 +285,11 @@ namespace Microsoft.Build.UnitTests
             int commandLineLength = CommandLine.GetCommandLine(t, false).Length;
             Assert.Equal(commandLineLength, maxCommandLineLength);
 
-            ExecuteTaskAndVerifyLogDoesNotContainResource
-            (
+            ExecuteTaskAndVerifyLogDoesNotContainResource(
                 t,
                 false,
                 "ResGen.CommandTooLong",
-                CommandLine.GetCommandLine(t, false).Length
-            );
+                CommandLine.GetCommandLine(t, false).Length);
 
             VerifyLogDoesNotContainResource((MockEngine)t.BuildEngine, GetPrivateLog(t), "ToolTask.CommandTooLong", typeof(ResGen).Name);
 
@@ -318,12 +309,10 @@ namespace Microsoft.Build.UnitTests
             commandLineLength = CommandLine.GetCommandLine(t, false).Length;
             Assert.Equal(commandLineLength, maxCommandLineLength + 1);
 
-            ExecuteTaskAndVerifyLogContainsErrorFromResource
-            (
+            ExecuteTaskAndVerifyLogContainsErrorFromResource(
                 t,
                 "ResGen.CommandTooLong",
-                CommandLine.GetCommandLine(t, false).Length
-            );
+                CommandLine.GetCommandLine(t, false).Length);
 
             VerifyLogDoesNotContainResource((MockEngine)t.BuildEngine, GetPrivateLog(t), "ToolTask.CommandTooLong", typeof(ResGen).Name);
         }
@@ -475,7 +464,6 @@ namespace Microsoft.Build.UnitTests
         /// Tests ResGen's /useSourcePath switch
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void UseSourcePath()
         {
             ResGen t = new ResGen();
@@ -580,7 +568,7 @@ namespace Microsoft.Build.UnitTests
         /// LogPrivate is a private property.
         /// </summary>
         /// <returns></returns>
-        static private TaskLoggingHelper GetPrivateLog(ToolTask task)
+        private static TaskLoggingHelper GetPrivateLog(ToolTask task)
         {
             PropertyInfo logPrivateProperty = typeof(ToolTask).GetProperty("LogPrivate", BindingFlags.Instance | BindingFlags.NonPublic);
             return (TaskLoggingHelper)logPrivateProperty.GetValue(task, null);

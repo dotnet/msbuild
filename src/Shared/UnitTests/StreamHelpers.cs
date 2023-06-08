@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 
@@ -7,14 +7,14 @@ using System.IO;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed internal class StreamHelpers
+    internal sealed class StreamHelpers
     {
         /// <summary>
         /// Take a string and convert it to a StreamReader.
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        static internal StreamReader StringToStreamReader(string value)
+        internal static StreamReader StringToStreamReader(string value)
         {
             MemoryStream m = new MemoryStream();
 #if FEATURE_ENCODING_DEFAULT

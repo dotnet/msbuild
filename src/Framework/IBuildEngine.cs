@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections;
 
@@ -94,12 +94,10 @@ namespace Microsoft.Build.Framework
         ///     to the child project (can be null).  The key and value should both be strings.</param>
         /// <param name="targetOutputs">The outputs of each specified target (can be null).</param>
         /// <returns>true, if build was successful</returns>
-        bool BuildProjectFile
-            (
+        bool BuildProjectFile(
             string projectFileName,
             string[] targetNames,
             IDictionary globalProperties,
-            IDictionary targetOutputs
-            );
+            IDictionary targetOutputs);
     }
 }

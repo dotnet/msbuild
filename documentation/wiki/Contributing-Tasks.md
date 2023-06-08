@@ -13,15 +13,15 @@ The following requirements are in place for contributed tasks:
 3. The task must have unit tests in place to prevent regressions.
 
 ## Developing a new Task
-Review the existing documentation on [Task Writing](https://docs.microsoft.com/en-us/visualstudio/msbuild/task-writing) to learn about the fundamentals.  You can also looking at existing tasks in the [Microsoft.Build.Tasks.Core assembly](https://github.com/dotnet/msbuild/tree/master/src/Tasks) for a great starting point.
+Review the existing documentation on [Task Writing](https://learn.microsoft.com/visualstudio/msbuild/task-writing) to learn about the fundamentals.  You can also looking at existing tasks in the [Microsoft.Build.Tasks.Core assembly](https://github.com/dotnet/msbuild/tree/main/src/Tasks) for a great starting point.
 
 Tasks are generally simple and should not require much effort to develop.  If you find a task becoming very complicated, consider breaking it up into smaller tasks which can be run together in a target.
 
 ## Developing unit tests
-Contributed tasks must have unit tests in place to prove they work and to prevent regressions caused by other code changes.  There are a lot of examples in the [Microsoft.Build.Tasks.UnitTests](https://github.com/dotnet/msbuild/tree/master/src/Tasks.UnitTests) project.  Please provide a reasonable amount of test coverage so ensure the quality of the product.
+Contributed tasks must have unit tests in place to prove they work and to prevent regressions caused by other code changes.  There are a lot of examples in the [Microsoft.Build.Tasks.UnitTests](https://github.com/dotnet/msbuild/tree/main/src/Tasks.UnitTests) project.  Please provide a reasonable amount of test coverage so ensure the quality of the product.
 
 ## Documentation
-You can document the new task in the [visualstudio-docs](https://github.com/MicrosoftDocs/visualstudio-docs/tree/master/docs/msbuild) repository.  This helps users discover the new functionality.  The easiest way is to copy the documentation page for an existing task as a template.
+You can document the new task in the [visualstudio-docs](https://github.com/MicrosoftDocs/visualstudio-docs/tree/main/docs/msbuild) repository.  This helps users discover the new functionality.  The easiest way is to copy the documentation page for an existing task as a template.
 
 ## Ship schedule
 MSBuild ships regularly with Visual Studio.  It also is updated in Preview releases.  Once your contribution is merged, expect it to be available in the next release.

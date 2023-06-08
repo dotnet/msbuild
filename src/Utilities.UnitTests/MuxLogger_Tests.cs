@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -69,8 +69,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             {
                 MuxLogger muxLogger = new MuxLogger();
                 muxLogger.RegisterLogger(1, new MockLogger());
-            }
-           );
+            });
         }
         /// <summary>
         /// Verifies that building with a logger attached to the mux logger is equivalent to building with the logger directly.
@@ -326,7 +325,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// <summary>
         /// A logger which signals an event when it gets a project started message.
         /// </summary>
-        private class EventingLogger : ILogger
+        private sealed class EventingLogger : ILogger
         {
             /// <summary>
             /// The event source

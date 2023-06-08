@@ -1,16 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using Xunit;
-using System.Linq;
 using Microsoft.Build.Evaluation;
+using Xunit;
 using Xunit.Abstractions;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -60,8 +59,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read metadatum with invalid name characters (but legal xml)
@@ -82,8 +80,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
 
         [Theory]
@@ -106,8 +103,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -129,8 +125,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
 
         [Theory]
@@ -153,8 +148,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -176,8 +170,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -203,8 +196,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -257,8 +249,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectMetadataElement metadatum = GetMetadataXml();
 
                 metadatum.Name = "ImportGroup";
-            }
-           );
+            });
         }
 
         [Fact]
@@ -270,8 +261,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 metadatum.Name = "Include";
-            }
-           );
+            });
         }
 
 
@@ -284,8 +274,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 metadatum.ExpressedAsAttribute = true;
-            }
-           );
+            });
         }
 
         [Theory]
@@ -371,8 +360,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectMetadataElement metadatum = GetMetadataXml();
 
                 metadatum.Value = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Read a metadatum containing an expression like @(..) but whose parent is an ItemDefinitionGroup
@@ -393,8 +381,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read a metadatum containing an expression like @(..) but whose parent is NOT an ItemDefinitionGroup
@@ -1259,7 +1246,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             return metadata;
         }
 
-        void VerifyAssertLineByLine(string expected, string actual)
+        private void VerifyAssertLineByLine(string expected, string actual)
         {
             Helpers.VerifyAssertLineByLine(expected, actual, false, _testOutput);
         }

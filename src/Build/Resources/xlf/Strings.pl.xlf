@@ -64,12 +64,12 @@
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
         <source>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="needs-review-translation">MSB4271: Zmienna środowiskowa MSBuildDisableFeaturesFromVersion ma nieprawidłowy format. Zostaną włączone wszystkie wersje fali zmian. Wprowadzona wartość: {0}. Bieżące fale zmian: {1}.</target>
+        <target state="new">MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
         <source>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="needs-review-translation">MSB4272: Zmienna środowiskowa MSBuildDisableFeaturesFromVersion ma ustawioną wersję, która została wycofana z użycia. Domyślnie zostanie użyta fala zmian w wersji: {0}. Wprowadzona wartość: {1}. Bieżące fale zmian: {2}.</target>
+        <target state="new">MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -91,6 +91,11 @@
         <target state="translated">MSB4006: Istnieje zależność cykliczna w docelowym grafie zależności obejmująca element docelowy „{0}”. Ponieważ element „{1}” ma zależność „{2}” od elementu „{3}”, zależność cykliczna to „{4}”.</target>
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
+      </trans-unit>
+      <trans-unit id="DefaultSDKResolverError">
+        <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
+        <target state="new">MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</target>
+        <note />
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
@@ -122,6 +127,13 @@
         <target state="translated">MSB4258: Podczas zapisywania pliku wyjściowej pamięci podręcznej wyników w ścieżce „{0}” wystąpił błąd: {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToResolveSDK">
+        <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+  {1}</source>
+        <target state="new">Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+  {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: Nieoczekiwana spacja na pozycji „{1}” warunku „{0}”. Czy zapomniano o usunięciu spacji?</target>
@@ -149,8 +161,7 @@
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
         <source>Loading the following project cache plugin: {0}</source>
-        <target state="needs-review-translation">Ładowanie następującej wtyczki pamięci podręcznej projektu: 
-    {0}</target>
+        <target state="new">Loading the following project cache plugin: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -178,6 +189,11 @@
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
         <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
         <target state="translated">MSB4270: nie znaleziono wtyczek pamięci podręcznej projektu w zestawie „{0}”. Oczekiwano jednej.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NodeReused">
+        <source>Reusing node {0} (PID: {1}).</source>
+        <target state="new">Reusing node {0} (PID: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -329,6 +345,11 @@
         <target state="translated">Wartość początkowa właściwości: $({0})=„{1}” Źródło: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="PropertyOutsidePropertyGroupInTarget">
+        <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
+        <target state="new">MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</target>
+        <note>{StrBegin="MSB4067: "}</note>
+      </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
         <target state="translated">MSB4274: wyłączenie węzła InProc prowadzi do obniżenia wydajności, gdy używane są wtyczki pamięci podręcznej projektu, które emitują żądania kompilowania serwera proxy.</target>
@@ -342,6 +363,11 @@
       <trans-unit id="SDKResolverFailed">
         <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
         <target state="translated">Wystąpił błąd programu do rozpoznawania zestawu SDK „{0}” podczas próby rozpoznania zestawu SDK „{1}”. Wyjątek: „{2}”</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverReturnedNull">
+        <source>SDK resolver "{0}" returned null.</source>
+        <target state="new">SDK resolver "{0}" returned null.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -393,6 +419,11 @@
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
         <target state="translated">Zadanie „{0}” żądało {1} rdzeni, uzyskało {2} i teraz jego łączna liczba rdzeni to {3}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskAssemblyLoaded">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
+        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">

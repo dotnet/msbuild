@@ -1,18 +1,19 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class Move_Tests
+    public sealed class Move_Tests
     {
         /// <summary>
         /// Basic case of moving a file
@@ -26,7 +27,10 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
+                {
                     sw.Write("This is a source temp file.");
+                }
+
                 FileInfo file = new FileInfo(sourceFile);
                 file.Attributes |= FileAttributes.ReadOnly; // mark read only
 
@@ -68,7 +72,10 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
+                {
                     sw.Write("This is a source temp file.");
+                }
+
                 FileInfo file = new FileInfo(sourceFile);
                 file.Attributes |= FileAttributes.ReadOnly; // mark read only
 
@@ -119,7 +126,9 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(sourceFile);
                 using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
@@ -139,7 +148,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a destination temp file.", destinationFileContents); // "Expected the destination file to still contain the contents of destination file."
             }
@@ -196,10 +207,14 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
+                {
                     sw.Write("This is a source temp file.");
+                }
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
@@ -218,7 +233,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a destination temp file.", destinationFileContents); // "Expected the destination file to be unchanged."
 
@@ -245,10 +262,14 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
+                {
                     sw.Write("This is a source temp file.");
+                }
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
@@ -264,7 +285,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
             }
@@ -291,10 +314,14 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
+                {
                     sw.Write("This is a source temp file.");
+                }
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
@@ -314,7 +341,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
@@ -339,10 +368,14 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
+                {
                     sw.Write("This is a source temp file.");
+                }
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(destinationFile, true))
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
@@ -362,7 +395,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
@@ -379,8 +414,7 @@ namespace Microsoft.Build.UnitTests
         /// MovedFiles should only include files that were successfully moved 
         /// (or skipped), not files for which there was an error.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "Under Unix all filenames are valid and this test is not useful"
+        [WindowsOnlyFact(additionalMessage: "Under Unix all filenames are valid and this test is not useful.")]
         public void OutputsOnlyIncludeSuccessfulMoves()
         {
             string temp = Path.GetTempPath();
@@ -459,15 +493,14 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Moving a locked file will fail
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "File locking Unix differs significantly from Windows"
+        [WindowsOnlyFact(additionalMessage: "File locking Unix differs significantly from Windows.")]
         public void MoveLockedFile()
         {
             string file = null;
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
                 bool result;
                 Move move = null;
 
@@ -554,8 +587,7 @@ namespace Microsoft.Build.UnitTests
         /// Moving a file on top of itself should be a success (no-op).
         /// Variation with different casing/relativeness.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "File names under Unix are case-sensitive and this test is not useful"
+        [WindowsOnlyFact(additionalMessage: "File names under Unix are case-sensitive and this test is not useful.")]
         public void MoveFileOnItself2()
         {
             string currdir = Directory.GetCurrentDirectory();
@@ -652,7 +684,9 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
+                {
                     sw.Write("This is a source temp file.");
+                }
 
                 // Don't create the dest folder, let task do that
 
@@ -671,7 +705,9 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
@@ -743,8 +779,7 @@ namespace Microsoft.Build.UnitTests
         /// If the destination path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException 
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong()
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -753,7 +788,9 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))    // HIGHCHAR: Test writes in UTF8 without preamble.
+                {
                     sw.Write("This is a source temp file.");
+                }
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
@@ -778,8 +815,7 @@ namespace Microsoft.Build.UnitTests
         /// If the source path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException 
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void Regress451057_ExitGracefullyIfPathNameIsTooLong2()
         {
             string sourceFile = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";

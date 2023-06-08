@@ -1,14 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
 
 #nullable disable
@@ -212,16 +210,10 @@ namespace Microsoft.Build.Globbing
                         RegexOptions regexOptions = FileMatcher.DefaultRegexOptions;
                         // compile the regex since it's expected to be used multiple times
                         // For the kind of regexes used here, compilation on .NET Framework tends to be expensive and not worth the small
-                        // run-time boost so it's enabled only on .NET Core by default.
+                        // run-time boost so it's enabled only on .NET Core.
 #if RUNTIME_TYPE_NETCORE
-                        bool compileRegex = true;
-#else
-                        bool compileRegex = !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0);
+                        regexOptions |= RegexOptions.Compiled;
 #endif
-                        if (compileRegex)
-                        {
-                            regexOptions |= RegexOptions.Compiled;
-                        }
                         Regex newRegex = new Regex(matchFileExpression, regexOptions);
                         lock (s_regexCache)
                         {

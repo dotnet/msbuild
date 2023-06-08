@@ -1,15 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Globalization;
-using System.Reflection;
 
 #nullable disable
 
@@ -21,13 +20,13 @@ namespace Microsoft.Build.BackEnd
     /// Each class implements a Translate method on INodePacket which takes this class
     /// as a parameter, and uses it to store and retrieve fields to the stream.
     /// </summary>
-    static internal class BinaryTranslator
+    internal static class BinaryTranslator
     {
         /// <summary>
         /// Returns a read-only serializer.
         /// </summary>
         /// <returns>The serializer.</returns>
-        static internal ITranslator GetReadTranslator(Stream stream, SharedReadBuffer buffer)
+        internal static ITranslator GetReadTranslator(Stream stream, SharedReadBuffer buffer)
         {
             return new BinaryReadTranslator(stream, buffer);
         }
@@ -37,7 +36,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="stream">The stream containing data to serialize.</param>
         /// <returns>The serializer.</returns>
-        static internal ITranslator GetWriteTranslator(Stream stream)
+        internal static ITranslator GetWriteTranslator(Stream stream)
         {
             return new BinaryWriteTranslator(stream);
         }
@@ -230,7 +229,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             /// <param name="byteArray">The array to be translated.</param>
             /// <param name="length">The length of array which will be used in translation. This parameter is not used when reading</param>
-            public void Translate(ref byte[] byteArray, ref int length) 
+            public void Translate(ref byte[] byteArray, ref int length)
             {
                 Translate(ref byteArray);
                 length = byteArray.Length;
@@ -303,7 +302,7 @@ namespace Microsoft.Build.BackEnd
             {
                 IList<T> listAsInterface = list;
                 Translate(ref listAsInterface, objectTranslator, count => new List<T>(count));
-                list = (List<T>) listAsInterface;
+                list = (List<T>)listAsInterface;
             }
 
             public void Translate<T, L>(ref IList<T> list, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>
@@ -388,16 +387,14 @@ namespace Microsoft.Build.BackEnd
             /// <param name="value">The context to be translated.</param>
             public void Translate(ref BuildEventContext value)
             {
-                value = new BuildEventContext
-                    (
+                value = new BuildEventContext(
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
-                    _reader.ReadInt32()
-                    );
+                    _reader.ReadInt32());
             }
 
 #endif
@@ -559,7 +556,7 @@ namespace Microsoft.Build.BackEnd
                     ref copy,
                     count => new Dictionary<string, string>(count, comparer));
 
-                dictionary = (Dictionary<string, string>) copy;
+                dictionary = (Dictionary<string, string>)copy;
             }
 
             public void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> dictionaryCreator)
@@ -712,12 +709,12 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-        /// <summary>
-        /// Reads in the boolean which says if this object is null or not.
-        /// </summary>
-        /// <typeparam name="T">The type of object to test.</typeparam>
-        /// <returns>True if the object should be read, false otherwise.</returns>
-        public bool TranslateNullable<T>(T value)
+            /// <summary>
+            /// Reads in the boolean which says if this object is null or not.
+            /// </summary>
+            /// <typeparam name="T">The type of object to test.</typeparam>
+            /// <returns>True if the object should be read, false otherwise.</returns>
+            public bool TranslateNullable<T>(T value)
             {
                 bool haveRef = _reader.ReadBoolean();
                 return haveRef;
@@ -1137,7 +1134,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             /// <param name="byteArray">The array to be translated.</param>
             /// <param name="length">The length of array which will be used in translation</param>
-            public void Translate(ref byte[] byteArray, ref int length) 
+            public void Translate(ref byte[] byteArray, ref int length)
             {
                 if (!TranslateNullable(byteArray))
                 {

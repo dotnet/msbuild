@@ -1,14 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Evaluation;
 using System;
 using System.IO;
-
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 
 
@@ -50,8 +50,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             Assert.Throws<InternalErrorException>(() =>
             {
                 ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => null, true, false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verifies that the delegate cannot return a project with a different path
@@ -62,8 +61,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             Assert.Throws<InternalErrorException>(() =>
             {
                 ProjectCollection.GlobalProjectCollection.ProjectRootElementCache.Get("c:\\foo", (p, c) => ProjectRootElement.Create("c:\\bar"), true, false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests that an entry added to the cache can be retrieved.
@@ -81,10 +79,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Tests that a strong reference is held to a single item
         /// </summary>
-        [Fact]
-        // This test fails on .NET Core and Mono: https://github.com/dotnet/msbuild/issues/282
-        [Trait("Category", "non-mono-tests")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/282")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "This test fails on .NET Core and Mono: https://github.com/dotnet/msbuild/issues/282")]
         public void AddEntryStrongReference()
         {
             string projectPath = NativeMethodsShared.IsUnixLike ? "/foo" : "c:\\foo";
@@ -117,7 +112,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             {
                 ProjectRootElementCache cache = new ProjectRootElementCache(true /* auto reload from disk */);
 
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
 
                 ProjectRootElement xml0 = ProjectRootElement.Create(path);
                 xml0.Save();
@@ -151,7 +146,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             {
                 ProjectRootElementCache cache = new ProjectRootElementCache(false /* do not auto reload from disk */);
 
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
 
                 ProjectRootElement xml0 = ProjectRootElement.Create(path);
                 xml0.Save();

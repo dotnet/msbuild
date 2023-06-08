@@ -23,10 +23,10 @@ variables:
   - name: SourceBranch
     value: $(IbcSourceBranchName)
   # If we're not on a vs* branch, use main as our optprof collection branch
-  # NOTE: the code is temporarily fixed. For the branches that should use opt-prof from the main branch we should use the latest working Opt-Prof 20220901.6-001 collected from main 20220901.6.
+  # NOTE: the code is temporarily fixed. For the branches that should use opt-prof from the main branch we should use the latest working Opt-Prof collected from main 20230217.4.
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
     - name: OptProfDrop
-      value: 'OptimizationData/DotNet-msbuild-Trusted/main/20220901.6/1387996/1'
+      value: 'OptimizationData/DotNet-msbuild-Trusted/main/20230217.4/7352286/1'   
     - name: SourceBranch
       value: ''
   # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
@@ -39,13 +39,15 @@ variables:
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
     value: .NETCoreValidation
+  - name: Codeql.Enabled
+    value: true
 
 stages:
 - stage: build
   displayName: Build
 
   jobs:
-  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/vs17.4') }}: # should track next-release's active dev branch
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}: # should track next-release's active dev branch
     - template: /eng/common/templates/job/onelocbuild.yml
       parameters:
         LclSource: lclFilesfromPackage
@@ -70,7 +72,7 @@ stages:
     - name: VisualStudio.MajorVersion
       value: 17
     - name: VisualStudio.ChannelName
-      value: 'int.d17.4'
+      value: 'int.main'
     - name: VisualStudio.DropName
       value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
@@ -259,7 +261,7 @@ stages:
     parameters:
       platform:
         name: 'Managed'
-        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
+        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7'
 
   - template: /eng/common/templates/job/publish-build-assets.yml
     parameters:

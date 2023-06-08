@@ -1,13 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
-using System.Diagnostics;
-
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
 #nullable disable
@@ -290,15 +290,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public string[] GetActiveTargets()
         {
-            var activeTargets = new string[RequestConfiguration.ActivelyBuildingTargets.Count];
-
-            int index = 0;
-            foreach (string target in RequestConfiguration.ActivelyBuildingTargets.Keys)
-            {
-                activeTargets[index++] = target;
-            }
-
-            return activeTargets;
+            return RequestConfiguration.ActivelyBuildingTargets.Keys.ToArray();
         }
 
         /// <summary>

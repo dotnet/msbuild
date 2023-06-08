@@ -1,7 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             }
         }
 
-        private static void ParseAssemblyAlias(Dictionary<string,string> aliases, XElement elem)
+        private static void ParseAssemblyAlias(Dictionary<string, string> aliases, XElement elem)
         {
             string alias = elem.Attribute("alias")?.Value;
             string name = elem.Attribute("name").Value;
@@ -101,7 +101,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             return aliasedTypeName;
         }
 
-        private static void ParseData(string resxFilename, bool pathsRelativeToBasePath, List<IResource> resources, Dictionary<string,string> aliases, XElement elem)
+        private static void ParseData(string resxFilename, bool pathsRelativeToBasePath, List<IResource> resources, Dictionary<string, string> aliases, XElement elem)
         {
             string name = elem.Attribute("name").Value;
             string value;
@@ -313,20 +313,32 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 {
                     int lastIndexOfQuote = stringValue.LastIndexOf("\"");
                     if (lastIndexOfQuote - 1 < 0)
+                    {
                         throw new ArgumentException(nameof(stringValue));
+                    }
+
                     fileName = stringValue.Substring(1, lastIndexOfQuote - 1); // remove the quotes in" ..... "
                     if (lastIndexOfQuote + 2 > stringValue.Length)
+                    {
                         throw new ArgumentException(nameof(stringValue));
+                    }
+
                     remainingString = stringValue.Substring(lastIndexOfQuote + 2);
                 }
                 else
                 {
                     int nextSemiColumn = stringValue.IndexOf(";");
                     if (nextSemiColumn == -1)
+                    {
                         throw new ArgumentException(nameof(stringValue));
+                    }
+
                     fileName = stringValue.Substring(0, nextSemiColumn);
                     if (nextSemiColumn + 1 > stringValue.Length)
+                    {
                         throw new ArgumentException(nameof(stringValue));
+                    }
+
                     remainingString = stringValue.Substring(nextSemiColumn + 1);
                 }
                 string[] parts = remainingString.Split(';');

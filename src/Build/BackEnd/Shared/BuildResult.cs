@@ -1,10 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -117,6 +118,8 @@ namespace Microsoft.Build.Execution
 
         private string _schedulerInducedError;
 
+        private HashSet<string> _projectTargets;
+
         /// <summary>
         /// Constructor for serialization.
         /// </summary>
@@ -228,6 +231,7 @@ namespace Microsoft.Build.Execution
             _circularDependency = result._circularDependency;
             _initialTargets = result._initialTargets;
             _defaultTargets = result._defaultTargets;
+            _projectTargets = result._projectTargets;
             _baseOverallResult = result.OverallResult == BuildResultCode.Success;
         }
 
@@ -244,6 +248,7 @@ namespace Microsoft.Build.Execution
             _circularDependency = result._circularDependency;
             _initialTargets = result._initialTargets;
             _defaultTargets = result._defaultTargets;
+            _projectTargets = result._projectTargets;
             _baseOverallResult = result.OverallResult == BuildResultCode.Success;
         }
 
@@ -434,6 +439,17 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// The defined targets for the project associated with this build result.
+        /// </summary>
+        internal HashSet<string> ProjectTargets
+        {
+            [DebuggerStepThrough]
+            get => _projectTargets;
+            [DebuggerStepThrough]
+            set => _projectTargets = value;
+        }
+
+        /// <summary>
         /// Container used to transport errors from the scheduler (issued while computing a build result)
         /// to the TaskHost that has the proper logging context (project id, target id, task id, file location)
         /// </summary>
@@ -478,6 +494,25 @@ namespace Microsoft.Build.Execution
             }
 
             _resultsByTarget[target] = result;
+        }
+
+        /// <summary>
+        /// Keep the results only for targets in <paramref name="targetsToKeep"/>.
+        /// </summary>
+        /// <param name="targetsToKeep">The targets whose results to keep.</param>
+        internal void KeepSpecificTargetResults(IReadOnlyCollection<string> targetsToKeep)
+        {
+            ErrorUtilities.VerifyThrow(
+                targetsToKeep.Count > 0,
+                $"{nameof(targetsToKeep)} should contain at least one target.");
+
+            foreach (string target in _resultsByTarget.Keys)
+            {
+                if (!targetsToKeep.Contains(target))
+                {
+                    _ = _resultsByTarget.TryRemove(target, out _);
+                }
+            }
         }
 
         /// <summary>
@@ -537,6 +572,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _nodeRequestId);
             translator.Translate(ref _initialTargets);
             translator.Translate(ref _defaultTargets);
+            translator.Translate(ref _projectTargets);
             translator.Translate(ref _circularDependency);
             translator.TranslateException(ref _requestException);
             translator.TranslateDictionary(ref _resultsByTarget, TargetResult.FactoryForDeserialization, CreateTargetResultDictionary);
@@ -562,9 +598,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void CacheIfPossible()
         {
-            foreach (string target in _resultsByTarget.Keys)
+            foreach (KeyValuePair<string, TargetResult> targetResultPair in _resultsByTarget)
             {
-                _resultsByTarget[target].CacheItems(ConfigurationId, target);
+                targetResultPair.Value.CacheItems(ConfigurationId, targetResultPair.Key);
             }
         }
 

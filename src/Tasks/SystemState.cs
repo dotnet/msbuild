@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -230,10 +230,8 @@ namespace Microsoft.Build.Tasks
         /// of the FX folders.
         /// </summary>
         /// <param name="installedAssemblyTableInfos">List of Assembly Table Info.</param>
-        internal void SetInstalledAssemblyInformation
-        (
-            AssemblyTableInfo[] installedAssemblyTableInfos
-        )
+        internal void SetInstalledAssemblyInformation(
+            AssemblyTableInfo[] installedAssemblyTableInfos)
         {
             redistList = RedistList.GetRedistList(installedAssemblyTableInfos);
         }
@@ -245,7 +243,9 @@ namespace Microsoft.Build.Tasks
         public override void Translate(ITranslator translator)
         {
             if (instanceLocalFileStateCache is null)
+            {
                 throw new NullReferenceException(nameof(instanceLocalFileStateCache));
+            }
 
             translator.TranslateDictionary(
                 ref instanceLocalFileStateCache,
@@ -361,7 +361,7 @@ namespace Microsoft.Build.Tasks
             DateTime lastModified = GetAndCacheLastModified(path);
             bool isCachedInInstance = instanceLocalFileStateCache.TryGetValue(path, out FileState cachedInstanceFileState);
             bool isCachedInProcess = s_processWideFileStateCache.TryGetValue(path, out FileState cachedProcessFileState);
-            
+
             bool isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
             bool isProcessFileStateUpToDate = isCachedInProcess && lastModified == cachedProcessFileState.LastModified;
 
@@ -421,10 +421,8 @@ namespace Microsoft.Build.Tasks
 
                 if (string.Equals(extension, ".dll", StringComparison.OrdinalIgnoreCase))
                 {
-                    IEnumerable<AssemblyEntry> assemblyNames = redistList.FindAssemblyNameFromSimpleName
-                        (
-                            Path.GetFileNameWithoutExtension(path)
-                        );
+                    IEnumerable<AssemblyEntry> assemblyNames = redistList.FindAssemblyNameFromSimpleName(
+                            Path.GetFileNameWithoutExtension(path));
                     string filename = Path.GetFileName(path);
 
                     foreach (AssemblyEntry a in assemblyNames)
@@ -438,7 +436,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            
+
             // Not a well-known FX assembly so now check the cache.
             FileState fileState = GetFileState(path);
             if (fileState.Assembly == null)
@@ -488,26 +486,22 @@ namespace Microsoft.Build.Tasks
         /// <param name="dependencies">Receives the list of dependencies.</param>
         /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
         /// <param name="frameworkName"></param>
-        private void GetAssemblyMetadata
-        (
+        private void GetAssemblyMetadata(
             string path,
             ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
             out AssemblyNameExtension[] dependencies,
             out string[] scatterFiles,
-            out FrameworkName frameworkName
-        )
+            out FrameworkName frameworkName)
         {
             FileState fileState = GetFileState(path);
             if (fileState.dependencies == null)
             {
-                getAssemblyMetadata
-                (
+                getAssemblyMetadata(
                     path,
                     assemblyMetadataCache,
                     out fileState.dependencies,
                     out fileState.scatterFiles,
-                    out fileState.frameworkName
-                 );
+                    out fileState.frameworkName);
 
                 isDirty = true;
             }

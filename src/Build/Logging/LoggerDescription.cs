@@ -1,14 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Reflection;
 using System.IO;
-
+using System.Reflection;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd;
-
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 
 #nullable disable
@@ -31,14 +29,12 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Creates a logger description from given data
         /// </summary>
-        public LoggerDescription
-        (
+        public LoggerDescription(
             string loggerClassName,
             string loggerAssemblyName,
             string loggerAssemblyFile,
             string loggerSwitchParameters,
-            LoggerVerbosity verbosity
-        ) : this(loggerClassName,
+            LoggerVerbosity verbosity) : this(loggerClassName,
             loggerAssemblyName,
             loggerAssemblyFile,
             loggerSwitchParameters,
@@ -50,15 +46,13 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Creates a logger description from given data
         /// </summary>
-        public LoggerDescription
-        (
+        public LoggerDescription(
             string loggerClassName,
             string loggerAssemblyName,
             string loggerAssemblyFile,
             string loggerSwitchParameters,
             LoggerVerbosity verbosity,
-            bool isOptional
-        )
+            bool isOptional)
         {
             _loggerClassName = loggerClassName;
 
@@ -353,7 +347,7 @@ namespace Microsoft.Build.Logging
             translator.Translate(ref _loggerId);
         }
 
-        static internal LoggerDescription FactoryForTranslation(ITranslator translator)
+        internal static LoggerDescription FactoryForTranslation(ITranslator translator)
         {
             LoggerDescription description = new LoggerDescription();
             ((ITranslatable)description).Translate(translator);

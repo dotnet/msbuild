@@ -1,17 +1,20 @@
-﻿using System.IO;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.IO;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
-    [PlatformSpecific(TestPlatforms.AnyUnix)]
     public class FixPathOnUnixTests
     {
-        [Fact]
+        [UnixOnlyFact]
         public void TestPathFixupInMetadata()
         {
             string buildProjectContents = @"

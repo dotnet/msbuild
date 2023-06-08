@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 // We don't automatically run these tests against the BCL implementation of ImmutableDictionary as it would require dual-compiling
 // this file. When making changes to this test, though, it is recommended to run them manually by uncommenting the following line.

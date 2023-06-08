@@ -1,6 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
@@ -10,11 +15,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Unittest;
 using Shouldly;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
@@ -255,8 +255,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             {
                                 { "ItemFromResolver", new SdkResultItem("ItemValueFromResolver", null) }
                             },
-                        warnings: null
-                    ));
+                        warnings: null));
 
             EvaluationContext.TestOnlyHookOnCreate = context =>
             {

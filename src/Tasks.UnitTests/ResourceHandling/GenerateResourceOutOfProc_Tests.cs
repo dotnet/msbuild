@@ -1,25 +1,24 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
-using Xunit;
-using Xunit.Abstractions;
 using System.IO;
 using System.Threading;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Shouldly;
+using Xunit;
+using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 {
-    [Trait("Category", "mono-osx-failing")]
-    [Trait("Category", "mono-windows-failing")]
-    sealed public class RequiredTransformations
+    public sealed class RequiredTransformations
     {
         private readonly ITestOutputHelper _output;
 
@@ -107,7 +106,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             File.Delete(resxFile2);
             File.Delete(resxFile3);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -176,8 +177,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             finally
             {
                 File.Delete(systemDll);
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
             }
         }
 
@@ -219,7 +227,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             File.Delete(t.OutputResources[0].ItemSpec);
             File.Delete(t2a.OutputResources[0].ItemSpec);
             foreach (ITaskItem item in t2b.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -245,7 +255,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -397,11 +409,30 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (firstResx != null) File.Delete(firstResx);
-                if (secondResx != null) File.Delete(secondResx);
-                if (cache != null) File.Delete(cache);
-                if (firstResx != null) File.Delete(Path.ChangeExtension(firstResx, ".resources"));
-                if (secondResx != null) File.Delete(Path.ChangeExtension(secondResx, ".resources"));
+                if (firstResx != null)
+                {
+                    File.Delete(firstResx);
+                }
+
+                if (secondResx != null)
+                {
+                    File.Delete(secondResx);
+                }
+
+                if (cache != null)
+                {
+                    File.Delete(cache);
+                }
+
+                if (firstResx != null)
+                {
+                    File.Delete(Path.ChangeExtension(firstResx, ".resources"));
+                }
+
+                if (secondResx != null)
+                {
+                    File.Delete(Path.ChangeExtension(secondResx, ".resources"));
+                }
             }
         }
 
@@ -459,7 +490,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Allow the task to skip processing based on having nothing out of date
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NothingOutOfDate()
         {
             string resxFile = null;
@@ -511,10 +541,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (txtFile != null) File.Delete(txtFile);
-                if (resourcesFile1 != null) File.Delete(resourcesFile1);
-                if (resourcesFile2 != null) File.Delete(resourcesFile2);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
+
+                if (resourcesFile1 != null)
+                {
+                    File.Delete(resourcesFile1);
+                }
+
+                if (resourcesFile2 != null)
+                {
+                    File.Delete(resourcesFile2);
+                }
             }
         }
 
@@ -524,8 +569,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// </summary>
         /// <remarks>System dll is not locked because it forces a new app domain</remarks>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void NothingOutOfDateExceptReference()
         {
             string resxFile = null;
@@ -574,10 +617,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (stateFile != null) File.Delete(stateFile);
-                if (localSystemDll != null) File.Delete(localSystemDll);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (stateFile != null)
+                {
+                    File.Delete(stateFile);
+                }
+
+                if (localSystemDll != null)
+                {
+                    File.Delete(localSystemDll);
+                }
             }
         }
 
@@ -625,10 +683,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (additionalInputs?[0] != null && File.Exists(additionalInputs[0].ItemSpec)) File.Delete(additionalInputs[0].ItemSpec);
-                if (additionalInputs?[1] != null && File.Exists(additionalInputs[1].ItemSpec)) File.Delete(additionalInputs[1].ItemSpec);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (additionalInputs?[0] != null && File.Exists(additionalInputs[0].ItemSpec))
+                {
+                    File.Delete(additionalInputs[0].ItemSpec);
+                }
+
+                if (additionalInputs?[1] != null && File.Exists(additionalInputs[1].ItemSpec))
+                {
+                    File.Delete(additionalInputs[1].ItemSpec);
+                }
             }
         }
 
@@ -654,7 +727,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -698,7 +773,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 File.Delete(t.OutputResources[0].ItemSpec);
                 File.Delete(t2a.OutputResources[0].ItemSpec);
                 foreach (ITaskItem item in t2b.FilesWritten)
+                {
                     File.Delete(item.ItemSpec);
+                }
             }
             catch (Exception e)
             {
@@ -740,10 +817,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
+
             File.Delete(t2.Sources[0].ItemSpec);
             foreach (ITaskItem item in t2.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -777,9 +859,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 string typeName = null;
                 if (t.StronglyTypedNamespace != null)
+                {
                     typeName = t.StronglyTypedNamespace + ".";
+                }
                 else
+                {
                     typeName = "";
+                }
 
                 typeName += t.StronglyTypedClassName;
 
@@ -832,9 +918,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 string typeName = null;
                 if (t.StronglyTypedNamespace != null)
+                {
                     typeName = t.StronglyTypedNamespace + ".";
+                }
                 else
+                {
                     typeName = "";
+                }
 
                 typeName += t.StronglyTypedClassName;
 
@@ -879,7 +969,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// STR class file is out of date, but resources are up to date. Should still generate it.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void StronglyTypedResourcesOutOfDate()
         {
             string resxFile = null;
@@ -956,10 +1045,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (strFile != null) File.Delete(strFile);
-                if (cacheFile != null) File.Delete(cacheFile);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (strFile != null)
+                {
+                    File.Delete(strFile);
+                }
+
+                if (cacheFile != null)
+                {
+                    File.Delete(cacheFile);
+                }
             }
         }
 
@@ -1009,9 +1113,20 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (strFile != null) File.Delete(strFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (strFile != null)
+                {
+                    File.Delete(strFile);
+                }
             }
         }
 
@@ -1044,9 +1159,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 string typeName = null;
                 if (t.StronglyTypedNamespace != null)
+                {
                     typeName = t.StronglyTypedNamespace + ".";
+                }
                 else
+                {
                     typeName = "";
+                }
 
                 typeName += t.StronglyTypedClassName;
 
@@ -1121,7 +1240,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  STR with resource namespace yields proper output, message (CS)
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void STRWithResourcesNamespaceCS()
         {
             Utilities.STRNamespaceTestHelper("CSharp", "MyResourcesNamespace", null, _output);
@@ -1149,14 +1267,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  STR with resource namespace and STR namespace yields proper output, message (CS)
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void STRWithResourcesNamespaceAndSTRNamespaceVB()
         {
             Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", "MySTClassNamespace", _output);
         }
     }
 
-    sealed public class TransformationErrors
+    public sealed class TransformationErrors
     {
         private readonly ITestOutputHelper _output;
 
@@ -1169,7 +1286,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Text input failures, no name, no '=', 'strings' token, invalid token, invalid escape
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TextToResourcesBadFormat()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -1207,7 +1323,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 // Done, so clean up.
                 File.Delete(t.Sources[0].ItemSpec);
                 foreach (ITaskItem item in t.FilesWritten)
+                {
                     File.Delete(item.ItemSpec);
+                }
             }
 
             // text file uses the strings token; since it's only a warning we have to have special asserts
@@ -1224,15 +1342,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
         ///  Cause failures in ResXResourceReader
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void FailedResXReader()
         {
             string resxFile1 = null;
@@ -1273,10 +1391,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (resxFile1 != null) File.Delete(resxFile1);
-                if (resxFile2 != null) File.Delete(resxFile2);
-                if (resourcesFile1 != null) File.Delete(resourcesFile1);
-                if (resourcesFile2 != null) File.Delete(resourcesFile2);
+                if (resxFile1 != null)
+                {
+                    File.Delete(resxFile1);
+                }
+
+                if (resxFile2 != null)
+                {
+                    File.Delete(resxFile2);
+                }
+
+                if (resourcesFile1 != null)
+                {
+                    File.Delete(resourcesFile1);
+                }
+
+                if (resourcesFile2 != null)
+                {
+                    File.Delete(resourcesFile2);
+                }
             }
         }
 
@@ -1284,8 +1417,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Cause failures in ResXResourceReader, different codepath
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void FailedResXReaderWithAllOutputResourcesSpecified()
         {
             string resxFile1 = null;
@@ -1333,10 +1464,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (resxFile1 != null) File.Delete(resxFile1);
-                if (resxFile2 != null) File.Delete(resxFile2);
-                if (resourcesFile1 != null) File.Delete(resourcesFile1);
-                if (resourcesFile2 != null) File.Delete(resourcesFile2);
+                if (resxFile1 != null)
+                {
+                    File.Delete(resxFile1);
+                }
+
+                if (resxFile2 != null)
+                {
+                    File.Delete(resxFile2);
+                }
+
+                if (resourcesFile1 != null)
+                {
+                    File.Delete(resourcesFile1);
+                }
+
+                if (resourcesFile2 != null)
+                {
+                    File.Delete(resourcesFile2);
+                }
             }
         }
 
@@ -1344,7 +1490,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Duplicate resource names
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void DuplicateResourceNames()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -1361,14 +1506,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
         ///  Non-string resource with text output
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void UnsupportedTextType()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -1390,7 +1536,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             File.Delete(t.Sources[0].ItemSpec);
             File.Delete(bitmap);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1418,8 +1566,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
             }
         }
 
@@ -1427,7 +1582,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Cause failures in ResourceReader
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void FailedResourceReader()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -1452,14 +1606,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
         ///  Invalid STR Class name
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void FailedSTRProperty()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -1483,7 +1638,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             File.Delete(t.Sources[0].ItemSpec);
             File.Delete(t.StronglyTypedFileName);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1515,12 +1672,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
     }
 
-    sealed public class PropertyHandling
+    public sealed class PropertyHandling
     {
         private readonly ITestOutputHelper _output;
 
@@ -1567,7 +1727,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1595,7 +1757,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1607,9 +1771,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             t.Sources = new ITaskItem[] {
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
                 new TaskItem( Utilities.WriteTestResX(false, null, null)),
             };
 
@@ -1624,25 +1788,28 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             // Done, so clean up.
             foreach (ITaskItem item in t.Sources)
+            {
                 File.Delete(item.ItemSpec);
+            }
+
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
         ///  FilesWritten contains OutputResources + StateFile
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void FilesWrittenSet()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
 
             t.Sources = new ITaskItem[] {
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
                 new TaskItem( Utilities.WriteTestResX(false, null, null)),
             };
 
@@ -1675,8 +1842,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Resource transformation fails on 3rd of 4 inputs, inputs 1 & 2 & 4 are in outputs and fileswritten.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void OutputFilesPartialInputs()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -1684,9 +1849,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             try
             {
                 t.Sources = new ITaskItem[] {
-                new TaskItem( Utilities.WriteTestText(null, null) ),
-                new TaskItem( Utilities.WriteTestText(null, null) ),
-                new TaskItem( Utilities.WriteTestText("goober", null) ),
+                new TaskItem( Utilities.WriteTestText(null, null)),
+                new TaskItem( Utilities.WriteTestText(null, null)),
+                new TaskItem( Utilities.WriteTestText("goober", null)),
                 new TaskItem( Utilities.WriteTestText(null, null)),
             };
                 foreach (ITaskItem taskItem in t.Sources)
@@ -1743,8 +1908,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  STR class name derived from output file transformation
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedClassName()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -1786,8 +1949,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  STR class file name derived from class name transformation
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedFileName()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -1826,7 +1987,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         }
     }
 
-    sealed public class PropertyErrors
+    public sealed class PropertyErrors
     {
         private readonly ITestOutputHelper _output;
 
@@ -1854,7 +2015,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -1894,7 +2057,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Source item not found
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SourceItemMissing()
         {
             string txtFile = null;
@@ -1921,17 +2083,22 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
             }
         }
 
         /// <summary>
         ///  Non-existent StateFile yields message
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-windows-failing")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void StateFileUnwritable()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -1959,7 +2126,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                     foreach (ITaskItem item in t.FilesWritten)
                     {
                         if (item.ItemSpec != null)
+                        {
                             File.Delete(item.ItemSpec);
+                        }
                     }
                 }
             }
@@ -1969,7 +2138,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Bad file extension on input
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void InputFileExtension()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -1992,7 +2160,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -2001,7 +2171,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Bad file extension on output
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void OutputFileExtension()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -2024,7 +2193,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -2054,7 +2225,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -2063,7 +2236,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  Invalid StronglyTypedLanguage yields CodeDOM exception
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void UnknownStronglyTypedLanguage()
         {
             GenerateResource t = Utilities.CreateTaskOutOfProc(_output);
@@ -2086,7 +2258,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -2119,10 +2293,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resxFile2 != null) File.Delete(resxFile2);
-                if (resxFile != null) File.Delete(Path.ChangeExtension(resxFile, ".resources"));
-                if (resxFile2 != null) File.Delete(Path.ChangeExtension(resxFile2, ".resources"));
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resxFile2 != null)
+                {
+                    File.Delete(resxFile2);
+                }
+
+                if (resxFile != null)
+                {
+                    File.Delete(Path.ChangeExtension(resxFile, ".resources"));
+                }
+
+                if (resxFile2 != null)
+                {
+                    File.Delete(Path.ChangeExtension(resxFile2, ".resources"));
+                }
             }
         }
 
@@ -2130,8 +2319,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         ///  STR class name derived from output file transformation
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void BadStronglyTypedFilename()
         {
             string txtFile = null;
@@ -2165,7 +2352,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
 
@@ -2199,7 +2389,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
 
@@ -2233,7 +2426,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
 
@@ -2267,7 +2463,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
 
@@ -2275,7 +2474,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// Verify that passing a STR language with more than 1 sources errors
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void StronglyTypedResourceFileIsExistingDirectory()
         {
             string dir = null;
@@ -2312,9 +2510,20 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (dir != null) FileUtilities.DeleteWithoutTrailingBackslash(dir);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (dir != null)
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(dir);
+                }
             }
         }
 
@@ -2340,7 +2549,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (resourcesFile != null) File.Delete(resourcesFile);
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
             }
         }
     }
@@ -2357,7 +2569,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         // FIXME: mono: looks for csc.exe
         // https://github.com/dotnet/msbuild/issues/677
-        [Trait("Category", "mono-osx-failing")]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2535,7 +2746,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         [Fact]
         // FIXME: mono: looks for csc.exe
         // https://github.com/dotnet/msbuild/issues/677
-        [Trait("Category", "mono-osx-failing")]
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting

@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Collections.Generic;
@@ -24,10 +28,10 @@ namespace Microsoft.Build.BuildEngine
         internal TargetInProgessState
         (
             EngineCallback engineCallback,
-            Target target, 
+            Target target,
             List<ProjectBuildState> waitingBuildStates,
             ProjectBuildState initiatingRequest,
-            BuildRequest [] outstandingBuildRequests,
+            BuildRequest[] outstandingBuildRequests,
             string projectName
         )
         {
@@ -172,7 +176,7 @@ namespace Microsoft.Build.BuildEngine
         (
             EngineCallback engineCallback,
             ProjectBuildState buildContext,
-            Target target, 
+            Target target,
             out BuildRequest parentRequest
         )
         {
@@ -297,21 +301,27 @@ namespace Microsoft.Build.BuildEngine
         #region Data
 
         // Unique identifier for the target
-        TargetIdWrapper targetId;
+        private TargetIdWrapper targetId;
+
         // List of targets waiting on the current target
-        List<TargetIdWrapper> parentTargets;
+        private List<TargetIdWrapper> parentTargets;
+
         // List of build requests waiting on the current target
-        List<BuildRequest> parentBuildRequests;
+        private List<BuildRequest> parentBuildRequests;
+
         // List of the build requests the target is waiting on
-        BuildRequest[] outstandingBuildRequests;
+        private BuildRequest[] outstandingBuildRequests;
+
         // Mapping between list of build requests waiting on the current target and targets
         // from which these build reuquests originated
-        TargetIdWrapper [] parentTargetsForBuildRequests;
+        private TargetIdWrapper[] parentTargetsForBuildRequests;
+
         // Name of the project containing the target (only used for logging)
-        string projectName;
+        private string projectName;
+
         // Set to true if the target had a been requested by host (direct requests from host only occur on
         // parent node)
-        bool requestedByHost;
+        private bool requestedByHost;
         #endregion
 
         #region CustomSerializationToStream

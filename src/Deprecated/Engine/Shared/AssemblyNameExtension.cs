@@ -1,11 +1,17 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Text;
 using System.Reflection;
 using System.Globalization;
+#if DEBUG
 using System.Diagnostics;
+#endif
 
 namespace Microsoft.Build.BuildEngine.Shared
 {
@@ -15,12 +21,12 @@ namespace Microsoft.Build.BuildEngine.Shared
     /// between the two is done lazily on demand.
     /// </summary>
     [Serializable]
-    sealed internal class AssemblyNameExtension
+    internal sealed class AssemblyNameExtension
     {
         private AssemblyName asAssemblyName = null;
         private string asString = null;
 
-        static private AssemblyNameExtension unnamedAssembly = new AssemblyNameExtension();
+        private static AssemblyNameExtension unnamedAssembly = new AssemblyNameExtension();
 
         /// <summary>
         /// Construct an unnamed assembly.
@@ -60,7 +66,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// Used when the assembly name comes from a user-controlled source like a project file or config file.
         /// Does extra checking on the assembly name and will throw exceptions if something is invalid.
         /// </param>
-        internal AssemblyNameExtension(string assemblyName, bool validate) 
+        internal AssemblyNameExtension(string assemblyName, bool validate)
         {
             asString = assemblyName;
 
@@ -85,7 +91,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
             return new AssemblyNameExtension(assemblyName);
         }
-        
+
         /// <summary>
         /// Assume there is a string version, create the AssemblyName version.
         /// </summary>
@@ -245,7 +251,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// Get a hash code for this assembly name.
         /// </summary>
         /// <returns></returns>
-        new internal int GetHashCode()
+        internal new int GetHashCode()
         {
             // Ok, so this isn't a great hashing algorithm. However, basenames with different 
             // versions or PKTs are relatively uncommon and so collisions should be low.
@@ -346,7 +352,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
 
             // If the lengths are the same then we can compare without copying.
-            if (baseLenThis == baseLenThat) 
+            if (baseLenThis == baseLenThat)
             {
                 return String.Compare(asString1, 0, asString2, 0, baseLenThis, StringComparison.OrdinalIgnoreCase);
             }
@@ -354,7 +360,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // Lengths are different, so string copy is required.
             string nameThis = asString1.Substring(0, baseLenThis);
             string nameThat = asString2.Substring(0, baseLenThat);
-            return String.Compare(nameThis, nameThat, StringComparison.OrdinalIgnoreCase);   
+            return String.Compare(nameThis, nameThat, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -390,7 +396,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
                 // If they weren't identical then they might still differ only by
                 // case. So we can't assume that they don't match. So fall through...
-                
+
             }
 
             // Do the names match?
@@ -498,7 +504,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// Convert to a string for display.
         /// </summary>
         /// <returns></returns>
-        override public string ToString()
+        public override string ToString()
         {
             CreateFullName();
             return this.asString;

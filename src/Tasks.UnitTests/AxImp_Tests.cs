@@ -1,16 +1,17 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
 {
-    sealed public class AxImp_Tests
+    public sealed class AxImp_Tests
     {
         /// <summary>
         /// Tests that the assembly being imported is passed to the command line
@@ -32,7 +33,6 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// Tests that the assembly being imported is passed to the command line
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ActiveXControlNameWithSpaces()
         {
             var t = new ResolveComReference.AxImp();
@@ -70,14 +70,9 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /nologo switch
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("The /nologo switch is not available on Mono.")]
         public void NoLogo()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "The /nologo switch is not available on Mono"
-            }
-
             var t = new ResolveComReference.AxImp();
 
             Assert.False(t.NoLogo); // "NoLogo should be false by default"

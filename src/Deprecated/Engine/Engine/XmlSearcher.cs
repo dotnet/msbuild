@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.IO;
@@ -67,7 +71,7 @@ namespace Microsoft.Build.BuildEngine
 
             // Now that we know what element/attribute number we're searching for, find
             // it in the Xml document on disk, and grab the line/column number.
-            return GetLineColumnByNodeNumber(fileName, elementNumber, attributeNumber, 
+            return GetLineColumnByNodeNumber(fileName, elementNumber, attributeNumber,
                 out foundLineNumber, out foundColumnNumber);
         }
 
@@ -116,7 +120,7 @@ namespace Microsoft.Build.BuildEngine
             }
             else if (xmlNodeToFind.NodeType == XmlNodeType.Attribute)
             {
-                elementToFind = ((XmlAttribute) xmlNodeToFind).OwnerElement;
+                elementToFind = ((XmlAttribute)xmlNodeToFind).OwnerElement;
                 ErrorUtilities.VerifyThrow(elementToFind != null, "How can an xml attribute not have a parent?");
             }
             else
@@ -275,7 +279,7 @@ namespace Microsoft.Build.BuildEngine
                                     foundLineNumber = reader.LineNumber;
                                     foundColumnNumber = reader.LinePosition;
 
-                                    if (reader.NodeType == XmlNodeType.Element) 
+                                    if (reader.NodeType == XmlNodeType.Element)
                                     {
                                         // Do a minus-one here, because the XmlTextReader points us at the first
                                         // letter of the tag name, whereas we would prefer to point at the opening
@@ -284,7 +288,7 @@ namespace Microsoft.Build.BuildEngine
                                         foundColumnNumber--;
                                     }
                                 }
-                                else if (reader.MoveToFirstAttribute()) 
+                                else if (reader.MoveToFirstAttribute())
                                 {
                                     // Caller wants a particular attribute within the element,
                                     // and the element does have 1 or more attributes.  So let's 
@@ -292,7 +296,7 @@ namespace Microsoft.Build.BuildEngine
                                     int currentXmlAttributeNumber = 0;
 
                                     // Loop through all the XML attributes on the current element.
-                                    do 
+                                    do
                                     {
                                         // Bump the current attribute number and check to see if this
                                         // is the one.
@@ -313,7 +317,7 @@ namespace Microsoft.Build.BuildEngine
                     }
                 }
             }
-            catch (XmlException) 
+            catch (XmlException)
             {
                 // Eat the exception.  If anything fails, we simply don't surface the line/column number.
             }

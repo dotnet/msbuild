@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.ComponentModel;
@@ -86,11 +86,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             get
             {
                 if (AssemblyIdentity == null)
+                {
                     return false;
+                }
+
                 if (String.Equals(AssemblyIdentity.Name, Constants.CLRPlatformAssemblyName, StringComparison.OrdinalIgnoreCase))
+                {
                     return true;
+                }
                 else
+                {
                     return false;
+                }
             }
         }
 
@@ -120,14 +127,24 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             get
             {
                 if (_assemblyIdentity == null)
+                {
                     return null;
+                }
+
                 string name = _assemblyIdentity.ToString();
                 if (IsVirtual)
+                {
                     name = "1: " + name; // virtual assemblies are first
+                }
                 else if (_isPrerequisite)
+                {
                     name = "2: " + name; // prerequisites are second
+                }
                 else
+                {
                     name = "3: " + name + ", " + TargetPath; // eveything else...
+                }
+
                 return name;
             }
         }
@@ -136,9 +153,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             string str = base.ToString();
             if (!String.IsNullOrEmpty(str))
+            {
                 return str;
+            }
+
             if (_assemblyIdentity != null)
+            {
                 return _assemblyIdentity.ToString();
+            }
+
             return String.Empty;
         }
 

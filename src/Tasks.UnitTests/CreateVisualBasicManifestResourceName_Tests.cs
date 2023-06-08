@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -16,7 +16,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CreateVisualBasicManifestResourceName_Tests
+    public sealed class CreateVisualBasicManifestResourceName_Tests
     {
         private readonly ITestOutputHelper _testOutput;
 
@@ -32,8 +32,7 @@ namespace Microsoft.Build.UnitTests
         public void Basic()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
+            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
                     fileName: @"f:\myproject\SubFolder\MyForm.resx",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: true,
@@ -47,8 +46,7 @@ Namespace Nested.TestNamespace
     End Class
 End Namespace
 "),
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal("Nested.TestNamespace.TestClass", result);
         }
@@ -60,8 +58,7 @@ End Namespace
         public void RelativeDependentUpon()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
+            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
                     fileName: @"f:\myproject\SubFolder\MyForm.resx",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: true,
@@ -75,9 +72,7 @@ Namespace TestNamespace
     End Class
 End Namespace
 "),
-                    log: null
-
-                );
+                    log: null);
 
             Assert.Equal("TestNamespace.TestClass", result);
         }
@@ -89,8 +84,7 @@ End Namespace
         public void AbsoluteDependentUpon()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
+            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
                     fileName: @"f:\myproject\SubFolder\MyForm.resx",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: true,
@@ -104,9 +98,7 @@ Namespace Nested.TestNamespace
     End Class
 End Namespace
 "),
-                    log: null
-
-                );
+                    log: null);
 
             Assert.Equal("Nested.TestNamespace.TestClass", result);
         }
@@ -118,8 +110,7 @@ End Namespace
         public void DependentWithCulture()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
+            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
                     fileName: @"f:\myproject\SubFolder\MyForm.en-GB.resx",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: true,
@@ -133,9 +124,7 @@ Namespace Nested.TestNamespace
     End Class
 End Namespace
 "),
-                    log: null
-
-                );
+                    log: null);
 
             Assert.Equal("Nested.TestNamespace.TestClass.en-GB", result);
         }
@@ -148,8 +137,7 @@ End Namespace
         public void DependentWithCultureMetadata()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
+            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
                     fileName: @"f:\myproject\SubFolder\MyForm.resx",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: true,
@@ -163,9 +151,7 @@ Namespace Nested.TestNamespace
     End Class
 End Namespace
 "),
-                    log: null
-
-                );
+                    log: null);
 
             Assert.Equal("Nested.TestNamespace.TestClass.en-GB", result);
         }
@@ -177,8 +163,7 @@ End Namespace
         public void DependentWithCultureAndRootNamespace()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
+            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
                     fileName: @"f:\myproject\SubFolder\MyForm.en-GB.resx",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: true,
@@ -192,9 +177,7 @@ Namespace Nested.TestNamespace
     End Class
 End Namespace
 "),
-                    log: null
-
-                );
+                    log: null);
 
             Assert.Equal("RootNamespace.Nested.TestNamespace.TestClass.en-GB", result);
         }
@@ -206,8 +189,7 @@ End Namespace
         public void DependentWithEmbeddedCulture()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
+            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
                     fileName: @"f:\myproject\SubFolder\MyForm.fr-fr.resx",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: true,
@@ -221,9 +203,7 @@ Namespace Nested.TestNamespace
     End Class
 End Namespace
 "),
-                    log: null
-
-                );
+                    log: null);
 
             Assert.Equal("RootNamespace.Nested.TestNamespace.TestClass.fr-fr", result);
         }
@@ -259,8 +239,7 @@ End Namespace
         public void RootnamespaceWithCulture_RetainCultureInFileName()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
+            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
                     fileName: @"File.cs.vb",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -269,8 +248,7 @@ End Namespace
                     culture: null,
                     binaryStream: null,
                     log: null,
-                    treatAsCultureNeutral: true // retain culture in name
-                );
+                    treatAsCultureNeutral: true); // retain culture in name
 
             // Visual basic does not carry subfolder.
             // See https://github.com/dotnet/msbuild/pull/5477
@@ -284,8 +262,7 @@ End Namespace
         public void Regress222308()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
+            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
                     fileName: @"..\..\XmlEditor\Setup\XmlEditor.rgs",
                     linkFileName: @"MyXmlEditor.rgs",
                     prependCultureAsDirectory: true,
@@ -293,9 +270,7 @@ End Namespace
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: null,
-                    log: null
-
-                );
+                    log: null);
 
             Assert.Equal("RootNamespace.MyXmlEditor.rgs", result);
         }
@@ -470,8 +445,7 @@ End Namespace
         public void Regress419591()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
+            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
                     fileName: "MyForm.ro.resx",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: true,
@@ -483,9 +457,7 @@ End Namespace
     Class MyForm 
     End Class
 "),
-                    log: null
-
-                );
+                    log: null);
 
             Assert.Equal("RootNamespace.MyForm", result);
         }
@@ -503,8 +475,7 @@ End Namespace
             c.BuildEngine = m;
 
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
+            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
                     fileName: "MyForm.resx",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
@@ -525,15 +496,12 @@ Namespace ClassLibrary3
     Class MyForm 
     End Class
 End Namespace
-"
-                    ),
-                    log: c.Log
-                );
+"),
+                    log: c.Log);
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("CreateManifestResourceName.DefinitionFoundWithinConditionalDirective"), "MyForm.vb", "MyForm.resx"),
-                m.Log
-            );
+                m.Log);
         }
 
         /// <summary>
@@ -665,8 +633,7 @@ End Namespace
         public void CulturedResourcesFileWithRootNamespace()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
+            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
                     fileName: @"MyResource.fr.resources",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: false,
@@ -674,8 +641,7 @@ End Namespace
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: null,
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal(@"RootNamespace.MyResource.fr.resources", result);
         }
@@ -687,8 +653,7 @@ End Namespace
         public void ResourcesFileWithRootNamespace()
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
+            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
                     fileName: @"MyResource.resources",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: false,
@@ -696,8 +661,7 @@ End Namespace
                     dependentUponFileName: null,
                     culture: null,
                     binaryStream: null,
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal(@"RootNamespace.MyResource.resources", result);
         }
@@ -705,8 +669,7 @@ End Namespace
         private void AssertSimpleCase(string code, string expected)
         {
             string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl
-                (
+            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
                     fileName: "MyForm.resx",
                     linkFileName: null,    // Link file name
                     prependCultureAsDirectory: true,
@@ -714,8 +677,7 @@ End Namespace
                     dependentUponFileName: "MyForm.vb",
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream(code),
-                    log: null
-                );
+                    log: null);
 
             Assert.Equal(expected, result);
         }

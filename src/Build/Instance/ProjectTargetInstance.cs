@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -139,8 +139,7 @@ namespace Microsoft.Build.Execution
         /// All parameters are in the unevaluated state.
         /// All location parameters may be null if not applicable, except for the main location parameter.
         /// </summary>
-        internal ProjectTargetInstance
-            (
+        internal ProjectTargetInstance(
             string name,
             string condition,
             string inputs,
@@ -161,8 +160,7 @@ namespace Microsoft.Build.Execution
             ElementLocation afterTargetsLocation,
             ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild> children,
             ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance> onErrorChildren,
-            bool parentProjectSupportsReturnsAttribute
-            )
+            bool parentProjectSupportsReturnsAttribute)
         {
             ErrorUtilities.VerifyThrowInternalLength(name, nameof(name));
             ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));
@@ -587,7 +585,7 @@ namespace Microsoft.Build.Execution
         internal static ProjectTargetInstance FactoryForDeserialization(ITranslator translator)
         {
             var instance = new ProjectTargetInstance();
-            var translatable = (ITranslatable) instance;
+            var translatable = (ITranslatable)instance;
 
             translatable.Translate(translator);
 

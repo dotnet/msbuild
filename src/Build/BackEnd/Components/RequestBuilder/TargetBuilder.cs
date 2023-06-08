@@ -1,21 +1,21 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using System.Linq;
 
 #nullable disable
 
@@ -406,21 +406,18 @@ namespace Microsoft.Build.BackEnd
                 (
                 !_cancellationToken.IsCancellationRequested &&
                 !stopProcessingStack &&
-                _targetsToBuild.Any()
-                )
+                _targetsToBuild.Any())
             {
                 TargetEntry currentTargetEntry = _targetsToBuild.Peek();
                 switch (currentTargetEntry.State)
                 {
                     case TargetEntryState.Dependencies:
                         // Ensure we are dealing with a target which actually exists.
-                        ProjectErrorUtilities.VerifyThrowInvalidProject
-                        (
+                        ProjectErrorUtilities.VerifyThrowInvalidProject(
                         _requestEntry.RequestConfiguration.Project.Targets.ContainsKey(currentTargetEntry.Name),
                         currentTargetEntry.ReferenceLocation,
                         "TargetDoesNotExist",
-                        currentTargetEntry.Name
-                        );
+                        currentTargetEntry.Name);
 
                         // If we already have results for this target which were not skipped, we can ignore it.  In 
                         // addition, we can also ignore its before and after targets -- if this target has already run, 

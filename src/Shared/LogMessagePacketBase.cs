@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -135,6 +135,16 @@ namespace Microsoft.Build.Shared
         /// Event is an EnvironmentVariableReadEventArgs
         /// </summary>
         EnvironmentVariableReadEvent = 19,
+
+        /// <summary>
+        /// Event is a ResponseFileUsedEventArgs
+        /// </summary>
+        ResponseFileUsedEvent = 20,
+
+        /// <summary>
+        /// Event is an AssemblyLoadBuildEventArgs
+        /// </summary>
+        AssemblyLoadEvent = 21,
     }
     #endregion
 
@@ -327,9 +337,9 @@ namespace Microsoft.Build.Shared
                 bool eventCanSerializeItself = methodInfo != null;
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
-                if (_buildEvent is ProjectEvaluationStartedEventArgs ||
-                    _buildEvent is ProjectEvaluationFinishedEventArgs ||
-                    _buildEvent is EnvironmentVariableReadEventArgs)
+                if (_buildEvent is ProjectEvaluationStartedEventArgs
+                    or ProjectEvaluationFinishedEventArgs
+                    or EnvironmentVariableReadEventArgs)
                 {
                     // switch to serialization methods that we provide in this file
                     // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
@@ -517,7 +527,9 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.TaskFinishedEvent => new TaskFinishedEventArgs(null, null, null, null, null, false),
                 LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
                 LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
+                LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(null),
 #if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
+                LoggingEventType.AssemblyLoadEvent => new AssemblyLoadBuildEventArgs(),
                 LoggingEventType.TaskParameterEvent => new TaskParameterEventArgs(0, null, null, true, default),
                 LoggingEventType.ProjectEvaluationStartedEvent => new ProjectEvaluationStartedEventArgs(),
                 LoggingEventType.ProjectEvaluationFinishedEvent => new ProjectEvaluationFinishedEventArgs(),
@@ -582,6 +594,10 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.Telemetry;
             }
+            else if (eventType == typeof(AssemblyLoadBuildEventArgs))
+            {
+                return LoggingEventType.AssemblyLoadEvent;
+            }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))
             {
@@ -618,6 +634,10 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(EnvironmentVariableReadEventArgs))
             {
                 return LoggingEventType.EnvironmentVariableReadEvent;
+            }
+            else if (eventType == typeof(ResponseFileUsedEventArgs))
+            {
+                return LoggingEventType.ResponseFileUsedEvent;
             }
             else
             {
@@ -657,6 +677,9 @@ namespace Microsoft.Build.Shared
             {
                 case LoggingEventType.BuildMessageEvent:
                     WriteBuildMessageEventToStream((BuildMessageEventArgs)buildEvent, translator);
+                    break;
+                case LoggingEventType.ResponseFileUsedEvent:
+                    WriteResponseFileUsedEventToStream((ResponseFileUsedEventArgs)buildEvent, translator);
                     break;
                 case LoggingEventType.TaskCommandLineEvent:
                     WriteTaskCommandLineEventToStream((TaskCommandLineEventArgs)buildEvent, translator);
@@ -798,6 +821,15 @@ namespace Microsoft.Build.Shared
         {
             MessageImportance importance = buildMessageEventArgs.Importance;
             translator.TranslateEnum(ref importance, (int)importance);
+        }
+
+        /// <summary>
+        /// Write a response file used log message into the translator
+        /// </summary>
+        private void WriteResponseFileUsedEventToStream(ResponseFileUsedEventArgs responseFileUsedEventArgs, ITranslator translator)
+        {
+            string filePath = responseFileUsedEventArgs.ResponseFilePath;
+            translator.Translate(ref filePath);
         }
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
@@ -1037,6 +1069,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.ProjectStartedEvent => ReadExternalProjectStartedEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.ProjectFinishedEvent => ReadExternalProjectFinishedEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.BuildMessageEvent => ReadBuildMessageEventFromStream(translator, message, helpKeyword, senderName),
+                LoggingEventType.ResponseFileUsedEvent => ReadResponseFileUsedEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.BuildWarningEvent => ReadBuildWarningEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.EnvironmentVariableReadEvent => ReadEnvironmentVariableReadEventFromStream(translator, message, helpKeyword, senderName),
                 _ => null,
@@ -1215,6 +1248,14 @@ namespace Microsoft.Build.Shared
             translator.TranslateEnum(ref importance, (int)importance);
 
             BuildMessageEventArgs buildEvent = new BuildMessageEventArgs(message, helpKeyword, senderName, importance);
+            return buildEvent;
+        }
+
+        private ResponseFileUsedEventArgs ReadResponseFileUsedEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
+        {
+            string responseFilePath = String.Empty;
+            translator.Translate(ref responseFilePath);
+            ResponseFileUsedEventArgs buildEvent = new ResponseFileUsedEventArgs(responseFilePath);
             return buildEvent;
         }
 

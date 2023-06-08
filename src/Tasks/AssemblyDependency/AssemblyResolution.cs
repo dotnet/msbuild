@@ -1,12 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -42,8 +42,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="resolvedSearchPath">Receives the searchPath that the reference was resolved at. Empty if not resolved.</param>
         /// <param name="userRequestedSpecificFile"> This will be true if the user requested a specific file.</param>
         /// <returns>The resolved path</returns>
-        internal static string ResolveReference
-        (
+        internal static string ResolveReference(
             IEnumerable<Resolver[]> jaggedResolvers,
             AssemblyNameExtension assemblyName,
             string sdkName,
@@ -55,8 +54,7 @@ namespace Microsoft.Build.Tasks
             string assemblyFolderKey,
             List<ResolutionSearchLocation> assembliesConsideredAndRejected,
             out string resolvedSearchPath,
-            out bool userRequestedSpecificFile
-        )
+            out bool userRequestedSpecificFile)
         {
             // Initialize outs.
             userRequestedSpecificFile = false;
@@ -76,8 +74,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if
                     (
-                        resolver.Resolve
-                        (
+                        resolver.Resolve(
                             assemblyName,
                             sdkName,
                             rawFileNameCandidate,
@@ -88,9 +85,7 @@ namespace Microsoft.Build.Tasks
                             assemblyFolderKey,
                             assembliesConsideredAndRejected,
                             out string fileLocation,
-                            out userRequestedSpecificFile
-                        )
-                    )
+                            out userRequestedSpecificFile))
                     {
                         resolvedSearchPath = resolver.SearchPath;
                         return fileLocation;
@@ -139,8 +134,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="log"></param>
         /// <returns></returns>
 #endif
-        public static Resolver[] CompileSearchPaths
-        (
+        public static Resolver[] CompileSearchPaths(
             IBuildEngine buildEngine,
             string[] searchPaths,
             string[] candidateAssemblyFiles,
@@ -157,8 +151,7 @@ namespace Microsoft.Build.Tasks
             GetAssemblyRuntimeVersion getRuntimeVersion,
             Version targetedRuntimeVersion,
             GetAssemblyPathInGac getAssemblyPathInGac,
-            TaskLoggingHelper log
-        )
+            TaskLoggingHelper log)
         {
             var resolvers = new Resolver[searchPaths.Length];
 
@@ -216,14 +209,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Build a resolver array from a set of directories to resolve directly from.
         /// </summary>
-        internal static Resolver[] CompileDirectories
-        (
+        internal static Resolver[] CompileDirectories(
             List<string> directories,
             FileExists fileExists,
             GetAssemblyName getAssemblyName,
             GetAssemblyRuntimeVersion getRuntimeVersion,
-            Version targetedRuntimeVersion
-        )
+            Version targetedRuntimeVersion)
         {
             var resolvers = new Resolver[directories.Count];
             for (int i = 0; i < directories.Count; i++)

@@ -1,13 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Reflection;
+using System.ComponentModel;
 using System.Globalization;
+using System.Reflection;
 using System.Resources;
 using System.Threading;
-
-using System.ComponentModel;
 
 #nullable disable
 
@@ -99,7 +98,7 @@ namespace Microsoft.Build.Tasks
 
         internal SR()
         {
-            _resources = new MainAssemblyFallbackResourceManager("System.Design", this.GetType().Assembly);            
+            _resources = new MainAssemblyFallbackResourceManager("System.Design", this.GetType().Assembly);
         }
 
         private static SR GetLoader()
@@ -129,7 +128,10 @@ namespace Microsoft.Build.Tasks
         {
             SR sys = GetLoader();
             if (sys == null)
+            {
                 return null;
+            }
+
             string res = sys._resources.GetString(name, SR.Culture);
 
             if (args?.Length > 0)
@@ -154,7 +156,10 @@ namespace Microsoft.Build.Tasks
         {
             SR sys = GetLoader();
             if (sys == null)
+            {
                 return null;
+            }
+
             return sys._resources.GetString(name, SR.Culture);
         }
 
@@ -169,7 +174,10 @@ namespace Microsoft.Build.Tasks
         {
             SR sys = GetLoader();
             if (sys == null)
+            {
                 return null;
+            }
+
             return sys._resources.GetObject(name, SR.Culture);
         }
     }

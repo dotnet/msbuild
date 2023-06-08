@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -8,6 +8,8 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
@@ -932,14 +934,12 @@ namespace Microsoft.Build.BackEnd.Logging
                     Assembly engineAssembly = typeof(LoggingService).GetTypeInfo().Assembly;
                     string loggerClassName = "Microsoft.Build.BackEnd.Logging.CentralForwardingLogger";
                     string loggerAssemblyName = engineAssembly.GetName().FullName;
-                    LoggerDescription centralForwardingLoggerDescription = new LoggerDescription
-                                                                                     (
+                    LoggerDescription centralForwardingLoggerDescription = new LoggerDescription(
                                                                                       loggerClassName,
                                                                                       loggerAssemblyName,
                                                                                       null /*Not needed as we are loading from current assembly*/,
                                                                                       string.Empty /*No parameters needed as we are forwarding all events*/,
-                                                                                      LoggerVerbosity.Diagnostic /*Not used, but the spirit of the logger is to forward everything so this is the most appropriate verbosity */
-                                                                                     );
+                                                                                      LoggerVerbosity.Diagnostic); /*Not used, but the spirit of the logger is to forward everything so this is the most appropriate verbosity */
 
                     // Registering a distributed logger will initialize the logger, and create and initialize the forwarding logger.
                     // In addition it will register the logging description so that it can be instantiated on a node.
@@ -1151,8 +1151,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     (warningEvent != null)
                     || (errorEvent != null)
                     || (buildEvent is CustomBuildEventArgs)
-                    || (buildEvent is CriticalBuildMessageEventArgs)
-                   )
+                    || (buildEvent is CriticalBuildMessageEventArgs))
                 {
                     ProcessLoggingEvent(buildEvent);
                 }
@@ -1590,8 +1589,20 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="Exception">Any exception which is a ExceptionHandling.IsCriticalException will not be wrapped</exception>
         private void InitializeLogger(ILogger logger, IEventSource sourceForLogger)
         {
+            ILogger UnwrapLoggerType(ILogger log)
+            {
+                while (log is ProjectCollection.ReusableLogger reusableLogger)
+                {
+                    log = reusableLogger.OriginalLogger;
+                }
+
+                return log;
+            }
+
             try
             {
+                using var assemblyLoadTracker = AssemblyLoadsTracker.StartTracking(this, AssemblyLoadingContext.LoggerInitialization, UnwrapLoggerType(logger).GetType());
+
                 INodeLogger nodeLogger = logger as INodeLogger;
                 if (nodeLogger != null)
                 {

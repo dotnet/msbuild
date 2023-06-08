@@ -1,17 +1,17 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
-using Microsoft.Build.Framework;
+using System.Linq;
+using System.Reflection;
+using System.Xml;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using System.Xml;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using Xunit;
-using System.Reflection;
+using Microsoft.Build.Framework;
 using Shouldly;
-using System.Linq;
+using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
      *
      * Tests that exercise the <OnError> tag.
      */
-    sealed public class OnError_Tests
+    public sealed class OnError_Tests
     {
         /*
          * Method:  Basic
@@ -58,7 +58,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Then these items and properties should be visible to the onerror targets.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void FailingTaskStillPublishesOutputs()
         {
             MockLogger l = new MockLogger();
@@ -558,8 +557,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </Project>"))));
 
                 /* No build required */
-            }
-           );
+            });
         }
 
         [Theory]
@@ -583,6 +581,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             else
             {
                 logger.ErrorCount.ShouldBe(0);
+                logger.AssertLogContains(String.Format(MockLogger.GetString("TaskReturnedFalseButDidNotLogError"), "FailingTask"));
             }
         }
 
@@ -597,10 +596,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PostBuildBasic()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project
-            (
-                XmlReader.Create(new StringReader(PostBuildBuilder("On_Success", FailAt.Nowhere)))
-            );
+            Project p = new Project(
+                XmlReader.Create(new StringReader(PostBuildBuilder("On_Success", FailAt.Nowhere))));
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -621,10 +618,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PostBuildOnSuccessWhereCompileFailed()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project
-            (
-                XmlReader.Create(new StringReader(PostBuildBuilder("On_Success", FailAt.Compile)))
-            );
+            Project p = new Project(
+                XmlReader.Create(new StringReader(PostBuildBuilder("On_Success", FailAt.Compile))));
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -646,10 +641,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PostBuildOnSuccessWhereGenerateSatellitesFailed()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project
-            (
-                XmlReader.Create(new StringReader(PostBuildBuilder("On_Success", FailAt.GenerateSatellites)))
-            );
+            Project p = new Project(
+                XmlReader.Create(new StringReader(PostBuildBuilder("On_Success", FailAt.GenerateSatellites))));
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -671,10 +664,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PostBuildAlwaysWhereCompileFailed()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project
-            (
-                XmlReader.Create(new StringReader(PostBuildBuilder("Always", FailAt.Compile)))
-            );
+            Project p = new Project(
+                XmlReader.Create(new StringReader(PostBuildBuilder("Always", FailAt.Compile))));
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -696,10 +687,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PostBuildFinalOutputChangedWhereCompileFailed()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project
-            (
-                XmlReader.Create(new StringReader(PostBuildBuilder("Final_Output_Changed", FailAt.Compile)))
-            );
+            Project p = new Project(
+                XmlReader.Create(new StringReader(PostBuildBuilder("Final_Output_Changed", FailAt.Compile))));
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -721,10 +710,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void PostBuildFinalOutputChangedWhereGenerateSatellitesFailed()
         {
             MockLogger l = new MockLogger();
-            Project p = new Project
-            (
-                XmlReader.Create(new StringReader(PostBuildBuilder("Final_Output_Changed", FailAt.GenerateSatellites)))
-            );
+            Project p = new Project(
+                XmlReader.Create(new StringReader(PostBuildBuilder("Final_Output_Changed", FailAt.GenerateSatellites))));
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
@@ -755,11 +742,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * conditions.
          *
          */
-        private static string PostBuildBuilder
-        (
+        private static string PostBuildBuilder(
             string controlFlag,  // On_Success, Always, Final_Output_Changed
-            FailAt failAt
-        )
+            FailAt failAt)
         {
             string compileStep = "";
             if (FailAt.Compile == failAt)
