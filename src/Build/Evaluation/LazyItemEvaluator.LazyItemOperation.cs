@@ -43,7 +43,7 @@ namespace Microsoft.Build.Evaluation
 
                 _lazyEvaluator = lazyEvaluator;
 
-                _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, itemType => GetReferencedItems(itemType, ImmutableHashSet<string>.Empty));
+                _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, _referencedItemLists);
                 _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
                 _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, _lazyEvaluator.EvaluationContext);
 
@@ -82,18 +82,6 @@ namespace Microsoft.Build.Evaluation
             protected virtual void MutateItems(ImmutableArray<I> items) { }
 
             protected virtual void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder) { }
-
-            private IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
-            {
-                if (_referencedItemLists.TryGetValue(itemType, out var itemList))
-                {
-                    return itemList.GetMatchedItems(globsToIgnore);
-                }
-                else
-                {
-                    return ImmutableList<I>.Empty;
-                }
-            }
 
             [DebuggerDisplay(@"{DebugString()}")]
             protected readonly struct ItemBatchingContext
