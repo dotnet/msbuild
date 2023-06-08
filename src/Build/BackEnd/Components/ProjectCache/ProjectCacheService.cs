@@ -21,7 +21,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
+using Microsoft.NET.StringTools;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {

@@ -5,13 +5,13 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace Microsoft.Build.Utilities;
+namespace Microsoft.NET.StringTools;
 
 /// <summary>
 /// Reads lines of text from a <see cref="Stream"/> into <see cref="ReadOnlySpan{T}"/>s for further processing.
 /// Allows efficient, low-allocation consumption of textual data from a stream.
 /// </summary>
-internal sealed class StreamLineSpanReader
+public sealed class StreamLineSpanReader
 {
     private readonly Stream _stream;
     private readonly Decoder _decoder;

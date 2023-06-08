@@ -10,7 +10,7 @@ using System.Text;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
+using Microsoft.NET.StringTools;
 
 using Shouldly;
 using Xunit;

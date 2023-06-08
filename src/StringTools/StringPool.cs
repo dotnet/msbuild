@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Build.Utilities;
+namespace Microsoft.NET.StringTools;
 
 /// <summary>
 /// Facilitates pooling of strings constructed from <c>ReadOnlySpan&lt;char&gt;</c> values,
@@ -12,7 +12,7 @@ namespace Microsoft.Build.Utilities;
 /// <remarks>
 /// Uses ordinal string comparison.
 /// </remarks>
-internal sealed class StringPool
+public sealed class StringPool
 {
     private int[]? _buckets;
     private Slot[]? _slots;

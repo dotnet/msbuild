@@ -14,7 +14,7 @@ using System.Xml;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
+using Microsoft.NET.StringTools;
 
 using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;

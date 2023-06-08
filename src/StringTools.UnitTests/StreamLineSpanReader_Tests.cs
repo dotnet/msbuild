@@ -7,9 +7,9 @@ using System.Text;
 
 using Xunit;
 
-namespace Microsoft.Build.Utilities;
+namespace Microsoft.NET.StringTools.Tests;
 
-public class StreamLineSpanReaderTests
+public class StreamLineSpanReader_Tests
 {
     [Fact]
     public void Basics()

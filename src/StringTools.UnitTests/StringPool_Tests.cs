@@ -5,9 +5,9 @@ using System;
 
 using Xunit;
 
-namespace Microsoft.Build.Utilities;
+namespace Microsoft.NET.StringTools.Tests;
 
-public class StringPoolTests
+public class StringPool_Tests
 {
     [Fact]
     public void BasicUsage()

@@ -5,6 +5,7 @@
 
     <IsPackable>false</IsPackable>
 
+    <RootNamespace>Microsoft.NET.StringTools.Tests</RootNamespace>
     <AssemblyName>Microsoft.NET.StringTools.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
     <IsLibraryTestProject>true</IsLibraryTestProject>

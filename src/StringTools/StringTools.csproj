@@ -14,6 +14,7 @@
 
     <EnablePackageValidation>true</EnablePackageValidation>
 
+    <RootNamespace>Microsoft.NET.StringTools</RootNamespace>
     <AssemblyName>Microsoft.NET.StringTools</AssemblyName>
     <PackageDescription>This package contains the $(AssemblyName) assembly which implements common string-related functionality such as weak interning.</PackageDescription>
     
@@ -41,6 +42,9 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net35'">
+    <Compile Remove="SpanExtensions.cs" />
+    <Compile Remove="StringPool.cs" />
+    <Compile Remove="StreamLineSpanReader.cs" />
     <Compile Remove="SpanBasedStringBuilder.cs" />
     <Compile Remove="InternableString.cs" />
     <Compile Remove="WeakStringCache.Concurrent.cs" />

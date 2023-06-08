@@ -1,12 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if NETFRAMEWORK
+#if NETFRAMEWORK || NETSTANDARD
 using System;
 
-namespace Microsoft.Build.Utilities;
+namespace Microsoft.NET.StringTools;
 
-internal static class SpanExtensions
+public static class SpanExtensions
 {
     public static bool StartsWith(this ReadOnlySpan<char> span, string s, StringComparison comparisonType)
     {
