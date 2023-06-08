@@ -112,7 +112,67 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>62c1334c8d33ca669a6eef6c0e38a806e043f7c2</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.Build.NuGetSdkResolver" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.Build.Tasks.Console" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.Build.Tasks.Pack" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.Commands" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.CommandLine.XPlat" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.Common" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.Configuration" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.Credentials" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.DependencyResolver.Core" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.Frameworks" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.LibraryModel" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.ProjectModel" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.Protocol" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.Packaging" Version="6.7.0-preview.3.59">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
+    </Dependency>
+    <Dependency Name="NuGet.Versioning" Version="6.7.0-preview.3.59">
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>698361e8e7bcf18140438d601a2aafa7b5ba2ffb</Sha>
     </Dependency>
@@ -120,6 +180,14 @@
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>11b375cec01792f2f37e3aaf199c0dc71aaa8786</Sha>
       <SourceBuild RepoName="vstest" ManagedOnly="true" />
+    </Dependency>
+    <Dependency Name="Microsoft.TestPlatform.CLI" Version="17.7.0-preview.23308.1">
+      <Uri>https://github.com/microsoft/vstest</Uri>
+      <Sha>11b375cec01792f2f37e3aaf199c0dc71aaa8786</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.TestPlatform.Build" Version="17.7.0-preview.23308.1">
+      <Uri>https://github.com/microsoft/vstest</Uri>
+      <Sha>11b375cec01792f2f37e3aaf199c0dc71aaa8786</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="8.0.0-preview.6.23308.3">
       <Uri>https://github.com/dotnet/runtime</Uri>
