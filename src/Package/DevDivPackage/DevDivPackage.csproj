@@ -12,7 +12,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\MSBuild\MSBuild.csproj" />
     <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectReference Include="..\..\Deprecated\Conversion\Microsoft.Build.Conversion.csproj" />
   </ItemGroup>
 
   <Import Project="..\NuspecProject.targets" />
