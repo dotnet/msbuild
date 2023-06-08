@@ -128,7 +128,7 @@ namespace Microsoft.Build.Execution
         /// Cache of tasks already found using exact matching,
         /// keyed by the task identity requested.
         /// </summary>
-        private readonly Lazy<Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>> _cachedTaskRecordsWithExactMatch = new(() => new(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact));
+        private readonly Lazy<ConcurrentDictionary<RegisteredTaskIdentity, RegisteredTaskRecord>> _cachedTaskRecordsWithExactMatch = new(() => new(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact));
 
         /// <summary>
         /// Cache of tasks already found using fuzzy matching,
