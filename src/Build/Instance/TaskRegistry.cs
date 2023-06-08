@@ -136,7 +136,7 @@ namespace Microsoft.Build.Execution
         /// Value is a dictionary of all possible matches for that
         /// task name, by unique identity.
         /// </summary>
-        private Dictionary<string, Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>> _cachedTaskRecordsWithFuzzyMatch;
+        private Lazy<ConcurrentDictionary<string, ConcurrentDictionary<RegisteredTaskIdentity, RegisteredTaskRecord>>> _cachedTaskRecordsWithFuzzyMatch = new(() => new(StringComparer.OrdinalIgnoreCase));
 
         /// <summary>
         /// Cache of task declarations i.e. the &lt;UsingTask&gt; tags fed to this registry,
@@ -493,9 +493,7 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
-                    Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord> taskRecords;
-
-                    if (_cachedTaskRecordsWithFuzzyMatch != null && _cachedTaskRecordsWithFuzzyMatch.TryGetValue(taskIdentity.Name, out taskRecords))
+                    if (_cachedTaskRecordsWithFuzzyMatch.IsValueCreated && _cachedTaskRecordsWithFuzzyMatch.Value.TryGetValue(taskIdentity.Name, out ConcurrentDictionary<RegisteredTaskIdentity, RegisteredTaskRecord> taskRecords))
                     {
                         // if we've looked up this exact one before, just grab it and return
                         if (taskRecords.TryGetValue(taskIdentity, out taskRecord))
@@ -560,8 +558,6 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                _cachedTaskRecordsWithFuzzyMatch ??= new Dictionary<string, Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>>(StringComparer.OrdinalIgnoreCase);
-
                 // Since this is a fuzzy match, we could conceivably have several sets of task identity parameters that match
                 // each other ... but might be mutually exclusive themselves.  E.g. CLR4|x86 and CLR2|x64 both match *|*.  
                 //
@@ -576,14 +572,12 @@ namespace Microsoft.Build.Execution
                 // 3. Look up Foo | baz (gets its own entry because it doesn't match Foo | bar)
                 // 4. Look up Foo | * (should get the Foo | * under Foo | bar, but depending on what the dictionary looks up 
                 //    first, might get Foo | baz, which also matches, instead) 
-                Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord> taskRecords;
-                if (!_cachedTaskRecordsWithFuzzyMatch.TryGetValue(taskIdentity.Name, out taskRecords))
-                {
-                    taskRecords = new Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
-                }
+                ConcurrentDictionary<RegisteredTaskIdentity, RegisteredTaskRecord> taskRecords
+                    = _cachedTaskRecordsWithFuzzyMatch.Value.GetOrAdd(taskIdentity.Name,
+                        _ => new (RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact));
 
                 taskRecords[taskIdentity] = taskRecord;
-                _cachedTaskRecordsWithFuzzyMatch[taskIdentity.Name] = taskRecords;
+                _cachedTaskRecordsWithFuzzyMatch.Value[taskIdentity.Name] = taskRecords;
             }
 
             return taskRecord;
@@ -668,7 +662,7 @@ namespace Microsoft.Build.Execution
             // contain tasks with a given name...
             RegisteredTaskIdentity taskIdentity = new RegisteredTaskIdentity(taskName, taskFactoryParameters);
             List<RegisteredTaskRecord> registeredTaskEntries =
-                _taskRegistrations.GetOrAdd(taskIdentity, new List<RegisteredTaskRecord>());
+                _taskRegistrations.GetOrAdd(taskIdentity, _ => new List<RegisteredTaskRecord>());
 
             RegisteredTaskRecord newRecord = new RegisteredTaskRecord(taskName, assemblyLoadInfo, taskFactory, taskFactoryParameters, inlineTaskRecord);
 
