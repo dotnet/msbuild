@@ -314,7 +314,7 @@ namespace Microsoft.Build.Construction
 
                 ReadOnlySpan<char> lineSpan = line.AsSpan().Trim();
 
-                if (lineSpan.StartsWith(slnFileHeaderNoVersion.AsSpan(), StringComparison.Ordinal))
+                if (lineSpan.StartsWith(slnFileHeaderNoVersion, StringComparison.Ordinal))
                 {
                     // Found it. Validate the version.
                     string fileVersionFromHeader = lineSpan.Slice(slnFileHeaderNoVersion.Length).ToString();
@@ -344,7 +344,7 @@ namespace Microsoft.Build.Construction
 
                     validVersionFound = true;
                 }
-                else if (lineSpan.StartsWith(slnFileVSVLinePrefix.AsSpan(), StringComparison.Ordinal))
+                else if (lineSpan.StartsWith(slnFileVSVLinePrefix, StringComparison.Ordinal))
                 {
                     if (ParseVisualStudioVersion(line.AsSpan()) is { Major: int major })
                     {
@@ -511,23 +511,23 @@ namespace Microsoft.Build.Construction
 
             while (TryReadLine(out ReadOnlySpan<char> line))
             {
-                if (line.StartsWith("Project(".AsSpan(), StringComparison.Ordinal))
+                if (line.StartsWith("Project(", StringComparison.Ordinal))
                 {
                     ParseProject(line, pool);
                 }
-                else if (line.StartsWith("GlobalSection(NestedProjects)".AsSpan(), StringComparison.Ordinal))
+                else if (line.StartsWith("GlobalSection(NestedProjects)", StringComparison.Ordinal))
                 {
                     ParseNestedProjects(pool);
                 }
-                else if (line.StartsWith("GlobalSection(SolutionConfigurationPlatforms)".AsSpan(), StringComparison.Ordinal))
+                else if (line.StartsWith("GlobalSection(SolutionConfigurationPlatforms)", StringComparison.Ordinal))
                 {
                     ParseSolutionConfigurations(pool);
                 }
-                else if (line.StartsWith("GlobalSection(ProjectConfigurationPlatforms)".AsSpan(), StringComparison.Ordinal))
+                else if (line.StartsWith("GlobalSection(ProjectConfigurationPlatforms)", StringComparison.Ordinal))
                 {
                     rawProjectConfigurationsEntries = ParseProjectConfigurations(pool);
                 }
-                else if (line.StartsWith("VisualStudioVersion".AsSpan(), StringComparison.Ordinal))
+                else if (line.StartsWith("VisualStudioVersion", StringComparison.Ordinal))
                 {
                     _currentVisualStudioVersion = ParseVisualStudioVersion(line);
                 }
@@ -669,7 +669,7 @@ namespace Microsoft.Build.Construction
                     break;
                 }
 
-                if (line.StartsWith(slnFileHeaderNoVersion.AsSpan(), StringComparison.Ordinal))
+                if (line.StartsWith(slnFileHeaderNoVersion, StringComparison.Ordinal))
                 {
                     // Found it. Validate the version.
                     ValidateSolutionFileVersion(line.Slice(slnFileHeaderNoVersion.Length));
@@ -787,16 +787,16 @@ namespace Microsoft.Build.Construction
             while (TryReadLine(out ReadOnlySpan<char> line))
             {
                 // If we see an "EndProject", well ... that's the end of this project!
-                if (line.Equals("EndProject".AsSpan(), StringComparison.Ordinal))
+                if (line.Equals("EndProject", StringComparison.Ordinal))
                 {
                     break;
                 }
-                else if (line.StartsWith("ProjectSection(ProjectDependencies)".AsSpan(), StringComparison.Ordinal))
+                else if (line.StartsWith("ProjectSection(ProjectDependencies)", StringComparison.Ordinal))
                 {
                     // We have a ProjectDependencies section.  Each subsequent line should identify
                     // a dependency.
                     line = ReadRequiredLine();
-                    while (!line.StartsWith("EndProjectSection".AsSpan(), StringComparison.Ordinal))
+                    while (!line.StartsWith("EndProjectSection", StringComparison.Ordinal))
                     {
                         // This should be a dependency.  The GUID identifying the parent project should
                         // be both the property name and the property value.
@@ -814,13 +814,13 @@ namespace Microsoft.Build.Construction
                         line = ReadRequiredLine();
                     }
                 }
-                else if (line.StartsWith("ProjectSection(WebsiteProperties)".AsSpan(), StringComparison.Ordinal))
+                else if (line.StartsWith("ProjectSection(WebsiteProperties)", StringComparison.Ordinal))
                 {
                     // We have a WebsiteProperties section.  This section is present only in Venus
                     // projects, and contains properties that we'll need in order to call the
                     // AspNetCompiler task.
                     line = ReadRequiredLine();
-                    while (!line.StartsWith("EndProjectSection".AsSpan(), StringComparison.Ordinal))
+                    while (!line.StartsWith("EndProjectSection", StringComparison.Ordinal))
                     {
                         if (!TryParseNameValue(line, allowEmpty: true, allowEqualsInValue: true, out ReadOnlySpan<char> propertyName, out ReadOnlySpan<char> propertyValue))
                         {
@@ -837,7 +837,7 @@ namespace Microsoft.Build.Construction
                         line = ReadRequiredLine();
                     }
                 }
-                else if (line.StartsWith("Project(".AsSpan(), StringComparison.Ordinal))
+                else if (line.StartsWith("Project(", StringComparison.Ordinal))
                 {
                     // Another Project spotted instead of EndProject for the current one - solution file is malformed.
                     string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out _, out _, "Shared.InvalidProjectFile",
@@ -1320,7 +1320,7 @@ namespace Microsoft.Build.Construction
 
             static bool TrySkip(ref ReadOnlySpan<char> line, string value)
             {
-                if (!line.StartsWith(value.AsSpan()))
+                if (!line.StartsWith(value, StringComparison.Ordinal))
                 {
                     return false;
                 }
@@ -1441,7 +1441,7 @@ namespace Microsoft.Build.Construction
         {
             while (TryReadLine(out ReadOnlySpan<char> line))
             {
-                if (line.Equals("EndGlobalSection".AsSpan(), StringComparison.Ordinal))
+                if (line.Equals("EndGlobalSection", StringComparison.Ordinal))
                 {
                     break;
                 }
@@ -1496,7 +1496,7 @@ namespace Microsoft.Build.Construction
         {
             while (TryReadLine(out ReadOnlySpan<char> line))
             {
-                if (line.Equals("EndGlobalSection".AsSpan(), StringComparison.Ordinal))
+                if (line.Equals("EndGlobalSection", StringComparison.Ordinal))
                 {
                     break;
                 }
@@ -1518,7 +1518,7 @@ namespace Microsoft.Build.Construction
                 }
 
                 // Fixing bug 555577: Solution file can have description information, in which case we ignore.
-                if (name.Equals("DESCRIPTION".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                if (name.Equals("DESCRIPTION", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -1610,7 +1610,7 @@ namespace Microsoft.Build.Construction
 
             while (TryReadLine(out ReadOnlySpan<char> line))
             {
-                if (line.Equals("EndGlobalSection".AsSpan(), StringComparison.Ordinal))
+                if (line.Equals("EndGlobalSection", StringComparison.Ordinal))
                 {
                     break;
                 }

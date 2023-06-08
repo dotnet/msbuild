@@ -160,6 +160,7 @@
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="FileSystem\*.cs" />
+    <Compile Include="Utilities\SpanExtensions.cs" />
     <Compile Include="Utilities\StringPool.cs" />
     <Compile Include="Utilities\StreamLineSpanReader.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
