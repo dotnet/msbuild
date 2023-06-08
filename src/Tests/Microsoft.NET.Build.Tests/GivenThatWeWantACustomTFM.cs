@@ -22,7 +22,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_imports_custom_parsing_targets()
         {
             var targetFramework = ToolsetInfo.CurrentTargetFramework;
-            var runtimeIdentifier = "osx-x64";
+            var runtimeIdentifier = $"{ToolsetInfo.LatestMacRuntimeIdentifier}-x64";
             TestProject testProject = new TestProject()
             {
                 Name = "CustomTFMProject",
