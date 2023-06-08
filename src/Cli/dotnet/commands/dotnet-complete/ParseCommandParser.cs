@@ -2,28 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class ParseCommandParser
     {
-        private static readonly Command Command = ConstructCommand();
+        private static readonly CliCommand Command = ConstructCommand();
 
-        public static Command GetCommand()
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            var command = new Command("parse")
+            var command = new CliCommand("parse")
             {
-                IsHidden = true
+                Hidden = true
             };
 
-            command.SetHandler(ParseCommand.Run);
+            command.SetAction(ParseCommand.Run);
 
             return command;
         }

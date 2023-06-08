@@ -14,9 +14,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal NewCommand RootCommand { get; }
 
         /// <summary>
-        /// Gets the executing <see cref="System.CommandLine.Command"/>.
+        /// Gets the executing <see cref="System.CommandLine.CliCommand"/>.
         /// </summary>
-        internal Command Command { get; }
+        internal CliCommand Command { get; }
 
         /// <summary>
         /// Gets the <see cref="System.CommandLine.ParseResult"/> for the command to be executed.

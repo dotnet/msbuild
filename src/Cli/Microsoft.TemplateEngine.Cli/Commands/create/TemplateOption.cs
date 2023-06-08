@@ -7,7 +7,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal class TemplateOption : IEquatable<TemplateOption>
     {
-        private Option _option;
+        private CliOption _option;
 
         internal TemplateOption(
             CliTemplateParameter parameter,
@@ -22,7 +22,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal IReadOnlySet<string> Aliases { get; private set; }
 
-        internal Option Option => _option;
+        internal CliOption Option => _option;
 
         public bool Equals(TemplateOption? other)
         {

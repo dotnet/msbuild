@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
@@ -15,10 +14,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             string commandName)
             : base(hostBuilder, commandName, SymbolStrings.Command_Uninstall_Description)
         {
-            this.AddArgument(NameArgument);
+            this.Arguments.Add(NameArgument);
         }
 
-        internal static Argument<string[]> NameArgument { get; } = new("package")
+        internal static CliArgument<string[]> NameArgument { get; } = new("package")
         {
             Description = SymbolStrings.Command_Uninstall_Argument_Package,
             Arity = new ArgumentArity(0, 99)
@@ -28,11 +27,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             UninstallCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
-            InvocationContext context)
+            ParseResult parseResult,
+            CancellationToken cancellationToken)
         {
             TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(environmentSettings, templatePackageManager);
 
-            return templatePackageCoordinator.EnterUninstallFlowAsync(args, context.GetCancellationToken());
+            return templatePackageCoordinator.EnterUninstallFlowAsync(args, cancellationToken);
         }
 
         protected override UninstallCommandArgs ParseContext(ParseResult parseResult)

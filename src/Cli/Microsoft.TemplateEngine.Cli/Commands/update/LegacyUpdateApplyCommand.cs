@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
@@ -15,18 +14,18 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Func<ParseResult, ITemplateEngineHost> hostBuilder)
             : base(parentCommand, hostBuilder, "--update-apply", SymbolStrings.Command_Legacy_Update_Check_Description)
         {
-            this.IsHidden = true;
-            parentCommand.AddNoLegacyUsageValidators(this, except: new Option[] { InteractiveOption, AddSourceOption });
+            this.Hidden = true;
+            parentCommand.AddNoLegacyUsageValidators(this, except: new CliOption[] { InteractiveOption, AddSourceOption });
         }
 
-        internal override Option<bool> InteractiveOption => ParentCommand.InteractiveOption;
+        internal override CliOption<bool> InteractiveOption => ParentCommand.InteractiveOption;
 
-        internal override Option<string[]> AddSourceOption => ParentCommand.AddSourceOption;
+        internal override CliOption<string[]> AddSourceOption => ParentCommand.AddSourceOption;
 
-        protected override Task<NewCommandStatus> ExecuteAsync(UpdateCommandArgs args, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, InvocationContext context)
+        protected override Task<NewCommandStatus> ExecuteAsync(UpdateCommandArgs args, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, ParseResult parseResult, CancellationToken cancellationToken)
         {
             PrintDeprecationMessage<LegacyUpdateApplyCommand, UpdateCommand>(args.ParseResult);
-            return base.ExecuteAsync(args, environmentSettings, templatePackageManager, context);
+            return base.ExecuteAsync(args, environmentSettings, templatePackageManager, parseResult, cancellationToken);
         }
     }
 }

@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Tools.Run.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("Missing value for option 'symbol-source'");
+                .HaveStdErrContaining("Required argument missing for option: '-ss'.");
         }
     }
 }

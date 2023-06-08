@@ -12,7 +12,7 @@ internal class Program
     {
         try
         {
-            return new ContainerizeCommand().InvokeAsync(args);
+            return new ContainerizeCommand().Parse(args).InvokeAsync();
         }
         catch (Exception e)
         {
