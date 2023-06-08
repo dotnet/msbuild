@@ -1104,7 +1104,9 @@ namespace Microsoft.Build.Execution
             /// When ever a taskName is checked against the factory we cache the result so we do not have to
             /// make possibly expensive calls over and over again.
             /// </summary>
-            private Dictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
+            private readonly Lazy<ConcurrentDictionary<RegisteredTaskIdentity, object>> _taskNamesCreatableByFactory
+                = new Lazy<ConcurrentDictionary<RegisteredTaskIdentity, object>>(() =>
+                    new(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact));
 
             /// <summary>
             /// Set of parameters that can be used by the task factory specifically.
@@ -1216,18 +1218,13 @@ namespace Microsoft.Build.Execution
             /// <returns>true if the task can be created by the factory, false if it cannot be created</returns>
             internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
             {
-                // Keep a cache of task identities which have been checked against the factory, this is useful because we ask this question everytime we get a registered task record or a taskFactory wrapper.
-                if (_taskNamesCreatableByFactory == null)
-                {
-                    _taskNamesCreatableByFactory = new Dictionary<RegisteredTaskIdentity, object>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
-                }
-
                 RegisteredTaskIdentity taskIdentity = new RegisteredTaskIdentity(taskName, taskIdentityParameters);
 
                 // See if the task name as already been checked against the factory, return the value if it has
                 object creatableByFactory = null;
-                if (!_taskNamesCreatableByFactory.TryGetValue(taskIdentity, out creatableByFactory))
+                if (!_taskNamesCreatableByFactory.Value.TryGetValue(taskIdentity, out creatableByFactory))
                 {
+                    // Multiple threads can enter here for a single taskIdentity and create the factory, only one will be stored in the dictionary
                     try
                     {
                         bool haveTaskFactory = GetTaskFactory(targetLoggingContext, elementLocation, taskProjectFile);
@@ -1293,7 +1290,7 @@ namespace Microsoft.Build.Execution
                     }
                     finally
                     {
-                        _taskNamesCreatableByFactory[taskIdentity] = creatableByFactory;
+                        _taskNamesCreatableByFactory.Value[taskIdentity] = creatableByFactory;
                     }
                 }
 
