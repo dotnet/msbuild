@@ -126,14 +126,14 @@ internal sealed class StringPool
         {
             fixed (char* pSpan0 = span)
             {
-                // Reinterpret the characters (int16) as int (int32) so that we can
+                // Reinterpret the characters (16 bit) as int (32 bit) so that we can
                 // compare two at a time per operation, for performance.
                 int* pStr = (int*)pStr0;
                 int* pSpan = (int*)pSpan0;
 
                 int charactersRemaining;
 
-                // Walk through the string, checking four characters at a time (two ints).
+                // Walk through the string, checking four characters at a time (two ints, 64 bits).
                 for (charactersRemaining = span.Length; charactersRemaining >= 4; charactersRemaining -= 4)
                 {
                     if (*pStr != *pSpan || pStr[1] != pSpan[1])
