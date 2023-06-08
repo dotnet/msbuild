@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -457,7 +459,7 @@ namespace Microsoft.Build.Execution
             // Project-level override tasks are keyed by task name (unqualified).
             // Because Foo.Bar and Baz.Bar are both valid, they are stored
             // in a dictionary keyed as `Bar` because most tasks are called unqualified
-            if (overriddenTasks.TryGetValue(taskName, out List<RegisteredTaskRecord> recs))
+            if (_overriddenTasks.TryGetValue(taskName, out List<RegisteredTaskRecord> recs))
             {
                 // When we determine this task was overridden, search all task records
                 // to find the most correct registration. Search with the fully qualified name (if applicable)
@@ -637,7 +639,7 @@ namespace Microsoft.Build.Execution
 
         // Create another set containing architecture-specific task entries.
         // Then when we look for them, check if the name exists in that.
-        private Dictionary<string, List<RegisteredTaskRecord>> overriddenTasks = new Dictionary<string, List<RegisteredTaskRecord>>();
+        private readonly ConcurrentDictionary<string, List<RegisteredTaskRecord>> _overriddenTasks = new();
 
         /// <summary>
         /// Registers an evaluated using task tag for future
@@ -682,26 +684,25 @@ namespace Microsoft.Build.Execution
                 string[] nameComponents = taskName.Split('.');
                 string unqualifiedTaskName = nameComponents[nameComponents.Length - 1];
 
-                // Is the task already registered?
-                if (overriddenTasks.TryGetValue(unqualifiedTaskName, out List<RegisteredTaskRecord> recs))
+                List<RegisteredTaskRecord> records = _overriddenTasks.GetOrAdd(unqualifiedTaskName, new List<RegisteredTaskRecord>());
+
+                lock (records)
                 {
-                    foreach (RegisteredTaskRecord rec in recs)
+                    if (records.Count == 0)
                     {
-                        if (rec.RegisteredName.Equals(taskIdentity.Name, StringComparison.OrdinalIgnoreCase))
-                        {
-                            loggingService.LogError(context, null, new BuildEventFileInfo(projectUsingTaskInXml.OverrideLocation), "DuplicateOverrideUsingTaskElement", taskName);
-                            break;
-                        }
+                        // New record's name may be fully qualified. Use it anyway to account for partial matches.
+                        records.Add(newRecord);
+                        loggingService.LogComment(context, MessageImportance.Low, "OverrideUsingTaskElementCreated", taskName, projectUsingTaskInXml.OverrideLocation);
                     }
-                    recs.Add(newRecord);
-                }
-                else
-                {
-                    // New record's name may be fully qualified. Use it anyway to account for partial matches.
-                    List<RegisteredTaskRecord> unqualifiedTaskNameMatches = new();
-                    unqualifiedTaskNameMatches.Add(newRecord);
-                    overriddenTasks.Add(unqualifiedTaskName, unqualifiedTaskNameMatches);
-                    loggingService.LogComment(context, MessageImportance.Low, "OverrideUsingTaskElementCreated", taskName, projectUsingTaskInXml.OverrideLocation);
+                    // Is the task already registered?
+                    else if (records.Any(rec => rec.RegisteredName.Equals(taskIdentity.Name, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        loggingService.LogError(context, null, new BuildEventFileInfo(projectUsingTaskInXml.OverrideLocation), "DuplicateOverrideUsingTaskElement", taskName);
+                    }
+                    else
+                    {
+                        records.Add(newRecord);
+                    }
                 }
             }
 
