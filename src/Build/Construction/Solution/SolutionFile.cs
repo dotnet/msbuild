@@ -1849,7 +1849,7 @@ namespace Microsoft.Build.Construction
         internal static bool TryParseConfigurationPlatform(ReadOnlySpan<char> input, bool isPlatformRequired, out ReadOnlySpan<char> configuration, out ReadOnlySpan<char> platform)
         {
             // "Debug|AnyCPU"
-            int pipeIndex = input.IndexOf(SolutionConfigurationInSolution.ConfigurationPlatformSeparator);
+            int pipeIndex = input.IndexOf('|');
 
             if (pipeIndex == -1)
             {
@@ -1870,7 +1870,7 @@ namespace Microsoft.Build.Construction
             configuration = input.Slice(0, pipeIndex);
             platform = input.Slice(pipeIndex + 1);
 
-            if (platform.IndexOf(SolutionConfigurationInSolution.ConfigurationPlatformSeparator) != -1)
+            if (platform.IndexOf('|') != -1)
             {
                 configuration = default;
                 platform = default;

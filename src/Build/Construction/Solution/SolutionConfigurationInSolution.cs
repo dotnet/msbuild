@@ -10,12 +10,6 @@ namespace Microsoft.Build.Construction
     /// </summary>
     public sealed class SolutionConfigurationInSolution
     {
-        /// <summary>
-        /// Default separator between configuration and platform in configuration
-        /// full names
-        /// </summary>
-        internal const char ConfigurationPlatformSeparator = '|';
-
         private static ImmutableDictionary<Key, string> _fullNameByKey = ImmutableDictionary<Key, string>.Empty;
 
         private string? _fullName;
