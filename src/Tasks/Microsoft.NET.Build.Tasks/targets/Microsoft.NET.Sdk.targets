@@ -27,7 +27,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="GetAssemblyVersion" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  <UsingTask TaskName="GenerateSatelliteAssemblies" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="GenerateSatelliteAssemblies" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />  
 
   <PropertyGroup>
     <DisableStandardFrameworkResolution Condition="'$(DisableStandardFrameworkResolution)' == ''">$(_IsNETCoreOrNETStandard)</DisableStandardFrameworkResolution>
@@ -152,6 +152,20 @@ Copyright (c) .NET Foundation. All rights reserved.
       $(RebuildDependsOn)
     </RebuildDependsOn>
   </PropertyGroup>
+
+  <Target Name="_AddMicrosoftNetCompilerToolsetFrameworkPackage" BeforeTargets="CollectPackageReferences">
+
+    <!-- Users should not be setting Microsoft.Net.Compilers.Toolset.Framework directly.
+         If they do, and they also set BuildWithNetFrameworkHostedCompiler, we will have
+         a duplicate PackageReference. This makes it more explicit that that is not supported. -->
+    <NETSdkWarning ResourceName="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework"
+        Condition="'@(PackageReference->AnyHaveMetadataValue('Identity', 'Microsoft.Net.Compilers.Toolset.Framework'))' == 'true'" /> 
+
+    <ItemGroup Condition="'$(BuildWithNetFrameworkHostedCompiler)' == 'true' and '$(OS)' == 'Windows_NT'">
+      <PackageReference Include="Microsoft.Net.Compilers.Toolset.Framework" PrivateAssets="all" Version="$(_NetFrameworkHostedCompilersVersion)" IsImplicitlyDefined="true" />
+    </ItemGroup>
+
+  </Target>
 
   <!-- TODO: this target should not check GeneratePackageOnBuild.
              remove when https://github.com/NuGet/Home/issues/7801 is fixed.
