@@ -1846,7 +1846,7 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="IsAotCompatible" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="IsAotCompatible" _locComment="" -->Indicates whether a class library is compatible with native AOT. Setting to true will enable trimming, single file, and AOT analyzers.</xs:documentation>
+            <xs:documentation><!-- _locID_text="IsAotCompatible" _locComment="" -->Indicates whether a class library is compatible with native AOT. Setting to true will enable analyzers for trimming, single file, and AOT.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="IsWebBootstrapper" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
