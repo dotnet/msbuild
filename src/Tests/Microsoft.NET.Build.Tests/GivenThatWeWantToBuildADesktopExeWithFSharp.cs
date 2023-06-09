@@ -27,7 +27,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/coreclr/issues/27275")]
+        [WindowsOnlyFact]
         public void It_builds_a_simple_desktop_app()
         {
             var targetFramework = "net45";
