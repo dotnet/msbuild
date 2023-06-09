@@ -30,7 +30,6 @@ Copyright (c) .NET Foundation. All rights reserved.
         '$(EnableTrimAnalyzer)' == 'true' Or
         '$(EnableSingleFileAnalyzer)' == 'true')">true</_RequiresILLinkPack>
     <_RequiresILLinkPack Condition="'$(_RequiresILLinkPack)' == ''">false</_RequiresILLinkPack>
-    <DynamicCodeSupport Condition="'$(DynamicCodeSupport)' == '' And '$(PublishAot)' == 'true'">false</DynamicCodeSupport>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
