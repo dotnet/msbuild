@@ -52,6 +52,12 @@ namespace Microsoft.Build.Tasks
         private static ConcurrentDictionary<string, FileState> s_processWideFileStateCache = new ConcurrentDictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
+        /// A callback to invoke to lazily load the serialized <see cref="ResolveAssemblyReferenceCache"/> from disk.
+        /// Null if lazy loading is disabled or if the cache has already been loaded.
+        /// </summary>
+        private Func<ResolveAssemblyReferenceCache> _loadDiskCacheCallback;
+
+        /// <summary>
         /// XML tables of installed assemblies.
         /// </summary>
         private RedistList redistList;
@@ -93,9 +99,13 @@ namespace Microsoft.Build.Tasks
         {
         }
 
-        public SystemState(ResolveAssemblyReferenceCache resolveAssemblyReferenceCache)
-            : base(resolveAssemblyReferenceCache)
+        /// <summary>
+        /// Construct.
+        /// </summary>
+        public SystemState(Func<ResolveAssemblyReferenceCache> loadDiskCacheCallback, bool loadLazily)
+            : base(loadLazily ? null : loadDiskCacheCallback())
         {
+            _loadDiskCacheCallback = loadLazily ? loadDiskCacheCallback : null;
         }
 
         /// <summary>
@@ -208,6 +218,16 @@ namespace Microsoft.Build.Tasks
             bool isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
             bool isProcessFileStateUpToDate = isCachedInProcess && lastModified == cachedProcessFileState.LastModified;
 
+            if (!isProcessFileStateUpToDate && !isInstanceFileStateUpToDate)
+            {
+                // If we haven't loaded the disk cache yet, do it now.
+                if (EnsureResolveAssemblyReferenceCacheLoaded())
+                {
+                    isCachedInInstance = instanceLocalFileStateCache.TryGetValue(path, out cachedInstanceFileState);
+                    isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
+                }
+            }
+
             // If the process-wide cache contains an up-to-date FileState, always use it
             if (isProcessFileStateUpToDate)
             {
@@ -253,6 +273,32 @@ namespace Microsoft.Build.Tasks
             s_processWideFileStateCache[path] = fileState;
 
             return fileState;
+        }
+
+        /// <summary>
+        /// Loads the on-disk cache if it has not been attempted before during the current RAR execution.
+        /// </summary>
+        /// <returns>
+        /// True if this method loaded the cache, false otherwise.
+        /// </returns>
+        private bool EnsureResolveAssemblyReferenceCacheLoaded()
+        {
+            if (_loadDiskCacheCallback == null)
+            {
+                // We've already loaded (or attempted to load) the disk cache, nothing to do.
+                return false;
+            }
+
+            ResolveAssemblyReferenceCache diskCache = _loadDiskCacheCallback();
+            _loadDiskCacheCallback = null;
+
+            if (diskCache != null)
+            {
+                // If we successully loaded the cache from disk, merge it with what we already have.
+                MergeInstanceLocalFileStateCache(diskCache, this);
+                return true;
+            }
+            return false;
         }
 
         /// <summary>

@@ -44,8 +44,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Class that holds the current file state.
         /// </summary>
-        [Serializable]
-        internal sealed class FileState : ITranslatable
+        internal record class FileState : ITranslatable
         {
             /// <summary>
             /// The last modified time for this file.
@@ -263,6 +262,43 @@ namespace Microsoft.Build.Tasks
             finally
             {
                 instanceLocalFileStateCache = oldFileStateCache;
+            }
+        }
+
+        /// <summary>
+        /// Merges the existing data in <paramref name="toCache"/> the data from <paramref name="fromCache"/> and sets <see cref="IsDirty"/>
+        /// on <paramref name="toCache"/> accordingly.
+        /// </summary>
+        /// <param name="fromCache">The cache deserialized from disk.</param>
+        /// <param name="toCache">The cache built so far during the current RAR task execution.</param>
+        internal static void MergeInstanceLocalFileStateCache(ResolveAssemblyReferenceCache fromCache, ResolveAssemblyReferenceCache toCache)
+        {
+            // Special case: toCache is empty.
+            if (toCache.instanceLocalFileStateCache.Count == 0)
+            {
+                toCache.instanceLocalFileStateCache = fromCache.instanceLocalFileStateCache;
+                toCache.IsDirty = false;
+            }
+            else
+            {
+                // If "to" is bigger than "from", then mark it dirty because we will want to save back the extras.
+                bool toIsDirty = toCache.instanceLocalFileStateCache.Count > fromCache.instanceLocalFileStateCache.Count;
+
+                foreach (KeyValuePair<string, FileState> kvp in fromCache.instanceLocalFileStateCache)
+                {
+                    // The "to" FileState is more up-to-date, so we add missing items only. We compare items present in both dictionaries
+                    // to calculate the new value of toCache.IsDirty.
+                    if (toCache.instanceLocalFileStateCache.TryGetValue(kvp.Key, out FileState toFileState))
+                    {
+                        toIsDirty |= !toFileState.Equals(kvp.Value);
+                    }
+                    else
+                    {
+                        toCache.instanceLocalFileStateCache.Add(kvp.Key, kvp.Value);
+                    }
+                }
+
+                toCache.IsDirty = toIsDirty;
             }
         }
     }
