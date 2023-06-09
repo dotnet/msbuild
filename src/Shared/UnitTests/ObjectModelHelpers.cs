@@ -1259,7 +1259,12 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal static void AssertDictionariesEqual<K, V>(IDictionary<K, V> x, IDictionary<K, V> y, Action<KeyValuePair<K, V>, KeyValuePair<K, V>> assertPairsEqual)
+        internal static void AssertDictionariesEqual<K, V>(
+            IDictionary<K, V> x,
+            IDictionary<K, V> y,
+            Action<KeyValuePair<K, V>, KeyValuePair<K, V>> assertPairsEqual,
+            IEqualityComparer<K>? keysComparer = null,
+            bool ignoreOrder = false)
         {
             if (x == null || y == null)
             {
@@ -1269,12 +1274,32 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(x.Count, y.Count);
 
-            for (var i = 0; i < x.Count; i++)
+            if (ignoreOrder)
             {
-                var xPair = x.ElementAt(i);
-                var yPair = y.ElementAt(i);
+                if (keysComparer == null)
+                {
+                    throw new ArgumentNullException(nameof(keysComparer), "keyComparer must be specified when order agnostic dictionaries comparison is requested");
+                }
+                foreach (var xPair in x)
+                {
+                    var yValue = y[xPair.Key];
+                    var yKey = y.Keys.FirstOrDefault(v => keysComparer.Equals(v,xPair.Key));
+                    if (yKey == null)
+                    {
+                        throw new KeyNotFoundException($"Key {xPair.Key} not found in dictionary");
+                    }
+                    assertPairsEqual(xPair, new KeyValuePair<K, V>(yKey, yValue));
+                }
+            }
+            else
+            {
+                for (var i = 0; i < x.Count; i++)
+                {
+                    var xPair = x.ElementAt(i);
+                    var yPair = y.ElementAt(i);
 
-                assertPairsEqual(xPair, yPair);
+                    assertPairsEqual(xPair, yPair);
+                }
             }
         }
 

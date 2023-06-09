@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -28,7 +29,9 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
                     {
                         Assert.Equal(xp.Key, yp.Key, TaskRegistry.RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
                         Assert.Equal(xp.Value, yp.Value, new RegisteredTaskRecordComparer());
-                    });
+                    },
+                    TaskRegistry.RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact,
+                    true);
 
                 return true;
             }
