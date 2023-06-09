@@ -127,7 +127,7 @@ public class EndToEndTests
         Directory.CreateDirectory(workingDirectory);
 
         new DotnetNewCommand(_testOutput, "console", "-f", tfm, "-o", "MinimalTestApp")
-            .WithVirtualHive()        
+            .WithVirtualHive()
             .WithWorkingDirectory(workingDirectory)
             .Execute()
             .Should().Pass();
@@ -182,7 +182,7 @@ public class EndToEndTests
         }
 
         new DotnetNewCommand(_testOutput, "webapi", "-f", ToolsetInfo.CurrentTargetFramework)
-            .WithVirtualHive()  
+            .WithVirtualHive()
             .WithWorkingDirectory(newProjectDir.FullName)
             // do not pollute the primary/global NuGet package store with the private package(s)
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
@@ -229,7 +229,7 @@ public class EndToEndTests
             $"/p:ContainerBaseImage={DockerRegistryManager.FullyQualifiedBaseImageAspNet}",
             $"/p:ContainerRegistry={DockerRegistryManager.LocalRegistry}",
             $"/p:ContainerRepository={imageName}",
-            $"/p:Version={imageTag}",
+            $"/p:ContainerImageTag={imageTag}",
             $"/p:RuntimeFrameworkVersion=8.0.0-preview.3.23174.8")
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
             .WithWorkingDirectory(newProjectDir.FullName)
@@ -368,7 +368,7 @@ public class EndToEndTests
             $"/p:ContainerRegistry={DockerRegistryManager.LocalRegistry}",
             $"/p:ContainerRepository={imageName}",
             $"/p:RuntimeFrameworkVersion=8.0.0-preview.3.23174.8",
-            $"/p:Version={imageTag}")
+            $"/p:ContainerImageTag={imageTag}")
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
