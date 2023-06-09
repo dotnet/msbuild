@@ -3,6 +3,8 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Remove.PackageReference;
 using LocalizableStrings = Microsoft.DotNet.Tools.Remove.PackageReference.LocalizableStrings;
@@ -11,32 +13,30 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class RemovePackageParser
     {
-        public static readonly CliArgument<IEnumerable<string>> CmdPackageArgument = new CliArgument<IEnumerable<string>>(Tools.Add.PackageReference.LocalizableStrings.CmdPackage)
+        public static readonly Argument<IEnumerable<string>> CmdPackageArgument = new Argument<IEnumerable<string>>(Tools.Add.PackageReference.LocalizableStrings.CmdPackage)
         {
             Description = LocalizableStrings.AppHelpText,
             Arity = ArgumentArity.OneOrMore,
         };
 
-        public static readonly CliOption<bool> InteractiveOption = new ForwardedOption<bool>("--interactive")
-        {
-            Description = CommonLocalizableStrings.CommandInteractiveOptionDescription
-        }.ForwardAs("--interactive");
+        public static readonly Option<bool> InteractiveOption = new ForwardedOption<bool>("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
+            .ForwardAs("--interactive");
 
-        private static readonly CliCommand Command = ConstructCommand();
+        private static readonly Command Command = ConstructCommand();
 
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
-            var command = new CliCommand("package", LocalizableStrings.AppFullName);
+            var command = new Command("package", LocalizableStrings.AppFullName);
 
-            command.Arguments.Add(CmdPackageArgument);
-            command.Options.Add(InteractiveOption);
+            command.AddArgument(CmdPackageArgument);
+            command.AddOption(InteractiveOption);
 
-            command.SetAction((parseResult) => new RemovePackageReferenceCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new RemovePackageReferenceCommand(parseResult).Execute());
 
             return command;
         }

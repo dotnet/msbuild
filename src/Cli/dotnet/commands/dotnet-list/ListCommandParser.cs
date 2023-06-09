@@ -1,7 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.List.LocalizableStrings;
 
@@ -11,31 +14,28 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-list";
 
-        public static readonly CliArgument<string> SlnOrProjectArgument = CreateSlnOrProjectArgument(CommonLocalizableStrings.SolutionOrProjectArgumentName, CommonLocalizableStrings.SolutionOrProjectArgumentDescription);
-
-        internal static CliArgument<string> CreateSlnOrProjectArgument(string name, string description)
-            => new CliArgument<string>(name)
+        public static readonly Argument<string> SlnOrProjectArgument = new Argument<string>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
-            Description = description,
+            Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
             Arity = ArgumentArity.ZeroOrOne
         }.DefaultToCurrentDirectory();
 
-        private static readonly CliCommand Command = ConstructCommand();
+        private static readonly Command Command = ConstructCommand();
 
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("list", DocsLink, LocalizableStrings.NetListCommand);
 
-            command.Arguments.Add(SlnOrProjectArgument);
-            command.Subcommands.Add(ListPackageReferencesCommandParser.GetCommand());
-            command.Subcommands.Add(ListProjectToProjectReferencesCommandParser.GetCommand());
+            command.AddArgument(SlnOrProjectArgument);
+            command.AddCommand(ListPackageReferencesCommandParser.GetCommand());
+            command.AddCommand(ListProjectToProjectReferencesCommandParser.GetCommand());
 
-            command.SetAction((parseResult) => parseResult.HandleMissingCommand());
+            command.SetHandler((parseResult) => parseResult.HandleMissingCommand());
 
             return command;
         }

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.TemplateEngine.Abstractions;
@@ -77,7 +78,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            CliRootCommand rootCommand = new();
+            RootCommand rootCommand = new();
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             rootCommand.Add(myCommand);
 
@@ -86,7 +87,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var instantiateCommand = (InstantiateCommand)parseResult.CommandResult.Command;
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
             TemplateCommand templateCommand = new(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            CliConfiguration parser = ParserFactory.CreateParser(templateCommand);
+            Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.TokensToInvoke ?? Array.Empty<string>());
             var templateArgs = new TemplateCommandArgs(templateCommand, instantiateCommand, templateParseResult);
 
@@ -97,7 +98,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new --name name create foo", "Unrecognized command or argument(s): '--name','name'.")]
         [InlineData("--name name new create foo", "Unrecognized command or argument '--name'.|Unrecognized command or argument 'name'.")]
         [InlineData("new --output name create foo", "Unrecognized command or argument(s): '--output','name'.")]
-        [InlineData("new --project name create foo", "Unrecognized command or argument(s): '--project','name'.")]
+        [InlineData("new --project name create foo", "Unrecognized command or argument(s): '--project','name'.|File does not exist: 'name'.")]
         [InlineData("new --force create foo", "Unrecognized command or argument(s): '--force'.")]
         [InlineData("new --dry-run create foo", "Unrecognized command or argument(s): '--dry-run'.")]
         [InlineData("new --no-update-check create foo", "Unrecognized command or argument(s): '--no-update-check'.")]
@@ -114,7 +115,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            CliRootCommand rootCommand = new();
+            RootCommand rootCommand = new();
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             rootCommand.Add(myCommand);
 
@@ -151,7 +152,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var instantiateCommand = (InstantiateCommand)parseResult.CommandResult.Command;
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
             TemplateCommand templateCommand = new(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            CliConfiguration parser = ParserFactory.CreateParser(templateCommand);
+            Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             var templateArgs = new TemplateCommandArgs(templateCommand, instantiateCommand, templateParseResult);
 
@@ -188,7 +189,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var instantiateCommand = (InstantiateCommand)parseResult.CommandResult.Command;
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
             TemplateCommand templateCommand = new(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            CliConfiguration parser = ParserFactory.CreateParser(templateCommand);
+            Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             var templateArgs = new TemplateCommandArgs(templateCommand, instantiateCommand, templateParseResult);
 
@@ -233,7 +234,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
 
             TemplateCommand templateCommand = new(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            CliConfiguration parser = ParserFactory.CreateParser(templateCommand);
+            Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             Assert.True(templateParseResult.Errors.Any());
             Assert.Equal(expectedError, templateParseResult.Errors.Single().Message);
@@ -269,7 +270,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             var args = new InstantiateCommandArgs(instantiateCommand, parseResult);
 
             TemplateCommand templateCommand = new(instantiateCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            CliConfiguration parser = ParserFactory.CreateParser(templateCommand);
+            Parser parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             Assert.True(templateParseResult.Errors.Any());
             Assert.Equal(expectedError, templateParseResult.Errors.Single().Message);

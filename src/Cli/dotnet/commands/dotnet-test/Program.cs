@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 
@@ -174,7 +175,7 @@ namespace Microsoft.DotNet.Tools.Test
                 msbuildArgs.Add($"-property:VSTestSessionCorrelationId={testSessionCorrelationId}");
             }
 
-            bool noRestore = (result.GetResult(TestCommandParser.NoRestoreOption) ?? result.GetResult(TestCommandParser.NoBuildOption)) is not null;
+            bool noRestore = result.HasOption(TestCommandParser.NoRestoreOption) || result.HasOption(TestCommandParser.NoBuildOption);
 
             TestCommand testCommand = new(
                 msbuildArgs,
@@ -216,7 +217,7 @@ namespace Microsoft.DotNet.Tools.Test
 
             var artifactsPostProcessArgs = new List<string> { "--artifactsProcessingMode-postprocess", $"--testSessionCorrelationId:{testSessionCorrelationId}" };
 
-            if (parseResult.GetResult(TestCommandParser.DiagOption) is not null)
+            if (parseResult.HasOption(TestCommandParser.DiagOption))
             {
                 artifactsPostProcessArgs.Add($"--diag:{parseResult.GetValue(TestCommandParser.DiagOption)}");
             }
@@ -258,9 +259,9 @@ namespace Microsoft.DotNet.Tools.Test
 
         private static void SetEnvironmentVariablesFromParameters(TestCommand testCommand, ParseResult parseResult)
         {
-            CliOption<IEnumerable<string>> option = TestCommandParser.EnvOption;
+            Option<IEnumerable<string>> option = TestCommandParser.EnvOption;
 
-            if (parseResult.GetResult(option) is null)
+            if (!parseResult.HasOption(option))
             {
                 return;
             }

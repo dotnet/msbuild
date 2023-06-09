@@ -6,8 +6,10 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.IO;
+using System.CommandLine.Invocation;
 using System.Linq;
+
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
 
@@ -75,131 +77,112 @@ Examples:
     public required IReadOnlyList<string> RemainingArguments { get; init; }
     public RunCommandLineOptions? RunOptions { get; init; }
 
-    public static CommandLineOptions? Parse(string[] args, IReporter reporter, out int errorCode, TextWriter? output = null, TextWriter? error = null)
+    public static CommandLineOptions? Parse(string[] args, IReporter reporter, out int errorCode, System.CommandLine.IConsole? console = null)
     {
-        var quietOption = new CliOption<bool>("--quiet", "-q")
-        {
-            Description = "Suppresses all output except warnings and errors"
-        };
+        var quietOption = new Option<bool>(new[] { "--quiet", "-q" }, "Suppresses all output except warnings and errors");
+        var verboseOption = new Option<bool>(new[] { "--verbose", "-v" }, "Show verbose output");
 
-        var verboseOption = new CliOption<bool>("--verbose", "-v")
+        verboseOption.AddValidator(v =>
         {
-            Description = "Show verbose output"
-        };
-
-        verboseOption.Validators.Add(v =>
-        {
-            if (v.GetResult(quietOption) is not null && v.GetResult(verboseOption) is not null)
+            if (v.FindResultFor(quietOption) is not null && v.FindResultFor(verboseOption) is not null)
             {
-                v.AddError(Resources.Error_QuietAndVerboseSpecified);
+                v.ErrorMessage = Resources.Error_QuietAndVerboseSpecified;
             }
         });
 
-        var listOption = new CliOption<bool>("--list") { Description = "Lists all discovered files without starting the watcher." };
-        var shortProjectOption = new CliOption<string>("-p") { Description = "The project to watch.", Hidden = true };
-        var longProjectOption = new CliOption<string>("--project") { Description = "The project to watch" };
+        var listOption = new Option<bool>("--list", "Lists all discovered files without starting the watcher.");
+        var shortProjectOption = new Option<string>("-p", "The project to watch.") { IsHidden = true };
+        var longProjectOption = new Option<string>("--project", "The project to watch");
 
         // launch profile used by dotnet-watch
-        var launchProfileWatchOption = new CliOption<string>(LaunchProfileOptionName, "-lp")
-        {
-            Description = "The launch profile to start the project with (case-sensitive)."
-        };
-        var noLaunchProfileWatchOption = new CliOption<bool>(NoLaunchProfileOptionName)
-        {
-            Description = "Do not attempt to use launchSettings.json to configure the application."
-        };
+        var launchProfileWatchOption = new Option<string>(new[] { "-lp", LaunchProfileOptionName }, "The launch profile to start the project with (case-sensitive).");
+        var noLaunchProfileWatchOption = new Option<bool>(new[] { NoLaunchProfileOptionName }, "Do not attempt to use launchSettings.json to configure the application.");
 
         // launch profile used by dotnet-run
-        var launchProfileRunOption = new CliOption<string>(LaunchProfileOptionName, "-lp") { Hidden = true };
-        var noLaunchProfileRunOption = new CliOption<bool>(NoLaunchProfileOptionName) { Hidden = true };
+        var launchProfileRunOption = new Option<string>(new[] { "-lp", LaunchProfileOptionName }) { IsHidden = true };
+        var noLaunchProfileRunOption = new Option<bool>(new[] { NoLaunchProfileOptionName }) { IsHidden = true };
 
-        var targetFrameworkOption = new CliOption<string>("--framework", "-f")
-        {
-            Description = "The target framework to run for. The target framework must also be specified in the project file."
-        };
-        var propertyOption = new CliOption<string[]>("--property")
-        {
-            Description = "Properties to be passed to MSBuild."
-        };
+        var targetFrameworkOption = new Option<string>(new[] { "-f", "--framework" }, "The target framework to run for. The target framework must also be specified in the project file.");
+        var propertyOption = new Option<string[]>(new[] { "--property" }, "Properties to be passed to MSBuild.");
 
-        propertyOption.Validators.Add(v =>
+        propertyOption.AddValidator(v =>
         {
             var invalidProperty = v.GetValue(propertyOption)?.FirstOrDefault(
                 property => !(property.IndexOf('=') is > 0 and var index && index < property.Length - 1 && property[..index].Trim().Length > 0));
 
             if (invalidProperty != null)
             {
-                v.AddError($"Invalid property format: '{invalidProperty}'. Expected 'name=value'.");
+                v.ErrorMessage = $"Invalid property format: '{invalidProperty}'. Expected 'name=value'.";
             }
         });
 
-        var noHotReloadOption = new CliOption<bool>("--no-hot-reload") { Description = "Suppress hot reload for supported apps." };
-        var nonInteractiveOption = new CliOption<bool>("--non-interactive")
+        var noHotReloadOption = new Option<bool>("--no-hot-reload", "Suppress hot reload for supported apps.");
+        var nonInteractiveOption = new Option<bool>(
+            "--non-interactive",
+            "Runs dotnet-watch in non-interactive mode. This option is only supported when running with Hot Reload enabled. " +
+            "Use this option to prevent console input from being captured.");
+
+        var remainingWatchArgs = new Argument<string[]>("forwardedArgs", "Arguments to pass to the child dotnet process.");
+        var remainingRunArgs = new Argument<string[]>(name: null);
+
+        var runCommand = new Command("run") { IsHidden = true };
+        var rootCommand = new RootCommand(Description);
+        addOptions(runCommand);
+        addOptions(rootCommand);
+
+        void addOptions(Command command)
         {
-            Description = "Runs dotnet-watch in non-interactive mode. This option is only supported when running with Hot Reload enabled. " +
-            "Use this option to prevent console input from being captured."
-        };
-
-        var remainingWatchArgs = new CliArgument<string[]>("forwardedArgs") { Description = "Arguments to pass to the child dotnet process." };
-        var remainingRunArgs = new CliArgument<string[]>("remainingRunArgs");
-
-        var runCommand = new CliCommand("run") { Hidden = true };
-        var rootCommand = new CliRootCommand(Description);
-        AddSymbols(runCommand);
-        AddSymbols(rootCommand);
-
-        void AddSymbols(CliCommand command)
-        {
-            command.Options.Add(quietOption);
-            command.Options.Add(verboseOption);
-            command.Options.Add(noHotReloadOption);
-            command.Options.Add(nonInteractiveOption);
-            command.Options.Add(longProjectOption);
-            command.Options.Add(shortProjectOption);
+            command.Add(quietOption);
+            command.Add(verboseOption);
+            command.Add(noHotReloadOption);
+            command.Add(nonInteractiveOption);
+            command.Add(longProjectOption);
+            command.Add(shortProjectOption);
 
             if (command == runCommand)
             {
-                command.Options.Add(launchProfileRunOption);
-                command.Options.Add(noLaunchProfileRunOption);
+                command.Add(launchProfileRunOption);
+                command.Add(noLaunchProfileRunOption);
             }
             else
             {
-                command.Options.Add(launchProfileWatchOption);
-                command.Options.Add(noLaunchProfileWatchOption);
+                command.Add(launchProfileWatchOption);
+                command.Add(noLaunchProfileWatchOption);
             }
 
-            command.Options.Add(targetFrameworkOption);
-            command.Options.Add(propertyOption);
+            command.Add(targetFrameworkOption);
+            command.Add(propertyOption);
 
-            command.Options.Add(listOption);
+            command.Add(listOption);
 
             if (command == runCommand)
             {
-                command.Arguments.Add(remainingRunArgs);
+                command.Add(remainingRunArgs);
             }
             else
             {
-                command.Subcommands.Add(runCommand);
-                command.Arguments.Add(remainingWatchArgs);
+                command.Add(runCommand);
+                command.Add(remainingWatchArgs);
             }
         };
 
         CommandLineOptions? options = null;
 
-        runCommand.SetAction(parseResult =>
+        runCommand.SetHandler(context =>
         {
-            RootHandler(parseResult, new()
+            RootHandler(context, new()
             {
-                LaunchProfileName = parseResult.GetValue(launchProfileRunOption),
-                NoLaunchProfile = parseResult.GetValue(noLaunchProfileRunOption),
-                RemainingArguments = parseResult.GetValue(remainingRunArgs) ?? Array.Empty<string>(),
+                LaunchProfileName = context.ParseResult.GetValue(launchProfileRunOption),
+                NoLaunchProfile = context.ParseResult.GetValue(noLaunchProfileRunOption),
+                RemainingArguments = context.ParseResult.GetValue(remainingRunArgs),
             });
         });
 
-        rootCommand.SetAction(parseResult => RootHandler(parseResult, runOptions: null));
+        rootCommand.SetHandler(context => RootHandler(context, runOptions: null));
 
-        void RootHandler(ParseResult parseResults, RunCommandLineOptions? runOptions)
+        void RootHandler(InvocationContext context, RunCommandLineOptions? runOptions)
         {
+            var parseResults = context.ParseResult;
             var projectValue = parseResults.GetValue(longProjectOption);
             if (string.IsNullOrEmpty(projectValue))
             {
@@ -224,17 +207,12 @@ Examples:
                 TargetFramework = parseResults.GetValue(targetFrameworkOption),
                 BuildProperties = parseResults.GetValue(propertyOption)?
                     .Select(p => (p[..p.IndexOf('=')].Trim(), p[(p.IndexOf('=') + 1)..])).ToArray(),
-                RemainingArguments = parseResults.GetValue(remainingWatchArgs) ?? Array.Empty<string>(),
+                RemainingArguments = parseResults.GetValue(remainingWatchArgs),
                 RunOptions = runOptions,
             };
         }
 
-        errorCode = new CliConfiguration(rootCommand)
-        {
-            Output = output ?? Console.Out,
-            Error = error ?? Console.Error
-        }.Invoke(args);
-
+        errorCode = rootCommand.Invoke(args, console);
         return options;
     }
 

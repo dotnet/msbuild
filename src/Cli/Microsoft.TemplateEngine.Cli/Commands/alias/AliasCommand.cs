@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
@@ -13,7 +14,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Func<ParseResult, ITemplateEngineHost> hostBuilder)
             : base(hostBuilder, "alias", SymbolStrings.Command_Alias_Description)
         {
-            Hidden = true;
+            IsHidden = true;
             this.Add(new AliasAddCommand(hostBuilder));
             this.Add(new AliasShowCommand(hostBuilder));
         }
@@ -22,8 +23,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             AliasCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
-            ParseResult parseResult,
-            CancellationToken cancellationToken) => throw new NotImplementedException();
+            InvocationContext context) => throw new NotImplementedException();
 
         protected override AliasCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
     }

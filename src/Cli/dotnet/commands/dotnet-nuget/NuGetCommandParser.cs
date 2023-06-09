@@ -3,6 +3,8 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.NuGet;
 
 namespace Microsoft.DotNet.Cli
@@ -13,150 +15,143 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-nuget";
 
-        private static readonly CliCommand Command = ConstructCommand();
+        private static readonly Command Command = ConstructCommand();
 
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("nuget", DocsLink);
 
-            // some subcommands are not defined here and just forwarded to NuGet app
-            command.TreatUnmatchedTokensAsErrors = false;
+            command.AddOption(new Option<bool>("--version"));
+            command.AddOption(new Option<string>(new string[] { "-v", "--verbosity" }));
 
-            command.Options.Add(new CliOption<bool>("--version"));
-            command.Options.Add(new CliOption<string>("--verbosity", "-v"));
+            command.AddCommand(GetDeleteCommand());
+            command.AddCommand(GetLocalsCommand());
+            command.AddCommand(GetPushCommand());
+            command.AddCommand(GetVerifyCommand());
+            command.AddCommand(GetTrustCommand());
+            command.AddCommand(GetSignCommand());
 
-            command.Subcommands.Add(GetDeleteCommand());
-            command.Subcommands.Add(GetLocalsCommand());
-            command.Subcommands.Add(GetPushCommand());
-            command.Subcommands.Add(GetVerifyCommand());
-            command.Subcommands.Add(GetTrustCommand());
-            command.Subcommands.Add(GetSignCommand());
-
-            command.SetAction(NuGetCommand.Run);
+            command.SetHandler(NuGetCommand.Run);
 
             return command;
         }
 
-        private static CliCommand GetDeleteCommand()
+        private static Command GetDeleteCommand()
         {
-            CliCommand deleteCommand = new("delete");
-            deleteCommand.Arguments.Add(new CliArgument<IEnumerable<string>>("package-paths") { Arity = ArgumentArity.OneOrMore });
-            deleteCommand.Options.Add(new CliOption<bool>("--force-english-output"));
-            deleteCommand.Options.Add(new CliOption<string>("--source", "-s"));
-            deleteCommand.Options.Add(new CliOption<bool>("--non-interactive"));
-            deleteCommand.Options.Add(new CliOption<string>("--api-key", "-k"));
-            deleteCommand.Options.Add(new CliOption<bool>("--no-service-endpoint"));
-            deleteCommand.Options.Add(new CliOption<bool>("--interactive"));
+            var deleteCommand = new Command("delete");
+            deleteCommand.AddArgument(new Argument<IEnumerable<string>>("package-paths") { Arity = ArgumentArity.OneOrMore });
+            deleteCommand.AddOption(new Option<bool>("--force-english-output"));
+            deleteCommand.AddOption(new Option<string>(new string[] { "-s", "--source" }));
+            deleteCommand.AddOption(new Option<bool>("--non-interactive"));
+            deleteCommand.AddOption(new Option<string>(new string[] { "-k", "--api-key" }));
+            deleteCommand.AddOption(new Option<bool>("--no-service-endpoint"));
+            deleteCommand.AddOption(new Option<bool>("--interactive"));
 
-            deleteCommand.SetAction(NuGetCommand.Run);
+            deleteCommand.SetHandler(NuGetCommand.Run);
 
             return deleteCommand;
         }
 
-        private static CliCommand GetLocalsCommand()
+        private static Command GetLocalsCommand()
         {
-            CliCommand localsCommand = new("locals");
+            var localsCommand = new Command("locals");
 
-            CliArgument<string> foldersArgument = new CliArgument<string>("folders");
-            foldersArgument.AcceptOnlyFromAmong(new string[] { "all", "http-cache", "global-packages", "plugins-cache", "temp" });
+            localsCommand.AddArgument(new Argument<string>("folders")
+                .AcceptOnlyFromAmong(new string[] { "all", "http-cache", "global-packages", "plugins-cache", "temp" }));
 
-            localsCommand.Arguments.Add(foldersArgument);
+            localsCommand.AddOption(new Option<bool>("--force-english-output"));
+            localsCommand.AddOption(new Option<bool>(new string[] { "-c", "--clear" }));
+            localsCommand.AddOption(new Option<bool>(new string[] { "-l", "--list" }));
 
-            localsCommand.Options.Add(new CliOption<bool>("--force-english-output"));
-            localsCommand.Options.Add(new CliOption<bool>("--clear", "-c"));
-            localsCommand.Options.Add(new CliOption<bool>("--list", "-l"));
-
-            localsCommand.SetAction(NuGetCommand.Run);
+            localsCommand.SetHandler(NuGetCommand.Run);
 
             return localsCommand;
         }
 
-        private static CliCommand GetPushCommand()
+        private static Command GetPushCommand()
         {
-            CliCommand pushCommand = new("push");
+            var pushCommand = new Command("push");
 
-            pushCommand.Arguments.Add(new CliArgument<IEnumerable<string>>("package-paths") { Arity = ArgumentArity.OneOrMore });
+            pushCommand.AddArgument(new Argument<IEnumerable<string>>("package-paths") { Arity = ArgumentArity.OneOrMore });
 
-            pushCommand.Options.Add(new CliOption<bool>("--force-english-output"));
-            pushCommand.Options.Add(new CliOption<string>("--source", "-s"));
-            pushCommand.Options.Add(new CliOption<string>("--symbol-source", "-ss"));
-            pushCommand.Options.Add(new CliOption<string>("--timeout", "-t"));
-            pushCommand.Options.Add(new CliOption<string>("--api-key", "-k"));
-            pushCommand.Options.Add(new CliOption<string>("--symbol-api-key", "-sk"));
-            pushCommand.Options.Add(new CliOption<bool>("--disable-buffering", "-d"));
-            pushCommand.Options.Add(new CliOption<bool>("--no-symbols", "-n"));
-            pushCommand.Options.Add(new CliOption<bool>("--no-service-endpoint"));
-            pushCommand.Options.Add(new CliOption<bool>("--interactive"));
-            pushCommand.Options.Add(new CliOption<bool>("--skip-duplicate"));
+            pushCommand.AddOption(new Option<bool>("--force-english-output"));
+            pushCommand.AddOption(new Option<string>(new string[] { "-s", "--source" }));
+            pushCommand.AddOption(new Option<string>(new string[] { "-ss", "--symbol-source" }));
+            pushCommand.AddOption(new Option<string>(new string[] { "-t", "--timeout" }));
+            pushCommand.AddOption(new Option<string>(new string[] { "-k", "--api-key" }));
+            pushCommand.AddOption(new Option<string>(new string[] { "-sk", "--symbol-api-key" }));
+            pushCommand.AddOption(new Option<bool>(new string[] { "-d", "--disable-buffering" }));
+            pushCommand.AddOption(new Option<bool>(new string[] { "-n", "--no-symbols" }));
+            pushCommand.AddOption(new Option<bool>("--no-service-endpoint"));
+            pushCommand.AddOption(new Option<bool>("--interactive"));
+            pushCommand.AddOption(new Option<bool>("--skip-duplicate"));
 
-            pushCommand.SetAction(NuGetCommand.Run);
+            pushCommand.SetHandler(NuGetCommand.Run);
 
             return pushCommand;
         }
 
-        private static CliCommand GetVerifyCommand()
+        private static Command GetVerifyCommand()
         {
             const string fingerprint = "--certificate-fingerprint";
-            CliCommand verifyCommand = new("verify");
+            var verifyCommand = new Command("verify");
 
-            verifyCommand.Arguments.Add(new CliArgument<IEnumerable<string>>("package-paths") { Arity = ArgumentArity.OneOrMore });
+            verifyCommand.AddArgument(new Argument<IEnumerable<string>>("package-paths") { Arity = ArgumentArity.OneOrMore });
 
-            verifyCommand.Options.Add(new CliOption<bool>("--all"));
-            verifyCommand.Options.Add(new ForwardedOption<IEnumerable<string>>(fingerprint)
+            verifyCommand.AddOption(new Option<bool>("--all"));
+            verifyCommand.AddOption(new ForwardedOption<IEnumerable<string>>(fingerprint)
                 .ForwardAsManyArgumentsEachPrefixedByOption(fingerprint)
                 .AllowSingleArgPerToken());
-            verifyCommand.Options.Add(CommonOptions.VerbosityOption);
+            verifyCommand.AddOption(CommonOptions.VerbosityOption);
 
-            verifyCommand.SetAction(NuGetCommand.Run);
+            verifyCommand.SetHandler(NuGetCommand.Run);
 
             return verifyCommand;
         }
 
-        private static CliCommand GetTrustCommand()
+        private static Command GetTrustCommand()
         {
-            CliCommand trustCommand = new("trust");
+            var trustCommand = new Command("trust");
 
-            CliArgument<string> commandArgument = new CliArgument<string>("command") { Arity = ArgumentArity.ZeroOrOne };
-            commandArgument.AcceptOnlyFromAmong(new string[] { "list", "author", "repository", "source", "certificate", "remove", "sync" });
+            trustCommand.AddArgument(new Argument<string>("command") { Arity = ArgumentArity.ZeroOrOne }
+                         .AcceptOnlyFromAmong(new string[] { "list", "author", "repository", "source", "certificate", "remove", "sync" }));
 
-            trustCommand.Arguments.Add(commandArgument);
+            trustCommand.AddOption(new Option<string>("--algorithm"));
+            trustCommand.AddOption(new Option<bool>("--allow-untrusted-root"));
+            trustCommand.AddOption(new Option<string>("--owners"));
+            trustCommand.AddOption(new Option<string>("--configfile"));
+            trustCommand.AddOption(CommonOptions.VerbosityOption);
 
-            trustCommand.Options.Add(new CliOption<string>("--algorithm"));
-            trustCommand.Options.Add(new CliOption<bool>("--allow-untrusted-root"));
-            trustCommand.Options.Add(new CliOption<string>("--owners"));
-            trustCommand.Options.Add(new CliOption<string>("--configfile"));
-            trustCommand.Options.Add(CommonOptions.VerbosityOption);
-
-            trustCommand.SetAction(NuGetCommand.Run);
+            trustCommand.SetHandler(NuGetCommand.Run);
 
             return trustCommand;
         }
         
-        private static CliCommand GetSignCommand()
+        private static Command GetSignCommand()
         {
-            CliCommand signCommand = new("sign");
+            var signCommand = new Command("sign");
 
-            signCommand.Arguments.Add(new CliArgument<IEnumerable<string>>("package-paths") { Arity = ArgumentArity.OneOrMore });
+            signCommand.AddArgument(new Argument<IEnumerable<string>>("package-paths") { Arity = ArgumentArity.OneOrMore });
 
-            signCommand.Options.Add(new CliOption<string>("--output", "-o"));
-            signCommand.Options.Add(new CliOption<string>("--certificate-path"));
-            signCommand.Options.Add(new CliOption<string>("--certificate-store-name"));
-            signCommand.Options.Add(new CliOption<string>("--certificate-store-location"));
-            signCommand.Options.Add(new CliOption<string>("--certificate-subject-name"));
-            signCommand.Options.Add(new CliOption<string>("--certificate-fingerprint"));
-            signCommand.Options.Add(new CliOption<string>("--certificate-password"));
-            signCommand.Options.Add(new CliOption<string>("--hash-algorithm"));
-            signCommand.Options.Add(new CliOption<string>("--timestamper"));
-            signCommand.Options.Add(new CliOption<string>("--timestamp-hash-algorithm"));
-            signCommand.Options.Add(new CliOption<bool>("--overwrite"));
-            signCommand.Options.Add(CommonOptions.VerbosityOption);
+            signCommand.AddOption(new Option<string>(new string[] { "-o", "--output" }));
+            signCommand.AddOption(new Option<string>("--certificate-path"));
+            signCommand.AddOption(new Option<string>("--certificate-store-name"));
+            signCommand.AddOption(new Option<string>("--certificate-store-location"));
+            signCommand.AddOption(new Option<string>("--certificate-subject-name"));
+            signCommand.AddOption(new Option<string>("--certificate-fingerprint"));
+            signCommand.AddOption(new Option<string>("--certificate-password"));
+            signCommand.AddOption(new Option<string>("--hash-algorithm"));
+            signCommand.AddOption(new Option<string>("--timestamper"));
+            signCommand.AddOption(new Option<string>("--timestamp-hash-algorithm"));
+            signCommand.AddOption(new Option<bool>("--overwrite"));
+            signCommand.AddOption(CommonOptions.VerbosityOption);
 
-            signCommand.SetAction(NuGetCommand.Run);
+            signCommand.SetHandler(NuGetCommand.Run);
 
             return signCommand;
         }

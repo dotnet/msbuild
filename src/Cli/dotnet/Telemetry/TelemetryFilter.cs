@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 using System.Globalization;
 
@@ -91,32 +92,32 @@ namespace Microsoft.DotNet.Cli.Telemetry
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"build", "publish"},
-                optionsToLog: new HashSet<CliOption> { BuildCommandParser.FrameworkOption, PublishCommandParser.FrameworkOption,
+                optionsToLog: new HashSet<Option> { BuildCommandParser.FrameworkOption, PublishCommandParser.FrameworkOption,
                     BuildCommandParser.RuntimeOption, PublishCommandParser.RuntimeOption, BuildCommandParser.ConfigurationOption,
                     PublishCommandParser.ConfigurationOption }
             ),
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"run", "clean", "test"},
-                optionsToLog: new HashSet<CliOption> { RunCommandParser.FrameworkOption, CleanCommandParser.FrameworkOption,
+                optionsToLog: new HashSet<Option> { RunCommandParser.FrameworkOption, CleanCommandParser.FrameworkOption,
                     TestCommandParser.FrameworkOption, RunCommandParser.ConfigurationOption, CleanCommandParser.ConfigurationOption,
                     TestCommandParser.ConfigurationOption }
             ),
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"pack"},
-                optionsToLog: new HashSet<CliOption> { PackCommandParser.ConfigurationOption }
+                optionsToLog: new HashSet<Option> { PackCommandParser.ConfigurationOption }
             ),
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"vstest"},
-                optionsToLog: new HashSet<CliOption> { CommonOptions.TestPlatformOption,
+                optionsToLog: new HashSet<Option> { CommonOptions.TestPlatformOption,
                     CommonOptions.TestFrameworkOption, CommonOptions.TestLoggerOption }
             ),
             new TopLevelCommandNameAndOptionToLog
             (
                 topLevelCommandName: new HashSet<string> {"publish"},
-                optionsToLog: new HashSet<CliOption> { PublishCommandParser.RuntimeOption }
+                optionsToLog: new HashSet<Option> { PublishCommandParser.RuntimeOption }
             ),
             new AllowListToSendVerbSecondVerbFirstArgument(new HashSet<string> {"workload", "tool", "new"}),
         };

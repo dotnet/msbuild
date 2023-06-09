@@ -9,22 +9,23 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadCleanCommandParser
     {
-        public static readonly CliOption<bool> CleanAllOption = new("--all") { Description = LocalizableStrings.CleanAllOptionDescription };
 
-        private static readonly CliCommand Command = ConstructCommand();
+        public static readonly Option<bool> CleanAllOption = new Option<bool>("--all", LocalizableStrings.CleanAllOptionDescription);
 
-        public static CliCommand GetCommand()
+        private static readonly Command Command = ConstructCommand();
+
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
-            CliCommand command = new("clean", LocalizableStrings.CommandDescription);
+            Command command = new Command("clean", LocalizableStrings.CommandDescription);
 
-            command.Options.Add(CleanAllOption);
+            command.AddOption(CleanAllOption);
 
-            command.SetAction((parseResult) => new WorkloadCleanCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new WorkloadCleanCommand(parseResult).Execute());
 
             return command;
         }

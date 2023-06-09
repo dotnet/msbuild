@@ -11,21 +11,19 @@ namespace Dotnet_new3
     {
         private const string CommandName = "new3";
 
-        private static readonly CliOption<bool> _debugEmitTelemetryOption = new("--debug:emit-telemetry", "Enable telemetry")
+        private static readonly Option<bool> _debugEmitTelemetryOption = new("--debug:emit-telemetry", "Enable telemetry")
         {
-            Hidden = true,
-            Recursive = true,
+            IsHidden = true
         };
 
-        private static readonly CliOption<bool> _debugDisableBuiltInTemplatesOption = new("--debug:disable-sdk-templates", "Disable built-in templates")
+        private static readonly Option<bool> _debugDisableBuiltInTemplatesOption = new("--debug:disable-sdk-templates", "Disable built-in templates")
         {
-            Hidden = true,
-            Recursive = true
+            IsHidden = true
         };
 
-        internal static CliCommand Create()
+        internal static Command Create()
         {
-            CliCommand newCommand = NewCommandFactory.Create(
+            Command newCommand = NewCommandFactory.Create(
                 CommandName,
                 (ParseResult parseResult) =>
                 {
@@ -33,9 +31,9 @@ namespace Dotnet_new3
                     return HostFactory.CreateHost(parseResult.GetValue(_debugDisableBuiltInTemplatesOption), outputPath?.FullName);
                 });
 
-            newCommand.Options.Add(_debugEmitTelemetryOption);
-            newCommand.Options.Add(_debugDisableBuiltInTemplatesOption);
-            newCommand.Subcommands.Add(new CompleteCommand());
+            newCommand.AddGlobalOption(_debugEmitTelemetryOption);
+            newCommand.AddGlobalOption(_debugDisableBuiltInTemplatesOption);
+            newCommand.AddCommand(new CompleteCommand());
             return newCommand;
         }
     }

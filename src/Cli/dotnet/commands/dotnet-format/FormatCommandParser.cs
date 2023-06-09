@@ -8,24 +8,24 @@ namespace Microsoft.DotNet.Tools.Format
 {
     internal static partial class FormatCommandParser
     {
-        public static readonly CliArgument<string[]> Arguments = new("arguments");
+        public static readonly Argument<string[]> Arguments = new();
 
         public static readonly string DocsLink = "https://aka.ms/dotnet-format";
 
-        private static readonly CliCommand Command = ConstructCommand();
+        private static readonly Command Command = ConstructCommand();
 
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
             var formatCommand = new DocumentedCommand("format", DocsLink)
             {
                 Arguments
             };
-            formatCommand.SetAction((ParseResult parseResult) => FormatCommand.Run(parseResult.GetValue(Arguments)));
+            formatCommand.SetHandler((ParseResult parseResult) => FormatCommand.Run(parseResult.GetValue(Arguments)));
             return formatCommand;
         }
     }

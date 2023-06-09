@@ -35,7 +35,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         internal static TemplateOptionResult? FromParseResult(TemplateOption option, ParseResult parseResult)
         {
-            OptionResult? optionResult = parseResult.GetResult(option.Option);
+            OptionResult? optionResult = parseResult.FindResultFor(option.Option);
 
             if (optionResult == null)
             {
@@ -45,8 +45,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             return new TemplateOptionResult(
                     option,
-                    optionResult.IdentifierToken?.Value ?? string.Empty,
-                    optionResult.Errors.Any() ? null : optionResult.GetValueOrDefault<object>()?.ToString());
+                    optionResult.Token?.Value ?? string.Empty,
+                    optionResult.GetValueOrDefault()?.ToString());
         }
     }
 }

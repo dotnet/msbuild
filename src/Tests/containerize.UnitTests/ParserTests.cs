@@ -18,19 +18,19 @@ public class ParserTests
         List<string> baseArgs = new()
         {
             publishDir.FullName,
-            command.BaseRegistryOption.Name,
+            command.BaseRegistryOption.Aliases.First(),
             "MyBaseRegistry",
-            command.BaseImageNameOption.Name,
+            command.BaseImageNameOption.Aliases.First(),
             "MyBaseImageName",
-            command.RepositoryOption.Name,
+            command.RepositoryOption.Aliases.First(),
             "MyImageName",
-            command.WorkingDirectoryOption.Name,
+            command.WorkingDirectoryOption.Aliases.First(),
             "MyWorkingDirectory",
-            command.EntrypointOption.Name,
+            command.EntrypointOption.Aliases.First(),
             "MyEntryPoint"
         };
 
-        baseArgs.Add(command.LabelsOption.Name);
+        baseArgs.Add(command.LabelsOption.Aliases.First());
         baseArgs.Add("NoValue=");
         baseArgs.Add("Valid2=Val2");
         baseArgs.Add("Valid3=Val 3");
@@ -61,19 +61,19 @@ public class ParserTests
         List<string> baseArgs = new()
         {
             publishDir.FullName,
-            command.BaseRegistryOption.Name,
+            command.BaseRegistryOption.Aliases.First(),
             "MyBaseRegistry",
-            command.BaseImageNameOption.Name,
+            command.BaseImageNameOption.Aliases.First(),
             "MyBaseImageName",
-            command.RepositoryOption.Name,
+            command.RepositoryOption.Aliases.First(),
             "MyImageName",
-            command.WorkingDirectoryOption.Name,
+            command.WorkingDirectoryOption.Aliases.First(),
             "MyWorkingDirectory",
-            command.EntrypointOption.Name,
+            command.EntrypointOption.Aliases.First(),
             "MyEntryPoint"
         };
 
-        baseArgs.Add(command.LabelsOption.Name);
+        baseArgs.Add(command.LabelsOption.Aliases.First());
         baseArgs.Add("NoValue=");
         baseArgs.Add("Valid2=Val2");
 
@@ -97,19 +97,19 @@ public class ParserTests
         List<string> baseArgs = new()
         {
             publishDir.FullName,
-            command.BaseRegistryOption.Name,
+            command.BaseRegistryOption.Aliases.First(),
             "MyBaseRegistry",
-            command.BaseImageNameOption.Name,
+            command.BaseImageNameOption.Aliases.First(),
             "MyBaseImageName",
-            command.RepositoryOption.Name,
+            command.RepositoryOption.Aliases.First(),
             "MyImageName",
-            command.WorkingDirectoryOption.Name,
+            command.WorkingDirectoryOption.Aliases.First(),
             "MyWorkingDirectory",
-            command.EntrypointOption.Name,
+            command.EntrypointOption.Aliases.First(),
             "MyEntryPoint"
         };
 
-        baseArgs.Add(command.LabelsOption.Name);
+        baseArgs.Add(command.LabelsOption.Aliases.First());
         foreach (var label in labelStr)
         {
             baseArgs.Add(label);
@@ -129,19 +129,19 @@ public class ParserTests
         List<string> baseArgs = new()
         {
             publishDir.FullName,
-            command.BaseRegistryOption.Name,
+            command.BaseRegistryOption.Aliases.First(),
             "MyBaseRegistry",
-            command.BaseImageNameOption.Name,
+            command.BaseImageNameOption.Aliases.First(),
             "MyBaseImageName",
-            command.RepositoryOption.Name,
+            command.RepositoryOption.Aliases.First(),
             "MyImageName",
-            command.WorkingDirectoryOption.Name,
+            command.WorkingDirectoryOption.Aliases.First(),
             "MyWorkingDirectory",
-            command.EntrypointOption.Name,
+            command.EntrypointOption.Aliases.First(),
             "MyEntryPoint"
         };
 
-        baseArgs.Add(command.EnvVarsOption.Name);
+        baseArgs.Add(command.EnvVarsOption.Aliases.First());
         baseArgs.Add("NoValue=");
         baseArgs.Add("Valid2=Val2");
         baseArgs.Add("Valid3=Val 3");
@@ -173,19 +173,19 @@ public class ParserTests
         List<string> baseArgs = new()
         {
             publishDir.FullName,
-            command.BaseRegistryOption.Name,
+            command.BaseRegistryOption.Aliases.First(),
             "MyBaseRegistry",
-            command.BaseImageNameOption.Name,
+            command.BaseImageNameOption.Aliases.First(),
             "MyBaseImageName",
-            command.RepositoryOption.Name,
+            command.RepositoryOption.Aliases.First(),
             "MyImageName",
-            command.WorkingDirectoryOption.Name,
+            command.WorkingDirectoryOption.Aliases.First(),
             "MyWorkingDirectory",
-            command.EntrypointOption.Name,
+            command.EntrypointOption.Aliases.First(),
             "MyEntryPoint"
         };
 
-        baseArgs.Add(command.PortsOption.Name);
+        baseArgs.Add(command.PortsOption.Aliases.First());
         baseArgs.Add("1500");
         baseArgs.Add("1501/udp");
         baseArgs.Add("1501/tcp");
@@ -218,19 +218,19 @@ public class ParserTests
         List<string> baseArgs = new()
         {
             publishDir.FullName,
-            command.BaseRegistryOption.Name,
+            command.BaseRegistryOption.Aliases.First(),
             "MyBaseRegistry",
-            command.BaseImageNameOption.Name,
+            command.BaseImageNameOption.Aliases.First(),
             "MyBaseImageName",
-            command.RepositoryOption.Name,
+            command.RepositoryOption.Aliases.First(),
             "MyImageName",
-            command.WorkingDirectoryOption.Name,
+            command.WorkingDirectoryOption.Aliases.First(),
             "MyWorkingDirectory",
-            command.EntrypointOption.Name,
+            command.EntrypointOption.Aliases.First(),
             "MyEntryPoint"
         };
 
-        baseArgs.Add(command.PortsOption.Name);
+        baseArgs.Add(command.PortsOption.Aliases.First());
         baseArgs.Add(portStr);
 
         ParseResult parseResult = command.Parse(baseArgs.ToArray());

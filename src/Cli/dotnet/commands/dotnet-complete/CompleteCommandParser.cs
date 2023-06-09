@@ -2,36 +2,38 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class CompleteCommandParser
     {
-        public static readonly CliArgument<string> PathArgument = new("path");
+        public static readonly Argument<string> PathArgument = new Argument<string>("path");
 
-        public static readonly CliOption<int?> PositionOption = new("--position")
+        public static readonly Option<int?> PositionOption = new Option<int?>("--position")
         {
-            HelpName = "command"
+            ArgumentHelpName = "command"
         };
 
-        private static readonly CliCommand Command = ConstructCommand();
+        private static readonly Command Command = ConstructCommand();
 
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
-            CliCommand command = new("complete")
+            var command = new Command("complete")
             {
-                Hidden = true
+                IsHidden = true
             };
 
-            command.Arguments.Add(PathArgument);
-            command.Options.Add(PositionOption);
+            command.AddArgument(PathArgument);
+            command.AddOption(PositionOption);
 
-            command.SetAction(CompleteCommand.Run);
+            command.SetHandler(CompleteCommand.Run);
 
             return command;
         }

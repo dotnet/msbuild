@@ -49,37 +49,34 @@ namespace Microsoft.TemplateEngine.Cli
         {
             return (context) =>
             {
-                string standardUsage = HelpBuilder.Default.GetOptionUsageLabel(o.Option);
+                string standardUsage = HelpBuilder.Default.GetIdentifierSymbolUsageLabel(o.Option, context);
                 if (standardUsage.Length > context.HelpBuilder.MaxWidth / 3)
                 {
                     if (Choices.Count > 2)
                     {
-                        o.Option.HelpName = $"{string.Join("|", Choices.Keys.Take(2))}|...";
-                        string updatedFirstColumn = HelpBuilder.Default.GetOptionUsageLabel(o.Option);
+                        o.Option.ArgumentHelpName = $"{string.Join("|", Choices.Keys.Take(2))}|...";
+                        string updatedFirstColumn = HelpBuilder.Default.GetIdentifierSymbolUsageLabel(o.Option, context);
                         if (updatedFirstColumn.Length <= context.HelpBuilder.MaxWidth / 3)
                         {
                             return updatedFirstColumn;
                         }
                     }
-                    o.Option.HelpName = HelpStrings.Text_ChoiceArgumentHelpName;
-                    return HelpBuilder.Default.GetOptionUsageLabel(o.Option);
+                    o.Option.ArgumentHelpName = HelpStrings.Text_ChoiceArgumentHelpName;
+                    return HelpBuilder.Default.GetIdentifierSymbolUsageLabel(o.Option, context);
                 }
                 return standardUsage;
             };
         }
 
-        protected override CliOption GetBaseOption(IReadOnlySet<string> aliases)
+        protected override Option GetBaseOption(IReadOnlySet<string> aliases)
         {
-            string name = GetName(aliases);
-
-            CliOption<string> option = new(name)
+            Option<string> option = new Option<string>(
+                aliases.ToArray(),
+                parseArgument: result => GetParseChoiceArgument(this)(result))
             {
-                CustomParser = result => GetParseChoiceArgument(this)(result),
                 Arity = new ArgumentArity(DefaultIfOptionWithoutValue == null ? 1 : 0, AllowMultipleValues ? _choices.Count : 1),
                 AllowMultipleArgumentsPerToken = AllowMultipleValues
             };
-
-            AddAliases(option, aliases);
 
             // empty string for the explicit unset option
             option.FromAmongCaseInsensitive(Choices.Keys.ToArray(), allowedHiddenValue: string.Empty);
@@ -102,7 +99,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (argumentResult.Tokens.Count == 0)
                 {
-                    if (or.Implicit)
+                    if (or.IsImplicit)
                     {
                         if (!string.IsNullOrWhiteSpace(parameter.DefaultValue))
                         {
@@ -111,16 +108,16 @@ namespace Microsoft.TemplateEngine.Cli
                                 return defaultValue;
                             }
                             //Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.
-                            argumentResult.AddError(string.Format(
+                            argumentResult.ErrorMessage = string.Format(
                                 LocalizableStrings.ParseChoiceTemplateOption_Error_InvalidDefaultValue,
                                 parameter.DefaultValue,
-                                or.IdentifierToken?.Value,
+                                or.Token?.Value,
                                 "choice",
-                                error));
+                                error);
                             return string.Empty;
                         }
                         //Default value for argument missing for option: '{0}'.
-                        argumentResult.AddError(string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultValue, or.IdentifierToken?.Value));
+                        argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultValue, or.Token?.Value);
                         return string.Empty;
                     }
                     if (parameter.DefaultIfOptionWithoutValue != null)
@@ -130,22 +127,22 @@ namespace Microsoft.TemplateEngine.Cli
                             return defaultValue;
                         }
                         //Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.
-                        argumentResult.AddError(string.Format(
+                        argumentResult.ErrorMessage = string.Format(
                             LocalizableStrings.ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue,
                             parameter.DefaultIfOptionWithoutValue,
-                            or.IdentifierToken?.Value,
+                            or.Token?.Value,
                             "choice",
-                            error));
+                            error);
                         return string.Empty;
                     }
                     //Required argument missing for option: '{0}'.
-                    argumentResult.AddError(string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultIfNoOptionValue, or.IdentifierToken?.Value));
+                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultIfNoOptionValue, or.Token?.Value);
                     return string.Empty;
                 }
                 else if (!parameter.AllowMultipleValues && argumentResult.Tokens.Count != 1)
                 {
                     //Using more than 1 argument is not allowed for '{0}', used: {1}.
-                    argumentResult.AddError(string.Format(LocalizableStrings.ParseTemplateOption_Error_InvalidCount, or.IdentifierToken?.Value, argumentResult.Tokens.Count));
+                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_InvalidCount, or.Token?.Value, argumentResult.Tokens.Count);
                     return string.Empty;
                 }
                 else
@@ -153,12 +150,12 @@ namespace Microsoft.TemplateEngine.Cli
                     if (!TryConvertValueToChoice(argumentResult.Tokens.Select(t => t.Value), parameter, out string value, out string error))
                     {
                         //Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.
-                        argumentResult.AddError(string.Format(
+                        argumentResult.ErrorMessage = string.Format(
                             LocalizableStrings.ParseChoiceTemplateOption_Error_InvalidArgument,
                             argumentResult.Tokens[0].Value,
-                            or.IdentifierToken?.Value,
+                            or.Token?.Value,
                             "choice",
-                            error));
+                            error);
                         return string.Empty;
                     }
 

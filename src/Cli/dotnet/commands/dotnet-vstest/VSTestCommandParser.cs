@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.VSTest;
 
 namespace Microsoft.DotNet.Cli
@@ -10,24 +12,22 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-vstest";
 
-        private static readonly CliCommand Command = ConstructCommand();
+        private static readonly Command Command = ConstructCommand();
 
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
-            DocumentedCommand command = new("vstest", DocsLink);
+            var command = new DocumentedCommand("vstest", DocsLink);
 
-            command.TreatUnmatchedTokensAsErrors = false;
+            command.AddOption(CommonOptions.TestPlatformOption);
+            command.AddOption(CommonOptions.TestFrameworkOption);
+            command.AddOption(CommonOptions.TestLoggerOption);
 
-            command.Options.Add(CommonOptions.TestPlatformOption);
-            command.Options.Add(CommonOptions.TestFrameworkOption);
-            command.Options.Add(CommonOptions.TestLoggerOption);
-
-            command.SetAction(VSTestCommand.Run);
+            command.SetHandler(VSTestCommand.Run);
 
             return command;
         }

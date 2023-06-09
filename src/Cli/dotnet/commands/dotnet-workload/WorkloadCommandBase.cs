@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Workloads.Workload
         /// <param name="nugetPackageDownloader">The package downloader to use for acquiring NuGet packages.</param>
         public WorkloadCommandBase(
             ParseResult parseResult,
-            CliOption<VerbosityOptions> verbosityOptions = null,
+            Option<VerbosityOptions> verbosityOptions = null,
             IReporter reporter = null,
             string tempDirPath = null,
             INuGetPackageDownloader nugetPackageDownloader = null) : base(parseResult)

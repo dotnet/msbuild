@@ -3,6 +3,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Completions;
+using System.CommandLine.Invocation;
 using System.Reflection;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
@@ -11,10 +12,11 @@ using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
+using Command = System.CommandLine.Command;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
-    internal abstract class BaseCommand : CliCommand
+    internal abstract class BaseCommand : Command
     {
         private readonly Func<ParseResult, ITemplateEngineHost> _hostBuilder;
 
@@ -47,7 +49,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         }
     }
 
-    internal abstract class BaseCommand<TArgs> : BaseCommand where TArgs : GlobalArgs
+    internal abstract class BaseCommand<TArgs> : BaseCommand, ICommandHandler where TArgs : GlobalArgs
     {
         internal BaseCommand(
             Func<ParseResult, ITemplateEngineHost> hostBuilder,
@@ -55,8 +57,69 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             string description)
             : base(hostBuilder, name, description)
         {
-            Action = new CommandAction(this);
+            this.Handler = this;
         }
+
+        public async Task<int> InvokeAsync(InvocationContext context)
+        {
+            TArgs args = ParseContext(context.ParseResult);
+            using IEngineEnvironmentSettings environmentSettings = CreateEnvironmentSettings(args, context.ParseResult);
+            using TemplatePackageManager templatePackageManager = new(environmentSettings);
+            CancellationToken cancellationToken = context.GetCancellationToken();
+
+            NewCommandStatus returnCode;
+
+            try
+            {
+                using (Timing.Over(environmentSettings.Host.Logger, "Execute"))
+                {
+                    await HandleGlobalOptionsAsync(args, environmentSettings, templatePackageManager, cancellationToken).ConfigureAwait(false);
+                    returnCode = await ExecuteAsync(args, environmentSettings, templatePackageManager, context).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                AggregateException? ax = ex as AggregateException;
+
+                while (ax != null && ax.InnerExceptions.Count == 1 && ax.InnerException is not null)
+                {
+                    ex = ax.InnerException;
+                    ax = ex as AggregateException;
+                }
+
+                Reporter.Error.WriteLine(ex.Message.Bold().Red());
+
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                    ax = ex as AggregateException;
+
+                    while (ax != null && ax.InnerExceptions.Count == 1 && ax.InnerException is not null)
+                    {
+                        ex = ax.InnerException;
+                        ax = ex as AggregateException;
+                    }
+
+                    Reporter.Error.WriteLine(ex.Message.Bold().Red());
+                }
+
+                if (!string.IsNullOrWhiteSpace(ex.StackTrace))
+                {
+                    Reporter.Error.WriteLine(ex.StackTrace.Bold().Red());
+                }
+                returnCode = NewCommandStatus.Unexpected;
+            }
+
+            if (returnCode != NewCommandStatus.Success)
+            {
+                Reporter.Error.WriteLine();
+                Reporter.Error.WriteLine(LocalizableStrings.BaseCommand_ExitCodeHelp, (int)returnCode);
+            }
+
+            return (int)returnCode;
+        }
+
+        public int Invoke(InvocationContext context) => InvokeAsync(context).GetAwaiter().GetResult();
 
         public override IEnumerable<CompletionItem> GetCompletions(CompletionContext context)
         {
@@ -84,7 +147,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             CancellationToken cancellationToken)
         {
             IReadOnlyList<ITemplateInfo> availableTemplates = await templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
-            string usedCommandAlias = args.ParseResult.CommandResult.IdentifierToken.Value;
+            string usedCommandAlias = args.ParseResult.CommandResult.Token.Value;
             if (!availableTemplates.Any(t => t.ShortNameList.Any(sn => string.Equals(sn, usedCommandAlias, StringComparison.OrdinalIgnoreCase))))
             {
                 return;
@@ -95,9 +158,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Reporter.Output.WriteLine();
         }
 
-        protected static void PrintDeprecationMessage<TDepr, TNew>(ParseResult parseResult, CliOption? additionalOption = null)
-            where TDepr : CliCommand
-            where TNew : CliCommand
+        protected static void PrintDeprecationMessage<TDepr, TNew>(ParseResult parseResult, Option? additionalOption = null) where TDepr : Command where TNew : Command
         {
             var newCommandExample = Example.For<TNew>(parseResult);
             if (additionalOption != null)
@@ -115,22 +176,22 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Reporter.Output.WriteLine();
         }
 
-        protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, ParseResult parseResult, CancellationToken cancellationToken);
+        protected abstract Task<NewCommandStatus> ExecuteAsync(TArgs args, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, InvocationContext context);
 
         protected abstract TArgs ParseContext(ParseResult parseResult);
 
-        protected virtual CliOption GetFilterOption(FilterOptionDefinition def)
+        protected virtual Option GetFilterOption(FilterOptionDefinition def)
         {
             return def.OptionFactory();
         }
 
-        protected IReadOnlyDictionary<FilterOptionDefinition, CliOption> SetupFilterOptions(IReadOnlyList<FilterOptionDefinition> filtersToSetup)
+        protected IReadOnlyDictionary<FilterOptionDefinition, Option> SetupFilterOptions(IReadOnlyList<FilterOptionDefinition> filtersToSetup)
         {
-            Dictionary<FilterOptionDefinition, CliOption> options = new();
+            Dictionary<FilterOptionDefinition, Option> options = new();
             foreach (FilterOptionDefinition filterDef in filtersToSetup)
             {
-                CliOption newOption = GetFilterOption(filterDef);
-                this.Options.Add(newOption);
+                Option newOption = GetFilterOption(filterDef);
+                this.AddOption(newOption);
                 options[filterDef] = newOption;
             }
             return options;
@@ -141,8 +202,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         /// </summary>
         protected void SetupTabularOutputOptions(ITabularOutputCommand command)
         {
-            this.Options.Add(command.ColumnsAllOption);
-            this.Options.Add(command.ColumnsOption);
+            this.AddOption(command.ColumnsAllOption);
+            this.AddOption(command.ColumnsOption);
         }
 
         private static async Task HandleGlobalOptionsAsync(
@@ -217,73 +278,6 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                   .DefineColumn(g => g.GetType().GetTypeInfo().Assembly.FullName ?? string.Empty, LocalizableStrings.Assembly, showAlways: true);
             Reporter.Output.WriteLine(generatorsFormatter.Layout());
             Reporter.Output.WriteLine();
-        }
-
-        private sealed class CommandAction : CliAction
-        {
-            private readonly BaseCommand<TArgs> _command;
-
-            public CommandAction(BaseCommand<TArgs> command) => _command = command;
-
-            public override async Task<int> InvokeAsync(ParseResult parseResult, CancellationToken cancellationToken)
-            {
-                TArgs args = _command.ParseContext(parseResult);
-                using IEngineEnvironmentSettings environmentSettings = _command.CreateEnvironmentSettings(args, parseResult);
-                using TemplatePackageManager templatePackageManager = new(environmentSettings);
-
-                NewCommandStatus returnCode;
-
-                try
-                {
-                    using (Timing.Over(environmentSettings.Host.Logger, "Execute"))
-                    {
-                        await HandleGlobalOptionsAsync(args, environmentSettings, templatePackageManager, cancellationToken).ConfigureAwait(false);
-                        returnCode = await _command.ExecuteAsync(args, environmentSettings, templatePackageManager, parseResult, cancellationToken).ConfigureAwait(false);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    AggregateException? ax = ex as AggregateException;
-
-                    while (ax != null && ax.InnerExceptions.Count == 1 && ax.InnerException is not null)
-                    {
-                        ex = ax.InnerException;
-                        ax = ex as AggregateException;
-                    }
-
-                    Reporter.Error.WriteLine(ex.Message.Bold().Red());
-
-                    while (ex.InnerException != null)
-                    {
-                        ex = ex.InnerException;
-                        ax = ex as AggregateException;
-
-                        while (ax != null && ax.InnerExceptions.Count == 1 && ax.InnerException is not null)
-                        {
-                            ex = ax.InnerException;
-                            ax = ex as AggregateException;
-                        }
-
-                        Reporter.Error.WriteLine(ex.Message.Bold().Red());
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(ex.StackTrace))
-                    {
-                        Reporter.Error.WriteLine(ex.StackTrace.Bold().Red());
-                    }
-                    returnCode = NewCommandStatus.Unexpected;
-                }
-
-                if (returnCode != NewCommandStatus.Success)
-                {
-                    Reporter.Error.WriteLine();
-                    Reporter.Error.WriteLine(LocalizableStrings.BaseCommand_ExitCodeHelp, (int)returnCode);
-                }
-
-                return (int)returnCode;
-            }
-
-            public override int Invoke(ParseResult parseResult) => InvokeAsync(parseResult, CancellationToken.None).GetAwaiter().GetResult();
         }
     }
 }

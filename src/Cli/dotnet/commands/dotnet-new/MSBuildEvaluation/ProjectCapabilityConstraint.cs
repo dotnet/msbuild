@@ -120,7 +120,7 @@ namespace Microsoft.TemplateEngine.MSBuildEvaluation
                     return TemplateConstraintResult.CreateRestricted(
                         this,
                         _evaluationResult.ErrorMessage ?? string.Format(LocalizableStrings.MultipleProjectsEvaluationResult_Error, foundProjects),
-                        string.Format(LocalizableStrings.ProjectCapabilityConstraint_Restricted_MultipleProjectsFound_CTA, SharedOptions.ProjectPathOption.Name));
+                        string.Format(LocalizableStrings.ProjectCapabilityConstraint_Restricted_MultipleProjectsFound_CTA, SharedOptions.ProjectPathOption.Aliases.First()));
                 }
                 if (_evaluationResult.Status == MSBuildEvaluationResult.EvalStatus.NoRestore)
                 {

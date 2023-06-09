@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.Build
@@ -33,13 +34,12 @@ namespace Microsoft.DotNet.Tools.Build
 
             parseResult.ShowHelpOrErrorIfAppropriate();
 
-            CommonOptions.ValidateSelfContainedOptions(
-                parseResult.GetResult(BuildCommandParser.SelfContainedOption) is not null,
-                parseResult.GetResult(BuildCommandParser.NoSelfContainedOption) is not null);
+            CommonOptions.ValidateSelfContainedOptions(parseResult.HasOption(BuildCommandParser.SelfContainedOption),
+                parseResult.HasOption(BuildCommandParser.NoSelfContainedOption));
 
             msbuildArgs.Add($"-consoleloggerparameters:Summary");
 
-            if (parseResult.GetResult(BuildCommandParser.NoIncrementalOption) is not null)
+            if (parseResult.HasOption(BuildCommandParser.NoIncrementalOption))
             {
                 msbuildArgs.Add("-target:Rebuild");
             }
@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Tools.Build
 
             msbuildArgs.AddRange(arguments);
 
-            bool noRestore = parseResult.GetResult(BuildCommandParser.NoRestoreOption) is not null;
+            bool noRestore = parseResult.HasOption(BuildCommandParser.NoRestoreOption);
 
             BuildCommand command = new BuildCommand(
                 msbuildArgs,
