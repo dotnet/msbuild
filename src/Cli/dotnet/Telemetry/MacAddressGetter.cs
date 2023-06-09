@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Net.NetworkInformation;
 using System.ComponentModel;
 using Microsoft.DotNet.Cli.Utils;
+using System.IO;
 
 namespace Microsoft.DotNet.Cli.Telemetry
 {
@@ -64,9 +65,22 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         private static string GetIpCommandOutput()
         {
+            var fileName = "ip";
+            if (OperatingSystem.IsMacOS())
+            {
+                fileName = "/sbin/ip";
+            }
+            else
+            {
+                fileName = File.Exists(@"/usr/bin/ip") ? @"/usr/bin/ip" :
+                           File.Exists(@"/usr/sbin/ip") ? @"/usr/sbin/ip" :
+                           File.Exists(@"/sbin/ip") ? @"/sbin/ip" :
+                           "ip";
+            }
+
             var ipResult = new ProcessStartInfo
             {
-                FileName = OperatingSystem.IsMacOS() ? "/sbin/ip" : "/usr/sbin/ip",
+                FileName = fileName,
                 Arguments = "link",
                 UseShellExecute = false
             }.ExecuteAndCaptureOutput(out string ipStdOut, out string ipStdErr);
@@ -104,9 +118,22 @@ namespace Microsoft.DotNet.Cli.Telemetry
             {
                 try
                 {
+                    var fileName = "/sbin/ifconfig";
+                    if (OperatingSystem.IsMacOS())
+                    {
+
+                    }
+                    else
+                    {
+                        fileName = File.Exists(fileName) ? fileName :
+                                   File.Exists("/usr/sbin/ifconfig") ? "/usr/sbin/ifconfig" :
+                                   File.Exists("/usr/bin/ifconfig") ? "/usr/bin/ifconfig" :
+                                   "ifconfig";
+                    }
+
                     var ifconfigResult = new ProcessStartInfo
                     {
-                        FileName = OperatingSystem.IsMacOS() ? @"/sbin/ifconfig" : "/usr/sbin/ifconfig",
+                        FileName = fileName,
                         Arguments = "-a",
                         UseShellExecute = false
                     }.ExecuteAndCaptureOutput(out string ifconfigStdOut, out string ifconfigStdErr);

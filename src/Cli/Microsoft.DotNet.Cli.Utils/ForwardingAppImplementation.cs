@@ -13,8 +13,6 @@ namespace Microsoft.DotNet.Cli.Utils
     /// </summary>
     internal class ForwardingAppImplementation
     {
-        private const string HostExe = "dotnet";
-
         private readonly string _forwardApplicationPath;
         private readonly IEnumerable<string> _argsToForward;
         private readonly string _depsFile;
