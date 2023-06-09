@@ -126,7 +126,10 @@ namespace Microsoft.DotNet.Watcher
                 try
                 {
                     using var hotReload = new HotReload(_reporter);
-                    hotReload.Initialize(context, cancellationToken);
+
+                    // Solution must be initialized before we start watching for file changes to avoid race condition
+                    // when the solution captures state of the file after the changes has already been made.
+                    await hotReload.InitializeAsync(context, cancellationToken);
 
                     _reporter.Verbose($"Running {processSpec.ShortDisplayName()} with the following arguments: '{string.Join(" ", processSpec.Arguments)}'");
                     var processTask = _processRunner.RunAsync(processSpec, combinedCancellationSource.Token);

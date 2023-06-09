@@ -26,12 +26,18 @@ namespace Microsoft.DotNet.Watcher.Tests
             var dependencyDir = Path.Combine(testAsset, "Dependency");
 
             await App.StartWatcherAsync(projectDir);
+            await App.AssertOutputLineStartsWith("Hello!");
 
-            var fileToChange = Path.Combine(dependencyDir, "Foo.cs");
-            var programCs = File.ReadAllText(fileToChange);
-            File.WriteAllText(fileToChange, programCs);
+            var newSrc = """
+                public class Lib
+                {
+                    public static void Print()
+                        => System.Console.WriteLine("Changed!");
+                }
+                """;
 
-            await App.AssertRestarted();
+            File.WriteAllText(Path.Combine(dependencyDir, "Foo.cs"), newSrc);
+            await App.AssertOutputLineStartsWith("Changed!");
         }
     }
 }

@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.ExternalAccess.Watch.Api;
+using Microsoft.CodeAnalysis.Host;
+using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.Tools.Internal;
 
@@ -23,17 +25,25 @@ namespace Microsoft.DotNet.Watcher.Tools
     internal sealed class CompilationHandler : IDisposable
     {
         private readonly IReporter _reporter;
-        private Task<(Solution, WatchHotReloadService)>? _initializeTask;
+        private Task<WatchHotReloadService>? _sessionTask;
         private Solution? _currentSolution;
         private WatchHotReloadService? _hotReloadService;
         private DeltaApplier? _deltaApplier;
+        private MSBuildWorkspace? _workspace;
 
         public CompilationHandler(IReporter reporter)
         {
             _reporter = reporter;
         }
 
-        public void Initialize(DotNetWatchContext context, CancellationToken cancellationToken)
+        public void Dispose()
+        {
+            _hotReloadService?.EndSession();
+            _deltaApplier?.Dispose();
+            _workspace?.Dispose();
+        }
+
+        public async Task InitializeAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
             Debug.Assert(context.ProjectGraph is not null);
 
@@ -50,24 +60,65 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             _deltaApplier.Initialize(context, cancellationToken);
 
-            if (_currentSolution is not null)
+            if (_workspace is not null)
             {
-                _currentSolution.Workspace.Dispose();
-                _currentSolution = null;
+                _workspace.Dispose();
             }
 
-            _initializeTask = Task.Run(async () =>
+            _workspace = MSBuildWorkspace.Create();
+
+            _workspace.WorkspaceFailed += (_sender, diag) =>
             {
-                var (solution, service) = await CompilationWorkspaceProvider.CreateWorkspaceAsync(
-                    context.FileSet.Project.ProjectPath,
-                    _deltaApplier.GetApplyUpdateCapabilitiesAsync(context, cancellationToken),
-                    _reporter,
-                    cancellationToken);
+                // Errors reported here are not fatal, an exception would be thrown for fatal issues.
+                _reporter.Verbose($"MSBuildWorkspace warning: {diag.Diagnostic}");
+            };
 
-                return (solution, service);
-            }, cancellationToken);
+            var project = await _workspace.OpenProjectAsync(context.FileSet.Project.ProjectPath, cancellationToken: cancellationToken);
 
-            return;
+            _currentSolution = project.Solution;
+
+            _sessionTask = StartSessionAsync(
+                _workspace.Services,
+                project.Solution,
+                _deltaApplier.GetApplyUpdateCapabilitiesAsync(context, cancellationToken),
+                _reporter,
+                cancellationToken);
+
+            PrepareCompilationsAsync(project.Solution, cancellationToken);
+        }
+
+        private static void PrepareCompilationsAsync(Solution solution, CancellationToken cancellationToken)
+        {
+            // Warm up the compilation. This would help make the deltas for first edit appear much more quickly
+            foreach (var project in solution.Projects)
+            {
+                // fire and forget:
+                _ = project.GetCompilationAsync(cancellationToken);
+            }
+        }
+
+        private static async Task<WatchHotReloadService> StartSessionAsync(
+            HostWorkspaceServices services,
+            Solution initialSolution,
+            Task<ImmutableArray<string>> hotReloadCapabilitiesTask,
+            IReporter reporter,
+            CancellationToken cancellationToken)
+        {
+            ImmutableArray<string> hotReloadCapabilities;
+            try
+            {
+                hotReloadCapabilities = await hotReloadCapabilitiesTask;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Failed to read Hot Reload capabilities: " + ex.Message, ex);
+            }
+
+            reporter.Verbose($"Hot reload capabilities: {string.Join(" ", hotReloadCapabilities)}.", emoji: "🔥");
+
+            var hotReloadService = new WatchHotReloadService(services, hotReloadCapabilities);
+            await hotReloadService.StartSessionAsync(initialSolution, cancellationToken);
+            return hotReloadService;
         }
 
         public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem[] files, CancellationToken cancellationToken)
@@ -85,11 +136,12 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return false;
             }
 
-            if (!await EnsureSolutionInitializedAsync())
+            if (!await EnsureSessionStartedAsync())
             {
                 HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
                 return false;
             }
+
             Debug.Assert(_hotReloadService != null);
             Debug.Assert(_currentSolution != null);
             Debug.Assert(_deltaApplier != null);
@@ -239,21 +291,16 @@ namespace Microsoft.DotNet.Watcher.Tools
             return builder;
         }
 
-        private async ValueTask<bool> EnsureSolutionInitializedAsync()
+        private async ValueTask<bool> EnsureSessionStartedAsync()
         {
-            if (_currentSolution != null)
-            {
-                return true;
-            }
-
-            if (_initializeTask is null)
+            if (_sessionTask is null)
             {
                 return false;
             }
 
             try
             {
-                (_currentSolution, _hotReloadService) = await _initializeTask;
+                _hotReloadService = await _sessionTask;
                 return true;
             }
             catch (Exception ex)
@@ -303,20 +350,6 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             Debug.Fail("This shouldn't happen.");
             return null;
-        }
-
-        public void Dispose()
-        {
-            _hotReloadService?.EndSession();
-            if (_deltaApplier is not null)
-            {
-                _deltaApplier.Dispose();
-            }
-
-            if (_currentSolution is not null)
-            {
-                _currentSolution.Workspace.Dispose();
-            }
         }
     }
 }
