@@ -844,7 +844,7 @@ namespace Microsoft.Build.CommandLine
                                     question,
                                     inputResultsCaches,
                                     outputResultsCache,
-                                    saveProject: getProperty.Length > 0 || getItem.Length > 0,
+                                    saveProject: getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0,
                                     ref result,
                                     commandLine))
                         {
