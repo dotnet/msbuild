@@ -300,7 +300,7 @@
     <comment>{StrBegin="CONTAINER2021: "}</comment>
   </data>
   <data name="BaseEntrypointOverwritten" xml:space="preserve">
-    <value>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'Cmd'.</value>
+    <value>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</value>
     <comment>{StrBegin="CONTAINER2022: "}</comment>
   </data>
   <data name="EntrypointAndAppCommandArgsSetNoAppCommandInstruction" xml:space="preserve">
@@ -328,7 +328,7 @@
     <comment>{StrBegin="CONTAINER2028: "}</comment>
   </data>
   <data name="EntrypointArgsSetPreferAppCommandArgs" xml:space="preserve">
-    <value>CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerCmd for arguments that can be overridden when the container is created.</value>
+    <value>CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for arguments that can be overridden when the container is created.</value>
     <comment>{StrBegin="CONTAINER2029: "}</comment>
   </data>
   <data name="_Test" xml:space="preserve">

@@ -247,7 +247,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
     {
         string[] entrypoint = Entrypoint.Select(i => i.ItemSpec).ToArray();
         string[] entrypointArgs = EntrypointArgs.Select(i => i.ItemSpec).ToArray();
-        string[] cmd = Cmd.Select(i => i.ItemSpec).ToArray();
+        string[] cmd = DefaultArgs.Select(i => i.ItemSpec).ToArray();
         string[] appCommand = AppCommand.Select(i => i.ItemSpec).ToArray();
         string[] appCommandArgs = AppCommandArgs.Select(i => i.ItemSpec).ToArray();
         string appCommandInstruction = AppCommandInstruction;
@@ -279,7 +279,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
 
                     if (entrypointArgs.Length > 0)
                     {
-                        // Log warning: Instead of ContainerEntrypointArgs, use ContainerAppCommandArgs for arguments that must always be set, or ContainerCmd for default arguments that the user override when creating the container.
+                        // Log warning: Instead of ContainerEntrypointArgs, use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for default arguments that the user override when creating the container.
                         Log.LogWarningWithCodeFromResources(nameof(Strings.EntrypointArgsSetPreferAppCommandArgs));
                     }
 
@@ -287,8 +287,8 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 }
                 else
                 {
-                    // There's an Entrypoint. Use Cmd for the AppCommand.
-                    appCommandInstruction = KnownAppCommandInstructions.Cmd;
+                    // There's an Entrypoint. Use DefaultArgs for the AppCommand.
+                    appCommandInstruction = KnownAppCommandInstructions.DefaultArgs;
                 }
             }
             else
@@ -324,7 +324,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                     return (Array.Empty<string>(), Array.Empty<string>());
                 }
                 break;
-            case KnownAppCommandInstructions.Cmd:
+            case KnownAppCommandInstructions.DefaultArgs:
                 cmd = appCommand.Concat(appCommandArgs).Concat(cmd).ToArray();
                 break;
             case KnownAppCommandInstructions.Entrypoint:

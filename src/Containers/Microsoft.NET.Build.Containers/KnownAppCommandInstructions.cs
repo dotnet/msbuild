@@ -5,9 +5,9 @@ namespace Microsoft.NET.Build.Containers;
 
 internal static class KnownAppCommandInstructions
 {
-    public const string Cmd = nameof(Cmd);
+    public const string DefaultArgs = nameof(DefaultArgs);
     public const string Entrypoint = nameof(Entrypoint);
     public const string None = nameof(None);
 
-    public static readonly string[] SupportedAppCommandInstructions = new [] { Cmd, Entrypoint, None };
+    public static readonly string[] SupportedAppCommandInstructions = new [] { Entrypoint, DefaultArgs, None };
 }

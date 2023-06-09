@@ -90,7 +90,7 @@ partial class CreateNewImage
     /// <summary>
     /// Default arguments passed. These can be overridden by the user when the container is created.
     /// </summary>
-    public ITaskItem[] Cmd { get; set; }
+    public ITaskItem[] DefaultArgs { get; set; }
 
     /// <summary>
     /// The file name and arguments that launch the application. For example: ['dotnet', 'app.dll'].
@@ -103,7 +103,7 @@ partial class CreateNewImage
     public ITaskItem[] AppCommandArgs { get; set; }
 
     /// <summary>
-    /// The Dockerfile instruction used for AppCommand. Can be set to 'Cmd', 'Entrypoint', 'None', '' (default).
+    /// The Dockerfile instruction used for AppCommand. Can be set to 'DefaultArgs', 'Entrypoint', 'None', '' (default).
     /// </summary>
     public string AppCommandInstruction { get; set; }
 
@@ -166,7 +166,7 @@ partial class CreateNewImage
         WorkingDirectory = "";
         Entrypoint = Array.Empty<ITaskItem>();
         EntrypointArgs = Array.Empty<ITaskItem>();
-        Cmd = Array.Empty<ITaskItem>();
+        DefaultArgs = Array.Empty<ITaskItem>();
         AppCommand = Array.Empty<ITaskItem>();
         AppCommandArgs = Array.Empty<ITaskItem>();
         AppCommandInstruction = "";

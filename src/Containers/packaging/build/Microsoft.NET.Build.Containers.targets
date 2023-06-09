@@ -210,7 +210,7 @@
                     AppCommand="@(ContainerAppCommand)"
                     AppCommandArgs="@(ContainerAppCommandArgs)"
                     AppCommandInstruction="$(ContainerAppCommandInstruction)"
-                    Cmd="@(ContainerCmd)"
+                    DefaultArgs="@(ContainerDefaultArgs)"
                     Labels="@(ContainerLabel)"
                     ExposedPorts="@(ContainerPort)"
                     ContainerEnvironmentVariables="@(ContainerEnvironmentVariables)"

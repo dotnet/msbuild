@@ -41,8 +41,8 @@ Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Entrypoint.get -> Microsoft.
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Entrypoint.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.EntrypointArgs.get -> Microsoft.Build.Framework.ITaskItem![]!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.EntrypointArgs.set -> void
-Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Cmd.get -> Microsoft.Build.Framework.ITaskItem![]!
-Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Cmd.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.DefaultArgs.get -> Microsoft.Build.Framework.ITaskItem![]!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.DefaultArgs.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.AppCommand.get -> Microsoft.Build.Framework.ITaskItem![]!
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.AppCommand.set -> void
 Microsoft.NET.Build.Containers.Tasks.CreateNewImage.AppCommandArgs.get -> Microsoft.Build.Framework.ITaskItem![]!
