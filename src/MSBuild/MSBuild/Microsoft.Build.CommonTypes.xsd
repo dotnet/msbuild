@@ -1844,6 +1844,11 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="EnableDefaultItems" _locComment="" -->Defaults to true, and if set to false will disable all default item globs.</xs:documentation>
         </xs:annotation>
     </xs:element>
+    <xs:element name="IsAotCompatible" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="IsAotCompatible" _locComment="" -->Indicates whether a class library is compatible with native AOT. Setting to true will enable trimming, single file, and AOT analyzers.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="IsWebBootstrapper" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="JCPA" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="Keyword" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
