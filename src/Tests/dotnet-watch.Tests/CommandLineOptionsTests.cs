@@ -2,8 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
+using System.CommandLine.IO;
 using System.Linq;
+
 using Xunit;
 
 namespace Microsoft.DotNet.Watcher.Tools
@@ -11,6 +12,7 @@ namespace Microsoft.DotNet.Watcher.Tools
     public class CommandLineOptionsTests
     {
         private readonly MockReporter _testReporter = new();
+        private readonly TestConsole _console = new();
 
         [Theory]
         [InlineData(new object[] { new[] { "-h" } })]
@@ -19,12 +21,11 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData(new object[] { new[] { "--help", "--bogus" } })]
         public void HelpArgs(string[] args)
         {
-            StringWriter output = new();
-            Assert.Null(CommandLineOptions.Parse(args, _testReporter, out var errorCode, output: output));
+            Assert.Null(CommandLineOptions.Parse(args, _testReporter, out var errorCode, _console));
             Assert.Equal(0, errorCode);
 
             Assert.Empty(_testReporter.Messages);
-            Assert.Contains("Usage:", output.ToString());
+            Assert.Contains("Usage:", _console.Out.ToString());
         }
 
         [Theory]
@@ -34,12 +35,11 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData(" P\t = V ", "P", " V ")]
         public void BuildProperties_Valid(string argValue, string name, string value)
         {
-            StringWriter error = new();
             var args = new[] { "--property", argValue };
-            var options = CommandLineOptions.Parse(args, _testReporter, out var errorCode, error: error);
+            var options = CommandLineOptions.Parse(args, _testReporter, out var errorCode, _console);
             Assert.Equal(new[] { (name, value) }, options.BuildProperties);
             Assert.Equal(0, errorCode);
-            Assert.Equal("", error.ToString());
+            Assert.Equal("", _console.Error.ToString());
         }
 
         [Theory]
@@ -49,19 +49,17 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData("==")]
         public void BuildProperties_Invalid(string value)
         {
-            StringWriter error = new();
             var args = new[] { "--property", value };
-            CommandLineOptions.Parse(args, _testReporter, out var errorCode, error: error);
+            CommandLineOptions.Parse(args, _testReporter, out var errorCode, _console);
             Assert.Equal(1, errorCode);
-            Assert.Equal($"Invalid property format: '{value}'. Expected 'name=value'.", error.ToString().Trim());
+            Assert.Equal($"Invalid property format: '{value}'. Expected 'name=value'.", _console.Error.ToString().Trim());
         }
 
         [Fact]
         public void RunOptions_NoRun()
         {
-            StringWriter output = new();
             var args = new[] { "--verbose" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.True(options.Verbose);
             Assert.False(options.NoLaunchProfile);
@@ -78,15 +76,14 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.False(watchNoProfile);
             Assert.Null(watchProfileName);
 
-            Assert.Empty(output.ToString());
+            Assert.Empty(_console.Out.ToString());
         }
 
         [Fact]
         public void RunOptions_Run()
         {
-            StringWriter output = new();
             var args = new[] { "--verbose", "run" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.True(options.Verbose);
             Assert.False(options.NoLaunchProfile);
@@ -105,15 +102,14 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.False(watchNoProfile);
             Assert.Null(watchProfileName);
 
-            Assert.Empty(output.ToString());
+            Assert.Empty(_console.Out.ToString());
         }
 
         [Fact]
         public void RunOptions_LaunchProfile_Watch()
         {
-            StringWriter output = new();
             var args = new[] { "-lp", "P", "run" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.Equal("P", options.LaunchProfileName);
             Assert.Null(options.RunOptions.LaunchProfileName);
@@ -124,15 +120,14 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.Empty(options.GetLaunchProcessArguments(hotReload: true, _testReporter, out _, out watchProfileName));
             Assert.Equal("P", watchProfileName);
 
-            Assert.Empty(output.ToString());
+            Assert.Empty(_console.Out.ToString());
         }
 
         [Fact]
         public void RunOptions_LaunchProfile_Run()
         {
-            StringWriter output = new();
             var args = new[] { "run", "-lp", "P" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.Null(options.LaunchProfileName);
             Assert.Equal("P", options.RunOptions.LaunchProfileName);
@@ -143,15 +138,14 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.Empty(options.GetLaunchProcessArguments(hotReload: true, _testReporter, out _, out watchProfileName));
             Assert.Equal("P", watchProfileName);
 
-            Assert.Empty(output.ToString());
+            Assert.Empty(_console.Out.ToString());
         }
 
         [Fact]
         public void RunOptions_LaunchProfile_Both()
         {
-            StringWriter output = new();
             var args = new[] { "-lp", "P1", "run", "-lp", "P2" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.Equal("P1", options.LaunchProfileName);
             Assert.Equal("P2", options.RunOptions.LaunchProfileName);
@@ -163,15 +157,14 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.Equal("P1", watchProfileName);
 
             Assert.Equal(new[] { "warn ⌚ Using launch profile name 'P1', ignoring 'P2'." }, _testReporter.Messages);
-            Assert.Empty(output.ToString());
+            Assert.Empty(_console.Out.ToString());
         }
 
         [Fact]
         public void RunOptions_NoProfile_Watch()
         {
-            StringWriter output = new();
             var args = new[] { "--no-launch-profile", "run" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.True(options.NoLaunchProfile);
             Assert.False(options.RunOptions.NoLaunchProfile);
@@ -182,15 +175,14 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.Empty(options.GetLaunchProcessArguments(hotReload: true, _testReporter, out watchNoLaunchProfile, out _));
             Assert.True(watchNoLaunchProfile);
 
-            Assert.Empty(output.ToString());
+            Assert.Empty(_console.Out.ToString());
         }
 
         [Fact]
         public void RunOptions_NoProfile_Run()
         {
-            StringWriter output = new();
             var args = new[] { "run", "--no-launch-profile" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.False(options.NoLaunchProfile);
             Assert.True(options.RunOptions.NoLaunchProfile);
@@ -201,15 +193,14 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.Empty(options.GetLaunchProcessArguments(hotReload: true, _testReporter, out watchNoLaunchProfile, out _));
             Assert.True(watchNoLaunchProfile);
 
-            Assert.Empty(output.ToString());
+            Assert.Empty(_console.Out.ToString());
         }
 
         [Fact]
         public void RunOptions_NoProfile_Both()
         {
-            StringWriter output = new();
             var args = new[] { "--no-launch-profile", "run", "--no-launch-profile" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.True(options.NoLaunchProfile);
             Assert.True(options.RunOptions.NoLaunchProfile);
@@ -220,15 +211,14 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.Empty(options.GetLaunchProcessArguments(hotReload: true, _testReporter, out watchNoLaunchProfile, out _));
             Assert.True(watchNoLaunchProfile);
 
-            Assert.Empty(output.ToString());
+            Assert.Empty(_console.Out.ToString());
         }
 
         [Fact]
         public void RemainingOptions()
         {
-            StringWriter output = new();
             var args = new[] { "-watchArg", "--verbose", "run", "-runArg" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
             //dotnet watch -- --verbose run
             Assert.True(options.Verbose);
             Assert.Equal(new[] { "-watchArg" }, options.RemainingArguments);
@@ -237,15 +227,14 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.Equal(new[] { "run", "-watchArg", "-runArg" }, options.GetLaunchProcessArguments(hotReload: false, _testReporter, out _, out _));
             Assert.Equal(new[] { "-watchArg", "-runArg" }, options.GetLaunchProcessArguments(hotReload: true, _testReporter, out _, out _));
 
-            Assert.Empty(output.ToString());
+            Assert.Empty(_console.Out.ToString());
         }
 
         [Fact]
         public void RemainingOptionsDashDash()
         {
-            StringWriter output = new();
             var args = new[] { "-watchArg", "--", "--verbose", "run", "-runArg" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.False(options.Verbose);
             Assert.Equal(new[] { "-watchArg", "--verbose", "run", "-runArg" }, options.RemainingArguments);
@@ -254,15 +243,14 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.Equal(new[] { "run", "-watchArg", "--verbose", "run", "-runArg" }, options.GetLaunchProcessArguments(hotReload: false, _testReporter, out _, out _));
             Assert.Equal(new[] { "-watchArg", "--verbose", "run", "-runArg" }, options.GetLaunchProcessArguments(hotReload: true, _testReporter, out _, out _));
 
-            Assert.Empty(output.ToString());
+            Assert.Empty(_console.Out.ToString());
         }
 
         [Fact]
         public void RemainingOptionsDashDashRun()
         {
-            StringWriter output = new();
             var args = new[] { "--", "run" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.False(options.Verbose);
             Assert.Equal(new[] { "run" }, options.RemainingArguments);
@@ -271,18 +259,17 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.Equal(new[] { "run", "run" }, options.GetLaunchProcessArguments(hotReload: false, _testReporter, out _, out _));
             Assert.Equal(new[] { "run" }, options.GetLaunchProcessArguments(hotReload: true, _testReporter, out _, out _));
 
-            Assert.Empty(output.ToString());
+            Assert.Empty(_console.Out.ToString());
         }
 
         [Theory]
         [CombinatorialData]
         public void OptionsSpecifiedBeforeOrAfterRun(bool afterRun)
         {
-            StringWriter output = new();
             var args = new[] { "--project", "P", "--framework", "F", "--property", "P1=V1", "--property", "P2=V2" };
             args = afterRun ? args.Prepend("run").ToArray() : args.Append("run").ToArray();
 
-            var options = CommandLineOptions.Parse(args, _testReporter, out _, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.Equal("P", options.Project);
             Assert.Equal("F", options.TargetFramework);
@@ -291,7 +278,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.Equal(new[] { "run", "--framework", "F", "--property", "P1=V1", "--property", "P2=V2" }, options.GetLaunchProcessArguments(hotReload: false, _testReporter, out _, out _));
             Assert.Empty(options.GetLaunchProcessArguments(hotReload: true, _testReporter, out _, out _));
 
-            Assert.Empty(output.ToString());
+            Assert.Empty(_console.Out.ToString());
         }
 
         public enum ArgPosition
@@ -313,7 +300,6 @@ namespace Microsoft.DotNet.Watcher.Tools
                 "--non-interactive")]
             string arg)
         {
-            StringWriter output = new();
             var args = new[] { arg };
 
             args = position switch
@@ -324,7 +310,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 _ => args,
             };
 
-            var options = CommandLineOptions.Parse(args, _testReporter, out _, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.True(arg switch
             {
@@ -336,17 +322,16 @@ namespace Microsoft.DotNet.Watcher.Tools
                 _ => false
             });
 
-            Assert.Empty(output.ToString());
+            Assert.Empty(_console.Out.ToString());
         }
 
         [Theory]
         [InlineData("--property", "P1=V1", "P2=V2")]
         public void OptionDuplicates_Allowed_Strings(string argName, string argValue1, string argValue2)
         {
-            StringWriter output = new();
             var args = new[] { argName, argValue1, "run", argName, argValue2 };
 
-            var options = CommandLineOptions.Parse(args, _testReporter, out var errorCode, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out var errorCode, _console);
 
             Assert.Equal(new[] { argValue1, argValue2 }, argName switch
             {
@@ -355,7 +340,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             });
 
             Assert.Equal(0, errorCode);
-            Assert.Equal("", output.ToString());
+            Assert.Equal("", _console.Out.ToString());
         }
 
         [Theory]
@@ -363,14 +348,13 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData(new object[] { new[] { "--framework", "abc" } })]
         public void OptionDuplicates_NotAllowed(string[] args)
         {
-            StringWriter output = new();
             args = args.Concat(new[] { "run" }).Concat(args).ToArray();
 
-            var options = CommandLineOptions.Parse(args, _testReporter, out var errorCode, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out var errorCode, _console);
             Assert.Null(options);
             Assert.Equal(1, errorCode);
 
-            Assert.Equal("", output.ToString());
+            Assert.Equal("", _console.Out.ToString());
         }
 
         [Theory]
@@ -384,31 +368,29 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData(new[] { "-watcharg", "run", "--", "--", "runarg" }, new[] { "-watcharg" }, new[] { "--", "runarg" })]
         public void ParsesRemainingArgs(string[] args, string[] expectedWatch, string[] expectedRun)
         {
-            StringWriter output = new();
-            var options = CommandLineOptions.Parse(args, _testReporter, out _, output: output);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.NotNull(options);
 
             Assert.Equal(expectedWatch, options.RemainingArguments);
             Assert.Equal(expectedRun, options.RunOptions?.RemainingArguments ?? Array.Empty<string>());
-            Assert.Empty(output.ToString());
+            Assert.Empty(_console.Out.ToString());
         }
 
         [Fact]
         public void CannotHaveQuietAndVerbose()
         {
-            StringWriter error = new();
             var args = new[] { "--quiet", "--verbose" };
-            _ = CommandLineOptions.Parse(args, _testReporter, out _, error: error);
+            _ = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
-            Assert.Contains(Resources.Error_QuietAndVerboseSpecified, error.ToString());
+            Assert.Contains(Resources.Error_QuietAndVerboseSpecified, _console.Error.ToString());
         }
 
         [Fact]
         public void ShortFormForProjectArgumentPrintsWarning()
         {
             var args = new[] { "-p", "MyProject.csproj" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.Equal(new[] { $"warn ⌚ {Resources.Warning_ProjectAbbreviationDeprecated}" }, _testReporter.Messages);
             Assert.NotNull(options);
@@ -419,7 +401,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         public void LongFormForProjectArgumentWorks()
         {
             var args = new[] { "--project", "MyProject.csproj" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.Empty(_testReporter.Messages);
             Assert.NotNull(options);
@@ -430,7 +412,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         public void LongFormForLaunchProfileArgumentWorks()
         {
             var args = new[] { "--launch-profile", "CustomLaunchProfile" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.Empty(_testReporter.Messages);
             Assert.NotNull(options);
@@ -441,7 +423,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         public void ShortFormForLaunchProfileArgumentWorks()
         {
             var args = new[] { "-lp", "CustomLaunchProfile" };
-            var options = CommandLineOptions.Parse(args, _testReporter, out _);
+            var options = CommandLineOptions.Parse(args, _testReporter, out _, _console);
 
             Assert.Empty(_testReporter.Messages);
             Assert.NotNull(options);

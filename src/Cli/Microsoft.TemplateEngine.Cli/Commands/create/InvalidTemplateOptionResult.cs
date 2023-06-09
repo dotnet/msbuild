@@ -82,9 +82,14 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return this.Equals(other as object);
         }
 
-        internal static InvalidTemplateOptionResult FromParseError(TemplateOption option, ParseResult parseResult, ParseError error)
+        internal static new InvalidTemplateOptionResult FromParseResult(TemplateOption option, ParseResult parseResult)
         {
-            OptionResult? optionResult = parseResult.GetResult(option.Option);
+            if (!parseResult.HasErrorFor(option.Option))
+            {
+                throw new ArgumentException($"{nameof(option)} does not have an error in {nameof(parseResult)}");
+            }
+
+            OptionResult? optionResult = parseResult.FindResultFor(option.Option);
             if (optionResult == null)
             {
                 //option is not specified
@@ -97,12 +102,30 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 optionValue = string.Join(", ", optionResult.Tokens.Select(t => t.Value));
             }
 
+            string? errorMessage = null;
+            if (!string.IsNullOrWhiteSpace(optionResult.ErrorMessage))
+            {
+                errorMessage = optionResult.ErrorMessage;
+            }
+            else
+            {
+                foreach (var result in optionResult.Children)
+                {
+                    if (string.IsNullOrWhiteSpace(result.ErrorMessage))
+                    {
+                        continue;
+                    }
+                    errorMessage = result.ErrorMessage;
+                    break;
+                }
+            }
+
             return new InvalidTemplateOptionResult(
                     option,
                     Kind.InvalidValue,
-                    optionResult.IdentifierToken?.Value ?? string.Empty,
+                    optionResult.Token?.Value ?? string.Empty,
                     optionValue,
-                    error.Message);
+                    errorMessage);
         }
 
         /// <summary>

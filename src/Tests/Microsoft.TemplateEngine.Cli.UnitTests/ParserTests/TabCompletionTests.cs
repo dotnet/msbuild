@@ -3,6 +3,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Completions;
+using System.CommandLine.Parsing;
 using FakeItEasy;
 using Microsoft.NET.TestFramework;
 using Microsoft.TemplateEngine.Abstractions;
@@ -21,7 +22,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Instantiate_CanSuggestTemplateOption_StartsWith()
         {
             ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
-            CliCommand myCommand = NewCommandFactory.Create("new", _ => host);
+            Command myCommand = NewCommandFactory.Create("new", _ => host);
 
             ParseResult parseResult = myCommand.Parse($"new console --framework {ToolsetInfo.CurrentTargetFramework} --l");
             string[] suggestions = parseResult.GetCompletions().Select(l => l.Label).ToArray();
@@ -37,7 +38,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Instantiate_CanSuggestLanguages()
         {
             ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
-            CliCommand myCommand = NewCommandFactory.Create("new", _ => host);
+            Command myCommand = NewCommandFactory.Create("new", _ => host);
 
             ParseResult parseResult = myCommand.Parse("new console --language ");
             string[] suggestions = parseResult.GetCompletions().Select(l => l.Label).ToArray();
@@ -54,7 +55,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_GetSuggestionsAfterInteractive()
         {
             ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
-            CliCommand myCommand = NewCommandFactory.Create("new", _ => host);
+            Command myCommand = NewCommandFactory.Create("new", _ => host);
 
             ParseResult parseResult = myCommand.Parse("new install --interactive ");
             string[] result = parseResult.GetCompletions().Select(l => l.Label).ToArray();
@@ -67,7 +68,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_GetSuggestionsAfterOptionWithoutArg()
         {
             ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
-            CliCommand myCommand = NewCommandFactory.Create("new", _ => host);
+            Command myCommand = NewCommandFactory.Create("new", _ => host);
 
             ParseResult parseResult = myCommand.Parse("new install --nuget-source ");
             CompletionItem[] result = parseResult.GetCompletions().ToArray();
@@ -81,7 +82,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Install_GetSuggestionsAfterOptionWithArg()
         {
             ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
-            CliCommand myCommand = NewCommandFactory.Create("new", _ => host);
+            Command myCommand = NewCommandFactory.Create("new", _ => host);
 
             ParseResult parseResult = myCommand.Parse("new install --nuget-source me");
             string[] result = parseResult.GetCompletions().Select(l => l.Label).ToArray();
@@ -94,7 +95,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         public void Instantiate_CanSuggestTemplate_StartsWith()
         {
             ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
-            CliCommand myCommand = NewCommandFactory.Create("new", _ => host);
+            Command myCommand = NewCommandFactory.Create("new", _ => host);
 
             ParseResult parseResult = myCommand.Parse("new co");
             string[] suggestions = parseResult.GetCompletions().Select(l => l.Label).ToArray();

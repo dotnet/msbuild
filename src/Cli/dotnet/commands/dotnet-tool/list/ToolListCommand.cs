@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools.Tool.Common;
 
@@ -32,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Tool.List
                 LocalizableStrings.ListToolCommandInvalidGlobalAndLocalAndToolPath);
 
             if (_parseResult.GetValue(ToolListCommandParser.GlobalOption)
-                || _parseResult.GetResult(ToolListCommandParser.ToolPathOption) is not null)
+                || _parseResult.HasOption(ToolListCommandParser.ToolPathOption))
             {
                 return _toolListGlobalOrToolPathCommand.Execute();
             }

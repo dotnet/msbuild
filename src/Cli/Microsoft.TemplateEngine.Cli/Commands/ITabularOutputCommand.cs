@@ -7,9 +7,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal interface ITabularOutputCommand
     {
-        internal CliOption<bool> ColumnsAllOption { get; }
+        internal Option<bool> ColumnsAllOption { get; }
 
-        internal CliOption<string[]> ColumnsOption { get; }
+        internal Option<string[]> ColumnsOption { get; }
     }
 
     internal interface ITabularOutputArgs

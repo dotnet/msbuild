@@ -9,131 +9,129 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     public static class SharedOptionsFactory
     {
-        public static CliOption AsHidden(this CliOption o)
+        public static Option AsHidden(this Option o)
         {
-            o.Hidden = true;
+            o.IsHidden = true;
             return o;
         }
 
-        public static CliOption<T> AsHidden<T>(this CliOption<T> o)
+        public static Option<T> AsHidden<T>(this Option<T> o)
         {
-            o.Hidden = true;
+            o.IsHidden = true;
             return o;
         }
 
-        public static CliOption<T> WithDescription<T>(this CliOption<T> o, string description)
+        public static Option<T> WithDescription<T>(this Option<T> o, string description)
         {
             o.Description = description;
             return o;
         }
 
-        public static CliOption<T> DisableAllowMultipleArgumentsPerToken<T>(this CliOption<T> o)
+        public static Option<T> DisableAllowMultipleArgumentsPerToken<T>(this Option<T> o)
         {
             o.AllowMultipleArgumentsPerToken = false;
             return o;
         }
 
-        internal static CliOption<bool> CreateInteractiveOption()
+        internal static Option<bool> CreateInteractiveOption()
         {
-            return new CliOption<bool>("--interactive")
+            return new Option<bool>("--interactive")
             {
                 Arity = new ArgumentArity(0, 1),
                 Description = SymbolStrings.Option_Interactive
             };
         }
 
-        internal static CliOption<string[]> CreateAddSourceOption()
+        internal static Option<string[]> CreateAddSourceOption()
         {
-            return new("--add-source", "--nuget-source")
+            return new(new[] { "--add-source", "--nuget-source" })
             {
                 Arity = new ArgumentArity(1, 99),
                 Description = SymbolStrings.Option_AddSource,
                 AllowMultipleArgumentsPerToken = true,
-                HelpName = "nuget-source"
             };
         }
 
-        internal static CliOption<bool> CreateForceOption()
+        internal static Option<bool> CreateForceOption()
         {
-            return new("--force")
+            return new(new[] { "--force" })
             {
                 Arity = new ArgumentArity(0, 1),
                 Description = SymbolStrings.TemplateCommand_Option_Force,
             };
         }
 
-        internal static CliOption<string> CreateAuthorOption()
+        internal static Option<string> CreateAuthorOption()
         {
-            return new("--author")
+            return new(new[] { "--author" })
             {
                 Arity = new ArgumentArity(1, 1),
                 Description = SymbolStrings.Option_AuthorFilter
             };
         }
 
-        internal static CliOption<string> CreateBaselineOption()
+        internal static Option<string> CreateBaselineOption()
         {
-            return new("--baseline")
+            return new(new[] { "--baseline" })
             {
                 Arity = new ArgumentArity(1, 1),
                 Description = SymbolStrings.Option_BaselineFilter,
-                Hidden = true
+                IsHidden = true
             };
         }
 
-        internal static CliOption<string> CreateLanguageOption()
+        internal static Option<string> CreateLanguageOption()
         {
-            return new("--language", "-lang")
+            return new(new[] { "--language", "-lang" })
             {
                 Arity = new ArgumentArity(1, 1),
                 Description = SymbolStrings.Option_LanguageFilter
             };
         }
 
-        internal static CliOption<string> CreateTypeOption()
+        internal static Option<string> CreateTypeOption()
         {
-            return new("--type")
+            return new(new[] { "--type" })
             {
                 Arity = new ArgumentArity(1, 1),
                 Description = SymbolStrings.Option_TypeFilter
             };
         }
 
-        internal static CliOption<string> CreateTagOption()
+        internal static Option<string> CreateTagOption()
         {
-            return new("--tag")
+            return new(new[] { "--tag" })
             {
                 Arity = new ArgumentArity(1, 1),
                 Description = SymbolStrings.Option_TagFilter
             };
         }
 
-        internal static CliOption<string> CreatePackageOption()
+        internal static Option<string> CreatePackageOption()
         {
-            return new("--package")
+            return new(new[] { "--package" })
             {
                 Arity = new ArgumentArity(1, 1),
                 Description = SymbolStrings.Option_PackageFilter
             };
         }
 
-        internal static CliOption<bool> CreateColumnsAllOption()
+        internal static Option<bool> CreateColumnsAllOption()
         {
-            return new("--columns-all")
+            return new(new[] { "--columns-all" })
             {
                 Arity = new ArgumentArity(0, 1),
                 Description = SymbolStrings.Option_ColumnsAll
             };
         }
 
-        internal static CliOption<string[]> CreateColumnsOption()
+        internal static Option<string[]> CreateColumnsOption()
         {
-            CliOption<string[]> option = new("--columns")
+            Option<string[]> option = new(new[] { "--columns" }, ParseCommaSeparatedValues)
             {
                 Arity = new ArgumentArity(1, 4),
                 Description = SymbolStrings.Option_Columns,
                 AllowMultipleArgumentsPerToken = true,
-                CustomParser = ParseCommaSeparatedValues
             };
             option.AcceptOnlyFromAmong(
                 TabularOutputSettings.ColumnNames.Author,

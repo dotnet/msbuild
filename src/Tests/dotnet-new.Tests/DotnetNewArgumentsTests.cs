@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .Execute()
                 .Should()
                 .ExitWith(127)
-                .And.HaveStdErrContaining("Required argument missing for option: '-v'")
+                .And.HaveStdErrContaining("Required argument missing for option: -v")
                 .And.HaveStdOutContaining(dotnetNewHelpOutput.StdOut);
         }
     }

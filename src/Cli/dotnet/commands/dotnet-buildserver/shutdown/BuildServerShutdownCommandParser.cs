@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.BuildServer.Shutdown;
 using LocalizableStrings = Microsoft.DotNet.Tools.BuildServer.Shutdown.LocalizableStrings;
 
@@ -9,26 +11,26 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ServerShutdownCommandParser
     {
-        public static readonly CliOption<bool> MSBuildOption = new CliOption<bool>("--msbuild") { Description = LocalizableStrings.MSBuildOptionDescription };
-        public static readonly CliOption<bool> VbcsOption = new CliOption<bool>("--vbcscompiler") { Description = LocalizableStrings.VBCSCompilerOptionDescription };
-        public static readonly CliOption<bool> RazorOption = new CliOption<bool>("--razor") { Description = LocalizableStrings.RazorOptionDescription};
+        public static readonly Option<bool> MSBuildOption = new Option<bool>("--msbuild", LocalizableStrings.MSBuildOptionDescription);
+        public static readonly Option<bool> VbcsOption = new Option<bool>("--vbcscompiler", LocalizableStrings.VBCSCompilerOptionDescription);
+        public static readonly Option<bool> RazorOption = new Option<bool>("--razor", LocalizableStrings.RazorOptionDescription);
 
-        private static readonly CliCommand Command = ConstructCommand();
+        private static readonly Command Command = ConstructCommand();
 
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
-            CliCommand command = new ("shutdown", LocalizableStrings.CommandDescription);
+            var command = new Command("shutdown", LocalizableStrings.CommandDescription);
 
-            command.Options.Add(MSBuildOption);
-            command.Options.Add(VbcsOption);
-            command.Options.Add(RazorOption);
+            command.AddOption(MSBuildOption);
+            command.AddOption(VbcsOption);
+            command.AddOption(RazorOption);
 
-            command.SetAction((parseResult) => new BuildServerShutdownCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new BuildServerShutdownCommand(parseResult).Execute());
 
             return command;
         }

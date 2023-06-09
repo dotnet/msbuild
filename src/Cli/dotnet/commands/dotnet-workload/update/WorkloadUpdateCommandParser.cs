@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.DotNet.Workloads.Workload.Update;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Update.LocalizableStrings;
@@ -10,45 +12,39 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadUpdateCommandParser
     {
-        public static readonly CliOption<string> TempDirOption = WorkloadInstallCommandParser.TempDirOption;
+        public static readonly Option<string> TempDirOption = WorkloadInstallCommandParser.TempDirOption;
 
-        public static readonly CliOption<bool> FromPreviousSdkOption = new("--from-previous-sdk")
+        public static readonly Option<bool> FromPreviousSdkOption = new Option<bool>("--from-previous-sdk", LocalizableStrings.FromPreviousSdkOptionDescription);
+
+        public static readonly Option<bool> AdManifestOnlyOption = new Option<bool>("--advertising-manifests-only", LocalizableStrings.AdManifestOnlyOptionDescription);
+
+        public static readonly Option<bool> PrintRollbackOption = new Option<bool>("--print-rollback")
         {
-            Description = LocalizableStrings.FromPreviousSdkOptionDescription
+            IsHidden = true
         };
 
-        public static readonly CliOption<bool> AdManifestOnlyOption = new("--advertising-manifests-only")
-        {
-            Description = LocalizableStrings.AdManifestOnlyOptionDescription
-        };
+        private static readonly Command Command = ConstructCommand();
 
-        public static readonly CliOption<bool> PrintRollbackOption = new("--print-rollback")
-        {
-            Hidden = true
-        };
-
-        private static readonly CliCommand Command = ConstructCommand();
-
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
-            CliCommand command = new("update", LocalizableStrings.CommandDescription);
+            Command command = new("update", LocalizableStrings.CommandDescription);
 
             InstallingWorkloadCommandParser.AddWorkloadInstallCommandOptions(command);
 
-            command.Options.Add(TempDirOption);
-            command.Options.Add(FromPreviousSdkOption);
-            command.Options.Add(AdManifestOnlyOption);
+            command.AddOption(TempDirOption);
+            command.AddOption(FromPreviousSdkOption);
+            command.AddOption(AdManifestOnlyOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
-            command.Options.Add(CommonOptions.VerbosityOption);
-            command.Options.Add(PrintRollbackOption);
-            command.Options.Add(WorkloadInstallCommandParser.SkipSignCheckOption);
+            command.AddOption(CommonOptions.VerbosityOption);
+            command.AddOption(PrintRollbackOption);
+            command.AddOption(WorkloadInstallCommandParser.SkipSignCheckOption);
 
-            command.SetAction((parseResult) => new WorkloadUpdateCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new WorkloadUpdateCommand(parseResult).Execute());
 
             return command;
         }

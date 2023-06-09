@@ -3,7 +3,6 @@
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
 using Microsoft.TemplateEngine.Edge;
@@ -12,38 +11,47 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal static class Extensions
     {
-        internal static string? GetValueForOptionOrNull(this ParseResult parseResult, CliOption option)
+        internal static string? GetValueForOptionOrNull(this ParseResult parseResult, Option option)
         {
-            OptionResult? result = parseResult.GetResult(option);
+            OptionResult? result = parseResult.FindResultFor(option);
             if (result == null)
             {
                 return null;
             }
-            return result.GetValueOrDefault<object>()?.ToString();
+            return result.GetValueOrDefault()?.ToString();
         }
 
         /// <summary>
         /// Checks if <paramref name="parseResult"/> contains an error for <paramref name="option"/>.
         /// </summary>
-        internal static bool HasErrorFor(this ParseResult parseResult, CliOption option, [NotNullWhen(true)] out ParseError? error)
+        internal static bool HasErrorFor(this ParseResult parseResult, Option option)
         {
-            error = parseResult.Errors.FirstOrDefault(e => IsOptionResult(e.SymbolResult, option)
-                || IsOptionResult(e.SymbolResult?.Parent, option));
+            if (!parseResult.Errors.Any())
+            {
+                return false;
+            }
 
-            return error is not null;
+            if (parseResult.Errors.Any(e => e.SymbolResult?.Symbol == option))
+            {
+                return true;
+            }
 
-            static bool IsOptionResult(SymbolResult? symbolResult, CliOption option)
-                => symbolResult is OptionResult optionResult && optionResult.Option == option;
+            if (parseResult.Errors.Any(e => e.SymbolResult?.Parent?.Symbol == option))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
-        /// Case insensitive version for <see cref="System.CommandLine.CliOption{TOption}.AcceptOnlyFromAmong(string[])"/>.
+        /// Case insensitive version for <see cref="System.CommandLine.Option{TOption}.AcceptOnlyFromAmong(string[])"/>.
         /// </summary>
-        internal static void FromAmongCaseInsensitive(this CliOption<string> option, string[]? allowedValues = null, string? allowedHiddenValue = null)
+        internal static void FromAmongCaseInsensitive(this Option<string> option, string[]? allowedValues = null, string? allowedHiddenValue = null)
         {
             allowedValues ??= Array.Empty<string>();
-            option.Validators.Add(optionResult => ValidateAllowedValues(optionResult, allowedValues, allowedHiddenValue));
-            option.CompletionSources.Add(allowedValues);
+            option.AddValidator(optionResult => ValidateAllowedValues(optionResult, allowedValues, allowedHiddenValue));
+            option.AddCompletions(allowedValues);
         }
 
         /// <summary>
@@ -71,10 +79,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             var invalidArguments = optionResult.Tokens.Where(token => !allowedValues.Append(allowedHiddenValue).Contains(token.Value, StringComparer.OrdinalIgnoreCase)).ToList();
             if (invalidArguments.Any())
             {
-                optionResult.AddError(string.Format(
+                optionResult.ErrorMessage = string.Format(
                     LocalizableStrings.Commands_Validator_WrongArgumentValue,
                     string.Join(", ", invalidArguments.Select(arg => $"'{arg.Value}'")),
-                    string.Join(", ", allowedValues.Select(allowedValue => $"'{allowedValue}'"))));
+                    string.Join(", ", allowedValues.Select(allowedValue => $"'{allowedValue}'")));
             }
         }
     }

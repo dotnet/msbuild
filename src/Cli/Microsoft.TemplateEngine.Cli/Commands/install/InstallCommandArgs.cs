@@ -9,18 +9,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public InstallCommandArgs(BaseInstallCommand installCommand, ParseResult parseResult) : base(installCommand, parseResult)
         {
-            var nameResult = parseResult.GetResult(InstallCommand.NameArgument);
-            if (nameResult is null || nameResult.Errors.Any())
-            {
-                throw new ArgumentException($"{nameof(parseResult)} should contain at least one argument for {nameof(InstallCommand.NameArgument)}", nameof(parseResult));
-            }
-
-            TemplatePackages = parseResult.GetValue(InstallCommand.NameArgument)!;
+            TemplatePackages = parseResult.GetValue(InstallCommand.NameArgument)
+                ?? throw new ArgumentException($"{nameof(parseResult)} should contain at least one argument for {nameof(InstallCommand.NameArgument)}", nameof(parseResult));
 
             //workaround for --install source1 --install source2 case
-            if (installCommand is LegacyInstallCommand && (TemplatePackages.Contains(installCommand.Name) || installCommand.Aliases.Any(alias => TemplatePackages.Contains(alias))))
+            if (installCommand is LegacyInstallCommand && installCommand.Aliases.Any(alias => TemplatePackages.Contains(alias)))
             {
-                TemplatePackages = TemplatePackages.Where(package => installCommand.Name != package && !installCommand.Aliases.Contains(package)).ToList();
+                TemplatePackages = TemplatePackages.Where(package => !installCommand.Aliases.Contains(package)).ToList();
             }
 
             if (!TemplatePackages.Any())
