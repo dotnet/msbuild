@@ -121,6 +121,9 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] UnavailableRuntimePacks { get; set; }
 
+        [Output]
+        public string[] KnownRuntimeIdentifierPlatforms { get; set; }
+
         private Version _normalizedTargetFrameworkVersion;
 
         protected override void ExecuteCore()
@@ -162,6 +165,7 @@ namespace Microsoft.NET.Build.Tasks
             List<ITaskItem> runtimePacks = new List<ITaskItem>();
             List<ITaskItem> unavailableRuntimePacks = new List<ITaskItem>();
 
+            HashSet<string> knownRuntimeIdentifierPlatforms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             HashSet<string> unrecognizedRuntimeIdentifiers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             bool windowsOnlyErrorLogged = false;
@@ -201,6 +205,14 @@ namespace Microsoft.NET.Build.Tasks
                         {
                             string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimeIdentifier);
                             preferredPackages.Add(runtimePackName);
+                        }
+
+                        // Update the known runtime identifier platforms based on the selected Microsoft.NETCore.App pack
+                        if (selectedRuntimePack.Value.Name.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase))
+                        {
+                            int separator = runtimeIdentifier.LastIndexOf('-');
+                            string platform = separator < 0 ? runtimeIdentifier : runtimeIdentifier.Substring(0, separator);
+                            knownRuntimeIdentifierPlatforms.Add(platform);
                         }
                     }
                 }
@@ -436,6 +448,11 @@ namespace Microsoft.NET.Build.Tasks
             if (implicitPackageReferences.Any())
             {
                 ImplicitPackageReferences = implicitPackageReferences.ToArray();
+            }
+
+            if (knownRuntimeIdentifierPlatforms.Count > 0)
+            {
+                KnownRuntimeIdentifierPlatforms = knownRuntimeIdentifierPlatforms.ToArray();
             }
         }
 

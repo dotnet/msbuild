@@ -924,4 +924,8 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1204: Ahead-of-time compilation is not supported on the current platform '{0}'.</value>
     <comment>{StrBegin="NETSDK1204: "}</comment>
   </data>
+  <data name="NonPortableRuntimeIdentifierDetected" xml:space="preserve">
+    <value>NETSDK1205: Found version-specific or distribution-specific runtime identifier(s): {0}. Affected libraries: {1}. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details.</value>
+    <comment>{StrBegin="NETSDK1205: "}</comment>
+  </data>
 </root>
