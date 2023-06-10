@@ -24,6 +24,8 @@ Microsoft.NET.Build.Containers.PortType.udp = 1 -> Microsoft.NET.Build.Container
 Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag
 Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.ComputedBaseImageTag.get -> string?
 Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.ComputeDotnetBaseImageTag() -> void
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.ContainerFamily.get -> string!
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.ContainerFamily.set -> void
 Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.SdkVersion.get -> string!
 Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.SdkVersion.set -> void
 Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.TargetFrameworkVersion.get -> string!

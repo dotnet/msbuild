@@ -32,7 +32,8 @@
   <Target Name="_ComputeContainerBaseImageTag" Returns="$(_ContainerBaseImageTag)">
     <ComputeDotnetBaseImageTag
       SdkVersion="$(NetCoreSdkVersion)"
-      TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV).0">
+      TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV).0"
+      ContainerFamily="$(ContainerFamily)">
         <Output TaskParameter="ComputedBaseImageTag" PropertyName="_ContainerBaseImageTag" />
     </ComputeDotnetBaseImageTag>
   </Target>
