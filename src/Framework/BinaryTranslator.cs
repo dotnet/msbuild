@@ -22,6 +22,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal static class BinaryTranslator
     {
+#nullable enable
         /// <summary>
         /// Returns a read-only serializer.
         /// </summary>
@@ -30,6 +31,7 @@ namespace Microsoft.Build.BackEnd
         {
             return new BinaryReadTranslator(stream, buffer);
         }
+#nullable disable
 
         /// <summary>
         /// Returns a write-only serializer.
@@ -56,14 +58,16 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private BinaryReader _reader;
 
+#nullable enable
             /// <summary>
             /// Constructs a serializer from the specified stream, operating in the designated mode.
             /// </summary>
             public BinaryReadTranslator(Stream packetStream, SharedReadBuffer buffer)
             {
                 _packetStream = packetStream;
-                _reader = InterningBinaryReader.Create(packetStream, buffer);
+                _reader = buffer.Create(packetStream);
             }
+#nullable disable
 
             /// <summary>
             /// Delegates the Dispose call the to the underlying BinaryReader.

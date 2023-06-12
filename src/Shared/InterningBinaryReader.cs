@@ -6,11 +6,12 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
-using Microsoft.Build.Framework;
 
 #if !CLR2COMPATIBILITY
 using System.Buffers;
 #endif
+
+using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 
 using Microsoft.NET.StringTools;
 
@@ -122,7 +123,7 @@ namespace Microsoft.Build
                         // the actual error seems most likely to be occurring. 
                         if (n < 0)
                         {
-                            EscapeHatches.ThrowInternalError("From calculating based on the memorystream, about to read n = {0}. length = {1}, rawPosition = {2}, readLength = {3}, stringLength = {4}, currPos = {5}.", n, length, rawPosition, readLength, stringLength, currPos);
+                            ErrorUtilities.ThrowInternalError("From calculating based on the memorystream, about to read n = {0}. length = {1}, rawPosition = {2}, readLength = {3}, stringLength = {4}, currPos = {5}.", n, length, rawPosition, readLength, stringLength, currPos);
                         }
 
                         memoryStream.Seek(n, SeekOrigin.Current);
@@ -137,7 +138,7 @@ namespace Microsoft.Build
                         // See above explanation -- the OutOfRange exception may also be coming from our setting of n here ...
                         if (n < 0)
                         {
-                            EscapeHatches.ThrowInternalError("From getting the length out of BaseStream.Read directly, about to read n = {0}. readLength = {1}, stringLength = {2}, currPos = {3}", n, readLength, stringLength, currPos);
+                            ErrorUtilities.ThrowInternalError("From getting the length out of BaseStream.Read directly, about to read n = {0}. readLength = {1}, stringLength = {2}, currPos = {3}", n, readLength, stringLength, currPos);
                         }
                     }
 
@@ -196,6 +197,14 @@ namespace Microsoft.Build
         }
 
         /// <summary>
+        /// A placeholder instructing InterningBinaryReader to use pooled buffer (to avoid extra allocations).
+        /// </summary>
+        /// <remarks>
+        /// Lifetime of the pooled buffer is managed by InterningBinaryReader (tied to BinaryReader lifetime wrapping the buffer)
+        /// </remarks> 
+        internal static SharedReadBuffer PoolingBuffer => NullBuffer.Instance;
+
+        /// <summary>
         /// Gets a buffer from the pool or creates a new one.
         /// </summary>
         /// <returns>The <see cref="Buffer"/>. Should be returned to the pool after we're done with it.</returns>
@@ -231,7 +240,7 @@ namespace Microsoft.Build
         /// Create a BinaryReader. It will either be an interning reader or standard binary reader
         /// depending on whether the interning reader is possible given the buffer and stream.
         /// </summary>
-        internal static BinaryReader Create(Stream stream, SharedReadBuffer sharedBuffer)
+        private static BinaryReader Create(Stream stream, SharedReadBuffer sharedBuffer)
         {
             Buffer buffer = (Buffer)sharedBuffer;
             if (buffer != null)
@@ -279,13 +288,24 @@ namespace Microsoft.Build
                     return _byteBuffer;
                 }
             }
-        }
-    }
 
-    /// <summary>
-    /// Opaque holder of shared buffer.
-    /// </summary>
-    internal abstract class SharedReadBuffer
-    {
+            public override BinaryReader Create(Stream stream)
+            {
+                return InterningBinaryReader.Create(stream, this);
+            }
+        }
+
+        private class NullBuffer : SharedReadBuffer
+        {
+            private NullBuffer()
+            { }
+
+            public static readonly SharedReadBuffer Instance = new NullBuffer();
+
+            public override BinaryReader Create(Stream stream)
+            {
+                return InterningBinaryReader.Create(stream, null);
+            }
+        }
     }
 }

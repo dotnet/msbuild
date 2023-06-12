@@ -30,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Binary serialization by ITranslatable -->
+    <Compile Include="..\Shared\InterningBinaryReader.cs" />
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
   </ItemGroup>
   <ItemGroup>

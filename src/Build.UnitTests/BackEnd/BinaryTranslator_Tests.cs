@@ -37,7 +37,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializationMode()
         {
             MemoryStream stream = new MemoryStream();
-            using ITranslator readTranslator = BinaryTranslator.GetReadTranslator(stream, null);
+            using ITranslator readTranslator = BinaryTranslator.GetReadTranslator(stream, InterningBinaryReader.PoolingBuffer);
             Assert.Equal(TranslationDirection.ReadFromStream, readTranslator.Mode);
 
             using ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(stream);

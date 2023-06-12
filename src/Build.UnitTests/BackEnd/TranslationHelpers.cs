@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         internal static ITranslator GetReadTranslator()
         {
             s_serializationStream.Seek(0, SeekOrigin.Begin);
-            return BinaryTranslator.GetReadTranslator(s_serializationStream, null);
+            return BinaryTranslator.GetReadTranslator(s_serializationStream, InterningBinaryReader.PoolingBuffer);
         }
 
         /// <summary>
