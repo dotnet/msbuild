@@ -869,7 +869,7 @@ You may need to build the project on another operating system or architecture, o
   </data>
   <data name="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed" xml:space="preserve">
     <value>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</value>
-      <comment>{StrBegin="NETSDK1191: "}</comment>
+    <comment>{StrBegin="NETSDK1191: "}</comment>
   </data>
   <data name="Net7NotCompatibleWithDev173" xml:space="preserve">
     <value>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</value>
@@ -927,5 +927,9 @@ You may need to build the project on another operating system or architecture, o
   <data name="NonPortableRuntimeIdentifierDetected" xml:space="preserve">
     <value>NETSDK1205: Found version-specific or distribution-specific runtime identifier(s): {0}. Affected libraries: {1}. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details.</value>
     <comment>{StrBegin="NETSDK1205: "}</comment>
+  </data>
+  <data name="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework" xml:space="preserve">
+    <value>NETSDK1206: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</value>
+    <comment>{StrBegin="NETSDK1206: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</comment>
   </data>
 </root>
