@@ -6,9 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
-using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.BackEnd
+namespace Microsoft.Build.Framework.BuildException
 {
     internal static class BuildExceptionSerializationHelper
     {
@@ -27,10 +26,10 @@ namespace Microsoft.Build.BackEnd
 
         internal static void InitializeSerializationContract(params Type[] exceptionTypesAllowlist)
         {
-            InitializeSerializationContract((IEnumerable<Type>)exceptionTypesWhitelist);
+            InitializeSerializationContract((IEnumerable<Type>)exceptionTypesAllowlist);
         }
 
-        internal static void InitializeSerializationContract(IEnumerable<Type> exceptionTypesWhitelist)
+        internal static void InitializeSerializationContract(IEnumerable<Type> exceptionTypesAllowlist)
         {
             if (s_exceptionFactories != null)
             {
@@ -39,7 +38,7 @@ namespace Microsoft.Build.BackEnd
 
             var exceptionFactories = new Dictionary<string, Func<string, Exception?, BuildExceptionBase>>();
 
-            foreach (Type exceptionType in exceptionTypesWhitelist)
+            foreach (Type exceptionType in exceptionTypesAllowlist)
             {
                 if (!IsSupportedExceptionType(exceptionType))
                 {

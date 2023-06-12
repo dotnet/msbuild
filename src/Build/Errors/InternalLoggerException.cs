@@ -3,13 +3,13 @@
 
 using System;
 using System.Runtime.Serialization;
-using Microsoft.Build.BackEnd;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.BuildException;
 using System.Collections.Generic;
 
 #nullable disable

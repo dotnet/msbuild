@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Build.BackEnd;
+namespace Microsoft.Build.Framework.BuildException;
 
 /// <summary>
 /// A catch-all type for remote exceptions that we don't know how to deserialize.

@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Build.BackEnd;
+namespace Microsoft.Build.Framework.BuildException;
 
 /// <summary>
 /// Remote exception internal data serving as the source for the exception deserialization.

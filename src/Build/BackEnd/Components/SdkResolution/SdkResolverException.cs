@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.BuildException;
 using Microsoft.Build.Shared;
 
 #nullable disable

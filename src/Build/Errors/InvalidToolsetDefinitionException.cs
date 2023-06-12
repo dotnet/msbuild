@@ -1,11 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-
+using Microsoft.Build.Framework.BuildException;
 using Microsoft.Build.Shared;
+using System;
 using System.Runtime.Serialization;
-using Microsoft.Build.BackEnd;
 using System.Collections.Generic;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;

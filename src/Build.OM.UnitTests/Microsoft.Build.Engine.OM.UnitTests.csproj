@@ -16,7 +16,7 @@
 
   <PropertyGroup>
     <!-- Managed manually since PackageDownload is not supported by dependabot https://github.com/dependabot/dependabot-core/issues/2920 -->
-    <NuGetCommandLinePackageVersion>6.5.0</NuGetCommandLinePackageVersion>
+    <NuGetCommandLinePackageVersion>4.9.6</NuGetCommandLinePackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

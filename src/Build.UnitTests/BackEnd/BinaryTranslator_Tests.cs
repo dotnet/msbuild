@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.BuildException;
 using Shouldly;
 using Xunit;
 

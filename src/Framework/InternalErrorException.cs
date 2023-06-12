@@ -4,7 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
-using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework.BuildException;
 
 #nullable disable
 

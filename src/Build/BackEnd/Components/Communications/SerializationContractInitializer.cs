@@ -6,6 +6,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.BuildException;
 using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.BackEnd
