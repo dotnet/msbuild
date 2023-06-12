@@ -58,6 +58,11 @@ namespace Microsoft.Build.Tasks
         private Func<ResolveAssemblyReferenceCache> _loadDiskCacheCallback;
 
         /// <summary>
+        /// True if we've already loaded (or attempted to load) the disk cache.
+        /// </summary>
+        internal bool IsDiskCacheLoaded => _loadDiskCacheCallback == null;
+
+        /// <summary>
         /// XML tables of installed assemblies.
         /// </summary>
         private RedistList redistList;
@@ -188,6 +193,17 @@ namespace Microsoft.Build.Tasks
             return GetRuntimeVersion;
         }
 
+        /// <summary>
+        /// Sets <see cref="ResolveAssemblyReferenceCache.IsDirty"/> flag to true if we have loaded (or attempted to load) the disk casche.
+        /// </summary>
+        private void SetIsDirty()
+        {
+            if (IsDiskCacheLoaded)
+            {
+                isDirty = true;
+            }
+        }
+
         private FileState GetFileState(string path)
         {
             // Looking up an assembly to get its metadata can be expensive for projects that reference large amounts
@@ -218,7 +234,7 @@ namespace Microsoft.Build.Tasks
             bool isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
             bool isProcessFileStateUpToDate = isCachedInProcess && lastModified == cachedProcessFileState.LastModified;
 
-            if (!isProcessFileStateUpToDate && !isInstanceFileStateUpToDate)
+            if (!isProcessFileStateUpToDate && !isInstanceFileStateUpToDate && lastModified != FileState.ImmutableFileLastModifiedMarker)
             {
                 // If we haven't loaded the disk cache yet, do it now.
                 if (EnsureResolveAssemblyReferenceCacheLoaded())
@@ -235,7 +251,7 @@ namespace Microsoft.Build.Tasks
                 if (!isInstanceFileStateUpToDate && cachedProcessFileState.IsWorthPersisting)
                 {
                     instanceLocalFileStateCache[path] = cachedProcessFileState;
-                    isDirty = true;
+                    SetIsDirty();
                 }
                 return cachedProcessFileState;
             }
@@ -267,7 +283,7 @@ namespace Microsoft.Build.Tasks
             if (fileState.IsWorthPersisting)
             {
                 instanceLocalFileStateCache[path] = fileState;
-                isDirty = true;
+                SetIsDirty();
             }
 
             s_processWideFileStateCache[path] = fileState;
@@ -281,9 +297,9 @@ namespace Microsoft.Build.Tasks
         /// <returns>
         /// True if this method loaded the cache, false otherwise.
         /// </returns>
-        private bool EnsureResolveAssemblyReferenceCacheLoaded()
+        internal bool EnsureResolveAssemblyReferenceCacheLoaded()
         {
-            if (_loadDiskCacheCallback == null)
+            if (IsDiskCacheLoaded)
             {
                 // We've already loaded (or attempted to load) the disk cache, nothing to do.
                 return false;
@@ -347,7 +363,7 @@ namespace Microsoft.Build.Tasks
                 }
                 if (fileState.IsWorthPersisting)
                 {
-                    isDirty = true;
+                    SetIsDirty();
                 }
             }
 
@@ -371,7 +387,7 @@ namespace Microsoft.Build.Tasks
                 fileState.RuntimeVersion = getAssemblyRuntimeVersion(path);
                 if (fileState.IsWorthPersisting)
                 {
-                    isDirty = true;
+                    SetIsDirty();
                 }
             }
 
@@ -406,7 +422,7 @@ namespace Microsoft.Build.Tasks
 
                 if (fileState.IsWorthPersisting)
                 {
-                    isDirty = true;
+                    SetIsDirty();
                 }
             }
 

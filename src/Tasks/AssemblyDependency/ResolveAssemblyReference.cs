@@ -2058,19 +2058,52 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void WriteStateFile()
         {
-            if (!String.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
+            if (!string.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
             {
                 _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log);
             }
-            else if (!String.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
+            else if (!string.IsNullOrEmpty(_stateFile))
             {
-                if (FailIfNotIncremental)
+                if (!_cache.IsInstanceLocalCacheEmpty && !_cache.IsDiskCacheLoaded && !_cache.IsDirty)
                 {
-                    Log.LogErrorFromResources("ResolveAssemblyReference.WritingCacheFile", _stateFile);
-                    return;
+                    // At least one cache entry was used during this RAR task execution (!IsInstanceLocalCacheEmpty), it was not loaded
+                    // from the cache file, meaning that everything came from the process-wide cache (!IsDiskCacheLoaded), and everything
+                    // was up-to-date, no cache updates needed (!IsDirty). This is the expected happy path when building incrementally and
+                    // having the ability to keep state in memory between executions, i.e. when we're in a long-running process.
+                    //
+                    // We have a couple of options in this case with respect to serializing the cache to disk.
+                    //
+                    // 1. We can skip serialization.
+                    // This is safe to do, obviously the fastest option too, but it would leave the cache file in an unknown state. Maybe
+                    // next time the user is going to build some other combination of projects or in a different order and we would actually
+                    // benefit from having the entries relevant for this project loaded from the disk cache.
+                    //
+                    // 2. We can serialize the cache if we can't prove that it's up to date.
+                    // This produces a cache with correct and deterministic contents. It may, however, result in an unneeded file system
+                    // write if the file does in fact contain up-to-date data and we just failed to prove it given the information we have.
+                    //
+                    // 3. We can deserialize the existing cache file if we can't prove it's up to date. Then serialize it if it needs a write.
+                    // This is the best option because, like 2., it produces a cache with correct and deterministic contents. Additionally,
+                    // it performs a write only if the file really needs updating. There may be cases where the file has to be read and then
+                    // written (just like before this cache optimization was introduced), but those will be rare. The expected case is that
+                    // we've lost our in-memory timestamps (long-running process has been restarted) so we're not sure if the file is stale
+                    // or not, we read it, see that it's *not* stale, and we're done.
+
+                    // TODO: Implement timestamp-based check for up-to-date cache file.
+
+                    _cache.EnsureResolveAssemblyReferenceCacheLoaded();
                 }
 
-                _cache.SerializeCache(_stateFile, Log);
+                if (_cache.IsDirty)
+                {
+                    if (FailIfNotIncremental)
+                    {
+                        Log.LogErrorFromResources("ResolveAssemblyReference.WritingCacheFile", _stateFile);
+                        return;
+                    }
+
+                    _cache.SerializeCache(_stateFile, Log);
+                }
             }
         }
         #endregion

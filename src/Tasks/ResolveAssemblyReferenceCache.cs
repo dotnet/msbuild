@@ -42,9 +42,14 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// True if we this cache is empty.
+        /// </summary>
+        internal bool IsInstanceLocalCacheEmpty => instanceLocalFileStateCache.Count == 0;
+
+        /// <summary>
         /// Class that holds the current file state.
         /// </summary>
-        internal record class FileState : ITranslatable
+        internal sealed class FileState : ITranslatable, IEquatable<FileState>
         {
             /// <summary>
             /// The last modified time for this file.
@@ -107,6 +112,17 @@ namespace Microsoft.Build.Tasks
                 translator.Translate(ref scatterFiles);
                 translator.Translate(ref runtimeVersion);
                 translator.Translate(ref frameworkName);
+            }
+
+            public bool Equals(FileState other)
+            {
+                return
+                    lastModified == other.LastModified &&
+                    assemblyName.Equals(other.assemblyName) &&
+                    Enumerable.SequenceEqual(dependencies, other.dependencies) &&
+                    Enumerable.SequenceEqual(scatterFiles, other.scatterFiles) &&
+                    frameworkName.Equals(other.frameworkName) &&
+                    runtimeVersion == other.runtimeVersion;
             }
 
             /// <summary>
