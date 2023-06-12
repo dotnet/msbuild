@@ -524,18 +524,37 @@ namespace Microsoft.Build.Graph.UnitTests
 
             var graphFromSolutionEdges = graphFromSolution.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
 
-            // Solutions add the CurrentSolutionConfigurationContents global property for platform resolution
-            foreach ((ConfigurationMetadata, ConfigurationMetadata) graphFromSolutionEdge in graphFromSolutionEdges.Keys)
+            // These are global properties added by GraphBuilder when building a solution
+            HashSet<string> propertiesToIgnore = new(StringComparer.OrdinalIgnoreCase)
             {
-                graphFromSolutionEdge.Item1.GlobalProperties.ShouldContainKey("CurrentSolutionConfigurationContents");
-                graphFromSolutionEdge.Item2.GlobalProperties.ShouldContainKey("CurrentSolutionConfigurationContents");
+                "CurrentSolutionConfigurationContents",
+                "BuildingSolutionFile",
+                "SolutionDir",
+                "SolutionExt",
+                "SolutionFileName",
+                "SolutionName",
+                SolutionProjectGenerator.SolutionPathPropertyName
+            };
+
+            // Solutions add these global properties
+            foreach (string propertyToIgnore in propertiesToIgnore)
+            {
+                foreach ((ConfigurationMetadata, ConfigurationMetadata) graphFromSolutionEdge in graphFromSolutionEdges.Keys)
+                {
+                    graphFromSolutionEdge.Item1.GlobalProperties.ShouldContainKey(propertyToIgnore);
+                    graphFromSolutionEdge.Item2.GlobalProperties.ShouldContainKey(propertyToIgnore);
+                }
             }
 
-            // Remove CurrentSolutionConfigurationContents for comparison purposes. This is done as a separate pass since some edges may be sharing an instance.
-            foreach ((ConfigurationMetadata, ConfigurationMetadata) graphFromSolutionEdge in graphFromSolutionEdges.Keys)
+            // Remove some properties for comparison purposes as we are comparing a graph created with and without a solution.
+            // This is done as a separate pass since some edges may be sharing an instance.
+            foreach (string propertyToIgnore in propertiesToIgnore)
             {
-                graphFromSolutionEdge.Item1.GlobalProperties.Remove("CurrentSolutionConfigurationContents");
-                graphFromSolutionEdge.Item2.GlobalProperties.Remove("CurrentSolutionConfigurationContents");
+                foreach ((ConfigurationMetadata, ConfigurationMetadata) graphFromSolutionEdge in graphFromSolutionEdges.Keys)
+                {
+                    graphFromSolutionEdge.Item1.GlobalProperties.Remove(propertyToIgnore);
+                    graphFromSolutionEdge.Item2.GlobalProperties.Remove(propertyToIgnore);
+                }
             }
 
             // Original edges get preserved.
