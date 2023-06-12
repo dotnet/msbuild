@@ -381,6 +381,21 @@
       <Sha>27e584661980ee6d82c419a2a471ae505b7d122e</Sha>
       <SourceBuild RepoName="symreader" ManagedOnly="true" />
     </Dependency>
+    <!-- Dependency required for flowing correct package version in source-build, using PVP flow. -->
+    <Dependency Name="Microsoft.Extensions.Logging.Console" Version="6.0.0">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>4822e3c3aa77eb82b2fb33c9321f923cf11ddde6</Sha>
+    </Dependency>
+    <!-- Dependency required for flowing correct package version in source-build, using PVP flow. -->
+    <Dependency Name="Microsoft.Extensions.FileSystemGlobbing" Version="6.0.0">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>4822e3c3aa77eb82b2fb33c9321f923cf11ddde6</Sha>
+    </Dependency>
+    <!-- Dependency required for flowing correct package version in source-build, using PVP flow. -->
+    <Dependency Name="System.ServiceProcess.ServiceController" Version="7.0.0">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="8.0.0-beta.23309.8">
