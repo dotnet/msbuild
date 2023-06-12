@@ -77,8 +77,8 @@
       <!-- An empty ContainerRegistry implies pushing to the local registry, putting this here for documentation purposes -->
       <!-- <ContainerRegistry></ContainerRegistry> -->
 
-      <!-- Set which local container registry to use. We only explicitly support Docker (or things that mimic Docker APIs and binary names) at the moment. -->
-      <LocalRegistry Condition="'$(LocalRegistry)' == ''">Docker</LocalRegistry>
+      <!-- An empty LocalRegistry implies detecting the local registry. LocalRegistry can be set explicity to Docker/Podman. -->
+      <!-- <LocalRegistry></LocalRegistry> -->
 
       <!-- Compatibility: previous versions used ImageName, but the proper term is Repository. Keep using that if explicitly set. -->
       <ContainerRepository Condition="'$(ContainerImageName)' != ''">$(ContainerImageName)</ContainerRepository>

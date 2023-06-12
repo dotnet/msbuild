@@ -91,7 +91,7 @@ public static class ContainerBuilder
         {
             if (isLocalPush)
             {
-                ILocalRegistry containerRegistry = GetLocalRegistry(localRegistry, Console.WriteLine);
+                ILocalRegistry containerRegistry = KnownLocalRegistryTypes.CreateLocalRegistry(localRegistry, Console.WriteLine);
                 if (!(await containerRegistry.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
                 {
                     Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.LocalRegistryNotAvailable)));
@@ -132,15 +132,5 @@ public static class ContainerBuilder
             }
         }
         return 0;
-    }
-
-    private static ILocalRegistry GetLocalRegistry(string localRegistryType, Action<string> logger)
-    {
-        ILocalRegistry registry = localRegistryType switch
-        {
-            KnownLocalRegistryTypes.Docker => new DockerCli(logger),
-            _ => throw new ArgumentException(Resource.FormatString(nameof(Strings.UnknownLocalRegistryType), localRegistryType, String.Join(",", KnownLocalRegistryTypes.SupportedLocalRegistryTypes)), nameof(localRegistryType))
-        };
-        return registry;
     }
 }

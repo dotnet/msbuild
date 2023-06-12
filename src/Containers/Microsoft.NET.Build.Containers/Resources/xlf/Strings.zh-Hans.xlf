@@ -58,9 +58,9 @@
         <note>{StrBegin="CONTAINER3002: "}</note>
       </trans-unit>
       <trans-unit id="DockerProcessCreationFailed">
-        <source>CONTAINER3001: Failed creating docker process.</source>
-        <target state="translated">CONTAINER3001: 创建 docker 进程失败。</target>
-        <note>{StrBegin="CONTAINER3001: "}</note>
+        <source>CONTAINER3001: Failed creating {0} process.</source>
+        <target state="new">CONTAINER3001: Failed creating {0} process.</target>
+        <note>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or 'podman'.</note>
       </trans-unit>
       <trans-unit id="EmptyOrWhitespacePropertyIgnored">
         <source>CONTAINER4006: Property '{0}' is empty or contains whitespace and will be ignored.</source>
