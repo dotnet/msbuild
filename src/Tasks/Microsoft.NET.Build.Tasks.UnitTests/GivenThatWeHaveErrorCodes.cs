@@ -38,6 +38,13 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             1101,
             1108,
             1180,
+            1196,
+            1197,
+            1199,
+            1200,
+            1201,
+            1203,
+            1204
         };
 
         [Fact]
@@ -98,7 +105,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 else
                 {
                     comment.Should().StartWith($@"{{StrBegin=""{prefix} ""}}",
-                        because: "localization instructions should indicate invariant error code as preceding translatable message.");
+                        because: $"localization instructions should indicate invariant error code as preceding translatable message.");
                 }
             }
         }

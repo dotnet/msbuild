@@ -331,8 +331,9 @@
     <value>NETSDK1056: Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</value>
     <comment>{StrBegin="NETSDK1056: "}</comment>
   </data>
-  <data name="UsingPreviewSdk_Info" xml:space="preserve">
+  <data name="UsingPreviewSdk" xml:space="preserve">
     <value>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</value>
+    <comment>{StrBegin="NETSDK1057: "}</comment>
   </data>
   <data name="InvalidItemSpecToUse" xml:space="preserve">
     <value>NETSDK1058: Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</value>
@@ -510,10 +511,10 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1100: To build a project targeting Windows on this operating system, set the EnableWindowsTargeting property to true.</value>
     <comment>{StrBegin="NETSDK1100: "}</comment>
   </data>
-  <data name="ILLinkRunning" xml:space="preserve">
+  <data name="ILLinkRunning_Info" xml:space="preserve">
     <value>Optimizing assemblies for size. This process might take a while.</value>
   </data>
-  <data name="ILLinkOptimizedAssemblies" xml:space="preserve">
+  <data name="ILLinkOptimizedAssemblies_Info" xml:space="preserve">
     <value>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</value>
   </data>
   <data name="ILLinkNotSupportedError" xml:space="preserve">
@@ -857,11 +858,11 @@ You may need to build the project on another operating system or architecture, o
   </data>
   <data name="PackageContainsIncorrectlyCasedLocale" xml:space="preserve">
     <value>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</value>
-    <comment>Error code is NETSDK1187. 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</comment>
+    <comment>{StrBegin="NETSDK1187: "} 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</comment>
   </data>
   <data name="PackageContainsUnknownLocale" xml:space="preserve">
     <value>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</value>
-    <comment>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</comment>
+    <comment>{StrBegin="NETSDK1188: "} 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</comment>
   </data>
   <data name="Prefer32BitIgnoredForNetCoreApp" xml:space="preserve">
     <value>NETSDK1189: Prefer32Bit is not supported and has no effect for netcoreapp target.</value>

@@ -469,12 +469,12 @@
         <target state="translated">NETSDK1102: アセンブリのサイズの最適化は、選択された公開構成に対してはサポートされていません。自己完結型のアプリを公開していることをご確認ください。</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
-      <trans-unit id="ILLinkOptimizedAssemblies">
+      <trans-unit id="ILLinkOptimizedAssemblies_Info">
         <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
         <target state="translated">アセンブリのサイズを最適化すると、アプリの動作が変わる可能性があります。公開した後に必ずテストしてください。https://aka.ms/dotnet-illink を参照してください</target>
         <note />
       </trans-unit>
-      <trans-unit id="ILLinkRunning">
+      <trans-unit id="ILLinkRunning_Info">
         <source>Optimizing assemblies for size. This process might take a while.</source>
         <target state="translated">アセンブリのサイズを最適化しています。このプロセスには時間がかかる場合があります。</target>
         <note />
@@ -682,13 +682,13 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageContainsIncorrectlyCasedLocale">
         <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
-        <target state="translated">NETSDK1187: パッケージ {0} {1} にロケール '{2}' のリソースがあります。大文字と小文字の区別に関する問題を防ぐために、このロケールはビルド内では標準形式 '{3}' に正規化されています。大文字と小文字の区別に関する問題があることをパッケージの作成者に通知するようお勧めします。</target>
-        <note>Error code is NETSDK1187. 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
+        <target state="needs-review-translation">NETSDK1187: パッケージ {0} {1} にロケール '{2}' のリソースがあります。大文字と小文字の区別に関する問題を防ぐために、このロケールはビルド内では標準形式 '{3}' に正規化されています。大文字と小文字の区別に関する問題があることをパッケージの作成者に通知するようお勧めします。</target>
+        <note>{StrBegin="NETSDK1187: "} 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
       </trans-unit>
       <trans-unit id="PackageContainsUnknownLocale">
         <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
-        <target state="translated">NETSDK1188: パッケージ {0} {1} にロケール '{2}' のリソースがあります。このロケールは .NET では認識されません。無効なロケールを使用していると思われることをパッケージ作成者に通知するようお勧めします。</target>
-        <note>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
+        <target state="needs-review-translation">NETSDK1188: パッケージ {0} {1} にロケール '{2}' のリソースがあります。このロケールは .NET では認識されません。無効なロケールを使用していると思われることをパッケージ作成者に通知するようお勧めします。</target>
+        <note>{StrBegin="NETSDK1188: "} 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
@@ -935,10 +935,10 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1107: Windows デスクトップ アプリケーションを作成するには、Microsoft.NET.Sdk.WindowsDesktop が必要です。現在の SDK では、'UseWpf' と 'UseWindowsForms' はサポートされていません。</target>
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
-      <trans-unit id="UsingPreviewSdk_Info">
+      <trans-unit id="UsingPreviewSdk">
         <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
-        <target state="translated">NETSDK1057: プレビュー版の .NET を使用しています。https://aka.ms/dotnet-support-policy をご覧ください</target>
-        <note />
+        <target state="new">NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</target>
+        <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">
         <source>NETSDK1131: Producing a managed Windows Metadata component with WinMDExp is not supported when targeting {0}.</source>
