@@ -1120,13 +1120,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
 
         /// <summary>
-        /// Filter by metadata presence
+        /// Filter items by WithoutMetadataValue function
         /// </summary>
         [Fact]
         public void WithoutMetadataValue()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess("""
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
+                <Project>
                     <ItemGroup>
                             <_Item Include="One">
                                 <A>true</A>
@@ -1141,8 +1141,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 <B></B>
                             </_Item>
                     </ItemGroup>
-                    <Target Name=""AfterBuild"">
-                        <Message Text=""[@(_Item->WithoutMetadataValue('a'), 'true')]""/>
+                    <Target Name="AfterBuild">
+                        <Message Text="[@(_Item->WithoutMetadataValue('a', 'true'),'|')]"/>
                     </Target>
                 </Project>
                 """);
