@@ -29,7 +29,7 @@ public abstract class BuildExceptionBase : Exception
         : base(message, inner)
     { }
 
-    // This is needed as soon as we allow opt out of the non-BinaryFormatter serialization
+    // This is needed to allow opting back in to BinaryFormatter serialization
     private protected BuildExceptionBase(SerializationInfo info, StreamingContext context)
         : base(info, context)
     { }
@@ -38,12 +38,18 @@ public abstract class BuildExceptionBase : Exception
 
     public override string ToString() => string.IsNullOrEmpty(_remoteTypeName) ? base.ToString() : $"{_remoteTypeName}->{base.ToString()}";
 
+    /// <summary>
+    /// Override this method to recover subtype-specific state from the remote exception.
+    /// </summary>
     protected virtual void InitializeCustomState(IDictionary<string, string?>? customKeyedSerializedData)
-    { /* This is it. Override for exceptions with custom state */ }
+    { }
 
+    /// <summary>
+    /// Override this method to provide subtype-specific state to be serialized.
+    /// </summary>
+    /// <returns></returns>
     protected virtual IDictionary<string, string?>? FlushCustomState()
     {
-        /* This is it. Override for exceptions with custom state */
         return null;
     }
 

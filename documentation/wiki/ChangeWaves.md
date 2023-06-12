@@ -26,7 +26,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 ### 17.8
 - [[RAR] Don't do I/O on SDK-provided references](https://github.com/dotnet/msbuild/pull/8688)
 - [Delete destination file before copy](https://github.com/dotnet/msbuild/pull/8685)
-- [Relay remoted exceptions over to single squashed exception type](https://github.com/dotnet/msbuild/pull/8779)
+- [New serialization approach for transferring build exceptions between processes](https://github.com/dotnet/msbuild/pull/8779)
 
 ### 17.6
 - [Parse invalid property under target](https://github.com/dotnet/msbuild/pull/8190)

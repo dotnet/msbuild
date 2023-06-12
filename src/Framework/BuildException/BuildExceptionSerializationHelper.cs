@@ -25,7 +25,7 @@ namespace Microsoft.Build.BackEnd
                    type.IsSubclassOf(typeof(BuildExceptionBase));
         }
 
-        internal static void InitializeSerializationContract(params Type[] exceptionTypesWhitelist)
+        internal static void InitializeSerializationContract(params Type[] exceptionTypesAllowlist)
         {
             InitializeSerializationContract((IEnumerable<Type>)exceptionTypesWhitelist);
         }
