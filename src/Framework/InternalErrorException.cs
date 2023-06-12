@@ -49,8 +49,7 @@ namespace Microsoft.Build.Framework
             this(message, innerException, false)
         { }
 
-        // Do not remove - used by BuildExceptionSerializationHelper
-        private static InternalErrorException CreateFromRemote(string message, Exception innerException)
+        internal static InternalErrorException CreateFromRemote(string message, Exception innerException)
         {
             return new InternalErrorException(message, innerException, true /* calledFromDeserialization */);
         }

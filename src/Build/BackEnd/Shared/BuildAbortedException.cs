@@ -54,8 +54,7 @@ namespace Microsoft.Build.Exceptions
             : this(message, innerException, false)
         { }
 
-        // Do not remove - used by BuildExceptionSerializationHelper
-        private static BuildAbortedException CreateFromRemote(string message, Exception innerException)
+        internal static BuildAbortedException CreateFromRemote(string message, Exception innerException)
         {
             return new BuildAbortedException(message, innerException, true /* calledFromDeserialization */);
         }

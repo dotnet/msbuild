@@ -58,8 +58,7 @@ namespace Microsoft.Build.Execution
         {
         }
 
-        // Do not remove - used by BuildExceptionSerializationHelper
-        private HostObjectException(string message, Exception innerException)
+        internal HostObjectException(string message, Exception innerException)
             : base(
                 message,
                 innerException)

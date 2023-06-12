@@ -3,14 +3,24 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
 using System.Threading;
 
 namespace Microsoft.Build.Framework.BuildException
 {
     internal static class BuildExceptionSerializationHelper
     {
+        public class TypeConstructionTuple
+        {
+            public TypeConstructionTuple(Type type, Func<string, Exception?, BuildExceptionBase> factory)
+            {
+                Type = type;
+                Factory = factory;
+            }
+
+            public Type Type { get; }
+            public Func<string, Exception?, BuildExceptionBase> Factory { get; }
+        }
+
         private static Dictionary<string, Func<string, Exception?, BuildExceptionBase>>? s_exceptionFactories;
 
         private static readonly Func<string, Exception?, BuildExceptionBase> s_defaultFactory =
@@ -24,12 +34,12 @@ namespace Microsoft.Build.Framework.BuildException
                    type.IsSubclassOf(typeof(BuildExceptionBase));
         }
 
-        internal static void InitializeSerializationContract(params Type[] exceptionTypesAllowlist)
+        internal static void InitializeSerializationContract(params TypeConstructionTuple[] exceptionsAllowlist)
         {
-            InitializeSerializationContract((IEnumerable<Type>)exceptionTypesAllowlist);
+            InitializeSerializationContract((IEnumerable<TypeConstructionTuple>)exceptionsAllowlist);
         }
 
-        internal static void InitializeSerializationContract(IEnumerable<Type> exceptionTypesAllowlist)
+        internal static void InitializeSerializationContract(IEnumerable<TypeConstructionTuple> exceptionsAllowlist)
         {
             if (s_exceptionFactories != null)
             {
@@ -38,50 +48,18 @@ namespace Microsoft.Build.Framework.BuildException
 
             var exceptionFactories = new Dictionary<string, Func<string, Exception?, BuildExceptionBase>>();
 
-            foreach (Type exceptionType in exceptionTypesAllowlist)
+            foreach (TypeConstructionTuple typeConstructionTuple in exceptionsAllowlist)
             {
+                Type exceptionType = typeConstructionTuple.Type;
+                Func<string, Exception?, BuildExceptionBase> exceptionFactory = typeConstructionTuple.Factory;
+
                 if (!IsSupportedExceptionType(exceptionType))
                 {
                     EscapeHatches.ThrowInternalError($"Type {exceptionType.FullName} is not recognized as a build exception type.");
                 }
 
-                // First try to find a static method CreateFromRemote
-                //   - to be used when exception has custom constructor logic (e.g. altering messages)
-                MethodInfo? methodInfo = exceptionType.GetMethod(
-                    "CreateFromRemote",
-                    BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
-                    null,
-                    new[] { typeof(string), typeof(Exception) },
-                    null);
-
-                if (methodInfo != null)
-                {
-                    string key = GetExceptionSerializationKey(exceptionType);
-                    var value = (Func<string, Exception?, BuildExceptionBase>)Delegate.CreateDelegate(typeof(Func<string, Exception?, BuildExceptionBase>), methodInfo);
-
-                    exceptionFactories[key] = value;
-                    continue;
-                }
-
-                // Otherwise use the constructor that accepts inner exception and a message
-                ConstructorInfo? ctorInfo = exceptionType.GetConstructor(
-                    BindingFlags.CreateInstance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
-                    null,
-                    new[] { typeof(string), typeof(Exception) },
-                    null);
-
-                if (ctorInfo != null)
-                {
-                    string key = GetExceptionSerializationKey(exceptionType);
-                    Func<string, Exception?, BuildExceptionBase> value = (message, innerException) =>
-                        (BuildExceptionBase)ctorInfo.Invoke(new object?[] { message, innerException });
-
-                    exceptionFactories[key] = value;
-                }
-                else
-                {
-                    Debug.Fail($"Unable to find a factory for exception type {exceptionType.FullName}");
-                }
+                string key = GetExceptionSerializationKey(exceptionType);
+                exceptionFactories[key] = exceptionFactory;
             }
 
             if (Interlocked.Exchange(ref s_exceptionFactories, exceptionFactories) != null)

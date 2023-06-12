@@ -34,8 +34,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             ErrorCode = errorCode;
         }
 
-        // Do not remove - used by BuildExceptionSerializationHelper
-        private ProjectCacheException(string message, Exception inner)
+        internal ProjectCacheException(string message, Exception inner)
             : base(message, inner)
         { }
 
