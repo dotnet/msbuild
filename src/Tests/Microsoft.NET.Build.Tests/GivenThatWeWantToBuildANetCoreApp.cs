@@ -1021,11 +1021,11 @@ class Program
             result.Should().Pass();
             if (shouldWarn)
             {
-                result.Should().HaveStdOutMatching($"NETSDK1205.*{package.ID}");
+                result.Should().HaveStdOutMatching($"NETSDK1206.*{package.ID}");
             }
             else
             {
-                result.Should().NotHaveStdOutContaining("NETSDK1205");
+                result.Should().NotHaveStdOutContaining("NETSDK1206");
             }
         }
     }
