@@ -1395,9 +1395,13 @@ namespace Microsoft.Build.BackEnd
                                     // Setting an item spec expects the escaped value, as does setting metadata.
                                     newItem = new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output.ItemSpec), parameterLocationEscaped);
 
-                                    newItem.SetMetadataOnTaskOutput(output.CloneCustomMetadata()
-                                        .Cast<DictionaryEntry>()
-                                        .Select(x => new KeyValuePair<string, string>((string)x.Key, EscapingUtilities.Escape((string)x.Value))));
+                                    var items = new List<KeyValuePair<string, string>>();
+                                    foreach (DictionaryEntry de in output.CloneCustomMetadata())
+                                    {
+                                        items.Add(new KeyValuePair<string, string>((string)de.Key, EscapingUtilities.Escape((string)de.Value)));
+                                    }
+
+                                    newItem.SetMetadataOnTaskOutput(items);
                                 }
                             }
 
