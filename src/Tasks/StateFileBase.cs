@@ -65,9 +65,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the specified file from disk into a StateFileBase derived object.
         /// </summary>
-        internal static StateFileBase DeserializeCache(string stateFile, TaskLoggingHelper log, Type requiredReturnType)
+        internal static T DeserializeCache<T>(string stateFile, TaskLoggingHelper log) where T : StateFileBase
         {
-            StateFileBase retVal = null;
+            T retVal = null;
 
             // First, we read the cache from disk if one exists, or if one does not exist, we create one.
             try
@@ -88,21 +88,20 @@ namespace Microsoft.Build.Tasks
                             return null;
                         }
 
-                        var constructors = requiredReturnType.GetConstructors();
+                        var constructors = typeof(T).GetConstructors();
                         foreach (var constructor in constructors)
                         {
                             var parameters = constructor.GetParameters();
                             if (parameters.Length == 1 && parameters[0].ParameterType == typeof(ITranslator))
                             {
-                                retVal = constructor.Invoke(new object[] { translator }) as StateFileBase;
+                                retVal = constructor.Invoke(new object[] { translator }) as T;
                             }
                         }
 
-                        if (retVal == null || !requiredReturnType.IsInstanceOfType(retVal))
+                        if (retVal == null)
                         {
                             log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile,
                                 log.FormatResourceString("General.IncompatibleStateFileType"));
-                            retVal = null;
                         }
                     }
                 }

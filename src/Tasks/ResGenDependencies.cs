@@ -196,7 +196,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static ResGenDependencies DeserializeCache(string stateFile, bool useSourcePath, TaskLoggingHelper log)
         {
-            var retVal = (ResGenDependencies)DeserializeCache(stateFile, log, typeof(ResGenDependencies)) ?? new ResGenDependencies();
+            var retVal = DeserializeCache<ResGenDependencies>(stateFile, log) ?? new ResGenDependencies();
 
             // Ensure that the cache is properly initialized with respect to how resgen will 
             // resolve linked files within .resx files.  ResGen has two different
