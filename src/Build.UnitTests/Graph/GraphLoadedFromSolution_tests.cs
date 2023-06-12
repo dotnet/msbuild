@@ -546,7 +546,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 }
             }
 
-            // Remove some properties for comparison purposes as we are comparing a graph created with and without a solution.
+            // Remove some properties for comparison purposes as we are comparing a graph created from a solution against the graph (without solution properties) used to make the solution.
             // This is done as a separate pass since some edges may be sharing an instance.
             foreach (string propertyToIgnore in propertiesToIgnore)
             {
