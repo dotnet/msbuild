@@ -76,6 +76,7 @@ jobs:
                     /p:Test=false
                     $(_InternalRuntimeDownloadArgs)
                     $(_OfficialBuildArgs)
+          continueOnError: false
           displayName: Build
           env:
             BuildConfig: $(_BuildConfig)
@@ -106,6 +107,7 @@ jobs:
                     $(_OfficialBuildIdArgs)
                     $(_InternalRuntimeDownloadArgs)
                     /p:Test=false
+          continueOnError: false
           displayName: Build
           env:
             BuildConfig: $(_BuildConfig)
@@ -149,6 +151,7 @@ jobs:
                     $(_OfficialBuildIdArgs)
                     $(_InternalRuntimeDownloadArgs)
                     -p:Test=false
+          continueOnError: false
           displayName: Build
           env:
             BuildConfig: $(_BuildConfig)
@@ -251,6 +254,7 @@ jobs:
                     $(_OfficialBuildIdArgs)
                     /p:Test=false
                     $(_InternalRuntimeDownloadArgs)
+          continueOnError: false
           displayName: Build
           env:
             BuildConfig: $(_BuildConfig)
