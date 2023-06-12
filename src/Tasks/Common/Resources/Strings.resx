@@ -900,4 +900,5 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1202: The workload '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</value>
     <comment>{StrBegin="NETSDK1202: "}</comment>
   </data>
+  <!-- The latest message added is NonPortableRuntimeIdentifierDetected. Please update this value with each PR to catch parallel PRs both adding a new message -->
 </root>
