@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
+
+  <PropertyGroup>
+    <!-- Test infra replaces this with the value of CurrentTargetFramework so we can compare against it below. -->
+    <CurrentTargetFramework>$(CurrentTargetFramework)</CurrentTargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IsTrimmable>true</IsTrimmable>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+
+  <Target Name="_AddKnownILLinkPack" BeforeTargets="ProcessFrameworkReferences">
+    <ItemGroup>
+      <KnownILLinkPack Include="@(KnownILLinkPack)"
+                       Condition="'%(TargetFramework)' == '$(CurrentTargetFramework)'"
+                       TargetFramework="$(TargetFramework)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

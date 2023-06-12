@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -15,6 +15,7 @@ using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Newtonsoft.Json;
 using NuGet.Frameworks;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -746,8 +747,11 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             // Before net8.0, ILLink analyzers shipped in a separate package.
-            // Add the analyzer package with version taken from KnownILLinkPack.
-            if (normalizedTargetFrameworkVersion < new Version(8, 0) && toolPackType is ToolPackType.ILLink)
+            // Add the analyzer package with version taken from KnownILLinkPack if the version is less than 8.0.0.
+            // The version comparison doesn't consider prerelease labels, so 8.0.0-foo will be considered equal to 8.0.0 and
+            // will not get the extra analyzer package reference.
+            if (toolPackType is ToolPackType.ILLink &&
+                new VersionComparer(VersionComparison.Version).Compare(NuGetVersion.Parse(packVersion), new NuGetVersion(8, 0, 0)) < 0)
             {
                 var analyzerPackage = new TaskItem("Microsoft.NET.ILLink.Analyzers");
                 analyzerPackage.SetMetadata(MetadataKeys.Version, packVersion);
