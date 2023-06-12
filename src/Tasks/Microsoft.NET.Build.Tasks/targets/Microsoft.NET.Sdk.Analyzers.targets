@@ -127,6 +127,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Used for analyzer to match namespace to folder structure -->
     <CompilerVisibleProperty Include="RootNamespace" />
     <CompilerVisibleProperty Include="ProjectDir" />
+    <!--
+      Used by the analyzers in the Microsoft.Interop.ComInterfaceGenerator to detect combinations
+      of built-in and source generated COM interop
+    -->
+    <CompilerVisibleProperty Include="EnableComHosting" />
   </ItemGroup>
 
   <!-- C# Code Style Analyzers -->
