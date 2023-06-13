@@ -31,7 +31,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(DirectoryBuildPropsPath)" Condition="'$(ImportDirectoryBuildProps)' == 'true' and exists('$(DirectoryBuildPropsPath)')"/>
 
-  <Import Project="$(AfterDirectoryBuildPropsImport)" Condition="'$(AfterDirectoryBuildPropsImport)' != ''" />
+  <Import Project="$(CustomAfterDirectoryBuildProps)" Condition="'$(CustomAfterDirectoryBuildProps)' != ''" />
 
   <!--
       Prepare to import project extensions which usually come from packages.  Package management systems will create a file at:
