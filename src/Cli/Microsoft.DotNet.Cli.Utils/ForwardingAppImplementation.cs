@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if NET
+
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.DotNet.Cli.Utils;
@@ -96,7 +98,9 @@ namespace Microsoft.DotNet.Cli.Utils
         private string GetHostExeName()
         {
             // Should instead make this a full path to dotnet
-            return Process.GetCurrentProcess().MainModule.FileName;
+            return System.Environment.ProcessPath;
         }
     }
 }
+
+#endif

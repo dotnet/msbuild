@@ -65,18 +65,10 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         private static string GetIpCommandOutput()
         {
-            var fileName = "ip";
-            if (OperatingSystem.IsMacOS())
-            {
-                fileName = "/sbin/ip";
-            }
-            else
-            {
-                fileName = File.Exists(@"/usr/bin/ip") ? @"/usr/bin/ip" :
+            var fileName = File.Exists(@"/usr/bin/ip") ? @"/usr/bin/ip" :
                            File.Exists(@"/usr/sbin/ip") ? @"/usr/sbin/ip" :
                            File.Exists(@"/sbin/ip") ? @"/sbin/ip" :
                            "ip";
-            }
 
             var ipResult = new ProcessStartInfo
             {
@@ -118,18 +110,10 @@ namespace Microsoft.DotNet.Cli.Telemetry
             {
                 try
                 {
-                    var fileName = "/sbin/ifconfig";
-                    if (OperatingSystem.IsMacOS())
-                    {
-
-                    }
-                    else
-                    {
-                        fileName = File.Exists(fileName) ? fileName :
+                    var fileName = File.Exists("/sbin/ifconfig") ? "/sbin/ifconfig" :
                                    File.Exists("/usr/sbin/ifconfig") ? "/usr/sbin/ifconfig" :
                                    File.Exists("/usr/bin/ifconfig") ? "/usr/bin/ifconfig" :
                                    "ifconfig";
-                    }
 
                     var ifconfigResult = new ProcessStartInfo
                     {
