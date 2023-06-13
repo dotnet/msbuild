@@ -5281,7 +5281,7 @@ namespace Microsoft.Build.Evaluation
     /// <summary>
     /// This class wraps information about properties which have been used before they are initialized.
     /// </summary>
-    internal class UsedUninitializedProperties
+    internal sealed class UsedUninitializedProperties
     {
         /// <summary>
         /// Lazily allocated collection of properties and the element which used them.
