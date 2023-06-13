@@ -29,6 +29,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <DirectoryBuildPropsPath Condition="'$(_DirectoryBuildPropsBasePath)' != '' and '$(_DirectoryBuildPropsFile)' != ''">$([System.IO.Path]::Combine('$(_DirectoryBuildPropsBasePath)', '$(_DirectoryBuildPropsFile)'))</DirectoryBuildPropsPath>
   </PropertyGroup>
 
+  <Import Project="$(CustomBeforeDirectoryBuildProps)" Condition="'$(CustomBeforeDirectoryBuildProps)' != ''" />
+
   <Import Project="$(DirectoryBuildPropsPath)" Condition="'$(ImportDirectoryBuildProps)' == 'true' and exists('$(DirectoryBuildPropsPath)')"/>
 
   <Import Project="$(CustomAfterDirectoryBuildProps)" Condition="'$(CustomAfterDirectoryBuildProps)' != ''" />
