@@ -920,12 +920,12 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1204: Ahead-of-time compilation is not supported on the current platform '{0}'.</value>
     <comment>{StrBegin="NETSDK1204: "}</comment>
   </data>
-  <data name="NonPortableRuntimeIdentifierDetected" xml:space="preserve">
-    <value>NETSDK1205: Found version-specific or distribution-specific runtime identifier(s): {0}. Affected libraries: {1}. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details.</value>
-    <comment>{StrBegin="NETSDK1205: "}</comment>
-  </data>
   <data name="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework" xml:space="preserve">
-    <value>NETSDK1206: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</value>
-    <comment>{StrBegin="NETSDK1206: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</comment>
+    <value>NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</value>
+    <comment>{StrBegin="NETSDK1205: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</comment>
+  </data>
+  <data name="NonPortableRuntimeIdentifierDetected" xml:space="preserve">
+    <value>NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): {0}. Affected libraries: {1}. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details.</value>
+    <comment>{StrBegin="NETSDK1206: "}</comment>
   </data>
 </root>
