@@ -876,8 +876,8 @@ You may need to build the project on another operating system or architecture, o
     <comment>{StrBegin="NETSDK1192: "}</comment>
   </data>
   <data name="AotNotSupported" xml:space="preserve">
-    <value>NETSDK1193: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</value>
-    <comment>{StrBegin="NETSDK1193: "}</comment>
+    <value>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</value>
+    <comment>{StrBegin="NETSDK1196: "}</comment>
   </data>
   <data name="WorkloadIsEol" xml:space="preserve">
     <value>NETSDK1202: The workload '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</value>
