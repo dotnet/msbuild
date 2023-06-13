@@ -833,16 +833,16 @@ You may need to build the project on another operating system or architecture, o
     <comment>{StrBegin="NETSDK1182: "}</comment>
   </data>
   <data name="TargetingPackNotRestored_TransitiveDisabled" xml:space="preserve">
-    <value>NETSDK1183: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</value>
-    <comment>{StrBegin="NETSDK1183: "}</comment>
-  </data>
-  <data name="RuntimePackNotRestored_TransitiveDisabled" xml:space="preserve">
-    <value>NETSDK1184: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</value>
+    <value>NETSDK1184: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</value>
     <comment>{StrBegin="NETSDK1184: "}</comment>
   </data>
-  <data name="UnknownFrameworkReference_MauiEssentials" xml:space="preserve">
-    <value>NETSDK1185: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</value>
+  <data name="RuntimePackNotRestored_TransitiveDisabled" xml:space="preserve">
+    <value>NETSDK1185: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</value>
     <comment>{StrBegin="NETSDK1185: "}</comment>
+  </data>
+  <data name="UnknownFrameworkReference_MauiEssentials" xml:space="preserve">
+    <value>NETSDK1186: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</value>
+    <comment>{StrBegin="NETSDK1186: "}</comment>
   </data>
   <data name="WorkloadIsEol" xml:space="preserve">
     <value>NETSDK1202: The workload '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</value>
