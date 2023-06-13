@@ -2,11 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -25,6 +26,15 @@ namespace Microsoft.Build.Tasks
         /// Cache at the ResolveAssemblyReferenceCache instance level. It is serialized and reused between instances.
         /// </summary>
         internal Dictionary<string, FileState> instanceLocalFileStateCache = new Dictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        internal static ConcurrentDictionary<string, (DateTime FileTimestamp, long ContentSequenceNumber)> s_processWideCacheFileCache = new(StringComparer.OrdinalIgnoreCase);
+
+        private static long s_sequenceNumber;
+
+        internal static long GetNextSequenceNumber() => Interlocked.Increment(ref s_sequenceNumber);
 
         /// <summary>
         /// True if the contents have changed.
@@ -52,6 +62,11 @@ namespace Microsoft.Build.Tasks
         internal sealed class FileState : ITranslatable, IEquatable<FileState>
         {
             /// <summary>
+            /// The value of a monotonically increasing counter at the time this instance was last modified. Not to be serialized.
+            /// </summary>
+            private long sequenceNumber;
+
+            /// <summary>
             /// The last modified time for this file.
             /// </summary>
             private DateTime lastModified;
@@ -64,28 +79,29 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// The assemblies that this file depends on.
             /// </summary>
-            internal AssemblyNameExtension[] dependencies;
+            private AssemblyNameExtension[] dependencies;
 
             /// <summary>
             /// The scatter files associated with this assembly.
             /// </summary>
-            internal string[] scatterFiles;
+            private string[] scatterFiles;
 
             /// <summary>
             /// FrameworkName the file was built against
             /// </summary>
-            internal FrameworkName frameworkName;
+            private FrameworkName frameworkName;
 
             /// <summary>
             /// The CLR runtime version for the assembly.
             /// </summary>
-            internal string runtimeVersion;
+            private string runtimeVersion;
 
             /// <summary>
             /// Default construct.
             /// </summary>
             internal FileState(DateTime lastModified)
             {
+                sequenceNumber = GetNextSequenceNumber();
                 this.lastModified = lastModified;
             }
 
@@ -94,6 +110,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             internal FileState(ITranslator translator)
             {
+                sequenceNumber = GetNextSequenceNumber();
                 Translate(translator);
             }
 
@@ -116,23 +133,68 @@ namespace Microsoft.Build.Tasks
 
             public bool Equals(FileState other)
             {
+                bool NullAwareSequenceEquals<T>(IEnumerable<T> first, IEnumerable<T> second)
+                {
+                    if (first == null || second == null)
+                    {
+                        return first == second;
+                    }
+                    return Enumerable.SequenceEqual(first, second);
+                }
+
+                bool NullAwareEquatableEquals<T>(IEquatable<T> first, IEquatable<T> second) where T : class
+                {
+                    if (first == null || second == null)
+                    {
+                        return first == second;
+                    }
+                    return first.Equals(second as T);
+                }
+
                 return
                     lastModified == other.LastModified &&
-                    assemblyName.Equals(other.assemblyName) &&
-                    Enumerable.SequenceEqual(dependencies, other.dependencies) &&
-                    Enumerable.SequenceEqual(scatterFiles, other.scatterFiles) &&
-                    frameworkName.Equals(other.frameworkName) &&
+                    NullAwareEquatableEquals(assemblyName, other.assemblyName) &&
+                    NullAwareSequenceEquals(dependencies, other.dependencies) &&
+                    NullAwareSequenceEquals(scatterFiles, other.scatterFiles) &&
+                    NullAwareEquatableEquals(frameworkName, other.frameworkName) &&
                     runtimeVersion == other.runtimeVersion;
             }
+
+            public void MergeTo(FileState other)
+            {
+                // If we're not talking about the same version of the assembly then don't do anything.
+                if (lastModified == other.lastModified)
+                {
+                    if (assemblyName != null && other.assemblyName == null)
+                    {
+                        other.assemblyName = assemblyName;
+                    }
+                    if (dependencies != null && other.dependencies == null)
+                    {
+                        other.dependencies = dependencies;
+                    }
+                    if (scatterFiles != null && other.scatterFiles == null)
+                    {
+                        other.scatterFiles = scatterFiles;
+                    }
+                    if (frameworkName != null && other.frameworkName == null)
+                    {
+                        other.frameworkName = frameworkName;
+                    }
+                    if (runtimeVersion != null && other.runtimeVersion == null)
+                    {
+                        other.runtimeVersion = runtimeVersion;
+                    }
+                }
+            }
+
+            internal long SequenceNumber => sequenceNumber;
 
             /// <summary>
             /// Gets the last modified date.
             /// </summary>
             /// <value></value>
-            internal DateTime LastModified
-            {
-                get { return lastModified; }
-            }
+            internal DateTime LastModified => lastModified;
 
             /// <summary>
             /// Get or set the assemblyName.
@@ -140,8 +202,51 @@ namespace Microsoft.Build.Tasks
             /// <value></value>
             internal AssemblyNameExtension Assembly
             {
-                get { return assemblyName; }
-                set { assemblyName = value; }
+                get => assemblyName;
+                set
+                {
+                    assemblyName = value;
+                    sequenceNumber = GetNextSequenceNumber();
+                }
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            internal AssemblyNameExtension[] Dependencies
+            {
+                get => dependencies;
+                set
+                {
+                    dependencies = value;
+                    sequenceNumber = GetNextSequenceNumber();
+                }
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            internal string[] ScatterFiles
+            {
+                get => scatterFiles;
+                set
+                {
+                    scatterFiles = value;
+                    sequenceNumber = GetNextSequenceNumber();
+                }
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            internal FrameworkName FrameworkName
+            {
+                get => frameworkName;
+                set
+                {
+                    frameworkName = value;
+                    sequenceNumber = GetNextSequenceNumber();
+                }
             }
 
             /// <summary>
@@ -150,18 +255,36 @@ namespace Microsoft.Build.Tasks
             /// <value></value>
             internal string RuntimeVersion
             {
-                get { return runtimeVersion; }
-                set { runtimeVersion = value; }
+                get => runtimeVersion;
+                set
+                {
+                    runtimeVersion = value;
+                    sequenceNumber = GetNextSequenceNumber();
+                }
             }
 
             /// <summary>
             /// Get or set the framework name the file was built against
             /// </summary>
-            [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Could be used in other assemblies")]
             internal FrameworkName FrameworkNameAttribute
             {
-                get { return frameworkName; }
-                set { frameworkName = value; }
+                get => frameworkName;
+                set
+                {
+                    frameworkName = value;
+                    sequenceNumber = GetNextSequenceNumber();
+                }
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            internal void SetAssemblyMetadata(AssemblyNameExtension[] dependencies, string[] scatterFiles, FrameworkName frameworkName)
+            {
+                this.dependencies = dependencies;
+                this.scatterFiles = scatterFiles;
+                this.frameworkName = frameworkName;
+                sequenceNumber = GetNextSequenceNumber();
             }
 
             /// <summary>
@@ -282,7 +405,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Merges the existing data in <paramref name="toCache"/> the data from <paramref name="fromCache"/> and sets <see cref="IsDirty"/>
+        /// Merges the existing data in <paramref name="toCache"/> with the data from <paramref name="fromCache"/> and sets <see cref="IsDirty"/>
         /// on <paramref name="toCache"/> accordingly.
         /// </summary>
         /// <param name="fromCache">The cache deserialized from disk.</param>
@@ -302,11 +425,12 @@ namespace Microsoft.Build.Tasks
 
                 foreach (KeyValuePair<string, FileState> kvp in fromCache.instanceLocalFileStateCache)
                 {
-                    // The "to" FileState is more up-to-date, so we add missing items only. We compare items present in both dictionaries
-                    // to calculate the new value of toCache.IsDirty.
+                    // We set toCache.IsDirty if the "to" FileState ends up being different from the "from" one as this indicates
+                    // the need to write the updated cache back to disk.
                     if (toCache.instanceLocalFileStateCache.TryGetValue(kvp.Key, out FileState toFileState))
                     {
-                        toIsDirty |= !toFileState.Equals(kvp.Value);
+                        kvp.Value.MergeTo(toFileState);
+                        toIsDirty = toIsDirty || !toFileState.Equals(kvp.Value);
                     }
                     else
                     {

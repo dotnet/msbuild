@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         Assembly = null,
                         RuntimeVersion = "v4.0.30319",
                         FrameworkNameAttribute = new FrameworkName(".NETFramework", Version.Parse("4.7.2"), "Profile"),
-                        scatterFiles = new string[] { "first", "second" } } } };
+                        ScatterFiles = new string[] { "first", "second" } } } };
             ResolveAssemblyReferenceCache rarCache = new();
             rarCache.instanceLocalFileStateCache = cache;
             ResolveAssemblyReferenceCache rarCache2 = null;
@@ -116,8 +116,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             dll2.FrameworkNameAttribute.FullName.ShouldBe(dll.FrameworkNameAttribute.FullName);
             dll2.LastModified.ShouldBe(dll.LastModified);
             dll2.RuntimeVersion.ShouldBe(dll.RuntimeVersion);
-            dll2.scatterFiles.Length.ShouldBe(dll.scatterFiles.Length);
-            dll2.scatterFiles[1].ShouldBe(dll.scatterFiles[1]);
+            dll2.ScatterFiles.Length.ShouldBe(dll.ScatterFiles.Length);
+            dll2.ScatterFiles[1].ShouldBe(dll.ScatterFiles[1]);
         }
     }
 }

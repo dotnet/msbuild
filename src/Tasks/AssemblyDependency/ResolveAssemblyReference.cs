@@ -2034,13 +2034,19 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the state file (if present) into the cache.
         /// </summary>
-        internal void ReadStateFile(FileExists fileExists)
+        internal void ReadStateFile(FileExists fileExists, GetLastWriteTime getLastWriteTime)
         {
             ResolveAssemblyReferenceCache diskCache = null;
 
             _cache = new SystemState(loadDiskCacheCallback: () =>
                 {
+                    Console.WriteLine("### Loading disk cache");
                     diskCache = StateFileBase.DeserializeCache<ResolveAssemblyReferenceCache>(_stateFile, Log);
+                    if (diskCache != null)
+                    {
+                        DateTime stateFileLastWriteTime = getLastWriteTime(_stateFile);
+                        ResolveAssemblyReferenceCache.s_processWideCacheFileCache[_stateFile] = (stateFileLastWriteTime, ResolveAssemblyReferenceCache.GetNextSequenceNumber());
+                    }
 
                     // Fall back to precomputed caches if we got nothing from the per-project state file.
                     if (diskCache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
@@ -2056,7 +2062,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Write out the state file if a state name was supplied and the cache is dirty.
         /// </summary>
-        internal void WriteStateFile()
+        internal void WriteStateFile(GetLastWriteTime getLastWriteTime)
         {
             if (!string.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
             {
@@ -2089,9 +2095,27 @@ namespace Microsoft.Build.Tasks
                     // we've lost our in-memory timestamps (long-running process has been restarted) so we're not sure if the file is stale
                     // or not, we read it, see that it's *not* stale, and we're done.
 
-                    // TODO: Implement timestamp-based check for up-to-date cache file.
+                    // For the cache file to be up to date, two conditions must hold. It needs to have the same timestamp as the last time we
+                    // read it. And none of the entries used during this RAR task execution must have been updated after we read it.
+                    bool loadCacheFile = true;
+                    if (ResolveAssemblyReferenceCache.s_processWideCacheFileCache.TryGetValue(_stateFile, out var timestamps) &&
+                        timestamps.FileTimestamp == getLastWriteTime(_stateFile))
+                    {
+                        loadCacheFile = false;
+                        foreach (KeyValuePair<string, ResolveAssemblyReferenceCache.FileState> kvp in _cache.instanceLocalFileStateCache)
+                        {
+                            if (kvp.Value.SequenceNumber > timestamps.ContentSequenceNumber)
+                            {
+                                loadCacheFile = true;
+                                break;
+                            }
+                        }
+                    }
 
-                    _cache.EnsureResolveAssemblyReferenceCacheLoaded();
+                    if (loadCacheFile && !_cache.EnsureResolveAssemblyReferenceCacheLoaded())
+                    {
+                        _cache.IsDirty = true;
+                    }
                 }
 
                 if (_cache.IsDirty)
@@ -2102,7 +2126,11 @@ namespace Microsoft.Build.Tasks
                         return;
                     }
 
+                    Console.WriteLine("### Saving disk cache");
                     _cache.SerializeCache(_stateFile, Log);
+
+                    DateTime stateFileLastWriteTime = getLastWriteTime(_stateFile);
+                    ResolveAssemblyReferenceCache.s_processWideCacheFileCache[_stateFile] = (stateFileLastWriteTime, ResolveAssemblyReferenceCache.GetNextSequenceNumber());
                 }
             }
         }
@@ -2331,7 +2359,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Load any prior saved state.
-                    ReadStateFile(fileExists);
+                    ReadStateFile(fileExists, getLastWriteTime);
                     _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
 
                     // Cache delegates.
@@ -2603,7 +2631,7 @@ namespace Microsoft.Build.Tasks
                     this.DependsOnSystemRuntime = useSystemRuntime.ToString();
                     this.DependsOnNETStandard = useNetStandard.ToString();
 
-                    WriteStateFile();
+                    WriteStateFile(getLastWriteTime);
 
                     // Save the new state out and put into the file exists if it is actually on disk.
                     if (_stateFile != null && fileExists(_stateFile))

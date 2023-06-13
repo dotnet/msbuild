@@ -411,24 +411,28 @@ namespace Microsoft.Build.Tasks
             out FrameworkName frameworkName)
         {
             FileState fileState = GetFileState(path);
-            if (fileState.dependencies == null)
+            if (fileState.Dependencies == null)
             {
                 getAssemblyMetadata(
                     path,
                     assemblyMetadataCache,
-                    out fileState.dependencies,
-                    out fileState.scatterFiles,
-                    out fileState.frameworkName);
+                    out dependencies,
+                    out scatterFiles,
+                    out frameworkName);
+
+                fileState.SetAssemblyMetadata(dependencies, scatterFiles, frameworkName);
 
                 if (fileState.IsWorthPersisting)
                 {
                     SetIsDirty();
                 }
             }
-
-            dependencies = fileState.dependencies;
-            scatterFiles = fileState.scatterFiles;
-            frameworkName = fileState.frameworkName;
+            else
+            {
+                dependencies = fileState.Dependencies;
+                scatterFiles = fileState.ScatterFiles;
+                frameworkName = fileState.FrameworkName;
+            }
         }
 
         /// <summary>
