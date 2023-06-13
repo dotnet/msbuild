@@ -128,7 +128,7 @@ Run 'dotnet [command] --help' for more information on a command.";
         public void WhenRunOnWindowsDotnetHelpCommandShouldContainProperProcessInformation()
         {
             var proc = HelpCommand.ConfigureProcess("https://aka.ms/dotnet-build");
-            Assert.Equal("cmd", proc.StartInfo.FileName);
+            Assert.EndsWith("cmd.exe", proc.StartInfo.FileName);
             Assert.Equal("/c start https://aka.ms/dotnet-build", proc.StartInfo.Arguments);
         }
 
