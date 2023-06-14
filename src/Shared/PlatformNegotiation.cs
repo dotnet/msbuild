@@ -86,6 +86,7 @@ namespace Microsoft.Build.Shared
                 // Keep NearestPlatform empty, log a warning. Common.CurrentVersion.targets will undefine 
                 // Platform/PlatformTarget when this is the case.
                 log?.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoCompatiblePlatformFound", projectPath);
+                return Tuple.Create(false, buildProjectReferenceAs);
             }
             // If the referenced project has a defined `Platform` that's compatible, it will build that way by default.
             // If we're about to tell the reference to build using its default platform, don't pass it as a global property.

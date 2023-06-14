@@ -326,6 +326,37 @@ namespace Microsoft.Build.Graph.UnitTests
         }
 
         [Fact]
+        public void FailsToResolveFilteredOut()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+
+                TransientTestFile entryProject = CreateProjectFile(env, 1, extraContent: @"<PropertyGroup>
+                                                                                                <EnableDynamicPlatformFiltering>true</EnableDynamicPlatformFiltering>    
+                                                                                                <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
+                                                                                                <Platform>x86</Platform>
+                                                                                                <PlatformLookupTable>AnyCPU=x64</PlatformLookupTable>
+                                                                                            </PropertyGroup>
+                                                                                            <ItemGroup>
+                                                                                                <ProjectReference Include=""$(MSBuildThisFileDirectory)2.proj"" >
+                                                                                                </ProjectReference>
+                                                                                            </ItemGroup>");
+                var proj2 = env.CreateFile("2.proj", @"
+                                                    <Project>
+                                                    <PropertyGroup>
+                                                        <Platforms>x64</Platforms>
+                                                    </PropertyGroup>
+                                                    </Project>");
+
+                ProjectGraph graph = new ProjectGraph(entryProject.Path);
+                // Here we are checking if platform is defined. in this case it should not be since Platorm would be set to the value this project defaults as
+                // in order to avoid dual build errors we remove platform in order to avoid the edge case where a project has global platform set and does not have global platform set
+                // yet still default to the same platform.
+                GetNodesWithProjectNumber(graph, 2).Count().ShouldBe(0);
+            }
+        }
+
+        [Fact]
         public void PlatformIsChosenAsDefault()
         {
             using (var env = TestEnvironment.Create())
