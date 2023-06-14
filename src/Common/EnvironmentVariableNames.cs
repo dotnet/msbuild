@@ -22,6 +22,8 @@ namespace Microsoft.DotNet.Cli
         public static readonly string ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS = "DOTNET_CLI_ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS";
         public static readonly string ENABLE_PACK_RELEASE_FOR_SOLUTIONS = "DOTNET_CLI_ENABLE_PACK_RELEASE_FOR_SOLUTIONS";
         public static readonly string DOTNET_ROOT = "DOTNET_ROOT";
+        public static readonly string DOTNET_TOOLS_ALLOW_MANIFEST_IN_ROOT = "DOTNET_TOOLS_ALLOW_MANIFEST_IN_ROOT";
+
 
 #if NET7_0_OR_GREATER
         private static readonly Version s_version6_0 = new(6, 0);
