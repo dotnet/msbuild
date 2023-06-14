@@ -1486,7 +1486,7 @@
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1063.
+        Next error code should be MSB1065.
 
         Don't forget to update this comment after using the new code.
   -->
