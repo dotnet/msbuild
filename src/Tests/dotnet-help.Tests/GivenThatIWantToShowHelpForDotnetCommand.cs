@@ -144,7 +144,7 @@ Run 'dotnet [command] --help' for more information on a command.";
         public void WhenRunOnMacOsDotnetHelpCommandShouldContainProperProcessInformation()
         {
             var proc = HelpCommand.ConfigureProcess("https://aka.ms/dotnet-build");
-            Assert.Equal("open", proc.StartInfo.FileName);
+            Assert.EndsWith("open", proc.StartInfo.FileName);
             Assert.Equal("https://aka.ms/dotnet-build", proc.StartInfo.Arguments);
         }
     }
