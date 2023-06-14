@@ -94,7 +94,7 @@
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
-        <target state="new">MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</target>
+        <target state="translated">MSB4276: 디렉터리 "{1}" 없으므로 기본 SDK 확인자가 SDK "{0}" resolve 못했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
@@ -109,7 +109,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentDerivedPropertyRead">
         <source>Property '{0}' with value '{1}' expanded from the environment.</source>
-        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
+        <target state="translated">값이 '{1}' 환경에서 확장된 속성 '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -130,7 +130,7 @@
       <trans-unit id="FailedToResolveSDK">
         <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
   {1}</source>
-        <target state="new">Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+        <target state="translated">SDK "{0}" resolve 수 없습니다. 아래 검색 메시지 중 하나가 SDK를 resolve 못한 이유를 나타냅니다. SDK를 올바르게 지정하려면 해당 메시지를 조사하고 resolve.
   {1}</target>
         <note />
       </trans-unit>
@@ -156,7 +156,7 @@
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
         <source>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</source>
-        <target state="new">MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</target>
+        <target state="translated">MSB4120: 대상 내의 항목 '{0}' 정의가 정규화된 메타데이터 '{1}' 통해 자신을 참조합니다. 이로 인해 의도하지 않은 확장 및 기존 항목의 교차 적용이 발생할 수 있습니다. 추가 정보: https://aka.ms/msbuild/metadata-self-ref</target>
         <note>{StrBegin="MSB4120: "}</note>
       </trans-unit>
       <trans-unit id="KillingProcessWithPid">
@@ -198,7 +198,7 @@
       </trans-unit>
       <trans-unit id="NodeReused">
         <source>Reusing node {0} (PID: {1}).</source>
-        <target state="new">Reusing node {0} (PID: {1}).</target>
+        <target state="translated">노드 {0}(PID: {1})을 다시 사용합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -352,7 +352,7 @@
       </trans-unit>
       <trans-unit id="PropertyOutsidePropertyGroupInTarget">
         <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
-        <target state="new">MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</target>
+        <target state="translated">MSB4067: &lt;{1}&gt; 요소 아래에 &lt;{0}&gt; 요소를 인식할 수 없습니다. 속성으로 지정하려는 경우 &lt;PropertyGroup&gt; 요소 내에 포함하세요.</target>
         <note>{StrBegin="MSB4067: "}</note>
       </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
@@ -372,7 +372,7 @@
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
-        <target state="new">SDK resolver "{0}" returned null.</target>
+        <target state="translated">SDK 확인자 "{0}" null을 반환했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -428,7 +428,7 @@
       </trans-unit>
       <trans-unit id="TaskAssemblyLoaded">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
-        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</target>
+        <target state="translated"> {0}{1} 동안 로드된 어셈블리: {2}(위치: {3}, MVID: {4}, AppDomain: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">

@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="new">Build {0} in {1}s</target>
+        <target state="translated">Kompiluj {0} w {1}s</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -28,14 +28,14 @@
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with errors</source>
-        <target state="new">failed with errors</target>
+        <target state="translated">niepowodzenie z błędami</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with warnings</source>
-        <target state="new">failed with warnings</target>
+        <target state="translated">niepowodzenie z ostrzeżeniami</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -80,12 +80,12 @@
                      but isn't up to date.
                      (Short form: -q)
     </source>
-        <target state="new">  -question
-                     (Experimental) Question whether there is any build work.
-                     MSBuild will error out when it detects a target or task
-                     that can be incremental (has inputs and outputs),
-                     but isn't up to date.
-                     (Short form: -q)
+        <target state="translated">  -Pytanie
+                     (Eksperymentalne) Pytanie, czy istnieje jakakolwiek praca kompilacji.
+                     Program MSBuild wyloguje się z błędu, gdy wykryje element docelowy lub zadanie
+                     które mogą być przyrostowe (ma dane wejściowe i wyjściowe),
+                     ale nie jest aktualny.
+                     (Krótka wersja: -q)
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -95,7 +95,7 @@
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
-        <target state="new">MSBuild version {0} for {1}</target>
+        <target state="translated">Wersja programu MSBuild {0} dla {1}</target>
         <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</note>
       </trans-unit>
       <trans-unit id="CurrentDirectory">
@@ -216,25 +216,25 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -isolateProjects[:True|MessageUponIsolationViolation|False]
-                     Causes MSBuild to build each project in isolation.
+        <target state="translated">  -isolateProjects[:True| MessageUponIsolationViolation| Fałsz]
+                     Powoduje, że program MSBuild kompiluje każdy projekt w izolacji.
 
-                     When set to "MessageUponIsolationViolation" (or its short
-                     form "Message"), only the results from top-level targets
-                     are serialized if the -outputResultsCache switch is
-                     supplied. This is to mitigate the chances of an
-                     isolation-violating target on a dependency project using
-                     incorrect state due to its dependency on a cached target
-                     whose side effects would not be taken into account.
-                     (For example, the definition of a property.)
+Gdy jest ustawiona wartość "MessageUponIsolationViolation" (lub jej krótka
+                     postać "Komunikat"), tylko wyniki z elementów docelowych najwyższego poziomu
+                     są serializowane, jeśli przełącznik -outputResultsCache jest
+                     Dostarczane. Ma to na celu ograniczenie prawdopodobieńszeń
+                     izolacja narusza cel w projekcie zależności przy użyciu
+                     niepoprawny stan ze względu na jego zależność od buforowanego elementu docelowego
+                     których efekty uboczne nie zostaną brane pod uwagę.
+                     (Na przykład definicja właściwości).
 
-                     This is a more restrictive mode of MSBuild as it requires
-                     that the project graph be statically discoverable at
-                     evaluation time, but can improve scheduling and reduce
-                     memory overhead when building a large set of projects.
-                     (Short form: -isolate)
+To jest bardziej restrykcyjny tryb programu MSBuild, ponieważ wymaga
+                     że wykres projektu jest statycznie wykrywalny w
+                     czas oceny, ale może poprawić planowanie i zmniejszyć
+                     narzut pamięci podczas kompilowania dużego zestawu projektów.
+                     (Krótka wersja: -isolate)
 
-                     This flag is experimental and may not work as intended.
+Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -352,13 +352,13 @@
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="new">  -warnNotAsError[:code[;code2]]
-                     List of warning codes to treats not treat as errors.
-                     Use a semicolon or a comma to separate
-                     multiple warning codes. Has no effect if the -warnaserror
-                     switch is not set.
+        <target state="translated">  -warnNotAsError[:code[;code2]]
+                     Lista kodów ostrzeżeń, które mają być traktowane jako błędy.
+                     Rozdziel średnikami lub przecinkami
+                     wiele kodów ostrzeżeń. Nie ma żadnego efektu, jeśli parametr -warnaserror
+                     przełącznik nie jest ustawiony.
 
-                     Example:
+Przykład:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -552,14 +552,14 @@
                            is set separately by
                            -fileloggerparameters.
 </source>
-        <target state="new">  -verbosity:&lt;level&gt; Display this amount of information in the event log.
-                     The available verbosity levels are: q[uiet], m[inimal],
-                     n[ormal], d[etailed], and diag[nostic]. (Short form: -v)
-                     Example:
+        <target state="translated">  -verbosity:&lt;level&gt; Wyświetl tę ilość informacji w dzienniku zdarzeń.
+                     Dostępne poziomy szczegółowości: q[uiet], m[inimal],
+                     n[ormal],[etailed] d i[nostic] diag. (Krótka wersja: -v)
+                     Przykład:
                        -verbosity:quiet
 
-                     Note: File loggers' verbosity
-                           is set separately by
+Uwaga: poziom szczegółowości rejestratorów plików
+                           jest ustawiane osobno przez
                            -fileloggerparameters.
 </target>
         <note>
@@ -743,10 +743,10 @@
                      will read build results from. If -isolateProjects is set
                      to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Semicolon separated list of input cache files that MSBuild
-                     will read build results from. If -isolateProjects is set
-                     to False, this sets it to True. (short form: -irc)
+        <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Rozdzielana średnikami lista wejściowych plików pamięci podręcznej, które msBuild
+                     odczyta wyniki kompilacji. Jeśli parametr -isolateProjects jest ustawiony
+                     Na wartość False, spowoduje to ustawienie wartości True. (krótka wersja: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -760,11 +760,11 @@
                      If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="new">  -outputResultsCache:[cacheFile]
-                     Output cache file where MSBuild will write the contents of
-                     its build result caches at the end of the build.
-                     If -isolateProjects is set to False, this sets it to True.
-                     (short form: -orc)
+        <target state="translated">  -outputResultsCache:[cacheFile]
+                     Wyjściowy plik pamięci podręcznej, w którym program MSBuild zapisze zawartość
+                     jego pamięci podręczne wyników kompilacji na końcu kompilacji.
+                     Jeśli parametr -isolateProjects ma wartość False, spowoduje to ustawienie wartości True.
+                     (krótka wersja: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -1389,7 +1389,7 @@
       </trans-unit>
       <trans-unit id="ProjectBuilding_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="new">{0}{1} {2} ({3}s)</target>
+        <target state="translated">{0}{1} {2}  ({3}s)</target>
         <note>
       Project building.
       {0}: indentation - few spaces to visually indent row
@@ -1400,7 +1400,7 @@
       </trans-unit>
       <trans-unit id="ProjectBuilding_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="new">{0}{1} {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3}  ({4}s)</target>
         <note>
       Project building including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1412,7 +1412,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="new">{0}{1} {2} ({3}s)</target>
+        <target state="translated">{0}{1} {2}  ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1431,7 +1431,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="new">{0}{1} {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3}  ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1490,14 +1490,14 @@
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="new">Restore complete ({0}s)</target>
+        <target state="translated">Przywracanie zakończone ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="new">Restore {0} in {1}s</target>
+        <target state="translated">Przywróć {0} w {1}s</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1565,7 +1565,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedSwitchForSolutionFiles">
         <source>The '{0}' switch is not supported for solution files.</source>
-        <target state="new">The '{0}' switch is not supported for solution files.</target>
+        <target state="translated">Przełącznik '{0}' nie jest obsługiwany w przypadku plików rozwiązań.</target>
         <note />
       </trans-unit>
       <trans-unit id="Using35Engine">

@@ -94,7 +94,7 @@
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
-        <target state="new">MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</target>
+        <target state="translated">MSB4276: Der Standard-SDK-Konfliktlöser konnte das SDK "{0}" nicht auflösen, da kein Verzeichnis "{1}" vorhanden war.</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
@@ -109,7 +109,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentDerivedPropertyRead">
         <source>Property '{0}' with value '{1}' expanded from the environment.</source>
-        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
+        <target state="translated">Die Eigenschaft '{0}' mit dem Wert '{1}' aus der Umgebung erweitert.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -130,7 +130,7 @@
       <trans-unit id="FailedToResolveSDK">
         <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
   {1}</source>
-        <target state="new">Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+        <target state="translated">SDK-"{0}" konnte nicht aufgelöst werden. Genau eine der folgenden Testmeldungen gibt an, warum das SDK nicht aufgelöst werden konnte. Untersuchen und beheben Sie diese Meldung, um das SDK korrekt anzugeben.
   {1}</target>
         <note />
       </trans-unit>
@@ -156,7 +156,7 @@
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
         <source>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</source>
-        <target state="new">MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</target>
+        <target state="translated">MSB4120: Element '{0}' Definition innerhalb von Zielverweisen selbst über (qualifizierte oder nicht qualifizierte) Metadatums-'{1}'. Dies kann dazu führen, dass bereits vorhandene Elemente unbeabsichtigt erweitert und quer angewendet werden. Weitere Informationen: https://aka.ms/msbuild/metadata-self-ref</target>
         <note>{StrBegin="MSB4120: "}</note>
       </trans-unit>
       <trans-unit id="KillingProcessWithPid">
@@ -198,7 +198,7 @@
       </trans-unit>
       <trans-unit id="NodeReused">
         <source>Reusing node {0} (PID: {1}).</source>
-        <target state="new">Reusing node {0} (PID: {1}).</target>
+        <target state="translated">Knoten {0} (PID: {1}) wird wiederverwendet.</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -352,7 +352,7 @@
       </trans-unit>
       <trans-unit id="PropertyOutsidePropertyGroupInTarget">
         <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
-        <target state="new">MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</target>
+        <target state="translated">MSB4067: Das Element &lt;{0}&gt; unterhalb &lt;{1}&gt; Elements ist unbekannt. Wenn sie eine Eigenschaft sein soll, schließen Sie sie in ein &lt;PropertyGroup&gt; Element ein.</target>
         <note>{StrBegin="MSB4067: "}</note>
       </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
@@ -372,7 +372,7 @@
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
-        <target state="new">SDK resolver "{0}" returned null.</target>
+        <target state="translated">SDK-Resolver "{0}" hat NULL zurückgegeben.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -428,7 +428,7 @@
       </trans-unit>
       <trans-unit id="TaskAssemblyLoaded">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
-        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</target>
+        <target state="translated">Assembly während {0}{1} geladen: {2} (Speicherort: {3}, MVID: {4}, AppDomain: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">

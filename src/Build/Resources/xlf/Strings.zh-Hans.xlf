@@ -109,7 +109,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentDerivedPropertyRead">
         <source>Property '{0}' with value '{1}' expanded from the environment.</source>
-        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
+        <target state="translated">'{1}'从环境中展开值的属性'{0}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -130,7 +130,7 @@
       <trans-unit id="FailedToResolveSDK">
         <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
   {1}</source>
-        <target state="new">Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+        <target state="translated">无法解析 SDK "{0}"。下面的一个探测消息正好指明了我们无法解析 SDK 的原因。调查并解决该消息以正确指定 SDK。
   {1}</target>
         <note />
       </trans-unit>
@@ -372,7 +372,7 @@
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
-        <target state="new">SDK resolver "{0}" returned null.</target>
+        <target state="translated">SDK 解析程序"{0}"返回 null。</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
