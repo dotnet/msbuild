@@ -725,7 +725,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else if (FailIfNotIncremental)
                 {
-                    Log.LogErrorFromResources("GenerateResource.OutOfDate");
+                    Log.LogErrorFromResources("GenerateResource.NothingOutOfDate");
                 }
                 else
                 {
