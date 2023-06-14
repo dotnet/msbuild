@@ -134,15 +134,22 @@ Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</v
   </data>
   <data name="FirstTimeMessageMoreInformation" xml:space="preserve">
     <value>----------------
-Installed an ASP.NET Core HTTPS development certificate.
-To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only).
-Learn about HTTPS: https://aka.ms/dotnet-https
-----------------
 Write your first app: https://aka.ms/dotnet-hello-world
 Find out what's new: https://aka.ms/dotnet-whats-new
 Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</value>
+  </data>
+  <data name="FirstTimeMessageAspNetCertificate" xml:space="preserve">
+    <value>----------------
+Installed an ASP.NET Core HTTPS development certificate.
+To trust the certificate, run 'dotnet dev-certs https --trust'
+Learn about HTTPS: https://aka.ms/dotnet-https</value>
+  </data>
+  <data name="FirstTimeMessageAspNetCertificateLinux" xml:space="preserve">
+    <value>----------------
+Installed an ASP.NET Core HTTPS development certificate.
+To trust the certificate, view the instructions: https://aka.ms/dotnet-https-linux</value>
   </data>
 </root>
