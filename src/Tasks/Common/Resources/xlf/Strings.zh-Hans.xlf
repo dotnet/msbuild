@@ -18,9 +18,9 @@
         <note>{StrBegin="NETSDK1204: "}</note>
       </trans-unit>
       <trans-unit id="AotUnsupportedTargetFramework">
-        <source>NETSDK1183: Ahead-of-time compilation is not supported for the target framework.</source>
-        <target state="new">NETSDK1183: Ahead-of-time compilation is not supported for the target framework.</target>
-        <note>{StrBegin="NETSDK1183: "}</note>
+        <source>NETSDK1207: Ahead-of-time compilation is not supported for the target framework.</source>
+        <target state="new">NETSDK1207: Ahead-of-time compilation is not supported for the target framework.</target>
+        <note>{StrBegin="NETSDK1207: "}</note>
       </trans-unit>
       <trans-unit id="AotUnsupportedTargetRuntimeIdentifier">
         <source>NETSDK1203: Ahead-of-time compilation is not supported for the target runtime identifier '{0}'.</source>

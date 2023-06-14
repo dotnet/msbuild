@@ -835,10 +835,6 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</value>
     <comment>{StrBegin="NETSDK1182: "}</comment>
   </data>
-  <data name="AotUnsupportedTargetFramework" xml:space="preserve">
-    <value>NETSDK1183: Ahead-of-time compilation is not supported for the target framework.</value>
-    <comment>{StrBegin="NETSDK1183: "}</comment>
-  </data>
   <data name="TargetingPackNotRestored_TransitiveDisabled" xml:space="preserve">
     <value>NETSDK1184: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</value>
     <comment>{StrBegin="NETSDK1184: "}</comment>
@@ -927,5 +923,9 @@ You may need to build the project on another operating system or architecture, o
   <data name="NonPortableRuntimeIdentifierDetected" xml:space="preserve">
     <value>NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): {0}. Affected libraries: {1}. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details.</value>
     <comment>{StrBegin="NETSDK1206: "}</comment>
+  </data>
+  <data name="AotUnsupportedTargetFramework" xml:space="preserve">
+    <value>NETSDK1207: Ahead-of-time compilation is not supported for the target framework.</value>
+    <comment>{StrBegin="NETSDK1207: "}</comment>
   </data>
 </root>
