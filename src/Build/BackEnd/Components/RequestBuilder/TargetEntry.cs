@@ -462,7 +462,7 @@ namespace Microsoft.Build.BackEnd
                         // UNDONE: (Refactor) Refactor TargetUpToDateChecker to take a logging context, not a logging service.
                         MSBuildEventSource.Log.TargetUpToDateStart();
                         TargetUpToDateChecker dependencyAnalyzer = new TargetUpToDateChecker(requestEntry.RequestConfiguration.Project, _target, targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext);
-                        DependencyAnalysisResult dependencyResult = dependencyAnalyzer.PerformDependencyAnalysis(bucket, out changedTargetInputs, out upToDateTargetInputs);
+                        DependencyAnalysisResult dependencyResult = dependencyAnalyzer.PerformDependencyAnalysis(bucket, _host.BuildParameters.Question, out changedTargetInputs, out upToDateTargetInputs);
                         MSBuildEventSource.Log.TargetUpToDateStop((int)dependencyResult);
 
                         switch (dependencyResult)
@@ -471,6 +471,13 @@ namespace Microsoft.Build.BackEnd
                             case DependencyAnalysisResult.FullBuild:
                             case DependencyAnalysisResult.IncrementalBuild:
                             case DependencyAnalysisResult.SkipUpToDate:
+                                if (dependencyResult != DependencyAnalysisResult.SkipUpToDate && _host.BuildParameters.Question && !string.IsNullOrEmpty(_target.Inputs) && !string.IsNullOrEmpty(_target.Outputs))
+                                {
+                                    targetSuccess = false;
+                                    aggregateResult = aggregateResult.AggregateResult(new WorkUnitResult(WorkUnitResultCode.Canceled, WorkUnitActionCode.Stop, null));
+                                    break;
+                                }
+
                                 // Create the lookups used to hold the current set of properties and items
                                 lookupForInference = bucket.Lookup;
                                 lookupForExecution = bucket.Lookup.Clone();

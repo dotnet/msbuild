@@ -1983,4 +1983,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="NodeReused" xml:space="preserve">
     <value>Reusing node {0} (PID: {1}).</value>
   </data>
+  <data name="ItemReferencingSelfInTarget" xml:space="preserve">
+    <value>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</value>
+    <comment>{StrBegin="MSB4120: "}</comment>
+  </data>
 </root>

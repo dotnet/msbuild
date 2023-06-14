@@ -19,6 +19,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -241,7 +242,7 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">Project collection</param>
         /// <returns>A new project instance</returns>
         public ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection)
-            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: null, interactive: false)
+            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: null, directoryCacheFactory: null, interactive: false)
         {
         }
 
@@ -260,9 +261,11 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">Project collection</param>
         /// <param name="projectLoadSettings">Project load settings</param>
         /// <param name="evaluationContext">The context to use for evaluation.</param>
+        /// <param name="directoryCacheFactory">The directory cache factory to use for file I/O.</param>
         /// <param name="interactive">Indicates if loading the project is allowed to interact with the user.</param>
         /// <returns>A new project instance</returns>
-        private ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, bool interactive)
+        private ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection,
+            ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
         {
             ErrorUtilities.VerifyThrowArgumentLength(projectFile, nameof(projectFile));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -279,7 +282,8 @@ namespace Microsoft.Build.Execution
             BuildEventContext buildEventContext = new BuildEventContext(buildParameters.NodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
             ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, true /*Explicitly Loaded*/);
 
-            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version provided */, buildParameters, projectCollection.LoggingService, buildEventContext, projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext);
+            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version provided */, buildParameters, projectCollection.LoggingService, buildEventContext,
+                projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext, directoryCacheFactory: directoryCacheFactory);
         }
 
         /// <summary>
@@ -327,7 +331,7 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">Project collection</param>
         /// <returns>A new project instance</returns>
         public ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection)
-            : this(xml, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: null, interactive: false)
+            : this(xml, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: null, directoryCacheFactory: null, interactive: false)
         {
         }
 
@@ -399,9 +403,11 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">Project collection</param>
         /// <param name="projectLoadSettings">Project load settings</param>
         /// <param name="evaluationContext">The context to use for evaluation.</param>
+        /// <param name="directoryCacheFactory">The directory cache factory to use for file I/O.</param>
         /// <param name="interactive">Indicates if loading the project is allowed to interact with the user.</param>
         /// <returns>A new project instance</returns>
-        private ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, bool interactive)
+        private ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection,
+            ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
         {
             BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
 
@@ -410,7 +416,8 @@ namespace Microsoft.Build.Execution
                 Interactive = interactive
             };
 
-            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version specified */, buildParameters, projectCollection.LoggingService, buildEventContext, projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext);
+            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version specified */, buildParameters, projectCollection.LoggingService, buildEventContext,
+                projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext, directoryCacheFactory: directoryCacheFactory);
         }
 
         /// <summary>
@@ -755,6 +762,7 @@ namespace Microsoft.Build.Execution
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
                 options.EvaluationContext,
+                options.DirectoryCacheFactory,
                 options.Interactive);
         }
 
@@ -773,6 +781,7 @@ namespace Microsoft.Build.Execution
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
                 options.EvaluationContext,
+                options.DirectoryCacheFactory,
                 options.Interactive);
         }
 
@@ -2702,7 +2711,8 @@ namespace Microsoft.Build.Execution
             ISdkResolverService sdkResolverService = null,
             int submissionId = BuildEventContext.InvalidSubmissionId,
             ProjectLoadSettings? projectLoadSettings = null,
-            EvaluationContext evaluationContext = null)
+            EvaluationContext evaluationContext = null,
+            IDirectoryCacheFactory directoryCacheFactory = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(explicitToolsVersion, "toolsVersion");
@@ -2792,8 +2802,8 @@ namespace Microsoft.Build.Execution
             evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
             Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
-                this,
-                null,
+                data: this,
+                project: null,
                 xml,
                 projectLoadSettings ?? buildParameters.ProjectLoadSettings, /* Use override ProjectLoadSettings if specified */
                 buildParameters.MaxNodeCount,
@@ -2801,6 +2811,7 @@ namespace Microsoft.Build.Execution
                 loggingService,
                 new ProjectItemInstanceFactory(this),
                 buildParameters.ToolsetProvider,
+                directoryCacheFactory,
                 ProjectRootElementCache,
                 buildEventContext,
                 sdkResolverService ?? evaluationContext.SdkResolverService, /* Use override ISdkResolverService if specified */
@@ -2942,11 +2953,9 @@ namespace Microsoft.Build.Execution
                 if (item.DirectMetadata != null)
                 {
                     directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
-                    foreach (ProjectMetadata directMetadatum in item.DirectMetadata)
-                    {
-                        ProjectMetadataInstance directMetadatumInstance = new ProjectMetadataInstance(directMetadatum);
-                        directMetadata.Set(directMetadatumInstance);
-                    }
+
+                    IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
+                    directMetadata.ImportProperties(projectMetadataInstances);
                 }
 
                 // For externally constructed ProjectItem, fall back to the publicly available EvaluateInclude

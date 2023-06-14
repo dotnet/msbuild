@@ -282,8 +282,13 @@ namespace Microsoft.Build.UnitTests
                             bool logMessage = !(eventArgs is BuildFinishedEventArgs) || LogBuildFinished;
                             if (logMessage)
                             {
-                                _fullLog.AppendLine(eventArgs.Message);
-                                _testOutputHelper?.WriteLine(eventArgs.Message);
+                                string msg = eventArgs.Message;
+                                if (eventArgs is BuildMessageEventArgs m && m.LineNumber != 0)
+                                {
+                                    msg = $"{m.File}({m.LineNumber},{m.ColumnNumber}): {msg}";
+                                }
+                                _fullLog.AppendLine(msg);
+                                _testOutputHelper?.WriteLine(msg);
                             }
                             break;
                         }
@@ -496,9 +501,9 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal void AssertNoWarnings() => Assert.Equal(0, WarningCount);
 
-        internal void AssertMessageCount(string message, int expectedCount)
+        internal void AssertMessageCount(string message, int expectedCount, bool regexSearch = true)
         {
-            var matches = Regex.Matches(FullLog, message);
+            var matches = Regex.Matches(FullLog, regexSearch ? message : Regex.Escape(message));
             matches.Count.ShouldBe(expectedCount);
         }
     }

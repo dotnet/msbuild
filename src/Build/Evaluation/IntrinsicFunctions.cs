@@ -165,6 +165,21 @@ namespace Microsoft.Build.Evaluation
             return ~first;
         }
 
+        internal static int LeftShift(int operand, int count)
+        {
+            return operand << count;
+        }
+
+        internal static int RightShift(int operand, int count)
+        {
+            return operand >> count;
+        }
+
+        internal static int RightShiftUnsigned(int operand, int count)
+        {
+            return operand >>> count;
+        }
+
         /// <summary>
         /// Get the value of the registry key and value, default value is null
         /// </summary>

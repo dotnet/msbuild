@@ -62,6 +62,11 @@
         <target state="translated">MSB6003: Impossible d'exécuter la tâche exécutable spécifiée "{0}". {1}</target>
         <note>{StrBegin="MSB6003: "}</note>
       </trans-unit>
+      <trans-unit id="ToolTask.NotUpToDate">
+        <source>Unable to skip task because it is not up-to-date.</source>
+        <target state="new">Unable to skip task because it is not up-to-date.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>
         <target state="translated">MSB6006: Arrêt de "{0}" avec le code {1}.</target>

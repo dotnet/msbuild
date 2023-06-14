@@ -984,7 +984,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Lame but simple way to get the lookup from another thread
+        /// Bad but simple way to get the lookup from another thread
         /// </summary>
         private static Lookup lookupPassedBetweenThreads;
 

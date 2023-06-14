@@ -88,15 +88,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// - An app.config was passed in that promotes UnifyMe version from 1.0.0.0 to 2.0.0.0
         /// - Version 1.0.0.0 of UnifyMe exists.
         /// - Version 2.0.0.0 of UnifyMe exists.
-        /// -Version 2.0.0.0 of UnifyMe is in the Black List
+        /// -Version 2.0.0.0 of UnifyMe is in the Deny List
         /// Expected:
         /// - There should be a warning indicating that DependsOnUnified has a dependency UnifyMe 2.0.0.0 which is not in a TargetFrameworkSubset.
         /// - There will be no unified message.
         /// Rationale:
-        /// Strongly named dependencies should unify according to the bindingRedirects in the app.config, if the unified version is in the black list it should be removed and warned.
+        /// Strongly named dependencies should unify according to the bindingRedirects in the app.config, if the unified version is in the deny list it should be removed and warned.
         /// </summary>
         [Fact]
-        public void ExistsPromotedDependencyInTheBlackList()
+        public void ExistsPromotedDependencyInTheDenyList()
         {
             string engineOnlySubset =
                 "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +

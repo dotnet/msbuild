@@ -742,7 +742,7 @@ namespace Microsoft.Build.Construction
             /// <summary>
             /// Get enumerator
             /// </summary>
-            public IEnumerator<ProjectElement> GetEnumerator()
+            public readonly IEnumerator<ProjectElement> GetEnumerator()
             {
                 return _enumerator;
             }
@@ -808,7 +808,7 @@ namespace Microsoft.Build.Construction
                 /// <summary>
                 /// Dispose. Do nothing.
                 /// </summary>
-                public void Dispose()
+                public readonly void Dispose()
                 {
                 }
 

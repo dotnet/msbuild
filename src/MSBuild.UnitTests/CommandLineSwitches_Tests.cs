@@ -157,6 +157,31 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("ll")]
+        [InlineData("LL")]
+        [InlineData("livelogger")]
+        [InlineData("LiveLogger")]
+        [InlineData("LIVELOGGER")]
+        [InlineData("tl")]
+        [InlineData("TL")]
+        [InlineData("terminallogger")]
+        [InlineData("TerminalLogger")]
+        [InlineData("TERMINALLOGGER")]
+        public void LiveLoggerSwitchIdentificationTests(string livelogger)
+        {
+            CommandLineSwitches.ParameterizedSwitch parameterlessSwitch;
+            string duplicateSwitchErrorMessage;
+
+            CommandLineSwitches.IsParameterizedSwitch(livelogger, out parameterlessSwitch, out duplicateSwitchErrorMessage, out bool multipleParametersAllowed, out string missingParametersErrorMessage, out bool unquoteParameters, out bool emptyParametersAllowed).ShouldBeTrue();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.LiveLogger);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeTrue();
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBeTrue();
+            emptyParametersAllowed.ShouldBeTrue();
+        }
+
+        [Theory]
         [InlineData("flp")]
         [InlineData("FLP")]
         [InlineData("fileLoggerParameters")]
@@ -1023,6 +1048,7 @@ namespace Microsoft.Build.UnitTests
                                         isolateProjects: ProjectIsolationMode.False,
                                         graphBuildOptions: null,
                                         lowPriority: false,
+                                        question: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,
                                         commandLine: null);

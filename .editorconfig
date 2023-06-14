@@ -295,6 +295,9 @@ dotnet_diagnostic.IDE0049.severity = suggestion
 # Use compound assignment
 dotnet_diagnostic.IDE0054.severity = suggestion
 
+# Fix formatting
+dotnet_diagnostic.IDE0055.severity = suggestion
+
 # Indexing can be simplified
 dotnet_diagnostic.IDE0056.severity = suggestion
 
@@ -386,6 +389,9 @@ dotnet_diagnostic.IDE0241.severity = suggestion
 
 # Struct can be made 'readonly'
 dotnet_diagnostic.IDE0250.severity = suggestion
+
+# Struct methods can be made 'readonly'
+dotnet_diagnostic.IDE0251.severity = suggestion
 
 # Null check can be simplified
 dotnet_diagnostic.IDE0270.severity = suggestion

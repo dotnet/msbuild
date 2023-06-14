@@ -130,26 +130,44 @@ namespace Microsoft.Build.UnitTests.Definition
             Should.Throw<ArgumentException>(() => EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated, fileSystem));
         }
 
-        [Fact]
-        public void EvaluationShouldUseDirectoryCache()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void EvaluationShouldUseDirectoryCache(bool useProjectInstance)
         {
-            var projectFile = _env.CreateFile("1.proj", @"<Project> <ItemGroup Condition=`Exists('1.file')`> <Compile Include='*.cs'/> </ItemGroup> </Project>".Cleanup()).Path;
+            var projectFile = _env.CreateFile("1.proj", @"<Project> <Import Project='1.file' Condition=`Exists('1.file')`/> <ItemGroup><Compile Include='*.cs'/></ItemGroup> </Project>".Cleanup()).Path;
 
             var projectCollection = _env.CreateProjectCollection().Collection;
             var directoryCacheFactory = new Helpers.LoggingDirectoryCacheFactory();
 
-            var project = Project.FromFile(
-                projectFile,
-                new ProjectOptions
-                {
-                    ProjectCollection = projectCollection,
-                    DirectoryCacheFactory = directoryCacheFactory,
-                });
+            int expectedEvaluationId;
+            if (useProjectInstance)
+            {
+                var projectInstance = ProjectInstance.FromFile(
+                    projectFile,
+                    new ProjectOptions
+                    {
+                        ProjectCollection = projectCollection,
+                        DirectoryCacheFactory = directoryCacheFactory,
+                    });
+                expectedEvaluationId = projectInstance.EvaluationId;
+            }
+            else
+            {
+                var project = Project.FromFile(
+                    projectFile,
+                    new ProjectOptions
+                    {
+                        ProjectCollection = projectCollection,
+                        DirectoryCacheFactory = directoryCacheFactory,
+                    });
+                expectedEvaluationId = project.LastEvaluationId;
+            }
 
             directoryCacheFactory.DirectoryCaches.Count.ShouldBe(1);
             var directoryCache = directoryCacheFactory.DirectoryCaches[0];
 
-            directoryCache.EvaluationId.ShouldBe(project.LastEvaluationId);
+            directoryCache.EvaluationId.ShouldBe(expectedEvaluationId);
 
             directoryCache.ExistenceChecks.OrderBy(kvp => kvp.Key).ShouldBe(
                 new Dictionary<string, int>
