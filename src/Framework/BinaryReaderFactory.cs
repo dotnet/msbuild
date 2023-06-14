@@ -8,7 +8,7 @@ namespace Microsoft.Build;
 /// <summary>
 /// Opaque holder of shared buffer.
 /// </summary>
-internal abstract class SharedReadBuffer
+internal abstract class BinaryReaderFactory
 {
     public abstract BinaryReader Create(Stream stream);
 }

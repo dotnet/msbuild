@@ -27,7 +27,7 @@ namespace Microsoft.Build.BackEnd
         /// Returns a read-only serializer.
         /// </summary>
         /// <returns>The serializer.</returns>
-        internal static ITranslator GetReadTranslator(Stream stream, SharedReadBuffer buffer)
+        internal static ITranslator GetReadTranslator(Stream stream, BinaryReaderFactory buffer)
         {
             return new BinaryReadTranslator(stream, buffer);
         }
@@ -62,7 +62,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Constructs a serializer from the specified stream, operating in the designated mode.
             /// </summary>
-            public BinaryReadTranslator(Stream packetStream, SharedReadBuffer buffer)
+            public BinaryReadTranslator(Stream packetStream, BinaryReaderFactory buffer)
             {
                 _packetStream = packetStream;
                 _reader = buffer.Create(packetStream);

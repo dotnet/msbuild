@@ -113,8 +113,8 @@
     <Compile Include="..\Shared\InterningBinaryReader.cs">
       <Link>InterningBinaryReader.cs</Link>
     </Compile>
-    <Compile Include="..\Framework\SharedReadBuffer.cs">
-      <Link>SharedReadBuffer.cs</Link>
+    <Compile Include="..\Framework\BinaryReaderFactory.cs">
+      <Link>BinaryReaderFactory.cs</Link>
     </Compile>
     <Compile Include="..\Shared\BinaryReaderExtensions.cs">
       <Link>BinaryReaderExtensions.cs</Link>
