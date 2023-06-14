@@ -13,9 +13,9 @@
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AotNotSupported">
-        <source>NETSDK1195: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
-        <target state="translated">NETSDK1195: o SDK não oferece suporte à compilação antecipada. Defina a propriedade PublishAot como false.</target>
-        <note>{StrBegin="NETSDK1195: "}</note>
+        <source>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
+        <target state="translated">NETSDK1196: o SDK não oferece suporte à compilação antecipada. Defina a propriedade PublishAot como false.</target>
+        <note>{StrBegin="NETSDK1196: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
