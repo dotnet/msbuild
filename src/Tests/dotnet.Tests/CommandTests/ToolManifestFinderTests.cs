@@ -4,18 +4,18 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.ToolManifest;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using NuGet.Frameworks;
+using Microsoft.NET.TestFramework;
 using NuGet.Versioning;
 using Xunit;
 using LocalizableStrings = Microsoft.DotNet.ToolManifest.LocalizableStrings;
-using System.Linq;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {
@@ -92,6 +92,108 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var manifestResult = toolManifest.Find();
 
             AssertToolManifestPackageListEqual(_defaultExpectedResult, manifestResult);
+        }
+
+        [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX)]
+        public void GivenManifestFileInRootDirectoryForLinuxMacOSItGetsContent()
+        {
+            var rootDirectory = new DirectoryPath(_testDirectoryRoot);
+            while (rootDirectory.GetParentPathNullable() != null)
+            {
+                rootDirectory = (DirectoryPath)rootDirectory.GetParentPathNullable();
+            }
+            var dotnetconfigDirectory = Path.Combine(rootDirectory.Value, ".config");
+            _fileSystem.Directory.CreateDirectory(dotnetconfigDirectory);
+            _fileSystem.File.WriteAllText(Path.Combine(dotnetconfigDirectory, _manifestFilename), _jsonContent);
+            var toolManifest =
+                new ToolManifestFinder(
+                    new DirectoryPath(_testDirectoryRoot),
+                    _fileSystem,
+                    new FakeDangerousFileDetector());
+
+            var manifestResult = toolManifest.Find();
+
+            var expectedResult = new List<ToolManifestPackage>
+            {
+                new ToolManifestPackage(
+                    new PackageId("t-rex"),
+                    NuGetVersion.Parse("1.0.53"),
+                    new[] {new ToolCommandName("t-rex")},
+                    new DirectoryPath(rootDirectory.Value)),
+                new ToolManifestPackage(
+                    new PackageId("dotnetsay"),
+                    NuGetVersion.Parse("2.1.4"),
+                    new[] {new ToolCommandName("dotnetsay")},
+                    new DirectoryPath(rootDirectory.Value))
+            };
+
+            AssertToolManifestPackageListEqual(expectedResult, manifestResult);
+        }
+
+        [PlatformSpecificFact(TestPlatforms.Windows)]
+        public void GivenManifestFileInRootDirectoryItThrowsError()
+        {
+            var rootDirectory = new DirectoryPath(_testDirectoryRoot);
+            while (rootDirectory.GetParentPathNullable() != null)
+            {
+                rootDirectory = (DirectoryPath) rootDirectory.GetParentPathNullable();
+            }
+            var dotnetconfigDirectory = Path.Combine(rootDirectory.Value, ".config");
+            _fileSystem.Directory.CreateDirectory(dotnetconfigDirectory);
+            _fileSystem.File.WriteAllText(Path.Combine(dotnetconfigDirectory, _manifestFilename), _jsonContent);
+            var toolManifest =
+                new ToolManifestFinder(
+                    new DirectoryPath(_testDirectoryRoot),
+                    _fileSystem,
+                    new FakeDangerousFileDetector());
+
+            Action a = () => toolManifest.Find();
+
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.Message.Should()
+                .Contain(LocalizableStrings.CannotFindAManifestFile);
+        }
+
+        [PlatformSpecificFact(TestPlatforms.Windows)]
+        public void GivenManifestFileInRootDirectoryWithEnvVariableCHECK_MANIFEST_IN_ROOTToTrueItGetsContent()
+        {
+            var rootDirectory = new DirectoryPath(_testDirectoryRoot);
+            while (rootDirectory.GetParentPathNullable() != null)
+            {
+                rootDirectory = (DirectoryPath)rootDirectory.GetParentPathNullable();
+            }
+            var dotnetconfigDirectory = Path.Combine(rootDirectory.Value, ".config");
+            _fileSystem.Directory.CreateDirectory(dotnetconfigDirectory);
+            _fileSystem.File.WriteAllText(Path.Combine(dotnetconfigDirectory, _manifestFilename), _jsonContent);
+            var toolManifest =
+                new ToolManifestFinder(
+                    new DirectoryPath(_testDirectoryRoot),
+                    _fileSystem,
+                    new FakeDangerousFileDetector(),
+                    getEnvironmentVariable: name => {
+                        if(name.Equals(EnvironmentVariableNames.DOTNET_TOOLS_ALLOW_MANIFEST_IN_ROOT, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return "true";
+                        }
+                        throw new ArgumentException($"Didn't expect environment query for {name}");
+                });
+
+            var manifestResult = toolManifest.Find();
+
+            var expectedResult = new List<ToolManifestPackage>
+            {
+                new ToolManifestPackage(
+                    new PackageId("t-rex"),
+                    NuGetVersion.Parse("1.0.53"),
+                    new[] {new ToolCommandName("t-rex")},
+                    new DirectoryPath(rootDirectory.Value)),
+                new ToolManifestPackage(
+                    new PackageId("dotnetsay"),
+                    NuGetVersion.Parse("2.1.4"),
+                    new[] {new ToolCommandName("dotnetsay")},
+                    new DirectoryPath(rootDirectory.Value))
+            };
+
+            AssertToolManifestPackageListEqual(expectedResult, manifestResult);
         }
 
         [Fact]
