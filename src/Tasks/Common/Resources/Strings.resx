@@ -507,10 +507,10 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1100: To build a project targeting Windows on this operating system, set the EnableWindowsTargeting property to true.</value>
     <comment>{StrBegin="NETSDK1100: "}</comment>
   </data>
-  <data name="ILLinkRunning_Info" xml:space="preserve">
+  <data name="ILLinkRunning" xml:space="preserve">
     <value>Optimizing assemblies for size. This process might take a while.</value>
   </data>
-  <data name="ILLinkOptimizedAssemblies_Info" xml:space="preserve">
+  <data name="ILLinkOptimizedAssemblies" xml:space="preserve">
     <value>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</value>
   </data>
   <data name="ILLinkNotSupportedError" xml:space="preserve">

@@ -469,14 +469,14 @@
         <target state="translated">NETSDK1102: Die Größenoptimierung von Assemblys wird für die ausgewählte Veröffentlichungskonfiguration nicht unterstützt. Stellen Sie sicher, dass Sie eine eigenständige App veröffentlichen.</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
-      <trans-unit id="ILLinkOptimizedAssemblies_Info">
+      <trans-unit id="ILLinkOptimizedAssemblies">
         <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="translated">Das Optimieren der Assembly für die Größe kann das Verhalten der App ändern. Stellen Sie sicher, dass nach der Veröffentlichung Tests durchgeführt werden. Informationen finden Sie unter https://aka.ms/dotnet-illink.</target>
+        <target state="new">Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
         <note />
       </trans-unit>
-      <trans-unit id="ILLinkRunning_Info">
+      <trans-unit id="ILLinkRunning">
         <source>Optimizing assemblies for size. This process might take a while.</source>
-        <target state="translated">Assemblys werden für die Größe optimiert. Dieser Vorgang kann eine Weile dauern.</target>
+        <target state="new">Optimizing assemblies for size. This process might take a while.</target>
         <note />
       </trans-unit>
       <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">

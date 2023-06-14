@@ -469,14 +469,14 @@
         <target state="translated">NETSDK1102: アセンブリのサイズの最適化は、選択された公開構成に対してはサポートされていません。自己完結型のアプリを公開していることをご確認ください。</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
-      <trans-unit id="ILLinkOptimizedAssemblies_Info">
+      <trans-unit id="ILLinkOptimizedAssemblies">
         <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="translated">アセンブリのサイズを最適化すると、アプリの動作が変わる可能性があります。公開した後に必ずテストしてください。https://aka.ms/dotnet-illink を参照してください</target>
+        <target state="new">Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
         <note />
       </trans-unit>
-      <trans-unit id="ILLinkRunning_Info">
+      <trans-unit id="ILLinkRunning">
         <source>Optimizing assemblies for size. This process might take a while.</source>
-        <target state="translated">アセンブリのサイズを最適化しています。このプロセスには時間がかかる場合があります。</target>
+        <target state="new">Optimizing assemblies for size. This process might take a while.</target>
         <note />
       </trans-unit>
       <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">

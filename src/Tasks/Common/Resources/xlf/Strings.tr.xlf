@@ -469,14 +469,14 @@
         <target state="translated">NETSDK1102: Derlemeleri boyut için iyileştirme, seçilen yayımlama yapılandırması için desteklenmiyor. Lütfen kendi içinde bulunan bir uygulama yayımladığınızdan emin olun.</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
-      <trans-unit id="ILLinkOptimizedAssemblies_Info">
+      <trans-unit id="ILLinkOptimizedAssemblies">
         <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="translated">Bütünleştirilmiş kodların boyutunu iyileştirmek uygulamanın davranışını değiştirebilir. Yayımladıktan sonra test etmeyi unutmayın. Bkz. https://aka.ms/dotnet-illink</target>
+        <target state="new">Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
         <note />
       </trans-unit>
-      <trans-unit id="ILLinkRunning_Info">
+      <trans-unit id="ILLinkRunning">
         <source>Optimizing assemblies for size. This process might take a while.</source>
-        <target state="translated">Derlemelerin boyutu iyileştiriliyor. Bu işlem biraz zaman alabilir.</target>
+        <target state="new">Optimizing assemblies for size. This process might take a while.</target>
         <note />
       </trans-unit>
       <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">

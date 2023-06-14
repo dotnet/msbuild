@@ -469,14 +469,14 @@
         <target state="translated">NETSDK1102: Optymalizacja zestawów pod kątem rozmiaru nie jest obsługiwana w przypadku wybranej konfiguracji publikowania. Upewnij się, że publikujesz niezależną aplikację.</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
-      <trans-unit id="ILLinkOptimizedAssemblies_Info">
+      <trans-unit id="ILLinkOptimizedAssemblies">
         <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="translated">Zestawy są optymalizowane pod kątem rozmiaru, co może spowodować zmianę zachowania aplikacji. Pamiętaj, aby wykonać testy po opublikowaniu. Zobacz: https://aka.ms/dotnet-illink</target>
+        <target state="new">Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
         <note />
       </trans-unit>
-      <trans-unit id="ILLinkRunning_Info">
+      <trans-unit id="ILLinkRunning">
         <source>Optimizing assemblies for size. This process might take a while.</source>
-        <target state="translated">Optymalizowanie zestawów pod kątem rozmiaru. Ten proces może trochę potrwać.</target>
+        <target state="new">Optimizing assemblies for size. This process might take a while.</target>
         <note />
       </trans-unit>
       <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">
