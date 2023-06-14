@@ -308,12 +308,12 @@
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryCount">
         <source>MSB3028: {0} is an invalid retry count. Value must not be negative.</source>
-        <target state="new">MSB3028: {0} is an invalid retry count. Value must not be negative.</target>
+        <target state="translated">MSB3028: {0} 是无效的重试计数。值不能为负数。</target>
         <note>{StrBegin="MSB3028: "} LOCALIZATION: {0} is a number.</note>
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryDelay">
         <source>MSB3029: {0} is an invalid retry delay. Value must not be negative.</source>
-        <target state="new">MSB3029: {0} is an invalid retry delay. Value must not be negative.</target>
+        <target state="translated">MSB3029: {0} 是无效的重试延迟时间。值不能为负数。</target>
         <note>{StrBegin="MSB3029: "} LOCALIZATION: {0} is a number.</note>
       </trans-unit>
       <trans-unit id="Delete.Retrying">
@@ -626,7 +626,7 @@
       </trans-unit>
       <trans-unit id="GenerateBindingRedirects.CreatingBindingRedirectionFile">
         <source>Creating binding redirection file "{0}".</source>
-        <target state="new">Creating binding redirection file "{0}".</target>
+        <target state="translated">正在创建绑定重定向文件"{0}"。</target>
         <note />
       </trans-unit>
       <trans-unit id="GenerateBindingRedirects.MissingConfigurationNode">
@@ -1046,9 +1046,9 @@
       </trans-unit>
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide</source>
+           More information: https://aka.ms/msbuild/net8-binaryformatter</source>
         <target state="new">MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide</target>
+           More information: https://aka.ms/msbuild/net8-binaryformatter</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
@@ -1405,12 +1405,12 @@
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.NoPlatformsListed">
         <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</source>
-        <target state="new">MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</target>
+        <target state="translated">MSB3982: EnableDynamicPlatformResolution 为 true，但引用的项目 \"{0}\" 没有设置 \"Platforms\" 或 \"Platform\" 元数据。它将在没有指定平台的情况下生成。</target>
         <note>{StrBegin="MSB3982: "}</note>
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
         <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
-        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
+        <target state="translated">引用项目 \"{0}\" 的平台属性与当前项目的平台 \"{1}\" 匹配。将在不使用全局平台属性的情况下生成引用的项目。</target>
         <note />
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.SamePlatform">
@@ -1596,7 +1596,7 @@
       </trans-unit>
       <trans-unit id="RemoveDir.EmptyPath">
         <source>MSB3232: An empty directory was passed to RemoveDir and was ignored.</source>
-        <target state="new">MSB3232: An empty directory was passed to RemoveDir and was ignored.</target>
+        <target state="translated">MSB3232: 已向 RemoveDir 传递一个空目录，并且已被忽略。</target>
         <note>{StrBegin="MSB3232: "}</note>
       </trans-unit>
       <trans-unit id="RemoveDir.Error">
@@ -1656,7 +1656,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoBecauseBadImage">
         <source>This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</source>
-        <target state="new">This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</target>
+        <target state="translated">此引用不是 “CopyLocal”，因为它是错误的图像。它可能是本机二进制文件，或者根本不是程序集。</target>
         <note>
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
@@ -2127,7 +2127,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
         <source>TargetFramework Profile List Paths:</source>
-        <target state="new">TargetFramework Profile List Paths:</target>
+        <target state="translated">TargetFramework 配置文件列表路径:</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">
@@ -2152,7 +2152,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
         <source>Updating assembly cache file "{0}".</source>
-        <target state="new">Updating assembly cache file "{0}".</target>
+        <target state="translated">正在更新程序集缓存文件"{0}"。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -2377,7 +2377,7 @@
       </trans-unit>
       <trans-unit id="ResolveKeySource.PfxUnsupported">
         <source>PFX signing not supported on .NET Core.</source>
-        <target state="new">PFX signing not supported on .NET Core.</target>
+        <target state="translated">.NET Core 上不支持 PFX 签名。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveKeySource.ResolvedThumbprintEmpty">
@@ -2731,7 +2731,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
         <source>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</source>
-        <target state="new">'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</target>
+        <target state="translated">只有当 “Overwrite=”true“ 时，"{0}"上的 ”WriteOnlyWhenDifferent“ 特性才会生效。</target>
         <note />
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
@@ -2811,7 +2811,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.SecuritySettingsViaUseTrustedSettings">
         <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
-        <target state="new">You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</target>
+        <target state="translated">你正在通过 UseTrustedSettings 参数启用宽松的 XSLT 安全设置。有关此设置的安全含义的详细信息，请参阅https://aka.ms/msbuild/xsltransformation-task</target>
         <note />
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
