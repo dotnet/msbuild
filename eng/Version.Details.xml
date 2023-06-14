@@ -166,25 +166,25 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
       <Sha>70ae3df4a6f3c92fb6b315afc405edd10ff38579</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="6.0.18">
+    <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="6.0.19">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>44b3a005f161dfc735446e61cbf1e792124170da</Sha>
+      <Sha>85490874889e328b493f95152e3b100ef7789f6e</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.WindowsDesktop.SharedFramework.x64.6.0" Version="6.0.18-servicing.23272.2">
+    <Dependency Name="VS.Redist.Common.WindowsDesktop.SharedFramework.x64.6.0" Version="6.0.19-servicing.23314.4">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>44b3a005f161dfc735446e61cbf1e792124170da</Sha>
+      <Sha>85490874889e328b493f95152e3b100ef7789f6e</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.WindowsDesktop.TargetingPack.x64.6.0" Version="6.0.18-servicing.23272.2">
+    <Dependency Name="VS.Redist.Common.WindowsDesktop.TargetingPack.x64.6.0" Version="6.0.19-servicing.23314.4">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>44b3a005f161dfc735446e61cbf1e792124170da</Sha>
+      <Sha>85490874889e328b493f95152e3b100ef7789f6e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="6.0.18">
+    <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="6.0.19">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
-      <Sha>44b3a005f161dfc735446e61cbf1e792124170da</Sha>
+      <Sha>85490874889e328b493f95152e3b100ef7789f6e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="6.0.18-servicing.23272.2" CoherentParentDependency="Microsoft.WindowsDesktop.App.Runtime.win-x64">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="6.0.19-servicing.23306.4" CoherentParentDependency="Microsoft.WindowsDesktop.App.Runtime.win-x64">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-wpf</Uri>
-      <Sha>a29a62bc7aa91d9e7509261a138af3c27c0506ea</Sha>
+      <Sha>856646c6f16cf5d21c8b3e6704be90d61c6287f2</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.App.Ref" Version="6.0.19">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
