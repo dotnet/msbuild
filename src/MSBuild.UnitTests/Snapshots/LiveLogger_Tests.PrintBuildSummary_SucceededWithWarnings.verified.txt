@@ -3,3 +3,4 @@
 [?25l[1F
 [?25h
 Build [33;1msucceeded with warnings[m in 5.0s
+]9;4;0;\
