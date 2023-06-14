@@ -482,7 +482,7 @@ namespace Microsoft.NET.Publish.Tests
                 publishCommand
                     .Execute($"/p:UseCurrentRuntimeIdentifier=true")
                     .Should().Fail()
-                    .And.HaveStdOutContaining("error NETSDK1183:");
+                    .And.HaveStdOutContaining("error NETSDK1207:");
             }
         }
 
@@ -506,7 +506,7 @@ namespace Microsoft.NET.Publish.Tests
                 publishCommand
                     .Execute($"/p:UseCurrentRuntimeIdentifier=true")
                     .Should().Fail()
-                    .And.HaveStdOutContaining("error NETSDK1183:");
+                    .And.HaveStdOutContaining("error NETSDK1207:");
             }
         }
 
