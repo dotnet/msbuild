@@ -35,6 +35,7 @@ namespace Microsoft.Build.Graph
         private const string PlatformMetadataName = "Platform";
         private const string PlatformsMetadataName = "Platforms";
         private const string EnableDynamicPlatformResolutionPropertyName = "EnableDynamicPlatformResolution";
+        private const string EnableDynamicPlatformFilteringPropertyName = "EnableDynamicPlatformFiltering";
         private const string OverridePlatformNegotiationValue = "OverridePlatformNegotiationValue";
         private const string ShouldUnsetParentConfigurationAndPlatformPropertyName = "ShouldUnsetParentConfigurationAndPlatform";
         private const string ProjectMetadataName = "Project";
@@ -122,6 +123,7 @@ namespace Microsoft.Build.Graph
 
                 string projectReferenceFullPath = projectReferenceItem.GetMetadataValue(FullPathMetadataName);
                 bool enableDynamicPlatformResolution = ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionPropertyName));
+                bool enableDynamicPlatformFiltering = ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformFilteringPropertyName));
 
                 PropertyDictionary<ProjectPropertyInstance> referenceGlobalProperties = GetGlobalPropertiesForItem(
                     projectReferenceItem,
@@ -179,13 +181,17 @@ namespace Microsoft.Build.Graph
 
                     var selectedPlatform = PlatformNegotiation.GetNearestPlatform(overridePlatformNegotiationMetadataValue, projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), requesterInstance.GetPropertyValue(PlatformLookupTableMetadataName), projectInstance.FullPath, requesterInstance.GetPropertyValue(PlatformMetadataName));
 
-                    if (selectedPlatform.Equals(String.Empty))
+                    if (enableDynamicPlatformFiltering && !selectedPlatform.Item1)
+                    {
+                        continue;
+                    }
+                    else if (selectedPlatform.Equals(String.Empty))
                     {
                         referenceGlobalProperties.Remove(PlatformMetadataName);
                     }
                     else
                     {
-                        SetProperty(referenceGlobalProperties, PlatformMetadataName, selectedPlatform);
+                        SetProperty(referenceGlobalProperties, PlatformMetadataName, selectedPlatform.Item2);
                     }
                 }
 

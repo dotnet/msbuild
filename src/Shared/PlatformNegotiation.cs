@@ -19,14 +19,14 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class PlatformNegotiation
     {
-        internal static string GetNearestPlatform(string overridePlatformValue, string referencedProjectPlatform, string projectReferencePlatformsMetadata, string projectReferenceLookupTableMetadata, string platformLookupTable, string projectPath, string currentProjectPlatform, TaskLoggingHelper? log = null)
+        internal static Tuple<bool, String> GetNearestPlatform(string overridePlatformValue, string referencedProjectPlatform, string projectReferencePlatformsMetadata, string projectReferenceLookupTableMetadata, string platformLookupTable, string projectPath, string currentProjectPlatform, TaskLoggingHelper? log = null)
         {
             Dictionary<string, string>? currentProjectLookupTable = ExtractLookupTable(platformLookupTable, log);
 
             if (string.IsNullOrEmpty(projectReferencePlatformsMetadata) && string.IsNullOrEmpty(referencedProjectPlatform))
             {
                 log?.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoPlatformsListed", projectPath);
-                return string.Empty;
+                return Tuple.Create(false, string.Empty);
             }
 
             // Pull platformLookupTable metadata from the referenced project. This allows custom
@@ -94,8 +94,9 @@ namespace Microsoft.Build.Shared
                 log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform", projectPath, referencedProjectPlatform);
                 buildProjectReferenceAs = string.Empty;
             }
-            return buildProjectReferenceAs;
+            return Tuple.Create(true, buildProjectReferenceAs);
         }
+
         internal static Dictionary<string, string>? ExtractLookupTable(string stringTable, TaskLoggingHelper? log = null)
         {
             if (string.IsNullOrEmpty(stringTable))
