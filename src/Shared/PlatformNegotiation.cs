@@ -19,7 +19,7 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class PlatformNegotiation
     {
-        internal static Tuple<bool, String> GetNearestPlatform(string overridePlatformValue, string referencedProjectPlatform, string projectReferencePlatformsMetadata, string projectReferenceLookupTableMetadata, string platformLookupTable, string projectPath, string currentProjectPlatform, TaskLoggingHelper? log = null)
+        internal static Tuple<bool, string> GetNearestPlatform(string overridePlatformValue, string referencedProjectPlatform, string projectReferencePlatformsMetadata, string projectReferenceLookupTableMetadata, string platformLookupTable, string projectPath, string currentProjectPlatform, TaskLoggingHelper? log = null)
         {
             Dictionary<string, string>? currentProjectLookupTable = ExtractLookupTable(platformLookupTable, log);
 

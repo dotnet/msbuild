@@ -185,7 +185,7 @@ namespace Microsoft.Build.Graph
                     {
                         continue;
                     }
-                    else if (selectedPlatform.Equals(String.Empty))
+                    else if (selectedPlatform.Item2.Equals(string.Empty))
                     {
                         referenceGlobalProperties.Remove(PlatformMetadataName);
                     }
