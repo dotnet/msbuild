@@ -35,11 +35,6 @@
     <PackageReference Include="System.Security.Permissions" />
     <PackageReference Include="System.Text.Encoding.CodePages" />
   </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <!-- Need Win32 API on .NET Standard to ping registry for some methods in ToolLocationHelper -->
-    <PackageReference Include="Microsoft.Win32.Registry" />
-  </ItemGroup>
   
   <ItemGroup Label="Shared Code">
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
