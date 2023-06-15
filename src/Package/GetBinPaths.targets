@@ -36,11 +36,6 @@
                          SetPlatform="Platform=x64"
                          OutputItemType="MSBuildTaskHostX64ResolvedProjectReferencePath"
                          GlobalPropertiesToRemove="TargetFramework" />
-
-    <Arm64ProjectReference Include="$(MSBuildThisFileDirectory)\..\MSBuild\MSBuild.csproj"
-                         SetPlatform="Platform=arm64"
-                         SetTargetFramework="TargetFramework=$(FullFrameworkTFM)"
-                         OutputItemType="MSBuildArm64ResolvedProjectReferencePath" />
   </ItemGroup>
 
   <Target Name="SetBinPaths" DependsOnTargets="ResolveProjectReferences">
@@ -52,24 +47,13 @@
 
       <Output TaskParameter="TargetOutputs" ItemName="%(X64ProjectReference.OutputItemType)" />
     </MSBuild>
-
-    <MSBuild
-        Projects="@(Arm64ProjectReference)"
-        BuildInParallel="$(BuildInParallel)"
-        Properties="Configuration=$(Configuration); %(Arm64ProjectReference.SetPlatform); %(Arm64ProjectReference.SetTargetFramework)"
-        RemoveProperties="%(Arm64ProjectReference.GlobalPropertiesToRemove)">
-
-      <Output TaskParameter="TargetOutputs" ItemName="%(Arm64ProjectReference.OutputItemType)" />
-    </MSBuild>
     
     <PropertyGroup>
       <X86BinPath>@(MSBuildResolvedProjectReferencePath->'%(RootDir)%(Directory)')</X86BinPath>
       <X64BinPath>@(MSBuildX64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</X64BinPath>
-      <Arm64BinPath>@(MSBuildArm64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</Arm64BinPath>
       <FrameworkBinPath>@(FrameworkResolvedProjectReferencePath->'%(RootDir)%(Directory)')</FrameworkBinPath>
       <MSBuildTaskHostBinPath>@(MSBuildTaskHostResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostBinPath>
       <MSBuildTaskHostX64BinPath>@(MSBuildTaskHostX64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostX64BinPath>
-      <MSBuildTaskHostArm64BinPath>@(MSBuildTaskHostArm64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostArm64BinPath>
       <MSBuildConversionBinPath>@(MSBuildConversionResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildConversionBinPath>
     </PropertyGroup>
   </Target>

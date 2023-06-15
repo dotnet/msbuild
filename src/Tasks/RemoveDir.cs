@@ -51,6 +51,14 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem directory in Directories)
             {
+                if (string.IsNullOrEmpty(directory.ItemSpec))
+                {
+                    // Skip any empty ItemSpecs, otherwise RemoveDir will wipe the root of the current drive (!).
+                    // https://github.com/dotnet/msbuild/issues/7563
+                    Log.LogWarningWithCodeFromResources("RemoveDir.EmptyPath");
+                    continue;
+                }
+
                 if (FileSystems.Default.DirectoryExists(directory.ItemSpec))
                 {
                     // Do not log a fake command line as well, as it's superfluous, and also potentially expensive

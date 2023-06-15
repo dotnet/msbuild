@@ -300,6 +300,7 @@ namespace Microsoft.Build.UnitTests
                     t.Execute().ShouldBeFalse();
                     engine.Errors.ShouldBe(1);
                     engine.AssertLogContains("MSB5029");
+                    engine.AssertLogContains(engine.ProjectFileOfTaskNode);
                 }
                 finally
                 {
@@ -353,6 +354,7 @@ namespace Microsoft.Build.UnitTests
                     t.Execute().ShouldBeTrue();
                     engine.Warnings.ShouldBe(1);
                     engine.AssertLogContains("MSB5029");
+                    engine.AssertLogContains(engine.ProjectFileOfTaskNode);
                 }
                 finally
                 {

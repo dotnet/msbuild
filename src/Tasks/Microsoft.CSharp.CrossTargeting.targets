@@ -9,7 +9,6 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project>
 
   <!-- Import design time targets for Roslyn Project System. These are only available if Visual Studio is installed. -->

@@ -288,7 +288,7 @@ namespace Microsoft.Build.Tasks
                 // .NETCore Launcher.exe based deployment: If the file is apphost.exe, we need to set 'TargetPath' metadata
                 // to {assemblyname}.exe so that the file gets published as {assemblyname}.exe and not apphost.exe.
                 //
-                if (LauncherBasedDeployment && 
+                if (LauncherBasedDeployment &&
                     targetPath.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) &&
                     !String.IsNullOrEmpty(AssemblyName))
                 {
@@ -396,7 +396,8 @@ namespace Microsoft.Build.Tasks
                         AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
                         if (identity != null && !String.Equals(identity.Culture, "neutral", StringComparison.Ordinal))
                         {
-                            CultureInfo satelliteCulture = GetItemCulture(item);
+                            CultureInfo satelliteCulture = new CultureInfo(identity.Culture);
+                            item.SetMetadata("Culture", identity.Culture);
                             if (PublishFlags.IsSatelliteIncludedByDefault(satelliteCulture, _targetCulture, _includeAllSatellites))
                             {
                                 _satelliteAssembliesPassedAsReferences.Add(item);
@@ -752,7 +753,7 @@ namespace Microsoft.Build.Tasks
             if (item.ItemSpec.EndsWith(".dll") && identity == null && !isDotNetCore)
             {
                 // It is possible that a native dll gets passed in here that was declared as a content file
-                // in a referenced nuget package, which will yield null here. We just need to ignore those 
+                // in a referenced nuget package, which will yield null here. We just need to ignore those
                 // for .NET FX case since those aren't actually references we care about. For .NET Core, native
                 // dll can be passed as a reference so we won't ignore it if isDotNetCore is true.
                 return true;
@@ -877,7 +878,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            
+
             IEnumerator IEnumerable.GetEnumerator()
             {
                 return _dictionary.Values.GetEnumerator();

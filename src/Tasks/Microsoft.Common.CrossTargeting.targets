@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.Common.CrossTargeting.targets
 
@@ -9,7 +9,6 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project DefaultTargets="Build">
 
   <PropertyGroup>
@@ -43,12 +42,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
         <AdditionalPropertiesFromProject>$(_AdditionalPropertiesFromProject)</AdditionalPropertiesFromProject>
         <HasSingleTargetFramework>false</HasSingleTargetFramework>
-        <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
-        <IsRidAgnostic>false</IsRidAgnostic>
-        <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <IsRidAgnostic>@(_TargetFrameworkInfo->'%(IsRidAgnostic)')</IsRidAgnostic>
         <!-- Extract necessary information for SetPlatform negotiation -->
         <!-- This target does not run for cpp projects. -->
         <IsVcxOrNativeProj>false</IsVcxOrNativeProj>
+        <Platform Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">$(Platform)</Platform>
         <Platforms>$(Platforms)</Platforms>
       </_ThisProjectBuildMetadata>
     </ItemGroup>

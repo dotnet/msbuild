@@ -599,6 +599,65 @@ namespace Microsoft.Build.Eventing
             WriteEvent(80, submissionId, sdkName, solutionPath, projectPath, success, wasResultCached);
         }
 
+        [Event(81, Keywords = Keywords.All)]
+        public void SdkResolverServiceFindResolversManifestsStart()
+        {
+            WriteEvent(81);
+        }
+
+        [Event(82, Keywords = Keywords.All)]
+        public void SdkResolverServiceFindResolversManifestsStop(int resolverManifestCount)
+        {
+            WriteEvent(82, resolverManifestCount);
+        }
+
+        [Event(83, Keywords = Keywords.All)]
+        public void SdkResolverServiceLoadResolversStart()
+        {
+            WriteEvent(83);
+        }
+
+        [Event(84, Keywords = Keywords.All)]
+        public void SdkResolverServiceLoadResolversStop(string manifestName, int resolverCount)
+        {
+            WriteEvent(84, manifestName, resolverCount);
+        }
+
+        [Event(85, Keywords = Keywords.All)]
+        public void CreateLoadedTypeStart(string assemblyName)
+        {
+            WriteEvent(85, assemblyName);
+        }
+
+        [Event(86, Keywords = Keywords.All)]
+        public void CreateLoadedTypeStop(string assemblyName)
+        {
+            WriteEvent(86, assemblyName);
+        }
+
+        [Event(87, Keywords = Keywords.All)]
+        public void LoadAssemblyAndFindTypeStart()
+        {
+            WriteEvent(87);
+        }
+
+        [Event(88, Keywords = Keywords.All)]
+        public void LoadAssemblyAndFindTypeStop(string assemblyPath, int numberOfPublicTypesSearched)
+        {
+            WriteEvent(88, assemblyPath, numberOfPublicTypesSearched);
+        }
+        
+        [Event(89, Keywords = Keywords.All)]
+        public void MSBuildServerBuildStart(string commandLine)
+        {
+            WriteEvent(89, commandLine);
+        }
+
+        [Event(90, Keywords = Keywords.All)]
+        public void MSBuildServerBuildStop(string commandLine, int countOfConsoleMessages, long sumSizeOfConsoleMessages, string clientExitType, string serverExitType)
+        {
+            WriteEvent(90, commandLine, countOfConsoleMessages, sumSizeOfConsoleMessages, clientExitType, serverExitType);
+        }
         #endregion
     }
 }

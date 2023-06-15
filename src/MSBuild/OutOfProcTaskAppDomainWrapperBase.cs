@@ -115,7 +115,7 @@ namespace Microsoft.Build.CommandLine
             try
             {
                 TypeLoader typeLoader = new TypeLoader(TaskLoader.IsTaskClass);
-                taskType = typeLoader.Load(taskName, AssemblyLoadInfo.Create(null, taskLocation));
+                taskType = typeLoader.Load(taskName, AssemblyLoadInfo.Create(null, taskLocation), false);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -133,7 +133,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             OutOfProcTaskHostTaskResult taskResult;
-            if (taskType.HasSTAThreadAttribute())
+            if (taskType.HasSTAThreadAttribute)
             {
 #if FEATURE_APARTMENT_STATE
                 taskResult = InstantiateAndExecuteTaskInSTAThread(oopTaskHostNode, taskType, taskName, taskLocation, taskFile, taskLine, taskColumn,

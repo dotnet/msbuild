@@ -1,3 +1,4 @@
+abstract Microsoft.Build.Utilities.AppDomainIsolatedTask.Execute() -> bool
 abstract Microsoft.Build.Utilities.Logger.Initialize(Microsoft.Build.Framework.IEventSource eventSource) -> void
 abstract Microsoft.Build.Utilities.Task.Execute() -> bool
 abstract Microsoft.Build.Utilities.ToolTask.GenerateFullPathToTool() -> string
@@ -33,6 +34,26 @@ const Microsoft.Build.Utilities.SDKManifest.Attributes.TargetedSDKConfiguration 
 const Microsoft.Build.Utilities.SDKManifest.Attributes.TargetPlatform = "TargetPlatform" -> string
 const Microsoft.Build.Utilities.SDKManifest.Attributes.TargetPlatformMinVersion = "TargetPlatformMinVersion" -> string
 const Microsoft.Build.Utilities.SDKManifest.Attributes.TargetPlatformVersion = "TargetPlatformVersion" -> string
+Microsoft.Build.Utilities.AppDomainIsolatedTask
+Microsoft.Build.Utilities.AppDomainIsolatedTask.AppDomainIsolatedTask() -> void
+Microsoft.Build.Utilities.AppDomainIsolatedTask.AppDomainIsolatedTask(System.Resources.ResourceManager taskResources) -> void
+Microsoft.Build.Utilities.AppDomainIsolatedTask.AppDomainIsolatedTask(System.Resources.ResourceManager taskResources, string helpKeywordPrefix) -> void
+Microsoft.Build.Utilities.AppDomainIsolatedTask.BuildEngine.get -> Microsoft.Build.Framework.IBuildEngine
+Microsoft.Build.Utilities.AppDomainIsolatedTask.BuildEngine.set -> void
+Microsoft.Build.Utilities.AppDomainIsolatedTask.HelpKeywordPrefix.get -> string
+Microsoft.Build.Utilities.AppDomainIsolatedTask.HelpKeywordPrefix.set -> void
+Microsoft.Build.Utilities.AppDomainIsolatedTask.HostObject.get -> Microsoft.Build.Framework.ITaskHost
+Microsoft.Build.Utilities.AppDomainIsolatedTask.HostObject.set -> void
+Microsoft.Build.Utilities.AppDomainIsolatedTask.Log.get -> Microsoft.Build.Utilities.TaskLoggingHelper
+Microsoft.Build.Utilities.AppDomainIsolatedTask.TaskResources.get -> System.Resources.ResourceManager
+Microsoft.Build.Utilities.AppDomainIsolatedTask.TaskResources.set -> void
+Microsoft.Build.Utilities.AssemblyFoldersExInfo
+Microsoft.Build.Utilities.AssemblyFoldersExInfo.AssemblyFoldersExInfo(Microsoft.Win32.RegistryHive hive, Microsoft.Win32.RegistryView view, string registryKey, string directoryPath, System.Version targetFrameworkVersion) -> void
+Microsoft.Build.Utilities.AssemblyFoldersExInfo.DirectoryPath.get -> string
+Microsoft.Build.Utilities.AssemblyFoldersExInfo.Hive.get -> Microsoft.Win32.RegistryHive
+Microsoft.Build.Utilities.AssemblyFoldersExInfo.Key.get -> string
+Microsoft.Build.Utilities.AssemblyFoldersExInfo.TargetFrameworkVersion.get -> System.Version
+Microsoft.Build.Utilities.AssemblyFoldersExInfo.View.get -> Microsoft.Win32.RegistryView
 Microsoft.Build.Utilities.AssemblyFoldersFromConfigInfo
 Microsoft.Build.Utilities.AssemblyFoldersFromConfigInfo.AssemblyFoldersFromConfigInfo(string directoryPath, System.Version targetFrameworkVersion) -> void
 Microsoft.Build.Utilities.AssemblyFoldersFromConfigInfo.DirectoryPath.get -> string
@@ -278,6 +299,7 @@ Microsoft.Build.Utilities.VisualStudioVersion.Version150 = 4 -> Microsoft.Build.
 Microsoft.Build.Utilities.VisualStudioVersion.Version160 = 5 -> Microsoft.Build.Utilities.VisualStudioVersion
 Microsoft.Build.Utilities.VisualStudioVersion.Version170 = 6 -> Microsoft.Build.Utilities.VisualStudioVersion
 Microsoft.Build.Utilities.VisualStudioVersion.VersionLatest = 6 -> Microsoft.Build.Utilities.VisualStudioVersion
+override Microsoft.Build.Utilities.AppDomainIsolatedTask.InitializeLifetimeService() -> object
 override Microsoft.Build.Utilities.CommandLineBuilder.ToString() -> string
 override Microsoft.Build.Utilities.TargetPlatformSDK.Equals(object obj) -> bool
 override Microsoft.Build.Utilities.TargetPlatformSDK.GetHashCode() -> int
@@ -290,6 +312,7 @@ static Microsoft.Build.Utilities.ToolLocationHelper.CurrentToolsVersion.get -> s
 static Microsoft.Build.Utilities.ToolLocationHelper.FilterPlatformExtensionSDKs(System.Version targetPlatformVersion, System.Collections.Generic.IDictionary<string, string> extensionSdks) -> System.Collections.Generic.IDictionary<string, string>
 static Microsoft.Build.Utilities.ToolLocationHelper.FilterTargetPlatformSdks(System.Collections.Generic.IList<Microsoft.Build.Utilities.TargetPlatformSDK> targetPlatformSdkList, System.Version osVersion, System.Version vsVersion) -> System.Collections.Generic.IList<Microsoft.Build.Utilities.TargetPlatformSDK>
 static Microsoft.Build.Utilities.ToolLocationHelper.FindRootFolderWhereAllFilesExist(string possibleRoots, string relativeFilePaths) -> string
+static Microsoft.Build.Utilities.ToolLocationHelper.GetAssemblyFoldersExInfo(string registryRoot, string targetFrameworkVersion, string registryKeySuffix, string osVersion, string platform, System.Reflection.ProcessorArchitecture targetProcessorArchitecture) -> System.Collections.Generic.IList<Microsoft.Build.Utilities.AssemblyFoldersExInfo>
 static Microsoft.Build.Utilities.ToolLocationHelper.GetAssemblyFoldersFromConfigInfo(string configFile, string targetFrameworkVersion, System.Reflection.ProcessorArchitecture targetProcessorArchitecture) -> System.Collections.Generic.IList<Microsoft.Build.Utilities.AssemblyFoldersFromConfigInfo>
 static Microsoft.Build.Utilities.ToolLocationHelper.GetDisplayNameForTargetFrameworkDirectory(string targetFrameworkDirectory, System.Runtime.Versioning.FrameworkName frameworkName) -> string
 static Microsoft.Build.Utilities.ToolLocationHelper.GetDotNetFrameworkRootRegistryKey(Microsoft.Build.Utilities.TargetDotNetFrameworkVersion version) -> string

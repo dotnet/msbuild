@@ -209,6 +209,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-

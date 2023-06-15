@@ -63,13 +63,13 @@
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
-        <source>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="translated">MSB4271: la variable d'environnement MSBuildDisableFeaturesFromVersion a un format non valide. Activation de toutes les versions des vagues de changements. Valeur entrée : {0}. Vagues de changements actuelles : {1}.</target>
+        <source>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
+        <target state="needs-review-translation">MSB4271: la variable d'environnement MSBuildDisableFeaturesFromVersion a un format non valide. Activation de toutes les versions des vagues de changements. Valeur entrée : {0}. Vagues de changements actuelles : {1}.</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
-        <source>MSB4272: Environment variable MSBuildDisableFeaturesFromVersion is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="translated">MSB4272: la variable d'environnement MSBuildDisableFeaturesFromVersion a une valeur correspondant à une version hors rotation. Utilisation par défaut de la vague de changements version {0}. Valeur entrée : {1}. Vagues de changements actuelles : {2}.</target>
+        <source>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
+        <target state="needs-review-translation">MSB4272: la variable d'environnement MSBuildDisableFeaturesFromVersion a une valeur correspondant à une version hors rotation. Utilisation par défaut de la vague de changements version {0}. Valeur entrée : {1}. Vagues de changements actuelles : {2}.</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -100,6 +100,11 @@
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: Le fichier cache des résultats de sortie spécifié est vide.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentDerivedPropertyRead">
+        <source>Property '{0}' with value '{1}' expanded from the environment.</source>
+        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -143,9 +148,8 @@
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
-        <source>Loading the following project cache plugin:
-    {0}</source>
-        <target state="translated">Chargement du plug-in de cache de projet suivant:
+        <source>Loading the following project cache plugin: {0}</source>
+        <target state="needs-review-translation">Chargement du plug-in de cache de projet suivant:
     {0}</target>
         <note />
       </trans-unit>
@@ -174,11 +178,6 @@
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
         <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
         <target state="translated">MSB4270: plug-ins de cache de projet introuvables dans l'assembly "{0}". Un plug-in est attendu.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NotAllNodesDefineACacheItem">
-        <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
-        <target state="translated">MSB4269: quand un nœud de graphe statique définit un cache de projet, tous les nœuds doivent définir le même cache de projet. Le ou les projets suivants ne contiennent pas de déclaration d'élément "{0}" : {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -219,19 +218,9 @@
         <target state="translated">Impossible d'appeler la méthode {0} avec une collection contenant des noms de cibles qui ont une valeur null ou qui sont vides.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyOneCachePluginMustBeSpecified">
-        <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
-        <target state="translated">MSB4265: un seul plug-in de cache de projet doit être spécifié, mais plusieurs plug-ins ont été trouvés : {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
         <source>Created an override using task: {0} at {1}</source>
         <target state="translated">Remplacement créé à l’aide de la tâche : {0} au {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectCacheBeginBuild">
-        <source>Initializing project cache plugin.</source>
-        <target state="translated">Initialisation du plug-in du cache de projet.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheEndBuild">

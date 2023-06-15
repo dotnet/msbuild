@@ -40,6 +40,12 @@ namespace Microsoft.Build.Internal
                 _streamReader = new StreamReader(_stream, s_utf8NoBom, detectEncodingFromByteOrderMarks: true);
                 Encoding detectedEncoding;
 
+#if RUNTIME_TYPE_NETCORE
+                // Ensure that all Windows codepages are available.
+                // Safe to call multiple times per https://docs.microsoft.com/en-us/dotnet/api/system.text.encoding.registerprovider
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+#endif
+
                 // The XmlDocumentWithWithLocation class relies on the reader's BaseURI property to be set,
                 // thus we pass the document's file path to the appropriate xml reader constructor.
                 Reader = GetXmlReader(file, _streamReader, loadAsReadOnly, out detectedEncoding);

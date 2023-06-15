@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -862,7 +863,10 @@ namespace Microsoft.Build.Utilities
                         _firstProjectStartedEventContext = buildEvent.BuildEventContext;
 
                         // We've never seen a project started event, so raise the build started event and save this project started event.
-                        BuildStartedEventArgs startedEvent = new BuildStartedEventArgs(_buildStartedEvent.Message, _buildStartedEvent.HelpKeyword, _buildStartedEvent.BuildEnvironment);
+                        BuildStartedEventArgs startedEvent =
+                            new BuildStartedEventArgs(_buildStartedEvent.Message,
+                            _buildStartedEvent.HelpKeyword,
+                            Traits.LogAllEnvironmentVariables ? _buildStartedEvent.BuildEnvironment : _buildStartedEvent.BuildEnvironment?.Where(kvp => EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
                         RaiseBuildStartedEvent(sender, startedEvent);
                     }
 

@@ -5,10 +5,15 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
+#if !NETFRAMEWORK
+using System.Runtime.Loader;
+#endif
 using System.Threading;
+using Microsoft.Build.Eventing;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -40,6 +45,25 @@ namespace Microsoft.Build.Shared
         /// Type filter for this typeloader
         /// </summary>
         private Func<Type, object, bool> _isDesiredType;
+
+        private static MetadataLoadContext _context;
+
+        private static string[] runtimeAssemblies = findRuntimeAssembliesWithMicrosoftBuildFramework();
+        private static string microsoftBuildFrameworkPath;
+
+        // We need to append Microsoft.Build.Framework from next to the executing assembly first to make sure it's loaded before the runtime variant.
+        private static string[] findRuntimeAssembliesWithMicrosoftBuildFramework()
+        {
+            string msbuildDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            microsoftBuildFrameworkPath = Path.Combine(msbuildDirectory, "Microsoft.Build.Framework.dll");
+            string[] msbuildAssemblies = Directory.GetFiles(msbuildDirectory, "*.dll");
+            string[] runtimeAssemblies = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
+
+            List<string> runtimeAssembliesList = new(runtimeAssemblies);
+            runtimeAssembliesList.AddRange(msbuildAssemblies);
+
+            return runtimeAssembliesList.ToArray();
+        }
 
         /// <summary>
         /// Constructor.
@@ -139,26 +163,20 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         private static Assembly LoadAssembly(AssemblyLoadInfo assemblyLoadInfo)
         {
-            Assembly loadedAssembly = null;
-
             try
             {
                 if (assemblyLoadInfo.AssemblyName != null)
                 {
-#if !FEATURE_ASSEMBLYLOADCONTEXT
-                    loadedAssembly = Assembly.Load(assemblyLoadInfo.AssemblyName);
-#else
-                    loadedAssembly = Assembly.Load(new AssemblyName(assemblyLoadInfo.AssemblyName));
-#endif
+                    return Assembly.Load(assemblyLoadInfo.AssemblyName);
                 }
                 else
                 {
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-                    loadedAssembly = Assembly.UnsafeLoadFrom(assemblyLoadInfo.AssemblyFile);
+                    return Assembly.UnsafeLoadFrom(assemblyLoadInfo.AssemblyFile);
 #else
-                    var baseDir = Path.GetDirectoryName(assemblyLoadInfo.AssemblyFile);
+                    string baseDir = Path.GetDirectoryName(assemblyLoadInfo.AssemblyFile);
                     s_coreClrAssemblyLoader.AddDependencyLocation(baseDir);
-                    loadedAssembly = s_coreClrAssemblyLoader.LoadFromPath(assemblyLoadInfo.AssemblyFile);
+                    return s_coreClrAssemblyLoader.LoadFromPath(assemblyLoadInfo.AssemblyFile);
 #endif
                 }
             }
@@ -169,8 +187,26 @@ namespace Microsoft.Build.Shared
                 // NOTE: don't use ErrorUtilities.VerifyThrowFileExists() here because that will hit the disk again
                 throw new FileNotFoundException(null, assemblyLoadInfo.AssemblyLocation, e);
             }
+        }
 
-            return loadedAssembly;
+        private static Assembly LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
+        {
+            string path = assemblyLoadInfo.AssemblyFile;
+            string[] localAssemblies = Directory.GetFiles(Path.GetDirectoryName(path), "*.dll");
+
+            // Deduplicate between MSBuild assemblies and task dependencies. 
+            Dictionary<string, string> assembliesDictionary = new(localAssemblies.Length + runtimeAssemblies.Length);
+            foreach (string localPath in localAssemblies) {
+                assembliesDictionary.Add(Path.GetFileName(localPath), localPath);
+            }
+
+            foreach (string runtimeAssembly in runtimeAssemblies)
+            {
+                assembliesDictionary[Path.GetFileName(runtimeAssembly)] = runtimeAssembly;
+            }
+
+            _context = new(new PathAssemblyResolver(assembliesDictionary.Values));
+            return _context.LoadFromAssemblyPath(path);
         }
 
         /// <summary>
@@ -181,10 +217,11 @@ namespace Microsoft.Build.Shared
         internal LoadedType Load
         (
             string typeName,
-            AssemblyLoadInfo assembly
+            AssemblyLoadInfo assembly,
+            bool useTaskHost = false
         )
         {
-            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly);
+            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, useTaskHost);
         }
 
         /// <summary>
@@ -199,7 +236,7 @@ namespace Microsoft.Build.Shared
             AssemblyLoadInfo assembly
         )
         {
-            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly);
+            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false);
         }
 
         /// <summary>
@@ -207,7 +244,7 @@ namespace Microsoft.Build.Shared
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
         /// </summary>
-        private LoadedType GetLoadedType(ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache, string typeName, AssemblyLoadInfo assembly)
+        private LoadedType GetLoadedType(ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache, string typeName, AssemblyLoadInfo assembly, bool useTaskHost)
         {
             // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which 
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
@@ -218,7 +255,7 @@ namespace Microsoft.Build.Shared
             AssemblyInfoToLoadedTypes typeNameToType =
                 loadInfoToType.GetOrAdd(assembly, (_) => new AssemblyInfoToLoadedTypes(_isDesiredType, _));
 
-            return typeNameToType.GetLoadedTypeByTypeName(typeName);
+            return typeNameToType.GetLoadedTypeByTypeName(typeName, useTaskHost);
         }
 
         /// <summary>
@@ -256,6 +293,8 @@ namespace Microsoft.Build.Shared
             /// </summary>
             private Dictionary<string, Type> _publicTypeNameToType;
 
+            private ConcurrentDictionary<string, LoadedType> _publicTypeNameToLoadedType;
+
             /// <summary>
             /// Have we scanned the public types for this assembly yet.
             /// </summary>
@@ -278,19 +317,24 @@ namespace Microsoft.Build.Shared
 
                 _isDesiredType = typeFilter;
                 _assemblyLoadInfo = loadInfo;
-                _typeNameToType = new ConcurrentDictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+                _typeNameToType = new(StringComparer.OrdinalIgnoreCase);
                 _publicTypeNameToType = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+                _publicTypeNameToLoadedType = new(StringComparer.OrdinalIgnoreCase);
             }
 
             /// <summary>
             /// Determine if a given type name is in the assembly or not. Return null if the type is not in the assembly
             /// </summary>
-            internal LoadedType GetLoadedTypeByTypeName(string typeName)
+            internal LoadedType GetLoadedTypeByTypeName(string typeName, bool useTaskHost)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
 
-                // Only one thread should be doing operations on this instance of the object at a time.
+                if (useTaskHost && _assemblyLoadInfo.AssemblyFile is not null)
+                {
+                    return GetLoadedTypeFromTypeNameUsingMetadataLoadContext(typeName);
+                }
 
+                // Only one thread should be doing operations on this instance of the object at a time.
                 Type type = _typeNameToType.GetOrAdd(typeName, (key) =>
                 {
                     if ((_assemblyLoadInfo.AssemblyName != null) && (typeName.Length > 0))
@@ -336,14 +380,40 @@ namespace Microsoft.Build.Shared
                     return null;
                 });
 
-                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly) : null;
+                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, typeof(ITaskItem), loadedViaMetadataLoadContext: false) : null;
+            }
+
+            private LoadedType GetLoadedTypeFromTypeNameUsingMetadataLoadContext(string typeName)
+            {
+                return _publicTypeNameToLoadedType.GetOrAdd(typeName, typeName =>
+                {
+                    MSBuildEventSource.Log.LoadAssemblyAndFindTypeStart();
+                    Assembly loadedAssembly = LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo);
+                    int numberOfTypesSearched = 0;
+                    foreach (Type publicType in loadedAssembly.GetExportedTypes())
+                    {
+                        numberOfTypesSearched++;
+                        if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
+                        {
+                            MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
+                            LoadedType loadedType = new(publicType, _assemblyLoadInfo, loadedAssembly, _context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName), loadedViaMetadataLoadContext: true);
+                            _context?.Dispose();
+                            _context = null;
+                            MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
+                            return loadedType;
+                        }
+                    }
+
+                    MSBuildEventSource.Log.LoadAssemblyAndFindTypeStop(_assemblyLoadInfo.AssemblyFile, numberOfTypesSearched);
+
+                    return null;
+                });
             }
 
             /// <summary>
             /// Scan the assembly pointed to by the assemblyLoadInfo for public types. We will use these public types to do partial name matching on 
             /// to find tasks, loggers, and task factories.
             /// </summary>
-            [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.Reflection.Assembly.LoadFrom", Justification = "Necessary in this case.")]
             private void ScanAssemblyForPublicTypes()
             {
                 // we need to search the assembly for the type...

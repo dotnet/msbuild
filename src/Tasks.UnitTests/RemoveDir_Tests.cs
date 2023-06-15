@@ -72,8 +72,32 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+
+        /// <summary>
+        /// Regression test: https://github.com/dotnet/msbuild/issues/7563
+        /// </summary>
+        [Fact]
+        public void DeleteEmptyDirectory_WarnsAndContinues()
+        {
+
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+               List<TaskItem> list = new List<TaskItem>();
+
+                for (int i = 0; i < 20; i++)
+               {
+                    list.Add(new TaskItem(""));
+               }
+
+               RemoveDir t = new RemoveDir();
+               t.Directories = list.ToArray();
+               t.BuildEngine = new MockEngine(_output);
+               t.Execute().ShouldBeTrue();
+
+                t.RemovedDirectories.Length.ShouldBe(0);
+                ((MockEngine)t.BuildEngine).Warnings.ShouldBe(20);
+               ((MockEngine)t.BuildEngine).AssertLogContains("MSB3232");
+            }
+        }
     }
 }
-
-
-

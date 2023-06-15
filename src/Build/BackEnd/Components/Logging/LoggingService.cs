@@ -4,12 +4,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
@@ -103,7 +101,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// The mapping of build request configuration ids to project file names.
         /// </summary>
-        private Dictionary<int, string> _projectFileMap;
+        private ConcurrentDictionary<int, string> _projectFileMap;
 
         /// <summary>
         /// The current state of the logging service
@@ -167,12 +165,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// The next project ID to assign when a project evaluation started event is received.
         /// </summary>
-        private int _nextEvaluationId = 1;
+        private int _nextEvaluationId;
 
         /// <summary>
         /// The next project ID to assign when a project started event is received.
         /// </summary>
-        private int _nextProjectId = 1;
+        private int _nextProjectId;
 
         /// <summary>
         /// The next target ID to assign when a target started event is received.
@@ -239,14 +237,32 @@ namespace Microsoft.Build.BackEnd.Logging
         #region LoggingThread Data
 
         /// <summary>
-        /// The data flow buffer for logging events.
+        /// Queue for asynchronous event processing.
         /// </summary>
-        private BufferBlock<object> _loggingQueue;
+        private ConcurrentQueue<object> _eventQueue;
 
         /// <summary>
-        /// The data flow processor for logging events.
+        /// Event set when message is consumed from queue.
         /// </summary>
-        private ActionBlock<object> _loggingQueueProcessor;
+        private AutoResetEvent _dequeueEvent;
+        /// <summary>
+        /// Event set when queue become empty.
+        /// </summary>
+        private ManualResetEvent _emptyQueueEvent;
+        /// <summary>
+        /// Even set when message is added into queue.
+        /// </summary>
+        private AutoResetEvent _enqueueEvent;
+
+        /// <summary>
+        /// CTS for stopping logging event processing.
+        /// </summary>
+        private CancellationTokenSource _loggingEventProcessingCancellation;
+
+        /// <summary>
+        /// Task which pump/process messages from <see cref="_eventQueue"/>
+        /// </summary>
+        private Thread _loggingEventProcessingThread;
 
         /// <summary>
         /// The queue size above which the queue will close to messages from remote nodes.
@@ -276,7 +292,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="nodeId">The node identifier.</param>
         protected LoggingService(LoggerMode loggerMode, int nodeId)
         {
-            _projectFileMap = new Dictionary<int, string>();
+            _projectFileMap = new ConcurrentDictionary<int, string>();
             _logMode = loggerMode;
             _loggers = new List<ILogger>();
             _loggerDescriptions = new List<LoggerDescription>();
@@ -301,7 +317,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (_logMode == LoggerMode.Asynchronous)
             {
-                CreateLoggingEventQueue();
+                StartLoggingEventProcessing();
             }
 
             // Ensure the static constructor of ItemGroupLoggingHelper runs.
@@ -372,11 +388,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get
             {
-                lock (_lockObject)
-                {
-                    _nextEvaluationId += MaxCPUCount + 2 /* We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)*/;
-                    return _nextEvaluationId;
-                }
+                // We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)
+                return Interlocked.Add(ref _nextEvaluationId, MaxCPUCount + 2);
             }
         }
 
@@ -388,11 +401,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get
             {
-                lock (_lockObject)
-                {
-                    _nextProjectId += MaxCPUCount + 2 /* We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)*/;
-                    return _nextProjectId;
-                }
+                // We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)
+                return Interlocked.Add(ref _nextProjectId, MaxCPUCount + 2);
             }
         }
 
@@ -404,11 +414,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get
             {
-                lock (_lockObject)
-                {
-                    _nextTargetId++;
-                    return _nextTargetId;
-                }
+                return Interlocked.Increment(ref _nextTargetId);
             }
         }
 
@@ -420,11 +426,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get
             {
-                lock (_lockObject)
-                {
-                    _nextTaskId++;
-                    return _nextTaskId;
-                }
+                return Interlocked.Increment(ref _nextTaskId);
             }
         }
 
@@ -691,28 +693,6 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Return whether or not the LoggingQueue has any events left in it
-        /// </summary>
-        public bool LoggingQueueHasEvents
-        {
-            get
-            {
-                lock (_lockObject)
-                {
-                    if (_loggingQueue != null)
-                    {
-                        return _loggingQueue.Count > 0;
-                    }
-                    else
-                    {
-                        ErrorUtilities.ThrowInternalError("loggingQueue is null");
-                        return false;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Return an array which contains the logger type names
         /// this can be used to display which loggers are registered on the node
         /// </summary>
@@ -861,7 +841,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         // 2. Terminate the logging event queue
                         if (_logMode == LoggerMode.Asynchronous)
                         {
-                            TerminateLoggingEventQueue();
+                            TerminateLoggingEventProcessing();
                         }
                     }
 
@@ -885,12 +865,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // sink for the central loggers.
                     _centralForwardingLoggerSinkId = -1;
 
-                    // Clean up anything related to the asynchronous logging
-                    if (_logMode == LoggerMode.Asynchronous)
-                    {
-                        _loggingQueue = null;
-                        _loggingQueueProcessor = null;
-                    }
+                    CleanLoggingEventProcessing();
 
                     _loggers = new List<ILogger>();
                     _loggerDescriptions = null;
@@ -924,7 +899,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             LogMessagePacket loggingPacket = (LogMessagePacket)packet;
             InjectNonSerializedData(loggingPacket);
-            ProcessLoggingEvent(loggingPacket.NodeBuildEvent, allowThrottling: true);
+            ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
         }
 
         /// <summary>
@@ -1150,45 +1125,42 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
         public void LogBuildEvent(BuildEventArgs buildEvent)
         {
-            lock (_lockObject)
+            ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
+
+            BuildWarningEventArgs warningEvent = null;
+            BuildErrorEventArgs errorEvent = null;
+            BuildMessageEventArgs messageEvent = null;
+
+            if ((warningEvent = buildEvent as BuildWarningEventArgs) != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
-                ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
+                warningEvent.ProjectFile = GetAndVerifyProjectFileFromContext(warningEvent.BuildEventContext);
+            }
+            else if ((errorEvent = buildEvent as BuildErrorEventArgs) != null && errorEvent.BuildEventContext != null && errorEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+            {
+                errorEvent.ProjectFile = GetAndVerifyProjectFileFromContext(errorEvent.BuildEventContext);
+            }
+            else if ((messageEvent = buildEvent as BuildMessageEventArgs) != null && messageEvent.BuildEventContext != null && messageEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+            {
+                messageEvent.ProjectFile = GetAndVerifyProjectFileFromContext(messageEvent.BuildEventContext);
+            }
 
-                BuildWarningEventArgs warningEvent = null;
-                BuildErrorEventArgs errorEvent = null;
-                BuildMessageEventArgs messageEvent = null;
-
-                if ((warningEvent = buildEvent as BuildWarningEventArgs) != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+            if (OnlyLogCriticalEvents)
+            {
+                // Only log certain events if OnlyLogCriticalEvents is true
+                if (
+                    (warningEvent != null)
+                    || (errorEvent != null)
+                    || (buildEvent is CustomBuildEventArgs)
+                    || (buildEvent is CriticalBuildMessageEventArgs)
+                   )
                 {
-                    warningEvent.ProjectFile = GetAndVerifyProjectFileFromContext(warningEvent.BuildEventContext);
-                }
-                else if ((errorEvent = buildEvent as BuildErrorEventArgs) != null && errorEvent.BuildEventContext != null && errorEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
-                {
-                    errorEvent.ProjectFile = GetAndVerifyProjectFileFromContext(errorEvent.BuildEventContext);
-                }
-                else if ((messageEvent = buildEvent as BuildMessageEventArgs) != null && messageEvent.BuildEventContext != null && messageEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
-                {
-                    messageEvent.ProjectFile = GetAndVerifyProjectFileFromContext(messageEvent.BuildEventContext);
-                }
-
-                if (OnlyLogCriticalEvents)
-                {
-                    // Only log certain events if OnlyLogCriticalEvents is true
-                    if (
-                        (warningEvent != null)
-                        || (errorEvent != null)
-                        || (buildEvent is CustomBuildEventArgs)
-                        || (buildEvent is CriticalBuildMessageEventArgs)
-                       )
-                    {
-                        ProcessLoggingEvent(buildEvent);
-                    }
-                }
-                else
-                {
-                    // Log all events if OnlyLogCriticalEvents is false
                     ProcessLoggingEvent(buildEvent);
                 }
+            }
+            else
+            {
+                // Log all events if OnlyLogCriticalEvents is false
+                ProcessLoggingEvent(buildEvent);
             }
         }
 
@@ -1202,20 +1174,21 @@ namespace Microsoft.Build.BackEnd.Logging
         /// In Synchronous mode the event should be routed to the correct sink or logger right away
         /// </summary>
         /// <param name="buildEvent">BuildEventArgs to process</param>
-        /// <param name="allowThrottling"><code>true</code> to allow throttling, otherwise <code>false</code>.</param>
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
-        internal virtual void ProcessLoggingEvent(object buildEvent, bool allowThrottling = false)
+        internal virtual void ProcessLoggingEvent(object buildEvent)
         {
             ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
             {
-                // If the queue is at capacity, this call will block - the task returned by SendAsync only completes 
-                // when the message is actually consumed or rejected (permanently) by the buffer.
-                var task = _loggingQueue.SendAsync(buildEvent);
-                if (allowThrottling)
+                // Block until queue is not full.
+                while (_eventQueue.Count >= _queueCapacity)
                 {
-                    task.Wait();
+                    // Block and wait for dequeue event.
+                    _dequeueEvent.WaitOne();
                 }
+
+                _eventQueue.Enqueue(buildEvent);
+                _enqueueEvent.Set();
             }
             else
             {
@@ -1227,41 +1200,21 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Wait for the logging messages in the logging queue to be completly processed.
+        /// Wait for the logging messages in the logging queue to be completely processed.
         /// This is required because for Logging build finished or when the component is to shutdown
         /// we need to make sure we process all of the events before the build finished event is raised
         /// and we need to make sure we process all of the logging events before we shutdown the component.
         /// </summary>
-        internal void WaitForThreadToProcessEvents()
+        public void WaitForLoggingToProcessEvents()
         {
-            // This method may be called in the shutdown submission callback, this callback may be called after the logging service has 
-            // shutdown and nulled out the events we were going to wait on.
-            if (_logMode == LoggerMode.Asynchronous && _loggingQueue != null)
+            while (_eventQueue?.IsEmpty == false)
             {
-                BufferBlock<object> loggingQueue = null;
-                ActionBlock<object> loggingQueueProcessor = null;
-
-                lock (_lockObject)
-                {
-                    loggingQueue = _loggingQueue;
-                    loggingQueueProcessor = _loggingQueueProcessor;
-
-                    // Replaces _loggingQueue and _loggingQueueProcessor with new one, this will assure that
-                    // no further messages could possibly be trying to be added into queue we are about to drain
-                    CreateLoggingEventQueue();
-                }
-
-                // Drain queue.
-                // This shall not be locked to avoid possible deadlock caused by
-                // event handlers to reenter 'this' instance while trying to log something.
-                if (loggingQueue != null)
-                {
-                    Debug.Assert(!Monitor.IsEntered(_lockObject));
-
-                    loggingQueue.Complete();
-                    loggingQueueProcessor.Completion.Wait();
-                }
+                _emptyQueueEvent?.WaitOne();
             }
+            // To avoid race condition when last message has been removed from queue but
+            //   not yet fully processed (handled by loggers), we need to make sure _emptyQueueEvent
+            //   is set as it is guaranteed to be in set state no sooner than after event has been processed.
+            _emptyQueueEvent?.WaitOne();
         }
 
         /// <summary>
@@ -1305,55 +1258,80 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Create a logging thread to process the logging queue
+        /// Create a logging thread to process the logging queue.
         /// </summary>
-        private void CreateLoggingEventQueue()
+        private void StartLoggingEventProcessing()
         {
-            // We are creating a two-node dataflow graph here.  The first node is a buffer, which will hold up to the number of
-            // logging events we have specified as the queueCapacity.  The second node is the processor which will actually process each message.
-            // When the capacity of the buffer is reached, further attempts to send messages to it will block.
-            // The reason we can't just set the BoundedCapacity on the processing block is that ActionBlock has some weird behavior
-            // when the queue capacity is reached.  Specifically, it will block new messages from being processed until it has
-            // entirely drained its input queue, as opposed to letting new ones in as old ones are processed.  This is logged as 
-            // a perf bug (305575) against Dataflow.  If they choose to fix it, we can eliminate the buffer node from the graph.
-            var dataBlockOptions = new DataflowBlockOptions
+            _eventQueue = new ConcurrentQueue<object>();
+            _dequeueEvent = new AutoResetEvent(false);
+            _emptyQueueEvent = new ManualResetEvent(false);
+            _enqueueEvent = new AutoResetEvent(false);
+            _loggingEventProcessingCancellation = new CancellationTokenSource();
+
+            _loggingEventProcessingThread = new Thread(LoggingEventProc);
+            _loggingEventProcessingThread.Name = $"MSBuild LoggingService events queue pump: {this.GetHashCode()}";
+            _loggingEventProcessingThread.IsBackground = true;
+            _loggingEventProcessingThread.Start();
+
+            void LoggingEventProc()
             {
-                BoundedCapacity = Convert.ToInt32(_queueCapacity)
-            };
+                var completeAdding = _loggingEventProcessingCancellation.Token;
+                WaitHandle[] waitHandlesForNextEvent = { completeAdding.WaitHandle, _enqueueEvent };
 
-            var loggingQueue = new BufferBlock<object>(dataBlockOptions);
+                do
+                {
+                    if (_eventQueue.TryDequeue(out object ev))
+                    {
+                        LoggingEventProcessor(ev);
+                        _dequeueEvent.Set();
+                    }
+                    else
+                    {
+                        _emptyQueueEvent.Set();
 
-            var executionDataBlockOptions = new ExecutionDataflowBlockOptions
-            {
-                BoundedCapacity = 1
-            };
+                        // Wait for next event, or finish.
+                        if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
+                        {
+                            WaitHandle.WaitAny(waitHandlesForNextEvent);
+                        }
 
-            var loggingQueueProcessor = new ActionBlock<object>(loggingEvent => LoggingEventProcessor(loggingEvent), executionDataBlockOptions);
+                        _emptyQueueEvent.Reset();
+                    }
+                } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
 
-            var dataLinkOptions = new DataflowLinkOptions
-            {
-                PropagateCompletion = true
-            };
-
-            loggingQueue.LinkTo(loggingQueueProcessor, dataLinkOptions);
-
-            lock (_lockObject)
-            {
-                _loggingQueue = loggingQueue;
-                _loggingQueueProcessor = loggingQueueProcessor;
+                _emptyQueueEvent.Set();
             }
         }
 
-        /// <summary>
-        /// Wait for the logginQueue to empty and then terminate the logging thread
-        /// </summary>
-        private void TerminateLoggingEventQueue()
-        {
-            // Dont accept any more items from other threads.
-            _loggingQueue.Complete();
 
-            // Wait for completion
-            _loggingQueueProcessor.Completion.Wait();
+        /// <summary>
+        /// Clean resources used for logging event processing queue.
+        /// </summary>
+        private void CleanLoggingEventProcessing()
+        {
+            _loggingEventProcessingCancellation?.Cancel();
+            _dequeueEvent?.Dispose();
+            _enqueueEvent?.Dispose();
+            _emptyQueueEvent?.Dispose();
+            _loggingEventProcessingCancellation?.Dispose();
+
+            _eventQueue = null;
+            _dequeueEvent = null;
+            _enqueueEvent = null;
+            _emptyQueueEvent = null;
+            _loggingEventProcessingCancellation = null;
+            _loggingEventProcessingThread = null;
+        }
+
+        /// <summary>
+        /// Create a logging thread to process the logging queue
+        /// </summary>
+        private void TerminateLoggingEventProcessing()
+        {
+            // Capture pump task in local variable as cancelling event processing is nulling _loggingEventProcessingThread.
+            var pumpTask = _loggingEventProcessingThread;
+            _loggingEventProcessingCancellation.Cancel();
+            pumpTask.Join();
         }
 
         /// <summary>
@@ -1451,17 +1429,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void RouteBuildEvent(object loggingEvent)
         {
-            BuildEventArgs buildEventArgs = null;
-
-            if (loggingEvent is BuildEventArgs bea)
-            {
-                buildEventArgs = bea;
-            }
-            else if (loggingEvent is KeyValuePair<int, BuildEventArgs> kvp)
-            {
-                buildEventArgs = kvp.Value;
-            }
-            else
+            BuildEventArgs buildEventArgs = loggingEvent as BuildEventArgs ?? (loggingEvent as KeyValuePair<int, BuildEventArgs>?)?.Value;
+            if (buildEventArgs is null)
             {
                 ErrorUtilities.ThrowInternalError("Unknown logging item in queue:" + loggingEvent.GetType().FullName);
             }
@@ -1560,7 +1529,7 @@ namespace Microsoft.Build.BackEnd.Logging
             TryRaiseProjectStartedEvent(eventArg);
 
             // The event has not been through a filter yet. All events must go through a filter before they make it to a logger
-            if (_filterEventSource != null)   // Loggers may not be registered
+            if (_filterEventSource != null) // Loggers may not be registered
             {
                 // Send the event to the filter, the Consume will not return until all of the loggers which have registered to the event have process
                 // them.
@@ -1581,7 +1550,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         {
                             if (!sink.HaveLoggedBuildStartedEvent)
                             {
-                                sink.Consume(eventArg, (int)pair.Key);
+                                sink.Consume(eventArg, pair.Key);
                             }
 
                             // Reset the HaveLoggedBuildStarted event because no one else will be sending a build started event to any loggers at this time.

@@ -16,6 +16,7 @@ using Xunit.Abstractions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System.Runtime.Versioning;
 
 #nullable disable
 
@@ -919,6 +920,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private static readonly DateTime New = new DateTime(2002, 1, 1);
 
         [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
+        [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
+        [SupportedOSPlatform("windows")]
         public void NewSymlinkOldDestinationIsUpToDate()
         {
             SimpleSymlinkInputCheck(symlinkWriteTime: New,
@@ -928,6 +931,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
+        [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
+        [SupportedOSPlatform("windows")]
         public void OldSymlinkOldDestinationIsUpToDate()
         {
             SimpleSymlinkInputCheck(symlinkWriteTime: Old,
@@ -937,6 +942,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
+        [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
+        [SupportedOSPlatform("windows")]
         public void OldSymlinkNewDestinationIsNotUpToDate()
         {
             SimpleSymlinkInputCheck(symlinkWriteTime: Old,
@@ -946,6 +953,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
+        [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
+        [SupportedOSPlatform("windows")]
         public void NewSymlinkNewDestinationIsNotUpToDate()
         {
             SimpleSymlinkInputCheck(symlinkWriteTime: Middle,
@@ -956,12 +965,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
+        [SupportedOSPlatform("windows")]
         static extern bool CreateSymbolicLink(string lpSymlinkFileName, string lpTargetFileName, UInt32 dwFlags);
 
         [DllImport("kernel32.dll", SetLastError = true)]
+        [SupportedOSPlatform("windows")]
         private static extern bool SetFileTime(SafeFileHandle hFile, ref long creationTime,
             ref long lastAccessTime, ref long lastWriteTime);
 
+        [SupportedOSPlatform("windows")]
         private void SimpleSymlinkInputCheck(DateTime symlinkWriteTime, DateTime targetWriteTime,
             DateTime outputWriteTime, bool expectedOutOfDate)
         {
@@ -1031,4 +1043,3 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
     }
 }
-

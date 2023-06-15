@@ -3,7 +3,7 @@
     "allowPrerelease": true
   },
   "tools": {
-    "dotnet": "6.0.311",
+    "dotnet": "7.0.100-rc.1.22431.12",
     "vs": {
       "version": "17.2.1"
     },

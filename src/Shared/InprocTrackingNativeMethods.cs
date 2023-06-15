@@ -152,7 +152,7 @@ namespace Microsoft.Build.Shared
 
         private static class FileTrackerDllStub
         {
-            private readonly static Lazy<string> fileTrackerDllName = new Lazy<string>(() => (IntPtr.Size == sizeof(Int32)) ? "FileTracker32.dll" : "FileTracker64.dll");
+            private readonly static Lazy<string> fileTrackerDllName = new Lazy<string>(() => RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "FileTrackerA4.dll" : (IntPtr.Size == sizeof(Int32)) ? "FileTracker32.dll" : "FileTracker64.dll");
 
             // Handle for FileTracker.dll itself
             [SecurityCritical]

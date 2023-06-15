@@ -63,13 +63,13 @@
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
-        <source>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="translated">MSB4271: 환경 변수 MSBuildDisableFeaturesFromVersion이 잘못된 형식으로 설정되어 있습니다. 변경 웨이브 버전을 모두 사용하도록 설정합니다. 입력한 값: {0}. 현재 변경 웨이브: {1}.</target>
+        <source>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
+        <target state="needs-review-translation">MSB4271: 환경 변수 MSBuildDisableFeaturesFromVersion이 잘못된 형식으로 설정되어 있습니다. 변경 웨이브 버전을 모두 사용하도록 설정합니다. 입력한 값: {0}. 현재 변경 웨이브: {1}.</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
-        <source>MSB4272: Environment variable MSBuildDisableFeaturesFromVersion is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="translated">MSB4272: 환경 변수 MSBuildDisableFeaturesFromVersion이 순환되지 않는 버전으로 설정되어 있습니다. 기본값인 변경 웨이브 버전 {0}(으)로 설정합니다. 입력한 값: {1}. 현재 변경 웨이브: {2}.</target>
+        <source>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
+        <target state="needs-review-translation">MSB4272: 환경 변수 MSBuildDisableFeaturesFromVersion이 순환되지 않는 버전으로 설정되어 있습니다. 기본값인 변경 웨이브 버전 {0}(으)로 설정합니다. 입력한 값: {1}. 현재 변경 웨이브: {2}.</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -100,6 +100,11 @@
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: 지정한 출력 결과 캐시 파일이 비어 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentDerivedPropertyRead">
+        <source>Property '{0}' with value '{1}' expanded from the environment.</source>
+        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -143,9 +148,8 @@
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
-        <source>Loading the following project cache plugin:
-    {0}</source>
-        <target state="translated">다음 프로젝트 캐시 플러그 인을 로드하는 중:
+        <source>Loading the following project cache plugin: {0}</source>
+        <target state="needs-review-translation">다음 프로젝트 캐시 플러그 인을 로드하는 중:
     {0}</target>
         <note />
       </trans-unit>
@@ -174,11 +178,6 @@
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
         <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
         <target state="translated">MSB4270: "{0}" 어셈블리에서 프로젝트 캐시 플러그 인을 찾을 수 없습니다. 1개가 필요합니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NotAllNodesDefineACacheItem">
-        <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
-        <target state="translated">MSB4269: 정적 그래프 노드에서 프로젝트 캐시를 정의할 때 모든 노드는 같은 프로젝트 캐시를 정의해야 합니다. {1} 프로젝트에는 "{0}" 항목 선언이 포함되어 있지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -219,19 +218,9 @@
         <target state="translated">null 또는 빈 대상 이름을 포함하는 컬렉션을 사용하여 {0} 메서드를 호출할 수 없습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyOneCachePluginMustBeSpecified">
-        <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
-        <target state="translated">MSB4265: 단일 프로젝트 캐시 플러그 인이 지정되어야 하지만, {0}에서 여러 개를 찾았습니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
         <source>Created an override using task: {0} at {1}</source>
         <target state="translated">다음 작업을 사용하여 재정의를 만들었습니다. {1}의 {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectCacheBeginBuild">
-        <source>Initializing project cache plugin.</source>
-        <target state="translated">프로젝트 캐시 플러그인을 초기화 중입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheEndBuild">

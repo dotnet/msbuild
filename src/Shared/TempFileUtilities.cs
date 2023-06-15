@@ -75,7 +75,7 @@ namespace Microsoft.Build.Shared
         /// <param name="subfolder"></param>
         internal static string GetTemporaryDirectory(bool createDirectory = true, string subfolder = null)
         {
-            string temporaryDirectory = Path.Combine(Path.Combine(TempFileDirectory, "Temporary" + Guid.NewGuid().ToString("N")), subfolder ?? string.Empty);
+            string temporaryDirectory = Path.Combine(TempFileDirectory, "Temporary" + Guid.NewGuid().ToString("N"), subfolder ?? string.Empty);
 
             if (createDirectory)
             {

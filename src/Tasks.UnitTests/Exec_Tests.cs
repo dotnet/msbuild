@@ -69,36 +69,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        public void EscapeSpecifiedCharactersInPathToGeneratedBatchFile_DisabledUnderChangeWave16_10()
-        {
-            using (var testEnvironment = TestEnvironment.Create())
-            {
-                ChangeWaves.ResetStateForTests();
-                testEnvironment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_10.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
-                var newTempPath = testEnvironment.CreateNewTempPathWithSubfolder("hello()w]o(rld)").TempPath;
-
-                string tempPath = Path.GetTempPath();
-                Assert.StartsWith(newTempPath, tempPath);
-
-                FileUtilities.ClearTempFileDirectory();
-
-                // Now run the Exec task on a simple command.
-                Exec exec = PrepareExec("echo Hello World!");
-                exec.Execute().ShouldBeFalse();
-
-                // These reset different things. ChangeWaves.ResetStateForTests only clears caches for things related to
-                // change waves. FileUtilities.ClearTempFileDirectory permits resetting the directory used for temp files.
-                ChangeWaves.ResetStateForTests();
-                FileUtilities.ClearTempFileDirectory();
-            }
-        }
-
         /// <summary>
         /// Ensures that calling the Exec task does not leave any extra TEMP files
         /// lying around.
@@ -1022,67 +992,6 @@ echo line 3"" />
                 }
             }
         }
-
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        public void EndToEndMultilineExec_EscapeSpecialCharacters_DisabledUnderChangeWave16_10()
-        {
-            using (var env = TestEnvironment.Create(_output))
-            {
-                ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_10.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
-                var testProject = env.CreateTestProjectWithFiles(@"<Project>
-<Target Name=""ExecCommand"">
-  <Exec Command=""echo Hello, World!"" />
-   </Target>
-</Project>");
-
-                // Ensure path has subfolders
-                var newTempPath = env.CreateNewTempPathWithSubfolder("hello()wo(rld)").TempPath;
-                string tempPath = Path.GetTempPath();
-                Assert.StartsWith(newTempPath, tempPath);
-
-                FileUtilities.ClearTempFileDirectory();
-
-                using (var buildManager = new BuildManager())
-                {
-                    MockLogger logger = new MockLogger(_output, profileEvaluation: false, printEventsToStdout: false);
-
-                    var parameters = new BuildParameters()
-                    {
-                        Loggers = new[] { logger },
-                    };
-
-                    var collection = new ProjectCollection(
-                        new Dictionary<string, string>(),
-                        new[] { logger },
-                        remoteLoggers: null,
-                        ToolsetDefinitionLocations.Default,
-                        maxNodeCount: 1,
-                        onlyLogCriticalEvents: false,
-                        loadProjectsReadOnly: true);
-
-                    var project = collection.LoadProject(testProject.ProjectFile).CreateProjectInstance();
-
-                    var request = new BuildRequestData(
-                        project,
-                        targetsToBuild: new[] { "ExecCommand" },
-                        hostServices: null);
-
-                    var result = buildManager.Build(parameters, request);
-
-                    logger.AssertLogContains("Hello, World!");
-
-                    result.OverallResult.ShouldBe(BuildResultCode.Failure);
-                }
-                ChangeWaves.ResetStateForTests();
-                FileUtilities.ClearTempFileDirectory();
-            }
-        }
     }
 
     internal class ExecWrapper : Exec
@@ -1104,6 +1013,3 @@ echo line 3"" />
         }
     }
 }
-
-
-

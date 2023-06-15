@@ -555,7 +555,11 @@ namespace System.Deployment.Internal.CodeSigning
 
                 if (useSha256)
                 {
-                    using (SHA256 sha2 = SHA256.Create("System.Security.Cryptography.SHA256CryptoServiceProvider"))
+                    using (SHA256 sha2 = SHA256.Create(
+#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
+                        "System.Security.Cryptography.SHA256CryptoServiceProvider"
+#endif
+                ))
                     {
                         byte[] hash = sha2.ComputeHash(exc.GetOutput() as MemoryStream);
                         if (hash == null)
@@ -568,7 +572,11 @@ namespace System.Deployment.Internal.CodeSigning
                 }
                 else
                 {
-                    using (SHA1 sha1 = SHA1.Create("System.Security.Cryptography.SHA1CryptoServiceProvider"))
+                    using (SHA1 sha1 = SHA1.Create(
+#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
+                        "System.Security.Cryptography.SHA1CryptoServiceProvider"
+#endif
+                        ))
                     {
                         byte[] hash = sha1.ComputeHash(exc.GetOutput() as MemoryStream);
                         if (hash == null)
@@ -603,7 +611,11 @@ namespace System.Deployment.Internal.CodeSigning
 
                 if (useSha256)
                 {
-                    using (SHA256 sha2 = SHA256.Create("System.Security.Cryptography.SHA256CryptoServiceProvider"))
+                    using (SHA256 sha2 = SHA256.Create(
+#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
+                        "System.Security.Cryptography.SHA256CryptoServiceProvider"
+#endif
+                        ))
                     {
                         byte[] hash = sha2.ComputeHash(exc.GetOutput() as MemoryStream);
                         if (hash == null)
@@ -616,7 +628,11 @@ namespace System.Deployment.Internal.CodeSigning
                 }
                 else
                 {
-                    using (SHA1 sha1 = SHA1.Create("System.Security.Cryptography.SHA1CryptoServiceProvider"))
+                    using (SHA1 sha1 = SHA1.Create(
+#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
+                        "System.Security.Cryptography.SHA1CryptoServiceProvider"
+#endif
+                         ))
                     {
                         byte[] hash = sha1.ComputeHash(exc.GetOutput() as MemoryStream);
                         if (hash == null)
@@ -1390,4 +1406,3 @@ namespace System.Deployment.Internal.CodeSigning
         }
     }
 }
-

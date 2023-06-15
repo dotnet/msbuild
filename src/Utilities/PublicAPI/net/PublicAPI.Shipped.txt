@@ -136,9 +136,11 @@ Microsoft.Build.Utilities.DotNetFrameworkArchitecture.Current = 0 -> Microsoft.B
 Microsoft.Build.Utilities.ExecutableType
 Microsoft.Build.Utilities.ExecutableType.Managed32Bit = 3 -> Microsoft.Build.Utilities.ExecutableType
 Microsoft.Build.Utilities.ExecutableType.Managed64Bit = 4 -> Microsoft.Build.Utilities.ExecutableType
+Microsoft.Build.Utilities.ExecutableType.ManagedARM64 = 7 -> Microsoft.Build.Utilities.ExecutableType
 Microsoft.Build.Utilities.ExecutableType.ManagedIL = 2 -> Microsoft.Build.Utilities.ExecutableType
 Microsoft.Build.Utilities.ExecutableType.Native32Bit = 0 -> Microsoft.Build.Utilities.ExecutableType
 Microsoft.Build.Utilities.ExecutableType.Native64Bit = 1 -> Microsoft.Build.Utilities.ExecutableType
+Microsoft.Build.Utilities.ExecutableType.NativeARM64 = 6 -> Microsoft.Build.Utilities.ExecutableType
 Microsoft.Build.Utilities.ExecutableType.SameAsCurrentProcess = 5 -> Microsoft.Build.Utilities.ExecutableType
 Microsoft.Build.Utilities.FileTracker
 Microsoft.Build.Utilities.FlatTrackingData

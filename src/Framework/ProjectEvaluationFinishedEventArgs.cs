@@ -5,8 +5,6 @@ using System;
 using System.Collections;
 using Microsoft.Build.Framework.Profiler;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -25,7 +23,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Initializes a new instance of the ProjectEvaluationFinishedEventArgs class.
         /// </summary>
-        public ProjectEvaluationFinishedEventArgs(string message, params object[] messageArgs)
+        public ProjectEvaluationFinishedEventArgs(string? message, params object[]? messageArgs)
             : base(message, helpKeyword: null, senderName: null, DateTime.UtcNow, messageArgs)
         {
         }
@@ -33,22 +31,22 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Gets or sets the full path of the project that started evaluation.
         /// </summary>
-        public string ProjectFile { get; set; }
+        public string? ProjectFile { get; set; }
 
         /// <summary>
         /// Global properties used during this evaluation.
         /// </summary>
-        public IEnumerable GlobalProperties { get; set; }
+        public IEnumerable? GlobalProperties { get; set; }
 
         /// <summary>
         /// Final set of properties produced by this evaluation.
         /// </summary>
-        public IEnumerable Properties { get; set; }
+        public IEnumerable? Properties { get; set; }
 
         /// <summary>
         /// Final set of items produced by this evaluation.
         /// </summary>
-        public IEnumerable Items { get; set; }
+        public IEnumerable? Items { get; set; }
 
         /// <summary>
         /// The result of profiling a project.

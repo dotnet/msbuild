@@ -20,6 +20,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 {
+    [PlatformSpecific(TestPlatforms.Windows)]
     public class ResolveSDKReferenceTestFixture
     {
         private Microsoft.Build.UnitTests.MockEngine.GetStringDelegate _resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
@@ -3701,6 +3702,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
     /// <summary>
     /// Test the output groups which will be used to generate the recipe fileGatherSDKOutputGroups
     /// </summary>
+    [PlatformSpecific(TestPlatforms.Windows)]
     public class GatherSDKOutputGroupsTestFixture
     {
         [Fact]

@@ -1,19 +1,19 @@
 ﻿// Taken from https://github.com/cklutz/LockCheck, MIT license.
 // Copyright (C) Christian Klutz
 
-#if !RUNTIME_TYPE_NETCORE && !MONO
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks
 {
+    [SupportedOSPlatform("windows")]
     internal class LockCheck
     {
         [Flags]
@@ -355,5 +355,3 @@ namespace Microsoft.Build.Tasks
         }
     }
 }
-
-#endif

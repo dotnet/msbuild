@@ -63,13 +63,13 @@
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
-        <source>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="translated">MSB4271: 環境變數 MSBuildDisableFeaturesFromVersion 設定的格式無效。正在啟用所有變更波版本。輸入的值: {0}。目前的變更波: {1}。</target>
+        <source>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
+        <target state="needs-review-translation">MSB4271: 環境變數 MSBuildDisableFeaturesFromVersion 設定的格式無效。正在啟用所有變更波版本。輸入的值: {0}。目前的變更波: {1}。</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
-        <source>MSB4272: Environment variable MSBuildDisableFeaturesFromVersion is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="translated">MSB4272: 環境變數 MSBuildDisableFeaturesFromVersion 已設定為無法輪替的版本。預設為變更波版本: {0}。輸入的值: {1}。目前的變更波: {2}。</target>
+        <source>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
+        <target state="needs-review-translation">MSB4272: 環境變數 MSBuildDisableFeaturesFromVersion 已設定為無法輪替的版本。預設為變更波版本: {0}。輸入的值: {1}。目前的變更波: {2}。</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -100,6 +100,11 @@
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: 指定的輸出結果快取檔案是空的。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentDerivedPropertyRead">
+        <source>Property '{0}' with value '{1}' expanded from the environment.</source>
+        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -143,9 +148,8 @@
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
-        <source>Loading the following project cache plugin:
-    {0}</source>
-        <target state="translated">正在載入下列專案快取外掛程式:
+        <source>Loading the following project cache plugin: {0}</source>
+        <target state="needs-review-translation">正在載入下列專案快取外掛程式:
     {0}</target>
         <note />
       </trans-unit>
@@ -174,11 +178,6 @@
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
         <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
         <target state="translated">MSB4270: 在組件 "{0}" 中找不到任何專案快取外掛程式，但應該要有一個外掛程式。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NotAllNodesDefineACacheItem">
-        <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
-        <target state="translated">MSB4269: 當任何靜態圖表節點定義了專案快取時，所有節點都必須定義相同的專案快取。下列專案不包含 "{0}" 項目宣告: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -219,19 +218,9 @@
         <target state="translated">無法使用內含 null 或空白目標名稱的集合呼叫方法 {0}。</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyOneCachePluginMustBeSpecified">
-        <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
-        <target state="translated">MSB4265: 只可指定單一專案快取外掛程式，但發現多個指定項目: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
         <source>Created an override using task: {0} at {1}</source>
         <target state="translated">已使用下列工作建立覆寫: 於 {1} 的 {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ProjectCacheBeginBuild">
-        <source>Initializing project cache plugin.</source>
-        <target state="translated">正在初始化專案快取外掛程式。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheEndBuild">

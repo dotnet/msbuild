@@ -353,7 +353,8 @@ namespace Microsoft.Build.BackEnd
                 _target.ConditionLocation,
                 projectLoggingContext.LoggingService,
                 projectLoggingContext.BuildEventContext,
-                FileSystems.Default);
+                FileSystems.Default,
+                loggingContext: projectLoggingContext);
 
             if (!condition)
             {
@@ -392,7 +393,7 @@ namespace Microsoft.Build.BackEnd
                 return new List<TargetSpecification>();
             }
 
-            var dependencies = _expander.ExpandIntoStringListLeaveEscaped(_target.DependsOnTargets, ExpanderOptions.ExpandPropertiesAndItems, _target.DependsOnTargetsLocation);
+            var dependencies = _expander.ExpandIntoStringListLeaveEscaped(_target.DependsOnTargets, ExpanderOptions.ExpandPropertiesAndItems, _target.DependsOnTargetsLocation, projectLoggingContext);
             List<TargetSpecification> dependencyTargets = new List<TargetSpecification>();
             foreach (string escapedDependency in dependencies)
             {

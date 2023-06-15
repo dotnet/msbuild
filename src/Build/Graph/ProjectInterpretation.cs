@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -29,6 +29,10 @@ namespace Microsoft.Build.Graph
         private const string InnerBuildReferenceItemName = "_ProjectSelfReference";
         internal static string TransitiveReferenceItemName = "_TransitiveProjectReference";
         internal const string AddTransitiveProjectReferencesInStaticGraphPropertyName = "AddTransitiveProjectReferencesInStaticGraph";
+        private const string PlatformLookupTableMetadataName = "PlatformLookupTable";
+        private const string PlatformMetadataName = "Platform";
+        private const string PlatformsMetadataName = "Platforms";
+        private const string EnableDynamicPlatformResolutionMetadataName = "EnableDynamicPlatformResolution";
 
         private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
 
@@ -38,7 +42,7 @@ namespace Microsoft.Build.Graph
         {
         }
 
-        private static readonly ImmutableList<GlobalPropertiesModifier> ModifierForNonMultitargetingNodes = new[] {(GlobalPropertiesModifier) ProjectReferenceGlobalPropertiesModifier}.ToImmutableList();
+        private static readonly ImmutableList<GlobalPropertiesModifier> ModifierForNonMultitargetingNodes = new[] { (GlobalPropertiesModifier)ProjectReferenceGlobalPropertiesModifier }.ToImmutableList();
 
         internal enum ProjectType
         {
@@ -59,7 +63,7 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        public IEnumerable<ReferenceInfo> GetReferences(ProjectInstance requesterInstance)
+        public IEnumerable<ReferenceInfo> GetReferences(ProjectInstance requesterInstance, ProjectCollection _projectCollection, ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory)
         {
             IEnumerable<ProjectItemInstance> projectReferenceItems;
             IEnumerable<GlobalPropertiesModifier> globalPropertiesModifiers = null;
@@ -97,6 +101,32 @@ namespace Microsoft.Build.Graph
                 var projectReferenceFullPath = projectReferenceItem.GetMetadataValue(FullPathMetadataName);
 
                 var referenceGlobalProperties = GetGlobalPropertiesForItem(projectReferenceItem, requesterInstance.GlobalPropertiesDictionary, globalPropertiesModifiers);
+
+                var requesterPlatform = "";
+                var requesterPlatformLookupTable = "";
+
+                if ( !projectReferenceItem.HasMetadata(SetPlatformMetadataName) && ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
+                {
+                    requesterPlatform = requesterInstance.GetPropertyValue("Platform");
+                    requesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");
+
+                    var  projectInstance = _projectInstanceFactory(
+                        projectReferenceFullPath,
+                        null, // Platform negotiation requires an evaluation with no global properties first
+                        _projectCollection);
+
+                    var selectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), requesterInstance.GetPropertyValue(PlatformLookupTableMetadataName), projectInstance.FullPath, requesterInstance.GetPropertyValue(PlatformMetadataName));
+
+                    if (selectedPlatform.Equals(String.Empty))
+                    {
+                        referenceGlobalProperties.Remove(PlatformMetadataName);
+                    }
+                    else
+                    {
+                        var platformPropertyInstance = ProjectPropertyInstance.Create(PlatformMetadataName, selectedPlatform);
+                        referenceGlobalProperties[PlatformMetadataName] = platformPropertyInstance;
+                    }
+                }
 
                 var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties);
 
@@ -161,8 +191,6 @@ namespace Microsoft.Build.Graph
 
                             if (outerBuildReferencingProject.ProjectReferences.Contains(innerBuild))
                             {
-                                graphBuilder.Edges.TryGetEdge((outerBuildReferencingProject, innerBuild), out var existingEdge);
-
                                 ErrorUtilities.VerifyThrow(
                                     graphBuilder.Edges[(outerBuildReferencingProject, innerBuild)]
                                         .ItemType.Equals(
@@ -196,7 +224,7 @@ namespace Microsoft.Build.Graph
                     project: outerBuild,
                     itemType: InnerBuildReferenceItemName,
                     includeEscaped: outerBuild.FullPath,
-                    directMetadata: new[] {new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}")},
+                    directMetadata: new[] { new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}") },
                     definingFileEscaped: outerBuild.FullPath);
             }
         }

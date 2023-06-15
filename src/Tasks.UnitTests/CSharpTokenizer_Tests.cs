@@ -446,6 +446,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-

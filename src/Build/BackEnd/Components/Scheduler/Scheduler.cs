@@ -15,7 +15,6 @@ using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
-using Microsoft.Build.Utilities;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
@@ -144,7 +143,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag used for debugging by forcing all scheduling to go out-of-proc.
         /// </summary>
-        internal bool ForceAffinityOutOfProc { get; private set; }
+        internal bool ForceAffinityOutOfProc
+            => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
+                ? Traits.Instance.InProcNodeDisabled || _componentHost.BuildParameters.DisableInProcNode
+                : Traits.Instance.InProcNodeDisabled;
 
         /// <summary>
         /// The path into which debug files will be written.
@@ -621,10 +623,6 @@ namespace Microsoft.Build.BackEnd
             _resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
             _configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
             _inprocNodeContext =  new NodeLoggingContext(_componentHost.LoggingService, InProcNodeId, true);
-            var inprocNodeDisabledViaEnvironmentVariable = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
-            ForceAffinityOutOfProc = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                ? inprocNodeDisabledViaEnvironmentVariable || _componentHost.BuildParameters.DisableInProcNode
-                : inprocNodeDisabledViaEnvironmentVariable;
         }
 
         /// <summary>
