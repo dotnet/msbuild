@@ -1,6 +1,7 @@
 ﻿angular
 api
 apicontroller
+blazor
 blazorserver
 blazorserver-empty
 blazorwasm
