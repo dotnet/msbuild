@@ -17,7 +17,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
