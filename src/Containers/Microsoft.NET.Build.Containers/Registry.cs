@@ -264,8 +264,6 @@ internal sealed class Registry
     private static string? CreateRidForPlatform(PlatformInformation platform)
     {
         // we only support linux and windows containers explicitly, so anything else we should skip past.
-        // there are theoretically other platforms/architectures that Docker supports (s390x?), but we are
-        // deliberately ignoring them without clear user signal.
         var osPart = platform.os switch
         {
             "linux" => "linux",
@@ -285,6 +283,8 @@ internal sealed class Registry
             "x386" => "x86",
             "arm" => $"arm{(platform.variant != "v7" ? platform.variant : "")}",
             "arm64" => "arm64",
+            "ppc64le" => "ppc64le",
+            "s390x" => "s390x",
             _ => null
         };
 
