@@ -55,9 +55,9 @@ stages:
           MirrorRepo: 'msbuild'
           LclSource: lclFilesfromPackage
           LclPackageId: 'LCL-JUNO-PROD-MSBUILDREL'
-          MirrorBranch: replace(variables['Build.SourceBranch'], 'refs/heads/', '')
+          MirrorBranch: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
           JobNameSuffix: '_release'
-          condition: $(EnableReleaseOneLocBuild)
+          condition: ${{ variables.EnableReleaseOneLocBuild }}
     # The localization setup for main branch. Note difference in package ID. Should not be used with release/ branches.
     - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
       - template: /eng/common/templates/job/onelocbuild.yml
