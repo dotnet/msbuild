@@ -884,8 +884,8 @@ You may need to build the project on another operating system or architecture, o
     <comment>{StrBegin="NETSDK1194: "}{Locked="--output"}</comment>
   </data>
   <data name="AotNotSupported" xml:space="preserve">
-    <value>NETSDK1195: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</value>
-    <comment>{StrBegin="NETSDK1195: "}</comment>
+    <value>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</value>
+    <comment>{StrBegin="NETSDK1196: "}</comment>
   </data>
   <data name="PublishProfileNotPresent" xml:space="preserve">
     <value>NETSDK1198: A publish profile with the name '{0}' was not found in the project. Set the PublishProfile property to a valid file name.</value>
