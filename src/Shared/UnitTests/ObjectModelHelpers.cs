@@ -1263,7 +1263,7 @@ namespace Microsoft.Build.UnitTests
             IDictionary<K, V> x,
             IDictionary<K, V> y,
             Action<KeyValuePair<K, V>, KeyValuePair<K, V>> assertPairsEqual,
-            IEqualityComparer<K>? keysComparer = null,
+            IEqualityComparer<K> keysComparer = null,
             bool ignoreOrder = false)
         {
             if (x == null || y == null)
