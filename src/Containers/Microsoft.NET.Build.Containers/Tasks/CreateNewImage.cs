@@ -102,7 +102,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         {
             if (IsLocalPush)
             {
-                ILocalRegistry localRegistry = GetLocalRegistry(msg => Log.LogMessage(msg));
+                ILocalRegistry localRegistry = KnownLocalRegistryTypes.CreateLocalRegistry(LocalRegistry, msg => Log.LogMessage(msg));
                 if (!(await localRegistry.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
                 {
                     Log.LogErrorWithCodeFromResources(nameof(Strings.LocalRegistryNotAvailable));
@@ -189,18 +189,6 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 }
             }
         }
-    }
-
-    private ILocalRegistry GetLocalRegistry(Action<string> logger) {
-        var registry = LocalRegistry switch {
-            KnownLocalRegistryTypes.Docker => new DockerCli(logger),
-            _ => throw new NotSupportedException(
-                Resource.FormatString(
-                    nameof(Strings.UnknownLocalRegistryType),
-                    LocalRegistry,
-                    string.Join(",", KnownLocalRegistryTypes.SupportedLocalRegistryTypes)))
-        };
-        return registry;
     }
 
     private Lazy<Registry?> SourceRegistry

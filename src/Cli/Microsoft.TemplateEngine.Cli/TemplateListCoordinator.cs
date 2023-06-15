@@ -110,7 +110,7 @@ namespace Microsoft.TemplateEngine.Cli
                         string.Format(
                             LocalizableStrings.TemplateListCoordinator_Error_FailedConstraints,
                             resolutionResult.ContraintsMismatchGroupCount,
-                            ListCommand.IgnoreConstraintsOption.Name)
+                            ListCommand.IgnoreConstraintsOption.Aliases.First())
                         .Bold().Red());
                 }
 

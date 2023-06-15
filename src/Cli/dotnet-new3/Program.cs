@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.Text;
 
 namespace Dotnet_new3
@@ -22,8 +23,8 @@ namespace Dotnet_new3
                 }
             }
 
-            CliRootCommand rootCommand = new();
-            rootCommand.Subcommands.Add(New3CommandFactory.Create());
+            RootCommand rootCommand = new RootCommand();
+            rootCommand.AddCommand(New3CommandFactory.Create());
             return ParserFactory.CreateParser(rootCommand).Parse(args).InvokeAsync();
         }
     }

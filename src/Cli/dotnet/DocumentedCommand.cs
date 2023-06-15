@@ -5,7 +5,7 @@ using System.CommandLine;
 
 namespace Microsoft.DotNet.Cli
 {
-    public class DocumentedCommand : CliCommand
+    public class DocumentedCommand : Command
     {
         public string DocsLink { get; set; }
 

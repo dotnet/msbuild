@@ -1,13 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Cli.Utils.Extensions;
 
 namespace Microsoft.DotNet.Cli.Telemetry
 {
@@ -15,14 +12,14 @@ namespace Microsoft.DotNet.Cli.Telemetry
     {
         public TopLevelCommandNameAndOptionToLog(
             HashSet<string> topLevelCommandName,
-            HashSet<CliOption> optionsToLog)
+            HashSet<Option> optionsToLog)
         {
             _topLevelCommandName = topLevelCommandName;
             _optionsToLog = optionsToLog;
         }
 
         private HashSet<string> _topLevelCommandName { get; }
-        private HashSet<CliOption> _optionsToLog { get; }
+        private HashSet<Option> _optionsToLog { get; }
 
         public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult, Dictionary<string, double> measurements = null)
         {
@@ -31,17 +28,14 @@ namespace Microsoft.DotNet.Cli.Telemetry
             foreach (var option in _optionsToLog)
             {
                 if (_topLevelCommandName.Contains(topLevelCommandName)
-                    && parseResult.GetResult(option) is OptionResult optionResult
-                    && !parseResult.Errors.Any(error => error.SymbolResult == optionResult)
-                    && optionResult.GetValueOrDefault<object>() is object optionValue
-                    && optionValue is not null)
+                    && parseResult.SafelyGetValueForOption(option) is string optionValue)
                 {
                     result.Add(new ApplicationInsightsEntryFormat(
                         "sublevelparser/command",
                         new Dictionary<string, string>
                         {
                             { "verb", topLevelCommandName},
-                            { option.Name.RemovePrefix(), Stringify(optionValue) }
+                            { option.Name, Stringify(parseResult.GetValue(option)) }
                         },
                         measurements));
                 }

@@ -12,30 +12,30 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadSearchCommandParser
     {
-        public static readonly CliArgument<string> WorkloadIdStubArgument =
-            new CliArgument<string>(LocalizableStrings.WorkloadIdStubArgumentName)
+        public static readonly Argument<string> WorkloadIdStubArgument =
+            new Argument<string>(LocalizableStrings.WorkloadIdStubArgumentName)
             {
                 Arity = ArgumentArity.ZeroOrOne,
                 Description = LocalizableStrings.WorkloadIdStubArgumentDescription
             };
 
-        public static readonly CliOption<string> VersionOption = InstallingWorkloadCommandParser.VersionOption;
+        public static readonly Option<string> VersionOption = InstallingWorkloadCommandParser.VersionOption;
 
-        private static readonly CliCommand Command = ConstructCommand();
+        private static readonly Command Command = ConstructCommand();
 
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
-            var command = new CliCommand("search", LocalizableStrings.CommandDescription);
-            command.Arguments.Add(WorkloadIdStubArgument);
-            command.Options.Add(CommonOptions.HiddenVerbosityOption);
-            command.Options.Add(VersionOption);
+            var command = new Command("search", LocalizableStrings.CommandDescription);
+            command.AddArgument(WorkloadIdStubArgument);
+            command.AddOption(CommonOptions.HiddenVerbosityOption);
+            command.AddOption(VersionOption);
 
-            command.SetAction((parseResult) => new WorkloadSearchCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new WorkloadSearchCommand(parseResult).Execute());
 
             return command;
         }

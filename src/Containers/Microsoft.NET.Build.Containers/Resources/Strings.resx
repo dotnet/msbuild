@@ -162,8 +162,8 @@
     <comment>{StrBegin="CONTAINER3002: "}</comment>
   </data>
   <data name="DockerProcessCreationFailed" xml:space="preserve">
-    <value>CONTAINER3001: Failed creating docker process.</value>
-    <comment>{StrBegin="CONTAINER3001: "}</comment>
+    <value>CONTAINER3001: Failed creating {0} process.</value>
+    <comment>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or 'podman'.</comment>
   </data>
   <data name="ImagePullNotSupported" xml:space="preserve">
     <value>CONTAINER1010: Pulling images from local registry is not supported.</value>

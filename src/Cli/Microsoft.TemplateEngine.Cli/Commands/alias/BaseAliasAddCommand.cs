@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
@@ -18,8 +19,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             AliasAddCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
-            ParseResult parseResult,
-            CancellationToken cancellationToken) => throw new NotImplementedException();
+            InvocationContext context) => throw new NotImplementedException();
 
         protected override AliasAddCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
     }

@@ -3,6 +3,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Completions;
+using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
@@ -28,78 +29,72 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.Add(new ListCommand(this, hostBuilder));
             this.Add(new AliasCommand(hostBuilder));
 
-            this.Options.Add(DebugCustomSettingsLocationOption);
-            this.Options.Add(DebugVirtualizeSettingsOption);
-            this.Options.Add(DebugAttachOption);
-            this.Options.Add(DebugReinitOption);
-            this.Options.Add(DebugRebuildCacheOption);
-            this.Options.Add(DebugShowConfigOption);
+            this.AddGlobalOption(DebugCustomSettingsLocationOption);
+            this.AddGlobalOption(DebugVirtualizeSettingsOption);
+            this.AddGlobalOption(DebugAttachOption);
+            this.AddGlobalOption(DebugReinitOption);
+            this.AddGlobalOption(DebugRebuildCacheOption);
+            this.AddGlobalOption(DebugShowConfigOption);
 
-            this.Options.Add(SharedOptions.OutputOption);
-            this.Options.Add(SharedOptions.NameOption);
-            this.Options.Add(SharedOptions.DryRunOption);
-            this.Options.Add(SharedOptions.ForceOption);
-            this.Options.Add(SharedOptions.NoUpdateCheckOption);
-            this.Options.Add(SharedOptions.ProjectPathOption);
+            this.AddOption(SharedOptions.OutputOption);
+            this.AddOption(SharedOptions.NameOption);
+            this.AddOption(SharedOptions.DryRunOption);
+            this.AddOption(SharedOptions.ForceOption);
+            this.AddOption(SharedOptions.NoUpdateCheckOption);
+            this.AddOption(SharedOptions.ProjectPathOption);
         }
 
-        internal static CliOption<string?> DebugCustomSettingsLocationOption { get; } = new("--debug:custom-hive")
+        internal static Option<string?> DebugCustomSettingsLocationOption { get; } = new("--debug:custom-hive")
         {
             Description = SymbolStrings.Option_Debug_CustomSettings,
-            Hidden = true,
-            Recursive = true
+            IsHidden = true
         };
 
-        internal static CliOption<bool> DebugVirtualizeSettingsOption { get; } = new("--debug:ephemeral-hive", "--debug:virtual-hive")
+        internal static Option<bool> DebugVirtualizeSettingsOption { get; } = new(new[] { "--debug:ephemeral-hive", "--debug:virtual-hive" })
         {
             Description = SymbolStrings.Option_Debug_VirtualSettings,
-            Hidden = true,
-            Recursive = true
+            IsHidden = true
         };
 
-        internal static CliOption<bool> DebugAttachOption { get; } = new("--debug:attach")
+        internal static Option<bool> DebugAttachOption { get; } = new("--debug:attach")
         {
             Description = SymbolStrings.Option_Debug_Attach,
-            Hidden = true,
-            Recursive = true
+            IsHidden = true
         };
 
-        internal static CliOption<bool> DebugReinitOption { get; } = new("--debug:reinit")
+        internal static Option<bool> DebugReinitOption { get; } = new("--debug:reinit")
         {
             Description = SymbolStrings.Option_Debug_Reinit,
-            Hidden = true,
-            Recursive = true
+            IsHidden = true
         };
 
-        internal static CliOption<bool> DebugRebuildCacheOption { get; } = new("--debug:rebuild-cache", "--debug:rebuildcache")
+        internal static Option<bool> DebugRebuildCacheOption { get; } = new(new[] { "--debug:rebuild-cache", "--debug:rebuildcache" })
         {
             Description = SymbolStrings.Option_Debug_RebuildCache,
-            Hidden = true,
-            Recursive = true
+            IsHidden = true
         };
 
-        internal static CliOption<bool> DebugShowConfigOption { get; } = new("--debug:show-config", "--debug:showconfig")
+        internal static Option<bool> DebugShowConfigOption { get; } = new(new[] { "--debug:show-config", "--debug:showconfig" })
         {
             Description = SymbolStrings.Option_Debug_ShowConfig,
-            Hidden = true,
-            Recursive = true
+            IsHidden = true
         };
 
-        internal static CliArgument<string> ShortNameArgument { get; } = new("template-short-name")
+        internal static Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
         {
             Description = SymbolStrings.Command_Instantiate_Argument_ShortName,
             Arity = new ArgumentArity(0, 1),
-            Hidden = true
+            IsHidden = true
         };
 
-        internal static CliArgument<string[]> RemainingArguments { get; } = new("template-args")
+        internal static Argument<string[]> RemainingArguments { get; } = new Argument<string[]>("template-args")
         {
             Description = SymbolStrings.Command_Instantiate_Argument_TemplateOptions,
             Arity = new ArgumentArity(0, 999),
-            Hidden = true
+            IsHidden = true
         };
 
-        internal IReadOnlyList<CliOption> PassByOptions { get; } = new CliOption[]
+        internal IReadOnlyList<Option> PassByOptions { get; } = new Option[]
         {
             SharedOptions.ForceOption,
             SharedOptions.NameOption,
@@ -150,10 +145,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             NewCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
-            ParseResult parseResult,
-            CancellationToken cancellationToken)
+            InvocationContext context)
         {
-            return InstantiateCommand.ExecuteAsync(args, environmentSettings, templatePackageManager, parseResult, cancellationToken);
+            return InstantiateCommand.ExecuteAsync(args, environmentSettings, templatePackageManager, context);
         }
 
         protected override NewCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);

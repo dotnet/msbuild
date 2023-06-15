@@ -4,7 +4,6 @@
 using System.CommandLine;
 using System.CommandLine.Help;
 using System.CommandLine.Parsing;
-using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
@@ -135,13 +134,13 @@ namespace Microsoft.TemplateEngine.Cli
         protected bool AllowMultipleValues { get; private init; }
 
         /// <summary>
-        /// Creates <see cref="CliOption"/> for template parameter.
+        /// Creates <see cref="Option"/> for template parameter.
         /// </summary>
         /// <param name="aliases">aliases to be used for option.</param>
-        internal CliOption GetOption(IReadOnlySet<string> aliases)
+        internal Option GetOption(IReadOnlySet<string> aliases)
         {
-            CliOption option = GetBaseOption(aliases);
-            option.Hidden = IsHidden;
+            Option option = GetBaseOption(aliases);
+            option.IsHidden = IsHidden;
 
             //if parameter is required, the default value is ignored.
             //the user should always specify the parameter, so the default value is not even shown.
@@ -150,34 +149,7 @@ namespace Microsoft.TemplateEngine.Cli
                 if (!string.IsNullOrWhiteSpace(DefaultValue)
                     || (Type == ParameterType.String || Type == ParameterType.Choice) && DefaultValue != null)
                 {
-                    switch (option)
-                    {
-                        case CliOption<string> stringOption:
-                            stringOption.DefaultValueFactory = (_) => DefaultValue;
-                            break;
-                        case CliOption<bool> booleanOption:
-                            booleanOption.DefaultValueFactory = (_) => bool.Parse(DefaultValue);
-                            break;
-                        case CliOption<long> integerOption:
-                            if (Type == ParameterType.Hex)
-                            {
-                                integerOption.DefaultValueFactory = (_) => Convert.ToInt64(DefaultValue, 16);
-                            }
-                            else
-                            {
-                                integerOption.DefaultValueFactory = (_) => long.Parse(DefaultValue);
-                            }
-                            break;
-                        case CliOption<float> floatOption:
-                            floatOption.DefaultValueFactory = (_) => float.Parse(DefaultValue);
-                            break;
-                        case CliOption<double> doubleOption:
-                            doubleOption.DefaultValueFactory = (_) => double.Parse(DefaultValue);
-                            break;
-                        default:
-                            Debug.Fail($"Unexpected Option type: {option.GetType()}");
-                            break;
-                    }
+                    option.SetDefaultValue(DefaultValue);
                 }
             }
             option.Description = GetOptionDescription();
@@ -204,83 +176,40 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
-        protected virtual CliOption GetBaseOption(IReadOnlySet<string> aliases)
+        protected virtual Option GetBaseOption(IReadOnlySet<string> aliases)
         {
-            string name = GetName(aliases);
-            CliOption cliOption = Type switch
+            return Type switch
             {
-                ParameterType.Boolean => new CliOption<bool>(name)
+                ParameterType.Boolean => new Option<bool>(aliases.ToArray())
                 {
                     Arity = new ArgumentArity(0, 1)
                 },
-                ParameterType.Integer => new CliOption<long>(name)
+                ParameterType.Integer => new Option<long>(
+                    aliases.ToArray(),
+                    parseArgument: result => GetParseArgument(this, ConvertValueToInt)(result))
                 {
-                    CustomParser = result => GetParseArgument(this, ConvertValueToInt)(result),
                     Arity = new ArgumentArity(string.IsNullOrWhiteSpace(DefaultIfOptionWithoutValue) ? 1 : 0, 1)
                 },
-                ParameterType.String => new CliOption<string>(name)
+                ParameterType.String => new Option<string>(
+                    aliases.ToArray(),
+                    parseArgument: result => GetParseArgument(this, ConvertValueToString)(result))
                 {
-                    CustomParser = result => GetParseArgument(this, ConvertValueToString)(result),
                     Arity = new ArgumentArity(DefaultIfOptionWithoutValue == null ? 1 : 0, 1)
                 },
-                ParameterType.Float => new CliOption<double>(name)
+                ParameterType.Float => new Option<double>(
+                    aliases.ToArray(),
+                    parseArgument: result => GetParseArgument(this, ConvertValueToFloat)(result))
                 {
-                    CustomParser = result => GetParseArgument(this, ConvertValueToFloat)(result),
                     Arity = new ArgumentArity(string.IsNullOrWhiteSpace(DefaultIfOptionWithoutValue) ? 1 : 0, 1)
                 },
-                ParameterType.Hex => new CliOption<long>(name)
+                ParameterType.Hex => new Option<long>(
+                   aliases.ToArray(),
+                   parseArgument: result => GetParseArgument(this, ConvertValueToHex)(result))
                 {
-                    CustomParser = result => GetParseArgument(this, ConvertValueToHex)(result),
                     Arity = new ArgumentArity(string.IsNullOrWhiteSpace(DefaultIfOptionWithoutValue) ? 1 : 0, 1)
                 },
                 _ => throw new Exception($"Unexpected value for {nameof(ParameterType)}: {Type}.")
             };
-            AddAliases(cliOption, aliases);
-            return cliOption;
-        }
-
-        /// <summary>
-        /// Returns the longest alias without prefix.
-        /// This is how System.CommandLine used to choose Name from aliases before Name and Aliases separation.
-        /// </summary>
-        protected string GetName(IReadOnlySet<string> aliases)
-        {
-            string name = "-";
-
-            foreach (string alias in aliases)
-            {
-                if ((alias.Length - GetPrefixLength(alias)) > (name.Length - GetPrefixLength(name)))
-                {
-                    name = alias;
-                }
-            }
-
-            return name;
-
-            static int GetPrefixLength(string alias)
-            {
-                if (alias[0] == '-')
-                {
-                    return alias.Length > 1 && alias[1] == '-' ? 2 : 1;
-                }
-                else if (alias[0] == '/')
-                {
-                    return 1;
-                }
-
-                return 0;
-            }
-        }
-
-        protected void AddAliases(CliOption option, IReadOnlySet<string> aliases)
-        {
-            foreach (string alias in aliases)
-            {
-                if (alias != option.Name)
-                {
-                    option.Aliases.Add(alias);
-                }
-            }
         }
 
         private static string ParameterTypeToString(ParameterType dataType)
@@ -322,7 +251,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (argumentResult.Tokens.Count == 0)
                 {
-                    if (or.Implicit)
+                    if (or.IsImplicit)
                     {
                         if (parameter.DefaultValue != null)
                         {
@@ -333,18 +262,18 @@ namespace Microsoft.TemplateEngine.Cli
                             }
 
                             //Cannot parse default value '{0}' for option '{1}' as expected type '{2}'.
-                            argumentResult.AddError(string.Format(
+                            argumentResult.ErrorMessage = string.Format(
                                 LocalizableStrings.ParseTemplateOption_Error_InvalidDefaultValue,
                                 parameter.DefaultValue,
-                                or.IdentifierToken?.Value,
-                                typeof(T).Name));
+                                or.Token?.Value,
+                                typeof(T).Name);
 
                             //https://github.com/dotnet/command-line-api/blob/5eca6545a0196124cc1a66d8bd43db8945f1f1b7/src/System.CommandLine/Argument%7BT%7D.cs#L99-L113
                             //system-command-line can handle null.
                             return default!;
                         }
                         //Default value for argument missing for option: '{0}'.
-                        argumentResult.AddError(string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultValue, or.IdentifierToken?.Value));
+                        argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultValue, or.Token?.Value);
                         return default!;
                     }
                     if (parameter.DefaultIfOptionWithoutValue != null)
@@ -355,15 +284,15 @@ namespace Microsoft.TemplateEngine.Cli
                             return value;
                         }
                         //Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.
-                        argumentResult.AddError(string.Format(
+                        argumentResult.ErrorMessage = string.Format(
                             LocalizableStrings.ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue,
                             parameter.DefaultIfOptionWithoutValue,
-                            or.IdentifierToken?.Value,
-                            typeof(T).Name));
+                            or.Token?.Value,
+                            typeof(T).Name);
                         return default!;
                     }
                     //Required argument missing for option: '{0}'.
-                    argumentResult.AddError(string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultIfNoOptionValue, or.IdentifierToken?.Value));
+                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_MissingDefaultIfNoOptionValue, or.Token?.Value);
                     return default!;
                 }
                 else if (argumentResult.Tokens.Count == 1)
@@ -374,17 +303,17 @@ namespace Microsoft.TemplateEngine.Cli
                         return value;
                     }
                     //Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.
-                    argumentResult.AddError(string.Format(
+                    argumentResult.ErrorMessage = string.Format(
                         LocalizableStrings.ParseTemplateOption_Error_InvalidArgument,
                         argumentResult.Tokens[0].Value,
-                        or.IdentifierToken?.Value,
-                        typeof(T).Name));
+                        or.Token?.Value,
+                        typeof(T).Name);
                     return default!;
                 }
                 else
                 {
                     //Using more than 1 argument is not allowed for '{0}', used: {1}.
-                    argumentResult.AddError(string.Format(LocalizableStrings.ParseTemplateOption_Error_InvalidCount, or.IdentifierToken?.Value, argumentResult.Tokens.Count));
+                    argumentResult.ErrorMessage = string.Format(LocalizableStrings.ParseTemplateOption_Error_InvalidCount, or.Token?.Value, argumentResult.Tokens.Count);
                     return default!;
                 }
             };

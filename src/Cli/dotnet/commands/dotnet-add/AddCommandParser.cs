@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Add.LocalizableStrings;
 
@@ -11,27 +13,27 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-add";
 
-        public static readonly CliArgument<string> ProjectArgument = new CliArgument<string>(CommonLocalizableStrings.ProjectArgumentName)
+        public static readonly Argument<string> ProjectArgument = new Argument<string>(CommonLocalizableStrings.ProjectArgumentName)
         {
             Description = CommonLocalizableStrings.ProjectArgumentDescription
         }.DefaultToCurrentDirectory();
 
-        private static readonly CliCommand Command = ConstructCommand();
+        private static readonly Command Command = ConstructCommand();
 
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
             var command = new DocumentedCommand("add", DocsLink, LocalizableStrings.NetAddCommand);
 
-            command.Arguments.Add(ProjectArgument);
-            command.Subcommands.Add(AddPackageParser.GetCommand());
-            command.Subcommands.Add(AddProjectToProjectReferenceParser.GetCommand());
+            command.AddArgument(ProjectArgument);
+            command.AddCommand(AddPackageParser.GetCommand());
+            command.AddCommand(AddProjectToProjectReferenceParser.GetCommand());
 
-            command.SetAction((parseResult) => parseResult.HandleMissingCommand());
+            command.SetHandler((parseResult) => parseResult.HandleMissingCommand());
 
             return command;
         }

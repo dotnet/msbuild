@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact(Skip = "https://github.com/dotnet/coreclr/issues/27275")]
+        [Fact]
         public void It_builds_the_library_successfully()
         {
             var testAsset = _testAssetsManager
@@ -46,7 +46,7 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        [Fact(Skip = "https://github.com/dotnet/coreclr/issues/27275")]
+        [Fact]
         public void It_builds_the_library_twice_in_a_row()
         {
             var testAsset = _testAssetsManager

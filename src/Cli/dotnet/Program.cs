@@ -6,16 +6,18 @@ using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
-using Microsoft.DotNet.CommandFactory;
 using NuGet.Frameworks;
-using CommandResult = System.CommandLine.Parsing.CommandResult;
-using System.CommandLine;
+using System.Linq;
+using Microsoft.DotNet.Tools.Help;
+using Microsoft.DotNet.CommandFactory;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -227,17 +229,7 @@ namespace Microsoft.DotNet.Cli
             if (parseResult.CanBeInvoked())
             {
                 PerformanceLogEventSource.Log.BuiltInCommandStart();
-
-                try
-                {
-                    exitCode = parseResult.Invoke();
-                    exitCode = AdjustExitCode(parseResult, exitCode);
-                }
-                catch (Exception exception)
-                {
-                    exitCode = Parser.ExceptionHandler(exception, parseResult);
-                }
-
+                exitCode = parseResult.Invoke();
                 PerformanceLogEventSource.Log.BuiltInCommandStop();
             }
             else
@@ -261,28 +253,6 @@ namespace Microsoft.DotNet.Cli
             PerformanceLogEventSource.Log.TelemetryClientFlushStop();
 
             telemetryClient.Dispose();
-
-            return exitCode;
-        }
-
-        private static int AdjustExitCode(ParseResult parseResult, int exitCode)
-        {
-            if (parseResult.Errors.Count > 0)
-            {
-                var commandResult = parseResult.CommandResult;
-
-                while (commandResult is not null)
-                {
-                    if (commandResult.Command.Name == "new")
-                    {
-                        // default parse error exit code is 1
-                        // for the "new" command and its subcommands it needs to be 127
-                        return 127;
-                    }
-
-                    commandResult = commandResult.Parent as CommandResult;
-                }
-            }
 
             return exitCode;
         }

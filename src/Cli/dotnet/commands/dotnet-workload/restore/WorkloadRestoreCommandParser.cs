@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Workloads.Workload.Restore;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Restore.LocalizableStrings;
 
@@ -9,21 +11,21 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadRestoreCommandParser
     {
-        private static readonly CliCommand Command = ConstructCommand();
+        private static readonly Command Command = ConstructCommand();
 
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
-            CliCommand command = new("restore", LocalizableStrings.CommandDescription);
+            Command command = new Command("restore", LocalizableStrings.CommandDescription);
 
-            command.Arguments.Add(RestoreCommandParser.SlnOrProjectArgument);
+            command.AddArgument(RestoreCommandParser.SlnOrProjectArgument);
             WorkloadInstallCommandParser.AddWorkloadInstallCommandOptions(command);
 
-            command.SetAction((parseResult) => new WorkloadRestoreCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new WorkloadRestoreCommand(parseResult).Execute());
 
             return command;
         }

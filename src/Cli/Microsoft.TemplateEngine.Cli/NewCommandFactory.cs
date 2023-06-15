@@ -8,7 +8,7 @@ namespace Microsoft.TemplateEngine.Cli
 {
     public static class NewCommandFactory
     {
-        public static CliCommand Create(string commandName, Func<ParseResult, ICliTemplateEngineHost> hostBuilder)
+        public static Command Create(string commandName, Func<ParseResult, ICliTemplateEngineHost> hostBuilder)
         {
             if (string.IsNullOrWhiteSpace(commandName))
             {

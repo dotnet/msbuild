@@ -20,16 +20,13 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-workload";
 
-        private static readonly CliCommand Command = ConstructCommand();
+        private static readonly Command Command = ConstructCommand();
 
-        public static readonly CliOption<bool> InfoOption = new("--info")
-        {
-            Description = CommonStrings.WorkloadInfoDescription
-        };
+        public static readonly Option<bool> InfoOption = new Option<bool>("--info", CommonStrings.WorkloadInfoDescription);
 
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
-            Command.Options.Add(InfoOption);
+            Command.AddOption(InfoOption);
             return Command;
         }
 
@@ -94,29 +91,21 @@ namespace Microsoft.DotNet.Cli
             return parseResult.HandleMissingCommand();
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
-            DocumentedCommand command = new("workload", DocsLink, CommonStrings.CommandDescription);
+            var command = new DocumentedCommand("workload", DocsLink, CommonStrings.CommandDescription);
 
-            command.Subcommands.Add(WorkloadInstallCommandParser.GetCommand());
-            command.Subcommands.Add(WorkloadUpdateCommandParser.GetCommand());
-            command.Subcommands.Add(WorkloadListCommandParser.GetCommand());
-            command.Subcommands.Add(WorkloadSearchCommandParser.GetCommand());
-            command.Subcommands.Add(WorkloadUninstallCommandParser.GetCommand());
-            command.Subcommands.Add(WorkloadRepairCommandParser.GetCommand());
-            command.Subcommands.Add(WorkloadRestoreCommandParser.GetCommand());
-            command.Subcommands.Add(WorkloadCleanCommandParser.GetCommand());
-            command.Subcommands.Add(WorkloadElevateCommandParser.GetCommand());
+            command.AddCommand(WorkloadInstallCommandParser.GetCommand());
+            command.AddCommand(WorkloadUpdateCommandParser.GetCommand());
+            command.AddCommand(WorkloadListCommandParser.GetCommand());
+            command.AddCommand(WorkloadSearchCommandParser.GetCommand());
+            command.AddCommand(WorkloadUninstallCommandParser.GetCommand());
+            command.AddCommand(WorkloadRepairCommandParser.GetCommand());
+            command.AddCommand(WorkloadRestoreCommandParser.GetCommand());
+            command.AddCommand(WorkloadCleanCommandParser.GetCommand());
+            command.AddCommand(WorkloadElevateCommandParser.GetCommand());
 
-            command.Validators.Add(commandResult =>
-            {
-                if (commandResult.GetResult(InfoOption) is null && !commandResult.Children.Any(child => child is CommandResult))
-                {
-                    commandResult.AddError(Tools.CommonLocalizableStrings.RequiredCommandNotPassed);
-                }
-            });
-
-            command.SetAction(ProcessArgs);
+            command.SetHandler((parseResult) => ProcessArgs(parseResult));
 
             return command;
         }

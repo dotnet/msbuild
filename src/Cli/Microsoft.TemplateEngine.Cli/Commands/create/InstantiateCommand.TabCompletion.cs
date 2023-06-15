@@ -3,6 +3,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Completions;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge;
@@ -60,7 +61,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                                 templateGroup,
                                 template);
 
-                            CliConfiguration parser = ParserFactory.CreateParser(command);
+                            Parser parser = ParserFactory.CreateParser(command);
 
                             //it is important to pass raw text to get the completion
                             //completions for args passed as array are not supported

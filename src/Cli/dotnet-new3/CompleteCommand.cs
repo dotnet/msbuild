@@ -3,6 +3,8 @@
 
 using System.CommandLine;
 using System.CommandLine.Completions;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 
 namespace Dotnet_new3
 {
@@ -13,22 +15,22 @@ namespace Dotnet_new3
     /// this implementation is for test purpose only.
     /// Keep in sync with https://github.com/dotnet/sdk/blob/main/src/Cli/dotnet/commands/dotnet-complete/CompleteCommand.cs.
     /// </remark>
-    internal class CompleteCommand : CliCommand
+    internal class CompleteCommand : Command
     {
-        private static readonly CliArgument<string> PathArgument = new("path");
+        private static readonly Argument<string> PathArgument = new Argument<string>("path");
 
-        private static readonly CliOption<int?> PositionOption = new("--position");
+        private static readonly Option<int?> PositionOption = new Option<int?>("--position");
 
         internal CompleteCommand() : base("complete", "tab completion")
         {
-            this.Arguments.Add(PathArgument);
-            this.Options.Add(PositionOption);
+            this.AddArgument(PathArgument);
+            this.AddOption(PositionOption);
 
-            this.SetAction(Run);
-            this.Hidden = true;
+            this.SetHandler((InvocationContext invocationContext) => Run(invocationContext.ParseResult));
+            this.IsHidden = true;
         }
 
-        public Task<int> Run(ParseResult result, CancellationToken cancellationToken)
+        public Task<int> Run(ParseResult result)
         {
             try
             {
@@ -40,7 +42,7 @@ namespace Dotnet_new3
                     input += " ";
                 }
 
-                CliCommand newCommand = New3CommandFactory.Create();
+                Command newCommand = New3CommandFactory.Create();
                 ParseResult newCommandResult = ParserFactory.CreateParser(newCommand).Parse(input);
                 foreach (CompletionItem suggestion in newCommandResult.GetCompletions(position).Distinct())
                 {

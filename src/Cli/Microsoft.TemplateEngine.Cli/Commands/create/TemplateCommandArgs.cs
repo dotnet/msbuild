@@ -42,7 +42,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             foreach (var opt in command.TemplateOptions)
             {
-                if (parseResult.GetResult(opt.Value.Option) is { } result)
+                if (parseResult.FindResultFor(opt.Value.Option) is { } result)
                 {
                     _templateOptions[opt.Key] = result;
                 }
@@ -80,7 +80,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         public ParseResult ParseResult { get; }
 
-        public CliCommand Command => _command;
+        public Command Command => _command;
 
         public NewCommand RootCommand { get; }
 
@@ -100,12 +100,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         private string? GetValue(string parameterName, OptionResult optionResult)
         {
             //if default value is used, no need to return it - it will be populated in template engine edge instead.
-            if (optionResult.Implicit)
+            if (optionResult.IsImplicit)
             {
                 return null;
             }
 
-            var optionValue = optionResult.GetValueOrDefault<object>();
+            var optionValue = optionResult.GetValueOrDefault();
             if (optionValue == null)
             {
                 return null;
@@ -129,10 +129,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 return newCommand;
             }
-            CliCommand? currentCommand = command;
+            Command? currentCommand = command;
             while (currentCommand != null && currentCommand is not NewCommand)
             {
-                currentCommand = currentCommand.Parents.OfType<CliCommand>().SingleOrDefault();
+                currentCommand = currentCommand.Parents.OfType<Command>().SingleOrDefault();
             }
             return currentCommand as NewCommand ?? throw new Exception($"Command structure is not correct: {nameof(NewCommand)} is not found.");
         }

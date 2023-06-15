@@ -3,6 +3,8 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.Sln.Add;
 using LocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 
@@ -10,39 +12,32 @@ namespace Microsoft.DotNet.Cli
 {
     public static class SlnAddParser
     {
-        public static readonly CliArgument<IEnumerable<string>> ProjectPathArgument = new(LocalizableStrings.AddProjectPathArgumentName)
+        public static readonly Argument<IEnumerable<string>> ProjectPathArgument = new Argument<IEnumerable<string>>(LocalizableStrings.AddProjectPathArgumentName)
         {
-            HelpName = LocalizableStrings.AddProjectPathArgumentName,
             Description = LocalizableStrings.AddProjectPathArgumentDescription,
             Arity = ArgumentArity.ZeroOrMore,
         };
 
-        public static readonly CliOption<bool> InRootOption = new("--in-root")
-        {
-            Description = LocalizableStrings.InRoot
-        };
+        public static readonly Option<bool> InRootOption = new Option<bool>("--in-root", LocalizableStrings.InRoot);
 
-        public static readonly CliOption<string> SolutionFolderOption = new("--solution-folder", "-s")
-        {
-            Description = LocalizableStrings.AddProjectSolutionFolderArgumentDescription
-        };
+        public static readonly Option<string> SolutionFolderOption = new Option<string>(new string[] { "-s", "--solution-folder" }, LocalizableStrings.AddProjectSolutionFolderArgumentDescription);
 
-        private static readonly CliCommand Command = ConstructCommand();
+        private static readonly Command Command = ConstructCommand();
 
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
-            CliCommand command = new("add", LocalizableStrings.AddAppFullName);
+            var command = new Command("add", LocalizableStrings.AddAppFullName);
 
-            command.Arguments.Add(ProjectPathArgument);
-            command.Options.Add(InRootOption);
-            command.Options.Add(SolutionFolderOption);
+            command.AddArgument(ProjectPathArgument);
+            command.AddOption(InRootOption);
+            command.AddOption(SolutionFolderOption);
 
-            command.SetAction((parseResult) => new AddProjectToSolutionCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new AddProjectToSolutionCommand(parseResult).Execute());
 
             return command;
         }

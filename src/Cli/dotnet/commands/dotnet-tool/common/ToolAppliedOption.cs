@@ -1,26 +1,28 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Tool.Common
 {
     internal class ToolAppliedOption
     {
-        public static CliOption<bool> GlobalOption = new("--global", "-g");
+        public static Option<bool> GlobalOption = new Option<bool>(new string[] { "--global", "-g" });
 
-        public static CliOption<bool> LocalOption = new("--local");
+        public static Option<bool> LocalOption = new Option<bool>("--local");
 
-        public static CliOption<string> ToolPathOption = new("--tool-path")
+        public static Option<string> ToolPathOption = new Option<string>("--tool-path")
         {
-            HelpName = Install.LocalizableStrings.ToolPathOptionName
+            ArgumentHelpName = Install.LocalizableStrings.ToolPathOptionName
         };
 
-        public static CliOption<string> ToolManifestOption = new("--tool-manifest")
+        public static Option<string> ToolManifestOption = new Option<string>("--tool-manifest")
         {
-            HelpName = Install.LocalizableStrings.ManifestPathOptionName,
+            ArgumentHelpName = Install.LocalizableStrings.ManifestPathOptionName,
             Arity = ArgumentArity.ZeroOrOne
         };
 
@@ -29,17 +31,17 @@ namespace Microsoft.DotNet.Tools.Tool.Common
             string message)
         {
             List<string> options = new List<string>();
-            if (parseResult.GetResult(GlobalOption) is not null)
+            if (parseResult.HasOption(GlobalOption))
             {
                 options.Add(GlobalOption.Name);
             }
 
-            if (parseResult.GetResult(LocalOption) is not null)
+            if (parseResult.HasOption(LocalOption))
             {
                 options.Add(LocalOption.Name);
             }
 
-            if (!string.IsNullOrWhiteSpace(parseResult.GetValue(ToolPathOption)))
+            if (!String.IsNullOrWhiteSpace(parseResult.GetValue(ToolPathOption)))
             {
                 options.Add(ToolPathOption.Name);
             }
@@ -67,7 +69,7 @@ namespace Microsoft.DotNet.Tools.Tool.Common
 
         private static bool GlobalOrToolPath(ParseResult parseResult)
         {
-            return parseResult.GetResult(GlobalOption) is not null ||
+            return parseResult.HasOption(GlobalOption) ||
                    !string.IsNullOrWhiteSpace(parseResult.GetValue(ToolPathOption));
         }
     }

@@ -100,7 +100,13 @@ namespace Microsoft.NET.TestFramework
                 File.Copy(srcFile, destFile, true);
             }
 
-            string[][] Properties = { new string[] { "TargetFramework", "$(CurrentTargetFramework)", ToolsetInfo.CurrentTargetFramework }, new string[] { "RuntimeIdentifier", "$(LatestWinRuntimeIdentifier)", ToolsetInfo.LatestWinRuntimeIdentifier }, new string[] { "RuntimeIdentifier", "$(LatestLinuxRuntimeIdentifier)", ToolsetInfo.LatestLinuxRuntimeIdentifier }, new string[] { "RuntimeIdentifier", "$(LatestMacRuntimeIdentifier)", ToolsetInfo.LatestMacRuntimeIdentifier }, new string[] { "RuntimeIdentifier", "$(LatestRuntimeIdentifiers)", ToolsetInfo.LatestRuntimeIdentifiers } };
+            string[][] Properties = {
+                new string[] { "TargetFramework", "$(CurrentTargetFramework)", ToolsetInfo.CurrentTargetFramework },
+                new string[] { "CurrentTargetFramework", "$(CurrentTargetFramework)", ToolsetInfo.CurrentTargetFramework },
+                new string[] { "RuntimeIdentifier", "$(LatestWinRuntimeIdentifier)", ToolsetInfo.LatestWinRuntimeIdentifier },
+                new string[] { "RuntimeIdentifier", "$(LatestLinuxRuntimeIdentifier)", ToolsetInfo.LatestLinuxRuntimeIdentifier },
+                new string[] { "RuntimeIdentifier", "$(LatestMacRuntimeIdentifier)", ToolsetInfo.LatestMacRuntimeIdentifier },
+                new string[] { "RuntimeIdentifier", "$(LatestRuntimeIdentifiers)", ToolsetInfo.LatestRuntimeIdentifiers } };
 
             foreach (string[] property in Properties)
             {

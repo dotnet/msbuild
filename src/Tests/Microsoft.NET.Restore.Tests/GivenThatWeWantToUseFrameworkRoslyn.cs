@@ -74,7 +74,7 @@ namespace Microsoft.NET.Restore.Tests
                 testAsset.GetRestoreCommand(Log, relativePath: testProjectName);
             var result = restoreCommand.Execute();
             result.Should().Pass();
-            result.Should().HaveStdOutContaining("NETSDK1080");
+            result.Should().HaveStdOutContaining("NETSDK1205");
         }
     }
 }

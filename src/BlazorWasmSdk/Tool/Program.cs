@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
@@ -14,22 +16,23 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tool
     {
         public static int Main(string[] args)
         {
-            CliRootCommand rootCommand = new();
-            CliCommand brotli = new("brotli");
+            var rootCommand = new RootCommand();
+            var brotli = new Command("brotli");
 
-            CliOption<CompressionLevel> compressionLevelOption = new("-c")
+            var compressionLevelOption = new Option<CompressionLevel>(
+                "-c",
+                defaultValueFactory: () => CompressionLevel.SmallestSize,
+                description: "System.IO.Compression.CompressionLevel for the Brotli compression algorithm.");
+            var sourcesOption = new Option<List<string>>(
+                "-s",
+                description: "A list of files to compress.")
             {
-                DefaultValueFactory = _ => CompressionLevel.SmallestSize,
-                Description = "System.IO.Compression.CompressionLevel for the Brotli compression algorithm.",
-            };
-            CliOption<List<string>> sourcesOption = new("-s")
-            {
-                Description = "A list of files to compress.",
                 AllowMultipleArgumentsPerToken = false
             };
-            CliOption<List<string>> outputsOption = new("-o")
+            var outputsOption = new Option<List<string>>(
+                "-o",
+                "The filenames to output the compressed file to.")
             {
-                Description = "The filenames to output the compressed file to.",
                 AllowMultipleArgumentsPerToken = false
             };
 
@@ -39,11 +42,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tool
 
             rootCommand.Add(brotli);
 
-            brotli.SetAction((ParseResult parseResult) =>
+            brotli.SetHandler((InvocationContext context) =>
             {
-                var c = parseResult.GetValue(compressionLevelOption);
-                var s = parseResult.GetValue(sourcesOption);
-                var o = parseResult.GetValue(outputsOption);
+                var parseResults = context.ParseResult;
+                var c = parseResults.GetValue(compressionLevelOption);
+                var s = parseResults.GetValue(sourcesOption);
+                var o = parseResults.GetValue(outputsOption);
 
                 Parallel.For(0, s.Count, i =>
                 {
@@ -65,7 +69,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tool
                 });
             });
 
-            return rootCommand.Parse(args).Invoke();
+            return rootCommand.InvokeAsync(args).Result;
         }
     }
 }

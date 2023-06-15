@@ -12,9 +12,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             TemplatePackages = parseResult.GetValue(BaseUninstallCommand.NameArgument) ?? Array.Empty<string>();
 
             //workaround for --install source1 --install source2 case
-            if (uninstallCommand is LegacyUninstallCommand && (TemplatePackages.Contains(uninstallCommand.Name) || uninstallCommand.Aliases.Any(alias => TemplatePackages.Contains(alias))))
+            if (uninstallCommand is LegacyUninstallCommand && uninstallCommand.Aliases.Any(alias => TemplatePackages.Contains(alias)))
             {
-                TemplatePackages = TemplatePackages.Where(package => uninstallCommand.Name != package && !uninstallCommand.Aliases.Contains(package)).ToList();
+                TemplatePackages = TemplatePackages.Where(package => !uninstallCommand.Aliases.Contains(package)).ToList();
             }
         }
 

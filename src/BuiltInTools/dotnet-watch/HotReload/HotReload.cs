@@ -2,15 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Watcher.Internal;
 using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    internal class HotReload : IDisposable
+    internal sealed class HotReload : IDisposable
     {
         private readonly StaticFileHandler _staticFileHandler;
         private readonly ScopedCssFileHandler _scopedCssFileHandler;
@@ -23,10 +21,13 @@ namespace Microsoft.DotNet.Watcher.Tools
             _compilationHandler = new CompilationHandler(reporter);
         }
 
-        public void Initialize(DotNetWatchContext dotNetWatchContext, CancellationToken cancellationToken)
+        public void Dispose()
         {
-            _compilationHandler.Initialize(dotNetWatchContext, cancellationToken);
+            _compilationHandler.Dispose();
         }
+
+        public Task InitializeAsync(DotNetWatchContext dotNetWatchContext, CancellationToken cancellationToken)
+            => _compilationHandler.InitializeAsync(dotNetWatchContext, cancellationToken);
 
         public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem[] files, CancellationToken cancellationToken)
         {
@@ -47,11 +48,6 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.Main);
             return fileHandlerResult;
-        }
-
-        public void Dispose()
-        {
-            _compilationHandler.Dispose();
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.ApiCompat
             bool enableRuleAttributesMustMatch,
             string[]? excludeAttributesFiles,
             bool enableRuleCannotChangeParameterName,
-            string? packagePath,
+            string packagePath,
             bool runApiCompat,
             bool enableStrictModeForCompatibleTfms,
             bool enableStrictModeForCompatibleFrameworksInPackage,

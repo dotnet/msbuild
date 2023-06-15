@@ -18,9 +18,9 @@
         <note>{StrBegin="NETSDK1204: "}</note>
       </trans-unit>
       <trans-unit id="AotUnsupportedTargetFramework">
-        <source>NETSDK1183: Ahead-of-time compilation is not supported for the target framework.</source>
-        <target state="new">NETSDK1183: Ahead-of-time compilation is not supported for the target framework.</target>
-        <note>{StrBegin="NETSDK1183: "}</note>
+        <source>NETSDK1207: Ahead-of-time compilation is not supported for the target framework.</source>
+        <target state="new">NETSDK1207: Ahead-of-time compilation is not supported for the target framework.</target>
+        <note>{StrBegin="NETSDK1207: "}</note>
       </trans-unit>
       <trans-unit id="AotUnsupportedTargetRuntimeIdentifier">
         <source>NETSDK1203: Ahead-of-time compilation is not supported for the target runtime identifier '{0}'.</source>
@@ -113,9 +113,9 @@
         <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
       <trans-unit id="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework">
-        <source>NETSDK1080: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</source>
-        <target state="new">NETSDK1080: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</target>
-        <note>{StrBegin="NETSDK1080: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</note>
+        <source>NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</source>
+        <target state="translated">NETSDK1205: 不应直接设置 Microsoft.Net.Compilers.Toolset.Framework 包。如果需要，请将属性 "BuildWithNetFrameworkHostedCompiler" 设置为 "true"。</target>
+        <note>{StrBegin="NETSDK1205: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</note>
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
@@ -674,6 +674,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</source>
         <target state="translated">NETSDK1121: 面向 .NET Core 的 C++/CLI 项目不能使用 SelfContained=true。</target>
         <note>{StrBegin="NETSDK1121: "}</note>
+      </trans-unit>
+      <trans-unit id="NonPortableRuntimeIdentifierDetected">
+        <source>NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): {0}. Affected libraries: {1}. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details.</source>
+        <target state="new">NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): {0}. Affected libraries: {1}. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details.</target>
+        <note>{StrBegin="NETSDK1206: "}</note>
       </trans-unit>
       <trans-unit id="NonSelfContainedExeCannotReferenceSelfContained">
         <source>NETSDK1151: The referenced project '{0}' is a self-contained executable.  A self-contained executable cannot be referenced by a non self-contained executable.  For more information, see https://aka.ms/netsdk1151</source>

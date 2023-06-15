@@ -1,7 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using LocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -10,30 +13,29 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-sln";
 
-        public static readonly CliArgument<string> SlnArgument = new CliArgument<string>(LocalizableStrings.SolutionArgumentName)
+        public static readonly Argument<string> SlnArgument = new Argument<string>(LocalizableStrings.SolutionArgumentName)
         {
-            HelpName = LocalizableStrings.SolutionArgumentName,
             Description = LocalizableStrings.SolutionArgumentDescription,
             Arity = ArgumentArity.ExactlyOne
         }.DefaultToCurrentDirectory();
 
-        private static readonly CliCommand Command = ConstructCommand();
+        private static readonly Command Command = ConstructCommand();
 
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
-            DocumentedCommand command = new("sln", DocsLink, LocalizableStrings.AppFullName);
+            var command = new DocumentedCommand("sln", DocsLink, LocalizableStrings.AppFullName);
 
-            command.Arguments.Add(SlnArgument);
-            command.Subcommands.Add(SlnAddParser.GetCommand());
-            command.Subcommands.Add(SlnListParser.GetCommand());
-            command.Subcommands.Add(SlnRemoveParser.GetCommand());
+            command.AddArgument(SlnArgument);
+            command.AddCommand(SlnAddParser.GetCommand());
+            command.AddCommand(SlnListParser.GetCommand());
+            command.AddCommand(SlnRemoveParser.GetCommand());
 
-            command.SetAction((parseResult) => parseResult.HandleMissingCommand());
+            command.SetHandler((parseResult) => parseResult.HandleMissingCommand());
 
             return command;
         }

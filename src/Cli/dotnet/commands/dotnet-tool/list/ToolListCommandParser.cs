@@ -2,44 +2,46 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.Tool.Common;
 using Microsoft.DotNet.Tools.Tool.List;
+using Microsoft.DotNet.Tools.Tool.Restore;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.List.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class ToolListCommandParser
     {
-        public static readonly CliArgument<string> PackageIdArgument = new("packageId")
+        public static readonly Argument<string> PackageIdArgument = new Argument<string>(LocalizableStrings.PackageIdArgumentName)
         {
-            HelpName = LocalizableStrings.PackageIdArgumentName,
             Description = LocalizableStrings.PackageIdArgumentDescription,
             Arity = ArgumentArity.ZeroOrOne,
         };
 
-        public static readonly CliOption<bool> GlobalOption = ToolAppliedOption.GlobalOption;
+        public static readonly Option<bool> GlobalOption = ToolAppliedOption.GlobalOption;
 
-        public static readonly CliOption<bool> LocalOption = ToolAppliedOption.LocalOption;
+        public static readonly Option<bool> LocalOption = ToolAppliedOption.LocalOption;
 
-        public static readonly CliOption<string> ToolPathOption = ToolAppliedOption.ToolPathOption;
+        public static readonly Option<string> ToolPathOption = ToolAppliedOption.ToolPathOption;
 
-        private static readonly CliCommand Command = ConstructCommand();
+        private static readonly Command Command = ConstructCommand();
 
-        public static CliCommand GetCommand()
+        public static Command GetCommand()
         {
             return Command;
         }
 
-        private static CliCommand ConstructCommand()
+        private static Command ConstructCommand()
         {
-            CliCommand command = new("list", LocalizableStrings.CommandDescription);
+            var command = new Command("list", LocalizableStrings.CommandDescription);
 
-            command.Arguments.Add(PackageIdArgument);
-            command.Options.Add(GlobalOption.WithHelpDescription(command, LocalizableStrings.GlobalOptionDescription));
-            command.Options.Add(LocalOption.WithHelpDescription(command, LocalizableStrings.LocalOptionDescription));
-            command.Options.Add(ToolPathOption.WithHelpDescription(command, LocalizableStrings.ToolPathOptionDescription));
+            command.AddArgument(PackageIdArgument);
+            command.AddOption(GlobalOption.WithHelpDescription(command, LocalizableStrings.GlobalOptionDescription));
+            command.AddOption(LocalOption.WithHelpDescription(command, LocalizableStrings.LocalOptionDescription));
+            command.AddOption(ToolPathOption.WithHelpDescription(command, LocalizableStrings.ToolPathOptionDescription));
 
-            command.SetAction((parseResult) => new ToolListCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new ToolListCommand(parseResult).Execute());
 
             return command;
         }

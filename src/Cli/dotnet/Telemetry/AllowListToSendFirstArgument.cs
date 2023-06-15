@@ -22,18 +22,12 @@ namespace Microsoft.DotNet.Cli.Telemetry
         public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult, Dictionary<string, double> measurements = null)
         {
             var result = new List<ApplicationInsightsEntryFormat>();
-            var topLevelCommandNameFromParse = parseResult.RootCommandResult.Children.FirstOrDefault() switch
-            {
-                System.CommandLine.Parsing.CommandResult commandResult => commandResult.Command.Name,
-                OptionResult optionResult => optionResult.Option.Name,
-                ArgumentResult argumentResult => argumentResult.Argument.Name,
-                _ => null
-            };
+            var topLevelCommandNameFromParse = parseResult.RootCommandResult.Children.FirstOrDefault()?.Symbol.Name;
             if (topLevelCommandNameFromParse != null)
             {
                 if (_topLevelCommandNameAllowList.Contains(topLevelCommandNameFromParse))
                 {
-                    var firstArgument = parseResult.RootCommandResult.Children.FirstOrDefault()?.Tokens.Where(t => t.Type.Equals(CliTokenType.Argument)).FirstOrDefault()?.Value ?? null;
+                    var firstArgument = parseResult.RootCommandResult.Children.FirstOrDefault()?.Tokens.Where(t => t.Type.Equals(TokenType.Argument)).FirstOrDefault()?.Value ?? null;
                     if (firstArgument != null)
                     {
                         result.Add(new ApplicationInsightsEntryFormat(
