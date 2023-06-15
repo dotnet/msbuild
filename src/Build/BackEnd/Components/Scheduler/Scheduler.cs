@@ -10,9 +10,11 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
@@ -540,20 +542,52 @@ namespace Microsoft.Build.BackEnd
         /// <param name="submissionId">The id of the submission which is at the root of the build.</param>
         public void WriteDetailedSummary(int submissionId)
         {
-            ILoggingService loggingService = _componentHost.LoggingService;
-            BuildEventContext context = new BuildEventContext(submissionId, 0, 0, 0, 0, 0);
-            loggingService.LogComment(context, MessageImportance.Normal, "DetailedSummaryHeader");
+            BuildParameters parameters = _componentHost.BuildParameters;
+            ILoggingService originalLoggingService = _componentHost.LoggingService;
+            ICollection<ILogger> loggers = originalLoggingService.Loggers;
+            LoggingService loggingService = originalLoggingService as LoggingService;
+            if (!parameters.DetailedSummary)
+            {
+                ILogger bl = _componentHost.LoggingService.Loggers.FirstOrDefault(l => l is BinaryLogger);
+                if (bl is null)
+                {
+                    return;
+                }
+                else
+                {
+                    // In real builds, an ILoggingService is always a LoggingService.
+                    if (loggingService is not null)
+                    {
+                        loggingService.Loggers = new List<ILogger>() { bl };
+                    }
+
+                    // In unit test code, we can just skip providing a detailed summary.
+                    else
+                    {
+                        return;
+                    }
+                }
+            }
+
+            ILoggingService loggingServiceToUse = loggingService ?? originalLoggingService;
+            BuildEventContext context = new(submissionId, 0, 0, 0, 0, 0);
+            loggingServiceToUse.LogComment(context, MessageImportance.Normal, "DetailedSummaryHeader");
 
             foreach (SchedulableRequest request in _schedulingData.GetRequestsByHierarchy(null))
             {
                 if (request.BuildRequest.SubmissionId == submissionId)
                 {
-                    loggingService.LogComment(context, MessageImportance.Normal, "BuildHierarchyHeader");
-                    WriteRecursiveSummary(loggingService, context, submissionId, request, 0, false /* useConfigurations */, true /* isLastChild */);
+                    loggingServiceToUse.LogComment(context, MessageImportance.Normal, "BuildHierarchyHeader");
+                    WriteRecursiveSummary(loggingServiceToUse, context, submissionId, request, 0, false /* useConfigurations */, true /* isLastChild */);
                 }
             }
 
-            WriteNodeUtilizationGraph(loggingService, context, false /* useConfigurations */);
+            WriteNodeUtilizationGraph(loggingServiceToUse, context, false /* useConfigurations */);
+
+            if (loggingService is not null)
+            {
+                loggingService.Loggers = loggers;
+            }
         }
 
         /// <summary>

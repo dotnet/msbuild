@@ -472,7 +472,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Enumerator over all registered loggers.
         /// </summary>
-        public ICollection<ILogger> Loggers => _loggers;
+        public ICollection<ILogger> Loggers
+        {
+            get
+            {
+                return _loggers;
+            }
+            internal set
+            {
+                _loggers = value.ToList();
+            }
+        }
 
         /// <summary>
         /// What type of logging mode is the logger running under.

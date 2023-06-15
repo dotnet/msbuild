@@ -2502,10 +2502,7 @@ namespace Microsoft.Build.Execution
                         break;
 
                     case ScheduleActionType.SubmissionComplete:
-                        if (_buildParameters.DetailedSummary)
-                        {
-                            _scheduler.WriteDetailedSummary(response.BuildResult.SubmissionId);
-                        }
+                        _scheduler.WriteDetailedSummary(response.BuildResult.SubmissionId);
 
                         ReportResultsToSubmission(response.BuildResult);
                         break;
