@@ -82,47 +82,16 @@ namespace Microsoft.Build.Evaluation
     [SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix", Justification = "This is a collection of projects API review has approved this")]
     public class ProjectCollection : IToolsetProvider, IBuildComponent, IDisposable
     {
-        // ProjectCollection is highly reentrant - project creation, toolset and logger changes, and so on
-        // all need lock protection, but there are a lot of read cases as well, and calls to create Projects
-        // call back to the ProjectCollection under locks. Use a RW lock, but default to always using
-        // upgradable read locks to avoid adding reentrancy bugs.
-        private class DisposableReaderWriterLockSlim
-        {
-            private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
-            public bool IsWriteLockHeld => _lock.IsWriteLockHeld;
-
-            public IDisposable EnterUpgradeableReadLock()
-            {
-                _lock.EnterUpgradeableReadLock();
-                return new DelegateDisposable(() => _lock.ExitUpgradeableReadLock());
-            }
-
-            public IDisposable EnterWriteLock()
-            {
-                _lock.EnterWriteLock();
-                return new DelegateDisposable(() => _lock.ExitWriteLock());
-            }
-        }
-
-        private class DelegateDisposable : IDisposable
-        {
-            private readonly Action _disposeAction;
-
-            public DelegateDisposable(Action disposeAction)
-            {
-                _disposeAction = disposeAction;
-            }
-
-            public void Dispose()
-            {
-                _disposeAction();
-            }
-        }
-
         /// <summary>
         /// The object to synchronize with when accessing certain fields.
         /// </summary>
-        private readonly DisposableReaderWriterLockSlim _locker = new DisposableReaderWriterLockSlim();
+        /// <remarks>
+        /// ProjectCollection is highly reentrant - project creation, toolset and logger changes, and so on
+        /// all need lock protection, but there are a lot of read cases as well, and calls to create Projects
+        /// call back to the ProjectCollection under locks. Use a RW lock, but default to always using
+        /// upgradable read locks to avoid adding reentrancy bugs.
+        /// </remarks>
+        private readonly ReaderWriterLockSlim _locker = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 
         /// <summary>
         /// The global singleton project collection used as a default for otherwise
@@ -144,6 +113,8 @@ namespace Microsoft.Build.Evaluation
         /// The display version of the file in which the Engine assembly lies.
         /// </summary>
         private static string s_assemblyDisplayVersion;
+
+        private static ProjectRootElementCacheBase s_projectRootElementCache = null;
 
         /// <summary>
         /// The projects loaded into this collection.
@@ -226,6 +197,12 @@ namespace Microsoft.Build.Evaluation
         private int _maxNodeCount;
 
         /// <summary>
+        /// LoggingService Logger mode.
+        /// If Asynchronous mode is used
+        /// </summary>
+        private LoggerMode _loggerMode;
+
+        /// <summary>
         /// Instantiates a project collection with no global properties or loggers that reads toolset
         /// information from the configuration file and registry.
         /// </summary>
@@ -302,6 +279,28 @@ namespace Microsoft.Build.Evaluation
         /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
         /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly)
+            : this(globalProperties, loggers, remoteLoggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging: false, reuseProjectRootElementCache: false)
+        {
+        }
+
+
+        /// <summary>
+        /// Instantiates a project collection with specified global properties and loggers and using the
+        /// specified toolset locations, node count, and setting of onlyLogCriticalEvents.
+        /// Global properties and loggers may be null.
+        /// Throws InvalidProjectFileException if any of the global properties are reserved.
+        /// May throw InvalidToolsetDefinitionException.
+        /// </summary>
+        /// <param name="globalProperties">The default global properties to use. May be null.</param>
+        /// <param name="loggers">The loggers to register. May be null and specified to any build instead.</param>
+        /// <param name="remoteLoggers">Any remote loggers to register. May be null and specified to any build instead.</param>
+        /// <param name="toolsetDefinitionLocations">The locations from which to load toolsets.</param>
+        /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
+        /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
+        /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
+        /// <param name="useAsynchronousLogging">If set to true, asynchronous logging will be used. <see cref="ProjectCollection.Dispose()"/> has to called to clear resources used by async logging.</param>
+        /// <param name="reuseProjectRootElementCache">If set to true, it will try to reuse <see cref="ProjectRootElementCacheBase"/> singleton.</param>
+        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache)
         {
             _loadedProjects = new LoadedProjectCollection();
             ToolsetLocations = toolsetDefinitionLocations;
@@ -311,14 +310,28 @@ namespace Microsoft.Build.Evaluation
             {
                 ProjectRootElementCache = new SimpleProjectRootElementCache();
             }
+            else if (reuseProjectRootElementCache && s_projectRootElementCache != null)
+            {
+                ProjectRootElementCache = s_projectRootElementCache;
+            }
             else
             {
-                ProjectRootElementCache = new ProjectRootElementCache(autoReloadFromDisk: false, loadProjectsReadOnly);
+                // When we are reusing ProjectRootElementCache we need to reload XMLs if it has changed between MSBuild Server sessions/builds.
+                // If we are not reusing, cache will be released at end of build and as we do not support project files will changes during build
+                // we do not need to auto reload.
+                bool autoReloadFromDisk = reuseProjectRootElementCache;
+                ProjectRootElementCache = new ProjectRootElementCache(autoReloadFromDisk, loadProjectsReadOnly);
+                if (reuseProjectRootElementCache)
+                {
+                    s_projectRootElementCache = ProjectRootElementCache;
+                }
             }
+
             OnlyLogCriticalEvents = onlyLogCriticalEvents;
 
             try
             {
+                _loggerMode = useAsynchronousLogging ? LoggerMode.Asynchronous : LoggerMode.Synchronous;
                 CreateLoggingService(maxNodeCount, onlyLogCriticalEvents);
 
                 RegisterLoggers(loggers);
@@ -418,8 +431,14 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Take care to ensure that there is never more than one value observed
                     // from this property even in the case of race conditions while lazily initializing.
-                    var local = new ProjectCollection();
-                    Interlocked.CompareExchange(ref s_globalProjectCollection, local, null);
+                    var local = new ProjectCollection(null, null, null, ToolsetDefinitionLocations.Default,
+                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true, reuseProjectRootElementCache: false);
+
+                    if (Interlocked.CompareExchange(ref s_globalProjectCollection, local, null) != null)
+                    {
+                        // Other thread beat us to it; dispose of this project collection
+                        local.Dispose();
+                    }
                 }
 
                 return s_globalProjectCollection;
@@ -490,7 +509,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     ErrorUtilities.VerifyThrow(_defaultToolsVersion != null, "Should have a default");
                     return _defaultToolsVersion;
@@ -502,7 +521,7 @@ namespace Microsoft.Build.Evaluation
                 ErrorUtilities.VerifyThrowArgumentLength(value, nameof(DefaultToolsVersion));
 
                 bool sendEvent = false;
-                using (_locker.EnterWriteLock())
+                using (_locker.EnterDisposableWriteLock())
                 {
                     if (!_toolsets.ContainsKey(value))
                     {
@@ -540,7 +559,7 @@ namespace Microsoft.Build.Evaluation
             {
                 Dictionary<string, string> dictionary;
 
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     if (_globalProperties.Count == 0)
                     {
@@ -573,7 +592,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     return _loadedProjects.Count;
                 }
@@ -591,7 +610,7 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     return _loggingService.Loggers == null
                         ? (ICollection<ILogger>) ReadOnlyEmptyCollection<ILogger>.Instance
@@ -610,7 +629,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     return new List<Toolset>(_toolsets.Values);
                 }
@@ -632,7 +651,7 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     return _isBuildEnabled;
                 }
@@ -642,7 +661,7 @@ namespace Microsoft.Build.Evaluation
             set
             {
                 bool sendEvent = false;
-                using (_locker.EnterWriteLock())
+                using (_locker.EnterDisposableWriteLock())
                 {
                     if (_isBuildEnabled != value)
                     {
@@ -665,7 +684,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     return _onlyLogCriticalEvents;
                 }
@@ -674,7 +693,7 @@ namespace Microsoft.Build.Evaluation
             set
             {
                 bool sendEvent = false;
-                using (_locker.EnterWriteLock())
+                using (_locker.EnterDisposableWriteLock())
                 {
                     if (_onlyLogCriticalEvents != value)
                     {
@@ -702,14 +721,14 @@ namespace Microsoft.Build.Evaluation
             get
             {
                 // Avoid write lock if possible, this getter is called a lot during Project construction.
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     if (_hostServices != null)
                     {
                         return _hostServices;
                     }
 
-                    using (_locker.EnterWriteLock())
+                    using (_locker.EnterDisposableWriteLock())
                     {
                         return _hostServices ?? (_hostServices = new HostServices());
                     }
@@ -719,7 +738,7 @@ namespace Microsoft.Build.Evaluation
             set
             {
                 bool sendEvent = false;
-                using (_locker.EnterWriteLock())
+                using (_locker.EnterDisposableWriteLock())
                 {
                     if (_hostServices != value)
                     {
@@ -745,7 +764,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     return _skipEvaluation;
                 }
@@ -754,7 +773,7 @@ namespace Microsoft.Build.Evaluation
             set
             {
                 bool sendEvent = false;
-                using (_locker.EnterWriteLock())
+                using (_locker.EnterDisposableWriteLock())
                 {
                     if (_skipEvaluation != value)
                     {
@@ -781,7 +800,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     return _disableMarkDirty;
                 }
@@ -790,7 +809,7 @@ namespace Microsoft.Build.Evaluation
             set
             {
                 bool sendEvent = false;
-                using (_locker.EnterWriteLock())
+                using (_locker.EnterDisposableWriteLock())
                 {
                     if (_disableMarkDirty != value)
                     {
@@ -831,7 +850,7 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     return _loggingService;
                 }
@@ -849,7 +868,7 @@ namespace Microsoft.Build.Evaluation
             {
                 var clone = new PropertyDictionary<ProjectPropertyInstance>();
 
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     foreach (ProjectPropertyInstance property in _globalProperties)
                     {
@@ -868,7 +887,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     // Retrieves the environment properties.
                     // This is only done once, when the project collection is created. Any subsequent
@@ -876,7 +895,7 @@ namespace Microsoft.Build.Evaluation
                     // of properties in their build parameters.
                     if (_environmentProperties == null)
                     {
-                        using (_locker.EnterWriteLock())
+                        using (_locker.EnterDisposableWriteLock())
                         {
                             if (_environmentProperties == null)
                             {
@@ -899,7 +918,7 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             get
             {
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     return _toolsetsVersion;
                 }
@@ -913,7 +932,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                using (_locker.EnterUpgradeableReadLock())
+                using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     return _maxNodeCount;
                 }
@@ -921,7 +940,7 @@ namespace Microsoft.Build.Evaluation
 
             set
             {
-                using (_locker.EnterWriteLock())
+                using (_locker.EnterDisposableWriteLock())
                 {
                     _maxNodeCount = value;
                 }
@@ -973,7 +992,7 @@ namespace Microsoft.Build.Evaluation
         public void AddToolset(Toolset toolset)
         {
             ErrorUtilities.VerifyThrowArgumentNull(toolset, nameof(toolset));
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 _toolsets[toolset.ToolsVersion] = toolset;
                 _toolsetsVersion++;
@@ -991,7 +1010,7 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
 
             bool changed;
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 changed = RemoveToolsetInternal(toolsVersion);
             }
@@ -1010,7 +1029,7 @@ namespace Microsoft.Build.Evaluation
         public void RemoveAllToolsets()
         {
             bool changed = false;
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 var toolsets = new List<Toolset>(Toolsets);
 
@@ -1033,7 +1052,7 @@ namespace Microsoft.Build.Evaluation
         public Toolset GetToolset(string toolsVersion)
         {
             ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 _toolsets.TryGetValue(toolsVersion, out var toolset);
                 return toolset;
@@ -1069,7 +1088,7 @@ namespace Microsoft.Build.Evaluation
         internal ICollection<Project> GetLoadedProjects(bool includeExternal, string fullPath = null)
         {
             List<Project> loaded;
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                     loaded = fullPath == null ? new List<Project>(_loadedProjects) : new List<Project>(_loadedProjects.GetMatchingProjectsIfAny(fullPath));
             }
@@ -1122,7 +1141,7 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentLength(fileName, nameof(fileName));
             fileName = FileUtilities.NormalizePath(fileName);
 
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 if (globalProperties == null)
                 {
@@ -1223,7 +1242,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public void RegisterLogger(ILogger logger)
         {
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 RegisterLoggerInternal(logger);
             }
@@ -1241,7 +1260,7 @@ namespace Microsoft.Build.Evaluation
             bool changed = false;
             if (loggers != null)
             {
-                using (_locker.EnterWriteLock())
+                using (_locker.EnterDisposableWriteLock())
                 {
                     foreach (ILogger logger in loggers)
                     {
@@ -1263,7 +1282,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public void RegisterForwardingLoggers(IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 if (remoteLoggers != null)
                 {
@@ -1282,7 +1301,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public void UnregisterAllLoggers()
         {
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 _loggingService.UnregisterAllLoggers();
 
@@ -1307,7 +1326,7 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 bool existed = _loadedProjects.RemoveProject(project);
                 ErrorUtilities.VerifyThrowInvalidOperation(existed, "OM_ProjectWasNotLoaded");
@@ -1359,7 +1378,7 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 Project conflictingProject = GetLoadedProjects(false, null).FirstOrDefault(project => project.UsesProjectRootElement(projectRootElement));
                 if (conflictingProject != null)
@@ -1378,7 +1397,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public void UnloadAllProjects()
         {
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 foreach (Project project in _loadedProjects)
                 {
@@ -1401,7 +1420,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public ProjectPropertyInstance GetGlobalProperty(string name)
         {
-            using (_locker.EnterUpgradeableReadLock())
+            using (_locker.EnterDisposableUpgradeableReadLock())
             {
                 return _globalProperties[name];
             }
@@ -1414,7 +1433,7 @@ namespace Microsoft.Build.Evaluation
         public void SetGlobalProperty(string name, string value)
         {
             bool sendEvent = false;
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 ProjectPropertyInstance propertyInGlobalProperties = _globalProperties.GetProperty(name);
                 bool changed = propertyInGlobalProperties == null || !String.Equals(((IValued)propertyInGlobalProperties).EscapedValue, value, StringComparison.OrdinalIgnoreCase);
@@ -1447,7 +1466,7 @@ namespace Microsoft.Build.Evaluation
         public bool RemoveGlobalProperty(string name)
         {
             bool set;
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 set = _globalProperties.Remove(name);
 
@@ -1510,7 +1529,7 @@ namespace Microsoft.Build.Evaluation
                 return false;
             }
 
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 ProjectRootElementCache.DiscardStrongReferences();
 
@@ -1541,7 +1560,7 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 if (oldFullPathIfAny != null)
                 {
@@ -1575,7 +1594,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal void AfterUpdateLoadedProjectGlobalProperties(Project project)
         {
-            using (_locker.EnterWriteLock())
+            using (_locker.EnterDisposableWriteLock())
             {
                 ErrorUtilities.VerifyThrowInvalidOperation(ReferenceEquals(project.ProjectCollection, this), "OM_IncorrectObjectAssociation", "Project", "ProjectCollection");
 
@@ -1603,6 +1622,12 @@ namespace Microsoft.Build.Evaluation
             if (disposing)
             {
                 ShutDownLoggingService();
+                if (ProjectRootElementCache != null)
+                {
+                    ProjectRootElementCache.ProjectRootElementAddedHandler -= ProjectRootElementCache_ProjectRootElementAddedHandler;
+                    ProjectRootElementCache.ProjectRootElementDirtied -= ProjectRootElementCache_ProjectRootElementDirtiedHandler;
+                    ProjectRootElementCache.ProjectDirtied -= ProjectRootElementCache_ProjectDirtiedHandler;
+                }
                 Tracing.Dump();
             }
         }
@@ -1724,7 +1749,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void CreateLoggingService(int maxCPUCount, bool onlyLogCriticalEvents)
         {
-            _loggingService = BackEnd.Logging.LoggingService.CreateLoggingService(LoggerMode.Synchronous, 0 /*Evaluation can be done as if it was on node "0"*/);
+            _loggingService = BackEnd.Logging.LoggingService.CreateLoggingService(_loggerMode, 0 /*Evaluation can be done as if it was on node "0"*/);
             _loggingService.MaxCPUCount = maxCPUCount;
             _loggingService.OnlyLogCriticalEvents = onlyLogCriticalEvents;
         }

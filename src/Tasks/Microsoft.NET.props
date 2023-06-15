@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.NET.props
 
@@ -12,7 +12,6 @@ these two files are used to encapsulate the multi-targeting and framework specif
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project>
 
   <!--
@@ -21,7 +20,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     Get the paths for the .NET Framework and .NET Core tools and sdk tools directories.
     This does not need to be a target since all of the values are availiable at project evaluation time.
     ============================================================
-    -->
+  -->
   <PropertyGroup>
     <TargetFrameworkSDKToolsDirectory Condition=" '$(TargetFrameworkSDKToolsDirectory)' == '' ">$(SDK40ToolsPath)</TargetFrameworkSDKToolsDirectory>
   </PropertyGroup>
@@ -31,7 +30,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                         SetHighEntropyVA
     Set HighEntropyVA according to the TargetFramework
     ============================================================
-    -->
+  -->
 
   <PropertyGroup Condition="('$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(TargetingClr2Framework)' != 'true' and '$(TargetFrameworkVersion)' != 'v4.0') or '$(TargetFrameworkIdentifier)' == '.NETCoreApp' or '$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <HighEntropyVA Condition="'$(HighEntropyVA)' == ''">true</HighEntropyVA>

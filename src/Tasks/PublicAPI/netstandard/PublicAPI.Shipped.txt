@@ -783,6 +783,8 @@ Microsoft.Build.Tasks.DownloadFile.SkipUnchangedFiles.get -> bool
 Microsoft.Build.Tasks.DownloadFile.SkipUnchangedFiles.set -> void
 Microsoft.Build.Tasks.DownloadFile.SourceUrl.get -> string
 Microsoft.Build.Tasks.DownloadFile.SourceUrl.set -> void
+Microsoft.Build.Tasks.DownloadFile.Timeout.get -> int
+Microsoft.Build.Tasks.DownloadFile.Timeout.set -> void
 Microsoft.Build.Tasks.Error
 Microsoft.Build.Tasks.Error.Code.get -> string
 Microsoft.Build.Tasks.Error.Code.set -> void
@@ -1133,6 +1135,22 @@ Microsoft.Build.Tasks.GetFrameworkPath.FrameworkVersion47Path.get -> string
 Microsoft.Build.Tasks.GetFrameworkPath.FrameworkVersion48Path.get -> string
 Microsoft.Build.Tasks.GetFrameworkPath.GetFrameworkPath() -> void
 Microsoft.Build.Tasks.GetFrameworkPath.Path.get -> string
+Microsoft.Build.Tasks.GetInstalledSDKLocations
+Microsoft.Build.Tasks.GetInstalledSDKLocations.GetInstalledSDKLocations() -> void
+Microsoft.Build.Tasks.GetInstalledSDKLocations.InstalledSDKs.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.GetInstalledSDKLocations.InstalledSDKs.set -> void
+Microsoft.Build.Tasks.GetInstalledSDKLocations.SDKDirectoryRoots.get -> string[]
+Microsoft.Build.Tasks.GetInstalledSDKLocations.SDKDirectoryRoots.set -> void
+Microsoft.Build.Tasks.GetInstalledSDKLocations.SDKExtensionDirectoryRoots.get -> string[]
+Microsoft.Build.Tasks.GetInstalledSDKLocations.SDKExtensionDirectoryRoots.set -> void
+Microsoft.Build.Tasks.GetInstalledSDKLocations.SDKRegistryRoot.get -> string
+Microsoft.Build.Tasks.GetInstalledSDKLocations.SDKRegistryRoot.set -> void
+Microsoft.Build.Tasks.GetInstalledSDKLocations.TargetPlatformIdentifier.get -> string
+Microsoft.Build.Tasks.GetInstalledSDKLocations.TargetPlatformIdentifier.set -> void
+Microsoft.Build.Tasks.GetInstalledSDKLocations.TargetPlatformVersion.get -> string
+Microsoft.Build.Tasks.GetInstalledSDKLocations.TargetPlatformVersion.set -> void
+Microsoft.Build.Tasks.GetInstalledSDKLocations.WarnWhenNoSDKsFound.get -> bool
+Microsoft.Build.Tasks.GetInstalledSDKLocations.WarnWhenNoSDKsFound.set -> void
 Microsoft.Build.Tasks.GetReferenceAssemblyPaths
 Microsoft.Build.Tasks.GetReferenceAssemblyPaths.BypassFrameworkInstallChecks.get -> bool
 Microsoft.Build.Tasks.GetReferenceAssemblyPaths.BypassFrameworkInstallChecks.set -> void
@@ -1149,6 +1167,39 @@ Microsoft.Build.Tasks.GetReferenceAssemblyPaths.TargetFrameworkMoniker.get -> st
 Microsoft.Build.Tasks.GetReferenceAssemblyPaths.TargetFrameworkMoniker.set -> void
 Microsoft.Build.Tasks.GetReferenceAssemblyPaths.TargetFrameworkMonikerDisplayName.get -> string
 Microsoft.Build.Tasks.GetReferenceAssemblyPaths.TargetFrameworkMonikerDisplayName.set -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles
+Microsoft.Build.Tasks.GetSDKReferenceFiles.CacheFileFolderPath.get -> string
+Microsoft.Build.Tasks.GetSDKReferenceFiles.CacheFileFolderPath.set -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles.CopyLocalFiles.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.GetSDKReferenceFiles.GetSDKReferenceFiles() -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles.LogCacheFileExceptions.get -> bool
+Microsoft.Build.Tasks.GetSDKReferenceFiles.LogCacheFileExceptions.set -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles.LogRedistConflictBetweenSDKsAsWarning.get -> bool
+Microsoft.Build.Tasks.GetSDKReferenceFiles.LogRedistConflictBetweenSDKsAsWarning.set -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles.LogRedistConflictWithinSDKAsWarning.get -> bool
+Microsoft.Build.Tasks.GetSDKReferenceFiles.LogRedistConflictWithinSDKAsWarning.set -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles.LogRedistFilesList.get -> bool
+Microsoft.Build.Tasks.GetSDKReferenceFiles.LogRedistFilesList.set -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles.LogReferenceConflictBetweenSDKsAsWarning.get -> bool
+Microsoft.Build.Tasks.GetSDKReferenceFiles.LogReferenceConflictBetweenSDKsAsWarning.set -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles.LogReferenceConflictWithinSDKAsWarning.get -> bool
+Microsoft.Build.Tasks.GetSDKReferenceFiles.LogReferenceConflictWithinSDKAsWarning.set -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles.LogReferencesList.get -> bool
+Microsoft.Build.Tasks.GetSDKReferenceFiles.LogReferencesList.set -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles.RedistFiles.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.GetSDKReferenceFiles.ReferenceExtensions.get -> string[]
+Microsoft.Build.Tasks.GetSDKReferenceFiles.ReferenceExtensions.set -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles.References.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.GetSDKReferenceFiles.ResolvedSDKReferences.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.GetSDKReferenceFiles.ResolvedSDKReferences.set -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles.TargetPlatformIdentifier.get -> string
+Microsoft.Build.Tasks.GetSDKReferenceFiles.TargetPlatformIdentifier.set -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles.TargetPlatformVersion.get -> string
+Microsoft.Build.Tasks.GetSDKReferenceFiles.TargetPlatformVersion.set -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles.TargetSDKIdentifier.get -> string
+Microsoft.Build.Tasks.GetSDKReferenceFiles.TargetSDKIdentifier.set -> void
+Microsoft.Build.Tasks.GetSDKReferenceFiles.TargetSDKVersion.get -> string
+Microsoft.Build.Tasks.GetSDKReferenceFiles.TargetSDKVersion.set -> void
 Microsoft.Build.Tasks.Hash
 Microsoft.Build.Tasks.Hash.Hash() -> void
 Microsoft.Build.Tasks.Hash.HashResult.get -> string
@@ -1277,6 +1328,26 @@ Microsoft.Build.Tasks.Hosting.IVbcHostObject5.SetPlatformWith32BitPreference(str
 Microsoft.Build.Tasks.Hosting.IVbcHostObject5.SetSubsystemVersion(string subsystemVersion) -> bool
 Microsoft.Build.Tasks.Hosting.IVbcHostObjectFreeThreaded
 Microsoft.Build.Tasks.Hosting.IVbcHostObjectFreeThreaded.Compile() -> bool
+Microsoft.Build.Tasks.IFixedTypeInfo
+Microsoft.Build.Tasks.IFixedTypeInfo.AddressOfMember(int memid, System.Runtime.InteropServices.ComTypes.INVOKEKIND invKind, out System.IntPtr ppv) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.CreateInstance(object pUnkOuter, ref System.Guid riid, out object ppvObj) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.GetContainingTypeLib(out System.Runtime.InteropServices.ComTypes.ITypeLib ppTLB, out int pIndex) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.GetDllEntry(int memid, System.Runtime.InteropServices.ComTypes.INVOKEKIND invKind, System.IntPtr pBstrDllName, System.IntPtr pBstrName, System.IntPtr pwOrdinal) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.GetDocumentation(int index, out string strName, out string strDocString, out int dwHelpContext, out string strHelpFile) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.GetFuncDesc(int index, out System.IntPtr ppFuncDesc) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.GetIDsOfNames(string[] rgszNames, int cNames, int[] pMemId) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.GetImplTypeFlags(int index, out System.Runtime.InteropServices.ComTypes.IMPLTYPEFLAGS pImplTypeFlags) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.GetMops(int memid, out string pBstrMops) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.GetNames(int memid, string[] rgBstrNames, int cMaxNames, out int pcNames) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.GetRefTypeInfo(System.IntPtr hRef, out Microsoft.Build.Tasks.IFixedTypeInfo ppTI) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.GetRefTypeOfImplType(int index, out System.IntPtr href) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.GetTypeAttr(out System.IntPtr ppTypeAttr) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.GetTypeComp(out System.Runtime.InteropServices.ComTypes.ITypeComp ppTComp) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.GetVarDesc(int index, out System.IntPtr ppVarDesc) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.Invoke(object pvInstance, int memid, short wFlags, ref System.Runtime.InteropServices.ComTypes.DISPPARAMS pDispParams, System.IntPtr pVarResult, System.IntPtr pExcepInfo, out int puArgErr) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.ReleaseFuncDesc(System.IntPtr pFuncDesc) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.ReleaseTypeAttr(System.IntPtr pTypeAttr) -> void
+Microsoft.Build.Tasks.IFixedTypeInfo.ReleaseVarDesc(System.IntPtr pVarDesc) -> void
 Microsoft.Build.Tasks.LC
 Microsoft.Build.Tasks.LC.LC() -> void
 Microsoft.Build.Tasks.LC.LicenseTarget.get -> Microsoft.Build.Framework.ITaskItem
@@ -1602,6 +1673,35 @@ Microsoft.Build.Tasks.ResolveProjectBase.GetProjectItem(Microsoft.Build.Framewor
 Microsoft.Build.Tasks.ResolveProjectBase.ProjectReferences.get -> Microsoft.Build.Framework.ITaskItem[]
 Microsoft.Build.Tasks.ResolveProjectBase.ProjectReferences.set -> void
 Microsoft.Build.Tasks.ResolveProjectBase.ResolveProjectBase() -> void
+Microsoft.Build.Tasks.ResolveSDKReference
+Microsoft.Build.Tasks.ResolveSDKReference.DisallowedSDKDependencies.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.ResolveSDKReference.DisallowedSDKDependencies.set -> void
+Microsoft.Build.Tasks.ResolveSDKReference.InstalledSDKs.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.ResolveSDKReference.InstalledSDKs.set -> void
+Microsoft.Build.Tasks.ResolveSDKReference.LogResolutionErrorsAsWarnings.get -> bool
+Microsoft.Build.Tasks.ResolveSDKReference.LogResolutionErrorsAsWarnings.set -> void
+Microsoft.Build.Tasks.ResolveSDKReference.Prefer32Bit.get -> bool
+Microsoft.Build.Tasks.ResolveSDKReference.Prefer32Bit.set -> void
+Microsoft.Build.Tasks.ResolveSDKReference.ProjectName.get -> string
+Microsoft.Build.Tasks.ResolveSDKReference.ProjectName.set -> void
+Microsoft.Build.Tasks.ResolveSDKReference.References.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.ResolveSDKReference.References.set -> void
+Microsoft.Build.Tasks.ResolveSDKReference.ResolvedSDKReferences.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.ResolveSDKReference.ResolveSDKReference() -> void
+Microsoft.Build.Tasks.ResolveSDKReference.RuntimeReferenceOnlySDKDependencies.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.ResolveSDKReference.RuntimeReferenceOnlySDKDependencies.set -> void
+Microsoft.Build.Tasks.ResolveSDKReference.SDKReferences.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.ResolveSDKReference.SDKReferences.set -> void
+Microsoft.Build.Tasks.ResolveSDKReference.TargetedSDKArchitecture.get -> string
+Microsoft.Build.Tasks.ResolveSDKReference.TargetedSDKArchitecture.set -> void
+Microsoft.Build.Tasks.ResolveSDKReference.TargetedSDKConfiguration.get -> string
+Microsoft.Build.Tasks.ResolveSDKReference.TargetedSDKConfiguration.set -> void
+Microsoft.Build.Tasks.ResolveSDKReference.TargetPlatformIdentifier.get -> string
+Microsoft.Build.Tasks.ResolveSDKReference.TargetPlatformIdentifier.set -> void
+Microsoft.Build.Tasks.ResolveSDKReference.TargetPlatformVersion.get -> string
+Microsoft.Build.Tasks.ResolveSDKReference.TargetPlatformVersion.set -> void
+Microsoft.Build.Tasks.ResolveSDKReference.WarnOnMissingPlatformVersion.get -> bool
+Microsoft.Build.Tasks.ResolveSDKReference.WarnOnMissingPlatformVersion.set -> void
 Microsoft.Build.Tasks.RoslynCodeTaskFactory
 Microsoft.Build.Tasks.RoslynCodeTaskFactory.CleanupTask(Microsoft.Build.Framework.ITask task) -> void
 Microsoft.Build.Tasks.RoslynCodeTaskFactory.CreateTask(Microsoft.Build.Framework.IBuildEngine taskFactoryLoggingHost) -> Microsoft.Build.Framework.ITask
@@ -1642,6 +1742,8 @@ Microsoft.Build.Tasks.SGen.UseProxyTypes.set -> void
 Microsoft.Build.Tasks.SignFile
 Microsoft.Build.Tasks.SignFile.CertificateThumbprint.get -> string
 Microsoft.Build.Tasks.SignFile.CertificateThumbprint.set -> void
+Microsoft.Build.Tasks.SignFile.DisallowMansignTimestampFallback.get -> bool
+Microsoft.Build.Tasks.SignFile.DisallowMansignTimestampFallback.set -> void
 Microsoft.Build.Tasks.SignFile.SignFile() -> void
 Microsoft.Build.Tasks.SignFile.SigningTarget.get -> Microsoft.Build.Framework.ITaskItem
 Microsoft.Build.Tasks.SignFile.SigningTarget.set -> void
@@ -1848,7 +1950,9 @@ override Microsoft.Build.Tasks.FindInvalidProjectReferences.Execute() -> bool
 override Microsoft.Build.Tasks.FindUnderPath.Execute() -> bool
 override Microsoft.Build.Tasks.FormatUrl.Execute() -> bool
 override Microsoft.Build.Tasks.FormatVersion.Execute() -> bool
+override Microsoft.Build.Tasks.GenerateApplicationManifest.Execute() -> bool
 override Microsoft.Build.Tasks.GenerateBindingRedirects.Execute() -> bool
+override Microsoft.Build.Tasks.GenerateDeploymentManifest.Execute() -> bool
 override Microsoft.Build.Tasks.GenerateLauncher.Execute() -> bool
 override Microsoft.Build.Tasks.GenerateManifestBase.Execute() -> bool
 override Microsoft.Build.Tasks.GenerateResource.Execute() -> bool
@@ -1856,7 +1960,9 @@ override Microsoft.Build.Tasks.GetAssemblyIdentity.Execute() -> bool
 override Microsoft.Build.Tasks.GetCompatiblePlatform.Execute() -> bool
 override Microsoft.Build.Tasks.GetFileHash.Execute() -> bool
 override Microsoft.Build.Tasks.GetFrameworkPath.Execute() -> bool
+override Microsoft.Build.Tasks.GetInstalledSDKLocations.Execute() -> bool
 override Microsoft.Build.Tasks.GetReferenceAssemblyPaths.Execute() -> bool
+override Microsoft.Build.Tasks.GetSDKReferenceFiles.Execute() -> bool
 override Microsoft.Build.Tasks.Hash.Execute() -> bool
 override Microsoft.Build.Tasks.LC.AddCommandLineCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) -> void
 override Microsoft.Build.Tasks.LC.AddResponseFileCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) -> void
@@ -1877,6 +1983,7 @@ override Microsoft.Build.Tasks.ResolveComReference.Execute() -> bool
 override Microsoft.Build.Tasks.ResolveKeySource.Execute() -> bool
 override Microsoft.Build.Tasks.ResolveManifestFiles.Execute() -> bool
 override Microsoft.Build.Tasks.ResolveNonMSBuildProjectOutput.Execute() -> bool
+override Microsoft.Build.Tasks.ResolveSDKReference.Execute() -> bool
 override Microsoft.Build.Tasks.SGen.Execute() -> bool
 override Microsoft.Build.Tasks.SGen.GenerateFullPathToTool() -> string
 override Microsoft.Build.Tasks.SGen.ToolName.get -> string
@@ -1914,6 +2021,7 @@ static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.Sign
 static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.SignFile(string certThumbprint, System.Uri timestampUrl, string path) -> void
 static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion) -> void
 static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion, string targetFrameworkIdentifier) -> void
+static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion, string targetFrameworkIdentifier, bool disallowMansignTimestampFallback) -> void
 static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.SignFile(System.Security.Cryptography.X509Certificates.X509Certificate2 cert, System.Uri timestampUrl, string path) -> void
 System.Deployment.Internal.CodeSigning.RSAPKCS1SHA256SignatureDescription
 System.Deployment.Internal.CodeSigning.RSAPKCS1SHA256SignatureDescription.RSAPKCS1SHA256SignatureDescription() -> void

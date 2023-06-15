@@ -791,10 +791,8 @@ namespace Microsoft.Build.Execution
         public bool LowPriority { get; set; }
 
         /// <summary>
-        /// If set, the BuildManager will query all
-        /// incoming <see cref="BuildSubmission"/> requests against the specified project cache.
-        /// Any <see cref="GraphBuildSubmission"/> requests will also use this project cache instead of
-        /// the potential project caches described in graph node's evaluations.
+        /// Gets or sets the project cache description to use for all <see cref="BuildSubmission"/> or <see cref="GraphBuildSubmission"/>
+        /// in addition to any potential project caches described in each project.
         /// </summary>
         public ProjectCacheDescriptor ProjectCacheDescriptor { get; set; }
 

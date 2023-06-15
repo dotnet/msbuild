@@ -279,7 +279,7 @@
     <comment>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</comment>
   </data>
   <data name="WildcardResultsInDriveEnumeration" xml:space="preserve">
-    <value>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined.</value>
+    <value>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined.</value>
     <comment>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</comment>
   </data>

@@ -11,7 +11,7 @@ Because our focus right now is on maintaining backwards compatibility, the team 
 
 When you are ready to proceed with making a change, get set up to [build](Home.md "See 'Building Testing and Debugging'") the code and familiarize yourself with our workflow and our coding conventions. These two blogs posts on contributing code to open source projects are good too: [Open Source Contribution Etiquette by Miguel de Icaza](https://tirania.org/blog/archive/2010/Dec-31.html) and [Don’t “Push” Your Pull Requests by Ilya Grigorik](https://www.igvita.com/2011/12/19/dont-push-your-pull-requests/).
 
-You must sign a Contributor License Agreement (CLA) before submitting your pull request. To complete the CLA, submit a request via the form and electronically sign the CLA when you receive the email containing the link to the document. You need to complete the CLA only once to cover all Microsoft Open Technologies OSS projects.
+You will have to sign a Contributor License Agreement (CLA) before we can accept your pull request. To complete the CLA, submit a pull request and a bot will comment with a link where you can electronically sign the CLA. You need to complete the CLA only once to cover all Microsoft Open Technologies OSS projects.
 
 ### Developer Workflow
 

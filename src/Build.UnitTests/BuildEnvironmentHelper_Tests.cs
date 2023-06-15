@@ -369,6 +369,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7552", TargetFrameworkMonikers.Any)]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentFindsAmd64RunningInAmd64NoVS()
         {
@@ -386,6 +387,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7552", TargetFrameworkMonikers.Any)]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentFindsAmd64NoVS()
         {
@@ -401,6 +403,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7552", TargetFrameworkMonikers.Any)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentFindsAmd64RunningInAmd64()

@@ -191,7 +191,7 @@ namespace Microsoft.Build.UnitTests
 
                 // We just tried to run "cmd.exe /C garbagegarbagegarbagegarbage.exe".  This should fail,
                 // but since "cmd.exe" doesn't log its errors in canonical format, no errors got
-                // logged by the tool itself.  Therefore, ToolTask's default implementation of 
+                // logged by the tool itself.  Therefore, ToolTask's default implementation of
                 // HandleTaskExecutionErrors should have logged error MSB6006.
                 engine.AssertLogContains("MSB6006");
             }
@@ -227,7 +227,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// ToolTask should never run String.Format on strings that are 
+        /// ToolTask should never run String.Format on strings that are
         /// not meant to be formatted.
         /// </summary>
         [Fact]
@@ -524,27 +524,16 @@ namespace Microsoft.Build.UnitTests
 
             ProcessStartInfo startInfo = task.StartInfo;
 
-#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
             startInfo.Environment["a"].ShouldBe("b");
             startInfo.Environment["c"].ShouldBe("d");
             startInfo.Environment[userVarName].ShouldBe("x");
             startInfo.Environment["path"].ShouldBe(String.Empty);
-#else
-            startInfo.EnvironmentVariables["a"].ShouldBe("b");
-            startInfo.EnvironmentVariables["c"].ShouldBe("d");
-            startInfo.EnvironmentVariables[userVarName].ShouldBe("x");
-            startInfo.EnvironmentVariables["path"].ShouldBe(string.Empty);
-#endif
 
             if (NativeMethodsShared.IsWindows)
             {
                 Assert.Equal(
                         Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
                         startInfo.Environment["programfiles"],
-#else
-                        startInfo.EnvironmentVariables["programfiles"],
-#endif
                         true);
             }
         }
@@ -562,11 +551,7 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
 
             result.ShouldBe(true);
-#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
             task.StartInfo.Environment["a"].ShouldBe("b=c");
-#else
-            task.StartInfo.EnvironmentVariables["a"].ShouldBe("b=c");
-#endif
         }
 
         /// <summary>
@@ -628,12 +613,7 @@ namespace Microsoft.Build.UnitTests
 
             result.ShouldBe(true);
             task.ExecuteCalled.ShouldBe(true);
-            Assert.True(
-#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
-                task.StartInfo.Environment["PATH"].Length > 0);
-#else
-                task.StartInfo.EnvironmentVariables["PATH"].Length > 0);
-#endif
+            Assert.True(task.StartInfo.Environment["PATH"].Length > 0);
         }
 
         /// <summary>
@@ -707,22 +687,14 @@ namespace Microsoft.Build.UnitTests
         public void GetProcessStartInfoCanOverrideEnvironmentVariables()
         {
             MyTool task = new MyTool();
-#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
             task.DoProcessStartInfoMutation = (p) => p.Environment.Remove("a");
-#else
-            task.DoProcessStartInfoMutation = (p) => p.EnvironmentVariables.Remove("a");
-#endif
-            
+
             task.BuildEngine = new MockEngine();
             task.EnvironmentVariables = new[] { "a=b" };
             bool result = task.Execute();
 
             result.ShouldBe(true);
-#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
             task.StartInfo.Environment.ContainsKey("a").ShouldBe(false);
-#else
-            task.StartInfo.EnvironmentVariables.ContainsKey("a").ShouldBe(false);
-#endif
         }
 
         [Fact]

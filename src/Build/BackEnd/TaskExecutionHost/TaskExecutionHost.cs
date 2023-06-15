@@ -23,6 +23,7 @@ using Microsoft.Build.Shared;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
+using System.Linq;
 
 #nullable disable
 
@@ -256,12 +257,12 @@ namespace Microsoft.Build.BackEnd
 
             TaskRequirements requirements = TaskRequirements.None;
 
-            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasSTAThreadAttribute())
+            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasSTAThreadAttribute)
             {
                 requirements |= TaskRequirements.RequireSTAThread;
             }
 
-            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasLoadInSeparateAppDomainAttribute())
+            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasLoadInSeparateAppDomainAttribute)
             {
                 requirements |= TaskRequirements.RequireSeparateAppDomain;
 
@@ -399,6 +400,14 @@ namespace Microsoft.Build.BackEnd
             try
             {
                 TaskPropertyInfo parameter = _taskFactoryWrapper.GetProperty(parameterName);
+                foreach (TaskPropertyInfo prop in _taskFactoryWrapper.TaskFactoryLoadedType.Properties)
+                {
+                    if (prop.Name.Equals(parameterName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        parameter = prop;
+                        break;
+                    }
+                }
 
                 // flag an error if we find a parameter that has no .NET property equivalent
                 ProjectErrorUtilities.VerifyThrowInvalidProject
@@ -420,17 +429,14 @@ namespace Microsoft.Build.BackEnd
                     _taskName
                 );
 
-                // grab the outputs from the task's designated output parameter (which is a .NET property)
-                Type type = parameter.PropertyType;
-
                 EnsureParameterInitialized(parameter, _batchBucket.Lookup);
 
-                if (TaskParameterTypeVerifier.IsAssignableToITask(type))
+                if (parameter.IsAssignableToITask)
                 {
                     ITaskItem[] outputs = GetItemOutputs(parameter);
                     GatherTaskItemOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation, parameter);
                 }
-                else if (TaskParameterTypeVerifier.IsValueTypeOutputParameter(type))
+                else if (parameter.IsValueTypeOutputParameter)
                 {
                     string[] outputs = GetValueOutputs(parameter);
                     GatherArrayStringAndValueOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation, parameter);
@@ -897,12 +903,14 @@ namespace Microsoft.Build.BackEnd
                 // Map to an intrinsic task, if necessary.
                 if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))
                 {
-                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null)), _taskName, null);
+                    Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).GetTypeInfo().Assembly;
+                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, null);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
                 else if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.CallTarget", StringComparison.OrdinalIgnoreCase))
                 {
-                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(typeof(TaskExecutionHost).GetTypeInfo().Assembly.FullName, null)), _taskName, null);
+                    Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).GetTypeInfo().Assembly;
+                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, null);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
             }
@@ -1008,12 +1016,43 @@ namespace Microsoft.Build.BackEnd
             try
             {
                 // check if the task has a .NET property corresponding to the parameter
-                TaskPropertyInfo parameter = _taskFactoryWrapper.GetProperty(parameterName);
+                LoadedType loadedType = _taskFactoryWrapper.TaskFactoryLoadedType;
+                int indexOfParameter = -1;
+                for (int i = 0; i < loadedType.Properties.Length; i++)
+                {
+                    if (loadedType.Properties[i].Name.Equals(parameterName))
+                    {
+                        indexOfParameter = i;
+                        break;
+                    }
+                }
+
+                // For most tasks, finding the parameter in our list of known properties is equivalent to
+                // saying the task was properly invoked, as far as this parameter is concerned. However,
+                // that is not true for CodeTaskFactories like RoslynCodeTaskFactory. In that case, they
+                // will often have a list of parameters under the UsingTask declaration. Fortunately, if
+                // your TaskFactory is RoslynCodeTaskFactory, it isn't TaskHostFactory, which means the
+                // types are fully loaded at this stage, and we can access them as we had in the past.
+                TaskPropertyInfo parameter = null;
+                Type parameterType = null;
+                if (indexOfParameter != -1)
+                {
+                    parameter = loadedType.Properties[indexOfParameter];
+                    parameterType = Type.GetType(
+                        loadedType.PropertyAssemblyQualifiedNames?[indexOfParameter] ??
+                        parameter.PropertyType.AssemblyQualifiedName);
+                }
+                else
+                {
+                    parameter = _taskFactoryWrapper.GetProperty(parameterName);
+                    if (parameter != null)
+                    {
+                        parameterType = Type.GetType(parameter.PropertyType.AssemblyQualifiedName);
+                    }
+                }
 
                 if (parameter != null)
                 {
-                    Type parameterType = parameter.PropertyType;
-
                     EnsureParameterInitialized(parameter, _batchBucket.Lookup);
 
                     // try to set the parameter
@@ -1068,30 +1107,15 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     // flag an error if we find a parameter that has no .NET property equivalent
-                    if (_taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssembly is null)
-                    {
-                        _taskLoggingContext.LogError
-                            (
-                            new BuildEventFileInfo( parameterLocation ),
-                            "UnexpectedTaskAttribute",
-                            parameterName,
-                            _taskName,
-                            _taskFactoryWrapper.TaskFactoryLoadedType.Type.Assembly.FullName,
-                            _taskFactoryWrapper.TaskFactoryLoadedType.Type.Assembly.Location
-                            );
-                    }
-                    else
-                    {
-                        _taskLoggingContext.LogError
-                            (
-                            new BuildEventFileInfo( parameterLocation ),
-                            "UnexpectedTaskAttribute",
-                            parameterName,
-                            _taskName,
-                            _taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssembly.FullName,
-                            _taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssembly.Location
-                            );
-                    }
+                    _taskLoggingContext.LogError
+                        (
+                        new BuildEventFileInfo( parameterLocation ),
+                        "UnexpectedTaskAttribute",
+                        parameterName,
+                        _taskName,
+                        _taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssemblyName.FullName,
+                        _taskFactoryWrapper.TaskFactoryLoadedType.Path
+                        );
                 }
             }
             catch (AmbiguousMatchException)
@@ -1174,7 +1198,7 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     // Expand out all the metadata, properties, and item vectors in the string.
-                    string expandedParameterValue = _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation);
+                    string expandedParameterValue = _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation, _targetLoggingContext);
 
                     if (expandedParameterValue.Length == 0)
                     {

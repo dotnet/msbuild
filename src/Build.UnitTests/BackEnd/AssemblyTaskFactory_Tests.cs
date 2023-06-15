@@ -220,7 +220,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void VerifyGetTaskParameters()
         {
             TaskPropertyInfo[] propertyInfos = _taskFactory.GetTaskParameters();
-            LoadedType comparisonType = new LoadedType(typeof(TaskToTestFactories), _loadInfo);
+            LoadedType comparisonType = new LoadedType(typeof(TaskToTestFactories), _loadInfo, typeof(TaskToTestFactories).GetTypeInfo().Assembly, typeof(ITaskItem));
             PropertyInfo[] comparisonInfo = comparisonType.Type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
             Assert.Equal(comparisonInfo.Length, propertyInfos.Length);
 

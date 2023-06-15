@@ -11,6 +11,7 @@ using Microsoft.Build.Shared;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
+using System.Linq;
 
 #nullable disable
 
@@ -108,7 +109,14 @@ namespace Microsoft.Build.BackEnd.Logging
                 WriteLinePrettyFromResource("BuildStartedWithTime", e.Timestamp);
             }
 
-            WriteEnvironment(e.BuildEnvironment);
+            if (Traits.LogAllEnvironmentVariables)
+            {
+                WriteEnvironment(e.BuildEnvironment);
+            }
+            else
+            {
+                WriteEnvironment(e.BuildEnvironment?.Where(kvp => EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
+            }
         }
 
         /// <summary>
@@ -511,17 +519,14 @@ namespace Microsoft.Build.BackEnd.Logging
                     setColor(ConsoleColor.DarkGray);
                 }
 
-                string nonNullMessage;
+                string nonNullMessage = e is EnvironmentVariableReadEventArgs environmentDerivedProperty ?
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentDerivedProperty.EnvironmentVariableName, e.Message)
+                    : e.Message ?? String.Empty;
 
                 // Include file information if present.
                 if (e.File != null)
                 {
                     nonNullMessage = EventArgsFormatting.FormatEventMessage(e, showProjectFile);
-                }
-                else
-                {
-                    // null messages are ok -- treat as blank line
-                    nonNullMessage = e.Message ?? String.Empty;
                 }
 
                 WriteLinePretty(nonNullMessage);

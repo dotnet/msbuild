@@ -53,6 +53,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-

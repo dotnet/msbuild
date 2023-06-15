@@ -4,7 +4,7 @@
     <UseAppHost>false</UseAppHost>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
-    
+
     <IsPackable>false</IsPackable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
@@ -14,6 +14,9 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">
     <!-- Bump these to the latest version despite transitive references to older -->
     <PackageReference Include="System.Private.Uri" />
     <PackageReference Include="System.Runtime" />

@@ -23,9 +23,12 @@ variables:
   - name: SourceBranch
     value: $(IbcSourceBranchName)
   # If we're not on a vs* branch, use main as our optprof collection branch
+  # NOTE: the code is temporarily fixed. For the branches that should use opt-prof from the main branch we should use the latest working Opt-Prof 20220901.6-001 collected from main 20220901.6.
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
+    - name: OptProfDrop
+      value: 'OptimizationData/DotNet-msbuild-Trusted/main/20220901.6/1387996/1'
     - name: SourceBranch
-      value: main
+      value: ''
   # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
   - ${{ if ne(parameters.OptProfDropName, 'default') }}:
     - name: OptProfDrop
@@ -68,7 +71,7 @@ stages:
           MirrorBranch: 'main'
           JobNameSuffix: '_main'
           condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
-          
+
   - job: Windows_NT
     pool:
       name: VSEngSS-MicroBuild2022-1ES
@@ -86,7 +89,7 @@ stages:
     - name: VisualStudio.MajorVersion
       value: 17
     - name: VisualStudio.ChannelName
-      value: 'int.d17.2'
+      value: 'int.d17.4'
     - name: VisualStudio.DropName
       value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
@@ -141,6 +144,7 @@ stages:
                 /p:TeamName=MSBuild
                 /p:DotNetPublishUsingPipelines=true
                 /p:VisualStudioIbcDrop=$(OptProfDrop)
+                /p:GenerateSbom=true
       displayName: Build
       condition: succeeded()
 
@@ -166,6 +170,7 @@ stages:
         channelName: $(VisualStudio.ChannelName)
         manifests: $(VisualStudio.SetupManifestList)
         outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+        bootstrapperCoreVersion:
       displayName: 'OptProf - Build VS bootstrapper'
       condition: succeeded()
 

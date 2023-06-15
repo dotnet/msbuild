@@ -3,8 +3,6 @@
 
 using System;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary> 
@@ -39,9 +37,9 @@ namespace Microsoft.Build.Framework
         /// <param name="senderName">name of event sender</param> 
         protected BuildStatusEventArgs
         (
-            string message,
-            string helpKeyword,
-            string senderName
+            string? message,
+            string? helpKeyword,
+            string? senderName
         )
             : this(message, helpKeyword, senderName, DateTime.UtcNow)
         {
@@ -58,9 +56,9 @@ namespace Microsoft.Build.Framework
         /// <param name="eventTimestamp">Timestamp when event was created</param>
         protected BuildStatusEventArgs
         (
-            string message,
-            string helpKeyword,
-            string senderName,
+            string? message,
+            string? helpKeyword,
+            string? senderName,
             DateTime eventTimestamp
         )
             : this(message, helpKeyword, senderName, eventTimestamp, messageArgs: null)
@@ -78,11 +76,11 @@ namespace Microsoft.Build.Framework
         /// <param name="messageArgs">Optional arguments for formatting the message string.</param>
         protected BuildStatusEventArgs
         (
-            string message,
-            string helpKeyword,
-            string senderName,
+            string? message,
+            string? helpKeyword,
+            string? senderName,
             DateTime eventTimestamp,
-            params object[] messageArgs
+            params object[]? messageArgs
         )
             : base(message, helpKeyword, senderName, eventTimestamp, messageArgs)
         {
@@ -90,4 +88,3 @@ namespace Microsoft.Build.Framework
         }
     }
 }
-

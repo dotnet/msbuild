@@ -3,8 +3,10 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
@@ -94,7 +96,18 @@ namespace Microsoft.Build.Evaluation
         string IProperty.EvaluatedValueEscaped
         {
             [DebuggerStepThrough]
-            get => EvaluatedValueEscapedInternal;
+            get
+            {
+                if (this is EnvironmentDerivedProjectProperty environmentProperty && environmentProperty.loggingContext is { IsValid: true } loggingContext && !environmentProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
+                {
+                    EnvironmentVariableReadEventArgs args = new(Name, EvaluatedValueEscapedInternal);
+                    args.BuildEventContext = loggingContext.BuildEventContext;
+                    loggingContext.LogBuildEvent(args);
+                    environmentProperty._loggedEnvProperty = true;
+                }
+
+                return EvaluatedValueEscapedInternal;
+            }
         }
 
         /// <summary>
@@ -237,9 +250,10 @@ namespace Microsoft.Build.Evaluation
         /// This is ONLY to be used by the Evaluator (and Project.SetGlobalProperty) and ONLY for Global, Environment, and Built-in properties.
         /// All other properties originate in XML, and should have a backing XML object.
         /// </summary>
-        internal static ProjectProperty Create(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
+        internal static ProjectProperty Create(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext = null)
         {
-            return new ProjectPropertyNotXmlBacked(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
+            return !isGlobalProperty && !mayBeReserved ? new EnvironmentDerivedProjectProperty(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext) :
+                new ProjectPropertyNotXmlBacked(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
         }
 
         /// <summary>
@@ -626,6 +640,19 @@ namespace Microsoft.Build.Evaluation
             public override bool IsImported
             {
                 get { return false; }
+            }
+        }
+
+        private class EnvironmentDerivedProjectProperty : ProjectPropertyNotXmlBacked
+        {
+            internal bool _loggedEnvProperty = false;
+            internal LoggingContext loggingContext;
+
+            internal EnvironmentDerivedProjectProperty(
+                Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext)
+                : base(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved)
+            {
+                this.loggingContext = loggingContext;
             }
         }
     }

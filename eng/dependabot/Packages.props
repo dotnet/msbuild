@@ -1,28 +1,64 @@
 <Project>
 
   <!-- Packages in this file have versions updated periodically by Dependabot.
-       Versions managed by Darc/Maestro should be in ..\Packages.props. -->
+  Versions managed by Darc/Maestro should be in ..\Packages.props.
 
-  <!--
-    Make sure to update the binding redirects (in src\MSBuild\app.config and src\MSBuild\app.amd64.config) for any changes to
-    the list of assemblies redistributed by MSBuild (non-MSBuild assemblies in the .vsix package).
-     -->
+  Make sure to update the binding redirects (in src\MSBuild\app.config and src\MSBuild\app.amd64.config) for any changes to
+  the list of assemblies redistributed by MSBuild (non-MSBuild assemblies in the .vsix package).
+
+  Packages must be set to their package version property if it exists (ex. BenchmarkDotNetVersion) since source-build uses
+  these properties to override package versions if necessary. -->
+
   <ItemGroup>
     <PackageReference Update="BenchmarkDotNet" Version="0.13.1" />
+    <PackageReference Update="BenchmarkDotNet" Condition="'$(BenchmarkDotNetVersion)' != ''" Version="$(BenchmarkDotNetVersion)" />
+
     <PackageReference Update="LargeAddressAware" Version="1.0.5" />
+    <PackageReference Update="LargeAddressAware" Condition="'$(LargeAddressAwareVersion)' != ''" Version="$(LargeAddressAwareVersion)" />
+
     <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3" />
+    <PackageReference Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Condition="'$(MicrosoftCodeAnalysisPublicApiAnalyzersVersion)' != ''" Version="$(MicrosoftCodeAnalysisPublicApiAnalyzersVersion)" />
+
     <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" />
-    <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.1.2196" PrivateAssets="All" />
+    <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Condition="'$(MicrosoftVisualStudioSDKEmbedInteropTypesVersion)' != ''" Version="$(MicrosoftVisualStudioSDKEmbedInteropTypesVersion)" />
+
+    <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.2.2146" PrivateAssets="All" />
+    <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Condition="'$(MicrosoftVisualStudioSetupConfigurationInteropVersion)' != ''" Version="$(MicrosoftVisualStudioSetupConfigurationInteropVersion)" PrivateAssets="All" />
+
+    <PackageReference Update="Microsoft.Win32.Registry" Version="5.0.0" />
+    <PackageReference Update="Microsoft.Win32.Registry" Condition="'$(MicrosoftWin32RegistryVersion)' != ''" Version="$(MicrosoftWin32RegistryVersion)" />
+
+    <PackageReference Update="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Update="Newtonsoft.Json" Condition="'$(NewtonsoftJsonVersion)' != ''" Version="$(NewtonsoftJsonVersion)" />
+
     <PackageReference Update="PdbGit" Version="3.0.41" />
+    <PackageReference Update="PdbGit" Condition="'$(PdbGitVersion)' != ''" Version="$(PdbGitVersion)" />
+
     <PackageReference Update="Shouldly" Version="3.0.0" />
+    <PackageReference Update="Shouldly" Condition="'$(ShouldlyVersion)' != ''" Version="$(ShouldlyVersion)" />
+
+    <PackageReference Update="System.CodeDom" Version="6.0.0" />
+    <PackageReference Update="System.CodeDom" Condition="'$(SystemCodeDomVersion)' != ''" Version="$(SystemCodeDomVersion)" />
+
+    <PackageReference Update="System.Private.Uri" Version="4.3.2" />
+    <PackageReference Update="System.Private.Uri" Condition="'$(SystemPrivateUriVersion)' != ''" Version="$(SystemPrivateUriVersion)" />
+
+    <PackageReference Update="System.Runtime" Version="4.3.1" />
+    <PackageReference Update="System.Runtime" Condition="'$(SystemRuntimeVersion)' != ''" Version="$(SystemRuntimeVersion)" />
+
+    <PackageReference Update="System.Security.Cryptography.Pkcs" Version="6.0.1" />
+    <PackageReference Update="System.Security.Cryptography.Pkcs" Condition="'$(SystemSecurityCryptographyPkcsVersion)' != ''" Version="$(SystemSecurityCryptographyPkcsVersion)" />
+
+    <PackageReference Update="System.Security.Cryptography.Xml" Version="6.0.1" />
+    <PackageReference Update="System.Security.Cryptography.Xml" Condition="'$(SystemSecurityCryptographyXmlVersion)' != ''" Version="$(SystemSecurityCryptographyXmlVersion)" />
+
+    <PackageReference Update="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
+    <PackageReference Update="System.Security.Cryptography.X509Certificates" Condition="'$(SystemSecurityCryptographyX509CertificatesVersion)' != ''" Version="$(SystemSecurityCryptographyX509CertificatesVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true' AND $(ProjectIsDeprecated) != 'true'">
     <GlobalPackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.3" />
-    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.406" PrivateAssets="all"/>
-  </ItemGroup>
-
-  <ItemGroup>
+    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435" PrivateAssets="all"/>
     <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 

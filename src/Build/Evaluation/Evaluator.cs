@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using ObjectModel = System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -25,13 +24,15 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using static Microsoft.Build.Execution.ProjectPropertyInstance;
 using Constants = Microsoft.Build.Internal.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using ObjectModel = System.Collections.ObjectModel;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 #nullable disable
 
@@ -767,7 +768,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (BuildEnvironmentHelper.Instance.RunningInVisualStudio)
                     {
-                        // TODO: Remove this when VS gets updated to setup project cache plugins.
+                        // TODO: Figure out a more elegant way to do this. See the comment on BuildManager.ProjectCacheDescriptors for explanation.
                         CollectProjectCachePlugins();
                     }
 
@@ -811,24 +812,41 @@ namespace Microsoft.Build.Evaluation
             if (this._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItems)
             {
                 globalProperties = _data.GlobalPropertiesDictionary;
-                properties = _data.Properties;
+                properties = Traits.LogAllEnvironmentVariables ? _data.Properties : FilterOutEnvironmentDerivedProperties(_data.Properties);
                 items = _data.Items;
             }
 
             _evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, _evaluationProfiler.ProfiledResult);
         }
 
+        private IEnumerable FilterOutEnvironmentDerivedProperties(PropertyDictionary<P> dictionary)
+        {
+            List<P> list = new(dictionary.Count);
+            foreach (P p in dictionary)
+            {
+                // This checks if a property was derived from the environment but is not one of the well-known environment variables we
+                // use to change build behavior.
+                if ((p is EnvironmentDerivedProjectPropertyInstance ||
+                    (p is ProjectProperty pp && pp.IsEnvironmentProperty)) &&
+                    !EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(p.Name))
+                {
+                    continue;
+                }
+
+                list.Add(p);
+            }
+
+            return list;
+        }
+
         private void CollectProjectCachePlugins()
         {
             foreach (var item in _data.GetItems(ItemTypeNames.ProjectCachePlugin))
             {
-                var metadataDictionary = item.Metadata.ToDictionary(m => m.Key, m => m.EscapedValue);
-
-                var pluginPath = Path.Combine(_data.Directory, item.EvaluatedInclude);
-
-                var projectCacheItem = new ProjectCacheItem(pluginPath, metadataDictionary);
-
-                BuildManager.ProjectCacheItems[pluginPath] = projectCacheItem;
+                string pluginPath = FileUtilities.NormalizePath(_data.Directory, item.EvaluatedInclude);
+                var pluginSettings = item.Metadata.ToDictionary(m => m.Key, m => m.EscapedValue);
+                var projectCacheItem = ProjectCacheDescriptor.FromAssemblyPath(pluginPath, pluginSettings);
+                BuildManager.ProjectCacheDescriptors.TryAdd(projectCacheItem, projectCacheItem);
             }
         }
 
@@ -842,12 +860,12 @@ namespace Microsoft.Build.Evaluation
             using (_evaluationProfiler.TrackFile(currentProjectOrImport.FullPath))
             {
                 // We accumulate InitialTargets from the project and each import
-                var initialTargets = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.InitialTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.InitialTargetsLocation);
+                var initialTargets = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.InitialTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.InitialTargetsLocation, _evaluationLoggingContext);
                 _initialTargetsList.AddRange(initialTargets);
 
                 if (!Traits.Instance.EscapeHatches.IgnoreTreatAsLocalProperty)
                 {
-                    foreach (string propertyName in _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation))
+                    foreach (string propertyName in _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation, _evaluationLoggingContext))
                     {
                         XmlUtilities.VerifyThrowProjectValidElementName(propertyName, currentProjectOrImport.Location);
                         _data.GlobalPropertiesToTreatAsLocal.Add(propertyName);
@@ -1051,8 +1069,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void AddBeforeAndAfterTargetMappings(ProjectTargetElement targetElement, Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets, Dictionary<string, List<TargetSpecification>> targetsWhichRunBeforeByTarget, Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget)
         {
-            var beforeTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.BeforeTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.BeforeTargetsLocation);
-            var afterTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.AfterTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.AfterTargetsLocation);
+            var beforeTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.BeforeTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.BeforeTargetsLocation, _evaluationLoggingContext);
+            var afterTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.AfterTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.AfterTargetsLocation, _evaluationLoggingContext);
 
             foreach (string beforeTarget in beforeTargets)
             {
@@ -1197,7 +1215,7 @@ namespace Microsoft.Build.Evaluation
         {
             foreach (ProjectPropertyInstance environmentProperty in _environmentProperties)
             {
-                _data.SetProperty(environmentProperty.Name, ((IProperty)environmentProperty).EvaluatedValueEscaped, isGlobalProperty: false, mayBeReserved: false, isEnvironmentVariable: true);
+                _data.SetProperty(environmentProperty.Name, ((IProperty)environmentProperty).EvaluatedValueEscaped, isGlobalProperty: false, mayBeReserved: false, isEnvironmentVariable: true, loggingContext: _evaluationLoggingContext);
             }
         }
 
@@ -1298,7 +1316,7 @@ namespace Microsoft.Build.Evaluation
                 // it is the same as what we are setting the value on. Note: This needs to be set before we expand the property we are currently setting.
                 _expander.UsedUninitializedProperties.CurrentlyEvaluatingPropertyElementName = propertyElement.Name;
 
-                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location);
+                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location, _evaluationLoggingContext);
 
                 // If we are going to set a property to a value other than null or empty we need to check to see if it has been used
                 // during evaluation.
@@ -1719,8 +1737,7 @@ namespace Microsoft.Build.Evaluation
             string directoryOfImportingFile,
             ProjectImportElement importElement,
             out List<ProjectRootElement> projects,
-            out SdkResult sdkResult,
-            bool throwOnFileNotExistsError = true)
+            out SdkResult sdkResult)
         {
             projects = null;
             sdkResult = null;
@@ -1833,7 +1850,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (!sdkResult.Success)
                 {
-                    if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) && (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10) || !_loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk)))
+                    if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) && !_loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk))
                     {
                         ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
                             importElement.Location.Line,
@@ -1859,7 +1876,7 @@ namespace Microsoft.Build.Evaluation
                 if (sdkResult.Path != null)
                 {
                     ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(sdkResult.Path, project),
-                        throwOnFileNotExistsError, out projects);
+                        throwOnFileNotExistsError: true, out projects);
 
                     if (projects?.Count > 0)
                     {
@@ -1872,7 +1889,7 @@ namespace Microsoft.Build.Evaluation
                         foreach (var additionalPath in sdkResult.AdditionalPaths)
                         {
                             ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, Path.Combine(additionalPath, project),
-                                throwOnFileNotExistsError, out var additionalProjects);
+                                throwOnFileNotExistsError: true, out var additionalProjects);
 
                             if (additionalProjects?.Count > 0)
                             {
@@ -1898,7 +1915,7 @@ namespace Microsoft.Build.Evaluation
             else
             {
                 ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, project,
-                    throwOnFileNotExistsError, out projects);
+                    throwOnFileNotExistsError: true, out projects);
             }
         }
 
@@ -2003,7 +2020,7 @@ namespace Microsoft.Build.Evaluation
         {
             imports = null;
 
-            string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
+            string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation, _evaluationLoggingContext);
             ElementLocation importLocationInProject = importElement.Location;
 
             if (String.IsNullOrWhiteSpace(importExpressionEscaped))
@@ -2241,31 +2258,31 @@ namespace Microsoft.Build.Evaluation
                         // There's a specific message for file not existing
                         if (!FileSystems.Default.FileExists(importFileUnescaped))
                         {
-                            bool ignoreMissingImportsFlagSet = (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0;
-                            if (!throwOnFileNotExistsError || ignoreMissingImportsFlagSet)
+                            if ((_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0)
                             {
-                                if (ignoreMissingImportsFlagSet)
+                                // Log message for import skipped
+                                ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                                    importElement.Location.Line,
+                                    importElement.Location.Column,
+                                    ProjectImportSkippedMissingFile,
+                                    importFileUnescaped,
+                                    importElement.ContainingProject.FullPath,
+                                    importElement.Location.Line,
+                                    importElement.Location.Column)
                                 {
-                                    // Log message for import skipped
-                                    ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
-                                        importElement.Location.Line,
-                                        importElement.Location.Column,
-                                        ProjectImportSkippedMissingFile,
-                                        importFileUnescaped,
-                                        importElement.ContainingProject.FullPath,
-                                        importElement.Location.Line,
-                                        importElement.Location.Column)
-                                    {
-                                        BuildEventContext = _evaluationLoggingContext.BuildEventContext,
-                                        UnexpandedProject = importElement.Project,
-                                        ProjectFile = importElement.ContainingProject.FullPath,
-                                        ImportedProjectFile = importFileUnescaped,
-                                        ImportIgnored = true,
-                                    };
+                                    BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                                    UnexpandedProject = importElement.Project,
+                                    ProjectFile = importElement.ContainingProject.FullPath,
+                                    ImportedProjectFile = importFileUnescaped,
+                                    ImportIgnored = true,
+                                };
 
-                                    _evaluationLoggingContext.LogBuildEvent(eventArgs);
-                                }
+                                _evaluationLoggingContext.LogBuildEvent(eventArgs);
 
+                                continue;
+                            }
+                            else if (!throwOnFileNotExistsError)
+                            {
                                 continue;
                             }
 
@@ -2428,7 +2445,8 @@ namespace Microsoft.Build.Evaluation
                     element.ConditionLocation,
                     _evaluationLoggingContext.LoggingService,
                     _evaluationLoggingContext.BuildEventContext,
-                    _evaluationContext.FileSystem
+                    _evaluationContext.FileSystem,
+                    loggingContext: _evaluationLoggingContext
                     );
 
                 return result;

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -147,6 +147,26 @@ namespace Microsoft.Build.BackEnd
             public void Translate(ref int value)
             {
                 value = _reader.ReadInt32();
+            }
+
+            /// <summary>
+            /// Translates an <see langword="int"/> array.
+            /// </summary>
+            /// <param name="array">The array to be translated.</param>
+            public void Translate(ref int[] array)
+            {
+                if (!TranslateNullable(array))
+                {
+                    return;
+                }
+
+                int count = _reader.ReadInt32();
+                array = new int[count];
+
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = _reader.ReadInt32();
+                }
             }
 
             /// <summary>
@@ -435,6 +455,7 @@ namespace Microsoft.Build.BackEnd
             /// Finally, converting the enum to an int assumes that we always want to transport enums as ints.  This
             /// works in all of our current cases, but certainly isn't perfectly generic.</remarks>
             public void TranslateEnum<T>(ref T value, int numericValue)
+                where T : struct, Enum
             {
                 numericValue = _reader.ReadInt32();
                 Type enumType = value.GetType();
@@ -812,6 +833,26 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
+            /// Translates an <see langword="int"/> array.
+            /// </summary>
+            /// <param name="array">The array to be translated.</param>
+            public void Translate(ref int[] array)
+            {
+                if (!TranslateNullable(array))
+                {
+                    return;
+                }
+
+                int count = array.Length;
+                _writer.Write(count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    _writer.Write(array[i]);
+                }
+            }
+
+            /// <summary>
             /// Translates a long.
             /// </summary>
             /// <param name="value">The value to be translated.</param>
@@ -1039,10 +1080,8 @@ namespace Microsoft.Build.BackEnd
             /// Finally, converting the enum to an int assumes that we always want to transport enums as ints.  This
             /// works in all of our current cases, but certainly isn't perfectly generic.</remarks>
             public void TranslateEnum<T>(ref T value, int numericValue)
+                where T : struct, Enum
             {
-                Type enumType = value.GetType();
-                ErrorUtilities.VerifyThrow(enumType.GetTypeInfo().IsEnum, "Must pass an enum type.");
-
                 _writer.Write(numericValue);
             }
 

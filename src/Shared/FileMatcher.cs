@@ -2,13 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Buffers;
 using System.Collections.Concurrent;
-using System.IO;
-using System.Text;
-using System.Diagnostics;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
@@ -114,49 +115,28 @@ namespace Microsoft.Build.Shared
                 ? getFileSystemEntries
                 : (type, path, pattern, directory, stripProjectDirectory) =>
                 {
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+                    // Always hit the filesystem with "*" pattern, cache the results, and do the filtering here.
+                    string cacheKey = type switch
                     {
-                        // New behavior:
-                        // Always hit the filesystem with "*" pattern, cache the results, and do the filtering here.
-                        string cacheKey = type switch
-                        {
-                            FileSystemEntity.Files => "F",
-                            FileSystemEntity.Directories => "D",
-                            FileSystemEntity.FilesAndDirectories => "A",
-                            _ => throw new NotImplementedException()
-                        } + ";" + path;
-                        IReadOnlyList<string> allEntriesForPath = getFileSystemDirectoryEntriesCache.GetOrAdd(
-                                cacheKey,
-                                s => getFileSystemEntries(
-                                    type,
-                                    path,
-                                    "*",
-                                    directory,
-                                    false));
-                        IEnumerable<string> filteredEntriesForPath = (pattern != null && !IsAllFilesWildcard(pattern))
-                            ? allEntriesForPath.Where(o => IsFileNameMatch(o, pattern))
-                            : allEntriesForPath;
-                        return stripProjectDirectory
-                            ? RemoveProjectDirectory(filteredEntriesForPath, directory).ToArray()
-                            : filteredEntriesForPath.ToArray();
-                    }
-                    else
-                    {
-                        // Legacy behavior:
-                        // Cache only directories, for files we won't hit the cache because the file name patterns tend to be unique
-                        if (type == FileSystemEntity.Directories)
-                        {
-                            return getFileSystemDirectoryEntriesCache.GetOrAdd(
-                                $"D;{path};{pattern ?? "*"}",
-                                s => getFileSystemEntries(
-                                    type,
-                                    path,
-                                    pattern,
-                                    directory,
-                                    stripProjectDirectory).ToArray());
-                        }
-                    }
-                    return getFileSystemEntries(type, path, pattern, directory, stripProjectDirectory);
+                        FileSystemEntity.Files => "F",
+                        FileSystemEntity.Directories => "D",
+                        FileSystemEntity.FilesAndDirectories => "A",
+                        _ => throw new NotImplementedException()
+                    } + ";" + path;
+                    IReadOnlyList<string> allEntriesForPath = getFileSystemDirectoryEntriesCache.GetOrAdd(
+                            cacheKey,
+                            s => getFileSystemEntries(
+                                type,
+                                path,
+                                "*",
+                                directory,
+                                false));
+                    IEnumerable<string> filteredEntriesForPath = (pattern != null && !IsAllFilesWildcard(pattern))
+                        ? allEntriesForPath.Where(o => IsFileNameMatch(o, pattern))
+                        : allEntriesForPath;
+                    return stripProjectDirectory
+                        ? RemoveProjectDirectory(filteredEntriesForPath, directory).ToArray()
+                        : filteredEntriesForPath.ToArray();
                 };
         }
 
@@ -857,6 +837,29 @@ namespace Microsoft.Build.Shared
             Dictionary<string, List<RecursionState>> searchesToExcludeInSubdirs,
             TaskOptions taskOptions)
         {
+#if FEATURE_SYMLINK_TARGET
+            // This is a pretty quick, simple check, but it misses some cases:
+            // symlink in folder A pointing to folder B and symlink in folder B pointing to folder A
+            // If folder C contains file Foo.cs and folder D, and folder D contains a symlink pointing to folder C, calling GetFilesRecursive and
+            // passing in folder D would currently find Foo.cs, whereas this would make us miss it.
+            // and most obviously, frameworks other than net6.0
+            // The solution I'd propose for the first two, if necessary, would be maintaining a set of symlinks and verifying, before following it,
+            // that we had not followed it previously. The third would require a more involved P/invoke-style fix.
+            // These issues should ideally be resolved as part of #703
+            try
+            {
+                FileSystemInfo linkTarget = Directory.ResolveLinkTarget(recursionState.BaseDirectory, returnFinalTarget: true);
+                if (linkTarget is not null && recursionState.BaseDirectory.Contains(linkTarget.FullName))
+                {
+                    return;
+                }
+            }
+            // This fails in tests with the MockFileSystem when they don't have real paths.
+            catch (IOException) { }
+            catch (ArgumentException) { }
+            catch (UnauthorizedAccessException) { }
+#endif
+
             ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec == null) || (recursionState.SearchData.RegexFileMatch == null),
                 "File-spec overrides the regular expression -- pass null for file-spec if you want to use the regular expression.");
 
@@ -975,15 +978,10 @@ namespace Microsoft.Build.Shared
 
                 if (searchesToExcludeInSubdirs != null)
                 {
-                    List<RecursionState> searchesForSubdir;
-
-                    if (searchesToExcludeInSubdirs.TryGetValue(subdir, out searchesForSubdir))
+                    if (searchesToExcludeInSubdirs.TryGetValue(subdir, out List<RecursionState> searchesForSubdir))
                     {
                         // We've found the base directory that these exclusions apply to.  So now add them as normal searches
-                        if (newSearchesToExclude == null)
-                        {
-                            newSearchesToExclude = new List<RecursionState>();
-                        }
+                        newSearchesToExclude ??= new();
                         newSearchesToExclude.AddRange(searchesForSubdir);
                     }
                 }
@@ -1022,10 +1020,10 @@ namespace Microsoft.Build.Shared
                     }
                 }
             }
-            // Use a foreach to reduce the overhead of Parallel.ForEach when we are not running in parallel
+            // Use a foreach to avoid the overhead of Parallel.ForEach when we are not running in parallel
             if (dop < 2)
             {
-                foreach (var subdir in _getFileSystemEntries(FileSystemEntity.Directories, recursionState.BaseDirectory, nextStep.DirectoryPattern, null, false))
+                foreach (string subdir in _getFileSystemEntries(FileSystemEntity.Directories, recursionState.BaseDirectory, nextStep.DirectoryPattern, null, false))
                 {
                     processSubdirectory(subdir);
                 }
@@ -1676,7 +1674,7 @@ namespace Microsoft.Build.Shared
             // Use a span-based Path.GetFileName if it is available.
 #if FEATURE_MSIOREDIST
             return IsMatch(Microsoft.IO.Path.GetFileName(path.AsSpan()), pattern);
-#elif NETSTANDARD2_0
+#elif NETSTANDARD2_0 || NETFRAMEWORK
             return IsMatch(Path.GetFileName(path), pattern);
 #else
             return IsMatch(Path.GetFileName(path.AsSpan()), pattern);

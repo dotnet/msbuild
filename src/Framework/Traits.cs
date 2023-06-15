@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -88,10 +87,28 @@ namespace Microsoft.Build.Framework
         public readonly bool EmitSolutionMetaproj = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildEmitSolution"));
 
         /// <summary>
+        /// Modifies Solution Generator to generate a metaproj that batches multiple Targets into one MSBuild task invoke.
+        /// </summary>
+        /// <remarks>
+        /// For example, a run of Clean;Build target will first run Clean on all projects,
+        /// then run Build on all projects.  When enabled, it will run Clean;Build on all
+        /// Projects at the back to back.  Allowing the second target to start sooner than before.
+        /// </remarks>
+        public readonly bool SolutionBatchTargets = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildSolutionBatchTargets"));
+
+        /// <summary>
         /// Log statistics about property functions which require reflection
         /// </summary>
         public readonly bool LogPropertyFunctionsRequiringReflection = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection"));
 
+        /// <summary>
+        /// Log all environment variables whether or not they are used in a build in the binary log.
+        /// </summary>
+        public static bool LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES"))
+#if !TASKHOST
+            && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4)
+#endif
+            ;
         /// <summary>
         /// Log property tracking information.
         /// </summary>
@@ -102,9 +119,16 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public readonly int DictionaryBasedItemRemoveThreshold = ParseIntFromEnvironmentVariableOrDefault("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", 100);
 
+        /// <summary>
+        /// Name of environment variables used to enable MSBuild server.
+        /// </summary>
+        public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
+
         public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
         public readonly bool DebugScheduler;
         public readonly bool DebugNodeCommunication;
+
+        public readonly bool InProcNodeDisabled = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
 
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {

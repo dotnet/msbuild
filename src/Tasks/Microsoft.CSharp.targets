@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.CSharp.targets
 
@@ -14,26 +14,25 @@ this file.
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project>
 
-   <Choose>
-      <When Condition="'$(IsCrossTargetingBuild)' == 'true'">
-         <PropertyGroup>
-            <CSharpTargetsPath>$(MSBuildToolsPath)\Microsoft.CSharp.CrossTargeting.targets</CSharpTargetsPath>
-          </PropertyGroup>
-      </When>
-      <Otherwise>
-         <PropertyGroup>
-            <CSharpTargetsPath>$(MSBuildToolsPath)\Microsoft.CSharp.CurrentVersion.targets</CSharpTargetsPath>
-         </PropertyGroup>
-      </Otherwise>
-   </Choose>
+  <Choose>
+    <When Condition="'$(IsCrossTargetingBuild)' == 'true'">
+      <PropertyGroup>
+        <CSharpTargetsPath>$(MSBuildToolsPath)\Microsoft.CSharp.CrossTargeting.targets</CSharpTargetsPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <CSharpTargetsPath>$(MSBuildToolsPath)\Microsoft.CSharp.CurrentVersion.targets</CSharpTargetsPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
 
-   <Import Project="$(MSBuildToolsPath)\Microsoft.Managed.Before.targets" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Managed.Before.targets" />
 
-   <Import Project="$(CSharpTargetsPath)" />
+  <Import Project="$(CSharpTargetsPath)" />
 
-   <Import Project="$(MSBuildToolsPath)\Microsoft.Managed.After.targets" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Managed.After.targets" />
 
 </Project>

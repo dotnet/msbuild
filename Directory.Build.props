@@ -14,6 +14,18 @@
 
   <PropertyGroup>
     <FullFrameworkTFM>net472</FullFrameworkTFM>
+    
+    <!-- 
+        When updating the version of .NET Core for MSBuild, this property is the 'source of truth'.
+        Other locations to update the version number:
+          global.json
+          eng/cibuild_bootstrapped_msbuild.ps1
+          eng/cibuild_bootstrapped_msbuild.sh
+          scripts/Deploy-MSBuild.ps1
+          src/Framework/README.md
+          src/Utilities/README.md
+     -->
+    <LatestDotNetCoreForMSBuild>net7.0</LatestDotNetCoreForMSBuild>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -36,9 +48,11 @@
         CS1701 and CS1702 are by default ignored by Microsoft.NET.Sdk, but if you define the NoWarn property in Directory.Build.props,
         you don't get those defaults.
         SYSLIB0011: Removing binary formatter will happen as part of a larger .NET-wide effort.
+        SYSLIB0037 & SYSLIB0044: The deprecated AssemblyName members could require a bigger refactor for us: https://github.com/dotnet/msbuild/issues/7902
+        RS0016 & RS0017: Roslyn analyzers seem to be bugged, claiming that API's that exist don't and vise-versa: https://github.com/dotnet/msbuild/issues/7903
     -->
 
-    <NoWarn>$(NoWarn);NU1603;NU5105;1701;1702;SYSLIB0011</NoWarn>
+    <NoWarn>$(NoWarn);NU1603;NU5105;1701;1702;SYSLIB0011;SYSLIB0037;SYSLIB0044;RS0016;RS0017;</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">

@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
-
-#nullable disable
+using System.Threading;
+using System.Diagnostics;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -17,29 +17,24 @@ namespace Microsoft.Build.BackEnd
     internal class NodeManager : INodeManager
     {
         /// <summary>
-        /// The invalid node id
-        /// </summary>
-        private const int InvalidNodeId = 0;
-
-        /// <summary>
         /// The node provider for the in-proc node.
         /// </summary>
-        private INodeProvider _inProcNodeProvider;
+        private INodeProvider? _inProcNodeProvider;
 
         /// <summary>
         /// The node provider for out-of-proc nodes.
         /// </summary> 
-        private INodeProvider _outOfProcNodeProvider;
+        private INodeProvider? _outOfProcNodeProvider;
 
         /// <summary>
         /// The build component host.
         /// </summary>
-        private IBuildComponentHost _componentHost;
+        private IBuildComponentHost? _componentHost;
 
         /// <summary>
         /// Mapping of manager-produced node IDs to the provider hosting the node.
         /// </summary>
-        private Dictionary<int, INodeProvider> _nodeIdToProvider;
+        private readonly Dictionary<int, INodeProvider> _nodeIdToProvider;
 
         /// <summary>
         /// The packet factory used to translate and route packets
@@ -92,32 +87,31 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="configuration">The configuration to use for the remote node.</param>
         /// <param name="nodeAffinity">The <see cref="NodeAffinity"/> to use.</param>
+        /// <param name="numberOfNodesToCreate">Number of nodes to be reused ot created.</param>
         /// <returns>A NodeInfo describing the node created, or null if none could be created.</returns>
-        public NodeInfo CreateNode(NodeConfiguration configuration, NodeAffinity nodeAffinity)
+        public IList<NodeInfo> CreateNodes(NodeConfiguration configuration, NodeAffinity nodeAffinity, int numberOfNodesToCreate)
         {
             // We will prefer to make nodes on the "closest" providers first; in-proc, then
             // out-of-proc, then remote.
             // When we support distributed build, we will also consider the remote provider.
-            int nodeId = InvalidNodeId;
-            if ((nodeAffinity == NodeAffinity.Any || nodeAffinity == NodeAffinity.InProc) && !_componentHost.BuildParameters.DisableInProcNode)
+            List<NodeInfo> nodes = new(numberOfNodesToCreate);
+            if ((nodeAffinity == NodeAffinity.Any || nodeAffinity == NodeAffinity.InProc) && !_componentHost!.BuildParameters.DisableInProcNode)
             {
-                nodeId = AttemptCreateNode(_inProcNodeProvider, configuration);
+                nodes.AddRange(AttemptCreateNode(_inProcNodeProvider!, configuration, numberOfNodesToCreate));
             }
 
-            if (nodeId == InvalidNodeId && (nodeAffinity == NodeAffinity.Any || nodeAffinity == NodeAffinity.OutOfProc))
+            if (nodes.Count < numberOfNodesToCreate && (nodeAffinity == NodeAffinity.Any || nodeAffinity == NodeAffinity.OutOfProc))
             {
-                nodeId = AttemptCreateNode(_outOfProcNodeProvider, configuration);
-            }
-
-            if (nodeId == InvalidNodeId)
-            {
-                return null;
+                nodes.AddRange(AttemptCreateNode(_outOfProcNodeProvider!, configuration, numberOfNodesToCreate - nodes.Count));
             }
 
             // If we created a node, they should no longer be considered shut down.
-            _nodesShutdown = false;
+            if (nodes.Count > 0)
+            {
+                _nodesShutdown = false;
+            }
 
-            return new NodeInfo(nodeId, _nodeIdToProvider[nodeId].ProviderType);
+            return nodes;
         }
 
         /// <summary>
@@ -127,14 +121,14 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         public void SendData(int node, INodePacket packet)
         {
-            // Look up the node provider for this node in the mapping.
-            if (!_nodeIdToProvider.TryGetValue(node, out INodeProvider provider))
+            if (!_nodeIdToProvider.TryGetValue(node, out INodeProvider? provider))
             {
                 ErrorUtilities.ThrowInternalError("Node {0} does not have a provider.", node);
             }
-
-            // Send the data.
-            provider.SendData(node, packet);
+            else
+            {
+                provider.SendData(node, packet);
+            }
         }
 
         /// <summary>
@@ -176,7 +170,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(_componentHost == null, "NodeManager already initialized.");
             ErrorUtilities.VerifyThrow(host != null, "We can't create a NodeManager with a null componentHost");
-            _componentHost = host;
+            _componentHost = host!;
 
             _inProcNodeProvider = _componentHost.GetComponent(BuildComponentType.InProcNodeProvider) as INodeProvider;
             _outOfProcNodeProvider = _componentHost.GetComponent(BuildComponentType.OutOfProcNodeProvider) as INodeProvider;
@@ -305,47 +299,57 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="nodeProvider">The provider used to create the node.</param>
         /// <param name="nodeConfiguration">The <see cref="NodeConfiguration"/> to use.</param>
-        /// <returns>The id of the node created.</returns>
-        private int AttemptCreateNode(INodeProvider nodeProvider, NodeConfiguration nodeConfiguration)
+        /// <param name="numberOfNodesToCreate">Number of nodes to be reused ot created.</param>
+        /// <returns>List of created nodes.</returns>
+        private IList<NodeInfo> AttemptCreateNode(INodeProvider nodeProvider, NodeConfiguration nodeConfiguration, int numberOfNodesToCreate)
         {
             // If no provider was passed in, we obviously can't create a node.
             if (nodeProvider == null)
             {
                 ErrorUtilities.ThrowInternalError("No node provider provided.");
-                return InvalidNodeId;
+                return new List<NodeInfo>();
             }
 
             // Are there any free slots on this provider?
             if (nodeProvider.AvailableNodes == 0)
             {
-                return InvalidNodeId;
+                return new List<NodeInfo>();
             }
 
             // Assign a global ID to the node we are about to create.
-            int nodeId;
+            int fromNodeId;
             if (nodeProvider is NodeProviderInProc)
             {
-                nodeId = _inprocNodeId;
+                fromNodeId = _inprocNodeId;
             }
             else
             {
-                nodeId = _nextNodeId;
-                _nextNodeId++;
+                // Reserve node numbers for all needed nodes.
+                fromNodeId = Interlocked.Add(ref _nextNodeId, numberOfNodesToCreate) - numberOfNodesToCreate;
             }
 
-            NodeConfiguration configToSend = nodeConfiguration.Clone();
-            configToSend.NodeId = nodeId;
 
             // Create the node and add it to our mapping.
-            bool createdNode = nodeProvider.CreateNode(nodeId, this, configToSend);
+            IList<NodeInfo> nodes = nodeProvider.CreateNodes(fromNodeId, this, AcquiredNodeConfigurationFactory, numberOfNodesToCreate);
 
-            if (!createdNode)
+            foreach (NodeInfo node in nodes)
             {
-                return InvalidNodeId;
+                _nodeIdToProvider.Add(node.NodeId, nodeProvider);
             }
 
-            _nodeIdToProvider.Add(nodeId, nodeProvider);
-            return nodeId;
+            return nodes;
+
+            NodeConfiguration AcquiredNodeConfigurationFactory(NodeInfo nodeInfo)
+            {
+                var config = nodeConfiguration.Clone();
+                config.NodeId = nodeInfo.NodeId;
+                return config;
+            }
+        }
+
+        public IEnumerable<Process> GetProcesses()
+        {
+            return _outOfProcNodeProvider?.GetProcesses()!;
         }
     }
 }

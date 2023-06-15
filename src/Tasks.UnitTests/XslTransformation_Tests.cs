@@ -66,6 +66,8 @@ namespace Microsoft.Build.UnitTests
         /// The contents of xsl document for tests.
         /// </summary>
         private readonly string _xslDocument = "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:msxsl=\"urn:schemas-microsoft-com:xslt\" exclude-result-prefixes=\"msxsl\"><xsl:output method=\"xml\" indent=\"yes\"/><xsl:template match=\"@* | node()\"><surround><xsl:copy><xsl:apply-templates select=\"@* | node()\"/></xsl:copy></surround></xsl:template></xsl:stylesheet>";
+
+
 #if FEATURE_COMPILED_XSL
         /// <summary>
         /// The contents of another xsl document for tests
@@ -842,6 +844,55 @@ namespace Microsoft.Build.UnitTests
                 catch (Exception e)
                 {
                     Assert.Contains("error?", e.Message);
+                }
+            }
+
+            CleanUp(dir);
+        }
+
+        /// <summary>
+        /// Xslt PreserveWhitespace = true
+        /// </summary>
+        [Fact]
+        public void XsltPreserveWhitespace()
+        {
+            string dir;
+            TaskItem[] xmlPaths;
+            TaskItem xslPath;
+            TaskItem[] outputPaths;
+            MockEngine engine;
+
+            Prepare(out dir, out _, out _, out _, out outputPaths, out _, out _, out engine);
+
+            var testingDocsDir = Path.Combine("TestDocuments", "Fdl2Proto");
+
+            xmlPaths = new TaskItem[] { new TaskItem(Path.Combine(testingDocsDir, "sila.xml")) };
+            xslPath = new TaskItem(Path.Combine(testingDocsDir, "fdl2proto.xsl"));
+
+            // load transformed xsl and assert it is well formatted
+            {
+                XslTransformation t = new XslTransformation();
+                
+                t.BuildEngine = engine;
+                t.XslInputPath = xslPath;
+                t.XmlInputPaths = xmlPaths;
+                t.OutputPaths = outputPaths;
+                t.UseTrustedSettings = true;
+                t.PreserveWhitespace = true;
+
+                t.Execute();
+                Console.WriteLine(engine.Log);
+
+                string expectedOutput;
+                using (StreamReader sr = new StreamReader(Path.Combine(testingDocsDir, "expected.proto")))
+                {
+                    expectedOutput = sr.ReadToEnd();
+                }
+
+                using (StreamReader sr = new StreamReader(t.OutputPaths[0].ItemSpec))
+                {
+                    string fileContents = sr.ReadToEnd();
+                    Assert.Equal(expectedOutput, fileContents);
                 }
             }
 

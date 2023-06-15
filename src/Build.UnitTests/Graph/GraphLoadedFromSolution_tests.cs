@@ -78,12 +78,10 @@ namespace Microsoft.Build.Graph.UnitTests
                 defaultTargets: null,
                 extraContent: referenceToSolution);
 
-            var exception = Should.Throw<InvalidOperationException>(
-                () =>
-                {
-                    new ProjectGraph(root.Path);
-                });
+            var aggException = Should.Throw<AggregateException>(() => new ProjectGraph(root.Path));
+            aggException.InnerExceptions.ShouldHaveSingleItem();
 
+            var exception = aggException.InnerExceptions[0].ShouldBeOfType<InvalidOperationException>();
             exception.Message.ShouldContain("MSB4263:");
         }
 

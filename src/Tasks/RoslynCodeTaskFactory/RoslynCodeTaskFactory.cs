@@ -103,6 +103,11 @@ namespace Microsoft.Build.Tasks
         private TaskLoggingHelper _log;
 
         /// <summary>
+        /// Stores functions that were added to the current app domain. Should be removed once we're finished.
+        /// </summary>
+        private ResolveEventHandler handlerAddedToAppDomain = null;
+
+        /// <summary>
         /// Stores the parameters parsed in the &lt;UsingTask /&gt;.
         /// </summary>
         private TaskPropertyInfo[] _parameters;
@@ -123,6 +128,10 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc cref="ITaskFactory.CleanupTask(ITask)"/>
         public void CleanupTask(ITask task)
         {
+            if (handlerAddedToAppDomain is not null)
+            {
+                AppDomain.CurrentDomain.AssemblyResolve -= handlerAddedToAppDomain;
+            }
         }
 
         /// <inheritdoc cref="ITaskFactory.CreateTask(IBuildEngine)"/>
@@ -433,7 +442,8 @@ namespace Microsoft.Build.Tasks
                 taskInfo.CodeType = RoslynCodeTaskFactoryCodeType.Class;
                 taskInfo.SourceCode = File.ReadAllText(sourceAttribute.Value.Trim());
             }
-            else if (typeAttribute != null)
+
+            if (typeAttribute != null)
             {
                 if (String.IsNullOrWhiteSpace(typeAttribute.Value))
                 {
@@ -515,7 +525,7 @@ namespace Microsoft.Build.Tasks
         /// Perhaps in the future this could be more powerful by using NuGet to resolve assemblies but we think
         /// that is too complicated for a simple in-line task.  If users have more complex requirements, they
         /// can compile their own task library.</remarks>
-        internal static bool TryResolveAssemblyReferences(TaskLoggingHelper log, RoslynCodeTaskFactoryTaskInfo taskInfo, out ITaskItem[] items)
+        internal bool TryResolveAssemblyReferences(TaskLoggingHelper log, RoslynCodeTaskFactoryTaskInfo taskInfo, out ITaskItem[] items)
         {
             // Store the list of resolved assemblies because a user can specify a short name or a full path
             ISet<string> resolvedAssemblyReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -532,6 +542,8 @@ namespace Microsoft.Build.Tasks
                 references = references.Union(DefaultReferences[taskInfo.CodeLanguage]);
             }
 
+            List<string> directoriesToAddToAppDomain = new();
+
             // Loop through the user specified references as well as the default references
             foreach (string reference in references)
             {
@@ -539,7 +551,9 @@ namespace Microsoft.Build.Tasks
                 if (FileSystems.Default.FileExists(reference))
                 {
                     // The path could be relative like ..\Assembly.dll so we need to get the full path
-                    resolvedAssemblyReferences.Add(Path.GetFullPath(reference));
+                    string fullPath = Path.GetFullPath(reference);
+                    directoriesToAddToAppDomain.Add(Path.GetDirectoryName(fullPath));
+                    resolvedAssemblyReferences.Add(fullPath);
                     continue;
                 }
 
@@ -572,7 +586,34 @@ namespace Microsoft.Build.Tasks
             // Transform the list of resolved assemblies to TaskItems if they were all resolved
             items = hasInvalidReference ? null : resolvedAssemblyReferences.Select(i => (ITaskItem)new TaskItem(i)).ToArray();
 
+            handlerAddedToAppDomain = (_, eventArgs) => TryLoadAssembly(directoriesToAddToAppDomain, new AssemblyName(eventArgs.Name));
+            AppDomain.CurrentDomain.AssemblyResolve += handlerAddedToAppDomain;
+
             return !hasInvalidReference;
+
+            static Assembly TryLoadAssembly(List<string> directories, AssemblyName name)
+            {
+                foreach (string directory in directories)
+                {
+                    string path;
+                    if (!string.IsNullOrEmpty(name.CultureName))
+                    {
+                        path = Path.Combine(directory, name.CultureName, name.Name + ".dll");
+                        if (File.Exists(path))
+                        {
+                            return Assembly.LoadFrom(path);
+                        }
+                    }
+
+                    path = Path.Combine(directory, name.Name + ".dll");
+                    if (File.Exists(path))
+                    {
+                        return Assembly.LoadFrom(path);
+                    }
+                }
+
+                return null;
+            }
         }
 
         private static CodeMemberProperty CreateProperty(CodeTypeDeclaration codeTypeDeclaration, string name, Type type, object defaultValue = null)
@@ -706,6 +747,12 @@ namespace Microsoft.Build.Tasks
                         _log.LogErrorWithCodeFromResources("CodeTaskFactory.FindSourceFileAt", sourceCodePath);
 
                         return false;
+                    }
+
+                    if (!deleteSourceCodeFile)
+                    {
+                        // Log the location of the code file because MSBUILDLOGCODETASKFACTORYOUTPUT was set.
+                        _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileAt", sourceCodePath);
                     }
                 }
 

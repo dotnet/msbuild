@@ -436,7 +436,7 @@ namespace Microsoft.Build.Execution
                         targetLoggingContext.LogComment(MessageImportance.Low, "TaskFoundFromFactory", taskName, taskFactory.Name);
                     }
 
-                    if (taskFactory.TaskFactoryLoadedType.HasSTAThreadAttribute())
+                    if (taskFactory.TaskFactoryLoadedType.HasSTAThreadAttribute)
                     {
                         targetLoggingContext.LogComment(MessageImportance.Low, "TaskNeedsSTA", taskName);
                     }
@@ -1666,34 +1666,41 @@ namespace Microsoft.Build.Execution
                         // Cannot have a null or empty name for the type after expansion.
                         ProjectErrorUtilities.VerifyThrowInvalidProject
                         (
-                        !String.IsNullOrEmpty(expandedType),
-                        parameter.ParameterTypeLocation,
-                        "InvalidEvaluatedAttributeValue",
-                        expandedType,
-                        parameter.ParameterType,
-                        XMakeAttributes.parameterType,
-                        XMakeElements.usingTaskParameter
+                            !String.IsNullOrEmpty(expandedType),
+                            parameter.ParameterTypeLocation,
+                            "InvalidEvaluatedAttributeValue",
+                            expandedType,
+                            parameter.ParameterType,
+                            XMakeAttributes.parameterType,
+                            XMakeElements.usingTaskParameter
                         );
 
-                        // Try and get the type directly 
-                        Type paramType = Type.GetType(expandedType);
-
-                        // The type could not be got directly try and see if the type can be found by appending the FrameworkAssemblyName to it.
-                        if (paramType == null)
+                        Type paramType;
+                        if (expandedType.StartsWith("Microsoft.Build.Framework.", StringComparison.OrdinalIgnoreCase) && !expandedType.Contains(","))
                         {
-                            paramType = Type.GetType(expandedType + "," + typeof(ITaskItem).GetTypeInfo().Assembly.FullName, false /* don't throw on error */, true /* case-insensitive */);
-
-                            ProjectErrorUtilities.VerifyThrowInvalidProject
-                            (
-                             paramType != null,
-                             parameter.ParameterTypeLocation,
-                             "InvalidEvaluatedAttributeValue",
-                             expandedType,
-                             parameter.ParameterType,
-                             XMakeAttributes.parameterType,
-                            XMakeElements.usingTaskParameter
-                            );
+                            // This is workaround for internal bug https://devdiv.visualstudio.com/DevDiv/_workitems/edit/1448821
+                            // Visual Studio can load different version of Microsoft.Build.Framework.dll and non fully classified type could be resolved from it 
+                            // which cause InvalidProjectFileException with "UnsupportedTaskParameterTypeError" message.
+                            // Another way to address this is to load types from compiled assembly - that would be more robust solution but also much more complex and risky code changes.
+                            paramType = Type.GetType(expandedType + "," + typeof(ITaskItem).GetTypeInfo().Assembly.FullName, false /* don't throw on error */, true /* case-insensitive */) ??
+                                        Type.GetType(expandedType);
                         }
+                        else
+                        {
+                            paramType = Type.GetType(expandedType) ??
+                                        Type.GetType(expandedType + "," + typeof(ITaskItem).GetTypeInfo().Assembly.FullName, false /* don't throw on error */, true /* case-insensitive */);
+                        }
+
+                        ProjectErrorUtilities.VerifyThrowInvalidProject
+                        (
+                            paramType != null,
+                            parameter.ParameterTypeLocation,
+                            "InvalidEvaluatedAttributeValue",
+                            expandedType,
+                            parameter.ParameterType,
+                            XMakeAttributes.parameterType,
+                            XMakeElements.usingTaskParameter
+                        );
 
                         bool output;
                         string expandedOutput = expander.ExpandIntoStringLeaveEscaped(parameter.Output, expanderOptions, parameter.OutputLocation);
@@ -1702,19 +1709,19 @@ namespace Microsoft.Build.Execution
                         {
                             ProjectErrorUtilities.ThrowInvalidProject
                             (
-                             parameter.OutputLocation,
-                             "InvalidEvaluatedAttributeValue",
-                             expandedOutput,
-                             parameter.Output,
-                             XMakeAttributes.output,
-                             XMakeElements.usingTaskParameter
+                                parameter.OutputLocation,
+                                "InvalidEvaluatedAttributeValue",
+                                expandedOutput,
+                                parameter.Output,
+                                XMakeAttributes.output,
+                                XMakeElements.usingTaskParameter
                             );
                         }
 
                         if (
                             (!output && (!TaskParameterTypeVerifier.IsValidInputParameter(paramType))) ||
                             (output && !TaskParameterTypeVerifier.IsValidOutputParameter(paramType))
-                           )
+                        )
                         {
                             ProjectErrorUtilities.ThrowInvalidProject
                             (
@@ -1723,7 +1730,7 @@ namespace Microsoft.Build.Execution
                                 paramType.FullName,
                                 parameter.ParameterType,
                                 parameter.Name
-                             );
+                            );
                         }
 
                         bool required;
@@ -1733,12 +1740,12 @@ namespace Microsoft.Build.Execution
                         {
                             ProjectErrorUtilities.ThrowInvalidProject
                             (
-                             parameter.RequiredLocation,
-                             "InvalidEvaluatedAttributeValue",
-                             expandedRequired,
-                             parameter.Required,
-                             XMakeAttributes.required,
-                             XMakeElements.usingTaskParameter
+                                parameter.RequiredLocation,
+                                "InvalidEvaluatedAttributeValue",
+                                expandedRequired,
+                                parameter.Required,
+                                XMakeAttributes.required,
+                                XMakeElements.usingTaskParameter
                             );
                         }
 

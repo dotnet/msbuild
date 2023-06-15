@@ -77,7 +77,7 @@ namespace Microsoft.Build.Tasks
 
                     // If TargetPath is already set, it takes priority.
                     // https://github.com/dotnet/msbuild/issues/2795
-                    string targetPath =  ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10) ? Files[i].GetMetadata(ItemMetadataNames.targetPath) : null;
+                    string targetPath = Files[i].GetMetadata(ItemMetadataNames.targetPath);
 
                     // If TargetPath not already set, fall back to default behavior.
                     if (string.IsNullOrEmpty(targetPath))

@@ -3,6 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+#if !CLR2COMPATIBILITY
+using System.Runtime.InteropServices;
+#endif
 using System.Runtime.CompilerServices;
 
 #nullable disable
@@ -88,6 +91,7 @@ namespace Microsoft.Build.Shared
         {
             internal const string x86 = "x86";
             internal const string x64 = "x64";
+            internal const string arm64 = "arm64";
             internal const string currentArchitecture = "CurrentArchitecture";
             internal const string any = "*";
         }
@@ -106,7 +110,7 @@ namespace Microsoft.Build.Shared
 
         private static readonly HashSet<string> ValidMSBuildRuntimeValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { MSBuildRuntimeValues.clr2, MSBuildRuntimeValues.clr4, MSBuildRuntimeValues.currentRuntime, MSBuildRuntimeValues.net, MSBuildRuntimeValues.any };
 
-        private static readonly HashSet<string> ValidMSBuildArchitectureValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { MSBuildArchitectureValues.x86, MSBuildArchitectureValues.x64, MSBuildArchitectureValues.currentArchitecture, MSBuildArchitectureValues.any };
+        private static readonly HashSet<string> ValidMSBuildArchitectureValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { MSBuildArchitectureValues.x86, MSBuildArchitectureValues.x64, MSBuildArchitectureValues.arm64, MSBuildArchitectureValues.currentArchitecture, MSBuildArchitectureValues.any };
 
         /// <summary>
         /// Returns true if and only if the specified attribute is one of the attributes that the engine specifically recognizes
@@ -429,7 +433,29 @@ namespace Microsoft.Build.Shared
         /// </comments>
         internal static string GetCurrentMSBuildArchitecture()
         {
+#if !CLR2COMPATIBILITY
+            string currentArchitecture = string.Empty;
+            switch (RuntimeInformation.ProcessArchitecture)
+            {
+                case Architecture.X86:
+                    currentArchitecture = MSBuildArchitectureValues.x86;
+                    break;
+                case Architecture.X64:
+                    currentArchitecture = MSBuildArchitectureValues.x64;
+                    break;
+                case Architecture.Arm64:
+                    currentArchitecture = MSBuildArchitectureValues.arm64;
+                    break;
+                default:
+                    // We're not sure what the architecture is, default to original 32/64bit logic.
+                    // This allows architectures like s390x to continue working.
+                    // https://github.com/dotnet/msbuild/issues/7729
+                    currentArchitecture = (IntPtr.Size == sizeof(Int64)) ? MSBuildArchitectureValues.x64 : MSBuildArchitectureValues.x86;
+                    break;
+            }
+#else
             string currentArchitecture = (IntPtr.Size == sizeof(Int64)) ? MSBuildArchitectureValues.x64 : MSBuildArchitectureValues.x86;
+#endif
             return currentArchitecture;
         }
 

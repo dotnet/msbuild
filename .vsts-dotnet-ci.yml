@@ -144,21 +144,22 @@ jobs:
     continueOnError: true
     condition: always()
 
-- job: RichCodeNavIndex
-  displayName: "Windows Code Indexing"
-  pool:
-    vmImage: 'windows-2022'
-  steps:
-  - task: BatchScript@1
-    displayName: build.cmd
-    inputs:
-      filename: 'build.cmd'
-  - task: RichCodeNavIndexer@0
-    displayName: RichCodeNav Upload
-    inputs:
-      languages: 'csharp'
-    continueOnError: true
-    condition: succeeded()
+# Unavailable in dnceng-public as of 9/1/2022; should be restored soon.
+# - job: RichCodeNavIndex
+#   displayName: "Windows Code Indexing"
+#   pool:
+#     vmImage: 'windows-2022'
+#   steps:
+#   - task: BatchScript@1
+#     displayName: build.cmd
+#     inputs:
+#       filename: 'build.cmd'
+#   - task: RichCodeNavIndexer@0
+#     displayName: RichCodeNav Upload
+#     inputs:
+#       languages: 'csharp'
+#     continueOnError: true
+#     condition: succeeded()
 
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"

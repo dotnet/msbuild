@@ -1,5 +1,9 @@
-Microsoft.Build.Tasks.SignFile.DisallowMansignTimestampFallback.get -> bool
-Microsoft.Build.Tasks.SignFile.DisallowMansignTimestampFallback.set -> void
-override Microsoft.Build.Tasks.GenerateApplicationManifest.Execute() -> bool
-override Microsoft.Build.Tasks.GenerateDeploymentManifest.Execute() -> bool
-static Microsoft.Build.Tasks.Deployment.ManifestUtilities.SecurityUtilities.SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion, string targetFrameworkIdentifier, bool disallowMansignTimestampFallback) -> void
+Microsoft.Build.Tasks.SetRidAgnosticValueForProjects
+Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.Projects.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.Projects.set -> void
+Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.SetRidAgnosticValueForProjects() -> void
+Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.UpdatedProjects.get -> Microsoft.Build.Framework.ITaskItem[]
+Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.UpdatedProjects.set -> void
+override Microsoft.Build.Tasks.SetRidAgnosticValueForProjects.Execute() -> bool
+Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.get -> bool
+Microsoft.Build.Tasks.XslTransformation.PreserveWhitespace.set -> void

@@ -17,6 +17,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.SdkResolution;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
+using System.Diagnostics;
 
 #nullable disable
 
@@ -239,9 +240,7 @@ namespace Microsoft.Build.Execution
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(bool enableReuse, bool lowPriority, out Exception shutdownException)
         {
-            // Console.WriteLine("Run called at {0}", DateTime.Now);
-
-            _nodeEndpoint = new NodeEndpointOutOfProc(this, enableReuse, lowPriority);
+            _nodeEndpoint = new NodeEndpointOutOfProc(enableReuse, lowPriority);
             _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
             _nodeEndpoint.Listen(this);
 
@@ -809,6 +808,32 @@ namespace Microsoft.Build.Execution
         private void HandleNodeBuildComplete(NodeBuildComplete buildComplete)
         {
             _shutdownReason = buildComplete.PrepareForReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
+            if (_shutdownReason == NodeEngineShutdownReason.BuildCompleteReuse)
+            {
+                ProcessPriorityClass priorityClass = Process.GetCurrentProcess().PriorityClass;
+                if (priorityClass != ProcessPriorityClass.Normal && priorityClass != ProcessPriorityClass.BelowNormal)
+                {
+                    // This isn't a priority class known by MSBuild. We should avoid connecting to this node.
+                    _shutdownReason = NodeEngineShutdownReason.BuildComplete;
+                }
+                else
+                {
+                    bool lowPriority = priorityClass == ProcessPriorityClass.BelowNormal;
+                    if (_nodeEndpoint.LowPriority != lowPriority)
+                    {
+                        if (!lowPriority || NativeMethodsShared.IsWindows)
+                        {
+                            Process.GetCurrentProcess().PriorityClass = lowPriority ? ProcessPriorityClass.Normal : ProcessPriorityClass.BelowNormal;
+                        }
+                        else
+                        {
+                            // On *nix, we can't adjust the priority up, so to avoid using this node at the wrong priority, we should not be reused.
+                            _shutdownReason = NodeEngineShutdownReason.BuildComplete;
+                        }
+                    }
+                }
+            }
+            
             _shutdownEvent.Set();
         }
     }

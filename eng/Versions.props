@@ -2,14 +2,14 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <PropertyGroup>
-    <VersionPrefix>17.2.13</VersionPrefix>
+    <VersionPrefix>17.4.7</VersionPrefix>
     <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
-    <MicroBuildPluginsSwixBuildVersion>1.0.672</MicroBuildPluginsSwixBuildVersion>
+    <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
     <MonoBuild Condition="'$(Configuration)' == 'Debug-MONO' or '$(Configuration)' == 'Release-MONO'">true</MonoBuild>
   </PropertyGroup>
   <!-- Repo Toolset Features -->
@@ -26,17 +26,31 @@
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
-    <SystemResourcesExtensionsPackageVersion>4.6.0</SystemResourcesExtensionsPackageVersion>
+    <SystemCollectionsImmutableVersion>6.0.0</SystemCollectionsImmutableVersion>
+    <SystemConfigurationConfigurationManagerVersion>6.0.0</SystemConfigurationConfigurationManagerVersion>
+    <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
+    <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
+    <SystemReflectionMetadataLoadContextVersion>6.0.0</SystemReflectionMetadataLoadContextVersion>
+    <SystemReflectionMetadataVersion>6.0.0</SystemReflectionMetadataVersion>
+    <SystemResourcesExtensionsPackageVersion>6.0.0</SystemResourcesExtensionsPackageVersion>
+    <SystemSecurityPermissionsVersion>6.0.0</SystemSecurityPermissionsVersion>
+    <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
+    <SystemTextEncodingCodePagesVersion>6.0.0</SystemTextEncodingCodePagesVersion>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <!-- DotNetCliVersion MUST match the dotnet version in global.json.
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
+    <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>6.0.0-beta.23221.7</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>6.0.0-preview.2.21154.6</MicrosoftExtensionsDependencyModelVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.2.0-2.22167.6</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.2.0-preview.2.109</NuGetBuildTasksVersion>
+    <MicrosoftIORedistVersion>6.0.0</MicrosoftIORedistVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.4.0-2.22458.3</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>6.4.0-preview.3.74</NuGetBuildTasksVersion>
+    <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
+    <SystemTextJsonVersion>6.0.0</SystemTextJsonVersion>
+    <SystemThreadingTasksDataflowVersion>6.0.0</SystemThreadingTasksDataflowVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386

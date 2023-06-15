@@ -113,7 +113,7 @@ namespace Microsoft.Build.Tasks
         private bool _isManagedWinMDFile;
 
         /// <summary>
-        /// The imageruntime version for this reference. 
+        /// The imageruntime version for this reference.
         /// </summary>
         private string _imageRuntimeVersion;
 
@@ -358,7 +358,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Determines if a given reference or its parent primary references have specific version metadata set to true.
-        /// If anyParentHasMetadata is set to true then we will return true if any parent primary reference has the specific version metadata set to true, 
+        /// If anyParentHasMetadata is set to true then we will return true if any parent primary reference has the specific version metadata set to true,
         /// if the value is false we will return true ONLY if all parent primary references have the metadata set to true.
         /// </summary>
         internal bool CheckForSpecificVersionMetadataOnParentsReference(bool anyParentHasMetadata)
@@ -373,7 +373,7 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                // Go through all of the primary items which lead to this dependency, if they all have specificVersion set to true then 
+                // Go through all of the primary items which lead to this dependency, if they all have specificVersion set to true then
                 // hasSpecificVersionMetadata will be true. If any item has the metadata set to false or not set then the value will be false.
                 foreach (ITaskItem item in GetSourceItems())
                 {
@@ -589,7 +589,7 @@ namespace Microsoft.Build.Tasks
         internal string AssemblyFolderKey { get; set; } = String.Empty;
 
         /// <summary>
-        /// Whether this assembly came from the project. If 'false' then this reference was deduced 
+        /// Whether this assembly came from the project. If 'false' then this reference was deduced
         /// through the reference resolution process.
         /// </summary>
         /// <value>'true' if this reference is a primary assembly.</value>
@@ -629,7 +629,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// If 'true' then the path that this item points to is known to be a bad image.
-        /// This item shouldn't be passed to compilers and so forth. 
+        /// This item shouldn't be passed to compilers and so forth.
         /// </summary>
         /// <value>'true' if this reference points to a bad image.</value>
         internal bool IsBadImage { get; private set; } = false;
@@ -721,7 +721,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Add a new version number for a version of this reference 
+        /// Add a new version number for a version of this reference
         /// </summary>
         internal void AddPreUnificationVersion(String referencePath, Version version, UnificationReason reason)
         {
@@ -819,7 +819,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Returns a collection of strings. Each string is the full path to an assembly that was 
+        /// Returns a collection of strings. Each string is the full path to an assembly that was
         /// considered for resolution but then rejected because it wasn't a complete match.
         /// </summary>
         internal List<ResolutionSearchLocation> AssembliesConsideredAndRejected { get; private set; } = new List<ResolutionSearchLocation>();
@@ -835,7 +835,7 @@ namespace Microsoft.Build.Tasks
         internal FrameworkName FrameworkNameAttribute { get; set; }
 
         /// <summary>
-        /// Indicates that the reference is primary and has ExternallyResolved=true metadata to denote that 
+        /// Indicates that the reference is primary and has ExternallyResolved=true metadata to denote that
         /// it was resolved by an external system (commonly from nuget). Such a system has already provided a
         /// resolved closure as primary references and therefore we can skip the expensive closure walk.
         /// </summary>
@@ -846,7 +846,7 @@ namespace Microsoft.Build.Tasks
         ///
         /// For example, if 'sourceReference' is MyAssembly.dll then a dependent assembly file
         /// might be en\MyAssembly.resources.dll
-        /// 
+        ///
         /// Assembly references do not have their own dependencies, therefore they are
         /// </summary>
         /// <param name="sourceReference">The source reference that this reference will be dependent on</param>
@@ -871,7 +871,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Make this reference a primary assembly reference. 
+        /// Make this reference a primary assembly reference.
         /// This is a refrence that is an assembly and is primary.
         /// </summary>
         /// <param name="sourceItem">The source item.</param>
@@ -1144,7 +1144,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// There are a number of properties which are set when we generate exclusion lists and it is useful to have this information on the references so that 
+        /// There are a number of properties which are set when we generate exclusion lists and it is useful to have this information on the references so that
         /// the correct reasons can be logged for these references being in the black list.
         /// </summary>
         internal class ExclusionListProperties

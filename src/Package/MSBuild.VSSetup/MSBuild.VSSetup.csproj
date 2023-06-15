@@ -1,4 +1,4 @@
-﻿<!-- Copyright (c)  Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information. -->
+<!-- Copyright (c)  Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information. -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
@@ -20,7 +20,7 @@
 
     <!-- Only add the swr file when building on full framework msbuild, otherwise,
     this triggers a build of the swixproj, which is not supported in core msbuild. -->
-    <SwrFile Include="*.swr" Condition=" '$(MSBuildRuntimeType)' == 'Full' " />
+    <SwrFile Include="files.swr" Condition=" '$(MSBuildRuntimeType)' == 'Full' " />
   </ItemGroup>
 
   <!-- GetBinPaths depends on GetBuildVersion which does not get imported if ProducesNoOutput.Settings.props is imported-->
@@ -34,11 +34,9 @@
       <SwrProperty Include="Version=$(VsixVersion)" />
       <SwrProperty Include="X86BinPath=$(X86BinPath)" />
       <SwrProperty Include="X64BinPath=$(X64BinPath)" />
-      <SwrProperty Include="Arm64BinPath=$(Arm64BinPath)" />
       <SwrProperty Include="FrameworkBinPath=$(FrameworkBinPath)" />
       <SwrProperty Include="TaskHostBinPath=$(MSBuildTaskHostBinPath)" />
       <SwrProperty Include="TaskHostX64BinPath=$(MSBuildTaskHostX64BinPath)" />
-      <SwrProperty Include="TaskHostArm64BinPath=$(MSBuildTaskHostArm64BinPath)" />
       <SwrProperty Include="MSBuildConversionBinPath=$(MSBuildConversionBinPath)" />
     </ItemGroup>
   </Target>
