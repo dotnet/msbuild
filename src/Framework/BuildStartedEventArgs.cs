@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -35,11 +35,9 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="message">text message</param>
         /// <param name="helpKeyword">help keyword </param>
-        public BuildStartedEventArgs
-        (
+        public BuildStartedEventArgs(
             string message,
-            string helpKeyword
-        )
+            string helpKeyword)
             : this(message, helpKeyword, DateTime.UtcNow)
         {
             // do nothing
@@ -52,12 +50,10 @@ namespace Microsoft.Build.Framework
         /// <param name="message">text message</param>
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="environmentOfBuild">A dictionary which lists the environment of the build when the build is started.</param>
-        public BuildStartedEventArgs
-        (
+        public BuildStartedEventArgs(
             string? message,
             string? helpKeyword,
-            IDictionary<string, string> environmentOfBuild
-        )
+            IDictionary<string, string> environmentOfBuild)
             : this(message, helpKeyword, DateTime.UtcNow)
         {
             environmentOnBuildStart = environmentOfBuild;
@@ -69,12 +65,10 @@ namespace Microsoft.Build.Framework
         /// <param name="message">text message</param>
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
-        public BuildStartedEventArgs
-        (
+        public BuildStartedEventArgs(
             string? message,
             string? helpKeyword,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : this(message, helpKeyword, eventTimestamp, null)
         {
             // do nothing
@@ -87,13 +81,11 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
         /// <param name="messageArgs">message args</param>
-        public BuildStartedEventArgs
-        (
+        public BuildStartedEventArgs(
             string? message,
             string? helpKeyword,
             DateTime eventTimestamp,
-            params object[]? messageArgs
-        )
+            params object[]? messageArgs)
             : base(message, helpKeyword, "MSBuild", eventTimestamp, messageArgs)
         {
             // do nothing

@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
@@ -7,10 +8,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.Build.Evaluation;
-    using Xunit;
     using Microsoft.Build.Framework;
+    using Xunit;
 
-    internal class ProjectPair : LinkPair<Project>
+    internal sealed class ProjectPair : LinkPair<Project>
     {
         public ProjectPair(Project view, Project real)
             : base(view, real)
@@ -68,7 +69,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var viewItems = this.View.GetItemsByEvaluatedInclude(evaluatedInclude);
 
             ViewValidation.Verify(viewItems, realItems, ViewValidation.Verify, new ValidationContext(this));
-            if (viewItems == null || viewItems.Count == 0) return null;
+            if (viewItems == null || viewItems.Count == 0)
+            {
+                return null;
+            }
+
             Assert.Equal(1, viewItems.Count);
             return which == ObjectType.View ? viewItems.First() : realItems.First();
         }
@@ -93,7 +98,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     {
         public static void Verify(ProjectProperty view, ProjectProperty real, ValidationContext context)
         {
-            if (view == null && real == null) return;
+            if (view == null && real == null)
+            {
+                return;
+            }
+
             VerifyLinkedNotNull(view);
             VerifyNotLinkedNotNull(real);
 
@@ -121,7 +130,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         // public static void Verify(ProjectMetadata view, ProjectMetadata real) => Verify(view, real, null);
         public static void Verify(ProjectMetadata view, ProjectMetadata real, ValidationContext context)
         {
-            if (view == null && real == null) return;
+            if (view == null && real == null)
+            {
+                return;
+            }
+
             VerifyLinkedNotNull(view);
             VerifyNotLinkedNotNull(real);
 
@@ -150,7 +163,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         // public static void Verify(ProjectItemDefinition view, ProjectItemDefinition real) => Verify(view, real, null);
         public static void Verify(ProjectItemDefinition view, ProjectItemDefinition real, ValidationContext context)
         {
-            if (view == null && real == null) return;
+            if (view == null && real == null)
+            {
+                return;
+            }
+
             VerifyLinkedNotNull(view);
             VerifyNotLinkedNotNull(real);
 
@@ -188,7 +205,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         // public static void Verify(ProjectItem view, ProjectItem real) => Verify(view, real, null);
         public static void Verify(ProjectItem view, ProjectItem real, ValidationContext context = null)
         {
-            if (view == null && real == null) return;
+            if (view == null && real == null)
+            {
+                return;
+            }
+
             VerifyLinkedNotNull(view);
             VerifyNotLinkedNotNull(real);
 
@@ -234,7 +255,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         private static void Verify(SdkReference view, SdkReference real, ValidationContext context = null)
         {
-            if (view == null && real == null) return;
+            if (view == null && real == null)
+            {
+                return;
+            }
+
             Assert.NotNull(view);
             Assert.NotNull(real);
 
@@ -245,7 +270,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         private static void Verify(SdkResult view, SdkResult real, ValidationContext context = null)
         {
-            if (view == null && real == null) return;
+            if (view == null && real == null)
+            {
+                return;
+            }
+
             Assert.NotNull(view);
             Assert.NotNull(real);
             Assert.Equal(real.Success, view.Success);
@@ -263,12 +292,16 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         private static void Verify(List<string> viewProps, List<string> realProps, ValidationContext context = null)
         {
-            if (viewProps == null && realProps == null) return;
+            if (viewProps == null && realProps == null)
+            {
+                return;
+            }
+
             Assert.NotNull(viewProps);
             Assert.NotNull(realProps);
             Assert.Equal(realProps.Count, viewProps.Count);
 
-            for (int i = 0; i< realProps.Count; i++)
+            for (int i = 0; i < realProps.Count; i++)
             {
                 Assert.Equal(realProps[i], viewProps[i]);
             }
@@ -276,14 +309,22 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(Project view, Project real, ValidationContext context = null)
         {
-            if (view == null && real == null) return;
+            if (view == null && real == null)
+            {
+                return;
+            }
+
             var pair = new ProjectPair(view, real);
             Verify(pair, context);
         }
 
         public static void Verify(ProjectPair pair, ValidationContext context = null)
         {
-            if (pair == null) return;
+            if (pair == null)
+            {
+                return;
+            }
+
             var real = pair.Real;
             var view = pair.View;
             context ??= new ValidationContext();

@@ -1,9 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -27,6 +30,7 @@ namespace Microsoft.Build.Evaluation
         private static PropertyInfo VersionProperty;
         private static PropertyInfo PlatformProperty;
         private static PropertyInfo PlatformVersionProperty;
+        private static PropertyInfo AllFrameworkVersionsProperty;
 
         public NuGetFrameworkWrapper()
         {
@@ -47,6 +51,7 @@ namespace Microsoft.Build.Evaluation
                 VersionProperty = NuGetFramework.GetProperty("Version");
                 PlatformProperty = NuGetFramework.GetProperty("Platform");
                 PlatformVersionProperty = NuGetFramework.GetProperty("PlatformVersion");
+                AllFrameworkVersionsProperty = NuGetFramework.GetProperty("AllFrameworkVersions");
             }
             catch
             {
@@ -90,6 +95,43 @@ namespace Microsoft.Build.Evaluation
         {
             var nonZeroVersionParts = version.Revision == 0 ? version.Build == 0 ? version.Minor == 0 ? 1 : 2 : 3 : 4;
             return version.ToString(Math.Max(nonZeroVersionParts, minVersionPartCount));
+        }
+
+        public string FilterTargetFrameworks(string incoming, string filter)
+        {
+            IEnumerable<(string originalTfm, object parsedTfm)> incomingFrameworks = ParseTfms(incoming);
+            IEnumerable<(string originalTfm, object parsedTfm)> filterFrameworks = ParseTfms(filter);
+            StringBuilder tfmList = new StringBuilder();
+
+            // An incoming target framework from 'incoming' is kept if it is compatible with any of the desired target frameworks on 'filter'
+            foreach (var l in incomingFrameworks)
+            {
+                if (filterFrameworks.Any(r =>
+                        (FrameworkProperty.GetValue(l.parsedTfm) as string).Equals(FrameworkProperty.GetValue(r.parsedTfm) as string, StringComparison.OrdinalIgnoreCase) &&
+                        (((Convert.ToBoolean(AllFrameworkVersionsProperty.GetValue(l.parsedTfm))) && (Convert.ToBoolean(AllFrameworkVersionsProperty.GetValue(r.parsedTfm)))) ||
+                         ((VersionProperty.GetValue(l.parsedTfm) as Version) == (VersionProperty.GetValue(r.parsedTfm) as Version)))))
+                {
+                    if (tfmList.Length == 0)
+                    {
+                        tfmList.Append(l.originalTfm);
+                    }
+                    else
+                    {
+                        tfmList.Append($";{l.originalTfm}");
+                    }
+                }
+            }
+
+            return tfmList.ToString();
+
+            IEnumerable<(string originalTfm, object parsedTfm)> ParseTfms(string desiredTargetFrameworks)
+            {
+                return desiredTargetFrameworks.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(tfm =>
+                {
+                    (string originalTfm, object parsedTfm) parsed = (tfm, Parse(tfm));
+                    return parsed;
+                });
+            }
         }
     }
 }

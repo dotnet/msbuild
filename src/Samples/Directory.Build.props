@@ -1,17 +1,21 @@
 ﻿<Project>
 
+  <!--This should be before importing parent properties, as it affects the output directory (defined in arcade SDK) -->
   <PropertyGroup>
     <!-- Use Samples subdirectory for samples in output folder -->
     <OutDirName>Samples\$(MSBuildProjectName)</OutDirName>
-
-    <!-- Don't regulate package versions for samples -->
-    <EnableCentralPackageVersions>false</EnableCentralPackageVersions>
-
-    <IsShipping>false</IsShipping>
-    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
   </PropertyGroup>
 
   <!-- Import parent props -->
   <Import Project="..\Directory.Build.props"/>
+
+  <PropertyGroup>
+    <!-- Don't regulate package versions for samples -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <ImportDirectoryPackagesProps>false</ImportDirectoryPackagesProps>
+
+    <IsShipping>false</IsShipping>
+    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
+  </PropertyGroup>
 
 </Project>

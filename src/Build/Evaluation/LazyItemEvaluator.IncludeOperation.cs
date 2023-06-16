@@ -1,17 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using Microsoft.CodeAnalysis.Collections;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 
 #nullable disable
 
@@ -19,15 +18,12 @@ namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        class IncludeOperation : LazyItemOperation
+        private class IncludeOperation : LazyItemOperation
         {
-            readonly int _elementOrder;
-
-            readonly string _rootDirectory;
-
-            readonly ImmutableSegmentedList<string> _excludes;
-
-            readonly ImmutableList<ProjectMetadataElement> _metadata;
+            private readonly int _elementOrder;
+            private readonly string _rootDirectory;
+            private readonly ImmutableSegmentedList<string> _excludes;
+            private readonly ImmutableList<ProjectMetadataElement> _metadata;
 
             public IncludeOperation(IncludeOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
                 : base(builder, lazyEvaluator)
@@ -171,7 +167,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        class IncludeOperationBuilder : OperationBuilderWithMetadata
+        private class IncludeOperationBuilder : OperationBuilderWithMetadata
         {
             public int ElementOrder { get; set; }
             public string RootDirectory { get; set; }

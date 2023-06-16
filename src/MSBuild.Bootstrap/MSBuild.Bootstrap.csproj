@@ -25,6 +25,10 @@
     <!-- Include NuGet build tasks -->
     <PackageReference Include="NuGet.Build.Tasks" />
     <PackageReference Include="Microsoft.Build.NuGetSdkResolver" />
+
+    <!-- As of 17.5, NuGet.Build.Tasks and Microsoft.Build.NuGetSdkResolver depends on Newtonsoft.Json version 13.0.1,
+         causing it to be downloaded and flagged by component governance -->
+    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(MonoBuild)' == 'true'">

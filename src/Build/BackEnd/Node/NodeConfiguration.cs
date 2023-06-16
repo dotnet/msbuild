@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_APPDOMAIN
 using System;
@@ -53,16 +53,14 @@ namespace Microsoft.Build.BackEnd
         /// <param name="forwardingLoggers">The forwarding loggers.</param>
         /// <param name="appDomainSetup">The AppDomain setup information.</param>
         /// <param name="loggingNodeConfiguration">The logging configuration for the node.</param>
-        public NodeConfiguration
-            (
+        public NodeConfiguration(
             int nodeId,
             BuildParameters buildParameters,
             LoggerDescription[] forwardingLoggers,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            LoggingNodeConfiguration loggingNodeConfiguration
-            )
+            LoggingNodeConfiguration loggingNodeConfiguration)
         {
             _nodeId = nodeId;
             _buildParameters = buildParameters;
@@ -137,7 +135,7 @@ namespace Microsoft.Build.BackEnd
             { return _loggingNodeConfiguration; }
         }
 
-#region INodePacket Members
+        #region INodePacket Members
 
         /// <summary>
         /// Retrieves the packet type.
@@ -149,9 +147,9 @@ namespace Microsoft.Build.BackEnd
             { return NodePacketType.NodeConfiguration; }
         }
 
-#endregion
+        #endregion
 
-#region INodePacketTranslatable Members
+        #region INodePacketTranslatable Members
 
         /// <summary>
         /// Translates the packet to/from binary form.
@@ -177,7 +175,7 @@ namespace Microsoft.Build.BackEnd
             configuration.Translate(translator);
             return configuration;
         }
-#endregion
+        #endregion
 
         /// <summary>
         /// We need to clone this object since it gets modified for each node which is launched.
@@ -188,8 +186,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                 , _appDomainSetup
 #endif
-                , _loggingNodeConfiguration
-                );
+                , _loggingNodeConfiguration);
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -149,6 +152,28 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 File.Delete(file);
             }
+        }
+
+        [Fact]
+        public void RedundantParametersAreLogged()
+        {
+            using TestEnvironment testEnv = TestEnvironment.Create(_output);
+
+            MockEngine engine = new(_output);
+
+            string file = testEnv.ExpectFile().Path;
+
+            WriteLinesToFile task = new()
+            {
+                BuildEngine = engine,
+                File = new TaskItem(file),
+                Lines = new ITaskItem[] { new TaskItem($"{nameof(RedundantParametersAreLogged)} Test") },
+                WriteOnlyWhenDifferent = true,
+                Overwrite = false,
+            };
+
+            task.Execute().ShouldBeTrue();
+            engine.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", file);
         }
 
         /// <summary>

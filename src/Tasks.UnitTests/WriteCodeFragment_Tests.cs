@@ -1,15 +1,16 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
-using Xunit;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Shouldly;
+using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -24,7 +25,6 @@ namespace Microsoft.Build.UnitTests
         /// Need an available language
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void InvalidLanguage()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -90,6 +90,51 @@ namespace Microsoft.Build.UnitTests
             string file = Path.Combine(Path.GetTempPath(), "CombineFileDirectory.tmp");
             Assert.Equal(file, task.OutputFile.ItemSpec);
             Assert.True(File.Exists(file));
+
+            File.Delete(task.OutputFile.ItemSpec);
+        }
+
+        /// <summary>
+        /// Combine file and directory where the directory does not already exist
+        /// </summary>
+        [Fact]
+        public void CombineFileDirectoryAndDirectoryDoesNotExist()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            TaskItem folder = new TaskItem(env.CreateFolder(folderPath: null, createFolder: false).Path);
+
+            TaskItem file = new TaskItem("CombineFileDirectory.tmp");
+
+            string expectedFile = Path.Combine(folder.ItemSpec, file.ItemSpec);
+            WriteCodeFragment task = CreateTask("c#", folder, file, new TaskItem[] { new TaskItem("aa") });
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            bool result = task.Execute();
+
+            Assert.True(result);
+            Assert.Equal(expectedFile, task.OutputFile.ItemSpec);
+            Assert.True(File.Exists(expectedFile));
+        }
+
+        /// <summary>
+        /// Combine file and directory where the directory does not already exist
+        /// </summary>
+        [Fact]
+        public void FileWithPathAndDirectoryDoesNotExist()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            TaskItem file = new TaskItem(Path.Combine(env.CreateFolder(folderPath: null, createFolder: false).Path, "File.tmp"));
+
+            WriteCodeFragment task = CreateTask("c#", null, file, new TaskItem[] { new TaskItem("aa") });
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            bool result = task.Execute();
+
+            Assert.True(result);
+            Assert.Equal(file.ItemSpec, task.OutputFile.ItemSpec);
+            Assert.True(File.Exists(task.OutputFile.ItemSpec));
         }
 
         /// <summary>
@@ -176,7 +221,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Bad file path
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact(additionalMessage: "No invalid characters on Unix.")]
         public void InvalidFilePath()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -194,8 +239,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Bad directory path
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "No invalid characters on Unix"
+        [WindowsOnlyFact(additionalMessage: "No invalid characters on Unix.")]
         public void InvalidDirectoryPath()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -247,7 +291,6 @@ namespace Microsoft.Build.UnitTests
         /// Test with the VB language
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void OneAttributeNoParamsVb()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -317,6 +360,27 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(".cs", task.OutputFile.ItemSpec.Substring(task.OutputFile.ItemSpec.Length - 3));
 
             File.Delete(task.OutputFile.ItemSpec);
+        }
+
+        /// <summary>
+        /// Specify directory where the directory does not already exist
+        /// </summary>
+        [Fact]
+        public void ToDirectoryAndDirectoryDoesNotExist()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            TaskItem folder = new TaskItem(env.CreateFolder(folderPath: null, createFolder: false).Path);
+
+            WriteCodeFragment task = CreateTask("c#", folder, null, new TaskItem[] { new TaskItem("System.AssemblyTrademarkAttribute") });
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            bool result = task.Execute();
+
+            Assert.True(result);
+            Assert.True(File.Exists(task.OutputFile.ItemSpec));
+            Assert.Equal(folder.ItemSpec, task.OutputFile.ItemSpec.Substring(0, folder.ItemSpec.Length));
+            Assert.Equal(".cs", task.OutputFile.ItemSpec.Substring(task.OutputFile.ItemSpec.Length - 3));
         }
 
         /// <summary>
@@ -493,10 +557,9 @@ namespace Microsoft.Build.UnitTests
         /// Multi line argument values should cause a verbatim string to be used
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void MultilineAttributeVB()
         {
-            var lines = new []{ "line 1", "line 2", "line 3" };
+            var lines = new[] { "line 1", "line 2", "line 3" };
             var multilineString = String.Join(Environment.NewLine, lines);
 
             WriteCodeFragment task = new WriteCodeFragment();
@@ -632,7 +695,6 @@ namespace Microsoft.Build.UnitTests
         /// These can also be combined with named params.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void OneAttributePositionalAndNamedParamsVisualBasic()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -670,8 +732,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: CLSCompliantAttribute(true)]"
-            );
+                @"[assembly: CLSCompliantAttribute(true)]");
         }
 
         /// <summary>
@@ -689,8 +750,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: TestAttribute(Int32Argument=42, BoolArgument=false)]"
-            );
+                @"[assembly: TestAttribute(Int32Argument=42, BoolArgument=false)]");
         }
 
         /// <summary>
@@ -707,8 +767,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: TestAttribute(Int32Argument_TypeName=""System.Int32"", BoolArgument=false)]"
-            );
+                @"[assembly: TestAttribute(Int32Argument_TypeName=""System.Int32"", BoolArgument=false)]");
         }
 
         /// <summary>
@@ -723,8 +782,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifyFailure(
                 CreateTask("c#", attribute),
-                "MSB3715"
-            );
+                "MSB3715");
         }
 
         /// <summary>
@@ -739,8 +797,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifyFailure(
                 CreateTask("c#", attribute),
-                "MSB3716"
-            );
+                "MSB3716");
         }
 
         /// <summary>
@@ -755,8 +812,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifyFailure(
                 CreateTask("c#", attribute),
-                "MSB3716"
-            );
+                "MSB3716");
         }
 
         /// <summary>
@@ -771,8 +827,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: TestAttribute(System.DateTimeKind.Local)]"
-            );
+                @"[assembly: TestAttribute(System.DateTimeKind.Local)]");
         }
 
         /// <summary>
@@ -787,8 +842,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: TestAttribute(typeof(System.Console))]"
-            );
+                @"[assembly: TestAttribute(typeof(System.Console))]");
         }
 
         /// <summary>
@@ -803,8 +857,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("visualbasic", attribute),
-                @"<Assembly: TestAttribute(GetType(System.Console))>"
-            );
+                @"<Assembly: TestAttribute(GetType(System.Console))>");
         }
 
         /// <summary>
@@ -820,8 +873,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifyFailure(
                 CreateTask("c#", attribute),
-                "MSB3716"
-            );
+                "MSB3716");
         }
 
         /// <summary>
@@ -837,8 +889,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: TestAttribute(42 /* A comment */)]"
-            );
+                @"[assembly: TestAttribute(42 /* A comment */)]");
         }
 
         /// <summary>
@@ -854,8 +905,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: TestAttribute(TestParameter=42 /* A comment */)]"
-            );
+                @"[assembly: TestAttribute(TestParameter=42 /* A comment */)]");
         }
 
         /// <summary>
@@ -870,8 +920,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: CLSCompliantAttribute(true)]"
-            );
+                @"[assembly: CLSCompliantAttribute(true)]");
         }
 
         /// <summary>
@@ -887,12 +936,11 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute(""MyAssembly"", AllInternalsVisible=true)]"
-            );
+                @"[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute(""MyAssembly"", AllInternalsVisible=true)]");
         }
 
         /// <summary>
-        /// For backward-compatibility, if multiple constructors are found with the same number 
+        /// For backward-compatibility, if multiple constructors are found with the same number
         /// of position arguments that was specified in the metadata, then the constructor that
         /// has strings for every parameter should be used.
         /// </summary>
@@ -914,8 +962,7 @@ namespace Microsoft.Build.UnitTests
             // all strings should be preferred over all other constructors.
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: System.Diagnostics.Contracts.ContractOptionAttribute(""a"", ""b"", ""false"")]"
-            );
+                @"[assembly: System.Diagnostics.Contracts.ContractOptionAttribute(""a"", ""b"", ""false"")]");
         }
 
         /// <summary>
@@ -940,8 +987,7 @@ namespace Microsoft.Build.UnitTests
             // is alphabetically before any of the other types.
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: System.Reflection.AssemblyFlagsAttribute(2)]"
-            );
+                @"[assembly: System.Reflection.AssemblyFlagsAttribute(2)]");
 
             // To prove that it's treating the argument as an int,
             // we can specify an enum value which should fail type
@@ -949,8 +995,7 @@ namespace Microsoft.Build.UnitTests
             attribute.SetMetadata("_Parameter1", "PublicKey");
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: System.Reflection.AssemblyFlagsAttribute(""PublicKey"")]"
-            );
+                @"[assembly: System.Reflection.AssemblyFlagsAttribute(""PublicKey"")]");
         }
 
         /// <summary>
@@ -967,8 +1012,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: System.ComponentModel.TypeConverterAttribute(""false"")]"
-            );
+                @"[assembly: System.ComponentModel.TypeConverterAttribute(""false"")]");
         }
 
         /// <summary>
@@ -984,8 +1028,7 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: System.Diagnostics.DebuggableAttribute(true, ""42"")]"
-            );
+                @"[assembly: System.Diagnostics.DebuggableAttribute(true, ""42"")]");
         }
 
         /// <summary>
@@ -1003,17 +1046,23 @@ namespace Microsoft.Build.UnitTests
 
             ExecuteAndVerifySuccess(
                 CreateTask("c#", attribute),
-                @"[assembly: System.Diagnostics.Contracts.ContractOptionAttribute(""foo"", ""bar"" /* setting */, false)]"
-            );
+                @"[assembly: System.Diagnostics.Contracts.ContractOptionAttribute(""foo"", ""bar"" /* setting */, false)]");
         }
 
         private WriteCodeFragment CreateTask(string language, params TaskItem[] attributes)
         {
-            WriteCodeFragment task = new();
-            task.Language = language;
-            task.OutputDirectory = new TaskItem(Path.GetTempPath());
-            task.AssemblyAttributes = attributes;
-            return task;
+            return CreateTask(language, new TaskItem(Path.GetTempPath()), null, attributes);
+        }
+
+        private WriteCodeFragment CreateTask(string language, TaskItem outputDirectory, TaskItem outputFile, params TaskItem[] attributes)
+        {
+            return new WriteCodeFragment()
+            {
+                Language = language,
+                OutputDirectory = outputDirectory,
+                OutputFile = outputFile,
+                AssemblyAttributes = attributes
+            };
         }
 
         private void ExecuteAndVerifySuccess(WriteCodeFragment task, params string[] expectedAttributes)

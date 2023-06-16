@@ -1,20 +1,19 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Collections.Generic;
 using System.Xml;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 
@@ -178,8 +177,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     </ItemDefinitionGroup>
 	                <Target Name='Build' />
 	            </Project>")));
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests that item definition metadata doesn't allow item expansion for the conditional.
@@ -207,8 +205,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     </ItemDefinitionGroup>
 	                <Target Name='Build' />
 	            </Project>")));
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests that item definition metadata doesn't allow item expansion for the value.
@@ -236,8 +233,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     </ItemDefinitionGroup>
 	                <Target Name='Build' />
 	            </Project>")));
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests that item metadata which contains a metadata expansion referring to an item type other
@@ -804,8 +800,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 </Project>
             ")));
                 p.Build("t", new ILogger[] { logger });
-            }
-           );
+            });
         }
         [Fact]
         public void UnqualifiedMetadataConditionOnItemDefinitionGroupErrors()
@@ -820,8 +815,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 </Project>
             ")));
                 p.Build("t", new ILogger[] { logger });
-            }
-           );
+            });
         }
 
         [Fact]
@@ -837,8 +831,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 </Project>
             ")));
                 p.Build("t", new ILogger[] { logger });
-            }
-           );
+            });
         }
         [Fact]
         public void MetadataConditionOnItemDefinition()
@@ -1045,8 +1038,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 </Project>
             ")));
                 bool result = p.Build("t", new ILogger[] { logger });
-            }
-           );
+            });
         }
 
 #if FEATURE_ASSEMBLY_LOCATION
@@ -1188,7 +1180,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             try
             {
-                importedFile = FileUtilities.GetTemporaryFile();
+                importedFile = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(importedFile, @"
                 <Project ToolsVersion='msbuilddefaulttoolsversion'>
                   <ItemDefinitionGroup>
@@ -1710,7 +1702,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             try
             {
-                otherProject = FileUtilities.GetTemporaryFile();
+                otherProject = FileUtilities.GetTemporaryFileName();
                 string otherProjectContent = @"<Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
@@ -1766,7 +1758,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             try
             {
-                otherProject = FileUtilities.GetTemporaryFile();
+                otherProject = FileUtilities.GetTemporaryFileName();
                 string otherProjectContent = @"<Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'>

@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System.Collections.Generic;
 using error = Microsoft.Build.BuildEngine.Shared.ErrorUtilities;
@@ -27,7 +31,7 @@ namespace Microsoft.Build.BuildEngine
     {
         // Registry location for storing tools version dependent data for msbuild
         private const string msbuildRegistryPath = @"SOFTWARE\Microsoft\MSBuild";
-        
+
         // Cached registry wrapper at root of the msbuild entries
         private RegistryKeyWrapper msbuildRegistryWrapper;
 
@@ -35,7 +39,7 @@ namespace Microsoft.Build.BuildEngine
         /// Default constructor
         /// </summary>
         internal ToolsetRegistryReader()
-            : this (new RegistryKeyWrapper(msbuildRegistryPath))
+            : this(new RegistryKeyWrapper(msbuildRegistryPath))
         {
         }
 
@@ -46,7 +50,7 @@ namespace Microsoft.Build.BuildEngine
         internal ToolsetRegistryReader(RegistryKeyWrapper msbuildRegistryWrapper)
         {
             error.VerifyThrowArgumentNull(msbuildRegistryWrapper, nameof(msbuildRegistryWrapper));
-       
+
             this.msbuildRegistryWrapper = msbuildRegistryWrapper;
         }
 
@@ -105,7 +109,7 @@ namespace Microsoft.Build.BuildEngine
         protected override IEnumerable<PropertyDefinition> GetPropertyDefinitions(string toolsVersion)
         {
             RegistryKeyWrapper toolsVersionWrapper = null;
-            
+
             try
             {
                 toolsVersionWrapper = msbuildRegistryWrapper.OpenSubKey("ToolsVersions\\" + toolsVersion);
@@ -123,7 +127,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     InvalidToolsetDefinitionException.Throw("PropertyNameInRegistryHasZeroLength", toolsVersionWrapper.Name);
                 }
-                
+
                 try
                 {
                     propertyValue = GetValue(toolsVersionWrapper, propertyName);
@@ -136,7 +140,7 @@ namespace Microsoft.Build.BuildEngine
                 yield return new PropertyDefinition(propertyName, propertyValue, toolsVersionWrapper.Name + "@" + propertyName);
             }
         }
-        
+
         /// <summary>
         /// Reads a string value from the specified registry key
         /// </summary>

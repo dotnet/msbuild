@@ -91,14 +91,6 @@
     <GenAPIFolderPath>$(RepoRoot)ref\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\</GenAPIFolderPath>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true'">
-    <!-- Ensure API stability for shipping packages -->
-    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" Condition="'$(DotNetBuildFromSource)' != 'true'" />
-
-    <AdditionalFiles Include="PublicAPI/$(PublicApiTfm)/PublicAPI.Shipped.txt" />
-    <AdditionalFiles Include="PublicAPI/$(PublicApiTfm)/PublicAPI.Unshipped.txt" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
     <PackageReference Include="xunit.console" />
   </ItemGroup>

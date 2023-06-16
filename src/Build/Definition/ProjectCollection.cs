@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -10,15 +10,14 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Xml;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
@@ -613,7 +612,7 @@ namespace Microsoft.Build.Evaluation
                 using (_locker.EnterDisposableUpgradeableReadLock())
                 {
                     return _loggingService.Loggers == null
-                        ? (ICollection<ILogger>) ReadOnlyEmptyCollection<ILogger>.Instance
+                        ? (ICollection<ILogger>)ReadOnlyEmptyCollection<ILogger>.Instance
                         : new List<ILogger>(_loggingService.Loggers);
                 }
             }
@@ -1090,7 +1089,7 @@ namespace Microsoft.Build.Evaluation
             List<Project> loaded;
             using (_locker.EnterDisposableWriteLock())
             {
-                    loaded = fullPath == null ? new List<Project>(_loadedProjects) : new List<Project>(_loadedProjects.GetMatchingProjectsIfAny(fullPath));
+                loaded = fullPath == null ? new List<Project>(_loadedProjects) : new List<Project>(_loadedProjects.GetMatchingProjectsIfAny(fullPath));
             }
 
             if (includeExternal)
@@ -1495,7 +1494,7 @@ namespace Microsoft.Build.Evaluation
             GC.SuppressFinalize(this);
         }
 
-#region IBuildComponent Members
+        #region IBuildComponent Members
 
         /// <summary>
         /// Initializes the component with the component host.
@@ -1512,7 +1511,7 @@ namespace Microsoft.Build.Evaluation
         {
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Unloads a project XML root element from the cache entirely, if it is not
@@ -1780,8 +1779,7 @@ namespace Microsoft.Build.Evaluation
 #if FEATURE_WIN32_REGISTRY
                 ToolsetRegistryReader registryReader = null,
 #endif
-                ToolsetConfigurationReader configReader = null
-                )
+                ToolsetConfigurationReader configReader = null)
         {
             _toolsets = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -1934,7 +1932,7 @@ namespace Microsoft.Build.Evaluation
                 _originalLogger = originalLogger;
             }
 
-#region IEventSource Members
+            #region IEventSource Members
 
             /// <summary>
             /// The Message logging event
@@ -2161,7 +2159,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-#endregion
+            #endregion
 
             /// <summary>
             /// Registers for all of the events on the specified event source.
@@ -2592,12 +2590,12 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (project.GlobalProperties.Count != globalProperties.Count)
+                if (project.GlobalPropertiesCount != globalProperties.Count)
                 {
                     return false;
                 }
 
-                foreach (KeyValuePair<string, string> leftProperty in project.GlobalProperties)
+                foreach (KeyValuePair<string, string> leftProperty in project.GlobalPropertiesEnumerable)
                 {
                     if (!globalProperties.TryGetValue(leftProperty.Key, out var rightValue))
                     {

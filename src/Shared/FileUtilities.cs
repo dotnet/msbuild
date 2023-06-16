@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 #if !CLR2COMPATIBILITY
@@ -60,6 +60,8 @@ namespace Microsoft.Build.Shared
         }
 
         internal static readonly StringComparison PathComparison = GetIsFileSystemCaseSensitive() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+        internal static readonly StringComparer PathComparer = GetIsFileSystemCaseSensitive() ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
 
         /// <summary>
         /// Determines whether the file system is case sensitive.
@@ -374,7 +376,11 @@ namespace Microsoft.Build.Shared
             if (fullPath != null)
             {
                 int i = fullPath.Length;
-                while (i > 0 && fullPath[--i] != Path.DirectorySeparatorChar && fullPath[i] != Path.AltDirectorySeparatorChar);
+                while (i > 0 && fullPath[--i] != Path.DirectorySeparatorChar && fullPath[i] != Path.AltDirectorySeparatorChar)
+                {
+                    ;
+                }
+
                 return FixFilePath(fullPath.Substring(0, i));
             }
             return null;
@@ -1096,7 +1102,9 @@ namespace Microsoft.Build.Shared
         private static bool HasExtension(string filename, string extension)
         {
             if (String.IsNullOrEmpty(filename))
+            {
                 return false;
+            }
 
             return filename.EndsWith(extension, PathComparison);
         }
@@ -1229,7 +1237,9 @@ namespace Microsoft.Build.Shared
         internal static string GetFolderAbove(string path, int count = 1)
         {
             if (count < 1)
+            {
                 return path;
+            }
 
             var parent = Directory.GetParent(path);
 
@@ -1356,8 +1366,15 @@ namespace Microsoft.Build.Shared
                 }
 
                 // uppercase both chars - notice that we need just one compare per char
-                if ((uint)(charA - 'a') <= (uint)('z' - 'a')) charA -= 0x20;
-                if ((uint)(charB - 'a') <= (uint)('z' - 'a')) charB -= 0x20;
+                if ((uint)(charA - 'a') <= (uint)('z' - 'a'))
+                {
+                    charA -= 0x20;
+                }
+
+                if ((uint)(charB - 'a') <= (uint)('z' - 'a'))
+                {
+                    charB -= 0x20;
+                }
 
                 // Set path delimiters the same
                 if (charA == '\\')

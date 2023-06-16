@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests
             _output = testOutput;
         }
 
-        private class MyTool : ToolTask, IDisposable
+        private sealed class MyTool : ToolTask, IDisposable
         {
             private string _fullToolName;
             private string _responseFileCommands = string.Empty;
@@ -203,7 +203,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void HandleExecutionErrorsWhenToolLogsError()
         {
             using (MyTool t = new MyTool())
@@ -340,7 +339,6 @@ namespace Microsoft.Build.UnitTests
         /// of the regular tool name
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ToolExeIsFoundOnToolPath()
         {
             string shellName = NativeMethodsShared.IsWindows ? "cmd.exe" : "sh";
@@ -390,7 +388,6 @@ namespace Microsoft.Build.UnitTests
         /// Task is found on path.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TaskFoundOnPath()
         {
             using (MyTool t = new MyTool())
@@ -416,7 +413,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OverrideStdOutImportanceToLow()
         {
-            string tempFile = FileUtilities.GetTemporaryFile();
+            string tempFile = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(tempFile, @"hello world");
 
             using (MyTool t = new MyTool())
@@ -444,7 +441,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OverrideStdOutImportanceToHigh()
         {
-            string tempFile = FileUtilities.GetTemporaryFile();
+            string tempFile = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(tempFile, @"hello world");
 
             using (MyTool t = new MyTool())
@@ -475,7 +472,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ToolTaskCanChangeCanonicalErrorFormat()
         {
-            string tempFile = FileUtilities.GetTemporaryFile();
+            string tempFile = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(tempFile, @"
                 Main.cs(17,20): warning CS0168: The variable 'foo' is declared but never used.
                 BADTHINGHAPPENED: This is my custom error format that's not in canonical error format.
@@ -510,7 +507,6 @@ namespace Microsoft.Build.UnitTests
         /// Passing env vars through the tooltask public property
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void EnvironmentVariablesToToolTask()
         {
             MyTool task = new MyTool();
@@ -542,7 +538,6 @@ namespace Microsoft.Build.UnitTests
         /// Equals sign in value
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void EnvironmentVariablesToToolTaskEqualsSign()
         {
             MyTool task = new MyTool();
@@ -603,7 +598,6 @@ namespace Microsoft.Build.UnitTests
         /// Not set should not wipe out other env vars
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void EnvironmentVariablesToToolTaskNotSet()
         {
             MyTool task = new MyTool();

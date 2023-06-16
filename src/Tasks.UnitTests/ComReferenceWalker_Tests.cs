@@ -1,12 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Tasks;
 using System.Runtime.InteropServices.ComTypes;
-using COMException = System.Runtime.InteropServices.COMException;
+using Microsoft.Build.Tasks;
 using Xunit;
+using COMException = System.Runtime.InteropServices.COMException;
 
 #nullable disable
 
@@ -14,7 +14,7 @@ namespace Microsoft.Build.UnitTests
 {
     public class ComReferenceWalker_Tests
     {
-        static private int MockReleaseComObject(object o)
+        private static int MockReleaseComObject(object o)
         {
             return 0;
         }

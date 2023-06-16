@@ -1,10 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.IO;
-
 using SdkResolverBase = Microsoft.Build.Framework.SdkResolver;
 using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResultBase = Microsoft.Build.Framework.SdkResult;
@@ -31,12 +30,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         public override SdkResultBase Resolve(SdkReference sdk, SdkResolverContextBase context, SdkResultFactoryBase factory)
         {
-            var sdkPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath, sdk.Name, "Sdk");
+            string sdkPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildSDKsPath, sdk.Name, "Sdk");
 
-            // Note: On failure MSBuild will log a generic message, no need to indicate a failure reason here.
             return FileUtilities.DirectoryExistsNoThrow(sdkPath)
                 ? factory.IndicateSuccess(sdkPath, string.Empty)
-                : factory.IndicateFailure(null);
+                : factory.IndicateFailure(new string[] { ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("DefaultSDKResolverError", sdk.Name, sdkPath) }, null);
         }
     }
 }

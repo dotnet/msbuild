@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Buffers.Binary;
@@ -10,15 +10,15 @@ using System.IO;
 using System.IO.Pipes;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices;
 #if FEATURE_PIPE_SECURITY
 using System.Security.Principal;
 #endif
 
 #if FEATURE_APM
 using Microsoft.Build.Eventing;
+#else
+using System.Threading;
 #endif
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -111,7 +111,7 @@ namespace Microsoft.Build.BackEnd
 
             // We wait for child nodes to exit to avoid them changing the terminal
             // after this process terminates.
-            bool waitForExit =  !enableReuse &&
+            bool waitForExit = !enableReuse &&
                                 !Console.IsInputRedirected &&
                                 Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout;
 
@@ -286,6 +286,11 @@ namespace Microsoft.Build.BackEnd
                     {
                         // Connection successful, use this node.
                         CommunicationsUtilities.Trace("Successfully connected to existed node {0} which is PID {1}", nodeId, nodeToReuse.Id);
+                        string msg = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("NodeReused", nodeId, nodeToReuse.Id);
+                        _componentHost.LoggingService.LogBuildEvent(new BuildMessageEventArgs(msg, null, null, MessageImportance.Low)
+                        {
+                            BuildEventContext = new BuildEventContext(nodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId)
+                        });
 
                         CreateNodeContext(nodeId, nodeToReuse, nodeStream);
                         return true;
@@ -316,12 +321,10 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) == null)
                         {
-                            CommunicationsUtilities.Trace
-                            (
+                            CommunicationsUtilities.Trace(
                                 "Failed to launch node from {0}. The required .NET Framework v3.5 is not installed or enabled. CommandLine: {1}",
                                 msbuildLocation,
-                                commandLineArgs
-                            );
+                                commandLineArgs);
 
                             string nodeFailedToLaunchError = ResourceUtilities.GetResourceString("TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled");
                             throw new NodeFailedToLaunchException(null, nodeFailedToLaunchError);
@@ -442,11 +445,17 @@ namespace Microsoft.Build.BackEnd
             // Try and connect to the process.
             string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(nodeProcessId);
 
-            NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            NamedPipeClientStream nodeStream = new NamedPipeClientStream(
+                serverName: ".",
+                pipeName,
+                PipeDirection.InOut,
+                PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                                                                         | PipeOptions.CurrentUserOnly
+                | PipeOptions.CurrentUserOnly
 #endif
-                                                                         );
+            );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
             CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId, pipeName, timeout);
 
             try
@@ -519,7 +528,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal class NodeContext
         {
-            enum ExitPacketState
+            private enum ExitPacketState
             {
                 None,
                 ExitPacketQueued,

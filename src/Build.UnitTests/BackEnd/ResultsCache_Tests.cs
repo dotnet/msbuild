@@ -1,12 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
@@ -145,8 +145,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 cache.AddResult(result);
 
                 cache.GetResultForRequest(request);
-            }
-           );
+            });
         }
         [Fact]
         public void TestRetrieveSubsetResults()
@@ -211,10 +210,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get
             {
-                yield return new[] {new ResultsCache()};
+                yield return new[] { new ResultsCache() };
 
-                var request1 = new BuildRequest(1, 2, 3, new[] {"target1"}, null, BuildEventContext.Invalid, null);
-                var request2 = new BuildRequest(4, 5, 6, new[] {"target2"}, null, BuildEventContext.Invalid, null);
+                var request1 = new BuildRequest(1, 2, 3, new[] { "target1" }, null, BuildEventContext.Invalid, null);
+                var request2 = new BuildRequest(4, 5, 6, new[] { "target2" }, null, BuildEventContext.Invalid, null);
 
                 var br1 = new BuildResult(request1);
                 br1.AddResultsForTarget("target1", BuildResultUtilities.GetEmptySucceedingTargetResult());
@@ -222,7 +221,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 var resultsCache = new ResultsCache();
                 resultsCache.AddResult(br1.Clone());
 
-                yield return new[] {resultsCache};
+                yield return new[] { resultsCache };
 
                 var br2 = new BuildResult(request2);
                 br2.AddResultsForTarget("target2", BuildResultUtilities.GetEmptyFailingTargetResult());
@@ -231,7 +230,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 resultsCache2.AddResult(br1.Clone());
                 resultsCache2.AddResult(br2.Clone());
 
-                yield return new[] {resultsCache2};
+                yield return new[] { resultsCache2 };
             }
         }
 
@@ -270,7 +269,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #region Helper Methods
 
-        static internal bool AreResultsIdentical(BuildResult a, BuildResult b)
+        internal static bool AreResultsIdentical(BuildResult a, BuildResult b)
         {
             if (a.ConfigurationId != b.ConfigurationId)
             {
@@ -314,7 +313,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return true;
         }
 
-        static internal bool AreResultsIdenticalForTargets(BuildResult a, BuildResult b, string[] targets)
+        internal static bool AreResultsIdenticalForTargets(BuildResult a, BuildResult b, string[] targets)
         {
             foreach (string target in targets)
             {
@@ -327,7 +326,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return true;
         }
 
-        static private bool AreResultsIdenticalForTarget(BuildResult a, BuildResult b, string target)
+        private static bool AreResultsIdenticalForTarget(BuildResult a, BuildResult b, string target)
         {
             if (!a.HasResultsForTarget(target) || !b.HasResultsForTarget(target))
             {
@@ -347,7 +346,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return true;
         }
 
-        static private bool AreItemsIdentical(IList<ITaskItem> a, IList<ITaskItem> b)
+        private static bool AreItemsIdentical(IList<ITaskItem> a, IList<ITaskItem> b)
         {
             // Exhaustive comparison of items should not be necessary since we don't merge on the item level.
             return a.Count == b.Count;

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -20,7 +20,7 @@ using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance
 namespace Microsoft.Build.BackEnd
 {
     using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-
+    using ItemVectorPartition = System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>;
     // ItemVectorPartitionCollection is designed to contains a set of project items which have possibly undergone transforms.
     // The outer dictionary it usually keyed by item type, so if items originally came from 
     // an expression like @(Foo), the outer dictionary would have a key of "Foo" in it.
@@ -29,7 +29,6 @@ namespace Microsoft.Build.BackEnd
     // the inner dictionary would have a key of "@(Foo->'%(Filename).obj')", in which would be 
     // contained a list of the items which were created/transformed using that pattern.    
     using ItemVectorPartitionCollection = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>>;
-    using ItemVectorPartition = System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>;
 
     /// <summary>
     /// Enumeration of the results of target dependency analysis.
@@ -128,12 +127,10 @@ namespace Microsoft.Build.BackEnd
         /// DependencyAnalysisResult.IncrementalBuild, if only some target outputs are out-of-date;
         /// DependencyAnalysisResult.FullBuild, if target is out-of-date
         /// </returns>
-        internal DependencyAnalysisResult PerformDependencyAnalysis
-        (
+        internal DependencyAnalysisResult PerformDependencyAnalysis(
             ItemBucket bucket,
             out ItemDictionary<ProjectItemInstance> changedTargetInputs,
-            out ItemDictionary<ProjectItemInstance> upToDateTargetInputs
-        )
+            out ItemDictionary<ProjectItemInstance> upToDateTargetInputs)
         {
             // Clear any old dependency analysis logging details
             _dependencyAnalysisDetail.Clear();
@@ -203,7 +200,7 @@ namespace Microsoft.Build.BackEnd
                          * 
                          */
                         ErrorUtilities.VerifyThrow(itemVectorsReferencedInBothTargetInputsAndOutputs.Count > 0, "The target must have inputs.");
-                        ErrorUtilities.VerifyThrow(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs).Count > 0, "The target must have inputs.");
+                        ErrorUtilities.VerifyThrow(!IsItemVectorEmpty(itemVectorsInTargetInputs), "The target must have inputs.");
 
                         result = PerformDependencyAnalysisIfDiscreteInputs(itemVectorsInTargetInputs,
                                     itemVectorTransformsInTargetInputs, discreteItemsInTargetInputs, itemVectorsReferencedOnlyInTargetInputs,
@@ -380,16 +377,14 @@ namespace Microsoft.Build.BackEnd
         /// <param name="itemVectorsInTargetOutputs"></param>
         /// <param name="discreteItemsInTargetOutputs"></param>
         /// <param name="targetOutputItemSpecs"></param>
-        private void ParseTargetInputOutputSpecifications
-        (
+        private void ParseTargetInputOutputSpecifications(
             ItemBucket bucket,
             out ItemVectorPartitionCollection itemVectorsInTargetInputs,
             out ItemVectorPartitionCollection itemVectorTransformsInTargetInputs,
             out Dictionary<string, string> discreteItemsInTargetInputs,
             out ItemVectorPartitionCollection itemVectorsInTargetOutputs,
             out Dictionary<string, string> discreteItemsInTargetOutputs,
-            out List<string> targetOutputItemSpecs
-        )
+            out List<string> targetOutputItemSpecs)
         {
             // break down the input/output specifications along the standard separator, after expanding all embedded properties
             // and item metadata
@@ -496,14 +491,12 @@ namespace Microsoft.Build.BackEnd
         /// <param name="itemVectorsReferencedOnlyInTargetInputs"></param>
         /// <param name="targetOutputItemSpecs"></param>
         /// <returns>Indication of how to build the target.</returns>
-        private DependencyAnalysisResult PerformDependencyAnalysisIfDiscreteInputs
-        (
+        private DependencyAnalysisResult PerformDependencyAnalysisIfDiscreteInputs(
             ItemVectorPartitionCollection itemVectorsInTargetInputs,
             ItemVectorPartitionCollection itemVectorTransformsInTargetInputs,
             Dictionary<string, string> discreteItemsInTargetInputs,
             List<string> itemVectorsReferencedOnlyInTargetInputs,
-            List<string> targetOutputItemSpecs
-        )
+            List<string> targetOutputItemSpecs)
         {
             DependencyAnalysisResult result = DependencyAnalysisResult.SkipUpToDate;
 
@@ -517,7 +510,7 @@ namespace Microsoft.Build.BackEnd
             // cannot correlate them to any output item
             foreach (string itemVectorType in itemVectorsReferencedOnlyInTargetInputs)
             {
-                discreteTargetInputItemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs, itemVectorType));
+                discreteTargetInputItemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs, itemVectorType, itemVectorsInTargetInputs[itemVectorType]));
             }
 
             // if there are any discrete input items, we can treat them as "meta" inputs, because:
@@ -571,14 +564,12 @@ namespace Microsoft.Build.BackEnd
         /// <param name="changedTargetInputs">The inputs which are "changed" and require a build</param>
         /// <param name="upToDateTargetInputs">The inpurt which are "up to date" and do not require a build</param>
         /// <returns>Indication of how to build the target.</returns>
-        private DependencyAnalysisResult PerformDependencyAnalysisIfCorrelatedInputsOutputs
-        (
+        private DependencyAnalysisResult PerformDependencyAnalysisIfCorrelatedInputsOutputs(
             ItemVectorPartitionCollection itemVectorsInTargetInputs,
             ItemVectorPartitionCollection itemVectorsInTargetOutputs,
             List<string> itemVectorsReferencedInBothTargetInputsAndOutputs,
             out ItemDictionary<ProjectItemInstance> changedTargetInputs,
-            out ItemDictionary<ProjectItemInstance> upToDateTargetInputs
-        )
+            out ItemDictionary<ProjectItemInstance> upToDateTargetInputs)
         {
             DependencyAnalysisResult result = DependencyAnalysisResult.SkipUpToDate;
 
@@ -722,13 +713,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="discreteItemsInTargetInputs"></param>
         /// <param name="targetOutputItemSpecs"></param>
         /// <returns>Indication of how to build the target.</returns>
-        private DependencyAnalysisResult PerformDependencyAnalysisIfDiscreteOutputs
-        (
+        private DependencyAnalysisResult PerformDependencyAnalysisIfDiscreteOutputs(
             ItemVectorPartitionCollection itemVectorsInTargetInputs,
             ItemVectorPartitionCollection itemVectorTransformsInTargetInputs,
             Dictionary<string, string> discreteItemsInTargetInputs,
-            List<string> targetOutputItemSpecs
-        )
+            List<string> targetOutputItemSpecs)
         {
             List<string> targetInputItemSpecs = GetItemSpecsFromItemVectors(itemVectorsInTargetInputs);
             targetInputItemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectorTransformsInTargetInputs));
@@ -780,15 +769,13 @@ namespace Microsoft.Build.BackEnd
         /// <param name="itemVectorTransforms">Collection for transforms if they should be collected separately, else null</param>
         /// <param name="discreteItems"></param>
         /// <param name="elementLocation"></param>
-        private void SeparateItemVectorsFromDiscreteItems
-        (
+        private void SeparateItemVectorsFromDiscreteItems(
             SemiColonTokenizer items,
             ItemBucket bucket,
             out ItemVectorPartitionCollection itemVectors,
             ItemVectorPartitionCollection itemVectorTransforms,
             out Dictionary<string, string> discreteItems,
-            ElementLocation elementLocation
-        )
+            ElementLocation elementLocation)
         {
             itemVectors = new ItemVectorPartitionCollection(MSBuildNameIgnoreCaseComparer.Default);
             discreteItems = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
@@ -853,6 +840,19 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        private static bool IsItemVectorEmpty(ItemVectorPartitionCollection itemVectors)
+        {
+            foreach (KeyValuePair<string, ItemVectorPartition> item in itemVectors)
+            {
+                if (GetItemSpecsFromItemVectors(itemVectors, item.Key, item.Value).Any())
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Retrieves the item-specs of all items in the given item vector collection.
         /// </summary>
@@ -860,11 +860,11 @@ namespace Microsoft.Build.BackEnd
         /// <returns>list of item-specs</returns>
         private static List<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors)
         {
-            List<string> itemSpecs = new List<string>();
+            List<string> itemSpecs = new();
 
-            foreach (string itemType in itemVectors.Keys)
+            foreach (KeyValuePair<string, ItemVectorPartition> item in itemVectors)
             {
-                itemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectors, itemType));
+                itemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectors, item.Key, item.Value));
             }
 
             return itemSpecs;
@@ -875,13 +875,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="itemVectors"></param>
         /// <param name="itemType"></param>
+        /// <param name="itemVectorPartition"></param>
         /// <returns>list of item-specs</returns>
-        private static List<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors, string itemType)
+        private static IEnumerable<string> GetItemSpecsFromItemVectors(ItemVectorPartitionCollection itemVectors, string itemType, ItemVectorPartition itemVectorPartition)
         {
-            List<string> itemSpecs = new List<string>();
-
-            ItemVectorPartition itemVectorPartition = itemVectors[itemType];
-
             if (itemVectorPartition != null)
             {
                 foreach (IList<ProjectItemInstance> items in itemVectorPartition.Values)
@@ -891,12 +888,10 @@ namespace Microsoft.Build.BackEnd
                         // The item can be null in the case of an item transform.
                         // eg., @(Compile->'%(NonExistentMetadata)')
                         // Nevertheless, include these, so that correlation can still occur.
-                        itemSpecs.Add((item == null) ? null : ((IItem)item).EvaluatedIncludeEscaped);
+                        yield return item == null ? null : ((IItem)item).EvaluatedIncludeEscaped;
                     }
                 }
             }
-
-            return itemSpecs;
         }
 
         /// <summary>

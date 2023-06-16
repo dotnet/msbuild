@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
@@ -51,8 +51,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
                 removeMetadataLocation: new MockElementLocation($"rm{stringCounter}"),
                 keepDuplicatesLocation: new MockElementLocation($"kd{stringCounter}"),
                 conditionLocation: new MockElementLocation($"cl{stringCounter}"),
-                metadata: metadata
-            );
+                metadata: metadata);
         }
 
         public static ProjectItemGroupTaskMetadataInstance CreateTargetItemMetadata(int? counter = null)
@@ -64,8 +63,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
                 $"v{stringCounter}",
                 $"c{stringCounter}",
                 new MockElementLocation($"location{stringCounter}"),
-                new MockElementLocation($"condition{stringCounter}")
-            );
+                new MockElementLocation($"condition{stringCounter}"));
         }
 
         public static ProjectPropertyGroupTaskInstance CreateTargetPropertyGroup(
@@ -79,8 +77,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
                 $"c{stringCounter}",
                 new MockElementLocation($"location{stringCounter}"),
                 new MockElementLocation($"conditionLocation{stringCounter}"),
-                properties
-            );
+                properties);
         }
 
         public static ProjectPropertyGroupTaskPropertyInstance CreateTargetProperty(int? counter = null)
@@ -92,8 +89,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
                 $"v{stringCounter}",
                 $"c{stringCounter}",
                 new MockElementLocation($"location{stringCounter}"),
-                new MockElementLocation($"conditionLocation{stringCounter}")
-            );
+                new MockElementLocation($"conditionLocation{stringCounter}"));
         }
 
         public static ProjectOnErrorInstance CreateTargetOnError(int? counter = null)
@@ -133,8 +129,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
                 new MockElementLocation($"conditionLocation{stringCounter}"),
                 new MockElementLocation($"coeLocation{stringCounter}"),
                 new MockElementLocation($"msbrLocation{stringCounter}"),
-                new MockElementLocation($"msbaLocation{stringCounter}")
-            );
+                new MockElementLocation($"msbaLocation{stringCounter}"));
         }
 
         public static ProjectTaskOutputPropertyInstance CreateTaskPropertyOutput(int? counter = null)
@@ -148,8 +143,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
                 new MockElementLocation($"location{stringCounter}"),
                 new MockElementLocation($"propertyLocation{stringCounter}"),
                 new MockElementLocation($"taskParamLocation{stringCounter}"),
-                new MockElementLocation($"conditionLocation{stringCounter}")
-            );
+                new MockElementLocation($"conditionLocation{stringCounter}"));
         }
 
         public static ProjectTaskOutputItemInstance CreateTaskItemyOutput(int? counter = null)
@@ -163,8 +157,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
                 new MockElementLocation($"location{stringCounter}"),
                 new MockElementLocation($"itemLocation{stringCounter}"),
                 new MockElementLocation($"taskParamLocation{stringCounter}"),
-                new MockElementLocation($"conditionLocation{stringCounter}")
-            );
+                new MockElementLocation($"conditionLocation{stringCounter}"));
         }
 
         public static ProjectTargetInstance CreateTarget(
@@ -197,8 +190,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
                 new MockElementLocation($"atLocation{stringCounter}"),
                 children,
                 errorChildren,
-                true
-            );
+                true);
         }
 
         private static string CounterToString(int? counter)

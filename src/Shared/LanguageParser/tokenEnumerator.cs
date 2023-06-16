@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections;
 
@@ -20,10 +20,10 @@ namespace Microsoft.Build.Shared.LanguageParser
         protected Token current = null;
 
         // Return the token char reader.
-        abstract internal TokenCharReader Reader { get; }
+        internal abstract TokenCharReader Reader { get; }
 
         // Implemented by derived class to find the next token.
-        abstract internal bool FindNextToken();
+        internal abstract bool FindNextToken();
 
         /*
         * Method:  MoveNext

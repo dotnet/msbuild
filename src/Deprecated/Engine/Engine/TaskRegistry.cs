@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.IO;
@@ -111,13 +115,13 @@ namespace Microsoft.Build.BuildEngine
             }
 
             Hashtable cachedTaskClasses = exactMatchRequired ? this.cachedTaskClassesWithExactMatch : this.cachedTaskClassesWithFuzzyMatch;
-            
+
             if (cachedTaskClasses.Contains(taskName))
             {
                 // Caller has asked us before for this same task name, and for the same value of "bool exactMatchRequired".
                 // Return whatever the previous result was, even if it was null.   Why would the result be different than
                 // it was before?  NOTE:  Hash tables CAN have "null" as their value, and this still returns "true" for Contains(...).
-                taskClass = (LoadedType) cachedTaskClasses[taskName];
+                taskClass = (LoadedType)cachedTaskClasses[taskName];
             }
             else
             {
@@ -250,11 +254,13 @@ namespace Microsoft.Build.BuildEngine
                 catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
                 {
                     if (ExceptionHandling.NotExpectedReflectionException(e))
+                    {
                         throw;
+                    }
 
                     ProjectErrorUtilities.VerifyThrowInvalidProject(false, taskNode, "TaskLoadFailure", taskName, assembly.ToString(), e.Message);
                 }
-                
+
                 if (taskClass != null)
                 {
                     return true;
@@ -274,10 +280,10 @@ namespace Microsoft.Build.BuildEngine
         public void RegisterTask(UsingTask usingTask, Expander expander, EngineLoggingServices loggingServices, BuildEventContext buildEventContext)
         {
             if (
-                // if the <UsingTask> tag doesn't have a condition on it
+                    // if the <UsingTask> tag doesn't have a condition on it
                     (usingTask.Condition == null)
                     ||
-                // or if the condition holds
+                    // or if the condition holds
                     Utilities.EvaluateCondition(usingTask.Condition, usingTask.ConditionAttribute, expander,
                         null, ParserOptions.AllowProperties | ParserOptions.AllowItemLists, loggingServices, buildEventContext)
                 )

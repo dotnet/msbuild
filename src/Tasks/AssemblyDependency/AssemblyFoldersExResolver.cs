@@ -1,5 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 #if FEATURE_WIN32_REGISTRY
 
 using System;
@@ -25,13 +26,10 @@ namespace Microsoft.Build.Tasks
         /// Regex for breaking up the searchpath pieces.
         /// </summary>
         private static readonly Lazy<Regex> s_crackAssemblyFoldersExSentinel = new Lazy<Regex>(
-            () => new Regex
-                (
+            () => new Regex(
                 AssemblyResolutionConstants.assemblyFoldersExSentinel +
                 "(?<REGISTRYKEYROOT>[^,]*),(?<TARGETRUNTIMEVERSION>[^,]*),(?<REGISTRYKEYSUFFIX>[^,]*)([,]*)(?<CONDITIONS>.*)}",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled
-                )
-            );
+                RegexOptions.IgnoreCase | RegexOptions.Compiled));
 
         /// <summary>
         /// Delegate.
@@ -200,8 +198,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="foundPath">The path where the file was found.</param>
         /// <param name="userRequestedSpecificFile">Whether or not the user wanted a specific file (for example, HintPath is a request for a specific file)</param>
         /// <returns>True if the file was resolved.</returns>
-        public override bool Resolve
-        (
+        public override bool Resolve(
             AssemblyNameExtension assemblyName,
             string sdkName,
             string rawFileNameCandidate,
@@ -212,8 +209,7 @@ namespace Microsoft.Build.Tasks
             string assemblyFolderKey,
             List<ResolutionSearchLocation> assembliesConsideredAndRejected,
             out string foundPath,
-            out bool userRequestedSpecificFile
-        )
+            out bool userRequestedSpecificFile)
         {
             foundPath = null;
             userRequestedSpecificFile = false;

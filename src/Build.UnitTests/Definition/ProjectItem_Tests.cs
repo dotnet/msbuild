@@ -1,15 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using System.Xml;
-using Microsoft.Build.Evaluation;
-using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Xunit;
+using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
 
 #nullable disable
 
@@ -46,8 +46,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// </summary>
         private static IList<ProjectItem> GetItemsFromFragment(string fragment)
         {
-            string content = String.Format
-                (
+            string content = String.Format(
                 ObjectModelHelpers.CleanupFileContents(@"
                     <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
                         <ItemGroup>
@@ -55,8 +54,7 @@ namespace Microsoft.Build.UnitTests.Definition
                         </ItemGroup>
                     </Project>
                 "),
-                 fragment
-                 );
+                 fragment);
 
             IList<ProjectItem> items = GetItems(content);
             return items;

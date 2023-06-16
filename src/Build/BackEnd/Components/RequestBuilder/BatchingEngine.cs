@@ -1,14 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-
 using Microsoft.Build.Collections;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 #nullable disable
 
@@ -78,12 +77,10 @@ namespace Microsoft.Build.BackEnd
         /// buckets of items to pass to the object in each batch.
         /// </summary>
         /// <returns>List containing ItemBucket objects, each one representing an execution batch.</returns>
-        internal static List<ItemBucket> PrepareBatchingBuckets
-        (
+        internal static List<ItemBucket> PrepareBatchingBuckets(
             List<string> batchableObjectParameters,
             Lookup lookup,
-            ElementLocation elementLocation
-        )
+            ElementLocation elementLocation)
         {
             return PrepareBatchingBuckets(batchableObjectParameters, lookup, null, elementLocation);
         }
@@ -98,13 +95,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="implicitBatchableItemType">Any item type that can be considered an implicit input to this batchable object.
         /// This is useful for items inside targets, where the item name is plainly an item type that's an "input" to the object.</param>
         /// <returns>List containing ItemBucket objects, each one representing an execution batch.</returns>
-        internal static List<ItemBucket> PrepareBatchingBuckets
-        (
+        internal static List<ItemBucket> PrepareBatchingBuckets(
             List<string> batchableObjectParameters,
             Lookup lookup,
             string implicitBatchableItemType,
-            ElementLocation elementLocation
-        )
+            ElementLocation elementLocation)
         {
             if (batchableObjectParameters == null)
             {
@@ -199,14 +194,12 @@ namespace Microsoft.Build.BackEnd
         /// the entire list of items will be returned in the Value.  Otherwise, the Value will be empty, indicating only the
         /// qualified item set (in the Key) should be batched.
         /// </returns>
-        private static Dictionary<string, ICollection<ProjectItemInstance>> GetItemListsToBeBatched
-        (
+        private static Dictionary<string, ICollection<ProjectItemInstance>> GetItemListsToBeBatched(
             Dictionary<string, MetadataReference> consumedMetadataReferences,   // Key is [string] potentially qualified metadata name
                                                                                 // Value is [struct MetadataReference]
             HashSet<string> consumedItemReferenceNames,
             Lookup lookup,
-            ElementLocation elementLocation
-        )
+            ElementLocation elementLocation)
         {
             // The keys in this hashtable are the names of the items that we will batch on.
             // The values are always String.Empty (not used).
@@ -295,13 +288,11 @@ namespace Microsoft.Build.BackEnd
         /// to the comparison operations, which dominate the time spent in this method.
         /// </remarks>
         /// <returns>List containing ItemBucket objects (can be empty), each one representing an execution batch.</returns>
-        private static List<ItemBucket> BucketConsumedItems
-        (
+        private static List<ItemBucket> BucketConsumedItems(
             Lookup lookup,
             Dictionary<string, ICollection<ProjectItemInstance>> itemListsToBeBatched,
             Dictionary<string, MetadataReference> consumedMetadataReferences,
-            ElementLocation elementLocation
-        )
+            ElementLocation elementLocation)
         {
             ErrorUtilities.VerifyThrow(itemListsToBeBatched.Count > 0, "Need item types consumed by the batchable object.");
             ErrorUtilities.VerifyThrow(consumedMetadataReferences.Count > 0, "Need item metadata consumed by the batchable object.");
@@ -379,12 +370,10 @@ namespace Microsoft.Build.BackEnd
         /// %(x) is expanded using the key "x", and %(z.x) is expanded using the key "z.x".
         /// </summary>
         /// <returns>the metadata values</returns>
-        private static Dictionary<string, string> GetItemMetadataValues
-        (
+        private static Dictionary<string, string> GetItemMetadataValues(
             ProjectItemInstance item,
             Dictionary<string, MetadataReference> consumedMetadataReferences,
-            ElementLocation elementLocation
-        )
+            ElementLocation elementLocation)
         {
             var itemMetadataValues = new Dictionary<string, string>(consumedMetadataReferences.Count, MSBuildNameIgnoreCaseComparer.Default);
 
@@ -396,8 +385,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (
                         (metadataItemName != null) &&
-                        (!String.Equals(item.ItemType, metadataItemName, StringComparison.OrdinalIgnoreCase))
-                    )
+                        (!String.Equals(item.ItemType, metadataItemName, StringComparison.OrdinalIgnoreCase)))
                 {
                     itemMetadataValues[metadataQualifiedName] = String.Empty;
                 }

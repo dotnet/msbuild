@@ -1,9 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Runtime.Serialization;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Build.Shared;
 
@@ -175,7 +175,7 @@ namespace Microsoft.Build.Framework
             set => buildEventContext = value;
         }
 
-#region CustomSerializationToStream
+        #region CustomSerializationToStream
         /// <summary>
         /// Serializes to a stream through a binary writer
         /// </summary>
@@ -249,9 +249,9 @@ namespace Microsoft.Build.Framework
                 }
             }
         }
-#endregion
+        #endregion
 
-#region SetSerializationDefaults
+        #region SetSerializationDefaults
         /// <summary>
         /// Run before the object has been deserialized
         /// UNDONE (Logging.)  Can this and the next function go away, and instead return a BuildEventContext.Invalid from

@@ -1,14 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
@@ -165,7 +165,10 @@ namespace Microsoft.Build.Evaluation
             // MSBuild looks up a property called "InnerBuildProperty". If that isn't present,
             // an empty string is returned and it then attempts to look up the value for that property
             // (which is an empty string). Thus this check.
-            if (string.IsNullOrEmpty(name)) return;
+            if (string.IsNullOrEmpty(name))
+            {
+                return;
+            }
 
             // If a property matches the name of an environment variable, but has NOT been overwritten by a non-environment-variable property
             // track it as an environment variable read.
@@ -185,7 +188,10 @@ namespace Microsoft.Build.Evaluation
         /// <param name="name">The name of the environment variable read.</param>
         private void TrackEnvironmentVariableRead(string name)
         {
-            if ((_settings & PropertyTrackingSetting.EnvironmentVariableRead) != PropertyTrackingSetting.EnvironmentVariableRead) return;
+            if ((_settings & PropertyTrackingSetting.EnvironmentVariableRead) != PropertyTrackingSetting.EnvironmentVariableRead)
+            {
+                return;
+            }
 
             var args = new EnvironmentVariableReadEventArgs(
                 name,
@@ -201,7 +207,10 @@ namespace Microsoft.Build.Evaluation
         /// <param name="name">The name of the uninitialized property read.</param>
         private void TrackUninitializedPropertyRead(string name)
         {
-            if ((_settings & PropertyTrackingSetting.UninitializedPropertyRead) != PropertyTrackingSetting.UninitializedPropertyRead) return;
+            if ((_settings & PropertyTrackingSetting.UninitializedPropertyRead) != PropertyTrackingSetting.UninitializedPropertyRead)
+            {
+                return;
+            }
 
             var args = new UninitializedPropertyReadEventArgs(
                 name,
@@ -240,14 +249,16 @@ namespace Microsoft.Build.Evaluation
         /// <param name="source">The source of the property.</param>
         private void TrackPropertyInitialValueSet(P property, PropertySource source)
         {
-            if ((_settings & PropertyTrackingSetting.PropertyInitialValueSet) != PropertyTrackingSetting.PropertyInitialValueSet) return;
+            if ((_settings & PropertyTrackingSetting.PropertyInitialValueSet) != PropertyTrackingSetting.PropertyInitialValueSet)
+            {
+                return;
+            }
 
             var args = new PropertyInitialValueSetEventArgs(
                     property.Name,
                     property.EvaluatedValue,
                     source.ToString(),
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("PropertyAssignment", property.Name, property.EvaluatedValue, source)
-                );
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("PropertyAssignment", property.Name, property.EvaluatedValue, source));
             args.BuildEventContext = _evaluationLoggingContext.BuildEventContext;
 
             _evaluationLoggingContext.LogBuildEvent(args);

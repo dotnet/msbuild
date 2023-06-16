@@ -79,7 +79,10 @@
       <Link>TestData\GlobbingTestData.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ProcessExtensions.cs" />
+    <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" />
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
+    <Compile Include="..\UnitTests.Shared\DriveMapping.cs" />
+    <Compile Include="..\UnitTests.Shared\DummyMappedDrive.cs" />
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>

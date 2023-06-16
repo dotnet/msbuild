@@ -1,5 +1,5 @@
-﻿// Taken from https://github.com/cklutz/LockCheck, MIT license.
-// Copyright (C) Christian Klutz
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
 
 #nullable disable
 
@@ -130,20 +129,19 @@ namespace Microsoft.Build.Tasks
             public FILETIME ProcessStartTime;
         }
 
-        const int CCH_RM_MAX_APP_NAME = 255;
-        const int CCH_RM_MAX_SVC_NAME = 63;
-        const int ERROR_SEM_TIMEOUT = 121;
-        const int ERROR_BAD_ARGUMENTS = 160;
-        const int ERROR_MAX_SESSIONS_REACHED = 353;
-        const int ERROR_WRITE_FAULT = 29;
-        const int ERROR_OUTOFMEMORY = 14;
-        const int ERROR_MORE_DATA = 234;
-        const int ERROR_ACCESS_DENIED = 5;
-        const int ERROR_INVALID_HANDLE = 6;
-        const int ERROR_CANCELLED = 1223;
-
-        static readonly int RM_SESSION_KEY_LEN = Guid.Empty.ToByteArray().Length; // 16-byte
-        static readonly int CCH_RM_SESSION_KEY = RM_SESSION_KEY_LEN * 2;
+        private const int CCH_RM_MAX_APP_NAME = 255;
+        private const int CCH_RM_MAX_SVC_NAME = 63;
+        private const int ERROR_SEM_TIMEOUT = 121;
+        private const int ERROR_BAD_ARGUMENTS = 160;
+        private const int ERROR_MAX_SESSIONS_REACHED = 353;
+        private const int ERROR_WRITE_FAULT = 29;
+        private const int ERROR_OUTOFMEMORY = 14;
+        private const int ERROR_MORE_DATA = 234;
+        private const int ERROR_ACCESS_DENIED = 5;
+        private const int ERROR_INVALID_HANDLE = 6;
+        private const int ERROR_CANCELLED = 1223;
+        private static readonly int RM_SESSION_KEY_LEN = Guid.Empty.ToByteArray().Length; // 16-byte
+        private static readonly int CCH_RM_SESSION_KEY = RM_SESSION_KEY_LEN * 2;
 
         internal enum RM_APP_TYPE
         {
@@ -156,7 +154,7 @@ namespace Microsoft.Build.Tasks
             RmCritical = 1000
         }
 
-        enum RM_APP_STATUS
+        private enum RM_APP_STATUS
         {
             RmStatusUnknown = 0x0,
             RmStatusRunning = 0x1,
@@ -169,7 +167,7 @@ namespace Microsoft.Build.Tasks
             RmStatusRestartMasked = 0x80
         }
 
-        enum RM_REBOOT_REASON
+        private enum RM_REBOOT_REASON
         {
             RmRebootReasonNone = 0x0,
             RmRebootReasonPermissionDenied = 0x1,
@@ -328,7 +326,9 @@ namespace Microsoft.Build.Tasks
             {
                 res = RmEndSession(handle);
                 if (res != 0)
+                {
                     throw GetException(res, "RmEndSession", "Failed to end the restart manager session.");
+                }
             }
 
             return Enumerable.Empty<ProcessInfo>();

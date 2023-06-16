@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 #if CLR2COMPATIBILITY
@@ -31,7 +31,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
     {
-#region Private Data
+        #region Private Data
 
 #if NETCOREAPP2_1_OR_GREATER || MONO
         /// <summary>
@@ -113,18 +113,18 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BinaryWriter _binaryWriter;
 
-#endregion
+        #endregion
 
-#region INodeEndpoint Events
+        #region INodeEndpoint Events
 
         /// <summary>
         /// Raised when the link status has changed.
         /// </summary>
         public event LinkStatusChangedDelegate OnLinkStatusChanged;
 
-#endregion
+        #endregion
 
-#region INodeEndpoint Properties
+        #region INodeEndpoint Properties
 
         /// <summary>
         /// Returns the link status of this node.
@@ -134,13 +134,13 @@ namespace Microsoft.Build.BackEnd
             get { return _status; }
         }
 
-#endregion
+        #endregion
 
-#region Properties
+        #region Properties
 
-#endregion
+        #endregion
 
-#region INodeEndpoint Methods
+        #region INodeEndpoint Methods
 
         /// <summary>
         /// Causes this endpoint to wait for the remote endpoint to connect
@@ -193,9 +193,9 @@ namespace Microsoft.Build.BackEnd
             _isClientDisconnecting = true;
         }
 
-#endregion
+        #endregion
 
-#region Construction
+        #region Construction
 
         /// <summary>
         /// Instantiates an endpoint to act as a client
@@ -226,8 +226,7 @@ namespace Microsoft.Build.BackEnd
                 security.AddAccessRule(rule);
                 security.SetOwner(identifier);
 
-                _pipeServer = new NamedPipeServerStream
-                    (
+                _pipeServer = new NamedPipeServerStream(
                     pipeName,
                     PipeDirection.InOut,
                     1, // Only allow one connection at a time.
@@ -240,14 +239,12 @@ namespace Microsoft.Build.BackEnd
                     PipeBufferSize, // Default input buffer
                     PipeBufferSize,  // Default output buffer
                     security,
-                    HandleInheritability.None
-                );
+                    HandleInheritability.None);
             }
             else
 #endif
             {
-                _pipeServer = new NamedPipeServerStream
-                    (
+                _pipeServer = new NamedPipeServerStream(
                     pipeName,
                     PipeDirection.InOut,
                     1, // Only allow one connection at a time.
@@ -258,12 +255,11 @@ namespace Microsoft.Build.BackEnd
 #endif
                     ,
                     PipeBufferSize, // Default input buffer
-                    PipeBufferSize  // Default output buffer
-                );
-             }
+                    PipeBufferSize);  // Default output buffer
+            }
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Returns the host handshake for this node endpoint
@@ -291,7 +287,7 @@ namespace Microsoft.Build.BackEnd
             OnLinkStatusChanged?.Invoke(this, newStatus);
         }
 
-#region Private Methods
+        #region Private Methods
 
         /// <summary>
         /// This does the actual work of changing the status and shutting down any threads we may have for
@@ -312,7 +308,7 @@ namespace Microsoft.Build.BackEnd
             ChangeLinkStatus(LinkStatus.Inactive);
         }
 
-#region Asynchronous Mode Methods
+        #region Asynchronous Mode Methods
 
         /// <summary>
         /// Adds a packet to the packet queue when asynchronous mode is enabled.
@@ -403,11 +399,14 @@ namespace Microsoft.Build.BackEnd
                         int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
                         for (int i = 0; i < handshakeComponents.Length; i++)
                         {
-                            int handshakePart = _pipeServer.ReadIntForHandshake(i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                            int handshakePart = _pipeServer.ReadIntForHandshake(
+                                byteToAccept: i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1_OR_GREATER || MONO
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
                             );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
                             if (handshakePart != handshakeComponents[i])
                             {
@@ -454,7 +453,7 @@ namespace Microsoft.Build.BackEnd
                         // 2. The host is too old sending us bits we automatically reject in the handshake
                         // 3. We expected to read the EndOfHandshake signal, but we received something else
                         CommunicationsUtilities.Trace("Client connection failed but we will wait for another connection. Exception: {0}", e.Message);
-                        
+
                         gotValidConnection = false;
                     }
                     catch (InvalidOperationException)
@@ -676,8 +675,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-#endregion
+        #endregion
 
-#endregion
+        #endregion
     }
 }

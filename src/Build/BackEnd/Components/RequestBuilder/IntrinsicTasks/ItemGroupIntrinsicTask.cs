@@ -1,21 +1,21 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared.FileSystem;
-using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
+using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
-using Microsoft.Build.BackEnd.Logging;
 
 #nullable disable
 
@@ -63,8 +63,7 @@ namespace Microsoft.Build.BackEnd
                     // "Execute" each bucket
                     foreach (ItemBucket bucket in buckets)
                     {
-                        bool condition = ConditionEvaluator.EvaluateCondition
-                            (
+                        bool condition = ConditionEvaluator.EvaluateCondition(
                             child.Condition,
                             ParserOptions.AllowAll,
                             bucket.Expander,
@@ -171,8 +170,7 @@ namespace Microsoft.Build.BackEnd
             // Third, expand the metadata.           
             foreach (ProjectItemGroupTaskMetadataInstance metadataInstance in child.Metadata)
             {
-                bool condition = ConditionEvaluator.EvaluateCondition
-                    (
+                bool condition = ConditionEvaluator.EvaluateCondition(
                     metadataInstance.Condition,
                     ParserOptions.AllowAll,
                     bucket.Expander,
@@ -201,8 +199,7 @@ namespace Microsoft.Build.BackEnd
             bucket.Expander.Metadata = originalMetadataTable;
 
             // Determine if we should NOT add duplicate entries
-            bool keepDuplicates = ConditionEvaluator.EvaluateCondition
-                (
+            bool keepDuplicates = ConditionEvaluator.EvaluateCondition(
                 child.KeepDuplicates,
                 ParserOptions.AllowAll,
                 bucket.Expander,
@@ -311,8 +308,7 @@ namespace Microsoft.Build.BackEnd
 
             foreach (ProjectItemGroupTaskMetadataInstance metadataInstance in child.Metadata)
             {
-                bool condition = ConditionEvaluator.EvaluateCondition
-                    (
+                bool condition = ConditionEvaluator.EvaluateCondition(
                     metadataInstance.Condition,
                     ParserOptions.AllowAll,
                     bucket.Expander,
@@ -369,14 +365,12 @@ namespace Microsoft.Build.BackEnd
         /// been refactored.
         /// </remarks>
         /// <returns>A list of items.</returns>
-        private List<ProjectItemInstance> ExpandItemIntoItems
-        (
+        private List<ProjectItemInstance> ExpandItemIntoItems(
             ProjectItemGroupTaskItemInstance originalItem,
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
             ISet<string> keepMetadata,
             ISet<string> removeMetadata,
-            LoggingContext loggingContext = null
-        )
+            LoggingContext loggingContext = null)
         {
             // todo this is duplicated logic with the item computation logic from evaluation (in LazyIncludeOperation.SelectItems)
             ProjectErrorUtilities.VerifyThrowInvalidProject(!(keepMetadata != null && removeMetadata != null), originalItem.KeepMetadataLocation, "KeepAndRemoveMetadataMutuallyExclusive");
@@ -472,7 +466,7 @@ namespace Microsoft.Build.BackEnd
 
                 foreach (string excludeSplitFile in excludeSplitFiles)
                 {
-                    excludesUnescapedForComparison.Add(excludeSplitFile);
+                    excludesUnescapedForComparison.Add(excludeSplitFile.NormalizeForPathComparison());
                 }
             }
 
@@ -480,7 +474,7 @@ namespace Microsoft.Build.BackEnd
 
             for (int i = 0; i < items.Count; i++)
             {
-                if (!excludesUnescapedForComparison.Contains(((IItem)items[i]).EvaluatedInclude))
+                if (!excludesUnescapedForComparison.Contains(((IItem)items[i]).EvaluatedInclude.NormalizeForPathComparison()))
                 {
                     remainingItems.Add(items[i]);
                 }
@@ -525,14 +519,12 @@ namespace Microsoft.Build.BackEnd
         /// <param name="expander">The expander to use</param>
         /// <param name="loggingContext">Context for logging</param>
         /// <returns>A list of matching items</returns>
-        private List<ProjectItemInstance> FindItemsMatchingSpecification
-            (
+        private List<ProjectItemInstance> FindItemsMatchingSpecification(
             ICollection<ProjectItemInstance> items,
             string specification,
             ElementLocation specificationLocation,
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
-            LoggingContext loggingContext = null
-            )
+            LoggingContext loggingContext = null)
         {
             if (items.Count == 0 || specification.Length == 0)
             {

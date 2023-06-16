@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
 
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     }
 
     // not used - just a copy/paste template for remoting support objects of Construction model hierarchical containers.
-    internal class TemplateProjectElementContainerLink : ProjectElementContainerLink, ILinkMock, IProjectElementLinkHelper, IProjectElementContainerLinkHelper
+    internal sealed class TemplateProjectElementContainerLink : ProjectElementContainerLink, ILinkMock, IProjectElementLinkHelper, IProjectElementContainerLinkHelper
     {
         public TemplateProjectElementContainerLink(MockProjectElementContainerLinkRemoter proxy, IImportHolder holder)
         {

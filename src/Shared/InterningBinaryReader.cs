@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Text;
@@ -75,7 +75,7 @@ namespace Microsoft.Build
         /// Read a string while checking the string precursor for intern opportunities.
         /// Taken from ndp\clr\src\bcl\system\io\binaryreader.cs-ReadString()
         /// </summary>
-        override public String ReadString()
+        public override String ReadString()
         {
             char[] resultBuffer = null;
             try
@@ -210,7 +210,7 @@ namespace Microsoft.Build
             return new Buffer();
         }
 
-#region IDisposable pattern
+        #region IDisposable pattern
 
         /// <summary>
         /// Returns our buffer to the pool if we were not passed one by the caller.
@@ -226,7 +226,7 @@ namespace Microsoft.Build
             base.Dispose(disposing);
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Create a BinaryReader. It will either be an interning reader or standard binary reader
@@ -286,7 +286,7 @@ namespace Microsoft.Build
     /// <summary>
     /// Opaque holder of shared buffer.
     /// </summary>
-    abstract internal class SharedReadBuffer
+    internal abstract class SharedReadBuffer
     {
     }
 }

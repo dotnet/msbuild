@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -10,15 +10,13 @@ namespace Microsoft.Build.BackEnd
 {
     internal class BufferedReadStream : Stream
     {
-        const int BUFFER_SIZE = 1024;
-
-        Stream _innerStream;
-        byte[] _buffer;
+        private const int BUFFER_SIZE = 1024;
+        private Stream _innerStream;
+        private byte[] _buffer;
 
         // The number of bytes in the buffer that have been read from the underlying stream but not read by consumers of this stream
-        int _currentlyBufferedByteCount;
-
-        int _currentIndexInBuffer;
+        private int _currentlyBufferedByteCount;
+        private int _currentIndexInBuffer;
 
         public BufferedReadStream(Stream innerStream)
         {

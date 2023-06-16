@@ -2,10 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 #nullable disable
 
@@ -33,11 +29,9 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="condition"></param>
         /// <param name="unformattedMessage"></param>
-        internal static void VerifyThrow
-        (
+        internal static void VerifyThrow(
             bool condition,
-            string unformattedMessage
-        )
+            string unformattedMessage)
         {
             if (!condition)
             {

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,9 @@ using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
+#if FEATURE_THREAD_CULTURE
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
+#endif
 using NodeEngineShutdownReason = Microsoft.Build.Execution.NodeEngineShutdownReason;
 
 #nullable disable
@@ -345,7 +347,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for component creation.
         /// </summary>
-        static internal IBuildComponent CreateComponent(BuildComponentType type)
+        internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
             ErrorUtilities.VerifyThrow(type == BuildComponentType.InProcNodeProvider, "Cannot create component of type {0}", type);
             return new NodeProviderInProc();
@@ -371,14 +373,14 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_THREAD_CULTURE
             _inProcNodeThread = new Thread(InProcNodeThreadProc, BuildParameters.ThreadStackSize);
 #else
-                CultureInfo culture = _componentHost.BuildParameters.Culture;
-                CultureInfo uiCulture = _componentHost.BuildParameters.UICulture;
-                _inProcNodeThread = new Thread(() =>
-                {
-                    CultureInfo.CurrentCulture = culture;
-                    CultureInfo.CurrentUICulture = uiCulture;
-                    InProcNodeThreadProc();
-                });
+            CultureInfo culture = _componentHost.BuildParameters.Culture;
+            CultureInfo uiCulture = _componentHost.BuildParameters.UICulture;
+            _inProcNodeThread = new Thread(() =>
+            {
+                CultureInfo.CurrentCulture = culture;
+                CultureInfo.CurrentUICulture = uiCulture;
+                InProcNodeThreadProc();
+            });
 #endif
             _inProcNodeThread.Name = String.Format(CultureInfo.CurrentCulture, "In-proc Node ({0})", _componentHost.Name);
             _inProcNodeThread.IsBackground = true;

@@ -1,20 +1,20 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using Microsoft.Build.Framework;
-using System.IO;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using Microsoft.CSharp;
-using System.Reflection;
-using Microsoft.Build.Shared;
+using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.Build.Tasks.Xaml;
+using System.IO;
+using System.Reflection;
 using System.Xaml;
-using Xunit;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks.Xaml;
+using Microsoft.CSharp;
 using Shouldly;
+using Xunit;
 
 #nullable disable
 
@@ -25,7 +25,6 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
     /// The text fixture to unit test the task generator.
     /// Creates a new TaskGenerator object and tests the various methods
     /// </summary>
-    [Trait("Category", "mono-osx-failing")]
     public sealed class LoadAndParseTests
     {
         /// <summary>
@@ -338,7 +337,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                                        <StringProperty Name=`TargetAssembly` Switch=`/target:&quot;[value]&quot;` />
                                      </Rule>
                                    </ProjectSchemaDefinitions>";
-            string tmpXamlFile = FileUtilities.GetTemporaryFile();
+            string tmpXamlFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText(tmpXamlFile, xmlContents.Replace("`", "\""));
@@ -450,7 +449,6 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         /// Code must be compilable on its own.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestGenerateCodeToStream()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -503,7 +501,6 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         /// Tests to make sure the file generated compiles
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestGenerateToFile()
         {
             string xml = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -565,7 +562,6 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
     #endregion
 
     #region Tests Generated code based on one xml file
-    [Trait("Category", "mono-osx-failing")]
     public sealed class GeneratedTaskTests
     {
         private Assembly _fakeTaskDll;

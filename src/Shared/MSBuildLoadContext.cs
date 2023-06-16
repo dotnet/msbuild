@@ -1,14 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared.FileSystem;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
 {
@@ -79,22 +78,22 @@ namespace Microsoft.Build.Shared
                 // bare search directory if that fails.
                 : new[] { assemblyName.CultureName, string.Empty })
             {
-                    var candidatePath = Path.Combine(_directory,
-                        cultureSubfolder,
-                        $"{assemblyName.Name}.dll");
+                var candidatePath = Path.Combine(_directory,
+                    cultureSubfolder,
+                    $"{assemblyName.Name}.dll");
 
-                    if (!FileSystems.Default.FileExists(candidatePath))
-                    {
-                        continue;
-                    }
+                if (!FileSystems.Default.FileExists(candidatePath))
+                {
+                    continue;
+                }
 
-                    AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
-                    if (candidateAssemblyName.Version != assemblyName.Version)
-                    {
-                        continue;
-                    }
+                AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
+                if (candidateAssemblyName.Version != assemblyName.Version)
+                {
+                    continue;
+                }
 
-                    return LoadFromAssemblyPath(candidatePath);
+                return LoadFromAssemblyPath(candidatePath);
             }
 
             // If the Assembly is provided via a file path, the following rules are used to load the assembly:

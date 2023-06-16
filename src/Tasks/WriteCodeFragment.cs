@@ -1,17 +1,19 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+#if FEATURE_SYSTEM_CONFIGURATION
+using System.Configuration;
 using System.Security;
+#endif
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -65,7 +67,7 @@ namespace Microsoft.Build.Tasks
         /// The path to the file that was generated.
         /// If this is set, and a file name, the destination folder will be prepended.
         /// If this is set, and is rooted, the destination folder will be ignored.
-        /// If this is not set, the destination folder will be used, an arbitrary file name will be used, and 
+        /// If this is not set, the destination folder will be used, an arbitrary file name will be used, and
         /// the default extension for the language selected.
         /// </summary>
         [Output]
@@ -110,6 +112,8 @@ namespace Microsoft.Build.Tasks
                 }
 
                 OutputFile ??= new TaskItem(FileUtilities.GetTemporaryFile(OutputDirectory.ItemSpec, null, extension));
+
+                FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(OutputFile.ItemSpec));
 
                 File.WriteAllText(OutputFile.ItemSpec, code); // Overwrites file if it already exists (and can be overwritten)
             }
@@ -251,8 +255,7 @@ namespace Microsoft.Build.Tasks
                 // as well as within the namespaces that we automatically import.
                 Lazy<Type> attributeType = new(
                     () => Type.GetType(attribute.Name, throwOnError: false) ?? NamespaceImports.Select(x => Type.GetType($"{x}.{attribute.Name}", throwOnError: false)).FirstOrDefault(),
-                    System.Threading.LazyThreadSafetyMode.None
-                );
+                    System.Threading.LazyThreadSafetyMode.None);
 
                 if (
                     !AddArguments(attribute, attributeType, providedOrderedParameters, isPositional: true)
@@ -317,7 +320,8 @@ namespace Microsoft.Build.Tasks
                         keysToRemove.Add(key);
 
                         // The parameter will have an explicit type. The metadata value is the type name.
-                        parameterTypes[parameterNameKey] = new ParameterType {
+                        parameterTypes[parameterNameKey] = new ParameterType
+                        {
                             Kind = ParameterTypeKind.Typed,
                             TypeName = value
                         };
@@ -349,7 +353,8 @@ namespace Microsoft.Build.Tasks
                         // that needs to be written to the generated file for that parameter.
                         if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
                         {
-                            parameterTypes[parameterNameKey] = new ParameterType {
+                            parameterTypes[parameterNameKey] = new ParameterType
+                            {
                                 Kind = ParameterTypeKind.Literal
                             };
                         }
@@ -379,8 +384,7 @@ namespace Microsoft.Build.Tasks
             CodeAttributeDeclaration attribute,
             Lazy<Type> attributeType,
             IReadOnlyList<AttributeParameter> parameters,
-            bool isPositional
-        )
+            bool isPositional)
         {
             Type[] constructorParameterTypes = null;
 
@@ -431,8 +435,7 @@ namespace Microsoft.Build.Tasks
                             value = ConvertParameterValueToInferredType(
                                 constructorParameterTypes[i],
                                 parameter.Value,
-                                $"#{i + 1}" /* back to 1 based */
-                            );
+                                $"#{i + 1}"); /* back to 1 based */
                         }
                         else
                         {
@@ -440,8 +443,7 @@ namespace Microsoft.Build.Tasks
                             value = ConvertParameterValueToInferredType(
                                 attributeType.Value?.GetProperty(parameter.Name)?.PropertyType,
                                 parameter.Value,
-                                parameter.Name
-                            );
+                                parameter.Name);
                         }
 
                         break;
@@ -481,7 +483,7 @@ namespace Microsoft.Build.Tasks
                     Log.LogMessageFromResources("WriteCodeFragment.MultipleConstructorsFound");
 
                     // Before parameter types could be specified, all parameter values were
-                    // treated as strings. To be backward-compatible, we need to prefer 
+                    // treated as strings. To be backward-compatible, we need to prefer
                     // the constructor that has all string parameters, if it exists.
                     var allStringParameters = candidates.FirstOrDefault(c => c.All(t => t == typeof(string)));
 
@@ -551,7 +553,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private CodeExpression ConvertParameterValueToInferredType(Type inferredType, string rawValue, string parameterName)
         {
-            // If we don't know what type the parameter should be, then we 
+            // If we don't know what type the parameter should be, then we
             // can't convert the type. We'll just treat is as a string.
             if (inferredType is null)
             {

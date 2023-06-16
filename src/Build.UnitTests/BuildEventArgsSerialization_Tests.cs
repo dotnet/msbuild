@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -303,6 +306,14 @@ namespace Microsoft.Build.UnitTests
                 e => e.ProjectFile,
                 e => e.Subcategory,
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+        }
+
+        [Fact]
+        public void RoundtripResponseFileUsedEventArgs()
+        {
+            var args = new ResponseFileUsedEventArgs("MSBuild.rsp");
+            Roundtrip(args,
+                e => e.ResponseFilePath);
         }
 
         [Fact]
