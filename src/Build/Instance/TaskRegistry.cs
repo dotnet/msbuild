@@ -1769,12 +1769,12 @@ namespace Microsoft.Build.Execution
 
             IDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> copy = _taskRegistrations;
             translator.TranslateDictionary(ref copy, TranslateTaskRegistrationKey, TranslateTaskRegistrationValue, count => CreateRegisteredTaskDictionary(count));
-            // Ensure that mutations of the deserialized task registry are getting unique order ids.
-            s_nextRegistrationOrderId = Math.Max(s_nextRegistrationOrderId, copy.Count);
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
                 _taskRegistrations = (ConcurrentDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>)copy;
+                // Ensure that mutations of the deserialized task registry are getting unique order ids.
+                s_nextRegistrationOrderId = Math.Max(s_nextRegistrationOrderId, copy?.Count ?? 0);
             }
         }
 
