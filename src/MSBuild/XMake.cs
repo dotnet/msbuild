@@ -1148,7 +1148,7 @@ namespace Microsoft.Build.CommandLine
                 InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectUpgradeNeededToVcxProj", projectFile), null);
             }
 
-            bool success = false;
+            bool success = true;
 
             ProjectCollection projectCollection = null;
             bool onlyLogCriticalEvents = false;
@@ -1292,7 +1292,7 @@ namespace Microsoft.Build.CommandLine
                     }
                     else
                     {
-                        success = PrintTargets(projectFile, toolsVersion, globalProperties, targetsWriter, projectCollection);
+                        success &= PrintTargets(projectFile, toolsVersion, globalProperties, targetsWriter, projectCollection);
                     }
                 }
 
