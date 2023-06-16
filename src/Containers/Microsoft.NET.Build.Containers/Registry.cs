@@ -378,7 +378,12 @@ internal sealed class Registry
             //    content.Headers.Add("Content-Range", $"0-{contents.Length - 1}");
             Debug.Assert(content.Headers.TryAddWithoutValidation("Content-Range", $"{chunkStart}-{chunkStart + bytesRead - 1}"));
 
-            HttpResponseMessage patchResponse = await client.PatchAsync(patchUri, content, cancellationToken).ConfigureAwait(false);
+            HttpRequestMessage patchMessage = new(HttpMethod.Patch, patchUri)
+            {
+                Content = content
+            };
+            patchMessage.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+            HttpResponseMessage patchResponse = await client.SendAsync(patchMessage, cancellationToken).ConfigureAwait(false);
 
             // Fail the upload if the response code is not Accepted (202) or if uploading to Amazon ECR which returns back Created (201).
             if (!(patchResponse.StatusCode == HttpStatusCode.Accepted || (IsAmazonECRRegistry && patchResponse.StatusCode == HttpStatusCode.Created)))
@@ -416,9 +421,13 @@ internal sealed class Registry
     {
         cancellationToken.ThrowIfCancellationRequested();
         StreamContent content = new StreamContent(contents);
-        content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
         content.Headers.ContentLength = contents.Length;
-        HttpResponseMessage patchResponse = await client.PatchAsync(uploadUri.Uri, content, cancellationToken).ConfigureAwait(false);
+        HttpRequestMessage patchMessage = new(HttpMethod.Patch, uploadUri.Uri)
+        {
+            Content = content
+        };
+        patchMessage.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+        HttpResponseMessage patchResponse = await client.SendAsync(patchMessage, cancellationToken).ConfigureAwait(false);
 
         cancellationToken.ThrowIfCancellationRequested();
         // Fail the upload if the response code is not Accepted (202) or if uploading to Amazon ECR which returns back Created (201).
