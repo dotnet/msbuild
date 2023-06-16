@@ -60,18 +60,18 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/nuget/nuget.client -->
-    <NuGetBuildTasksPackageVersion>6.7.0-preview.3.80</NuGetBuildTasksPackageVersion>
-    <NuGetBuildTasksConsolePackageVersion>6.7.0-preview.3.80</NuGetBuildTasksConsolePackageVersion>
+    <NuGetBuildTasksPackageVersion>6.7.0-preview.3.83</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksConsolePackageVersion>6.7.0-preview.3.83</NuGetBuildTasksConsolePackageVersion>
     <NuGetLocalizationPackageVersion>6.0.0-rc.278</NuGetLocalizationPackageVersion>
-    <NuGetBuildTasksPackPackageVersion>6.7.0-preview.3.80</NuGetBuildTasksPackPackageVersion>
-    <NuGetCommandLineXPlatPackageVersion>6.7.0-preview.3.80</NuGetCommandLineXPlatPackageVersion>
-    <NuGetProjectModelPackageVersion>6.7.0-preview.3.80</NuGetProjectModelPackageVersion>
-    <MicrosoftBuildNuGetSdkResolverPackageVersion>6.7.0-preview.3.80</MicrosoftBuildNuGetSdkResolverPackageVersion>
-    <NuGetCommonPackageVersion>6.7.0-preview.3.80</NuGetCommonPackageVersion>
-    <NuGetConfigurationPackageVersion>6.7.0-preview.3.80</NuGetConfigurationPackageVersion>
-    <NuGetFrameworksPackageVersion>6.7.0-preview.3.80</NuGetFrameworksPackageVersion>
-    <NuGetPackagingPackageVersion>6.7.0-preview.3.80</NuGetPackagingPackageVersion>
-    <NuGetVersioningPackageVersion>6.7.0-preview.3.80</NuGetVersioningPackageVersion>
+    <NuGetBuildTasksPackPackageVersion>6.7.0-preview.3.83</NuGetBuildTasksPackPackageVersion>
+    <NuGetCommandLineXPlatPackageVersion>6.7.0-preview.3.83</NuGetCommandLineXPlatPackageVersion>
+    <NuGetProjectModelPackageVersion>6.7.0-preview.3.83</NuGetProjectModelPackageVersion>
+    <MicrosoftBuildNuGetSdkResolverPackageVersion>6.7.0-preview.3.83</MicrosoftBuildNuGetSdkResolverPackageVersion>
+    <NuGetCommonPackageVersion>6.7.0-preview.3.83</NuGetCommonPackageVersion>
+    <NuGetConfigurationPackageVersion>6.7.0-preview.3.83</NuGetConfigurationPackageVersion>
+    <NuGetFrameworksPackageVersion>6.7.0-preview.3.83</NuGetFrameworksPackageVersion>
+    <NuGetPackagingPackageVersion>6.7.0-preview.3.83</NuGetPackagingPackageVersion>
+    <NuGetVersioningPackageVersion>6.7.0-preview.3.83</NuGetVersioningPackageVersion>
     <NuGetPackagingVersion>$(NuGetPackagingPackageVersion)</NuGetPackagingVersion>
     <NuGetProjectModelVersion>$(NuGetProjectModelPackageVersion)</NuGetProjectModelVersion>
   </PropertyGroup>
