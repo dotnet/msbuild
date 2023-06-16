@@ -799,23 +799,30 @@ namespace Microsoft.Build.CommandLine
                     }
                     else if ((getProperty.Length > 0 || getItem.Length > 0) && (targets is null || targets.Length == 0))
                     {
-                        Project project = Project.FromFile(projectFile, new Definition.ProjectOptions()
+                        try
                         {
-                            GlobalProperties = globalProperties,
-                            ToolsVersion = toolsVersion,
-                        });
+                            Project project = Project.FromFile(projectFile, new Definition.ProjectOptions()
+                            {
+                                GlobalProperties = globalProperties,
+                                ToolsVersion = toolsVersion,
+                            });
 
-                        // Special case if the user requests exactly one property: skip json formatting
-                        if (getProperty.Length == 1 && getItem.Length == 0)
-                        {
-                            Console.WriteLine(project.GetPropertyValue(getProperty[0]));
+                            // Special case if the user requests exactly one property: skip json formatting
+                            if (getProperty.Length == 1 && getItem.Length == 0)
+                            {
+                                Console.WriteLine(project.GetPropertyValue(getProperty[0]));
+                            }
+                            else
+                            {
+                                JsonOutputFormatter jsonOutputFormatter = new();
+                                jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
+                                jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
+                                Console.WriteLine(jsonOutputFormatter.ToString());
+                            }
                         }
-                        else
+                        catch (InvalidProjectFileException e)
                         {
-                            JsonOutputFormatter jsonOutputFormatter = new();
-                            jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
-                            jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
-                            Console.WriteLine(jsonOutputFormatter.ToString());
+                            Console.Error.WriteLine(e.Message);
                         }
                     }
                     else // regular build
@@ -870,8 +877,13 @@ namespace Microsoft.Build.CommandLine
                     {
                         ProjectInstance builtProject = result.ProjectStateAfterBuild;
 
+                        if (builtProject is null)
+                        {
+                            // Build failed; do not proceed
+                            Console.Error.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildFailedWithPropertiesItemsOrTargetResultsRequested", "insertErrorMessageHere"));
+                        }
                         // Special case if the user requests exactly one property: skip the json formatting
-                        if (getProperty.Length == 1 && getItem.Length == 0 && getTargetResult.Length == 0)
+                        else if (getProperty.Length == 1 && getItem.Length == 0 && getTargetResult.Length == 0)
                         {
                             Console.WriteLine(builtProject.GetPropertyValue(getProperty[0]));
                         }

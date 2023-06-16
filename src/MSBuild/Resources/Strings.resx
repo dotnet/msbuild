@@ -1499,6 +1499,10 @@
       {4}: duration in seconds with 1 decimal point
     </comment>
   </data>
+  <data name="BuildFailedWithPropertiesItemsOrTargetResultsRequested" xml:space="preserve">
+    <value>Build failed. Properties, Items, and Target results cannot be obtained. See error below:
+    {0}</value>
+  </data>
   <!-- **** LiveLogger strings end **** -->
 
     <!--
