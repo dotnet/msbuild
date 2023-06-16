@@ -805,10 +805,18 @@ namespace Microsoft.Build.CommandLine
                             ToolsVersion = toolsVersion,
                         });
 
-                        JsonOutputFormatter jsonOutputFormatter = new();
-                        jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
-                        jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
-                        Console.WriteLine(jsonOutputFormatter.ToString());
+                        // Special case if the user requests exactly one property: skip json formatting
+                        if (getProperty.Length == 1 && getItem.Length == 0)
+                        {
+                            Console.WriteLine(project.GetPropertyValue(getProperty[0]));
+                        }
+                        else
+                        {
+                            JsonOutputFormatter jsonOutputFormatter = new();
+                            jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
+                            jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
+                            Console.WriteLine(jsonOutputFormatter.ToString());
+                        }
                     }
                     else // regular build
                     {
@@ -862,11 +870,19 @@ namespace Microsoft.Build.CommandLine
                     {
                         ProjectInstance builtProject = result.ProjectStateAfterBuild;
 
-                        JsonOutputFormatter jsonOutputFormatter = new();
-                        jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => builtProject.GetPropertyValue(property));
-                        jsonOutputFormatter.AddItemInstancesInJsonFormat(getItem, builtProject);
-                        jsonOutputFormatter.AddTargetResultsInJsonFormat(getTargetResult, result);
-                        Console.WriteLine(jsonOutputFormatter.ToString());
+                        // Special case if the user requests exactly one property: skip the json formatting
+                        if (getProperty.Length == 1 && getItem.Length == 0 && getTargetResult.Length == 0)
+                        {
+                            Console.WriteLine(builtProject.GetPropertyValue(getProperty[0]));
+                        }
+                        else
+                        {
+                            JsonOutputFormatter jsonOutputFormatter = new();
+                            jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => builtProject.GetPropertyValue(property));
+                            jsonOutputFormatter.AddItemInstancesInJsonFormat(getItem, builtProject);
+                            jsonOutputFormatter.AddTargetResultsInJsonFormat(getTargetResult, result);
+                            Console.WriteLine(jsonOutputFormatter.ToString());
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(timerOutputFilename))
