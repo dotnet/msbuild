@@ -56,6 +56,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Enable the built-in source generators. -->
     <EnableRequestDelegateGenerator Condition="'$(EnableRequestDelegateGenerator)' == ''">true</EnableRequestDelegateGenerator>
     <EnableConfigurationBindingGenerator Condition="'$(EnableConfigurationBindingGenerator)' == ''">true</EnableConfigurationBindingGenerator>
+
+    <!-- Enable System.GC.DynamicAdaptationMode by default for aot'd apps to get a GC that dynamically adapts to the application's memory use. -->
+    <GarbageCollectionAdaptationMode Condition="'$(GarbageCollectionAdaptationMode)' == '' And '$(ServerGarbageCollection)' == 'true'">1</GarbageCollectionAdaptationMode>
   </PropertyGroup>
 
   <!-- Enable the interceptors compiler feature by default for projects that use the RequestDelegateGenerator. -->

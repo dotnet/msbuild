@@ -61,7 +61,7 @@ namespace Microsoft.NET.Sdk.Web.Tests
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
             testProject.RecordProperties("NETCoreSdkPortableRuntimeIdentifier");
-            testProject.AdditionalProperties["PublishAOT"] = "true";
+            testProject.AdditionalProperties["PublishAot"] = "true";
             testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
             testProject.PropertiesToRecord.Add("PublishTrimmed");
             testProject.PropertiesToRecord.Add("TrimMode");
@@ -83,6 +83,7 @@ namespace Microsoft.NET.Sdk.Web.Tests
 
             responseFileContents.Should().Contain("--feature:System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault=false");
             responseFileContents.Should().Contain("--feature:System.Diagnostics.Tracing.EventSource.IsSupported=true");
+            responseFileContents.Should().Contain("--runtimeknob:System.GC.DynamicAdaptationMode=1");
             File.Exists(Path.Combine(outputDirectory, "web.config")).Should().BeFalse();
         }
 
