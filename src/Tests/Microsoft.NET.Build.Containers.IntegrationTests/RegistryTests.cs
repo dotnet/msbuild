@@ -28,6 +28,7 @@ public class RegistryTests
     }
 
     [InlineData("quay.io/centos/centos")]
+    [InlineData("registry.access.redhat.com/ubi8/dotnet-70")]
     [Theory]
     public async Task CanReadManifestFromRegistry(string fullyQualifiedContainerName)
     {
