@@ -473,6 +473,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Build.Contain
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Build.Containers.UnitTests", "src\Tests\Microsoft.NET.Build.Containers.UnitTests\Microsoft.NET.Build.Containers.UnitTests.csproj", "{E54506B8-0B81-4FC4-99B5-5C67E19D4B09}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDDLTests", "src\Tests\SDDLTests\SDDLTests.csproj", "{FEA8B7B5-901B-4A3A-948F-7E5F54F09FF5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -887,6 +889,10 @@ Global
 		{E54506B8-0B81-4FC4-99B5-5C67E19D4B09}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E54506B8-0B81-4FC4-99B5-5C67E19D4B09}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E54506B8-0B81-4FC4-99B5-5C67E19D4B09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEA8B7B5-901B-4A3A-948F-7E5F54F09FF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEA8B7B5-901B-4A3A-948F-7E5F54F09FF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEA8B7B5-901B-4A3A-948F-7E5F54F09FF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEA8B7B5-901B-4A3A-948F-7E5F54F09FF5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1049,6 +1055,7 @@ Global
 		{F04DB812-7278-47F2-913E-225CE2EF150C} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{7DCA2BEC-B1E1-4F2B-952A-A26B5110FDA5} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{E54506B8-0B81-4FC4-99B5-5C67E19D4B09} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{FEA8B7B5-901B-4A3A-948F-7E5F54F09FF5} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}
