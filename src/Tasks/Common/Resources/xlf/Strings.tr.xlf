@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="AotNotSupported">
         <source>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
-        <target state="needs-review-translation">NETSDK1195: SDK önceden derlemeyi desteklemez. PublishAot özelliğini false olarak ayarlayın.</target>
+        <target state="translated">NETSDK1196: SDK önceden derlemeyi desteklemez. PublishAot özelliğini false olarak ayarlayın.</target>
         <note>{StrBegin="NETSDK1196: "}</note>
       </trans-unit>
       <trans-unit id="AotUnsupportedHostRuntimeIdentifier">
