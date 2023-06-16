@@ -1,12 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
 
 using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
@@ -30,6 +30,8 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public override void Initialize(DotNetWatchContext context, CancellationToken cancellationToken)
         {
+            Debug.Assert(context.ProcessSpec != null);
+
             base.Initialize(context, cancellationToken);
 
             // Configure the app for EnC
@@ -143,7 +145,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         private readonly struct UpdatePayload
         {
             public string Type => "BlazorHotReloadDeltav1";
-            public string SharedSecret { get; init; }
+            public string? SharedSecret { get; init; }
             public IEnumerable<UpdateDelta> Deltas { get; init; }
         }
 

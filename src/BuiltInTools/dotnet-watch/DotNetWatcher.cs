@@ -1,8 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -44,13 +44,15 @@ namespace Microsoft.DotNet.Watcher
 
         public async Task WatchAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
+            Debug.Assert(context.ProcessSpec != null);
+
             var cancelledTaskSource = new TaskCompletionSource();
-            cancellationToken.Register(state => ((TaskCompletionSource)state).TrySetResult(),
+            cancellationToken.Register(state => ((TaskCompletionSource)state!).TrySetResult(),
                 cancelledTaskSource);
 
             var processSpec = context.ProcessSpec;
             processSpec.Executable = _muxerPath;
-            var initialArguments = processSpec.Arguments.ToArray();
+            var initialArguments = processSpec.Arguments?.ToArray() ?? Array.Empty<string>();
 
             if (context.SuppressMSBuildIncrementalism)
             {
@@ -140,7 +142,7 @@ namespace Microsoft.DotNet.Watcher
 
                     if (finishedTask == processTask)
                     {
-                        // Process exited. Redo evaludation
+                        // Process exited. Redo evalulation
                         context.RequiresMSBuildRevaluation = true;
                         // Now wait for a file to change before restarting process
                         context.ChangedFile = await fileSetWatcher.GetChangedFileAsync(cancellationToken, () => _reporter.Warn("Waiting for a file to change before restarting dotnet...", emoji: "⏳"));
@@ -150,6 +152,7 @@ namespace Microsoft.DotNet.Watcher
                         Debug.Assert(finishedTask == fileSetTask);
                         var changedFile = fileSetTask.Result;
                         context.ChangedFile = changedFile;
+                        Debug.Assert(changedFile != null, "ChangedFile should only be null when cancelled");
                         _reporter.Output($"File changed: {changedFile.Value.FilePath}");
                     }
                 }

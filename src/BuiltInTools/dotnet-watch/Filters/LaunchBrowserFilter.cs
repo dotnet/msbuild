@@ -1,12 +1,14 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.NavigateTo;
 using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
@@ -15,13 +17,13 @@ namespace Microsoft.DotNet.Watcher.Tools
     {
         private static readonly Regex NowListeningRegex = new Regex(@"Now listening on: (?<url>.*)\s*$", RegexOptions.None | RegexOptions.Compiled, TimeSpan.FromSeconds(10));
         private readonly DotNetWatchOptions _options;
-        private readonly string _browserPath;
+        private readonly string? _browserPath;
         private bool _attemptedBrowserLaunch;
-        private Process _browserProcess;
-        private IReporter _reporter;
-        private string _launchPath;
+        private Process? _browserProcess;
+        private IReporter? _reporter;
+        private string? _launchPath;
         private CancellationToken _cancellationToken;
-        private DotNetWatchContext _watchContext;
+        private DotNetWatchContext? _watchContext;
 
         public LaunchBrowserFilter(DotNetWatchOptions dotNetWatchOptions)
         {
@@ -31,6 +33,8 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public ValueTask ProcessAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
+            Debug.Assert(context.ProcessSpec != null);
+
             if (_options.SuppressLaunchBrowser)
             {
                 return default;
@@ -63,6 +67,8 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         private void OnOutput(object sender, DataReceivedEventArgs eventArgs)
         {
+            Debug.Assert(_reporter != null);
+
             if (string.IsNullOrEmpty(eventArgs.Data))
             {
                 return;
@@ -112,6 +118,8 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         private void LaunchBrowser(string launchUrl)
         {
+            Debug.Assert(_reporter != null);
+
             var fileName = Uri.TryCreate(_launchPath, UriKind.Absolute, out _) ? _launchPath : launchUrl + "/" + _launchPath;
             var args = string.Empty;
             if (!string.IsNullOrEmpty(_browserPath))
@@ -134,8 +142,11 @@ namespace Microsoft.DotNet.Watcher.Tools
             });
         }
 
-        private static bool CanLaunchBrowser(DotNetWatchContext context, out string launchUrl)
+        private static bool CanLaunchBrowser(DotNetWatchContext context, out string? launchUrl)
         {
+            Debug.Assert(context.ProcessSpec != null);
+            Debug.Assert(context.FileSet?.Project != null);
+
             launchUrl = null;
             var reporter = context.Reporter;
 
@@ -148,7 +159,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             if (!context.HotReloadEnabled)
             {
-                var dotnetCommand = context.ProcessSpec.Arguments.FirstOrDefault();
+                var dotnetCommand = context.ProcessSpec.Arguments?.FirstOrDefault();
                 if (!string.Equals(dotnetCommand, "run", StringComparison.Ordinal))
                 {
                     reporter.Verbose("Browser refresh is only supported for run commands.");

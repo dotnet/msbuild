@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -170,7 +169,7 @@ namespace Microsoft.DotNet.Watcher.Internal
                     {
                         _reporter.Warn("Fix the error to continue or press Ctrl+C to exit.");
 
-                        var fileSet = new FileSet(null, new[] { new FileItem { FilePath = _projectFile } });
+                        var fileSet = new FileSet(projectInfo: null, new[] { new FileItem { FilePath = _projectFile } });
 
                         using (var watcher = new FileSetWatcher(fileSet, _reporter))
                         {

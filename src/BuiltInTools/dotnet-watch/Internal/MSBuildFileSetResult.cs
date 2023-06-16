@@ -11,28 +11,28 @@ namespace Microsoft.DotNet.Watcher.Internal
     internal sealed class MSBuildFileSetResult
     {
         [DataMember]
-        public string RunCommand { get; init; }
+        public required string RunCommand { get; init; }
 
         [DataMember]
-        public string RunArguments { get; init; }
+        public required string RunArguments { get; init; }
 
         [DataMember]
-        public string RunWorkingDirectory { get; init; }
+        public required string RunWorkingDirectory { get; init; }
 
         [DataMember]
-        public bool IsNetCoreApp { get; init; }
+        public required bool IsNetCoreApp { get; init; }
 
         [DataMember]
-        public string TargetFrameworkVersion { get; init; }
+        public required string TargetFrameworkVersion { get; init; }
 
         [DataMember]
-        public string RuntimeIdentifier { get; init; }
+        public required string RuntimeIdentifier { get; init; }
 
         [DataMember]
-        public string DefaultAppHostRuntimeIdentifier { get; init; }
+        public required string DefaultAppHostRuntimeIdentifier { get; init; }
 
         [DataMember]
-        public Dictionary<string, ProjectItems> Projects { get; init; }
+        public required Dictionary<string, ProjectItems> Projects { get; init; }
     }
 
     [DataContract]
@@ -49,9 +49,9 @@ namespace Microsoft.DotNet.Watcher.Internal
     internal sealed class StaticFileItem
     {
         [DataMember]
-        public string FilePath { get; init; }
+        public required string FilePath { get; init; }
 
         [DataMember]
-        public string StaticWebAssetPath { get; init; }
+        public required string StaticWebAssetPath { get; init; }
     }
 }

@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -32,14 +33,14 @@ namespace Microsoft.DotNet.Watcher.Tools
         private readonly byte[] ReloadMessage = Encoding.UTF8.GetBytes("Reload");
         private readonly byte[] WaitMessage = Encoding.UTF8.GetBytes("Wait");
         private readonly JsonSerializerOptions _jsonSerializerOptions = new(JsonSerializerDefaults.Web);
-        private readonly List<(WebSocket clientSocket, string sharedSecret)> _clientSockets = new();
+        private readonly List<(WebSocket clientSocket, string? sharedSecret)> _clientSockets = new();
         private readonly RSA _rsa;
         private readonly DotNetWatchOptions _options;
         private readonly IReporter _reporter;
         private readonly string _muxerPath;
         private readonly TaskCompletionSource _terminateWebSocket;
         private readonly TaskCompletionSource _clientConnected;
-        private IHost _refreshServer;
+        private IHost? _refreshServer;
 
         public BrowserRefreshServer(DotNetWatchOptions options, IReporter reporter, string muxerPath)
         {
@@ -86,8 +87,10 @@ namespace Microsoft.DotNet.Watcher.Tools
             var serverUrls = _refreshServer.Services
                 .GetRequiredService<IServer>()
                 .Features
-                .Get<IServerAddressesFeature>()
+                .Get<IServerAddressesFeature>()?
                 .Addresses;
+
+            Debug.Assert(serverUrls != null);
 
             if (envHostName is null)
             {
@@ -113,8 +116,8 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return;
             }
 
-            var subProtocol = (string)null;
-            string sharedSecret = null;
+            string? subProtocol = null;
+            string? sharedSecret = null;
             if (context.WebSockets.WebSocketRequestedProtocols.Count == 1)
             {
                 subProtocol = context.WebSockets.WebSocketRequestedProtocols[0];
@@ -157,7 +160,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             return SendMessage(jsonSerialized, cancellationToken);
         }
 
-        public async ValueTask SendJsonWithSecret<TValue>(Func<string, TValue> valueFactory, CancellationToken cancellationToken = default)
+        public async ValueTask SendJsonWithSecret<TValue>(Func<string?, TValue> valueFactory, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -220,10 +223,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 clientSocket.Dispose();
             }
 
-            if (_refreshServer != null)
-            {
-                _refreshServer.Dispose();
-            }
+            _refreshServer?.Dispose();
 
             _terminateWebSocket.TrySetResult();
         }

@@ -12,8 +12,10 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     public class MSBuildEvaluationFilterTest
     {
+        private static readonly FileSet s_emptyFileSet = new(projectInfo: null!, Array.Empty<FileItem>());
+
         private readonly IFileSetFactory _fileSetFactory = Mock.Of<IFileSetFactory>(
-            f => f.CreateAsync(It.IsAny<CancellationToken>()) == Task.FromResult<FileSet>(FileSet.Empty));
+            f => f.CreateAsync(It.IsAny<CancellationToken>()) == Task.FromResult(s_emptyFileSet));
 
         [Fact]
         public async Task ProcessAsync_EvaluatesFileSetIfProjFileChanges()
