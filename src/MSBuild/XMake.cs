@@ -17,28 +17,27 @@ using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
-
-using FileLogger = Microsoft.Build.Logging.FileLogger;
-using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
-using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
-using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
-using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
-using LiveLogger = Microsoft.Build.Logging.LiveLogger.LiveLogger;
 using Microsoft.Build.Shared.Debugging;
-using Microsoft.Build.Experimental;
-using Microsoft.Build.Framework.Telemetry;
-using Microsoft.Build.Internal;
+using Microsoft.Build.Shared.FileSystem;
+using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
+using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
+using FileLogger = Microsoft.Build.Logging.FileLogger;
+using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
+using LiveLogger = Microsoft.Build.Logging.LiveLogger.LiveLogger;
+using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
+using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorLogger;
 
 #nullable disable
 
@@ -880,7 +879,8 @@ namespace Microsoft.Build.CommandLine
                         if (builtProject is null)
                         {
                             // Build failed; do not proceed
-                            Console.Error.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildFailedWithPropertiesItemsOrTargetResultsRequested", "insertErrorMessageHere"));
+                            string errorMessage = loggers.Length == 1 ? (loggers[0] as SimpleErrorLogger).errorList.ToString() : "internal error";
+                            Console.Error.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildFailedWithPropertiesItemsOrTargetResultsRequested", errorMessage));
                         }
                         // Special case if the user requests exactly one property: skip the json formatting
                         else if (getProperty.Length == 1 && getItem.Length == 0 && getTargetResult.Length == 0)
@@ -2554,7 +2554,18 @@ namespace Microsoft.Build.CommandLine
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
 
-                    loggers = ProcessLoggingSwitches(
+                    if (getProperty.Length + getItem.Length + getTargetResult.Length > 0)
+                    {
+                        loggers = new ILogger[] { new SimpleErrorLogger() };
+                        distributedLoggerRecords = new List<DistributedLoggerRecord>();
+                        verbosity = LoggerVerbosity.Quiet;
+                        originalVerbosity = LoggerVerbosity.Quiet;
+                        profilerLogger = null;
+                        enableProfiler = false;
+                    }
+                    else
+                    {
+                        loggers = ProcessLoggingSwitches(
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Logger],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DistributedLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
@@ -2573,6 +2584,7 @@ namespace Microsoft.Build.CommandLine
                         cpuCount,
                         out profilerLogger,
                         out enableProfiler);
+                    }
 
                     // We're finished with defining individual loggers' verbosity at this point, so we don't need to worry about messing them up.
                     if (Traits.Instance.DebugEngine)
