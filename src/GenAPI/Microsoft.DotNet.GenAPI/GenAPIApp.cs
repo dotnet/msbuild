@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+#if !NET
+using System.Text.RegularExpressions;
+#endif
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiSymbolExtensions;
 using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
@@ -198,9 +201,17 @@ namespace Microsoft.DotNet.GenAPI
 
             """;
 
-            return !string.IsNullOrEmpty(headerFile) ?
+            string header = !string.IsNullOrEmpty(headerFile) ?
                 File.ReadAllText(headerFile) :
                 defaultFileHeader;
+
+#if NET
+            header = header.ReplaceLineEndings();
+#else
+            header = Regex.Replace(header, @"\r\n|\n\r|\n|\r", Environment.NewLine);
+#endif
+
+            return header;
         }
     }
 }

@@ -80,8 +80,7 @@ namespace Microsoft.DotNet.GenAPI
             SyntaxNode compilationUnit = _syntaxGenerator.CompilationUnit(namespaceSyntaxNodes)
                 .WithAdditionalAnnotations(Formatter.Annotation, Simplifier.Annotation)
                 .Rewrite(new TypeDeclarationCSharpSyntaxRewriter())
-                .Rewrite(new BodyBlockCSharpSyntaxRewriter(_exceptionMessage))
-                .NormalizeWhitespace();
+                .Rewrite(new BodyBlockCSharpSyntaxRewriter(_exceptionMessage));
 
             if (_includeAssemblyAttributes)
             {
@@ -89,6 +88,7 @@ namespace Microsoft.DotNet.GenAPI
             }
 
             compilationUnit = GenerateForwardedTypeAssemblyAttributes(assemblySymbol, compilationUnit);
+            compilationUnit = compilationUnit.NormalizeWhitespace(eol: Environment.NewLine);
 
             Document document = project.AddDocument(assemblySymbol.Name, compilationUnit);
             document = Simplifier.ReduceAsync(document).Result;
