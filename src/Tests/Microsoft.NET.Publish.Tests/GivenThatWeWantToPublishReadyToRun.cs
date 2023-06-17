@@ -361,11 +361,6 @@ namespace Microsoft.NET.Publish.Tests
             return GetTargetOS(runtimeIdentifier) == TargetOSEnum.Windows;
         }
 
-        private static bool IsTargetOsLinux(string runtimeIdentifier)
-        {
-            return GetTargetOS(runtimeIdentifier) == TargetOSEnum.Linux;
-        }
-
         private void TestProjectPublishing_Internal(string projectName,
             string targetFramework,
             bool makeExeProject = true,
@@ -411,9 +406,9 @@ namespace Microsoft.NET.Publish.Tests
             else
                 publishDirectory.Should().NotHaveFile("System.Private.CoreLib.dll");
 
-            if (emitNativeSymbols && !IsTargetOsOsX(testProject.RuntimeIdentifier))
+            NuGetFramework framework = NuGetFramework.Parse(targetFramework);
+            if (emitNativeSymbols && (!IsTargetOsOsX(testProject.RuntimeIdentifier) || framework.Version.Major >= 6))
             {
-                NuGetFramework framework = NuGetFramework.Parse(targetFramework);
                 Log.WriteLine("Checking for symbol files");
                 IEnumerable<string> pdbFiles;
 
@@ -484,8 +479,7 @@ public class Program
             {
                 return Path.GetFileName(Path.ChangeExtension(assemblyFile, "ni.pdb"));
             }
-
-            if (IsTargetOsLinux(runtimeIdentifier))
+            else if (!IsTargetOsOsX(runtimeIdentifier) || framework.Version.Major >= 6)
             {
                 if (framework.Version.Major >= 6)
                 {

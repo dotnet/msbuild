@@ -164,13 +164,16 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (EmitSymbols)
                 {
-                    if (IsTargetWindows && hasValidDiaSymReaderLib)
+                    if (IsTargetWindows)
                     {
-                        outputPDBImage = Path.ChangeExtension(outputR2RImage, "ni.pdb");
-                        outputPDBImageRelativePath = Path.ChangeExtension(outputR2RImageRelativePath, "ni.pdb");
-                        crossgen1CreatePDBCommand = $"/CreatePDB \"{Path.GetDirectoryName(outputPDBImage)}\"";
+                        if (hasValidDiaSymReaderLib)
+                        {
+                            outputPDBImage = Path.ChangeExtension(outputR2RImage, "ni.pdb");
+                            outputPDBImageRelativePath = Path.ChangeExtension(outputR2RImageRelativePath, "ni.pdb");
+                            crossgen1CreatePDBCommand = $"/CreatePDB \"{Path.GetDirectoryName(outputPDBImage)}\"";
+                        }
                     }
-                    else if (IsTargetLinux)
+                    else if ((ReadyToRunUseCrossgen2 && !_crossgen2IsVersion5) || IsTargetLinux)
                     {
                         string perfmapExtension;
                         if (ReadyToRunUseCrossgen2 && !_crossgen2IsVersion5 && _perfmapFormatVersion >= 1)
@@ -270,12 +273,15 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     string compositePDBImage = null;
                     string compositePDBRelativePath = null;
-                    if (IsTargetWindows && hasValidDiaSymReaderLib)
+                    if (IsTargetWindows)
                     {
-                        compositePDBImage = Path.ChangeExtension(compositeR2RImage, ".ni.pdb");
-                        compositePDBRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, ".ni.pdb");
+                        if (hasValidDiaSymReaderLib)
+                        {
+                            compositePDBImage = Path.ChangeExtension(compositeR2RImage, ".ni.pdb");
+                            compositePDBRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, ".ni.pdb");
+                        }
                     }
-                    else if (IsTargetLinux)
+                    else
                     {
                         string perfmapExtension = (_perfmapFormatVersion >= 1 ? ".ni.r2rmap" : ".ni.{composite}.map");
                         compositePDBImage = Path.ChangeExtension(compositeR2RImage, perfmapExtension);
