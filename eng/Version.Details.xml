@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23315.1">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23316.2">
       <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
-      <Sha>b34c6434a7b422a79e104ef7f24cee0d6ddba3c5</Sha>
+      <Sha>3e92e7cead1e08476973f637007bb22cde7843ca</Sha>
       <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
     </Dependency>
     <!-- Necessary for source-build. This allows the package to be retrieved from previously-source-built artifacts
