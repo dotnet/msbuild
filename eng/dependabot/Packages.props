@@ -46,7 +46,7 @@
     <PackageReference Update="System.Runtime" Version="4.3.1" />
     <PackageReference Update="System.Runtime" Condition="'$(SystemRuntimeVersion)' != ''" Version="$(SystemRuntimeVersion)" />
 
-    <PackageReference Update="System.Security.Cryptography.Pkcs" Version="6.0.1" />
+    <PackageReference Update="System.Security.Cryptography.Pkcs" Version="6.0.3" />
     <PackageReference Update="System.Security.Cryptography.Pkcs" Condition="'$(SystemSecurityCryptographyPkcsVersion)' != ''" Version="$(SystemSecurityCryptographyPkcsVersion)" />
 
     <PackageReference Update="System.Security.Cryptography.Xml" Version="6.0.1" />
