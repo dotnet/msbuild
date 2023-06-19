@@ -29,9 +29,14 @@ namespace Microsoft.Build.Tasks
         private byte _serializedVersion = CurrentSerializationVersion;
 
         /// <summary>
+        /// True if <see cref="SerializeCache"/> should create the state file and serialize ourselves, false otherwise.
+        /// </summary>
+        internal virtual bool HasStateToSave => true;
+
+        /// <summary>
         /// Writes the contents of this object out to the specified file.
         /// </summary>
-        internal virtual void SerializeCache(string stateFile, TaskLoggingHelper log)
+        internal virtual void SerializeCache(string stateFile, TaskLoggingHelper log, bool serializeEmptyState = false)
         {
             try
             {
@@ -42,11 +47,14 @@ namespace Microsoft.Build.Tasks
                         File.Delete(stateFile);
                     }
 
-                    using (var s = new FileStream(stateFile, FileMode.CreateNew))
+                    if (serializeEmptyState || HasStateToSave)
                     {
-                        var translator = BinaryTranslator.GetWriteTranslator(s);
-                        translator.Translate(ref _serializedVersion);
-                        Translate(translator);
+                        using (var s = new FileStream(stateFile, FileMode.CreateNew))
+                        {
+                            var translator = BinaryTranslator.GetWriteTranslator(s);
+                            translator.Translate(ref _serializedVersion);
+                            Translate(translator);
+                        }
                     }
                 }
             }
