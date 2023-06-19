@@ -41,19 +41,38 @@ variables:
     value: .NETCoreValidation
   - name: Codeql.Enabled
     value: true
+  - name: EnableReleaseOneLocBuild
+    value: false
 
 stages:
 - stage: build
   displayName: Build
 
   jobs:
-  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}: # should track next-release's active dev branch
-    - template: /eng/common/templates/job/onelocbuild.yml
-      parameters:
-        LclSource: lclFilesfromPackage
-        LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
-        MirrorRepo: 'msbuild'
-        MirrorBranch: 'main' # should match condition above
+  - ${{ if and( ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    # The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
+    # Used for vs17.2, vs17.4, vs17.6 etc. branches only.
+    # When the branch is setup for localization (the localization ticket needs to be created - https://aka.ms/ceChangeLocConfig, requesting change from one release branch to another),
+    #  set 'EnableReleaseOneLocBuild' to true.
+    - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs') }}:
+      - template: /eng/common/templates/job/onelocbuild.yml
+        parameters:
+          MirrorRepo: 'msbuild'
+          LclSource: lclFilesfromPackage
+          LclPackageId: 'LCL-JUNO-PROD-MSBUILDREL'
+          MirrorBranch: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
+          JobNameSuffix: '_release'
+          condition: ${{ variables.EnableReleaseOneLocBuild }}
+    # The localization setup for main branch. Note difference in package ID. Should not be used with release/ branches.
+    - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+      - template: /eng/common/templates/job/onelocbuild.yml
+        parameters:
+          MirrorRepo: 'msbuild'
+          LclSource: lclFilesfromPackage
+          LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
+          MirrorBranch: 'main'
+          JobNameSuffix: '_main'
+          condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
 
   - job: Windows_NT
     pool:
