@@ -188,7 +188,7 @@
       </trans-unit>
       <trans-unit id="Copy.NonWindowsLinkErrorMessage">
         <source>The {0} library call failed with the following error code: {1}.</source>
-        <target state="translated">次のエラー コードにより、{0} ライブラリの呼び出しに失敗しました: {1}。</target>
+        <target state="translated">{0} ライブラリの呼び出しは次のエラー コードで失敗しました: {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
@@ -208,7 +208,7 @@
       </trans-unit>
       <trans-unit id="Copy.RetryingAsSymbolicLink">
         <source>Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</source>
-        <target state="new">Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</target>
+        <target state="translated">ハード リンクを使用して "{0}" を "{1}" にコピーできませんでした。代わりにシンボリック リンクを使用してファイルをコピーしています。 {2}</target>
         <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
       </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
@@ -318,7 +318,7 @@
       </trans-unit>
       <trans-unit id="Delete.Retrying">
         <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</source>
-        <target state="translated">MSB3062: ファイル "{0}"を削除できませんでした。再試行{1}を {2}ミリ秒で開始しています。{3}</target>
+        <target state="translated">MSB3062: ファイル "{0}" を削除できませんでした。{1} の再試行を {2}ミリ秒で開始します。{3}</target>
         <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message.</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
@@ -626,7 +626,7 @@
       </trans-unit>
       <trans-unit id="GenerateBindingRedirects.CreatingBindingRedirectionFile">
         <source>Creating binding redirection file "{0}".</source>
-        <target state="translated">バインド リダイレクト ファイル "{0}"を作成しています。</target>
+        <target state="translated">バインド リダイレクト ファイル "{0}" を作成しています。</target>
         <note />
       </trans-unit>
       <trans-unit id="GenerateBindingRedirects.MissingConfigurationNode">
@@ -1047,8 +1047,8 @@
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/msbuild/net8-binaryformatter</source>
-        <target state="new">MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://aka.ms/msbuild/net8-binaryformatter</target>
+        <target state="translated">MSB3825: "{0}" 型のリソース "{1}" は、実行時に BinaryFormatter を介して逆シリアル化されます。BinaryFormatter は、セキュリティ上のリスクが発生する可能性があるため非推奨であり、.NET 9 を使用して削除されます。引き続き使用する場合は、プロパティ "GenerateResourceWarnOnBinaryFormatterUse" を false に設定してください。
+           詳細情報: https://aka.ms/msbuild/net8-binaryformatter</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
@@ -2152,7 +2152,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
         <source>Updating assembly cache file "{0}".</source>
-        <target state="translated">アセンブリ キャッシュ ファイル "{0}"を更新しています。</target>
+        <target state="translated">アセンブリ キャッシュ ファイル "{0}" を更新しています。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -2651,7 +2651,7 @@
       </trans-unit>
       <trans-unit id="Unzip.ZipSlipExploit">
         <source>Entry is outside the target directory: "{0}"</source>
-        <target state="translated">エントリがターゲット ディレクトリ外です: "{0}"</target>
+        <target state="translated">エントリがターゲット ディレクトリの外部にあります: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
@@ -2731,7 +2731,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
         <source>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</source>
-        <target state="translated">"{0}"の 'WriteOnlyWhenDifferent' 属性は、'Overwrite="true"' の場合にのみ有効になります。</target>
+        <target state="translated">"{0}" の 'WriteOnlyWhenDifferent' 属性は、'Overwrite="true"' の場合にのみ有効になります。</target>
         <note />
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
@@ -2811,7 +2811,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.SecuritySettingsViaUseTrustedSettings">
         <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
-        <target state="translated">UseTrustedSettings パラメーターを使用して、緩和された XSLT セキュリティ設定を有効にしています。この設定のセキュリティへの影響の詳細については、https://aka.ms/msbuild/xsltransformation-taskを参照してください</target>
+        <target state="translated">UseTrustedSettings パラメーターを使用して、緩和された XSLT セキュリティ設定を有効にしています。この設定のセキュリティへの影響の詳細については、https://aka.ms/msbuild/xsltransformation-task を参照してください</target>
         <note />
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">

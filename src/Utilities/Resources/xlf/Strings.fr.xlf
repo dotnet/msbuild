@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="ToolTask.NotUpToDate">
         <source>Unable to skip task because it is not up-to-date.</source>
-        <target state="translated">Impossible d’ignorer la tâche, car elle n’est pas à jour.</target>
+        <target state="translated">Nous n’avons pas pu ignorer la tâche, car elle n’est pas à jour.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">

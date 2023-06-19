@@ -208,7 +208,7 @@
       </trans-unit>
       <trans-unit id="Copy.RetryingAsSymbolicLink">
         <source>Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</source>
-        <target state="new">Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</target>
+        <target state="translated">Impossibile utilizzare un collegamento reale per copiare "{0}" in "{1}". Verrà invece copiato il file con collegamento simbolico. {2}</target>
         <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
       </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
@@ -1656,7 +1656,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoBecauseBadImage">
         <source>This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</source>
-        <target state="translated">Il riferimento non è "CopyLocal" perché è un'immagine non valida. Potrebbe essere un file binario nativo o non essere affatto un assembly.</target>
+        <target state="translated">Questo riferimento non è "CopyLocal" perché è un'immagine non valida. Potrebbe essere un file binario nativo o non essere affatto un assembly.</target>
         <note>
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
@@ -2377,7 +2377,7 @@
       </trans-unit>
       <trans-unit id="ResolveKeySource.PfxUnsupported">
         <source>PFX signing not supported on .NET Core.</source>
-        <target state="translated">Firma PFX non supportata in .NET Core.</target>
+        <target state="translated">La firma PFX non è supportata in .NET Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveKeySource.ResolvedThumbprintEmpty">
@@ -2651,7 +2651,7 @@
       </trans-unit>
       <trans-unit id="Unzip.ZipSlipExploit">
         <source>Entry is outside the target directory: "{0}"</source>
-        <target state="translated">Voce esterna alla directory di destinazione: "{0}"</target>
+        <target state="translated">Il valore immesso non è compreso nella directory di destinazione: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
@@ -2811,7 +2811,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.SecuritySettingsViaUseTrustedSettings">
         <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
-        <target state="translated">Si stanno abilitando le impostazioni di sicurezza XSLT rilassate tramite il parametro UseTrustedSettings. Per altri dettagli sulle implicazioni di sicurezza di questa impostazione, vedere https://aka.ms/msbuild/xsltransformation-task</target>
+        <target state="translated">Si stanno abilitando impostazioni di sicurezza XSLT flessibili tramite il parametro UseTrustedSettings. Per altri dettagli sulle implicazioni di sicurezza di questa impostazione, vedere https://aka.ms/msbuild/xsltransformation-task</target>
         <note />
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">

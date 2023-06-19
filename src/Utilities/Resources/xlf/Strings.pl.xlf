@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="ToolTask.NotUpToDate">
         <source>Unable to skip task because it is not up-to-date.</source>
-        <target state="translated">Nie można pominąć zadania, ponieważ jest ono nieaktualne.</target>
+        <target state="translated">Nie można pominąć zadania, ponieważ nie jest ono aktualne.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
