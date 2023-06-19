@@ -26,10 +26,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         private readonly WorkloadSet? _workloadSet;
 
-        public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, string? userProfileDir, string? requestedWorkloadSet = null)
-            : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable, userProfileDir, requestedWorkloadSet)
+        public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, string? userProfileDir, string? globalJsonPath)
+            : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable, userProfileDir)
         {
-
         }
 
         internal SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, Func<string, string?> getEnvironmentVariable, string? userProfileDir, string? requestedWorkloadSet = null)
@@ -343,6 +342,21 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         public string GetSdkFeatureBand()
         {
             return _sdkVersionBand.ToString();
+        }
+
+        public static string? GetGlobalJsonPath(string? globalJsonStartDir)
+        {
+            string? directory = globalJsonStartDir;
+            while (directory != null)
+            {
+                string globalJsonPath = Path.Combine(directory, "global.json");
+                if (File.Exists(globalJsonPath))
+                {
+                    return globalJsonPath;
+                }
+                directory = Path.GetDirectoryName(directory);
+            }
+            return null;
         }
     }
 }

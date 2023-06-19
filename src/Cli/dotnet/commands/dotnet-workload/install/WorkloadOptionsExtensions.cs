@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             else
             {
-                var manifests = new SdkDirectoryWorkloadManifestProvider(dotnetPath, versionOption, userProfileDir).GetManifests();
+                var manifests = new SdkDirectoryWorkloadManifestProvider(dotnetPath, versionOption, userProfileDir, SdkDirectoryWorkloadManifestProvider.GetGlobalJsonPath(Environment.CurrentDirectory)).GetManifests();
                 if (!manifests.Any() && checkIfFeatureBandManifestsExist)
                 {
                     throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, new SdkFeatureBand(versionOption).ToString()), isUserError: false);
