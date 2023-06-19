@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -19,16 +21,19 @@ namespace Microsoft.DotNet.ToolManifest
         private readonly IDangerousFileDetector _dangerousFileDetector;
         private readonly ToolManifestEditor _toolManifestEditor;
         private const string ManifestFilenameConvention = "dotnet-tools.json";
+        private readonly Func<string, string> _getEnvironmentVariable;
 
         public ToolManifestFinder(
             DirectoryPath probeStart,
             IFileSystem fileSystem = null,
-            IDangerousFileDetector dangerousFileDetector = null)
+            IDangerousFileDetector dangerousFileDetector = null,
+            Func<string, string> getEnvironmentVariable = null)
         {
             _probeStart = probeStart;
             _fileSystem = fileSystem ?? new FileSystemWrapper();
             _dangerousFileDetector = dangerousFileDetector ?? new DangerousFileDetector();
             _toolManifestEditor = new ToolManifestEditor(_fileSystem, dangerousFileDetector);
+            _getEnvironmentVariable = getEnvironmentVariable ?? Environment.GetEnvironmentVariable;
         }
 
         public IReadOnlyCollection<ToolManifestPackage> Find(FilePath? filePath = null)
@@ -143,7 +148,7 @@ namespace Microsoft.DotNet.ToolManifest
             EnumerateDefaultAllPossibleManifests()
         {
             DirectoryPath? currentSearchDirectory = _probeStart;
-            while (currentSearchDirectory.HasValue)
+            while (currentSearchDirectory.HasValue && (currentSearchDirectory.Value.GetParentPathNullable() != null || AllowManifestInRoot()))
             {
                 var currentSearchDotConfigDirectory =
                     currentSearchDirectory.Value.WithSubDirectories(Constants.DotConfigDirectoryName);
@@ -155,6 +160,23 @@ namespace Microsoft.DotNet.ToolManifest
             }
         }
 
+        private bool AllowManifestInRoot()
+        {
+            string environmentVariableValue = _getEnvironmentVariable(EnvironmentVariableNames.DOTNET_TOOLS_ALLOW_MANIFEST_IN_ROOT);
+            if (!string.IsNullOrWhiteSpace(environmentVariableValue))
+            {
+                if (environmentVariableValue.Equals("true", StringComparison.OrdinalIgnoreCase) || environmentVariableValue.Equals("1", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return !RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        }
+        
         public FilePath FindFirst(bool createIfNotFound = false)
         {
             foreach ((FilePath possibleManifest, DirectoryPath _) in EnumerateDefaultAllPossibleManifests())
