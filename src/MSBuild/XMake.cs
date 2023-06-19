@@ -879,7 +879,8 @@ namespace Microsoft.Build.CommandLine
                         if (builtProject is null)
                         {
                             // Build failed; do not proceed
-                            string errorMessage = loggers.Length == 1 ? (loggers[0] as SimpleErrorLogger).errorList.ToString() : "internal error";
+                            ILogger simpleLogger = loggers.FirstOrDefault(l => l is SimpleErrorLogger);
+                            string errorMessage = simpleLogger is null ? "internal error" : (simpleLogger as SimpleErrorLogger).errorList.ToString();
                             Console.Error.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildFailedWithPropertiesItemsOrTargetResultsRequested", errorMessage));
                         }
                         // Special case if the user requests exactly one property: skip the json formatting
@@ -1524,7 +1525,7 @@ namespace Microsoft.Build.CommandLine
                         }
                         finally
                         {
-                            buildManager.EndBuild(saveProject);
+                            buildManager.EndBuild();
                         }
                     }
                     catch (Exception ex)
@@ -2554,37 +2555,25 @@ namespace Microsoft.Build.CommandLine
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
 
-                    if (getProperty.Length + getItem.Length + getTargetResult.Length > 0)
-                    {
-                        loggers = new ILogger[] { new SimpleErrorLogger() };
-                        distributedLoggerRecords = new List<DistributedLoggerRecord>();
-                        verbosity = LoggerVerbosity.Quiet;
-                        originalVerbosity = LoggerVerbosity.Quiet;
-                        profilerLogger = null;
-                        enableProfiler = false;
-                    }
-                    else
-                    {
-                        loggers = ProcessLoggingSwitches(
-                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Logger],
-                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DistributedLogger],
-                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
-                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
-                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
-                        liveLogger,
-                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
-                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
-                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
-                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation],
-                        groupedFileLoggerParameters,
-                        getProperty.Length + getItem.Length + getTargetResult.Length == 0,
-                        out distributedLoggerRecords,
-                        out verbosity,
-                        out originalVerbosity,
-                        cpuCount,
-                        out profilerLogger,
-                        out enableProfiler);
-                    }
+                    loggers = ProcessLoggingSwitches(
+                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Logger],
+                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DistributedLogger],
+                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
+                    commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
+                    commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
+                    liveLogger,
+                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
+                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
+                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
+                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation],
+                    groupedFileLoggerParameters,
+                    getProperty.Length + getItem.Length + getTargetResult.Length > 0,
+                    out distributedLoggerRecords,
+                    out verbosity,
+                    out originalVerbosity,
+                    cpuCount,
+                    out profilerLogger,
+                    out enableProfiler);
 
                     // We're finished with defining individual loggers' verbosity at this point, so we don't need to worry about messing them up.
                     if (Traits.Instance.DebugEngine)
@@ -3452,7 +3441,7 @@ namespace Microsoft.Build.CommandLine
             string[] binaryLoggerParameters,
             string[] profileEvaluationParameters,
             string[][] groupedFileLoggerParameters,
-            bool canAdjustVerbosity,
+            bool useSimpleErrorLogger,
             out List<DistributedLoggerRecord> distributedLoggerRecords,
             out LoggerVerbosity verbosity,
             out LoggerVerbosity originalVerbosity,
@@ -3473,15 +3462,19 @@ namespace Microsoft.Build.CommandLine
             var loggers = new List<ILogger>();
 
             var outVerbosity = verbosity;
-            ProcessBinaryLogger(binaryLoggerParameters, loggers, canAdjustVerbosity, ref outVerbosity);
+            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref outVerbosity);
 
             ProcessLoggerSwitch(loggerSwitchParameters, loggers, verbosity);
 
             // Add any loggers which have been specified on the commandline
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
-            // Choose default console logger
-            if (liveLoggerOptIn)
+            // Otherwise choose default console logger: None, TerminalLogger, or the older ConsoleLogger
+            if (useSimpleErrorLogger)
+            {
+                loggers.Add(new SimpleErrorLogger());
+            }
+            else if (liveLoggerOptIn)
             {
                 ProcessLiveLogger(noConsoleLogger, distributedLoggerRecords, cpuCount, loggers);
             }
@@ -3589,7 +3582,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, List<ILogger> loggers, bool canAdjustVerbosity, ref LoggerVerbosity verbosity)
+        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, List<ILogger> loggers, ref LoggerVerbosity verbosity)
         {
             if (binaryLoggerParameters == null || binaryLoggerParameters.Length == 0)
             {
@@ -3603,7 +3596,7 @@ namespace Microsoft.Build.CommandLine
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.
             // Since we always want task inputs for a binary logger, set it to diagnostic.
-            verbosity = canAdjustVerbosity ? LoggerVerbosity.Diagnostic : verbosity;
+            verbosity = LoggerVerbosity.Diagnostic;
 
             loggers.Add(logger);
         }

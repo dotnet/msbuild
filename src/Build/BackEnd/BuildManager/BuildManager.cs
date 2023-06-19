@@ -910,18 +910,6 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if there is no build in progress.</exception>
         public void EndBuild()
         {
-            EndBuild(false);
-        }
-
-        /// <summary>
-        /// Signals that no more build requests are expected (or allowed) and the BuildManager may clean up.
-        /// </summary>
-        /// <remarks>
-        /// This call blocks until all currently pending requests are complete.
-        /// </remarks>
-        /// <exception cref="InvalidOperationException">Thrown if there is no build in progress.</exception>
-        public void EndBuild(bool skipLoggingBuildFinished)
-        {
             lock (_syncLock)
             {
                 ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
@@ -1030,10 +1018,7 @@ namespace Microsoft.Build.Execution
                             _overallBuildSuccess = false;
                         }
 
-                        if (!skipLoggingBuildFinished)
-                        {
-                            loggingService.LogBuildFinished(_overallBuildSuccess);
-                        }
+                        loggingService.LogBuildFinished(_overallBuildSuccess);
 
                         if (_buildTelemetry != null)
                         {
