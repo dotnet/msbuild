@@ -105,12 +105,7 @@ namespace Microsoft.DotNet.Installer.Windows
                 // the parent folders as access rules become cumulative. The acccess rules for the directory should all have
                 // object and container inheritance set to ensure access rights are inherited when creating files.
                 DirectorySecurity ds = new();
-                ds.SetOwner(s_AdministratorsSid);
-                ds.SetGroup(s_AdministratorsSid);
-                ds.SetAccessRule(s_AdministratorRule);
-                ds.SetAccessRule(s_LocalSystemRule);
-                ds.SetAccessRule(s_UsersRule);
-                ds.SetAccessRule(s_EveryoneRule);
+                SetDirectoryAccessRules(ds);
                 ds.CreateDirectory(path);
             }
             else if (resetAccessRules)
@@ -130,13 +125,7 @@ namespace Microsoft.DotNet.Installer.Windows
                         ds.PurgeAccessRules(ace.IdentityReference);
                     }
 
-                    ds.SetOwner(s_AdministratorsSid);
-                    ds.SetGroup(s_AdministratorsSid);
-                    ds.SetAccessRule(s_AdministratorRule);
-                    ds.SetAccessRule(s_LocalSystemRule);
-                    ds.SetAccessRule(s_UsersRule);
-                    ds.SetAccessRule(s_EveryoneRule);
-
+                    SetDirectoryAccessRules(ds);
                     DirectoryInfo di = new DirectoryInfo(path);
                     di.SetAccessControl(ds);
                 }
@@ -288,6 +277,22 @@ namespace Microsoft.DotNet.Installer.Windows
 
             msiPath = possibleMsiPath;
             return true;
+        }
+
+        /// <summary>
+        /// Apply a standard set of access rules to the directory security descriptor. The owner and group will
+        /// be set to built-in Administrators. Full access is granted to built-in administators and SYSTEM with
+        /// read, execute, synchronize permssions for built-in users and Everyone.
+        /// </summary>
+        /// <param name="ds">The security descriptor to update.</param>
+        private static void SetDirectoryAccessRules(DirectorySecurity ds)
+        {
+            ds.SetOwner(s_AdministratorsSid);
+            ds.SetGroup(s_AdministratorsSid);
+            ds.SetAccessRule(s_AdministratorRule);
+            ds.SetAccessRule(s_LocalSystemRule);
+            ds.SetAccessRule(s_UsersRule);
+            ds.SetAccessRule(s_EveryoneRule);
         }
 
         /// <summary>
