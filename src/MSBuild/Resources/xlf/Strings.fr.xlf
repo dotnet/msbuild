@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="translated">Générer {0} en {1}s</target>
+        <target state="translated">Générer {0} dans {1}s</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -21,7 +21,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
         <source>failed</source>
-        <target state="new">failed</target>
+        <target state="translated">échec</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -42,14 +42,14 @@
       </trans-unit>
       <trans-unit id="BuildResult_Succeeded">
         <source>succeeded</source>
-        <target state="new">succeeded</target>
+        <target state="translated">a réussi</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
-        <target state="new">succeeded with warnings</target>
+        <target state="translated">a réussi avec des avertissements</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -80,7 +80,7 @@
                      but isn't up to date.
                      (Short form: -q)
     </source>
-        <target state="translated">  -Question
+        <target state="translated">  -question
                      (Expérimental) Spécifiez s’il existe un travail de build.
                      MSBuild génère une erreur lorsqu’il détecte une cible ou une tâche
                      qui peut être incrémentielle (a des entrées et des sorties),
@@ -95,7 +95,7 @@
       </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1064: Low priority value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1064: la valeur basse priorité n’est pas valide. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -231,7 +231,7 @@
 Lorsqu’il est défini sur « MessageCalculIsolationViolation » (ou sa valeur
                      formulaire « Message »), seuls les résultats des cibles de niveau supérieur
                      sont sérialisées si le commutateur -outputResultsCache
-                     Fourni. Ceci permet d’atténuer les chances d’une
+                     fourni. Ceci permet d’atténuer les chances d’une
                      violation d’isolation de la cible sur un projet de dépendance à l’aide de
                      état incorrect en raison de sa dépendance sur une cible mise en cache
                      dont les effets secondaires ne sont pas pris en compte.
@@ -364,7 +364,7 @@ Cet indicateur est expérimental et peut ne pas fonctionner comme prévu.
                      plusieurs codes d’avertissement. N’a aucun effet si -warnaserror
                      n’est pas défini.
 
-Exemple:
+                     Exemple:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -612,42 +612,42 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Parameters to console logger. (Short form: -clp)
-                     The available parameters are:
-                        PerformanceSummary--Show time spent in tasks, targets
-                            and projects.
-                        Summary--Show error and warning summary at the end.
-                        NoSummary--Don't show error and warning summary at the
-                            end.
-                        ErrorsOnly--Show only errors.
-                        WarningsOnly--Show only warnings.
-                        NoItemAndPropertyList--Don't show list of items and
-                            properties at the start of each project build.
-                        ShowCommandLine--Show TaskCommandLineEvent messages
-                        ShowTimestamp--Display the Timestamp as a prefix to any
-                            message.
-                        ShowEventId--Show eventId for started events, finished
-                            events, and messages
-                        ForceNoAlign--Does not align the text to the size of
-                            the console buffer
-                        DisableConsoleColor--Use the default console colors
-                            for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
-                        EnableMPLogging--Enable the multiprocessor logging
-                            style even when running in non-multiprocessor
-                            mode. This logging style is on by default.
-                        ForceConsoleColor--Use ANSI console colors even if
-                            console does not support it
-                        PreferConsoleColor--Use ANSI console colors only if
-                            target console does support it
-                     Verbosity--overrides the -verbosity setting for this
-                            logger.
-                     Example:
+        <target state="translated">  -consoleLoggerParameters:&lt;paramètres&gt;
+         Paramètres du journaliseur de la console. (Forme abrégée : -clp)
+         Paramètres disponibles :
+            PerformanceSummary--Affiche la durée des tâches, des cibles
+                et des projets.
+            Summary--Récapitulatif des erreurs et des avertissements à la fin.
+            NoSummary--Aucun récapitulatif des erreurs et des avertissements
+                à la fin.
+            ErrorsOnly--Affiche uniquement les erreurs.
+            WarningsOnly--Affiche uniquement les avertissements.
+            NoItemAndPropertyList--N'affiche pas la liste des éléments et
+                des propriétés au début de chaque build de projet.
+            ShowCommandLine--Affiche les messages de TaskCommandLineEvent
+            ShowTimestamp--Affiche l'horodatage en tant que préfixe des
+                messages.
+            ShowEventId--Affiche eventId pour les événements démarrés et
+                achevés ainsi que les messages
+            ForceNoAlign--N'aligne pas le texte par rapport à la taille de la
+                mémoire tampon de la console
+            DisableConsoleColor--Utilise les couleurs de la console par défaut
+                pour tous les messages de journalisation.
+            DisableMPLogging--Désactive le style de journalisation
+                multiprocesseur de la sortie durant l'exécution en
+                mode non multiprocesseur.
+            EnableMPLogging--Active le style de journalisation multiprocesseur
+                même durant l'exécution en mode non
+                multiprocesseur. Style de journalisation activé par défaut.
+            ForceConsoleColor--Utilise les couleurs de la console ANSI même si
+                cela n'est pas pris en charge par la console
+            PreferConsoleColor-Utilise les couleurs de console ANSI uniquement si
+                            la console cible le prend en charge
+                     Verbosity--Remplace le paramètre -verbosity pour ce
+                            journaliseur.
+                     Exemple:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
-                                                 Verbosity=minimal
+                         Verbosity=minimal
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -1424,7 +1424,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
         <source> → {0}</source>
-        <target state="new"> → {0}</target>
+        <target state="translated"> → {0}</target>
         <note>
       Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
       {0}: VT100 coded hyperlink to project output directory

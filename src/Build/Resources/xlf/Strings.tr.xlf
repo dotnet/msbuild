@@ -64,12 +64,12 @@
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
         <source>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="new">MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</target>
+        <target state="translated">MSB4271: MSBUILDDISABLEFEATURESFROMVERSION ortam değişkeni geçersiz bir biçime ayarlandı. Tüm değişiklik dalgası sürümleri etkinleştiriliyor. Girilen değer: {0}. Geçerli Değişiklik Dalgaları: {1}.</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
         <source>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="new">MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</target>
+        <target state="translated">MSB4272: MSBUILDDISABLEFEATURESFROMVERSION ortam değişkeni, düzenli değişiklik dışı bir sürüme ayarlandı. Varsayılan Değişiklik Dalgası sürümüne dönülüyor: {0}. Girilen değer: {1}. Geçerli Değişiklik Dalgaları: {2}.</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -94,7 +94,7 @@
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
-        <target state="translated">MSB4276: Varsayılan SDK çözümleyicisi, dizin "{0}" olmadığından SDK "{1}" çözümleyemedi.</target>
+        <target state="translated">MSB4276: "{1}" dizini olmadığından, varsayılan SDK çözümleyicisi "{0}" SDK’sını çözümleyemedi.</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
@@ -109,7 +109,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentDerivedPropertyRead">
         <source>Property '{0}' with value '{1}' expanded from the environment.</source>
-        <target state="translated">Değer '{0}' özellik '{1}' ortamdan genişletildi.</target>
+        <target state="translated">'{1}' değerine sahip '{0}' özelliği ortamdan genişletildi.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -130,7 +130,7 @@
       <trans-unit id="FailedToResolveSDK">
         <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
   {1}</source>
-        <target state="translated">SDK hizmeti çözümlenemedi"{0}". Aşağıdaki yoklama iletilerden tam olarak biri SDK'yı neden çözümleyemedik? SDK'yı doğru şekilde belirtmek için bu iletiyi araştırın ve çözümleyin.
+        <target state="translated">SDK "{0}" çözümlenemedi. Aşağıdaki yoklama iletilerinden tam olarak biri, SDK'yı neden çözümleyemediğimizi gösterir. SDK'yı doğru şekilde belirtmek için bu iletiyi inceleyin ve çözümleyin.
   {1}</target>
         <note />
       </trans-unit>
@@ -156,7 +156,7 @@
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
         <source>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</source>
-        <target state="translated">MSB4120: '{0}' içindeki öğe tanımı, (nitelikli veya tam olmayan) meta veri dosyası aracılığıyla kendi '{1}'. Bu, önceden varolan öğelerin İstenilmeyen şekilde genişletilmesine ve çapraz olarak uygulanıp uygulanamalarına neden olabilir. Daha fazla bilgi: https://aka.ms/msbuild/metadata-self-ref</target>
+        <target state="translated">MSB4120: (Nitelikli veya niteliksiz) meta veri dosyası '{1}' aracılığıyla hedef içindeki '{0}' öğesinin tanımı kendi kendisine başvuruyor. Bu, önceden var olan öğelerin istenmeyen şekilde genişlemesine ve çapraz olarak uygulanmasına neden olabilir. Daha fazla bilgi: https://aka.ms/msbuild/metadata-self-ref</target>
         <note>{StrBegin="MSB4120: "}</note>
       </trans-unit>
       <trans-unit id="KillingProcessWithPid">
@@ -166,7 +166,7 @@
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
         <source>Loading the following project cache plugin: {0}</source>
-        <target state="new">Loading the following project cache plugin: {0}</target>
+        <target state="translated">Şu proje önbelleği eklentisi yükleniyor:{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -198,7 +198,7 @@
       </trans-unit>
       <trans-unit id="NodeReused">
         <source>Reusing node {0} (PID: {1}).</source>
-        <target state="translated">Düğüm yeniden {0} (PID: {1}).</target>
+        <target state="translated">Düğüm {0} yeniden kullanılıyor (PID: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -352,7 +352,7 @@
       </trans-unit>
       <trans-unit id="PropertyOutsidePropertyGroupInTarget">
         <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
-        <target state="translated">MSB4067: &lt;{0}&gt; altındaki &lt;{1}&gt; tanınmadı. Bunu bir özellik olarak amaçlaydıysanız, bunu bir &lt;PropertyGroup&gt; girin.</target>
+        <target state="translated">MSB4067: &lt;{1}&gt; altındaki &lt;{0}&gt; öğesi tanınmıyor. Bunun bir özellik olmasını amaçladıysanız, bir &lt;PropertyGroup&gt; öğesi içine ekleyin.</target>
         <note>{StrBegin="MSB4067: "}</note>
       </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">

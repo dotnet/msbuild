@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="translated">Сборка {0} в {1}s</target>
+        <target state="translated">Сборка {0} через {1} с</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -21,7 +21,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
         <source>failed</source>
-        <target state="new">failed</target>
+        <target state="translated">сбой</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -42,14 +42,14 @@
       </trans-unit>
       <trans-unit id="BuildResult_Succeeded">
         <source>succeeded</source>
-        <target state="new">succeeded</target>
+        <target state="translated">успешно выполнено</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
-        <target state="new">succeeded with warnings</target>
+        <target state="translated">успешно выполнено с предупреждением</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -80,11 +80,11 @@
                      but isn't up to date.
                      (Short form: -q)
     </source>
-        <target state="translated">  -Вопрос
-                     (Экспериментальная функция) Укажите, есть ли какие-либо трудозатраты сборки.
-                     MSBuild выпустит ошибку при обнаружении целевого объекта или задачи
-                     которые могут быть добавочной (содержит входные и выходные данные),
-                     но не обновлен.
+        <target state="translated">  -question
+                     (Экспериментальный параметр) Запрашивает, есть ли работа по сборке.
+                     MSBuild выдает ошибку при обнаружении целевого объекта или задачи,
+                     которые могут быть добавочными (с входными и выходными данными),
+                     но не обновлены.
                      (Краткая форма: -q)
     </target>
         <note>
@@ -224,25 +224,25 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -isolateProjects[:True| MessageUponIsolationViolation| Ложь]
-                     Приводит к тому, что MSBuild выполняет сборку каждого проекта в режиме изоляции.
+        <target state="translated">  -isolateProjects[:True|MessageUponIsolationViolation|False]
+                     MSBuild выполняет сборку каждого проекта изолированно.
 
-Если задано значение "MessageUponIsolationViolation" (или его краткая
-                     в формате "Сообщение"), только результаты из целевых объектов верхнего уровня
-                     сериализуются, если параметр -outputResultsCache
-                     Поставляется. Это позволяет снизить шансы
-                     нарушая изоляцию целевой объект в проекте зависимостей с использованием
-                     неправильное состояние из-за зависимости от кэшированного целевого объекта
-                     побочные эффекты которых не будут использованы.
-                     (Например, определение свойства.)
+                     Если задано значение "MessageUponIsolationViolation" или его краткая
+                     форма "Message"), то происходит сериализация результатов только целевых объектов
+                     верхнего уровня, если указан параметр -outputResultsCache.
+                     Этот параметр позволяет исключить ситуацию, когда
+                     нарушающий изоляцию целевой объект в проекте зависимости может использовать
+                     неверное состояние из-за зависимости от кэшированного целевого объекта,
+                     побочные эффекты которого не учитываются.
+                     (Например, определение какого-либо свойства.)
 
-Это более строгий режим MSBuild, так как он требует
-                     что граф проекта может быть статически обнаруживаемым в
-                     время оценки, но может улучшить планирование и уменьшить
-                     недостаточно памяти при сборке большого набора проектов.
+                     Это режим MSBuild с более строгими ограничениями,
+                     поскольку для него требуется, чтобы граф проекта был статически обнаруживаемым во
+                     время проверки. Тем не менее, при этом улучшается планирование и снижается
+                     избыточное использование памяти при сборки крупного набора проектов.
                      (Краткая форма: -isolate)
 
-Этот флаг является экспериментальным и может работать неправильно.
+                     Это экспериментальный флаг, он может работать неправильно.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -357,13 +357,13 @@
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="translated">  -warnNotAsError[:code[;code2]]
-                     Список кодов предупреждений, которые не будут рассматриваться как ошибки.
-                     Используйте точку с запятой или запятую для разделения
-                     несколько кодов предупреждений. Не оказывает влияния, если параметр -warnaserror
-                     параметр не задано.
+        <target state="translated">  -warnNotAsError[:код[;код2]]
+                     Список кодов предупреждений, которые не следует обрабатывать в качестве ошибок.
+                     Используйте точку с запятой или запятую, чтобы разделить
+                     несколько кодов предупреждения. Не действует, если параметр -warnaserror
+                     не задан.
 
-Примере:
+                     Пример:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -554,14 +554,14 @@
                            is set separately by
                            -fileloggerparameters.
 </source>
-        <target state="translated">  -verbosity:&lt;level&gt; Отображение этого объема данных в журнале событий.
-                     Доступные уровни детализации: q[uiet], m[inimal],
-                     n[ormal], d[etailed] и diag[nostic]. (Краткая форма: -v)
-                     Примере:
+        <target state="translated">  -verbosity:&lt;уровень&gt; Уровень детализации сведений в журнале событий.
+                     Доступные уровни детализации: q (или quiet) — отсутствует, m (или minimal) — минимальный,
+                     n (или normal) — обычный, d (или detailed) — подробный, diag (или diagnostic) — диагностика. (Краткая форма: -v)
+                     Пример:
                        -verbosity:quiet
 
-Примечание. Уровень детализации средства ведения журнала файлов
-                           задан отдельно
+                     Примечание. Детализация средств ведения журналов файлов
+                           устанавливается отдельно с помощью
                            -fileloggerparameters.
 </target>
         <note>
@@ -611,40 +611,40 @@
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Parameters to console logger. (Short form: -clp)
-                     The available parameters are:
-                        PerformanceSummary--Show time spent in tasks, targets
-                            and projects.
-                        Summary--Show error and warning summary at the end.
-                        NoSummary--Don't show error and warning summary at the
-                            end.
-                        ErrorsOnly--Show only errors.
-                        WarningsOnly--Show only warnings.
-                        NoItemAndPropertyList--Don't show list of items and
-                            properties at the start of each project build.
-                        ShowCommandLine--Show TaskCommandLineEvent messages
-                        ShowTimestamp--Display the Timestamp as a prefix to any
-                            message.
-                        ShowEventId--Show eventId for started events, finished
-                            events, and messages
-                        ForceNoAlign--Does not align the text to the size of
-                            the console buffer
-                        DisableConsoleColor--Use the default console colors
-                            for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
-                        EnableMPLogging--Enable the multiprocessor logging
-                            style even when running in non-multiprocessor
-                            mode. This logging style is on by default.
-                        ForceConsoleColor--Use ANSI console colors even if
-                            console does not support it
-                        PreferConsoleColor--Use ANSI console colors only if
-                            target console does support it
-                     Verbosity--overrides the -verbosity setting for this
-                            logger.
-                     Example:
+        <target state="translated">  -consoleLoggerParameters:&lt;параметры&gt;
+                     Параметры средства ведения журнала консоли. (Краткая форма: -clp)
+                     Доступны следующие параметры:
+                        PerformanceSummary--показывать время, затраченное на выполнение задач,
+                            целевых объектов и проектов.
+                        Summary--показывать сводку ошибок и предупреждений по завершении работы.
+                        NoSummary--не показывать сводку ошибок и предупреждений по
+                            завершении работы.
+                        ErrorsOnly--показывать только ошибки.
+                        WarningsOnly--показывать только предупреждения.
+                        NoItemAndPropertyList--не показывать список элементов и
+                            свойств в начале сборки каждого проекта.
+                        ShowCommandLine--показывать сообщения TaskCommandLineEvent
+                        ShowTimestamp--показывать метку времени в качестве префикса к любому
+                            сообщению.
+                        ShowEventId--показывать код события eventId для запущенных событий,
+                            завершенных событий и сообщений
+                        ForceNoAlign--не выравнивать текст относительно размера
+                            буфера консоли
+                        DisableConsoleColor--использовать цвета консоли по умолчанию
+                            для всех сообщений ведения журнала.
+                        DisableMPLogging--отключить многопроцессорный
+                            стиль ведения журнала выходных данных при работе в
+                            режиме, отличном от многопроцессорного.
+                        EnableMPLogging--включить многопроцессорный стиль ведения журнала
+                            даже при работе в режиме, отличном от
+                            многопроцессорного. Этот стиль ведения журнала включен по умолчанию.
+                        ForceConsoleColor--использовать цвета консоли ANSI, даже если
+                            консоль не поддерживает их
+                        PreferConsoleColor--использовать цвета консоли ANSI лишь в случае, если
+                            целевая консоль поддерживает их
+                     Verbosity--переопределяет параметр -verbosity (уровень детализации) для этого
+                            средства ведения журнала.
+                     Пример:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
@@ -745,10 +745,10 @@
                      will read build results from. If -isolateProjects is set
                      to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Разделенный точками с запятой список входных файлов кэша, которые MSBuild
-                     будет считывайте результаты сборки. Если задано значение -isolateProjects
-                     значение False, при этом задано значение True. (краткая форма: -irc)
+        <target state="translated">  -inputResultsCaches:&lt;файл кэша&gt;...
+                     Список входных файлов кэша (разделитель — точка с запятой), из которых MSBuild
+                     будет читать результаты сборки. Если для параметра -isolateProjects задано значение
+                     "False", то оно будет изменено на "True". (Краткая форма: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -762,11 +762,11 @@
                      If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="translated">  -outputResultsCache:[cacheFile]
-                     Выходной файл кэша, в котором MSBuild будет записывать содержимое
-                     кэш результатов сборки в конце сборки.
-                     Если для параметра -isolateProjects задано значение False, для него задано значение True.
-                     (краткая форма: -orc)
+        <target state="translated">  -outputResultsCache:[файл кэша]
+                     Выходной файл кэша, в который MSBuild будет записывать содержимое
+                     кэша результата сборки по окончании сборки.
+                     Если для параметра -isolateProjects задано значение "False", оно будет изменено на "True".
+                     (Краткая форма: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -1389,7 +1389,7 @@
       </trans-unit>
       <trans-unit id="ProjectBuilding_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2}  ({3}с)</target>
+        <target state="translated">{0}{1} {2} ({3} с)</target>
         <note>
       Project building.
       {0}: indentation - few spaces to visually indent row
@@ -1400,7 +1400,7 @@
       </trans-unit>
       <trans-unit id="ProjectBuilding_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3}  ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} ({4} с)</target>
         <note>
       Project building including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1412,7 +1412,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2}  ({3}с)</target>
+        <target state="translated">{0}{1} {2} ({3} с)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1423,7 +1423,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
         <source> → {0}</source>
-        <target state="new"> → {0}</target>
+        <target state="translated"> → {0}</target>
         <note>
       Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
       {0}: VT100 coded hyperlink to project output directory
@@ -1431,7 +1431,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3}  ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} ({4} с)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1490,14 +1490,14 @@
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="translated">Восстановление завершено ({0}с)</target>
+        <target state="translated">Восстановление завершено ({0} с)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="translated">Восстановить {0} в {1}s</target>
+        <target state="translated">Восстановление {0} через {1} с</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1565,7 +1565,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedSwitchForSolutionFiles">
         <source>The '{0}' switch is not supported for solution files.</source>
-        <target state="translated">Ключ '{0}' не поддерживается для файлов решения.</target>
+        <target state="translated">Параметр "{0}" не поддерживается для файлов решений.</target>
         <note />
       </trans-unit>
       <trans-unit id="Using35Engine">

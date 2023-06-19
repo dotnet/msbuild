@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="translated">Sestavit {0} v {1}</target>
+        <target state="translated">Sestavení {0} za {1}s</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -21,7 +21,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
         <source>failed</source>
-        <target state="new">failed</target>
+        <target state="translated">neúspěšné</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -42,14 +42,14 @@
       </trans-unit>
       <trans-unit id="BuildResult_Succeeded">
         <source>succeeded</source>
-        <target state="new">succeeded</target>
+        <target state="translated">úspěšné</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
-        <target state="new">succeeded with warnings</target>
+        <target state="translated">úspěšně dokončeno s upozorněními</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -80,9 +80,10 @@
                      but isn't up to date.
                      (Short form: -q)
     </source>
-        <target state="translated">  -Otázka
-                     (Experimentální) Otázka, zda existuje nějaká práce na sestavení
-                     Nástroj MSBuild se při zjištění cíle nebo úlohy
+        <target state="translated">  -question
+                     (experimentální) Dotaz, jestli je dochází k práci na sestavení.
+                     MSBuild zobrazí chybu při zjištění cíle nebo úkolu
+,
                      který může být přírůstkový (obsahuje vstupy a výstupy),
                      ale není aktuální.
                      (Krátký tvar: -q)
@@ -226,24 +227,27 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -isolateProjects[:True| MessageUponIsolationViolation| Nepravda]
-                     Způsobí, že NÁSTROJ MSBuild sestaví každý projekt v izolaci.
+                     Způsobí, že MSBuild sestaví každý projekt v izolaci.
 
-Když se nastaví na MessageUponIsolationViolation (nebo jeho krátká
-                     formulář Zpráva), pouze výsledky z cílů nejvyšší úrovně
-                     jsou serializovány, pokud je přepínač -outputResultsCache
-                     Dodává. Tímto se zmírní pravděpodobnost, že
-                     izolace porušující cíl v projektu závislosti pomocí
-                     nesprávný stav kvůli své závislosti na cíli uloženém v mezipaměti
-                     jejichž vedlejší účinky by se nezohlednily.
-                     (Například definice vlastnosti))
+Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
+                     tvar „Zpráva“), jsou serializovány pouze výsledky z cílů nejvyšší úrovně
+                     pokud je dodán přepínač -outputResultsCache
+.
+                     Tímto se zmírní pravděpodobnost
+                     cíle porušujícího izolaci v projektu závislosti pomocí
+                     nesprávného stavu kvůli své závislosti na cíli uloženém v mezipaměti
+,
+                     jehož vedlejší účinky by se nezohlednily.
+                     (Například definice vlastnosti.)
 
-Toto je přísnější režim MSBuildu, jak ho vyžaduje.
-                     že graf projektu je staticky zjistitelný v
-                     vyhodnocování, ale může zlepšit plánování a snížit
+                    Toto je přísnější režim MSBuildu, protože vyžaduje
+,
+                     aby byl graf projektu staticky zjistitelný v
+                     období vyhodnocování, ale může zlepšit plánování a snížit
                      režie paměti při sestavování velké sady projektů.
                      (Krátký tvar: -isolate)
 
-Tento příznak je experimentální a nemusí fungovat podle očekávání.
+                     Tento příznak je experimentální a nemusí fungovat podle očekávání.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -359,12 +363,13 @@ Tento příznak je experimentální a nemusí fungovat podle očekávání.
                        -warnNotAsError:MSB3026
     </source>
         <target state="translated">  -warnNotAsError[:code[;code2]]
-                     Seznam kódů upozornění, které se mají považovat za chyby
-                     K oddělení použijte středník nebo čárku.
-                     více kódů upozornění. Nemá žádný vliv, pokud -warnaserror
-                     přepínač není nastaven.
+                     Seznam kódů upozornění, které se nemají považovat za chyby.
+                     K oddělení
+ více kódů upozornění použijte středník 
+                     nebo čárku. Nemá žádný vliv, pokud přepínač -warnaserror
+                     není nastavený.
 
-Příklad:
+                     Příklad:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -559,13 +564,13 @@ Příklad:
                            -fileloggerparameters.
 </source>
         <target state="translated">  -verbosity:&lt;level&gt; Zobrazí toto množství informací v protokolu událostí.
-                     Dostupné úrovně podrobností: q[uiet], m[inimal],
-                     n[ormal], d[etailed] a diagnostikovat[nostic]. (Krátký tvar: -v)
+                     Dostupné úrovně podrobnosti: q[uiet], m[inimal],
+                     n[ormal], d[etailed] a diag[nostic]. (Krátký tvar: -v)
                      Příklad:
                        -verbosity:quiet
 
-Poznámka: Podrobnosti protokolování souborů
-                           je nastaveno samostatně
+                     Poznámka: Podrobnost protokolování souborů
+                           je nastavena samostatně přes
                            -fileloggerparameters.
 </target>
         <note>
@@ -615,40 +620,40 @@ Poznámka: Podrobnosti protokolování souborů
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Parameters to console logger. (Short form: -clp)
-                     The available parameters are:
-                        PerformanceSummary--Show time spent in tasks, targets
-                            and projects.
-                        Summary--Show error and warning summary at the end.
-                        NoSummary--Don't show error and warning summary at the
-                            end.
-                        ErrorsOnly--Show only errors.
-                        WarningsOnly--Show only warnings.
-                        NoItemAndPropertyList--Don't show list of items and
-                            properties at the start of each project build.
-                        ShowCommandLine--Show TaskCommandLineEvent messages
-                        ShowTimestamp--Display the Timestamp as a prefix to any
-                            message.
-                        ShowEventId--Show eventId for started events, finished
-                            events, and messages
-                        ForceNoAlign--Does not align the text to the size of
-                            the console buffer
-                        DisableConsoleColor--Use the default console colors
-                            for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
-                        EnableMPLogging--Enable the multiprocessor logging
-                            style even when running in non-multiprocessor
-                            mode. This logging style is on by default.
-                        ForceConsoleColor--Use ANSI console colors even if
-                            console does not support it
-                        PreferConsoleColor--Use ANSI console colors only if
-                            target console does support it
-                     Verbosity--overrides the -verbosity setting for this
-                            logger.
-                     Example:
+        <target state="translated">  -consoleloggerparameters:&lt;parameters&gt;
+                     Parametry do protokolovacího nástroje konzoly. (Krátký tvar: -clp)
+                     Dostupné parametry jsou:
+                        PerformanceSummary – zobrazí dobu zpracování úloh, cílů
+                            a projektů.
+                        Summary – zobrazí souhrn chyb a upozornění na konci.
+                        NoSummary – nezobrazí souhrny chyb a upozornění na
+                            konci.
+                        ErrorsOnly – zobrazí jenom chyby.
+                        WarningsOnly – zobrazí jenom upozornění.
+                        NoItemAndPropertyList – nezobrazí na začátku sestavení každého
+                            projektu seznamy položek a vlastností.
+                        ShowCommandLine – zobrazí zprávy TaskCommandLineEvent.
+                        ShowTimestamp – před každou zprávou zobrazí
+                            časové razítko.
+                        ShowEventId – zobrazí ID události pro spuštěné a dokončené
+                            události a zprávy.
+                        ForceNoAlign – nenastav9 text podle velikosti vyrovnávací
+                            paměti konzoly.
+                        DisableConsoleColor – použije výchozí barvy konzoly
+                            pro všechny zprávy protokolování.
+                        DisableMPLogging – zakáže víceprocesorový styl výstupu
+                            protokolování při práci v jiném než víceprocesorovém
+                            režimu.
+                        EnableMPLogging – povolí víceprocesorový styl výstupu
+                            protokolování i při práci v jiném
+                            režimu. Tento styl protokolování je výchozí. 
+                        ForceConsoleColor – použije barvy konzoly ANSI,
+                            i když to konzola nepodporuje.
+                        PreferConsoleColor– použije barvy konzoly ANSI, pouze pokud
+                            to cílová konzola podporuje.
+                        Verbosity – potlačí nastavení -verbosity
+                            pro tento protokolovací nástroj.
+                     Příklad:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
@@ -751,8 +756,8 @@ Poznámka: Podrobnosti protokolování souborů
    </source>
         <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
                      Středníky oddělený seznam vstupních souborů mezipaměti, které MSBuild
-                     načte výsledky sestavení. Pokud je nastaven parametr -isolateProjects
-                     na hodnotu False, nastavíte ji na hodnotu True. (krátký tvar: -irc)
+                     načte výsledky sestavení. Pokud je parametr -isolateProjects nastaven
+                     na hodnotu False, toto ho nastaví na hodnotu True. (krátký tvar: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -767,9 +772,9 @@ Poznámka: Podrobnosti protokolování souborů
                      (short form: -orc)
    </source>
         <target state="translated">  -outputResultsCache:[cacheFile]
-                     Výstupní soubor mezipaměti, do kterého MSBuild zapíše obsah
+                     výstupní soubor mezipaměti, do kterého nástroj MSBuild zapíše obsah
                      mezipaměti výsledků sestavení na konci sestavení.
-                     Pokud je parametr -isolateProjects nastaven na hodnotu False, nastaví se hodnota True.
+                     Pokud je parametr -isolateProjects nastaven na hodnotu False, toto ho                                nastaví na hodnotu True.
                      (krátký tvar: -orc)
    </target>
         <note>
@@ -1398,7 +1403,7 @@ Poznámka: Podrobnosti protokolování souborů
       </trans-unit>
       <trans-unit id="ProjectBuilding_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3})</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project building.
       {0}: indentation - few spaces to visually indent row
@@ -1409,7 +1414,7 @@ Poznámka: Podrobnosti protokolování souborů
       </trans-unit>
       <trans-unit id="ProjectBuilding_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4})</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project building including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1421,7 +1426,7 @@ Poznámka: Podrobnosti protokolování souborů
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3})</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1432,7 +1437,7 @@ Poznámka: Podrobnosti protokolování souborů
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
         <source> → {0}</source>
-        <target state="new"> → {0}</target>
+        <target state="translated"> → {0}</target>
         <note>
       Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
       {0}: VT100 coded hyperlink to project output directory
@@ -1440,7 +1445,7 @@ Poznámka: Podrobnosti protokolování souborů
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4})</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1506,7 +1511,7 @@ Poznámka: Podrobnosti protokolování souborů
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="translated">Obnovit {0} v {1}s</target>
+        <target state="translated">Obnoví se {0} za {1}s</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1574,7 +1579,7 @@ Poznámka: Podrobnosti protokolování souborů
       </trans-unit>
       <trans-unit id="UnsupportedSwitchForSolutionFiles">
         <source>The '{0}' switch is not supported for solution files.</source>
-        <target state="translated">Přepínač '{0}' není pro soubory řešení podporován.</target>
+        <target state="translated">Přepínač „{0}“ se pro soubory řešení nepodporuje.</target>
         <note />
       </trans-unit>
       <trans-unit id="Using35Engine">

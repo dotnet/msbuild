@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="translated">Criar {0} em {1}s</target>
+        <target state="translated">Construir {0} em {1}s</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -21,7 +21,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
         <source>failed</source>
-        <target state="new">failed</target>
+        <target state="translated">falhou</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -42,14 +42,14 @@
       </trans-unit>
       <trans-unit id="BuildResult_Succeeded">
         <source>succeeded</source>
-        <target state="new">succeeded</target>
+        <target state="translated">êxito</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
-        <target state="new">succeeded with warnings</target>
+        <target state="translated">êxito com avisos</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -80,12 +80,13 @@
                      but isn't up to date.
                      (Short form: -q)
     </source>
-        <target state="translated">  -Pergunta
-                     (Experimental) Questione se há algum trabalho de compilação.
-                     O MSBuild fará um erro quando detectar um destino ou uma tarefa
-                     que pode ser incremental (tem entradas e saídas),
-                     mas não está atualizado.
-                     (Forma abreviada: -q)    </target>
+        <target state="translated">  -pergunta
+                     (Experimental) Questione se há algum trabalho de construção.
+                     O MSBuild apresentará um erro ao detectar um destino ou tarefa
+                     que pode ser incremental (possui entradas e saídas),
+                     não está atualizado.
+                     (forma abreviada: -q)
+    </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
       LOCALIZATION: "-question" and "-q" should not be localized.
@@ -225,25 +226,26 @@ arquivo de resposta.
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -isolateProjects[:True| MessageUponIsolationViolation| Falso]
-                     Faz com que o MSBuild compile cada projeto em isolamento.
+        <target state="translated">  -isolarProjects[:True|MessageUponIsolationViolation|False]
+                     Faz com que o MSBuild crie cada projeto isoladamente.
 
-Quando definido como "MessageUponIsolationViolation" (ou sua
-                     form "Message"), only the results from top-level targets
-                     serão serializados se a opção -outputResultsCache for
-                     Fornecido. Isso é para reduzir as chances de um
-                     destino de violação de isolamento em um projeto de dependência usando
-                     estado incorreto devido à sua dependência em um destino armazenado em cache
-                     cujos efeitos colaterais não seriam levado em conta.
+                     Quando definido como "MessageUponIsolationViolation" (ou sua abreviação
+                     formulário "Mensagem"), apenas os resultados dos alvos de nível superior
+                     são serializados se a opção -outputResultsCache for
+                     fornecido. Isso é para mitigar as chances de um
+                     alvo de violação de isolamento em um projeto de dependência usando
+                     estado incorreto devido à sua dependência de um destino armazenado em cache
+                     cujos efeitos colaterais não seriam levados em consideração.
                      (Por exemplo, a definição de uma propriedade.)
 
-Este é um modo mais restritivo do MSBuild, pois ele requer
-                     em que o grafo do projeto seja detectável estaticamente em
+                     Este é um modo mais restritivo do MSBuild, pois requer
+                     que o gráfico do projeto seja descoberto estaticamente em
                      tempo de avaliação, mas pode melhorar o agendamento e reduzir
                      sobrecarga de memória ao criar um grande conjunto de projetos.
-                     (Forma abreviada: -isolate)
+                     (forma abreviada: -isolar)
 
-Este sinalizador é experimental e pode não funcionar conforme o esperado.    </target>
+                     Este sinalizador é experimental e pode não funcionar conforme o esperado.
+    </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
       LOCALIZATION: "-isolateProjects" should not be localized.
@@ -357,14 +359,15 @@ Este sinalizador é experimental e pode não funcionar conforme o esperado.    <
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="translated">  -warnNotAsError[:code[;code2]]
-                     Lista de códigos de aviso a serem tratados como erros.
+        <target state="translated">  -warningNotAsError[:code[;code2]]
+                     Lista de códigos de aviso para tratar e não tratar como erros.
                      Use ponto e vírgula ou vírgula para separar
-                     vários códigos de aviso. Não tem efeito se -warnaserror
-                     opção não definida.
+                     vários códigos de advertência. Não tem efeito se o -warnaserror
+                     interruptor não está definido.
 
-Exemplo:
-                       -warnNotAsError:MSB3026    </target>
+                     Exemplo:
+                       -warnNotAsError:MSB3026
+    </target>
         <note>
       LOCALIZATION: "-warnNotAsError" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -553,15 +556,16 @@ Exemplo:
                            is set separately by
                            -fileloggerparameters.
 </source>
-        <target state="translated">  -verbosity:&lt;level&gt; Exibir esta quantidade de informações no log de eventos.
-                     Os níveis de detalhamento disponíveis são: q[uiet], m[inimal],
-                     n[ormal], d[etailed] e diag[nostic]. (Forma abreviada: -v)
+        <target state="translated">  -verbosidade:&lt;level&gt; Exibe essa quantidade de informações no log de eventos.
+                     Os níveis de verbosidade disponíveis são: q[uiet], m[inimal],
+                     n[ormal], d[detalhado] e diag[nóstico]. (forma abreviada: -v)
                      Exemplo:
-                       -verbosity:quiet
+                       - verbosidade: quieto
 
-Observação: detalhamento dos agentes de arquivo
+                     Nota: verbosidade dos registradores de arquivos
                            é definido separadamente por
-                           -fileloggerparameters.</target>
+                           -fileloggerparameters.
+</target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "MSBuild", "MSBuild.exe" and "MSBuild.rsp"
@@ -609,42 +613,42 @@ Observação: detalhamento dos agentes de arquivo
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Parameters to console logger. (Short form: -clp)
-                     The available parameters are:
-                        PerformanceSummary--Show time spent in tasks, targets
-                            and projects.
-                        Summary--Show error and warning summary at the end.
-                        NoSummary--Don't show error and warning summary at the
-                            end.
-                        ErrorsOnly--Show only errors.
-                        WarningsOnly--Show only warnings.
-                        NoItemAndPropertyList--Don't show list of items and
-                            properties at the start of each project build.
-                        ShowCommandLine--Show TaskCommandLineEvent messages
-                        ShowTimestamp--Display the Timestamp as a prefix to any
-                            message.
-                        ShowEventId--Show eventId for started events, finished
-                            events, and messages
-                        ForceNoAlign--Does not align the text to the size of
-                            the console buffer
-                        DisableConsoleColor--Use the default console colors
-                            for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
-                        EnableMPLogging--Enable the multiprocessor logging
-                            style even when running in non-multiprocessor
-                            mode. This logging style is on by default.
-                        ForceConsoleColor--Use ANSI console colors even if
-                            console does not support it
-                        PreferConsoleColor--Use ANSI console colors only if
-                            target console does support it
-                     Verbosity--overrides the -verbosity setting for this
-                            logger.
-                     Example:
+        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
+                     Parâmetros para o logger do console. (forma abreviada: -clp)
+                     Os parâmetros disponíveis são:
+                        PerformanceSummary--Mostra o tempo gasto em tarefas, alvos
+                            e projetos.
+                        Resumo--Mostra o resumo do erro e do aviso no final.
+                        NoSummary--Não mostra o resumo de erros e avisos no
+                            fim.
+                        ErrorOnly--Mostrar apenas erros.
+                        WarningsOnly--Mostra apenas avisos.
+                        NoItemAndPropertyList--Não mostra a lista de itens e
+                            properties no início de cada compilação do projeto.
+                        ShowCommandLine--Mostra mensagens TaskCommandLineEvent
+                        ShowTimestamp--Exibe o timestamp como um prefixo para qualquer
+                            mensagem.
+                        ShowEventId--Mostra eventId para eventos iniciados, concluídos
+                            eventos e mensagens
+                        ForceNoAlign--Não alinha o texto ao tamanho de
+                            o buffer do console
+                        DisableConsoleColor--Use as cores padrão do console
+                            para todas as mensagens de registro.
+                        DisableMPLogging-- Desativa o multiprocessador
+                            estilo de registro de saída ao executar em
+                            modo não multiprocessador.
+                        EnableMPLogging--Habilita o log do multiprocessador
+                            estilo mesmo quando executado em não multiprocessador
+                            modo. Esse estilo de criação de log está ativado por padrão.
+                        ForceConsoleColor--Use as cores do console ANSI mesmo se
+                            o console não suporta isso
+                        PreferConsoleColor--Use as cores do console ANSI somente se
+                            o console de destino suporta isso
+                     Verbosity--substitui a configuração -verbosity para este
+                            registrador.
+                     Exemplo:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
-                                                 Verbosity=minimal
+                                                 Verbosidade=mínimo
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -744,9 +748,10 @@ Observação: detalhamento dos agentes de arquivo
                      to False, this sets it to True. (short form: -irc)
    </source>
         <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Lista separada por ponto e vírgula de arquivos de cache de entrada que o MSBuild
-                     lerá os resultados da compilação. Se -isolateProjects estiver definido
-                     como False, isso o define como Verdadeiro. (forma abreviada: -irc)   </target>
+                     Lista separada por ponto-e-vírgula de arquivos de cache de entrada que o MSBuild
+                     irá ler os resultados da compilação. Se -isolateProjects estiver definido
+                     para Falso, isso o define como Verdadeiro. (forma abreviada: -irc)
+   </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -760,10 +765,11 @@ Observação: detalhamento dos agentes de arquivo
                      (short form: -orc)
    </source>
         <target state="translated">  -outputResultsCache:[cacheFile]
-                     Arquivo de cache de saída no qual o MSBuild gravará o conteúdo do
-                     seus caches de resultados de compilação no final da compilação.
-                     Se -isolateProjects estiver definido como False, isso o definirá como True.
-                     (forma abreviada: -orc)   </target>
+                     Arquivo de cache de saída onde o MSBuild gravará o conteúdo de
+                     seu resultado de compilação é armazenado em cache no final da compilação.
+                     Se -isolateProjects for definido como False, isso o definirá como True.
+                     (forma abreviada: -orc)
+   </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -1419,7 +1425,7 @@ Observação: detalhamento dos agentes de arquivo
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
         <source> → {0}</source>
-        <target state="new"> → {0}</target>
+        <target state="translated"> → {0}</target>
         <note>
       Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
       {0}: VT100 coded hyperlink to project output directory
@@ -1561,7 +1567,7 @@ Observação: detalhamento dos agentes de arquivo
       </trans-unit>
       <trans-unit id="UnsupportedSwitchForSolutionFiles">
         <source>The '{0}' switch is not supported for solution files.</source>
-        <target state="translated">Não '{0}' comutador de configuração para arquivos de solução.</target>
+        <target state="translated">A opção '{0}' não é suportada para arquivos de solução.</target>
         <note />
       </trans-unit>
       <trans-unit id="Using35Engine">

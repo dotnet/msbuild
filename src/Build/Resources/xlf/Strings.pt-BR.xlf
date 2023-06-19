@@ -64,12 +64,12 @@
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
         <source>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="new">MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</target>
+        <target state="translated">MSB4271: A variável de ambiente MSBUILDDISABLEFEATURESFROMVERSION está definida para um formato inválido. Habilitando todas as versões de onda de mudança. Valor inserido: {0}. Ondas de Mudança Atuais: {1}.</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
         <source>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="new">MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</target>
+        <target state="translated">MSB4272: A variável de ambiente MSBUILDDISABLEFEATURESFROMVERSION está definida para uma versão que está fora de rotação. Padrão para alterar a versão do Wave: {0}. Valor inserido: {1}. Ondas de Mudança Atuais: {2}.</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -94,7 +94,7 @@
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
-        <target state="translated">MSB4276: Falha do resolvedor de SDK padrão ao resolve SDK "{0}" porque o "{1}" diretório não existia.</target>
+        <target state="translated">MSB4276: O resolvedor SDK padrão falhou ao resolver SDK "{0}" porque o diretório "{1}" não existia.</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
@@ -109,7 +109,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentDerivedPropertyRead">
         <source>Property '{0}' with value '{1}' expanded from the environment.</source>
-        <target state="translated">A '{0}' com valor '{1}' expandido do ambiente.</target>
+        <target state="translated">Imóvel '{0}' com valor '{1}' expandido do ambiente.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -130,7 +130,7 @@
       <trans-unit id="FailedToResolveSDK">
         <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
   {1}</source>
-        <target state="translated">Não foi possível resolve SDK "{0}". Exatamente uma das mensagens de investigação abaixo indica por que não resolve o SDK. Investigue e resolve essa mensagem para especificar corretamente o SDK.
+        <target state="translated">Não foi possível resolver SDK "{0}". Exatamente uma das mensagens de investigação abaixo indica por que não foi possível resolver o SDK. Investigue e resolva essa mensagem para especificar corretamente o SDK.
   {1}</target>
         <note />
       </trans-unit>
@@ -156,7 +156,7 @@
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
         <source>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</source>
-        <target state="translated">MSB4120: o item '{0}' definição dentro do destino faz referência a si mesmo por meio da referência (qualificada ou não qualificada) '{1}'. Isso pode levar à expansão não solicitada e à aplicação cruzada de itens pré-existentes. Mais informações: https://aka.ms/msbuild/metadata-self-ref</target>
+        <target state="translated">MSB4120: A definição do item '{0}' dentro do destino faz referência a si mesmo via metadado (qualificado ou não qualificado) '{1}'. Isso pode levar à expansão não intencional e à aplicação cruzada de itens pré-existentes. Mais informações: https://aka.ms/msbuild/metadata-self-ref</target>
         <note>{StrBegin="MSB4120: "}</note>
       </trans-unit>
       <trans-unit id="KillingProcessWithPid">
@@ -166,7 +166,7 @@
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
         <source>Loading the following project cache plugin: {0}</source>
-        <target state="new">Loading the following project cache plugin: {0}</target>
+        <target state="translated">Carregando o seguinte plug-in de cache do projeto: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -198,7 +198,7 @@
       </trans-unit>
       <trans-unit id="NodeReused">
         <source>Reusing node {0} (PID: {1}).</source>
-        <target state="translated">Reutilizando {0} nó (PID: {1}).</target>
+        <target state="translated">Reutilizando nó {0} (PID: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -352,7 +352,7 @@
       </trans-unit>
       <trans-unit id="PropertyOutsidePropertyGroupInTarget">
         <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
-        <target state="translated">MSB4067: O elemento &lt;{0}&gt; abaixo do &lt;{1}&gt; não é reconhecido. Se você pretende que isso seja uma propriedade, coloque-a dentro de um &lt;PropertyGroup&gt; elemento.</target>
+        <target state="translated">MSB4067: O elemento &lt;{0}&gt; abaixo do elemento &lt;{1}&gt; não é reconhecido. Se você pretende que seja uma propriedade, coloque-a dentro de um elemento &lt;PropertyGroup&gt;.</target>
         <note>{StrBegin="MSB4067: "}</note>
       </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
@@ -372,7 +372,7 @@
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
-        <target state="translated">O resolvedor de SDK "{0}" retornou nulo.</target>
+        <target state="translated">O resolvedor do SDK "{0}" retornou nulo.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -428,7 +428,7 @@
       </trans-unit>
       <trans-unit id="TaskAssemblyLoaded">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
-        <target state="translated">Assembly carregado durante {0}{1}: {2} (local: {3}, MVID: {4}, AppDomain: {5})</target>
+        <target state="translated">Montagem carregada durante {0}{1}: {2} (localização: {3}, MVID: {4}, AppDomain: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">

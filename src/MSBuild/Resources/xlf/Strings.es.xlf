@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="translated">{0} de compilación en {1}s</target>
+        <target state="translated">Compilación {0} en {1}s</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -21,7 +21,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
         <source>failed</source>
-        <target state="new">failed</target>
+        <target state="translated">erróneo</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -42,14 +42,14 @@
       </trans-unit>
       <trans-unit id="BuildResult_Succeeded">
         <source>succeeded</source>
-        <target state="new">succeeded</target>
+        <target state="translated">realizado correctamente</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
-        <target state="new">succeeded with warnings</target>
+        <target state="translated">correcto con advertencias</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -80,7 +80,7 @@
                      but isn't up to date.
                      (Short form: -q)
     </source>
-        <target state="translated">  -Pregunta
+        <target state="translated">  -question
                      (Experimental) Pregunta si hay algún trabajo de compilación.
                      MSBuild generará un error cuando detecte un destino o tarea
                      que puede ser incremental (tiene entradas y salidas),
@@ -95,7 +95,7 @@
       </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1064: Low priority value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1064: El valor de prioridad baja no es válido. {0}.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -228,22 +228,22 @@
         <target state="translated">  -isolateProjects[:True| MessageUponIsolationViolation| Falso]
                      Hace que MSBuild compile cada proyecto de forma aislada.
 
-Cuando se establece en "MessageUponIsolationViolation" (o su valor corto
+                     Cuando se establece en "MessageUponIsolationViolation" (o su valor corto
                      forma "Mensaje"), solo los resultados de los destinos de nivel superior
                      se serializan si el modificador -outputResultsCache es
                      Suministrado. Esto es para mitigar las posibilidades de un
                      destino que infringe el aislamiento en un proyecto de dependencia mediante
-                     estado incorrecto debido a su dependencia en un destino almacenado en caché
+                     un estado incorrecto debido a su dependencia en un destino almacenado en caché
                      cuyos efectos secundarios no se tendrán en cuenta.
                      (Por ejemplo, la definición de una propiedad.)
 
-Este es un modo más restrictivo de MSBuild, ya que requiere
+                     Este es un modo más restrictivo de MSBuild, ya que requiere
                      que el gráfico del proyecto se pueda detectar estáticamente en
                      tiempo de evaluación, pero puede mejorar la programación y reducir
-                     sobrecarga de memoria al compilar un gran conjunto de proyectos.
+                     la sobrecarga de memoria al compilar un gran conjunto de proyectos.
                      (Forma corta: -isolate)
 
-Esta marca es experimental y puede que no funcione según lo previsto.
+                     Esta marca es experimental y puede que no funcione según lo previsto.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -359,12 +359,12 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                        -warnNotAsError:MSB3026
     </source>
         <target state="translated">  -warnNotAsError[:code[;code2]]
-                     Lista de códigos de advertencia para tratar que no se traten como errores.
+                     Lista de códigos de advertencia para que no se traten como errores.
                      Use un punto y coma o una coma para separar
-                     varios códigos de advertencia. No tiene efecto si el error -warnaserror
-                     modificador no establecido.
+                     varios códigos de advertencia. No tiene efecto si el modificador -warnaserror
+                     no se ha establecido.
 
-Ejemplo:
+                     Ejemplo:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -565,7 +565,7 @@ Ejemplo:
                      Ejemplo:
                        -verbosity:quiet
 
-Nota: nivel de detalle de los registradores de archivos
+                     Nota: nivel de detalle de los registradores de archivos
                            se establece por separado por
                            -fileloggerparameters.
 </target>
@@ -616,40 +616,40 @@ Nota: nivel de detalle de los registradores de archivos
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Parameters to console logger. (Short form: -clp)
-                     The available parameters are:
-                        PerformanceSummary--Show time spent in tasks, targets
-                            and projects.
-                        Summary--Show error and warning summary at the end.
-                        NoSummary--Don't show error and warning summary at the
-                            end.
-                        ErrorsOnly--Show only errors.
-                        WarningsOnly--Show only warnings.
-                        NoItemAndPropertyList--Don't show list of items and
-                            properties at the start of each project build.
-                        ShowCommandLine--Show TaskCommandLineEvent messages
-                        ShowTimestamp--Display the Timestamp as a prefix to any
-                            message.
-                        ShowEventId--Show eventId for started events, finished
-                            events, and messages
-                        ForceNoAlign--Does not align the text to the size of
-                            the console buffer
-                        DisableConsoleColor--Use the default console colors
-                            for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
-                        EnableMPLogging--Enable the multiprocessor logging
-                            style even when running in non-multiprocessor
-                            mode. This logging style is on by default.
-                        ForceConsoleColor--Use ANSI console colors even if
-                            console does not support it
-                        PreferConsoleColor--Use ANSI console colors only if
-                            target console does support it
-                     Verbosity--overrides the -verbosity setting for this
-                            logger.
-                     Example:
+        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
+                     Parámetros del registrador de consola. (Forma corta: -clp)
+                     Los parámetros disponibles son:
+                        PerformanceSummary: muestra el tiempo empleado en tareas, destinos
+                            y proyectos.
+                        Summary: muestra un resumen de errores y advertencias al final.
+                        NoSummary: no muestra el resumen de errores y advertencias al
+                            final.
+                        ErrorsOnly: muestra solo errores.
+                        WarningsOnly: muestra solo advertencias.
+                        NoItemAndPropertyList: no muestra la lista de elementos y
+                            propiedades al principio de cada compilación del proyecto.
+                        ShowCommandLine: muestra los mensajes de TaskCommandLineEvent
+                        ShowTimestamp: muestra la marca de tiempo como un prefijo en los
+                            mensajes.
+                        ShowEventId: muestra el identificador de evento para los eventos iniciados, los eventos 
+                            finalizados y los mensajes.
+                        ForceNoAlign: no alinea el texto al tamaño del
+                            búfer de la consola
+                        DisableConsoleColor: usa los colores de consola predeterminados
+                            para todos los mensajes de registro.
+                        DisableMPLogging: deshabilita el estilo de registro de resultados
+                            de multiprocesador al ejecutarse en el
+                            modo de no multiprocesador.
+                        EnableMPLogging: habilita el estilo de registro de
+                            multiprocesador aunque se ejecute en el modo de
+                            no multiprocesador. Este estilo de registro está habilitado de forma predeterminada.
+                     ForceConsoleColor: usa los colores de consola ANSI incluso si
+                            la consola no lo admite.
+                        PreferConsoleColor--usa los colores de consola ANSI solo si
+                            la consola lo admite
+                        Verbosity: invalida el valor -verbosity para este
+                            registrador.
+                     Ejemplo:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
@@ -753,7 +753,7 @@ Nota: nivel de detalle de los registradores de archivos
         <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
                      Lista separada por punto y coma de los archivos de caché de entrada que MSBuild
                      leerá los resultados de la compilación. Si se establece -isolateProjects
-                     en False, se establece en True. (forma corta: -irc)
+                     en False, esta se establece en True. (forma corta: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -767,10 +767,10 @@ Nota: nivel de detalle de los registradores de archivos
                      If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="translated">  -outputResultsCache:[cacheFile]
-                     Archivo de caché de resultados donde MSBuild escribirá el contenido de
-                     sus memorias caché de resultados de compilación al final de la compilación.
-                     Si -isolateProjects se establece en False, se establece en True.
+        <target state="translated">  -outputResultsCache:[archivo-de-caché]
+                     Archivo de caché de salida donde MSBuild escribe el contenido de
+                     las memorias caché de resultados de compilación cuando esta acaba.
+                     Si se establece -isolateProjects en False, esta se establece en True.
                      (forma corta: -orc)
    </target>
         <note>
@@ -1397,7 +1397,7 @@ Nota: nivel de detalle de los registradores de archivos
       </trans-unit>
       <trans-unit id="ProjectBuilding_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3})</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project building.
       {0}: indentation - few spaces to visually indent row
@@ -1408,7 +1408,7 @@ Nota: nivel de detalle de los registradores de archivos
       </trans-unit>
       <trans-unit id="ProjectBuilding_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4})</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project building including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1420,7 +1420,7 @@ Nota: nivel de detalle de los registradores de archivos
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3})</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1431,7 +1431,7 @@ Nota: nivel de detalle de los registradores de archivos
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
         <source> → {0}</source>
-        <target state="new"> → {0}</target>
+        <target state="translated"> → {0}</target>
         <note>
       Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
       {0}: VT100 coded hyperlink to project output directory
@@ -1439,7 +1439,7 @@ Nota: nivel de detalle de los registradores de archivos
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4})</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row

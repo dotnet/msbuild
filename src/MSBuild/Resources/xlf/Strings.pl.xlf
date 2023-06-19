@@ -21,35 +21,35 @@
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
         <source>failed</source>
-        <target state="new">failed</target>
+        <target state="translated">niepowodzenie</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with errors</source>
-        <target state="translated">niepowodzenie z błędami</target>
+        <target state="translated">zakończono niepowodzeniem, z błędami</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with warnings</source>
-        <target state="translated">niepowodzenie z ostrzeżeniami</target>
+        <target state="translated">zakończono niepowodzeniem, z ostrzeżeniami.</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_Succeeded">
         <source>succeeded</source>
-        <target state="new">succeeded</target>
+        <target state="translated">powodzenie</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
-        <target state="new">succeeded with warnings</target>
+        <target state="translated">zakończono powodzeniem, z ostrzeżeniem</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -80,12 +80,12 @@
                      but isn't up to date.
                      (Short form: -q)
     </source>
-        <target state="translated">  -Pytanie
-                     (Eksperymentalne) Pytanie, czy istnieje jakakolwiek praca kompilacji.
-                     Program MSBuild wyloguje się z błędu, gdy wykryje element docelowy lub zadanie
-                     które mogą być przyrostowe (ma dane wejściowe i wyjściowe),
-                     ale nie jest aktualny.
-                     (Krótka wersja: -q)
+        <target state="translated">  -question
+                     (Eksperymentalne) Pytanie, czy istnieje jakakolwiek kompilacja.
+                     Program MSBuild wyrzuci błąd, gdy wykryje element docelowy lub zadanie
+                     , które może być przyrostowe (ma dane wejściowe i wyjściowe),
+                     ale nie jest aktualne.
+                     (Skrócona forma: -q)
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -226,25 +226,26 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -isolateProjects[:True| MessageUponIsolationViolation| Fałsz]
-                     Powoduje, że program MSBuild kompiluje każdy projekt w izolacji.
+        <target state="translated">  -isolateProjects[:True|MessageUponIsolationViolation|False]
+                     Powoduje, że program MSBuild kompiluje każdy projekt osobno.
 
-Gdy jest ustawiona wartość "MessageUponIsolationViolation" (lub jej krótka
-                     postać "Komunikat"), tylko wyniki z elementów docelowych najwyższego poziomu
-                     są serializowane, jeśli przełącznik -outputResultsCache jest
-                     Dostarczane. Ma to na celu ograniczenie prawdopodobieńszeń
-                     izolacja narusza cel w projekcie zależności przy użyciu
-                     niepoprawny stan ze względu na jego zależność od buforowanego elementu docelowego
-                     których efekty uboczne nie zostaną brane pod uwagę.
+                     Po ustawieniu na wartość „MessageUponIsolationViolation” (lub jej skróconą
+                     formę „Message”), serializowane są tylko wyniki z celów najwyższego poziomu
+                     , jeśli przełącznik -outputResultsCache jest
+                     dostarczony. Ma to na celu zmniejszenie szans na to, że cel 
+                     naruszy izolację w projekcie zależnym przy użyciu
+                     nieprawidłowego stanu z powodu jego zależności od buforowanego celu
+                     którego efekty uboczne nie byłyby brane pod uwagę.
                      (Na przykład definicja właściwości).
 
-To jest bardziej restrykcyjny tryb programu MSBuild, ponieważ wymaga
-                     że wykres projektu jest statycznie wykrywalny w
-                     czas oceny, ale może poprawić planowanie i zmniejszyć
-                     narzut pamięci podczas kompilowania dużego zestawu projektów.
-                     (Krótka wersja: -isolate)
+                     Jest to bardziej restrykcyjny tryb MSBuild, ponieważ wymaga
+,
+                     aby graf projektu był statycznie wykrywalny w
+                     czasie ewaluacji, ale może też poprawiać planowanie i zmniejszyć
+                     pamięć podczas budowania dużego zestawu projektów.
+                     (Skrócona forma: -isolate)
 
-Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
+                     Ta flaga jest eksperymentalna i może nie działać zgodnie z przeznaczeniem.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -363,12 +364,12 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                        -warnNotAsError:MSB3026
     </source>
         <target state="translated">  -warnNotAsError[:code[;code2]]
-                     Lista kodów ostrzeżeń, które mają być traktowane jako błędy.
-                     Rozdziel średnikami lub przecinkami
-                     wiele kodów ostrzeżeń. Nie ma żadnego efektu, jeśli parametr -warnaserror
-                     przełącznik nie jest ustawiony.
+                     Lista kodów ostrzeżeń, które nie są traktowane jako błędy.
+                     Użyj średnika lub przecinka, aby oddzielić
+                     wiele kodów ostrzeżeń. Nie ma wpływu, jeśli przełącznik -warnaserror
+                     nie jest ustawiony.
 
-Przykład:
+                     Przykład:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -563,13 +564,13 @@ Przykład:
                            -fileloggerparameters.
 </source>
         <target state="translated">  -verbosity:&lt;level&gt; Wyświetl tę ilość informacji w dzienniku zdarzeń.
-                     Dostępne poziomy szczegółowości: q[uiet], m[inimal],
-                     n[ormal],[etailed] d i[nostic] diag. (Krótka wersja: -v)
+                     Dostępne poziomy szczegółowości to: q[uiet], m[inimal],
+                     n[ormal], d[etailed], and diag[nostic]. (Skrócona forma: -v)
                      Przykład:
-                       -verbosity:quiet
+                       -verbosity:cichy
 
-Uwaga: poziom szczegółowości rejestratorów plików
-                           jest ustawiane osobno przez
+                     Note: szczegółowość rejestratorów plików
+                           jest ustawiana oddzielnie przez
                            -fileloggerparameters.
 </target>
         <note>
@@ -619,40 +620,41 @@ Uwaga: poziom szczegółowości rejestratorów plików
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Parameters to console logger. (Short form: -clp)
-                     The available parameters are:
-                        PerformanceSummary--Show time spent in tasks, targets
-                            and projects.
-                        Summary--Show error and warning summary at the end.
-                        NoSummary--Don't show error and warning summary at the
-                            end.
-                        ErrorsOnly--Show only errors.
-                        WarningsOnly--Show only warnings.
-                        NoItemAndPropertyList--Don't show list of items and
-                            properties at the start of each project build.
-                        ShowCommandLine--Show TaskCommandLineEvent messages
-                        ShowTimestamp--Display the Timestamp as a prefix to any
-                            message.
-                        ShowEventId--Show eventId for started events, finished
-                            events, and messages
-                        ForceNoAlign--Does not align the text to the size of
-                            the console buffer
-                        DisableConsoleColor--Use the default console colors
-                            for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
-                        EnableMPLogging--Enable the multiprocessor logging
-                            style even when running in non-multiprocessor
-                            mode. This logging style is on by default.
-                        ForceConsoleColor--Use ANSI console colors even if
-                            console does not support it
-                        PreferConsoleColor--Use ANSI console colors only if
-                            target console does support it
-                     Verbosity--overrides the -verbosity setting for this
-                            logger.
-                     Example:
+        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
+                     Parametry rejestratora konsoli. (Krótka wersja: -clp)
+                     Dostępne parametry:
+                        PerformanceSummary--pokazuje czas spędzony na zadaniach, elementach docelowych
+                        i projektach.
+                        Summary--pokazuje na końcu podsumowanie błędów i ostrzeżeń.
+                        NoSummary--nie pokazuje na końcu podsumowania błędów
+                        i ostrzeżeń.
+                        ErrorsOnly--pokazuje tylko błędy.
+                        WarningsOnly--pokazuje tylko ostrzeżenia.
+                        NoItemAndPropertyList--nie pokazuje listy elementów i
+                        właściwości na początku każdej kompilacji projektu.
+                        ShowCommandLine--pokazuje komunikaty TaskCommandLineEvent
+                        ShowTimestamp--wyświetla sygnaturę czasową jako prefiks każdego
+                        komunikatu.
+                        ShowEventId--pokazuje identyfikator zdarzenia dla rozpoczętych zdarzeń, zakończonych
+                        zdarzeń i komunikatów.
+                        ForceNoAlign--nie dopasowuje tekstu do rozmiaru
+                        buforu konsoli.
+                        DisableConsoleColor--używa domyślnych kolorów konsoli
+                            dla wszystkich komunikatów dotyczących rejestrowania.
+                        DisableMPLogging--wyłącza styl rejestrowania
+                        wieloprocesorowego wyników podczas działania w
+                        trybie nie-wieloprocesorowym.
+                        EnableMPLogging--włącza styl rejestrowania wieloprocesorowego
+                        nawet podczas działania w trybie nie-wieloprocesorowym
+                        Ten styl rejestrowania jest włączony domyślnie.
+                        ForceConsoleColor--używa kolorów konsoli ANSI nawet wtedy
+,
+                            gdy konsola ich nie obsługuje
+                        PreferConsoleColor--używa kolorów konsoli ANSI tylko gdy
+                            konsola docelowa obsługuje tę funkcję
+                        Verbosity--zastępuje ustawienie -szczegółowość dla tego
+                        rejestratora.
+                     Przykład:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
@@ -754,9 +756,9 @@ Uwaga: poziom szczegółowości rejestratorów plików
                      to False, this sets it to True. (short form: -irc)
    </source>
         <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Rozdzielana średnikami lista wejściowych plików pamięci podręcznej, które msBuild
-                     odczyta wyniki kompilacji. Jeśli parametr -isolateProjects jest ustawiony
-                     Na wartość False, spowoduje to ustawienie wartości True. (krótka wersja: -irc)
+                     Rozdzielona średnikami lista wejściowych plików pamięci podręcznej, z których MSBuild 
+                     odczyta wyniki kompilacji. Jeśli jest ustawione -isolateProjects
+                     na wartość Fałsz, ta opcja ustawia ją na wartość Prawda. (skrócona forma: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -772,9 +774,9 @@ Uwaga: poziom szczegółowości rejestratorów plików
    </source>
         <target state="translated">  -outputResultsCache:[cacheFile]
                      Wyjściowy plik pamięci podręcznej, w którym program MSBuild zapisze zawartość
-                     jego pamięci podręczne wyników kompilacji na końcu kompilacji.
-                     Jeśli parametr -isolateProjects ma wartość False, spowoduje to ustawienie wartości True.
-                     (krótka wersja: -orc)
+                     pamięci podręcznej wyników kompilacji na końcu kompilacji.
+                     Jeśli -isolateProjects jest ustawiona na wartość Fałsz, to ustawia je na wartość Prawda.
+                     (skrócona forma: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -842,7 +844,7 @@ Uwaga: poziom szczegółowości rejestratorów plików
                      Example:
                        -ignoreProjectExtensions:.sln
     </source>
-        <target state="translated">-ignoreProjectExtensions:&lt;rozszerzenia&gt;
+        <target state="translated">  -ignoreProjectExtensions:&lt;rozszerzenia&gt;
                      Lista rozszerzeń, które mają zostać zignorowane podczas
                      ustalania pliku projektu do kompilacji. Przy użyciu średnika lub przecinka
                      można rozdzielać wiele rozszerzeń.
@@ -1399,7 +1401,7 @@ Uwaga: poziom szczegółowości rejestratorów plików
       </trans-unit>
       <trans-unit id="ProjectBuilding_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2}  ({3}s)</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project building.
       {0}: indentation - few spaces to visually indent row
@@ -1410,7 +1412,7 @@ Uwaga: poziom szczegółowości rejestratorów plików
       </trans-unit>
       <trans-unit id="ProjectBuilding_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3}  ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project building including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1422,7 +1424,7 @@ Uwaga: poziom szczegółowości rejestratorów plików
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2}  ({3}s)</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1433,7 +1435,7 @@ Uwaga: poziom szczegółowości rejestratorów plików
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
         <source> → {0}</source>
-        <target state="new"> → {0}</target>
+        <target state="translated"> → {0}</target>
         <note>
       Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
       {0}: VT100 coded hyperlink to project output directory
@@ -1441,7 +1443,7 @@ Uwaga: poziom szczegółowości rejestratorów plików
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3}  ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1500,7 +1502,7 @@ Uwaga: poziom szczegółowości rejestratorów plików
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="translated">Przywracanie zakończone ({0}s)</target>
+        <target state="translated">Zakończono przywracanie ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
     </note>
@@ -1575,7 +1577,7 @@ Uwaga: poziom szczegółowości rejestratorów plików
       </trans-unit>
       <trans-unit id="UnsupportedSwitchForSolutionFiles">
         <source>The '{0}' switch is not supported for solution files.</source>
-        <target state="translated">Przełącznik '{0}' nie jest obsługiwany w przypadku plików rozwiązań.</target>
+        <target state="translated">Przełącznik „{0}” nie jest obsługiwany dla plików rozwiązań.</target>
         <note />
       </trans-unit>
       <trans-unit id="Using35Engine">
@@ -1918,7 +1920,7 @@ dzienników                     tekstowych i wykorzystać w innych narzędziach 
                      w określonym pliku. Jeśli rozszerzenie określonego
                      pliku to „md”, wynik jest generowany w formacie znaczników
                      markdown. W przeciwnym razie jest tworzony plik rozdzielany tabulatorami.
-</target>
+    </target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_33_RestorePropertySwitch">
