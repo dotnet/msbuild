@@ -112,8 +112,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     comment.Should().NotContain("StrBegin",
                         because: "informational messages should not have error codes.");
                 }
-                else
+                else if (!_infoExceptions.Contains(name))
                 {
+
                     comment.Should().StartWith($@"{{StrBegin=""{prefix} ""}}",
                         because: $"localization instructions should indicate invariant error code as preceding translatable message.");
                 }

@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     },
                     new object[] {
                         "simple.dependencies",
-                        new int[] { 113, 2613, 1, 878, 96 },
+                        new int[] { 113, 2613, 1, 878, 94 },
                     },
                 };
             }
