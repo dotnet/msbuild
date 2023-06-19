@@ -930,6 +930,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1139: 대상 플랫폼 식별자 {0}을(를) 인식할 수 없습니다.</target>
         <note>{StrBegin="NETSDK1139: "}</note>
       </trans-unit>
+      <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">
+        <source>NETSDK1208: The target platform identifier {0} was not recognized. Please ensure that MSBuildEnableWorkloadResolver is set to true and .NET workloads are enabled</source>
+        <target state="new">NETSDK1208: The target platform identifier {0} was not recognized. Please ensure that MSBuildEnableWorkloadResolver is set to true and .NET workloads are enabled</target>
+        <note>{StrBegin="NETSDK1208: "}</note>
+      </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
         <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>
         <target state="translated">NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop을 사용하려면 Windows 데스크톱 애플리케이션을 빌드해야 합니다. 'UseWpf' 및 'UseWindowsForms'는 현재 SDK에서 지원하지 않습니다.</target>

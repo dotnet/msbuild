@@ -930,6 +930,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1139: Identifikátor cílové platformy {0} se nerozpoznal.</target>
         <note>{StrBegin="NETSDK1139: "}</note>
       </trans-unit>
+      <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">
+        <source>NETSDK1208: The target platform identifier {0} was not recognized. Please ensure that MSBuildEnableWorkloadResolver is set to true and .NET workloads are enabled</source>
+        <target state="new">NETSDK1208: The target platform identifier {0} was not recognized. Please ensure that MSBuildEnableWorkloadResolver is set to true and .NET workloads are enabled</target>
+        <note>{StrBegin="NETSDK1208: "}</note>
+      </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
         <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>
         <target state="translated">NETSDK1107: K sestavování desktopových aplikací pro Windows se vyžaduje Microsoft.NET.Sdk.WindowsDesktop. Aktuální verze sady SDK nepodporuje hodnoty UseWpf a UseWindowsForms.</target>

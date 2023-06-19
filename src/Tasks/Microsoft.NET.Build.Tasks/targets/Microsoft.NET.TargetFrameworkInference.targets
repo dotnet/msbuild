@@ -109,8 +109,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       <TargetPlatformSupported Condition="'$(TargetPlatformIdentifier)' == 'Windows'">true</TargetPlatformSupported>
     </PropertyGroup>
 
-    <NETSdkError Condition="'$(TargetPlatformSupported)' != 'true'"
+    <UseWorkloadsSpecificError Condition="($(TargetPlatformIdentifier.StartsWith('ios')) or $(TargetPlatformIdentifier.StartsWith('tvos')) or $(TargetPlatformIdentifier.StartsWith('maccatalyst')) or $(TargetPlatformIdentifier.StartsWith('android')) or $(TargetPlatformIdentifier.StartsWith('browser'))) and '$(MSBuildEnableWorkloadResolver)' != 'true'">true</UseWorkloadsSpecificError>
+
+    <NETSdkError Condition="'$(TargetPlatformSupported)' != 'true' and '$(UseWorkloadsSpecificError)' != 'true'"
                  ResourceName="UnsupportedTargetPlatformIdentifier"
+                 FormatArguments="$(TargetPlatformIdentifier)" />
+
+    <NETSdkError Condition="'$(TargetPlatformSupported)' != 'true' and '$(UseWorkloadsSpecificError)' == 'true'"
+                 ResourceName="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled"
                  FormatArguments="$(TargetPlatformIdentifier)" />
   </Target>
 
