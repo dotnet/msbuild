@@ -852,8 +852,7 @@ namespace Microsoft.Build.Tasks
                 name = item.GetMetadata(FileUtilities.ItemSpecModifiers.Filename);
             }
 
-            AssemblyName assemblyName = new AssemblyName($"{name}, Version={version}, Culture=neutral, PublicKeyToken={publicKeyToken}");
-            return new AssemblyNameExtension(assemblyName);
+            return new AssemblyNameExtension($"{name}, Version={version}, Culture=neutral, PublicKeyToken={publicKeyToken}");
         }
 
         /// <summary>
