@@ -51,7 +51,7 @@
     <MicrosoftDotNetXUnitExtensionsVersion>6.0.0-beta.23313.5</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>7.0.0</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftIORedistVersion>6.0.0</MicrosoftIORedistVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.7.0-3.23311.1</MicrosoftNetCompilersToolsetVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.7.0-3.23318.1</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>6.7.0-preview.2.51</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemTextJsonVersion>7.0.0</SystemTextJsonVersion>
