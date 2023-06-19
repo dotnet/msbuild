@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.Installer.Windows
                 string packageDirectory = GetPackageDirectory(packageId, packageVersion);
 
                 // Delete the package directory and create a new one. If all the files were properly
-                // cached, the client would not request this action. 
+                // cached, the client would not request this action.
                 if (Directory.Exists(packageDirectory))
                 {
                     Directory.Delete(packageDirectory, recursive: true);

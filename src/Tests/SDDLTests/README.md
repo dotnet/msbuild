@@ -17,7 +17,7 @@ recreating them.
 
 The test will verify the security descriptor for 3 objects.
 - The root directory
-of the cahce in `ProgramData\SDDLTest`. This is the equivalent of `ProgramData\dotnet` used by
+of the cache in `ProgramData\SDDLTest`. This is the equivalent of `ProgramData\dotnet` used by
 workload related commands.
 
 - A sub folder, `ProgramData\SDDLTest\a`. This is equivalent to creating
