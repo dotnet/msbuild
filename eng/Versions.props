@@ -132,8 +132,8 @@
     <MicrosoftTemplateEngineUtilsPackageVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateEngineUtilsPackageVersion>
     <MicrosoftTemplateSearchCommonPackageVersion>$(MicrosoftTemplateEngineAbstractionsPackageVersion)</MicrosoftTemplateSearchCommonPackageVersion>
     <!-- test dependencies -->
-    <MicrosoftTemplateEngineMocksPackageVersion>7.0.108-servicing.23316.18</MicrosoftTemplateEngineMocksPackageVersion>
-    <MicrosoftTemplateEngineTestHelperPackageVersion>7.0.108-servicing.23316.18</MicrosoftTemplateEngineTestHelperPackageVersion>
+    <MicrosoftTemplateEngineMocksPackageVersion>7.0.108-servicing.23318.14</MicrosoftTemplateEngineMocksPackageVersion>
+    <MicrosoftTemplateEngineTestHelperPackageVersion>7.0.108-servicing.23318.14</MicrosoftTemplateEngineTestHelperPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/visualfsharp -->
