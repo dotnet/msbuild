@@ -50,13 +50,13 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
       <Sha>5b20af47d99620150c53eaf5db8636fdf730b126</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="17.4.6">
+    <Dependency Name="Microsoft.Build" Version="17.4.8">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>020b625cf1f16f4a4f22b3c15a015c1160467ed5</Sha>
+      <Sha>40ad487c8a1c8e38639d7bd16177b09ee6cce323</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.4.6-preview-23307-04">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.4.8-preview-23316-11">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>020b625cf1f16f4a4f22b3c15a015c1160467ed5</Sha>
+      <Sha>40ad487c8a1c8e38639d7bd16177b09ee6cce323</Sha>
     </Dependency>
     <Dependency Name="Microsoft.FSharp.Compiler" Version="12.4.0-beta.22571.5">
       <Uri>https://github.com/dotnet/fsharp</Uri>
