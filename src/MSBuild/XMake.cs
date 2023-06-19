@@ -2486,7 +2486,7 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Verbosity, "q", "q", true, true, true);
                     }
 
-                    targets = targets.Union(getTargetResult).ToArray();
+                    targets = targets.Union(getTargetResult, MSBuildNameIgnoreCaseComparer.Default).ToArray();
 
                     // figure out which ToolsVersion has been set on the command line
                     toolsVersion = ProcessToolsVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ToolsVersion]);

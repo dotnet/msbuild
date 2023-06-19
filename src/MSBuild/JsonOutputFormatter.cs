@@ -14,7 +14,7 @@ namespace Microsoft.Build.CommandLine
 {
     internal class JsonOutputFormatter
     {
-        private static readonly JsonSerializerOptions Options = new() { AllowTrailingCommas = true, WriteIndented = true };
+        private static readonly JsonSerializerOptions Options = new() { AllowTrailingCommas = false, WriteIndented = true };
         private readonly JsonNode _topLevelNode = new JsonObject();
 
         public override string ToString()
