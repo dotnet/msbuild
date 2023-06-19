@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Installer.Windows
                 {
                     DirectorySecurity ds = new(path, AccessControlSections.Access);
 
-                    ds.SetAccessRuleProtection(true, false);
+                    ds.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
 
                     foreach (FileSystemAccessRule ace in ds.GetAccessRules(includeExplicit: true,
                         includeInherited: true, typeof(NTAccount)))
@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.Installer.Windows
 
                 string packageDirectory = GetPackageDirectory(packageId, packageVersion);
 
-                // Delete the package directory and create a new one. If all the files were properly
+                // Delete the package directory and create a new one that's secure. If all the files were properly
                 // cached, the client would not request this action.
                 if (Directory.Exists(packageDirectory))
                 {
@@ -209,7 +209,6 @@ namespace Microsoft.DotNet.Installer.Windows
         {
             if (!File.Exists(destinationFile))
             {
-
                 FileAccessRetrier.RetryOnMoveAccessFailure(() => File.Move(sourceFile, destinationFile));
 
                 log?.LogMessage($"Moved '{sourceFile}' to '{destinationFile}'");
