@@ -70,8 +70,11 @@
     </Compile>
     <Compile Include="..\Shared\Constants.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
-    <Compile Include="..\Shared\ErrorUtilities.cs">
+    <Compile Include="..\Framework\ErrorUtilities.cs">
       <Link>ErrorUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\ErrorUtilities.cs">
+      <Link>SharedErrorUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>EscapingUtilities.cs</Link>
@@ -97,10 +100,10 @@
     <Compile Include="..\Shared\INodePacketHandler.cs">
       <Link>INodePacketHandler.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ITranslatable.cs">
+    <Compile Include="..\Framework\ITranslatable.cs">
       <Link>ITranslatable.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ITranslator.cs">
+    <Compile Include="..\Framework\ITranslator.cs">
       <Link>ITranslator.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
@@ -109,6 +112,15 @@
     </Compile>
     <Compile Include="..\Shared\InterningBinaryReader.cs">
       <Link>InterningBinaryReader.cs</Link>
+    </Compile>
+    <Compile Include="..\Framework\BinaryReaderFactory.cs">
+      <Link>BinaryReaderFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\BinaryReaderExtensions.cs">
+      <Link>BinaryReaderExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\BinaryWriterExtensions.cs">
+      <Link>BinaryWriterExtensions.cs</Link>
     </Compile>
     <Compile Include="..\Shared\LogMessagePacketBase.cs">
       <Link>LogMessagePacketBase.cs</Link>
@@ -132,8 +144,20 @@
     <Compile Include="..\Shared\NodePacketFactory.cs">
       <Link>NodePacketFactory.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\BinaryTranslator.cs">
+    <Compile Include="..\Framework\BinaryTranslator.cs">
       <Link>BinaryTranslator.cs</Link>
+    </Compile>
+    <Compile Include="..\Framework\BuildException\BuildExceptionBase.cs">
+      <Link>BuildExceptionBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Framework\BuildException\BuildExceptionRemoteState.cs">
+      <Link>BuildExceptionRemoteState.cs</Link>
+    </Compile>
+    <Compile Include="..\Framework\BuildException\BuildExceptionSerializationHelper.cs">
+      <Link>BuildExceptionSerializationHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Framework\BuildException\GenericBuildTransferredException.cs">
+      <Link>GenericBuildTransferredException.cs</Link>
     </Compile>
     <Compile Include="..\Shared\NodeShutdown.cs">
       <Link>NodeShutdown.cs</Link>
@@ -167,6 +191,9 @@
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyResources.cs" />
+    <Compile Include="..\Framework\ChangeWaves.cs">
+      <Link>ChangeWaves.cs</Link>
+    </Compile>
     <Compile Include="Concurrent\ConcurrentDictionary.cs" />
     <Compile Include="Concurrent\ConcurrentQueue.cs" />
     <Compile Include="Immutable\ImmutableDictionary.cs" />

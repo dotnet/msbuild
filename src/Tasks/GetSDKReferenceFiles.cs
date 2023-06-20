@@ -931,7 +931,7 @@ namespace Microsoft.Build.Tasks
                     if (!string.IsNullOrEmpty(cacheFile))
                     {
                         using FileStream fs = new FileStream(cacheFile, FileMode.Open);
-                        using var translator = BinaryTranslator.GetReadTranslator(fs, buffer: null);
+                        using var translator = BinaryTranslator.GetReadTranslator(fs, InterningBinaryReader.PoolingBuffer);
                         SDKInfo sdkInfo = new SDKInfo();
                         sdkInfo.Translate(translator);
                         return sdkInfo;

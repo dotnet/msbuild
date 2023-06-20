@@ -234,6 +234,8 @@ internal sealed class LiveLogger : INodeLogger
         }
 
         _buildStartTime = e.Timestamp;
+
+        Terminal.Write(AnsiCodes.SetProgressIndeterminate);
     }
 
     /// <summary>
@@ -268,6 +270,7 @@ internal sealed class LiveLogger : INodeLogger
         }
         finally
         {
+            Terminal.Write(AnsiCodes.RemoveProgress);
             Terminal.EndUpdate();
         }
 
