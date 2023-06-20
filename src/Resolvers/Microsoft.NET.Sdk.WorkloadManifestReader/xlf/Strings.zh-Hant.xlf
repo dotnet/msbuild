@@ -107,11 +107,6 @@
         <target state="translated">找不到指定的工作負載資訊清單: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifiedWorkloadSetNotFound">
-        <source>Specified workload set was not found: {0}</source>
-        <target state="translated">找不到指定的工作負載集: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">位移 {1} 有未預期的權杖 '{0}'</target>
@@ -135,6 +130,11 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">資訊清單 '{2}' [{3}] 中工作負載重新導向 '{1}' 的未解析目標 '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found</source>
+        <target state="new">Workload version {0}, which was specified in {1}, was not found</target>
         <note />
       </trans-unit>
     </body>

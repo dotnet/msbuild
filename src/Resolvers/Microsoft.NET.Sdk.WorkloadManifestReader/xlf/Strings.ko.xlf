@@ -107,11 +107,6 @@
         <target state="translated">지정한 워크로드 매니페스트를 찾을 수 없습니다. {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifiedWorkloadSetNotFound">
-        <source>Specified workload set was not found: {0}</source>
-        <target state="translated">지정한 워크로드 집합을 찾을 수 없습니다. {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">오프셋 {1}에 예기치 않은 토큰 '{0}'이(가) 있습니다.</target>
@@ -135,6 +130,11 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">매니페스트 '{2}' [{3}]의 워크로드 리디렉션 '{1}'에 대한 확인되지 않는 대상 '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found</source>
+        <target state="new">Workload version {0}, which was specified in {1}, was not found</target>
         <note />
       </trans-unit>
     </body>

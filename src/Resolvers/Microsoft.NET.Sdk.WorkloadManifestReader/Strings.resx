@@ -192,8 +192,8 @@
   <data name="SpecifiedManifestNotFound" xml:space="preserve">
     <value>Specified workload manifest was not found: {0}</value>
   </data>
-  <data name="SpecifiedWorkloadSetNotFound" xml:space="preserve">
-    <value>Specified workload set was not found: {0}</value>
+  <data name="WorkloadVersionFromGlobalJsonNotFound" xml:space="preserve">
+    <value>Workload version {0}, which was specified in {1}, was not found</value>
   </data>
   <data name="InvalidVersionForWorkload" xml:space="preserve">
     <value>Error parsing version '{1}' for workload manifest ID '{0}'</value>
