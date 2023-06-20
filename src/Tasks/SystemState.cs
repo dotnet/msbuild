@@ -22,8 +22,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Class is used to cache system state.
     /// </summary>
-    /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
-    [Serializable]
     internal sealed class SystemState : StateFileBase, ITranslatable
     {
         /// <summary>
@@ -210,6 +208,16 @@ namespace Microsoft.Build.Tasks
                 get { return frameworkName; }
                 set { frameworkName = value; }
             }
+
+            /// <summary>
+            /// The last-modified value to use for immutable framework files which we don't do I/O on.
+            /// </summary>
+            internal static DateTime ImmutableFileLastModifiedMarker => DateTime.MaxValue;
+
+            /// <summary>
+            /// It is wasteful to persist entries for immutable framework files.
+            /// </summary>
+            internal bool IsWorthPersisting => lastModified != ImmutableFileLastModifiedMarker;
         }
 
         /// <summary>
@@ -258,7 +266,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Flag that indicates
+        /// Flag that indicates that <see cref="instanceLocalFileStateCache"/> has been modified.
         /// </summary>
         /// <value></value>
         internal bool IsDirty
@@ -339,7 +347,7 @@ namespace Microsoft.Build.Tasks
         {
             // Looking up an assembly to get its metadata can be expensive for projects that reference large amounts
             // of assemblies. To avoid that expense, we remember and serialize this information betweeen runs in
-            // XXXResolveAssemblyReferencesInput.cache files in the intermediate directory and also store it in an
+            // <ProjectFileName>.AssemblyReference.cache files in the intermediate directory and also store it in an
             // process-wide cache to share between successive builds.
             //
             // To determine if this information is up-to-date, we use the last modified date of the assembly, however,
@@ -368,8 +376,8 @@ namespace Microsoft.Build.Tasks
             // If the process-wide cache contains an up-to-date FileState, always use it
             if (isProcessFileStateUpToDate)
             {
-                // For the next build, we may be using a different process. Update the file cache.
-                if (!isInstanceFileStateUpToDate)
+                // For the next build, we may be using a different process. Update the file cache if the entry is worth persisting.
+                if (!isInstanceFileStateUpToDate && cachedProcessFileState.IsWorthPersisting)
                 {
                     instanceLocalFileStateCache[path] = cachedProcessFileState;
                     isDirty = true;
@@ -399,9 +407,15 @@ namespace Microsoft.Build.Tasks
         private FileState InitializeFileState(string path, DateTime lastModified)
         {
             var fileState = new FileState(lastModified);
-            instanceLocalFileStateCache[path] = fileState;
+
+            // Dirty the instance-local cache only with entries that are worth persisting.
+            if (fileState.IsWorthPersisting)
+            {
+                instanceLocalFileStateCache[path] = fileState;
+                isDirty = true;
+            }
+
             s_processWideFileStateCache[path] = fileState;
-            isDirty = true;
 
             return fileState;
         }
@@ -450,7 +464,10 @@ namespace Microsoft.Build.Tasks
                 {
                     fileState.Assembly = AssemblyNameExtension.UnnamedAssembly;
                 }
-                isDirty = true;
+                if (fileState.IsWorthPersisting)
+                {
+                    isDirty = true;
+                }
             }
 
             if (fileState.Assembly.IsUnnamedAssembly)
@@ -471,7 +488,10 @@ namespace Microsoft.Build.Tasks
             if (String.IsNullOrEmpty(fileState.RuntimeVersion))
             {
                 fileState.RuntimeVersion = getAssemblyRuntimeVersion(path);
-                isDirty = true;
+                if (fileState.IsWorthPersisting)
+                {
+                    isDirty = true;
+                }
             }
 
             return fileState.RuntimeVersion;
@@ -503,7 +523,10 @@ namespace Microsoft.Build.Tasks
                     out fileState.scatterFiles,
                     out fileState.frameworkName);
 
-                isDirty = true;
+                if (fileState.IsWorthPersisting)
+                {
+                    isDirty = true;
+                }
             }
 
             dependencies = fileState.dependencies;
@@ -527,7 +550,7 @@ namespace Microsoft.Build.Tasks
             foreach (ITaskItem stateFile in stateFiles)
             {
                 // Verify that it's a real stateFile. Log message but do not error if not.
-                SystemState sysState = DeserializeCache(stateFile.ToString(), log, typeof(SystemState)) as SystemState;
+                SystemState sysState = DeserializeCache<SystemState>(stateFile.ToString(), log);
                 if (sysState == null)
                 {
                     continue;

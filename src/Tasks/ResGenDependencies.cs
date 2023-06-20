@@ -23,11 +23,7 @@ namespace Microsoft.Build.Tasks
     /// <remarks>
     /// This class is a caching mechanism for the resgen task to keep track of linked
     /// files within processed .resx files.
-    /// 
-    /// This is an on-disk serialization format, don't change field names or types or use readonly.
     /// </remarks>
-    /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
-    [Serializable]
     internal sealed class ResGenDependencies : StateFileBase, ITranslatable
     {
         /// <summary>
@@ -200,7 +196,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static ResGenDependencies DeserializeCache(string stateFile, bool useSourcePath, TaskLoggingHelper log)
         {
-            var retVal = (ResGenDependencies)DeserializeCache(stateFile, log, typeof(ResGenDependencies)) ?? new ResGenDependencies();
+            var retVal = DeserializeCache<ResGenDependencies>(stateFile, log) ?? new ResGenDependencies();
 
             // Ensure that the cache is properly initialized with respect to how resgen will 
             // resolve linked files within .resx files.  ResGen has two different
@@ -218,11 +214,7 @@ namespace Microsoft.Build.Tasks
 
         /// <remarks>
         /// Represents a single .resx file in the dependency cache.
-        /// 
-        /// This is an on-disk serialization format, don't change field names or types or use readonly.
         /// </remarks>
-        /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
-        [Serializable]
         internal sealed class ResXFile : DependencyFile, ITranslatable
         {
             // Files contained within this resx file.
@@ -325,10 +317,11 @@ namespace Microsoft.Build.Tasks
         /// Represents a single assembly in the dependency cache, which may produce 
         /// 0 to many ResW files.
         /// 
-        /// This is an on-disk serialization format, don't change field names or types or use readonly.
+        /// Must be serializable because instances may be marshaled cross-AppDomain, see <see cref="ProcessResourceFiles.PortableLibraryCacheInfo"/>.
         /// </remarks>
-        /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
+#if FEATURE_APPDOMAIN
         [Serializable]
+#endif
         internal sealed class PortableLibraryFile : DependencyFile, ITranslatable
         {
             internal string[] outputFiles;

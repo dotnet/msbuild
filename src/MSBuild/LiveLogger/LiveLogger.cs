@@ -136,6 +136,11 @@ internal sealed class LiveLogger : INodeLogger
     private ITerminal Terminal { get; }
 
     /// <summary>
+    /// Should the logger's test environment refresh the console output manually instead of using a background thread?
+    /// </summary>
+    private bool _manualRefresh;
+
+    /// <summary>
     /// List of events the logger needs as parameters to the <see cref="ConfigurableForwardingLogger"/>.
     /// </summary>
     /// <remarks>
@@ -172,6 +177,7 @@ internal sealed class LiveLogger : INodeLogger
     internal LiveLogger(ITerminal terminal)
     {
         Terminal = terminal;
+        _manualRefresh = true;
     }
 
     #region INodeLogger implementation
@@ -221,10 +227,15 @@ internal sealed class LiveLogger : INodeLogger
     /// </summary>
     private void BuildStarted(object sender, BuildStartedEventArgs e)
     {
-        _refresher = new Thread(ThreadProc);
-        _refresher.Start();
+        if (!_manualRefresh)
+        {
+            _refresher = new Thread(ThreadProc);
+            _refresher.Start();
+        }
 
         _buildStartTime = e.Timestamp;
+
+        Terminal.Write(AnsiCodes.SetProgressIndeterminate);
     }
 
     /// <summary>
@@ -259,6 +270,7 @@ internal sealed class LiveLogger : INodeLogger
         }
         finally
         {
+            Terminal.Write(AnsiCodes.RemoveProgress);
             Terminal.EndUpdate();
         }
 

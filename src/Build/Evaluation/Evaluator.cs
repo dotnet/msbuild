@@ -1316,12 +1316,12 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Is the property we are currently setting in the list of properties which have been used but not initialized
                     IElementLocation elementWhichUsedProperty;
-                    bool isPropertyInList = _expander.UsedUninitializedProperties.Properties.TryGetValue(propertyElement.Name, out elementWhichUsedProperty);
+                    bool isPropertyInList = _expander.UsedUninitializedProperties.TryGetPropertyElementLocation(propertyElement.Name, out elementWhichUsedProperty);
 
                     if (isPropertyInList)
                     {
                         // Once we are going to warn for a property once, remove it from the list so we do not add it again.
-                        _expander.UsedUninitializedProperties.Properties.Remove(propertyElement.Name);
+                        _expander.UsedUninitializedProperties.RemoveProperty(propertyElement.Name);
                         _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(propertyElement.Location), "UsedUninitializedProperty", propertyElement.Name, elementWhichUsedProperty.LocationString);
                     }
                 }

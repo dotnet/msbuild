@@ -866,216 +866,216 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Given a path get the CLR runtime version of the file
+        /// Given a path get the CLR runtime version of the file.
         /// </summary>
         /// <param name="path">path to the file</param>
         /// <returns>The CLR runtime version or empty if the path does not exist or the file is not an assembly.</returns>
         public static string GetRuntimeVersion(string path)
         {
-            using (var sr = new BinaryReader(File.OpenRead(path)))
+            if (!FileSystems.Default.FileExists(path))
             {
-                if (!FileSystems.Default.FileExists(path))
+                return string.Empty;
+            }
+
+            using Stream stream = File.OpenRead(path);
+            using BinaryReader reader = new BinaryReader(stream);
+            return GetRuntimeVersion(reader);
+        }
+
+        /// <summary>
+        /// Given a <see cref="BinaryReader"/> get the CLR runtime version of the underlying file.
+        /// </summary>
+        /// <param name="sr">A <see cref="BinaryReader"/> positioned at the first byte of the file.</param>
+        /// <returns>The CLR runtime version or empty if the data does not represent an assembly.</returns>
+        internal static string GetRuntimeVersion(BinaryReader sr)
+        {
+            // This algorithm for getting the runtime version is based on
+            // the ECMA Standard 335: The Common Language Infrastructure (CLI)
+            // http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf
+
+            try
+            {
+                const uint PEHeaderPointerOffset = 0x3c;
+                const uint PEHeaderSize = 20;
+                const uint OptionalPEHeaderSize = 224;
+                const uint OptionalPEPlusHeaderSize = 240;
+                const uint SectionHeaderSize = 40;
+
+                // The PE file format is specified in section II.25
+
+                // A PE image starts with an MS-DOS header followed by a PE signature, followed by the PE file header,
+                // and then the PE optional header followed by PE section headers.
+                // There must be room for all of that.
+
+                if (sr.BaseStream.Length < PEHeaderPointerOffset + 4 + PEHeaderSize + OptionalPEHeaderSize +
+                    SectionHeaderSize)
                 {
                     return string.Empty;
                 }
 
-                // This algorithm for getting the runtime version is based on
-                // the ECMA Standard 335: The Common Language Infrastructure (CLI)
-                // http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf
+                // The PE format starts with an MS-DOS stub of 128 bytes.
+                // At offset 0x3c in the DOS header is a 4-byte unsigned integer offset to the PE
+                // signature (shall be “PE\0\0”), immediately followed by the PE file header
 
-                try
+                sr.BaseStream.Position = PEHeaderPointerOffset;
+                var peHeaderOffset = sr.ReadUInt32();
+
+                if (peHeaderOffset + 4 + PEHeaderSize + OptionalPEHeaderSize + SectionHeaderSize >=
+                    sr.BaseStream.Length)
                 {
-                    const uint PEHeaderPointerOffset = 0x3c;
-                    const uint PEHeaderSize = 20;
-                    const uint OptionalPEHeaderSize = 224;
-                    const uint OptionalPEPlusHeaderSize = 240;
-                    const uint SectionHeaderSize = 40;
-
-                    // The PE file format is specified in section II.25
-
-                    // A PE image starts with an MS-DOS header followed by a PE signature, followed by the PE file header,
-                    // and then the PE optional header followed by PE section headers.
-                    // There must be room for all of that.
-
-                    if (sr.BaseStream.Length < PEHeaderPointerOffset + 4 + PEHeaderSize + OptionalPEHeaderSize +
-                        SectionHeaderSize)
-                    {
-                        return string.Empty;
-                    }
-
-                    // The PE format starts with an MS-DOS stub of 128 bytes.
-                    // At offset 0x3c in the DOS header is a 4-byte unsigned integer offset to the PE
-                    // signature (shall be “PE\0\0”), immediately followed by the PE file header
-
-                    sr.BaseStream.Position = PEHeaderPointerOffset;
-                    var peHeaderOffset = sr.ReadUInt32();
-
-                    if (peHeaderOffset + 4 + PEHeaderSize + OptionalPEHeaderSize + SectionHeaderSize >=
-                        sr.BaseStream.Length)
-                    {
-                        return string.Empty;
-                    }
-
-                    // The PE header is specified in section II.25.2
-                    // Read the PE header signature
-
-                    sr.BaseStream.Position = peHeaderOffset;
-                    if (!ReadBytes(sr, (byte)'P', (byte)'E', 0, 0))
-                    {
-                        return string.Empty;
-                    }
-
-                    // The PE header immediately follows the signature
-                    var peHeaderBase = peHeaderOffset + 4;
-
-                    // At offset 2 of the PE header there is the number of sections
-                    sr.BaseStream.Position = peHeaderBase + 2;
-                    var numberOfSections = sr.ReadUInt16();
-                    if (numberOfSections > 96)
-                    {
-                        return string.Empty; // There can't be more than 96 sections, something is wrong
-                    }
-
-                    // Immediately after the PE Header is the PE Optional Header.
-                    // This header is optional in the general PE spec, but always
-                    // present in assembly files.
-                    // From this header we'll get the CLI header RVA, which is
-                    // at offset 208 for PE32, and at offset 224 for PE32+
-
-                    var optionalHeaderOffset = peHeaderBase + PEHeaderSize;
-
-                    uint cliHeaderRvaOffset;
-                    uint optionalPEHeaderSize;
-
-                    sr.BaseStream.Position = optionalHeaderOffset;
-                    var magicNumber = sr.ReadUInt16();
-
-                    if (magicNumber == 0x10b) // PE32
-                    {
-                        optionalPEHeaderSize = OptionalPEHeaderSize;
-                        cliHeaderRvaOffset = optionalHeaderOffset + 208;
-                    }
-                    else if (magicNumber == 0x20b) // PE32+
-                    {
-                        optionalPEHeaderSize = OptionalPEPlusHeaderSize;
-                        cliHeaderRvaOffset = optionalHeaderOffset + 224;
-                    }
-                    else
-                    {
-                        return string.Empty;
-                    }
-
-                    // Read the CLI header RVA
-
-                    sr.BaseStream.Position = cliHeaderRvaOffset;
-                    var cliHeaderRva = sr.ReadUInt32();
-                    if (cliHeaderRva == 0)
-                    {
-                        return string.Empty; // No CLI section
-                    }
-
-                    // Immediately following the optional header is the Section
-                    // Table, which contains a number of section headers.
-                    // Section headers are specified in section II.25.3
-
-                    // Each section header has the base RVA, size, and file
-                    // offset of the section. To find the file offset of the
-                    // CLI header we need to find a section that contains
-                    // its RVA, and the calculate the file offset using
-                    // the base file offset of the section.
-
-                    var sectionOffset = optionalHeaderOffset + optionalPEHeaderSize;
-
-                    // Read all section headers, we need them to make RVA to
-                    // offset conversions.
-
-                    var sections = new HeaderInfo[numberOfSections];
-                    for (int n = 0; n < numberOfSections; n++)
-                    {
-                        // At offset 8 of the section is the section size
-                        // and base RVA. At offset 20 there is the file offset
-                        sr.BaseStream.Position = sectionOffset + 8;
-                        var sectionSize = sr.ReadUInt32();
-                        var sectionRva = sr.ReadUInt32();
-                        sr.BaseStream.Position = sectionOffset + 20;
-                        var sectionDataOffset = sr.ReadUInt32();
-                        sections[n] = new HeaderInfo
-                        {
-                            VirtualAddress = sectionRva,
-                            Size = sectionSize,
-                            FileOffset = sectionDataOffset
-                        };
-                        sectionOffset += SectionHeaderSize;
-                    }
-
-                    uint cliHeaderOffset = RvaToOffset(sections, cliHeaderRva);
-
-                    // CLI section not found
-                    if (cliHeaderOffset == 0)
-                    {
-                        return string.Empty;
-                    }
-
-                    // The CLI header is specified in section II.25.3.3.
-                    // It contains all of the runtime-specific data entries and other information.
-                    // From the CLI header we need to get the RVA of the metadata root,
-                    // which is located at offset 8.
-
-                    sr.BaseStream.Position = cliHeaderOffset + 8;
-                    var metadataRva = sr.ReadUInt32();
-
-                    var metadataOffset = RvaToOffset(sections, metadataRva);
-                    if (metadataOffset == 0)
-                    {
-                        return string.Empty;
-                    }
-
-                    // The metadata root is specified in section II.24.2.1
-                    // The first 4 bytes contain a signature.
-                    // The version string is at offset 12.
-
-                    sr.BaseStream.Position = metadataOffset;
-                    if (!ReadBytes(sr, 0x42, 0x53, 0x4a, 0x42)) // Metadata root signature
-                    {
-                        return string.Empty;
-                    }
-
-                    // Read the version string length
-                    sr.BaseStream.Position = metadataOffset + 12;
-                    var length = sr.ReadInt32();
-                    if (length > 255 || length <= 0 || sr.BaseStream.Position + length >= sr.BaseStream.Length)
-                    {
-                        return string.Empty;
-                    }
-
-                    // Read the version string
-                    var v = Encoding.UTF8.GetString(sr.ReadBytes(length));
-                    if (v.Length < 2 || v[0] != 'v')
-                    {
-                        return string.Empty;
-                    }
-
-                    // Per II.24.2.1, version string length is rounded up
-                    // to a multiple of 4. So we may read eg "4.0.30319\0\0"
-                    // Version.Parse works fine, but it's not pretty in the log.
-                    int firstNull = v.IndexOf('\0');
-                    if (firstNull > 0)
-                    {
-                        v = v.Substring(0, firstNull);
-                    }
-
-                    // Make sure it is a version number
-                    if (!Version.TryParse(v.Substring(1), out _))
-                    {
-                        return string.Empty;
-                    }
-                    return v;
-                }
-                catch
-                {
-                    // Something went wrong in spite of all checks. Corrupt file?
                     return string.Empty;
                 }
+
+                // The PE header is specified in section II.25.2
+                // Read the PE header signature
+
+                sr.BaseStream.Position = peHeaderOffset;
+                if (!ReadBytes(sr, (byte)'P', (byte)'E', 0, 0))
+                {
+                    return string.Empty;
+                }
+
+                // The PE header immediately follows the signature
+                var peHeaderBase = peHeaderOffset + 4;
+
+                // At offset 2 of the PE header there is the number of sections
+                sr.BaseStream.Position = peHeaderBase + 2;
+                var numberOfSections = sr.ReadUInt16();
+                if (numberOfSections > 96)
+                {
+                    return string.Empty; // There can't be more than 96 sections, something is wrong
+                }
+
+                // Immediately after the PE Header is the PE Optional Header.
+                // This header is optional in the general PE spec, but always
+                // present in assembly files.
+                // From this header we'll get the CLI header RVA, which is
+                // at offset 208 for PE32, and at offset 224 for PE32+
+
+                var optionalHeaderOffset = peHeaderBase + PEHeaderSize;
+
+                uint cliHeaderRvaOffset;
+                uint optionalPEHeaderSize;
+
+                sr.BaseStream.Position = optionalHeaderOffset;
+                var magicNumber = sr.ReadUInt16();
+
+                if (magicNumber == 0x10b) // PE32
+                {
+                    optionalPEHeaderSize = OptionalPEHeaderSize;
+                    cliHeaderRvaOffset = optionalHeaderOffset + 208;
+                }
+                else if (magicNumber == 0x20b) // PE32+
+                {
+                    optionalPEHeaderSize = OptionalPEPlusHeaderSize;
+                    cliHeaderRvaOffset = optionalHeaderOffset + 224;
+                }
+                else
+                {
+                    return string.Empty;
+                }
+
+                // Read the CLI header RVA
+
+                sr.BaseStream.Position = cliHeaderRvaOffset;
+                var cliHeaderRva = sr.ReadUInt32();
+                if (cliHeaderRva == 0)
+                {
+                    return string.Empty; // No CLI section
+                }
+
+                // Immediately following the optional header is the Section
+                // Table, which contains a number of section headers.
+                // Section headers are specified in section II.25.3
+
+                // Each section header has the base RVA, size, and file
+                // offset of the section. To find the file offset of the
+                // CLI header we need to find a section that contains
+                // its RVA, and the calculate the file offset using
+                // the base file offset of the section.
+
+                var sectionOffset = optionalHeaderOffset + optionalPEHeaderSize;
+
+                // Read all section headers, we need them to make RVA to
+                // offset conversions.
+
+                var sections = new HeaderInfo[numberOfSections];
+                for (int n = 0; n < numberOfSections; n++)
+                {
+                    // At offset 8 of the section is the section size
+                    // and base RVA. At offset 20 there is the file offset
+                    sr.BaseStream.Position = sectionOffset + 8;
+                    var sectionSize = sr.ReadUInt32();
+                    var sectionRva = sr.ReadUInt32();
+                    sr.BaseStream.Position = sectionOffset + 20;
+                    var sectionDataOffset = sr.ReadUInt32();
+                    sections[n] = new HeaderInfo
+                    {
+                        VirtualAddress = sectionRva,
+                        Size = sectionSize,
+                        FileOffset = sectionDataOffset
+                    };
+                    sectionOffset += SectionHeaderSize;
+                }
+
+                uint cliHeaderOffset = RvaToOffset(sections, cliHeaderRva);
+
+                // CLI section not found
+                if (cliHeaderOffset == 0)
+                {
+                    return string.Empty;
+                }
+
+                // The CLI header is specified in section II.25.3.3.
+                // It contains all of the runtime-specific data entries and other information.
+                // From the CLI header we need to get the RVA of the metadata root,
+                // which is located at offset 8.
+
+                sr.BaseStream.Position = cliHeaderOffset + 8;
+                var metadataRva = sr.ReadUInt32();
+
+                var metadataOffset = RvaToOffset(sections, metadataRva);
+                if (metadataOffset == 0)
+                {
+                    return string.Empty;
+                }
+
+                // The metadata root is specified in section II.24.2.1
+                // The first 4 bytes contain a signature.
+                // The version string is at offset 12.
+
+                sr.BaseStream.Position = metadataOffset;
+                if (!ReadBytes(sr, 0x42, 0x53, 0x4a, 0x42)) // Metadata root signature
+                {
+                    return string.Empty;
+                }
+
+                // Read the version string length
+                sr.BaseStream.Position = metadataOffset + 12;
+                var length = sr.ReadInt32();
+                if (length > 255 || length <= 0 || sr.BaseStream.Position + length >= sr.BaseStream.Length)
+                {
+                    return string.Empty;
+                }
+
+                // Read the version string
+                var v = Encoding.UTF8.GetString(sr.ReadBytes(length));
+
+                // Per II.24.2.1, version string length is rounded up
+                // to a multiple of 4. So we may read eg "4.0.30319\0\0"
+                // Version.Parse works fine, but it's not pretty in the log.
+                int firstNull = v.IndexOf('\0');
+                if (firstNull > 0)
+                {
+                    v = v.Substring(0, firstNull);
+                }
+
+                return v;
+            }
+            catch
+            {
+                // Something went wrong in spite of all checks. Corrupt file?
+                return string.Empty;
             }
         }
 

@@ -323,7 +323,7 @@
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
         <source>File "{0}" doesn't exist. Skipping.</source>
-        <target state="translated">El archivo"{0}" no existe. Se omitirá.</target>
+        <target state="translated">El archivo "{0}" no existe. Se omitirá.</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadFile.DidNotDownloadBecauseOfFileMatch">
@@ -541,7 +541,7 @@
       </trans-unit>
       <trans-unit id="General.TaskRequiresWindows">
         <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
-        <target state="translated">MSB3096: La tarea “{0}” solo se admite cuando se compila en Windows.</target>
+        <target state="translated">MSB3096: La tarea "{0}" solo se admite cuando se compila en Windows.</target>
         <note>{StrBegin="MSB3096: "}</note>
       </trans-unit>
       <trans-unit id="General.UndefineProperties">
@@ -1046,9 +1046,9 @@
       </trans-unit>
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide</source>
+           More information: https://aka.ms/msbuild/net8-binaryformatter</source>
         <target state="new">MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide</target>
+           More information: https://aka.ms/msbuild/net8-binaryformatter</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
@@ -1080,6 +1080,11 @@
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
         <target state="translated">MSB3821: No se puede procesar el archivo {0} porque está en Internet o en una zona restringida, o bien tiene la marca de la Web. Quite esta marca si desea procesar los archivos.</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
+        <source>MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</source>
+        <target state="new">MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</target>
+        <note>{StrBegin="MSB3826: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.OutputDoesntExist">
         <source>Output file "{0}" does not exist.</source>
@@ -1285,12 +1290,12 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CannotWriteAssembly">
         <source>MSB3575: GenerateResource cannot write assemblies, only read from them. Cannot create assembly "{0}".</source>
-        <target state="translated">MSB3575: GenerateResource no puede escribir ensamblados, solo leerlos. No se puede crear el ensamblado"{0}".</target>
+        <target state="translated">MSB3575: GenerateResource no puede escribir ensamblados, solo leerlos. No se puede crear el ensamblado "{0}".</target>
         <note>{StrBegin="MSB3575: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CreatingCultureInfoFailed">
         <source>MSB3576: Creating the CultureInfo failed for assembly "{2}". Note the set of cultures supported is Operating System-dependent, and the Operating System has removed some cultures from time to time (ie, some Serbian cultures are split up in Windows 7).  The culture may be a user-defined custom culture that we can't currently load on this machine.  Exception info: {0}: {1}</source>
-        <target state="translated">MSB3576: Error al crear CultureInfo para el ensamblado"{2}". Tenga en cuenta que el conjunto de referencias culturales admitido depende del sistema operativo y este ha quitado algunas referencias culturales de vez en cuando (por ejemplo, en Windows 7, algunas referencias culturales de serbio están divididas).  La referencia cultural puede ser una referencia cultural personalizada definida por el usuario que no se pueda cargar actualmente en este equipo.  Información de la excepción: {0}: {1}</target>
+        <target state="translated">MSB3576: Error al crear CultureInfo para el ensamblado "{2}". Tenga en cuenta que el conjunto de referencias culturales admitido depende del sistema operativo y este ha quitado algunas referencias culturales de vez en cuando (por ejemplo, en Windows 7, algunas referencias culturales de serbio están divididas).  La referencia cultural puede ser una referencia cultural personalizada definida por el usuario que no se pueda cargar actualmente en este equipo.  Información de la excepción: {0}: {1}</target>
         <note>{StrBegin="MSB3576: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.DuplicateOutputFilenames">
@@ -1340,7 +1345,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CannotLoadAssemblyLoadFromFailed">
         <source>MSB3816: Loading assembly "{0}" failed. {1}</source>
-        <target state="translated">MSB3816: Error al cargar el ensamblado"{0}". {1}</target>
+        <target state="translated">MSB3816: Error al cargar el ensamblado "{0}". {1}</target>
         <note>{StrBegin="MSB3816: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MainAssemblyMissingNeutralResourcesLanguage">
@@ -2120,9 +2125,9 @@
         <target state="translated">Información de listas de perfiles de TargetFramework:</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader">
+      <trans-unit id="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
         <source>TargetFramework Profile List Paths:</source>
-        <target state="translated">Rutas de acceso de listas de perfiles de TargetFramework:</target>
+        <target state="new">TargetFramework Profile List Paths:</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">
@@ -2576,12 +2581,12 @@
       </trans-unit>
       <trans-unit id="UnregisterAssembly.UnregisterTlbCantLoadFile">
         <source>MSB3397: Cannot unregister type library "{0}" - cannot load file, check to make sure it's a valid type library.</source>
-        <target state="translated">MSB3397: No se puede anular el registro de la biblioteca de tipos ""{0}"". No se puede cargar el archivo. Asegúrese de que es una biblioteca de tipos válida.</target>
+        <target state="translated">MSB3397: No se puede anular el registro de la biblioteca de tipos "{0}". No se puede cargar el archivo. Asegúrese de que es una biblioteca de tipos válida.</target>
         <note>{StrBegin="MSB3397: "}</note>
       </trans-unit>
       <trans-unit id="UnregisterAssembly.UnregisterTlbFileDoesNotExist">
         <source>Cannot unregister type library "{0}" - file doesn't exist.</source>
-        <target state="translated">No puede anularse el registro de la biblioteca de tipos ""{0}"". El archivo no existe.</target>
+        <target state="translated">No puede anularse el registro de la biblioteca de tipos "{0}". El archivo no existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnregisterAssembly.UnregisterTlbFileNotRegistered">

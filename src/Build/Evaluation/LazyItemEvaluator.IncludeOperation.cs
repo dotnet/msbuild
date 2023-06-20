@@ -12,8 +12,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.CodeAnalysis.Collections;
 
-#nullable disable
-
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
@@ -21,7 +19,7 @@ namespace Microsoft.Build.Evaluation
         private class IncludeOperation : LazyItemOperation
         {
             private readonly int _elementOrder;
-            private readonly string _rootDirectory;
+            private readonly string? _rootDirectory;
             private readonly ImmutableSegmentedList<string> _excludes;
             private readonly ImmutableArray<ProjectMetadataElement> _metadata;
 
@@ -37,9 +35,9 @@ namespace Microsoft.Build.Evaluation
 
             protected override ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                var itemsToAdd = ImmutableArray.CreateBuilder<I>();
+                ImmutableArray<I>.Builder? itemsToAdd = null;
 
-                Lazy<Func<string, bool>> excludeTester = null;
+                Lazy<Func<string, bool>>? excludeTester = null;
                 ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
                 if (_excludes != null)
                 {
@@ -57,7 +55,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                ISet<string> excludePatternsForGlobs = null;
+                ISet<string>? excludePatternsForGlobs = null;
 
                 foreach (var fragment in _itemSpec.Fragments)
                 {
@@ -73,6 +71,7 @@ namespace Microsoft.Build.Evaluation
                             isTransformExpression: out _,
                             elementLocation: _itemElement.IncludeLocation);
 
+                        itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
                         itemsToAdd.AddRange(
                             excludeTester != null
                                 ? itemsFromExpression.Where(item => !excludeTester.Value(item.EvaluatedInclude))
@@ -84,8 +83,8 @@ namespace Microsoft.Build.Evaluation
 
                         if (excludeTester?.Value(EscapingUtilities.UnescapeAll(value)) != true)
                         {
-                            var item = _itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath);
-                            itemsToAdd.Add(item);
+                            itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
+                            itemsToAdd.Add(_itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath));
                         }
                     }
                     else if (fragment is GlobFragment globFragment)
@@ -127,6 +126,7 @@ namespace Microsoft.Build.Evaluation
 
                             foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                             {
+                                itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
                                 itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
                             }
                         }
@@ -137,7 +137,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                return itemsToAdd.ToImmutable();
+                return itemsToAdd?.ToImmutable() ?? ImmutableArray<I>.Empty;
             }
 
             private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableList<string>.Builder excludePatterns)
@@ -170,7 +170,7 @@ namespace Microsoft.Build.Evaluation
         private class IncludeOperationBuilder : OperationBuilderWithMetadata
         {
             public int ElementOrder { get; set; }
-            public string RootDirectory { get; set; }
+            public string? RootDirectory { get; set; }
 
             public ImmutableSegmentedList<string>.Builder Excludes { get; } = ImmutableSegmentedList.CreateBuilder<string>();
 

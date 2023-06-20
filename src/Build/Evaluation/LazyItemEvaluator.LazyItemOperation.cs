@@ -43,7 +43,7 @@ namespace Microsoft.Build.Evaluation
 
                 _lazyEvaluator = lazyEvaluator;
 
-                _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, itemType => GetReferencedItems(itemType, ImmutableHashSet<string>.Empty));
+                _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, _referencedItemLists);
                 _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
                 _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, _lazyEvaluator.EvaluationContext);
 
@@ -82,18 +82,6 @@ namespace Microsoft.Build.Evaluation
             protected virtual void MutateItems(ImmutableArray<I> items) { }
 
             protected virtual void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder) { }
-
-            private IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
-            {
-                if (_referencedItemLists.TryGetValue(itemType, out var itemList))
-                {
-                    return itemList.GetMatchedItems(globsToIgnore);
-                }
-                else
-                {
-                    return ImmutableList<I>.Empty;
-                }
-            }
 
             [DebuggerDisplay(@"{DebugString()}")]
             protected readonly struct ItemBatchingContext
@@ -238,7 +226,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // Metadata expressions are allowed here.
                         // Temporarily gather and expand these in a table so they can reference other metadata elements above.
-                        EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(_itemType);
+                        EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(_itemType, capacity: metadata.Length);
                         _expander.Metadata = metadataTable;
 
                         // Also keep a list of everything so we can get the predecessor objects correct.

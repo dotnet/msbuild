@@ -1046,9 +1046,9 @@
       </trans-unit>
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide</source>
+           More information: https://aka.ms/msbuild/net8-binaryformatter</source>
         <target state="new">MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide</target>
+           More information: https://aka.ms/msbuild/net8-binaryformatter</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
@@ -1080,6 +1080,11 @@
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
         <target state="translated">MSB3821: Impossible de traiter le fichier {0} car il se trouve dans la zone Internet ou Restreinte ou il contient Mark of the Web. Pour traiter ces fichiers, supprimez Mark of the Web.</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
+        <source>MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</source>
+        <target state="new">MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</target>
+        <note>{StrBegin="MSB3826: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.OutputDoesntExist">
         <source>Output file "{0}" does not exist.</source>
@@ -2120,9 +2125,9 @@
         <target state="translated">Informations de listes de profil TargetFramework :</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader">
+      <trans-unit id="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
         <source>TargetFramework Profile List Paths:</source>
-        <target state="translated">Chemins d'accès de listes de profil TargetFramework :</target>
+        <target state="new">TargetFramework Profile List Paths:</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">
