@@ -175,6 +175,31 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="ExtendedBuildMessageEventArgs"/>
         /// </summary>
         ExtendedBuildMessageEvent = 27,
+
+        /// <summary>
+        /// Event is <see cref="CriticalBuildMessageEventArgs"/>
+        /// </summary>
+        CriticalBuildMessage = 28,
+
+        /// <summary>
+        /// Event is <see cref="MetaprojectGeneratedEventArgs"/>
+        /// </summary>
+        MetaprojectGenerated = 29,
+
+        /// <summary>
+        /// Event is <see cref="PropertyInitialValueSetEventArgs"/>
+        /// </summary>
+        PropertyInitialValueSet = 30,
+
+        /// <summary>
+        /// Event is <see cref="PropertyReassignmentEventArgs"/>
+        /// </summary>
+        PropertyReassignment = 31,
+
+        /// <summary>
+        /// Event is <see cref="UninitializedPropertyReadEventArgs"/>
+        /// </summary>
+        UninitializedPropertyRead = 32
     }
     #endregion
 
@@ -370,7 +395,8 @@ namespace Microsoft.Build.Shared
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
                 if (_buildEvent is ProjectEvaluationStartedEventArgs
                     or ProjectEvaluationFinishedEventArgs
-                    or EnvironmentVariableReadEventArgs)
+                    or EnvironmentVariableReadEventArgs
+                    or ResponseFileUsedEventArgs)
                 {
                     // switch to serialization methods that we provide in this file
                     // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
@@ -573,6 +599,11 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.ExtendedBuildMessageEvent => new ExtendedBuildMessageEventArgs(),
                 LoggingEventType.ExternalProjectStartedEvent => new ExternalProjectStartedEventArgs(null, null, null, null, null),
                 LoggingEventType.ExternalProjectFinishedEvent => new ExternalProjectFinishedEventArgs(null, null, null, null, false),
+                LoggingEventType.CriticalBuildMessage => new CriticalBuildMessageEventArgs(null, null, null, -1, -1, -1, -1, null, null, null),
+                LoggingEventType.MetaprojectGenerated => new MetaprojectGeneratedEventArgs(null, null, null),
+                LoggingEventType.PropertyInitialValueSet => new PropertyInitialValueSetEventArgs(),
+                LoggingEventType.PropertyReassignment => new PropertyReassignmentEventArgs(),
+                LoggingEventType.UninitializedPropertyRead => new UninitializedPropertyReadEventArgs(),
 #endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -659,6 +690,26 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(ExtendedBuildMessageEventArgs))
             {
                 return LoggingEventType.ExtendedBuildMessageEvent;
+            }
+            else if (eventType == typeof(CriticalBuildMessageEventArgs))
+            {
+                return LoggingEventType.CriticalBuildMessage;
+            }
+            else if (eventType == typeof(MetaprojectGeneratedEventArgs))
+            {
+                return LoggingEventType.MetaprojectGenerated;
+            }
+            else if (eventType == typeof(PropertyInitialValueSetEventArgs))
+            {
+                return LoggingEventType.PropertyInitialValueSet;
+            }
+            else if (eventType == typeof(PropertyReassignmentEventArgs))
+            {
+                return LoggingEventType.PropertyReassignment;
+            }
+            else if (eventType == typeof(UninitializedPropertyReadEventArgs))
+            {
+                return LoggingEventType.UninitializedPropertyRead;
             }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))
@@ -768,9 +819,16 @@ namespace Microsoft.Build.Shared
         private void WriteEnvironmentVariableReadEventArgs(EnvironmentVariableReadEventArgs environmentVariableReadEventArgs, ITranslator translator)
         {
             string name = environmentVariableReadEventArgs.EnvironmentVariableName;
+            MessageImportance importance = environmentVariableReadEventArgs.Importance;
+
             translator.Translate(ref name);
-            BuildEventContext context = environmentVariableReadEventArgs.BuildEventContext;
+            translator.TranslateEnum(ref importance, (int)importance);
+
 #if !CLR2COMPATIBILITY
+            DateTime timestamp = environmentVariableReadEventArgs.RawTimestamp;
+            BuildEventContext context = environmentVariableReadEventArgs.BuildEventContext;
+
+            translator.Translate(ref timestamp);
             translator.Translate(ref context);
 #endif
         }
@@ -861,7 +919,13 @@ namespace Microsoft.Build.Shared
         private void WriteResponseFileUsedEventToStream(ResponseFileUsedEventArgs responseFileUsedEventArgs, ITranslator translator)
         {
             string filePath = responseFileUsedEventArgs.ResponseFilePath;
+
             translator.Translate(ref filePath);
+
+#if !CLR2COMPATIBILITY
+            DateTime timestamp = responseFileUsedEventArgs.RawTimestamp;
+            translator.Translate(ref timestamp);
+#endif
         }
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
@@ -1112,13 +1176,21 @@ namespace Microsoft.Build.Shared
         private EnvironmentVariableReadEventArgs ReadEnvironmentVariableReadEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
         {
             string environmentVariableName = null;
+            MessageImportance importance = default;
+
             translator.Translate(ref environmentVariableName);
-            BuildEventContext context = null;
+            translator.TranslateEnum(ref importance, (int)importance);
+
+            EnvironmentVariableReadEventArgs args = new(environmentVariableName, message, helpKeyword, senderName, importance);
+
 #if !CLR2COMPATIBILITY
+            DateTime timestamp = default;
+            BuildEventContext context = null;
+            translator.Translate(ref timestamp);
             translator.Translate(ref context);
-#endif
-            EnvironmentVariableReadEventArgs args = new(environmentVariableName, message);
+            args.RawTimestamp = timestamp;
             args.BuildEventContext = context;
+#endif
             return args;
         }
 
@@ -1242,6 +1314,14 @@ namespace Microsoft.Build.Shared
             string responseFilePath = String.Empty;
             translator.Translate(ref responseFilePath);
             ResponseFileUsedEventArgs buildEvent = new ResponseFileUsedEventArgs(responseFilePath);
+
+#if !CLR2COMPATIBILITY
+            DateTime timestamp = default;
+            translator.Translate(ref timestamp);
+            buildEvent.RawTimestamp = timestamp;
+#endif
+
+
             return buildEvent;
         }
 

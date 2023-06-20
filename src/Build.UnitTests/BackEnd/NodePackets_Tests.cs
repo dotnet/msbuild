@@ -66,6 +66,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExtendedBuildWarningEventArgs extWarning = new("extWarn", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
             ExtendedBuildMessageEventArgs extMessage = new("extMsg", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", MessageImportance.Normal);
             ExtendedCustomBuildEventArgs extCustom = new("extCustom", "message", "help", "sender");
+            CriticalBuildMessageEventArgs criticalMessage = new("Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "Sender", DateTime.Now, "arg1");
+            PropertyInitialValueSetEventArgs propInit = new("prop", "val", "propsource", "message", "help", "sender", MessageImportance.Normal);
+            MetaprojectGeneratedEventArgs metaProjectGenerated = new("metaName", "path", "message");
+            PropertyReassignmentEventArgs propReassign = new("prop", "prevValue", "newValue", "loc", "message", "help", "sender", MessageImportance.Normal);
+            ResponseFileUsedEventArgs responseFileUsed = new("path");
+            UninitializedPropertyReadEventArgs uninitializedPropertyRead = new("prop", "message", "help", "sender", MessageImportance.Normal);
+            EnvironmentVariableReadEventArgs environmentVariableRead = new("env", "message", "help", "sender", MessageImportance.Normal);
+
             VerifyLoggingPacket(buildFinished, LoggingEventType.BuildFinishedEvent);
             VerifyLoggingPacket(buildStarted, LoggingEventType.BuildStartedEvent);
             VerifyLoggingPacket(lowMessage, LoggingEventType.BuildMessageEvent);
@@ -89,6 +97,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(extWarning, LoggingEventType.ExtendedBuildWarningEvent);
             VerifyLoggingPacket(extMessage, LoggingEventType.ExtendedBuildMessageEvent);
             VerifyLoggingPacket(extCustom, LoggingEventType.ExtendedCustomEvent);
+            VerifyLoggingPacket(criticalMessage, LoggingEventType.CriticalBuildMessage);
+            VerifyLoggingPacket(propInit, LoggingEventType.PropertyInitialValueSet);
+            VerifyLoggingPacket(metaProjectGenerated, LoggingEventType.MetaprojectGenerated);
+            VerifyLoggingPacket(propReassign, LoggingEventType.PropertyReassignment);
+            VerifyLoggingPacket(responseFileUsed, LoggingEventType.ResponseFileUsedEvent);
+            VerifyLoggingPacket(uninitializedPropertyRead, LoggingEventType.UninitializedPropertyRead);
+            VerifyLoggingPacket(environmentVariableRead, LoggingEventType.EnvironmentVariableReadEvent);
         }
 
         private static BuildEventContext CreateBuildEventContext()
@@ -230,6 +245,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 BuildEventArgs[] testArgs = new BuildEventArgs[]
                 {
+                    new ResponseFileUsedEventArgs("path"),
+                    new UninitializedPropertyReadEventArgs("prop", "message", "help", "sender", MessageImportance.Normal),
+                    new EnvironmentVariableReadEventArgs("env", "message", "help", "sender", MessageImportance.Normal) { BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6) },
+                    new PropertyReassignmentEventArgs("prop", "prevValue", "newValue", "loc", "message", "help", "sender", MessageImportance.Normal),
+                    new PropertyInitialValueSetEventArgs("prop", "val", "propsource", "message", "help", "sender", MessageImportance.Normal),
+                    new MetaprojectGeneratedEventArgs("metaName", "path", "message"),
+                    new CriticalBuildMessageEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "Sender", DateTime.Now, "arg1"),
                     new BuildFinishedEventArgs("Message", "Keyword", true),
                     new BuildStartedEventArgs("Message", "Help"),
                     new BuildMessageEventArgs("Message", "help", "sender", MessageImportance.Low),
@@ -297,7 +319,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         // Since we use struct DictionaryEntry of class TaskItemData, generated DictionaryEntry.Equals compare TaskItemData by references.
                         // Bellow will instruct equivalency test to not use DictionaryEntry.Equals but its public members for equivalency tests.
                         .ComparingByMembers<DictionaryEntry>() 
-                        .WithTracing());
+                        .WithTracing(), "Roundtrip deserialization of message type {0} should be equivalent", args.GetType().Name);
                 }
             }
             finally
