@@ -82,7 +82,6 @@ namespace Microsoft.Build.Shared
             return new Guid(reader.ReadBytes(sizeof(Guid)));
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ReadExtendedBuildEventData(this BinaryReader reader, IExtendedBuildEventArgs data)
         {
             data.ExtendedType = reader.ReadString();
