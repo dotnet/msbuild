@@ -27,22 +27,22 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Cache of names of required properties on this type
         /// </summary>
-        private IDictionary<string, string> _namesOfPropertiesWithRequiredAttribute;
+        private IReadOnlyDictionary<string, string> _namesOfPropertiesWithRequiredAttribute;
 
         /// <summary>
         /// Cache of names of output properties on this type
         /// </summary>
-        private IDictionary<string, string> _namesOfPropertiesWithOutputAttribute;
+        private IReadOnlyDictionary<string, string> _namesOfPropertiesWithOutputAttribute;
 
         /// <summary>
         /// Cache of names of properties on this type whose names are ambiguous
         /// </summary>
-        private IDictionary<string, string> _namesOfPropertiesWithAmbiguousMatches;
+        private IReadOnlyDictionary<string, string> _namesOfPropertiesWithAmbiguousMatches;
 
         /// <summary>
         /// Cache of PropertyInfos for this type
         /// </summary>
-        private IDictionary<string, TaskPropertyInfo> _propertyInfoCache;
+        private IReadOnlyDictionary<string, TaskPropertyInfo> _propertyInfoCache;
 
         /// <summary>
         /// The name of the task this factory can create.
@@ -101,7 +101,7 @@ namespace Microsoft.Build.Execution
         /// Caches the result - since it can't change during the build.
         /// </summary>
         /// <returns></returns>
-        public IDictionary<string, string> GetNamesOfPropertiesWithRequiredAttribute
+        public IReadOnlyDictionary<string, string> GetNamesOfPropertiesWithRequiredAttribute
         {
             get
             {
@@ -116,7 +116,7 @@ namespace Microsoft.Build.Execution
         /// Caches the result - since it can't change during the build.
         /// </summary>
         /// <returns></returns>
-        public IDictionary<string, string> GetNamesOfPropertiesWithOutputAttribute
+        public IReadOnlyDictionary<string, string> GetNamesOfPropertiesWithOutputAttribute
         {
             get
             {
@@ -244,8 +244,23 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void PopulatePropertyInfoCacheIfNecessary()
         {
-            if (_propertyInfoCache == null)
+            if (_propertyInfoCache != null)
             {
+                return;
+            }
+
+            lock (this)
+            {
+                if (_propertyInfoCache != null)
+                {
+                    return;
+                }
+
+                Dictionary<string, TaskPropertyInfo> propertyInfoCache = null;
+                Dictionary<string, string> namesOfPropertiesWithRequiredAttribute = null;
+                Dictionary<string, string> namesOfPropertiesWithOutputAttribute = null;
+                Dictionary<string, string> namesOfPropertiesWithAmbiguousMatches = null;
+
                 bool taskTypeImplementsIGeneratedTask = typeof(IGeneratedTask).IsAssignableFrom(_taskFactory.TaskType);
                 TaskPropertyInfo[] propertyInfos = _taskFactory.GetTaskParameters();
 
@@ -262,12 +277,12 @@ namespace Microsoft.Build.Execution
 
                     try
                     {
-                        if (_propertyInfoCache == null)
+                        if (propertyInfoCache == null)
                         {
-                            _propertyInfoCache = new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase);
+                            propertyInfoCache = new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase);
                         }
 
-                        _propertyInfoCache.Add(propertyInfo.Name, propertyInfo);
+                        propertyInfoCache.Add(propertyInfo.Name, propertyInfo);
                     }
                     catch (ArgumentException)
                     {
@@ -276,42 +291,42 @@ namespace Microsoft.Build.Execution
                         // that wouldn't have been thrown unless and until the project actually tried to set this ambiguous parameter.
                         // So rather than fail here, we store a list of ambiguous names and throw later, when one of them
                         // is requested.
-                        if (_namesOfPropertiesWithAmbiguousMatches == null)
+                        if (namesOfPropertiesWithAmbiguousMatches == null)
                         {
-                            _namesOfPropertiesWithAmbiguousMatches = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                            namesOfPropertiesWithAmbiguousMatches = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                         }
 
-                        _namesOfPropertiesWithAmbiguousMatches[propertyInfo.Name] = String.Empty;
+                        namesOfPropertiesWithAmbiguousMatches[propertyInfo.Name] = String.Empty;
                     }
 
                     if (propertyInfos[i].Required)
                     {
-                        if (_namesOfPropertiesWithRequiredAttribute == null)
+                        if (namesOfPropertiesWithRequiredAttribute == null)
                         {
-                            _namesOfPropertiesWithRequiredAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                            namesOfPropertiesWithRequiredAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                         }
 
                         // we have a require attribute defined, keep a record of that
-                        _namesOfPropertiesWithRequiredAttribute[propertyInfo.Name] = String.Empty;
+                        namesOfPropertiesWithRequiredAttribute[propertyInfo.Name] = String.Empty;
                     }
 
                     if (propertyInfos[i].Output)
                     {
-                        if (_namesOfPropertiesWithOutputAttribute == null)
+                        if (namesOfPropertiesWithOutputAttribute == null)
                         {
-                            _namesOfPropertiesWithOutputAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                            namesOfPropertiesWithOutputAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                         }
 
                         // we have a output attribute defined, keep a record of that
-                        _namesOfPropertiesWithOutputAttribute[propertyInfo.Name] = String.Empty;
+                        namesOfPropertiesWithOutputAttribute[propertyInfo.Name] = String.Empty;
                     }
                 }
 
-                _propertyInfoCache ??= ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance;
+                _propertyInfoCache = (IReadOnlyDictionary<string, TaskPropertyInfo>)propertyInfoCache ?? ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance;
 
-                _namesOfPropertiesWithRequiredAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
-                _namesOfPropertiesWithOutputAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
-                _namesOfPropertiesWithAmbiguousMatches ??= ReadOnlyEmptyDictionary<string, string>.Instance;
+                _namesOfPropertiesWithRequiredAttribute = (IReadOnlyDictionary<string, string>)namesOfPropertiesWithRequiredAttribute ?? ReadOnlyEmptyDictionary<string, string>.Instance;
+                _namesOfPropertiesWithOutputAttribute   = (IReadOnlyDictionary<string, string>)namesOfPropertiesWithOutputAttribute   ?? ReadOnlyEmptyDictionary<string, string>.Instance;
+                _namesOfPropertiesWithAmbiguousMatches  = (IReadOnlyDictionary<string, string>)namesOfPropertiesWithAmbiguousMatches  ?? ReadOnlyEmptyDictionary<string, string>.Instance;
             }
         }
         #endregion
