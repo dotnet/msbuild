@@ -9,17 +9,13 @@ using Xunit;
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     [Collection(TestConstants.UsesStaticTelemetryState)]
-
     public class GivenDotnetMSBuildInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
-        const string ExpectedPrefix = "-maxcpucount -verbosity:m";
-       
-        private static readonly string WorkingDirectory =
-            TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetPackInvocation));
+        private const string ExpectedPrefix = "-maxcpucount -verbosity:m";
+        private static readonly string WorkingDirectory = TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetPackInvocation));
 
         [Theory]
         [InlineData(new string[] { "--disable-build-servers" }, "-p:UseRazorBuildServer=false -p:UseSharedCompilation=false /nodeReuse:false")]
-
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
