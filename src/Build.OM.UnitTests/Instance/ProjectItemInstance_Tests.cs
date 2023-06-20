@@ -96,6 +96,26 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
+        /// Basic ProjectItemInstance with metadata added using ImportMetadata
+        /// </summary>
+        [Fact]
+        public void AccessorsWithImportedMetadata()
+        {
+            ProjectItemInstance item = GetItemInstance();
+
+            ((IMetadataContainer)item).ImportMetadata(new Dictionary<string, string>
+            {
+                { "m1", "v1" },
+                { "m2", "v2" },
+            });
+
+            Assert.Equal("m1", item.GetMetadata("m1").Name);
+            Assert.Equal("m2", item.GetMetadata("m2").Name);
+            Assert.Equal("v1", item.GetMetadataValue("m1"));
+            Assert.Equal("v2", item.GetMetadataValue("m2"));
+        }
+
+        /// <summary>
         /// Get metadata not present
         /// </summary>
         [Fact]
