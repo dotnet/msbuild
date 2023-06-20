@@ -168,7 +168,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         }
 
         [Serializable]
-        class GlobalJsonFormatException : Exception
+        internal class GlobalJsonFormatException : Exception
         {
             public GlobalJsonFormatException() { }
             public GlobalJsonFormatException(string messageFormat, params object?[] args) : base(string.Format(messageFormat, args)) { }

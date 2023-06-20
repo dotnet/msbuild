@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
+using Microsoft.NET.Sdk.Localization;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.NET.TestFramework;
 
@@ -201,10 +202,32 @@ namespace ManifestReaderTests
                 .BeEquivalentTo("ios: 11.0.2/8.0.100", "android: 33.0.2-rc.1/8.0.200", "maui: 15.0.1-rc.456/8.0.200-rc.2");
         }
 
-        [Fact]
-        public void ItUsesLatestWorkloadSet()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ItUsesLatestWorkloadSet(bool globalJsonExists)
         {
-            Initialize("8.0.200");
+            Initialize("8.0.200", identifier: globalJsonExists.ToString());
+
+            string? globalJsonPath;
+            if (globalJsonExists)
+            {
+                globalJsonPath = Path.Combine(_testDirectory, "global.json");
+                File.WriteAllText(globalJsonPath, """
+                    {
+                        "sdk": {
+                            "version": "1.0.42",
+                        },
+                        "msbuild-sdks": {
+                            "Microsoft.DotNet.Arcade.Sdk": "7.0.0-beta.23254.2",
+                        }
+                    }
+                    """);
+            }
+            else
+            {
+                globalJsonPath = null;
+            }
 
             CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
             CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
@@ -223,7 +246,7 @@ namespace ManifestReaderTests
     """);
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: globalJsonPath);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -400,6 +423,104 @@ namespace ManifestReaderTests
 
             Assert.Throws<ArgumentException>(() =>
                 new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null));
+        }
+
+        [Fact]
+        public void ItUsesWorkloadSetFromGlobalJson()
+        {
+            Initialize("8.0.200");
+
+            string? globalJsonPath = Path.Combine(_testDirectory, "global.json");
+            File.WriteAllText(globalJsonPath, """
+            {
+                "sdk": {
+                    "version": "8.0.200",
+                    "workloadversion": "8.0.201"
+                },
+                "msbuild-sdks": {
+                    "Microsoft.DotNet.Arcade.Sdk": "7.0.0-beta.23254.2",
+                }
+            }
+            """);
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.201", """
+{
+  "ios": "11.0.2/8.0.100"
+}
+""");
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: globalJsonPath);
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("ios: 11.0.2/8.0.100");
+        }
+
+        [Fact]
+        public void ItFailsIfWorkloadSetFromGlobalJsonIsNotInstalled()
+        {
+            Initialize("8.0.200");
+
+            string? globalJsonPath = Path.Combine(_testDirectory, "global.json");
+            File.WriteAllText(globalJsonPath, """
+            {
+                "sdk": {
+                    "version": "8.0.200",
+                    "workloadversion": "8.0.201"
+                },
+                "msbuild-sdks": {
+                    "Microsoft.DotNet.Arcade.Sdk": "7.0.0-beta.23254.2",
+                }
+            }
+            """);
+
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+
+            var ex = Assert.Throws<FileNotFoundException>(() => new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: globalJsonPath));
+            ex.Message.Should().Be(string.Format(Strings.WorkloadVersionFromGlobalJsonNotFound, "8.0.201", globalJsonPath));
+        }
+
+        [Fact]
+        public void ItFailsIfGlobalJsonIsMalformed()
+        {
+            Initialize("8.0.200");
+
+            string? globalJsonPath = Path.Combine(_testDirectory, "global.json");
+            File.WriteAllText(globalJsonPath, """
+            {
+                "sdk": {
+                    "workloadversion": [ "8.0.202" ]
+                }
+            }
+            """);
+
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+
+            var ex = Assert.Throws<SdkDirectoryWorkloadManifestProvider.GlobalJsonFormatException>(
+                () => new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: globalJsonPath));
         }
 
         [Fact]
