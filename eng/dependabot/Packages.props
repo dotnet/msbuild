@@ -13,6 +13,9 @@
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.1" />
     <PackageVersion Update="BenchmarkDotNet" Condition="'$(BenchmarkDotNetVersion)' != ''" Version="$(BenchmarkDotNetVersion)" />
 
+    <PackageVersion Include="FluentAssertions" Version="6.11.0" />
+    <PackageVersion Update="FluentAssertions" Condition="'$(FluentAssertionsVersion)' != ''" Version="$(FluentAssertionsVersion)" />
+
     <PackageVersion Include="LargeAddressAware" Version="1.0.5" />
     <PackageVersion Update="LargeAddressAware" Condition="'$(LargeAddressAwareVersion)' != ''" Version="$(LargeAddressAwareVersion)" />
 

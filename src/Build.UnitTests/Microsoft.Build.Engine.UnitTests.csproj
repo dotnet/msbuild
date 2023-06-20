@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <Reference Include="System.IO.Compression" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-
+    <PackageReference Include="FluentAssertions" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="System.Net.Http" />
