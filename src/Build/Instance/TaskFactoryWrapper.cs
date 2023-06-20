@@ -55,6 +55,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private IDictionary<string, string> _factoryIdentityParameters;
 
+        /// <summary>
+        /// The object used to synchronize cache initialization.
+        /// </summary>
+        private readonly object _cacheInitSyncObject = new object();
+
         #endregion
 
         #region Constructors
@@ -249,7 +254,7 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            lock (this)
+            lock (_cacheInitSyncObject)
             {
                 if (_propertyInfoCache != null)
                 {
