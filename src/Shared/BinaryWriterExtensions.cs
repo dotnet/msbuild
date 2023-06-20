@@ -87,7 +87,6 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteExtendedBuildEventData(this BinaryWriter writer, IExtendedBuildEventArgs data)
         {
             writer.Write(data.ExtendedType);
