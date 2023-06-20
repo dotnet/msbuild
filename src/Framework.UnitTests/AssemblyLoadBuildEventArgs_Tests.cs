@@ -29,7 +29,7 @@ namespace Microsoft.Build.Framework.UnitTests
             stream.Position = 0;
             using BinaryReader br = new BinaryReader(stream);
             AssemblyLoadBuildEventArgs argDeserialized = new();
-            argDeserialized.CreateFromStream(br, 0);
+            argDeserialized.CreateFromStream(br, int.MaxValue /*latest*/);
 
             argDeserialized.LoadingInitiator.ShouldBe(loadingInitiator);
             argDeserialized.AssemblyName.ShouldBe(assemblyName);
