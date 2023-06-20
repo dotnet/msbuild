@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="translated">{0} in {1}s erstellen</target>
+        <target state="translated">Erstellen von {0} in {1}s</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -21,35 +21,35 @@
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
         <source>failed</source>
-        <target state="new">failed</target>
+        <target state="translated">Fehlgeschlagen</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with errors</source>
-        <target state="translated">Fehler mit Fehlern</target>
+        <target state="translated">Fehlgeschlagen mit Fehlern</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with warnings</source>
-        <target state="translated">Fehler mit Warnungen</target>
+        <target state="translated">Fehlgeschlagen mit Warnungen</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_Succeeded">
         <source>succeeded</source>
-        <target state="new">succeeded</target>
+        <target state="translated">Erfolgreich</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
-        <target state="new">succeeded with warnings</target>
+        <target state="translated">Erfolgreich mit Warnungen</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -80,11 +80,11 @@
                      but isn't up to date.
                      (Short form: -q)
     </source>
-        <target state="translated">  -Frage
+        <target state="translated">  -question
                      (Experimentell) Fragen Sie, ob Buildarbeiten vorhanden sind.
-                     MSBuild führt einen Fehler aus, wenn ein Ziel oder eine Aufgabe erkannt wird.
-                     die inkrementell sein können (mit Eingaben und Ausgaben),
-                     ist aber nicht auf dem neuesten Stand.
+                     MSBuild führt einen Fehler aus, wenn ein Ziel oder eine Aufgabe erkannt wird,
+                     das/die inkrementell sein kann (mit Eingaben und Ausgaben),
+                     aber nicht auf dem neuesten Stand ist.
                      (Kurzform: -q)
     </target>
         <note>
@@ -95,7 +95,7 @@
       </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1064: Low priority value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1064: Der Wert mit niedriger Priorität ist ungültig. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -225,25 +225,25 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -isolateProjects[:True| MessageUponIsolationViolation| Falsch]
+        <target state="translated">  -isolateProjects[:True| MessageUponIsolationViolation| False]
                      Führt dazu, dass MSBuild jedes Projekt isoliert erstellt.
 
-Bei Festlegung auf "MessageUponIsolationViolation" (oder die zugehörige Kurzeinstellung
-                     form "Message"), only the results from top-level targets
-                     serialisiert werden, wenn der Parameter "-outputResultsCache"
-                     Geliefert. Dies dient dazu, die Wahrscheinlichkeit einer
-                     isolationsverstößes Ziel für ein Abhängigkeitsprojekt mithilfe von
-                     Falscher Status aufgrund seiner Abhängigkeit von einem zwischengespeicherten Ziel.
-                     deren Nebenwirkungen nicht berücksichtigt würden.
+Bei Festlegung auf "MessageUponIsolationViolation" (oder die zugehörige Kurzform
+                      "Message"), werden die Resultate von Top Level-Zielen
+                     nur serialisiert, wenn der Parameter "-outputResultsCache"
+                     angegeben wurde. Dies dient dazu, die Wahrscheinlichkeit eines
+                     gegen die Isolation verstoßenden Ziels für ein Abhängigkeitsprojekt mithilfe von
+                     Falscher Status aufgrund seiner Abhängigkeit von einem zwischengespeicherten Ziel,
+                     dessen Nebenwirkungen nicht berücksichtigt würden, abzuschwächen.
                      (Beispiel: Die Definition einer Eigenschaft.)
 
-Dies ist ein restriktiverer Modus von MSBuild, wie er erfordert.
-                     dass das Projektdiagramm statisch auffindbar ist bei
-                     Auswertungszeit, kann aber die Planung verbessern und verringern.
-                     Arbeitsspeicheraufwand beim Erstellen einer großen Gruppe von Projekten.
+Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
+                     dass das Projektdiagramm zum Zeitpunkt der Auswertung statisch auffindbar ist,
+                     jedoch kann die Planung kann verbessert und
+                     der Arbeitsspeicheraufwand reduziert werden, wenn große Gruppen von Projekten erstellt werden.
                      (Kurzform: -isolate)
 
-Dieses Kennzeichen ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
+                     Dieses Kennzeichen ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -359,12 +359,12 @@ Dieses Kennzeichen ist experimentell und funktioniert möglicherweise nicht wie 
                        -warnNotAsError:MSB3026
     </source>
         <target state="translated">  -warnNotAsError[:code[;code2]]
-                     Liste der Warnungscodes, die nicht als Fehler behandelt werden sollen.
-                     Semikolon oder Komma zum Trennen verwenden
-                     mehrere Warnungscodes. Hat keine Auswirkungen, wenn der -warnaserror
-                     Switch ist nicht festgelegt.
+                     Liste der Warnungscodes, die nicht als Fehler behandelt werden.
+                     Semikolon oder Komma zum Trennen 
+                     mehrerer Warnungscodes verwenden. Hat keine Auswirkungen, wenn der Switch -warnaserror
+                     nicht festgelegt ist.
 
-Beispiel:
+                     Beispiel:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -612,40 +612,40 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Parameters to console logger. (Short form: -clp)
-                     The available parameters are:
-                        PerformanceSummary--Show time spent in tasks, targets
-                            and projects.
-                        Summary--Show error and warning summary at the end.
-                        NoSummary--Don't show error and warning summary at the
-                            end.
-                        ErrorsOnly--Show only errors.
-                        WarningsOnly--Show only warnings.
-                        NoItemAndPropertyList--Don't show list of items and
-                            properties at the start of each project build.
-                        ShowCommandLine--Show TaskCommandLineEvent messages
-                        ShowTimestamp--Display the Timestamp as a prefix to any
-                            message.
-                        ShowEventId--Show eventId for started events, finished
-                            events, and messages
-                        ForceNoAlign--Does not align the text to the size of
-                            the console buffer
-                        DisableConsoleColor--Use the default console colors
-                            for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
-                        EnableMPLogging--Enable the multiprocessor logging
-                            style even when running in non-multiprocessor
-                            mode. This logging style is on by default.
-                        ForceConsoleColor--Use ANSI console colors even if
-                            console does not support it
-                        PreferConsoleColor--Use ANSI console colors only if
-                            target console does support it
-                     Verbosity--overrides the -verbosity setting for this
-                            logger.
-                     Example:
+        <target state="translated">  -consoleloggerparameters:&lt;Parameter&gt;
+                     Parameter für die Konsolenprotokollierung. (Kurzform: -clp)
+                     Folgende Parameter sind verfügbar:
+                        PerformanceSummary: Zeigt die in Aufgaben, Zielen und
+                            Projekten verbrachte Zeit an.
+                        Summary: Zeigt abschließend eine Zusammenfassung der Fehler und Warnungen an.
+                        NoSummary: Zeigt keine Fehler- und Warnungsübersicht am
+                            Ende an.
+                        ErrorsOnly: Zeigt nur Fehler an.
+                        WarningsOnly: Zeigt nur Warnungen an.
+                        NoItemAndPropertyList: Zeigt keine Liste der Elemente
+                            und Eigenschaften am Anfang jeder Projekterstellung an.
+                        ShowCommandLine: Zeigt TaskCommandLineEvent-Meldungen an. 
+                        ShowTimestamp: Zeigt den Timestamp als Präfix einer
+                            Meldung an.
+                        ShowEventId: Zeigt die eventId für gestartete
+                            Ereignisse, abgeschlossene Ereignisse und Meldungen an.
+                        ForceNoAlign: Richtet den Text nicht an der Größe des
+                            Konsolenpuffers aus.
+                        DisableConsoleColor: Verwendet die Standardkonsolenfarben
+                            für alle Protokollierungsmeldungen.
+                        DisableMPLogging: Deaktiviert die Ausgabe wie
+                            bei der Mehrprozessorprotokollierung im Modus mit nur einem Prozessor.
+                        EnableMPLogging: Aktiviert das Format der
+                            Mehrprozessorprotokollierung auch bei der Ausführung
+                            im Modus mit nur einem Prozessor.
+Dieses Protokollierungsformat ist standardmäßig aktiviert.
+                         ForceConsoleColor: Verwendet selbst dann
+                            ANSI-Konsolenfarben, wenn die Konsole dies nicht unterstützt.
+                        PreferConsoleColor: Verwendet ANSI-Konsolenfarben nur,
+                            wenn die Zielkonsole dies unterstützt.
+                     Verbosity: Überschreibt die Einstellung für -verbosity für
+                            diese Protokollierung.
+                     Beispiel:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
@@ -747,9 +747,9 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
                      to False, this sets it to True. (short form: -irc)
    </source>
         <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Durch Semikolon getrennte Liste der Eingabecachedateien, die MSBuild
-                     liest Buildergebnisse aus. Wenn "-isolateProjects" festgelegt ist
-                     auf "False" festgelegt, wird dieser Wert auf "True" festgelegt. (Kurzform: -irc)
+                     Durch Semikolon getrennte Liste der Eingabecachedateien, aus denen MSBuild
+                     Buildergebnisse liest. Wenn "-isolateProjects"
+                     auf "False" festgelegt ist, wird dieser Wert auf "True" festgelegt. (Kurzform: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -764,8 +764,8 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
                      (short form: -orc)
    </source>
         <target state="translated">  -outputResultsCache:[cacheFile]
-                     Ausgabecachedatei, in die MSBuild den Inhalt schreibt von
-                     die Zugehörigen Buildergebniscaches am Ende des Builds.
+                     Ausgabecachedatei, in die MSBuild den Inhalt
+                     des Buildergebniscaches am Ende des Builds schreibt.
                      Wenn "-isolateProjects" auf "False" festgelegt ist, wird diese Einstellung auf "True" festgelegt.
                      (Kurzform: -orc)
    </target>
@@ -1390,7 +1390,7 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
       </trans-unit>
       <trans-unit id="ProjectBuilding_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3})</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project building.
       {0}: indentation - few spaces to visually indent row
@@ -1401,7 +1401,7 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
       </trans-unit>
       <trans-unit id="ProjectBuilding_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4})</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project building including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1413,7 +1413,7 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3})</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1424,7 +1424,7 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
         <source> → {0}</source>
-        <target state="new"> → {0}</target>
+        <target state="translated"> → {0}</target>
         <note>
       Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
       {0}: VT100 coded hyperlink to project output directory
@@ -1432,7 +1432,7 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4})</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1498,7 +1498,7 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="translated">{0} in {1}wiederherstellen</target>
+        <target state="translated">Wiederherstellen von {0} in {1}s</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1566,7 +1566,7 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
       </trans-unit>
       <trans-unit id="UnsupportedSwitchForSolutionFiles">
         <source>The '{0}' switch is not supported for solution files.</source>
-        <target state="translated">Der Schalter '{0}' wird für Projektmappendateien nicht unterstützt.</target>
+        <target state="translated">Der Switch "{0}" wird für Projektmappendateien nicht unterstützt.</target>
         <note />
       </trans-unit>
       <trans-unit id="Using35Engine">

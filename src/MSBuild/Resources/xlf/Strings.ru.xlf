@@ -95,7 +95,7 @@
       </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1064: Low priority value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1064: недопустимое значение низкого приоритета. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
