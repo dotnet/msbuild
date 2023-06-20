@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Microsoft.Build.Framework.BuildException;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions; // for SecurityPermissionAttribute
 #endif
@@ -20,7 +22,7 @@ namespace Microsoft.Build.Framework
     // promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type
     // without following certain special FX guidelines, can break both forward and backward compatibility
     [Serializable]
-    public class LoggerException : Exception
+    public class LoggerException : BuildExceptionBase
     {
         /// <summary>
         /// Default constructor.
@@ -102,6 +104,21 @@ namespace Microsoft.Build.Framework
 
             info.AddValue("errorCode", errorCode);
             info.AddValue("helpKeyword", helpKeyword);
+        }
+
+        protected override IDictionary<string, string> FlushCustomState()
+        {
+            return new Dictionary<string, string>()
+            {
+                { nameof(errorCode), errorCode },
+                { nameof(helpKeyword), helpKeyword },
+            };
+        }
+
+        protected override void InitializeCustomState(IDictionary<string, string> state)
+        {
+            errorCode = state[nameof(errorCode)];
+            helpKeyword = state[nameof(helpKeyword)];
         }
 
         #endregion
