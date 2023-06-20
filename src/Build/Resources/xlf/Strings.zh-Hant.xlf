@@ -64,12 +64,12 @@
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
         <source>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="new">MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</target>
+        <target state="translated">MSB4271: 環境變數 MSBUILDDISABLEFEATURESFROMVERSION 設為無效的格式。正在啟用所有變更波段版本。輸入的值: {0}。目前的變更波段: {1}。</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
         <source>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="new">MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</target>
+        <target state="translated">MSB4272: 環境變數 MSBUILDDISABLEFEATURESFROMVERSION 設為無法輪替的版本。預設為變更波段版本: {0}。輸入的值: {1}。目前的變更波段: {2}。</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -94,7 +94,7 @@
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
-        <target state="new">MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</target>
+        <target state="translated">MSB4276: 預設的 SDK 解析程式無法解析 SDK "{0}"，因為目錄 "{1}" 不存在。</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
@@ -109,7 +109,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentDerivedPropertyRead">
         <source>Property '{0}' with value '{1}' expanded from the environment.</source>
-        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
+        <target state="translated">從環境展開值為 '{1}' 的屬性 '{0}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -130,7 +130,7 @@
       <trans-unit id="FailedToResolveSDK">
         <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
   {1}</source>
-        <target state="new">Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+        <target state="translated">無法解析 SDK "{0}"。下面有一個確切探查訊息會指出無法解析 SDK 的原因。請調查並解析該訊息以正確指定 SDK。
   {1}</target>
         <note />
       </trans-unit>
@@ -156,7 +156,7 @@
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
         <source>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</source>
-        <target state="new">MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</target>
+        <target state="translated">MSB4120: 目標內的項目 '{0}' 定義透過 (限定或不限定) 中繼資料 '{1}' 參考本身。這可能會導致意外的擴充和交叉套用既有的項目。詳細資訊: https://aka.ms/msbuild/metadata-self-ref</target>
         <note>{StrBegin="MSB4120: "}</note>
       </trans-unit>
       <trans-unit id="KillingProcessWithPid">
@@ -166,7 +166,7 @@
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
         <source>Loading the following project cache plugin: {0}</source>
-        <target state="new">Loading the following project cache plugin: {0}</target>
+        <target state="translated">載入下列專案快取外掛程式: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -198,7 +198,7 @@
       </trans-unit>
       <trans-unit id="NodeReused">
         <source>Reusing node {0} (PID: {1}).</source>
-        <target state="new">Reusing node {0} (PID: {1}).</target>
+        <target state="translated">重複使用節點 {0} (PID: {1})。</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -231,7 +231,7 @@
       </trans-unit>
       <trans-unit id="OM_NoMatchOnMetadataOutsideTargets">
         <source>MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</source>
-        <target state="translated">MatchOnMetadata 無法在 &lt;目標&gt; 之外使用。</target>
+        <target state="translated">MatchOnMetadata 無法在 &lt;Target&gt; 之外使用。</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
@@ -352,7 +352,7 @@
       </trans-unit>
       <trans-unit id="PropertyOutsidePropertyGroupInTarget">
         <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
-        <target state="new">MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</target>
+        <target state="translated">MSB4067: 無法辨識元素 &lt;{1}&gt; 下的元素 &lt;{0}&gt;。如果您想要將此項目設為屬性，請將它括在 &lt;PropertyGroup&gt; 元素內。</target>
         <note>{StrBegin="MSB4067: "}</note>
       </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
@@ -372,7 +372,7 @@
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
-        <target state="new">SDK resolver "{0}" returned null.</target>
+        <target state="translated">SDK 解析程式 "{0}" 傳回 Null。</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -428,7 +428,7 @@
       </trans-unit>
       <trans-unit id="TaskAssemblyLoaded">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
-        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</target>
+        <target state="translated">組件在 {0}{1} 期間載入: {2} (位置: {3}，MVID: {4}，AppDomain: {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
@@ -1891,7 +1891,7 @@
       </trans-unit>
       <trans-unit id="WhenNotAllowedAfterOtherwise">
         <source>MSB4084: A &lt;When&gt; element may not follow an &lt;Otherwise&gt; element in a &lt;Choose&gt;.</source>
-        <target state="translated">MSB4084: 在 &lt;Choose&gt; 中，&lt;When&gt; 項目不能接在 &lt;Otherwise&gt; 項目後面。</target>
+        <target state="translated">MSB4084: 在 &lt;Choose&gt; 中，&lt;When&gt; 元素不能接在 &lt;Otherwise&gt; 元素後面。</target>
         <note>{StrBegin="MSB4084: "}</note>
       </trans-unit>
       <trans-unit id="MustCallInitializeBeforeApplyParameter">
