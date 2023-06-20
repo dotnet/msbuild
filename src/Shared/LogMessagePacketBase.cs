@@ -147,6 +147,16 @@ namespace Microsoft.Build.Shared
         AssemblyLoadEvent = 21,
 
         /// <summary>
+        /// Event is <see cref="ExternalProjectStartedEventArgs"/>
+        /// </summary>
+        ExternalProjectStartedEvent = 22,
+
+        /// <summary>
+        /// Event is <see cref="ExternalProjectFinishedEventArgs"/>
+        /// </summary>
+        ExternalProjectFinishedEvent = 23,
+
+        /// <summary>
         /// Event is <see cref="ExtendedCustomBuildEventArgs"/>
         /// </summary>
         ExtendedCustomEvent = 24,
@@ -561,6 +571,8 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.ExtendedBuildErrorEvent => new ExtendedBuildErrorEventArgs(),
                 LoggingEventType.ExtendedBuildWarningEvent => new ExtendedBuildWarningEventArgs(),
                 LoggingEventType.ExtendedBuildMessageEvent => new ExtendedBuildMessageEventArgs(),
+                LoggingEventType.ExternalProjectStartedEvent => new ExternalProjectStartedEventArgs(null, null, null, null, null),
+                LoggingEventType.ExternalProjectFinishedEvent => new ExternalProjectFinishedEventArgs(null, null, null, null, false),
 #endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -598,6 +610,15 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.ProjectStartedEvent;
             }
+            else if (eventType == typeof(ExternalProjectStartedEventArgs))
+            {
+                return LoggingEventType.ExternalProjectStartedEvent;
+            }
+            else if (eventType == typeof(ExternalProjectFinishedEventArgs))
+            {
+                return LoggingEventType.ExternalProjectFinishedEvent;
+            }
+
 #if !TASKHOST
             else if (eventType == typeof(ProjectEvaluationFinishedEventArgs))
             {
@@ -731,12 +752,6 @@ namespace Microsoft.Build.Shared
                 case LoggingEventType.BuildWarningEvent:
                     WriteBuildWarningEventToStream((BuildWarningEventArgs)buildEvent, translator);
                     break;
-                case LoggingEventType.ProjectStartedEvent:
-                    WriteExternalProjectStartedEventToStream((ExternalProjectStartedEventArgs)buildEvent, translator);
-                    break;
-                case LoggingEventType.ProjectFinishedEvent:
-                    WriteExternalProjectFinishedEventToStream((ExternalProjectFinishedEventArgs)buildEvent, translator);
-                    break;
                 case LoggingEventType.EnvironmentVariableReadEvent:
                     WriteEnvironmentVariableReadEventArgs((EnvironmentVariableReadEventArgs)buildEvent, translator);
                     break;
@@ -758,30 +773,6 @@ namespace Microsoft.Build.Shared
 #if !CLR2COMPATIBILITY
             translator.Translate(ref context);
 #endif
-        }
-
-        /// <summary>
-        /// Serialize ExternalProjectFinished Event Argument to the stream
-        /// </summary>
-        private void WriteExternalProjectFinishedEventToStream(ExternalProjectFinishedEventArgs externalProjectFinishedEventArgs, ITranslator translator)
-        {
-            string projectFile = externalProjectFinishedEventArgs.ProjectFile;
-            translator.Translate(ref projectFile);
-
-            bool succeeded = externalProjectFinishedEventArgs.Succeeded;
-            translator.Translate(ref succeeded);
-        }
-
-        /// <summary>
-        /// ExternalProjectStartedEvent
-        /// </summary>
-        private void WriteExternalProjectStartedEventToStream(ExternalProjectStartedEventArgs externalProjectStartedEventArgs, ITranslator translator)
-        {
-            string projectFile = externalProjectStartedEventArgs.ProjectFile;
-            translator.Translate(ref projectFile);
-
-            string targetNames = externalProjectStartedEventArgs.TargetNames;
-            translator.Translate(ref targetNames);
         }
 
         #region Writes to Stream
@@ -1107,8 +1098,6 @@ namespace Microsoft.Build.Shared
             {
                 LoggingEventType.TaskCommandLineEvent => ReadTaskCommandLineEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.BuildErrorEvent => ReadTaskBuildErrorEventFromStream(translator, message, helpKeyword, senderName),
-                LoggingEventType.ProjectStartedEvent => ReadExternalProjectStartedEventFromStream(translator, message, helpKeyword, senderName),
-                LoggingEventType.ProjectFinishedEvent => ReadExternalProjectFinishedEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.BuildMessageEvent => ReadBuildMessageEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.ResponseFileUsedEvent => ReadResponseFileUsedEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.BuildWarningEvent => ReadBuildWarningEventFromStream(translator, message, helpKeyword, senderName),
@@ -1131,50 +1120,6 @@ namespace Microsoft.Build.Shared
             EnvironmentVariableReadEventArgs args = new(environmentVariableName, message);
             args.BuildEventContext = context;
             return args;
-        }
-
-        /// <summary>
-        /// Read and reconstruct a ProjectFinishedEventArgs from the stream
-        /// </summary>
-        private ExternalProjectFinishedEventArgs ReadExternalProjectFinishedEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
-        {
-            string projectFile = null;
-            translator.Translate(ref projectFile);
-
-            bool succeeded = true;
-            translator.Translate(ref succeeded);
-
-            ExternalProjectFinishedEventArgs buildEvent =
-                new ExternalProjectFinishedEventArgs(
-                    message,
-                    helpKeyword,
-                    senderName,
-                    projectFile,
-                    succeeded);
-
-            return buildEvent;
-        }
-
-        /// <summary>
-        /// Read and reconstruct a ProjectStartedEventArgs from the stream
-        /// </summary>
-        private ExternalProjectStartedEventArgs ReadExternalProjectStartedEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
-        {
-            string projectFile = null;
-            translator.Translate(ref projectFile);
-
-            string targetNames = null;
-            translator.Translate(ref targetNames);
-
-            ExternalProjectStartedEventArgs buildEvent =
-                new ExternalProjectStartedEventArgs(
-                    message,
-                    helpKeyword,
-                    senderName,
-                    projectFile,
-                    targetNames);
-
-            return buildEvent;
         }
 
         /// <summary>
