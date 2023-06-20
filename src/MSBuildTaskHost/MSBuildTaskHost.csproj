@@ -61,6 +61,9 @@
     <Compile Include="..\Framework\ITaskItem2.cs">
       <Link>ITaskItem2.cs</Link>
     </Compile>
+    <Compile Include="..\Framework\IExtendedBuildEventArgs.cs">
+      <Link>IExtendedBuildEventArgs.cs</Link>
+    </Compile>
     <Compile Include="..\Framework\AssemblyUtilities.cs" />
     <Compile Include="..\Framework\ResponseFileUsedEventArgs.cs" />
     <Compile Include="..\Shared\BufferedReadStream.cs" />

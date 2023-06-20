@@ -1170,7 +1170,6 @@ namespace Microsoft.Build.CommandLine
                         "DeprecatedEventSerialization",
                         buildEvent?.GetType().Name ?? string.Empty);
                 }
-
             }
         }
 
