@@ -4,67 +4,67 @@
     <body>
       <trans-unit id="ComImporter.LocalServerNotSupported">
         <source>Out of process servers are not supported</source>
-        <target state="translated">No se admiten los servidores externos al proceso</target>
+        <target state="new">Out of process servers are not supported</target>
         <note />
       </trans-unit>
       <trans-unit id="ComImporter.MissingValue">
         <source>Registry key '{0}' is missing value '{1}'.</source>
-        <target state="translated">Falta el valor '{1}' en la clave del Registro '{0}'.</target>
+        <target state="new">Registry key '{0}' is missing value '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ComImporter.NoRegisteredClasses">
         <source>No registered classes were detected for this component.</source>
-        <target state="translated">No se detectaron clases registradas para este componente.</target>
+        <target state="new">No registered classes were detected for this component.</target>
         <note />
       </trans-unit>
       <trans-unit id="ComImporter.ProtectedFile">
         <source>Components under system file protection should not be isolated.</source>
-        <target state="translated">Los componentes sometidos a protección del sistema de archivos no deben estar aislados.</target>
+        <target state="new">Components under system file protection should not be isolated.</target>
         <note />
       </trans-unit>
       <trans-unit id="ComImporter.TypeLibraryLoadFailure">
         <source>Could not load type library.</source>
-        <target state="translated">No se pudo cargar la biblioteca de tipos.</target>
+        <target state="new">Could not load type library.</target>
         <note />
       </trans-unit>
       <trans-unit id="ComImporter.SubKeyNotImported">
         <source>Registry key '{0}' was not imported.</source>
-        <target state="translated">No se importó la clave del Registro '{0}'.</target>
+        <target state="new">Registry key '{0}' was not imported.</target>
         <note />
       </trans-unit>
       <trans-unit id="ComImporter.ValueNotImported">
         <source>Registry value '{0}' was not imported.</source>
-        <target state="translated">No se importó el valor del Registro '{0}'.</target>
+        <target state="new">Registry value '{0}' was not imported.</target>
         <note />
       </trans-unit>
       <trans-unit id="SecurityUtil.SignTargetNotFound">
         <source>The file to be signed {0} could not be found.</source>
-        <target state="translated">No se encuentra el archivo que hay que firmar {0}.</target>
+        <target state="new">The file to be signed {0} could not be found.</target>
         <note />
       </trans-unit>
       <trans-unit id="SecurityUtil.SigntoolFail">
         <source>Failed to sign {0}. {1}</source>
-        <target state="translated">No se pudo firmar {0}. {1}</target>
+        <target state="new">Failed to sign {0}. {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="SecurityUtil.SigntoolWarning">
         <source>Warning while signing {0}. {1}</source>
-        <target state="translated">Advertencia al firmar {0}. {1}</target>
+        <target state="new">Warning while signing {0}. {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="SecurityUtil.SigntoolNotFound">
         <source>SignTool.exe was not found at path {0}.</source>
-        <target state="translated">SignTool.exe no se encontró en la ruta de acceso {0}.</target>
+        <target state="new">SignTool.exe was not found at path {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="SecurityUtil.TimestampUrlNotFound">
         <source>Timestamp URL server name or address could not be resolved.</source>
-        <target state="translated">No se pudo resolver el nombre o la dirección del servidor de direcciones URL de marca de tiempo.</target>
+        <target state="new">Timestamp URL server name or address could not be resolved.</target>
         <note />
       </trans-unit>
       <trans-unit id="SecurityUtil.OnlyRSACertsAreAllowed">
         <source>Only certificates using RSA encryption are valid for signing ClickOnce manifests.</source>
-        <target state="translated">Solo los certificados que usan el cifrado RSA son válidos para firmar manifiestos de ClickOnce.</target>
+        <target state="new">Only certificates using RSA encryption are valid for signing ClickOnce manifests.</target>
         <note />
       </trans-unit>
       <trans-unit id="TrustInfo.RequestedExecutionLevelComment">
@@ -80,17 +80,17 @@
          If you want to utilize File and Registry Virtualization for backward
          compatibility then delete the requestedExecutionLevel node.
     </source>
-        <target state="translated">
-          Opciones del manifiesto de Control de cuentas de usuario
-          Si quiere cambiar el nivel de Control de cuentas de usuario de Windows, reemplace el
-          nodo requestedExecutionLevel por alguno de los siguientes.
+        <target state="new">
+          UAC Manifest Options
+          If you want to change the Windows User Account Control level replace the
+          requestedExecutionLevel node with one of the following.
 
         &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-         Si desea usar la virtualización de archivos y del Registro para la
-         compatibilidad con versiones anteriores, elimine el nodo requestedExecutionLevel.
+         If you want to utilize File and Registry Virtualization for backward
+         compatibility then delete the requestedExecutionLevel node.
     </target>
         <note />
       </trans-unit>

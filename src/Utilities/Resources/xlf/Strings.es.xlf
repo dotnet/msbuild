@@ -4,62 +4,62 @@
     <body>
       <trans-unit id="DebugPathTooLong">
         <source>MSB6012: The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
-        <target state="translated">MSB6012: La ruta de acceso "{0}" usada para los registros de depuración es demasiado larga. Establézcalo en un valor más corto con la variable de entorno MSBUILDDEBUGPATH o cambie la configuración del sistema para permitir rutas de acceso largas.</target>
+        <target state="new">MSB6012: The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</target>
         <note>{StrBegin="MSB6012: "}</note>
       </trans-unit>
       <trans-unit id="General.InvalidToolSwitch">
         <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
-        <target state="translated">MSB6001: Modificador de línea de comandos no válido para "{0}". {1}</target>
+        <target state="new">MSB6001: Invalid command line switch for "{0}". {1}</target>
         <note>{StrBegin="MSB6001: "}UE: This message is shown when a tool-based task (i.e. the task is a wrapper for an .exe) is given a parameter value that converts into an invalid command line switch for the tool. "{0}" is the name of the tool e.g. "csc.exe", and "{1}" is a message explaining the problem. LOCALIZATION: "{1}" is a localized message.</note>
       </trans-unit>
       <trans-unit id="General.QuotesNotAllowedInThisKindOfTaskParameter">
         <source>Illegal quote passed to the command line switch named "{0}". The value was [{1}].</source>
-        <target state="translated">Se pasaron comillas no válidas al modificador de línea de comandos denominado "{0}". El valor era [{1}].</target>
+        <target state="new">Illegal quote passed to the command line switch named "{0}". The value was [{1}].</target>
         <note />
       </trans-unit>
       <trans-unit id="General.QuotesNotAllowedInThisKindOfTaskParameterNoSwitchName">
         <source>Illegal quote in the command line value [{0}].</source>
-        <target state="translated">Comillas no válidas en el valor de la línea de comandos [{0}].</target>
+        <target state="new">Illegal quote in the command line value [{0}].</target>
         <note />
       </trans-unit>
       <trans-unit id="General.ToolCommandFailedNoErrorCode">
         <source>The command exited with code {0}.</source>
-        <target state="translated">El comando salió con el código {0}.</target>
+        <target state="new">The command exited with code {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LoggingBeforeTaskInitialization">
         <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="translated">MSB6005: La tarea intentó registrarse antes de inicializarse. El mensaje era: {0}</target>
+        <target state="new">MSB6005: Task attempted to log before it was initialized. Message was: {0}</target>
         <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
       </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
-        <target state="translated">MSB6010: No se ha podido encontrar el archivo de manifiesto de plataforma en "{0}".</target>
+        <target state="new">MSB6010: Could not find platform manifest file at "{0}".</target>
         <note>{StrBegin="MSB6010: "}</note>
       </trans-unit>
       <trans-unit id="ToolLocationHelper.UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
-        <target state="translated">La versión "{0}" de .NET Framework no es compatible. Especifique un valor de la enumeración Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <target state="new">.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolLocationHelper.UnsupportedFrameworkVersionForWindowsSdk">
         <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
-        <target state="translated">La versión "{0}" de .NET Framework no es compatible cuando se establece de forma explícita Windows SDK como destino, que solo se admite en .NET 4.5 y posterior.  Especifique un valor de la enumeración Microsoft.Build.Utilities.TargetDotNetFrameworkVersion que sea Version45 o posterior.</target>
+        <target state="new">.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolLocationHelper.UnsupportedVisualStudioVersion">
         <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
-        <target state="translated">La versión "{0}" de Visual Studio no es compatible.  Especifique un valor de la enumeración Microsoft.Build.Utilities.VisualStudioVersion.</target>
+        <target state="new">Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolTask.CommandTooLong">
         <source>MSB6002: The command-line for the "{0}" task is too long. Command-lines longer than 32000 characters are likely to fail. Try reducing the length of the command-line by breaking down the call to "{0}" into multiple calls with fewer parameters per call.</source>
-        <target state="translated">MSB6002: La línea de comandos para la tarea "{0}" es demasiado larga. Las líneas de comandos con más de 32 000 caracteres son propensas a acabar en error. Reduzca la longitud de la línea de comandos dividiendo la llamada a "{0}" en varias llamadas con menos parámetros por llamada.</target>
+        <target state="new">MSB6002: The command-line for the "{0}" task is too long. Command-lines longer than 32000 characters are likely to fail. Try reducing the length of the command-line by breaking down the call to "{0}" into multiple calls with fewer parameters per call.</target>
         <note>{StrBegin="MSB6002: "}</note>
       </trans-unit>
       <trans-unit id="ToolTask.CouldNotStartToolExecutable">
         <source>MSB6003: The specified task executable "{0}" could not be run. {1}</source>
-        <target state="translated">MSB6003: No se pudo ejecutar la tarea ejecutable especificada "{0}". {1}</target>
+        <target state="new">MSB6003: The specified task executable "{0}" could not be run. {1}</target>
         <note>{StrBegin="MSB6003: "}</note>
       </trans-unit>
       <trans-unit id="ToolTask.NotUpToDate">
@@ -69,222 +69,222 @@
       </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>
-        <target state="translated">MSB6006: "{0}" salió con el código {1}.</target>
+        <target state="new">MSB6006: "{0}" exited with code {1}.</target>
         <note>{StrBegin="MSB6006: "}</note>
       </trans-unit>
       <trans-unit id="ToolTask.ToolExecutableNotFound">
         <source>MSB6004: The specified task executable location "{0}" is invalid.</source>
-        <target state="translated">MSB6004: La ubicación de la tarea ejecutable especificada "{0}" no es válida.</target>
+        <target state="new">MSB6004: The specified task executable location "{0}" is invalid.</target>
         <note>{StrBegin="MSB6004: "}</note>
       </trans-unit>
       <trans-unit id="ToolTask.ValidateParametersFailed">
         <source>MSB6011: Invalid parameters passed to the {0} task.</source>
-        <target state="translated">MSB6011: Se han pasado parámetros no válidos a la tarea {0}.</target>
+        <target state="new">MSB6011: Invalid parameters passed to the {0} task.</target>
         <note>{StrBegin="MSB6011: "}</note>
       </trans-unit>
       <trans-unit id="ToolsLocationHelper.InvalidRedistFile">
         <source>There was an error reading the redist list file "{0}". {1}</source>
-        <target state="translated">Error al leer el archivo de lista de paquetes redistribuibles "{0}". {1}</target>
+        <target state="new">There was an error reading the redist list file "{0}". {1}</target>
         <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
       </trans-unit>
       <trans-unit id="ToolsLocationHelper.CouldNotCreateChain">
         <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
-        <target state="translated">Error al intentar que la versión de .NET Framework de la ruta de acceso "{0}" incluyera la versión de .NET Framework de la ruta de acceso "{1}" como parte de sus rutas de acceso de ensamblados de referencia. {2}</target>
+        <target state="new">The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</target>
         <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
       </trans-unit>
       <trans-unit id="ToolsLocationHelper.CouldNotGenerateReferenceAssemblyDirectory">
         <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
-        <target state="translated">Error al intentar generar una ruta de acceso de ensamblado de referencia a partir de la ruta de acceso "{0}" y del moniker "{1}" de la versión de .NET Framework. {2}</target>
+        <target state="new">When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</target>
         <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
       </trans-unit>
       <trans-unit id="ToolTask.InvalidEnvironmentParameter">
         <source>MSB6007: The "{0}" value passed to the Environment property is not in the format "name=value", where the value part may be empty.</source>
-        <target state="translated">MSB6007: El valor "{0}" pasado a la propiedad Environment no tiene el formato "nombre=valor", en donde la parte correspondiente al valor puede estar vacía.</target>
+        <target state="new">MSB6007: The "{0}" value passed to the Environment property is not in the format "name=value", where the value part may be empty.</target>
         <note>{StrBegin="MSB6007: "}</note>
       </trans-unit>
       <trans-unit id="ToolTask.EnvironmentVariableHeader">
         <source>Environment Variables passed to tool:</source>
-        <target state="translated">Variables de entorno pasadas a la herramienta:</target>
+        <target state="new">Environment Variables passed to tool:</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_LogFilesNotAvailable">
         <source>Tracking logs are not available, minimal rebuild will be disabled.</source>
-        <target state="translated">No hay registros de seguimiento disponibles, se deshabilitará la recompilación mínima.</target>
+        <target state="new">Tracking logs are not available, minimal rebuild will be disabled.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_MissingInputs">
         <source>Missing input files detected, minimal rebuild will be disabled.</source>
-        <target state="translated">Se detectó que faltan archivos de entrada, se deshabilitará la recompilación mínima.</target>
+        <target state="new">Missing input files detected, minimal rebuild will be disabled.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_MissingOutputs">
         <source>Missing output files detected, minimal rebuild will be disabled.</source>
-        <target state="translated">Se detectó que faltan archivos de salida, se deshabilitará la recompilación mínima.</target>
+        <target state="new">Missing output files detected, minimal rebuild will be disabled.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_UpToDate">
         <source>Skipping task because it is up-to-date.</source>
-        <target state="translated">Se omitirá la tarea porque está actualizada.</target>
+        <target state="new">Skipping task because it is up-to-date.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_TrackingLogNotAvailable">
         <source>Write Tracking log not available, minimal rebuild will be disabled.</source>
-        <target state="translated">El registro de seguimiento de escritura no está disponible, se deshabilitará la recompilación mínima.</target>
+        <target state="new">Write Tracking log not available, minimal rebuild will be disabled.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_WriteTrackingLogs">
         <source>Write Tracking Logs:</source>
-        <target state="translated">Registros de seguimiento de escritura:</target>
+        <target state="new">Write Tracking Logs:</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_WriteTrackingCached">
         <source>Using cached output dependency table built from:</source>
-        <target state="translated">Se usará una tabla de dependencias de salida almacenadas en caché compilada a partir de:</target>
+        <target state="new">Using cached output dependency table built from:</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_TrackingLogs">
         <source>Tracking Logs:</source>
-        <target state="translated">Registros de seguimiento:</target>
+        <target state="new">Tracking Logs:</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_TrackingCached">
         <source>Using cached dependency table built from:</source>
-        <target state="translated">Se usará una tabla de dependencias almacenadas en caché compilada a partir de:</target>
+        <target state="new">Using cached dependency table built from:</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_OutputsFor">
         <source>Outputs for {0}:</source>
-        <target state="translated">Salidas para {0}:</target>
+        <target state="new">Outputs for {0}:</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_InputsFor">
         <source>Inputs for {0}:</source>
-        <target state="translated">Entradas para {0}:</target>
+        <target state="new">Inputs for {0}:</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_OutputsNotShown">
         <source>Output details ({0} of them) were not logged for performance reasons.</source>
-        <target state="translated">Los detalles de salida ({0} de ellos) no se registraron por motivos de rendimiento.</target>
+        <target state="new">Output details ({0} of them) were not logged for performance reasons.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_InputsNotShown">
         <source>Input details ({0} of them) were not logged for performance reasons.</source>
-        <target state="translated">No se registraron los detalles de entrada ({0} de ellos) por motivos de rendimiento.</target>
+        <target state="new">Input details ({0} of them) were not logged for performance reasons.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SingleLogFileNotAvailable">
         <source>Tracking log {0} is not available.</source>
-        <target state="translated">El registro de seguimiento {0} no está disponible.</target>
+        <target state="new">Tracking log {0} is not available.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledAsNoTrackingLog">
         <source>{0} will be compiled because the tracking log is not available.</source>
-        <target state="translated">{0} se compilará porque el registro de seguimiento no está disponible.</target>
+        <target state="new">{0} will be compiled because the tracking log is not available.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceNotInTrackingLog">
         <source>{0} will be compiled because it was not found in the tracking log.</source>
-        <target state="translated">{0} se compilará porque no se encontró en el registro de seguimiento.</target>
+        <target state="new">{0} will be compiled because it was not found in the tracking log.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceOutputsNotAvailable">
         <source>{0} will be compiled because not all outputs are available.</source>
-        <target state="translated">{0} se compilará porque no todas las salidas están disponibles.</target>
+        <target state="new">{0} will be compiled because not all outputs are available.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledMissingDependency">
         <source>{0} will be compiled because dependency {1} was missing.</source>
-        <target state="translated">{0} se compilará porque faltaba la dependencia {1}.</target>
+        <target state="new">{0} will be compiled because dependency {1} was missing.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledDependencyWasModifiedAt">
         <source>{0} will be compiled because {1} was modified at {2}.</source>
-        <target state="translated">{0} se compilará porque {1} se modificó en {2}.</target>
+        <target state="new">{0} will be compiled because {1} was modified at {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiled">
         <source>{0} will be compiled.</source>
-        <target state="translated">{0} se compilará.</target>
+        <target state="new">{0} will be compiled.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_AllOutputsAreUpToDate">
         <source>All outputs are up-to-date.</source>
-        <target state="translated">Todas las salidas están actualizadas.</target>
+        <target state="new">All outputs are up-to-date.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_DependencyWasModifiedAt">
         <source>File {0} was modified at {1} which is newer than {2} modified at {3}.</source>
-        <target state="translated">El archivo {0} se modificó a las {1}, por lo que es más reciente que {2}, que se modificó a las {3}.</target>
+        <target state="new">File {0} was modified at {1} which is newer than {2} modified at {3}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_OutputDoesNotExist">
         <source>{0} does not exist; source compilation required.</source>
-        <target state="translated">{0} no existe; es preciso compilar el origen.</target>
+        <target state="new">{0} does not exist; source compilation required.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourceWillBeCompiledOutputDoesNotExist">
         <source>{0} will be compiled because output {1} does not exist.</source>
-        <target state="translated">{0} se compilará porque la salida {1} no existe.</target>
+        <target state="new">{0} will be compiled because output {1} does not exist.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_ReadTrackingLogs">
         <source>Read Tracking Logs:</source>
-        <target state="translated">Registros de seguimiento de lectura:</target>
+        <target state="new">Read Tracking Logs:</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_ReadTrackingCached">
         <source>Using cached input dependency table built from:</source>
-        <target state="translated">Se usará una tabla de dependencias de entrada almacenadas en caché compilada a partir de:</target>
+        <target state="new">Using cached input dependency table built from:</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_OutputForRootNotFound">
         <source>No output for {0} was found in the tracking log; source compilation required.</source>
-        <target state="translated">No se encuentra ninguna salida para {0} en el registro de seguimiento; es preciso compilar el origen.</target>
+        <target state="new">No output for {0} was found in the tracking log; source compilation required.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_DependenciesForRootNotFound">
         <source>No dependencies for output {0} were found in the tracking log; source compilation required.</source>
-        <target state="translated">No se encuentran dependencias para la salida {0} en el registro de seguimiento: es preciso compilar el origen.</target>
+        <target state="new">No dependencies for output {0} were found in the tracking log; source compilation required.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_WriteLogEntryNotFound">
         <source>Could not find {0} in the write tracking log.</source>
-        <target state="translated">No se encuentra {0} en el registro de seguimiento de escritura.</target>
+        <target state="new">Could not find {0} in the write tracking log.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_ReadLogEntryNotFound">
         <source>Could not find {0} in the read tracking log.</source>
-        <target state="translated">No se encuentra {0} en el registro de seguimiento de lectura.</target>
+        <target state="new">Could not find {0} in the read tracking log.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_SourcesAndCorrespondingOutputMismatch">
         <source>The number of source files and corresponding outputs must match.</source>
-        <target state="translated">El número de archivos de origen y sus salidas correspondientes deben coincidir.</target>
+        <target state="new">The number of source files and corresponding outputs must match.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_InputNewerThanOutput">
         <source>Source compilation required: input {0} is newer than output {1}.</source>
-        <target state="translated">Es preciso compilar el origen: la entrada {0} es más reciente que la salida {1}.</target>
+        <target state="new">Source compilation required: input {0} is newer than output {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_RebuildingDueToInvalidTLog">
         <source>MSB6008: Forcing a rebuild of all sources due to an error with the tracking logs. {0}</source>
-        <target state="translated">MSB6008: Se va a forzar una recompilación de todos los orígenes debido a un error con los registros de seguimiento. {0}</target>
+        <target state="new">MSB6008: Forcing a rebuild of all sources due to an error with the tracking logs. {0}</target>
         <note>{StrBegin="MSB6008: "}</note>
       </trans-unit>
       <trans-unit id="Tracking_RebuildingDueToInvalidTLogContents">
         <source>MSB6009: Forcing a rebuild of all source files due to the contents of "{0}" being invalid.</source>
-        <target state="translated">MSB6009: Se va a forzar una recompilación de todos los archivos de código fuente porque el contenido de "{0}" no es válido.</target>
+        <target state="new">MSB6009: Forcing a rebuild of all source files due to the contents of "{0}" being invalid.</target>
         <note>{StrBegin="MSB6009: "}</note>
       </trans-unit>
       <trans-unit id="MuxLogger_BuildFinishedFailure">
         <source>Build FAILED.</source>
-        <target state="translated">ERROR al compilar.</target>
+        <target state="new">Build FAILED.</target>
         <note />
       </trans-unit>
       <trans-unit id="MuxLogger_BuildFinishedSuccess">
         <source>Build succeeded.</source>
-        <target state="translated">Compilación correcta.</target>
+        <target state="new">Build succeeded.</target>
         <note />
       </trans-unit>
     </body>

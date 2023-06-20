@@ -4,67 +4,67 @@
     <body>
       <trans-unit id="ComImporter.LocalServerNotSupported">
         <source>Out of process servers are not supported</source>
-        <target state="translated">不支持进程外服务器</target>
+        <target state="new">Out of process servers are not supported</target>
         <note />
       </trans-unit>
       <trans-unit id="ComImporter.MissingValue">
         <source>Registry key '{0}' is missing value '{1}'.</source>
-        <target state="translated">注册表项“{0}”缺少值“{1}”。</target>
+        <target state="new">Registry key '{0}' is missing value '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ComImporter.NoRegisteredClasses">
         <source>No registered classes were detected for this component.</source>
-        <target state="translated">未检测到此组件的注册类。</target>
+        <target state="new">No registered classes were detected for this component.</target>
         <note />
       </trans-unit>
       <trans-unit id="ComImporter.ProtectedFile">
         <source>Components under system file protection should not be isolated.</source>
-        <target state="translated">处于系统文件保护下的组件不应被隔离。</target>
+        <target state="new">Components under system file protection should not be isolated.</target>
         <note />
       </trans-unit>
       <trans-unit id="ComImporter.TypeLibraryLoadFailure">
         <source>Could not load type library.</source>
-        <target state="translated">未能加载类型库。</target>
+        <target state="new">Could not load type library.</target>
         <note />
       </trans-unit>
       <trans-unit id="ComImporter.SubKeyNotImported">
         <source>Registry key '{0}' was not imported.</source>
-        <target state="translated">未导入注册表项“{0}”。</target>
+        <target state="new">Registry key '{0}' was not imported.</target>
         <note />
       </trans-unit>
       <trans-unit id="ComImporter.ValueNotImported">
         <source>Registry value '{0}' was not imported.</source>
-        <target state="translated">未导入注册表值“{0}”。</target>
+        <target state="new">Registry value '{0}' was not imported.</target>
         <note />
       </trans-unit>
       <trans-unit id="SecurityUtil.SignTargetNotFound">
         <source>The file to be signed {0} could not be found.</source>
-        <target state="translated">未能找到要签名的文件 {0}。</target>
+        <target state="new">The file to be signed {0} could not be found.</target>
         <note />
       </trans-unit>
       <trans-unit id="SecurityUtil.SigntoolFail">
         <source>Failed to sign {0}. {1}</source>
-        <target state="translated">未能对 {0} 签名。{1}</target>
+        <target state="new">Failed to sign {0}. {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="SecurityUtil.SigntoolWarning">
         <source>Warning while signing {0}. {1}</source>
-        <target state="translated">对 {0} 签名时出现警告。{1}</target>
+        <target state="new">Warning while signing {0}. {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="SecurityUtil.SigntoolNotFound">
         <source>SignTool.exe was not found at path {0}.</source>
-        <target state="translated">在路径 {0} 下未找到 SignTool.exe。</target>
+        <target state="new">SignTool.exe was not found at path {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="SecurityUtil.TimestampUrlNotFound">
         <source>Timestamp URL server name or address could not be resolved.</source>
-        <target state="translated">未能解析时间戳 URL 服务器名称或地址。</target>
+        <target state="new">Timestamp URL server name or address could not be resolved.</target>
         <note />
       </trans-unit>
       <trans-unit id="SecurityUtil.OnlyRSACertsAreAllowed">
         <source>Only certificates using RSA encryption are valid for signing ClickOnce manifests.</source>
-        <target state="translated">只有使用 RSA 加密的证书才是可用于对 ClickOnce 清单进行签名的有效证书。</target>
+        <target state="new">Only certificates using RSA encryption are valid for signing ClickOnce manifests.</target>
         <note />
       </trans-unit>
       <trans-unit id="TrustInfo.RequestedExecutionLevelComment">
@@ -80,17 +80,17 @@
          If you want to utilize File and Registry Virtualization for backward
          compatibility then delete the requestedExecutionLevel node.
     </source>
-        <target state="translated">
-          UAC 清单选项
-          如果要更改 Windows 用户帐户控制级别，请用以下节点之一替换
-          requestedExecutionLevel 节点。
+        <target state="new">
+          UAC Manifest Options
+          If you want to change the Windows User Account Control level replace the
+          requestedExecutionLevel node with one of the following.
 
         &lt;requestedExecutionLevel  level="asInvoker" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="requireAdministrator" uiAccess="false" /&gt;
         &lt;requestedExecutionLevel  level="highestAvailable" uiAccess="false" /&gt;
 
-          如果要利用文件和注册表虚拟化提供
-          向后兼容性，请删除 requestedExecutionLevel 节点。
+         If you want to utilize File and Registry Virtualization for backward
+         compatibility then delete the requestedExecutionLevel node.
     </target>
         <note />
       </trans-unit>
