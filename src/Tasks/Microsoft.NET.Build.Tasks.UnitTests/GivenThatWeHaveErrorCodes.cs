@@ -37,7 +37,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             1101,
             1108,
             1180,
-            1196,
             1197,
             1199,
             1200,
