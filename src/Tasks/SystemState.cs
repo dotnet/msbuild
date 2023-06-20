@@ -608,7 +608,7 @@ namespace Microsoft.Build.Tasks
         internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log)
         {
             // Save a copy of instanceLocalOutgoingFileStateCache so we can restore it later. SerializeCacheByTranslator serializes
-            // instanceLocalFileStateCache by default, so change that to the relativized form, then change it back.
+            // instanceLocalOutgoingFileStateCache by default, so change that to the relativized form, then change it back.
             Dictionary<string, FileState> oldFileStateCache = instanceLocalOutgoingFileStateCache;
             instanceLocalOutgoingFileStateCache = instanceLocalFileStateCache.ToDictionary(kvp => FileUtilities.MakeRelative(Path.GetDirectoryName(stateFile), kvp.Key), kvp => kvp.Value);
 
