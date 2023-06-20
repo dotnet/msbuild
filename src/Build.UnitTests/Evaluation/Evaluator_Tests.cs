@@ -4473,6 +4473,38 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        [Theory]
+        [InlineData("$(Hello)", 0, 8, "Hello")]
+        [InlineData("$(Hello)|$(World)", 9, 8, "World")]
+        [InlineData("$(He()o)", 0, 8, null)]
+        [InlineData("$)Hello(", 0, 8, null)]
+        [InlineData("$(Helloo", 0, 8, null)]
+        [InlineData("$Heello)", 0, 8, null)]
+        [InlineData("$(He$$o)", 0, 8, null)]
+        [InlineData(" $(Helo)", 0, 8, null)]
+        [InlineData("$(Helo) ", 0, 8, null)]
+        [InlineData("$()", 0, 3, "")]
+        [InlineData("$( Hello )", 0, 10, " Hello ")]
+        [InlineData("$(He-ll-o)", 0, 10, "He-ll-o")]
+        [InlineData("$(He ll o)", 0, 10, "He ll o")]
+        [InlineData("aaa$(Hello)", 3, 8, "Hello")]
+        [InlineData("aaa$(Hello)bbb", 3, 8, "Hello")]
+        public void TryGetSingleProperty(string input, int start, int length, string expected)
+        {
+            bool result = ConditionEvaluator.TryGetSingleProperty(input.AsSpan(), start, length, out ReadOnlySpan<char> actual);
+
+            if (expected is null)
+            {
+                Assert.False(result);
+                Assert.True(actual.IsEmpty);
+            }
+            else
+            {
+                Assert.True(result);
+                Assert.Equal(expected, actual.ToString());
+            }
+        }
+
         [Fact]
         public void VerifyMSBuildLastModifiedProjectForImport()
         {

@@ -117,7 +117,6 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The handler for the write delegate of the console logger we are deriving from.
         /// </summary>
-        /// <owner>KieranMo</owner>
         /// <param name="text">The text to write to the log</param>
         private void Write(string text)
         {
@@ -143,7 +142,6 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Shutdown method implementation of ILogger - we need to flush and close our logfile.
         /// </summary>
-        /// <owner>KieranMo</owner>
         public override void Shutdown()
         {
             fileWriter?.Close();
@@ -152,7 +150,6 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Parses out the logger parameters from the Parameters string.
         /// </summary>
-        /// <owner>KieranMo</owner>
         private void ParseFileLoggerParameters()
         {
             if (this.Parameters != null)
@@ -180,7 +177,6 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Apply a parameter parsed by the file logger.
         /// </summary>
-        /// <owner>KieranMo</owner>
         private void ApplyFileLoggerParameter(string parameterName, string parameterValue)
         {
             switch (parameterName.ToUpperInvariant())

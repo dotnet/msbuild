@@ -61,7 +61,7 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        internal IEnumerable<ProjectGraphEntryPoint> AsEnumerable()
+        internal readonly IEnumerable<ProjectGraphEntryPoint> AsEnumerable()
         {
             yield return this;
         }

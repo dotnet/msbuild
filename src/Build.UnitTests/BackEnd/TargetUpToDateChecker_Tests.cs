@@ -572,7 +572,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ItemBucket itemBucket = new ItemBucket(null, null, new Lookup(itemsByName, new PropertyDictionary<ProjectPropertyInstance>()), 0);
                 TargetUpToDateChecker analyzer = new TargetUpToDateChecker(p, p.Targets["Build"], _mockHost, BuildEventContext.Invalid);
 
-                return analyzer.PerformDependencyAnalysis(itemBucket, out changedTargetInputs, out upToDateTargetInputs);
+                return analyzer.PerformDependencyAnalysis(itemBucket, false, out changedTargetInputs, out upToDateTargetInputs);
             }
             finally
             {

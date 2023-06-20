@@ -40,6 +40,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private readonly HashSet<string> _externallyResolvedPrimaryReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// The keys are normalized full paths of primary references resolved by an external entity to RAR and considered immutable, the values are assembly names or null if not known.
+        /// </summary>
+        private readonly Dictionary<string, AssemblyNameExtension> _externallyResolvedImmutableFiles = new Dictionary<string, AssemblyNameExtension>(StringComparer.OrdinalIgnoreCase);
+
         /// <summary>The table of remapped assemblies. Used for Unification.</summary>
         private IEnumerable<DependentAssembly> _remappedAssemblies = Enumerable.Empty<DependentAssembly>();
 
@@ -148,9 +153,9 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// When we exclude an assembly from resolution because it is part of out exclusion list we need to let the user know why this is.
-        /// There can be a number of reasons each for un-resolving a reference, these reasons are encapsulated by a different black list. We need to log a specific message
-        /// depending on which black list we have found the offending assembly in. This delegate allows one to tie a set of logging messages to a black list so that when we
-        /// discover an assembly in the black list we can log the correct message.
+        /// There can be a number of reasons each for un-resolving a reference, these reasons are encapsulated by a different deny list. We need to log a specific message
+        /// depending on which deny list we have found the offending assembly in. This delegate allows one to tie a set of logging messages to a deny list so that when we
+        /// discover an assembly in the deny list we can log the correct message.
         /// </summary>
         internal delegate void LogExclusionReason(bool displayPrimaryReferenceMessage, AssemblyNameExtension assemblyName, Reference reference, ITaskItem referenceItem, string targetedFramework);
 
@@ -824,6 +829,34 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Tries to create an <see cref="AssemblyNameExtension"/> out of a primary reference metadata.
+        /// </summary>
+        private static AssemblyNameExtension GetAssemblyNameFromItemMetadata(ITaskItem item)
+        {
+            string version = item.GetMetadata(ItemMetadataNames.assemblyVersion);
+            if (string.IsNullOrEmpty(version))
+            {
+                return null;
+            }
+
+            string publicKeyToken = item.GetMetadata(ItemMetadataNames.publicKeyToken);
+            if (string.IsNullOrEmpty(publicKeyToken))
+            {
+                return null;
+            }
+
+            string name = item.GetMetadata(ItemMetadataNames.assemblyName);
+            if (string.IsNullOrEmpty(name))
+            {
+                // Fall back to inferring assembly name from file name.
+                name = item.GetMetadata(FileUtilities.ItemSpecModifiers.Filename);
+            }
+
+            AssemblyName assemblyName = new AssemblyName($"{name}, Version={version}, Culture=neutral, PublicKeyToken={publicKeyToken}");
+            return new AssemblyNameExtension(assemblyName);
+        }
+
+        /// <summary>
         /// Given an item that refers to a file name, make it a primary reference.
         /// </summary>
         private void SetPrimaryFileItem(ITaskItem referenceAssemblyFile)
@@ -1225,6 +1258,17 @@ namespace Microsoft.Build.Tasks
             string rawFileNameCandidate,
             Reference reference)
         {
+            bool isImmutableFrameworkReference = false;
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
+            {
+                // For a path to be an immutable reference, it must be externally resolved and has a FrameworkReferenceName defined.
+                if (assemblyName == null && !string.IsNullOrEmpty(rawFileNameCandidate) && reference.IsPrimary && reference.ExternallyResolved)
+                {
+                    string frameworkReferenceName = reference.PrimarySourceItem.GetMetadata(ItemMetadataNames.frameworkReferenceName);
+                    isImmutableFrameworkReference = !string.IsNullOrEmpty(frameworkReferenceName);
+                }
+            }
+
             // Now, resolve this reference.
             string resolvedPath = null;
             string resolvedSearchPath = String.Empty;
@@ -1272,6 +1316,7 @@ namespace Microsoft.Build.Tasks
                     reference.SDKName,
                     rawFileNameCandidate,
                     reference.IsPrimary,
+                    isImmutableFrameworkReference,
                     reference.WantSpecificVersion,
                     reference.GetExecutableExtensions(_allowedAssemblyExtensions),
                     reference.HintPath,
@@ -1291,7 +1336,13 @@ namespace Microsoft.Build.Tasks
             // If the path was resolved, then specify the full path on the reference.
             if (resolvedPath != null)
             {
-                reference.FullPath = FileUtilities.NormalizePath(resolvedPath);
+                resolvedPath = FileUtilities.NormalizePath(resolvedPath);
+                if (isImmutableFrameworkReference)
+                {
+                    _externallyResolvedImmutableFiles[resolvedPath] = GetAssemblyNameFromItemMetadata(reference.PrimarySourceItem);
+                }
+                reference.FullPath = resolvedPath;
+
                 reference.ResolvedSearchPath = resolvedSearchPath;
                 reference.UserRequestedSpecificFile = userRequestedSpecificFile;
             }
@@ -1308,15 +1359,15 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// This method will remove references from the reference table which are contained in the blacklist.
-        /// References which are primary references but are in the black list will be placed in the invalidResolvedFiles list.
-        /// References which are dependency references but are in the black list will be placed in the invalidResolvedDependencyFiles list.
+        /// This method will remove references from the reference table which are contained in the denylist.
+        /// References which are primary references but are in the deny list will be placed in the invalidResolvedFiles list.
+        /// References which are dependency references but are in the deny list will be placed in the invalidResolvedDependencyFiles list.
         /// </summary>
         internal void RemoveReferencesMarkedForExclusion(bool removeOnlyNoWarning, string subsetName)
         {
             MSBuildEventSource.Log.RarRemoveReferencesMarkedForExclusionStart();
             {
-                // Create a table which will contain the references which are not in the black list
+                // Create a table which will contain the references which are not in the deny list
                 var goodReferences = new Dictionary<AssemblyNameExtension, Reference>(AssemblyNameComparer.GenericComparer);
 
                 // List of references which were removed from the reference table, we will loop through these and make sure that we get rid of the dependent references also.
@@ -1330,7 +1381,7 @@ namespace Microsoft.Build.Tasks
                     subsetName = String.Empty;
                 }
 
-                // Go through each of the references, we go through this table because in general it will be considerably smaller than the blacklist. (10's of references vs 100's of black list items)
+                // Go through each of the references, we go through this table because in general it will be considerably smaller than the denylist. (10's of references vs 100's of deny list items)
                 foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
                 {
                     AssemblyNameExtension assemblyName = assembly.Key;
@@ -1338,14 +1389,14 @@ namespace Microsoft.Build.Tasks
 
                     AddToDependencyGraph(dependencyGraph, assemblyName, assemblyReference);
 
-                    // Is the assembly name not in the black list. This means the assembly could be allowed.
+                    // Is the assembly name not in the deny list. This means the assembly could be allowed.
                     bool isMarkedForExclusion = assemblyReference.ExclusionListLoggingProperties.IsInExclusionList;
                     LogExclusionReason logExclusionReason = assemblyReference.ExclusionListLoggingProperties.ExclusionReasonLogDelegate;
 
                     // Case one, the assembly is a primary reference
                     if (assemblyReference.IsPrimary)
                     {
-                        // The assembly is good if it is not in the black list or it has specific version set to true.
+                        // The assembly is good if it is not in the deny list or it has specific version set to true.
                         if (!isMarkedForExclusion || assemblyReference.WantSpecificVersion)
                         {
                             // Do not add the reference to the good list if it has been added to the removed references list, possibly because of us processing another reference.
@@ -1364,16 +1415,16 @@ namespace Microsoft.Build.Tasks
                     // the current primary reference and they need to be removed.
                     ICollection<ITaskItem> dependees = assemblyReference.GetSourceItems();
 
-                    // Need to deal with dependencies, this can also include primary references who are dependencies themselves and are in the black list
+                    // Need to deal with dependencies, this can also include primary references who are dependencies themselves and are in the deny list
                     if (!assemblyReference.IsPrimary || (assemblyReference.IsPrimary && isMarkedForExclusion && (dependees?.Count > 1)))
                     {
                         // Does the assembly have specific version true, or does any of its primary parent references have specific version true.
-                        // This is checked because, if an assembly is in the black list, the only way it can possibly be allowed is if
+                        // This is checked because, if an assembly is in the deny list, the only way it can possibly be allowed is if
                         // ANY of the primary references which caused it have specific version set to true. To see if any primary references have the metadata we pass true to the method indicating 
                         // we want to know if any primary references have specific version set to true.
                         bool hasSpecificVersionTrue = assemblyReference.CheckForSpecificVersionMetadataOnParentsReference(true);
 
-                        // A dependency is "good" if it is not in the black list or any of its parents have specific version set to true
+                        // A dependency is "good" if it is not in the deny list or any of its parents have specific version set to true
                         if (!isMarkedForExclusion || hasSpecificVersionTrue)
                         {
                             // Do not add the reference to the good list if it has been added to the removed references list, possibly because of us processing another reference.
@@ -1383,8 +1434,8 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        // If the dependency is in the black list we need to remove the primary references which depend on this refernce.
-                        // note, a reference can both be in the good references list and in the black list. This can happen if a multiple primary references
+                        // If the dependency is in the deny list we need to remove the primary references which depend on this refernce.
+                        // note, a reference can both be in the good references list and in the deny list. This can happen if a multiple primary references
                         // depend on a single dependency. The dependency can be good for one reference but not allowed for the other.
                         if (isMarkedForExclusion)
                         {
@@ -1429,7 +1480,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// We have determined the given assembly reference is in the black list, we now need to find the primary references which caused it and make sure those are removed from the list of references.
+        /// We have determined the given assembly reference is in the deny list, we now need to find the primary references which caused it and make sure those are removed from the list of references.
         /// </summary>
         private void RemoveDependencyMarkedForExclusion(LogExclusionReason logExclusionReason, bool removeOnlyNoWarning, string subsetName, Dictionary<AssemblyNameExtension, Reference> goodReferences, List<Reference> removedReferences, AssemblyNameExtension assemblyName, Reference assemblyReference)
         {
@@ -1477,7 +1528,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// A primary references has been determined to be in the black list, it needs to be removed from the list of references by not being added to the list of good references
+        /// A primary references has been determined to be in the deny list, it needs to be removed from the list of references by not being added to the list of good references
         /// and added to the list of removed references.
         /// </summary>
         private static void RemovePrimaryReferenceMarkedForExclusion(LogExclusionReason logExclusionReason, bool removeOnlyNoWarning, string subsetName, List<Reference> removedReferences, AssemblyNameExtension assemblyName, Reference assemblyReference)
@@ -1510,7 +1561,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Go through the dependency graph and make sure that for a reference to remove that we get rid of all dependency assemblies which are not referenced by any other
-        /// assembly. The remove reference list should contain ALL primary references which should be removed because they, or one of their dependencies is in the black list.
+        /// assembly. The remove reference list should contain ALL primary references which should be removed because they, or one of their dependencies is in the deny list.
         /// </summary>
         /// <param name="removedReference">Reference to remove dependencies for</param>
         /// <param name="referenceList">Reference list which contains reference to be used in unification and returned as resolved items</param>
@@ -3155,6 +3206,29 @@ namespace Microsoft.Build.Tasks
             }
 
             return anyMarkedReference;
+        }
+
+        /// <summary>
+        /// Returns true if the full path passed in <paramref name="path"/> represents a file that came from an external trusted
+        /// entity and is guaranteed to be immutable.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <returns>True if known to be immutable, false otherwise.</returns>
+        internal bool IsImmutableFile(string path)
+        {
+            return _externallyResolvedImmutableFiles.ContainsKey(path);
+        }
+
+        /// <summary>
+        /// Returns the assembly name of a file if the file came from an external trusted entity and is considered immutable.
+        /// </summary>
+        /// <param name="path">The file path.</param>
+        /// <returns>Assembly name or null if not known.</returns>
+        internal AssemblyNameExtension GetImmutableFileAssemblyName(string path)
+        {
+            return _externallyResolvedImmutableFiles.TryGetValue(path, out AssemblyNameExtension assemblyNameExtension)
+                ? assemblyNameExtension
+                : null;
         }
     }
 }

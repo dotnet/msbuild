@@ -129,6 +129,36 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        ///  Helper method to create a message build event from a string resource and some parameters
+        /// </summary>
+        /// <param name="importance">Importance level of the message</param>
+        /// <param name="file">The file in which the event occurred</param>
+        /// <param name="messageResourceName">string within the resource which indicates the format string to use</param>
+        /// <param name="messageArgs">string resource arguments</param>
+        internal void LogComment(MessageImportance importance, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
+        {
+            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+
+            _loggingService.LogBuildEvent(new BuildMessageEventArgs(
+                null,
+                null,
+                file.File,
+                file.Line,
+                file.Column,
+                file.EndLine,
+                file.EndColumn,
+                ResourceUtilities.GetResourceString(messageResourceName),
+                helpKeyword: null,
+                senderName: "MSBuild",
+                importance,
+                DateTime.UtcNow,
+                messageArgs)
+            {
+                BuildEventContext = _eventContext
+            });
+        }
+
+        /// <summary>
         /// Helper method to create a message build event from a string
         /// </summary>
         /// <param name="importance">Importance level of the message</param>

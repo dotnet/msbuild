@@ -57,7 +57,7 @@ namespace Microsoft.NET.StringTools
             /// <summary>
             /// Returns the current character.
             /// </summary>
-            public char Current => (_string._builder == null ? _string.FirstString[_charIndex] : _string._builder[_charIndex]);
+            public readonly char Current => (_string._builder == null ? _string.FirstString[_charIndex] : _string._builder[_charIndex]);
 
             /// <summary>
             /// Moves to the next character.
@@ -88,7 +88,7 @@ namespace Microsoft.NET.StringTools
         /// <summary>
         /// A convenience getter to ensure that we always operate on a non-null string.
         /// </summary>
-        private string FirstString => _firstString ?? string.Empty;
+        private readonly string FirstString => _firstString ?? string.Empty;
 
         /// <summary>
         /// Constructs a new InternableString wrapping the given string.
@@ -116,13 +116,13 @@ namespace Microsoft.NET.StringTools
         /// <summary>
         /// Gets the length of the string.
         /// </summary>
-        public int Length => (_builder == null ? FirstString.Length : _builder.Length);
+        public readonly int Length => (_builder == null ? FirstString.Length : _builder.Length);
 
         /// <summary>
         /// Creates a new enumerator for enumerating characters in this string. Does not allocate.
         /// </summary>
         /// <returns>The enumerator.</returns>
-        public Enumerator GetEnumerator()
+        public readonly Enumerator GetEnumerator()
         {
             return new Enumerator(this);
         }
@@ -132,7 +132,7 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         /// <param name="other">Another string.</param>
         /// <returns>True if this string is equal to <paramref name="other"/>.</returns>
-        public bool Equals(string other)
+        public readonly bool Equals(string other)
         {
             if (other.Length != Length)
             {
@@ -163,7 +163,7 @@ namespace Microsoft.NET.StringTools
         /// System.String in which case the original string is returned.
         /// </summary>
         /// <returns>The string.</returns>
-        public string ExpensiveConvertToString()
+        public readonly string ExpensiveConvertToString()
         {
             // Special case: if we hold just one string, we can directly return it.
             if (_firstString != null)
@@ -178,9 +178,9 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         /// <param name="str">The string to compare to.</param>
         /// <returns>True is this instance wraps the given string.</returns>
-        public bool ReferenceEquals(string str)
+        public readonly bool ReferenceEquals(string str)
         {
-            return Object.ReferenceEquals(str, _firstString);
+            return ReferenceEquals(str, _firstString);
         }
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace Microsoft.NET.StringTools
         /// Implements the simple yet very decently performing djb2 hash function (xor version).
         /// </summary>
         /// <returns>A stable hashcode of the string represented by this instance.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             uint hash = (5381 << 16) + 5381;
             bool isOddIndex = false;
