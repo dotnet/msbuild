@@ -250,8 +250,9 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Constructor for deserialization
         /// </summary>
-        protected LogMessagePacketBase(ITranslator translator)
+        protected LogMessagePacketBase(ITranslator translator, TargetFinishedTranslator targetFinishedTranslator = null)
         {
+            _targetFinishedTranslator = targetFinishedTranslator;
             Translate(translator);
         }
 
