@@ -398,59 +398,43 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             ITaskItem[] sources = new ITaskItem[] { new TaskItem(resxFileInput) };
             ITaskItem[] output;
 
-            {
-                GenerateResource t = Utilities.CreateTask(_output);
-                t.Sources = sources;
-                t.StateFile = stateFile;
-                Utilities.ExecuteTask(t);
+            GenerateResource t1 = Utilities.CreateTask(_output);
+            t1.Sources = sources;
+            t1.StateFile = stateFile;
+            Utilities.ExecuteTask(t1);
+            Utilities.AssertLogContainsResource(t1, "GenerateResource.OutputDoesntExist", t1.OutputResources[0].ItemSpec);
+            output = t1.OutputResources;
 
-                Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
+            // Run again to ensure all files are up to date.
+            GenerateResource t2 = Utilities.CreateTask(_output);
+            t2.Sources = sources;
+            t2.StateFile = stateFile;
+            t2.FailIfNotIncremental = true;
+            Utilities.ExecuteTask(t2);
 
-                output = t.OutputResources;
-            }
+            // Delete the file and verify that FailIfNotIncremental will print the missing file
+            GenerateResource t3 = Utilities.CreateTask(_output);
+            t3.StateFile = stateFile;
+            t3.Sources = sources;
+            t3.FailIfNotIncremental = true;
 
-            {
-                // Run again to ensure all files are up to date.
-                GenerateResource t = Utilities.CreateTask(_output);
-                t.Sources = sources;
-                t.StateFile = stateFile;
-                t.FailIfNotIncremental = true;
-                Utilities.ExecuteTask(t);
-            }
+            // Delete the output
+            File.Delete(output[0].ItemSpec);
+            t3.Execute().ShouldBeFalse();
+            Utilities.AssertLogContainsResource(t3, "GenerateResource.ProcessingFile", sources[0].ItemSpec, output[0].ItemSpec);
 
-            {
-                // Delete the file and verify that FailIfNotIncremental will print the missing file
-                GenerateResource t = Utilities.CreateTask(_output);
-                t.StateFile = stateFile;
-                t.Sources = sources;
-                t.FailIfNotIncremental = true;
+            GenerateResource t4 = Utilities.CreateTask(_output);
+            t4.Sources = sources;
+            t4.StateFile = stateFile;
+            Utilities.ExecuteTask(t4);
+            Utilities.AssertLogContainsResource(t4, "GenerateResource.OutputDoesntExist", t4.OutputResources[0].ItemSpec);
 
-                // Delete the output
-                File.Delete(output[0].ItemSpec);
-
-                t.Execute().ShouldBeFalse();
-
-                Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", sources[0].ItemSpec, output[0].ItemSpec);
-            }
-
-            {
-                GenerateResource t = Utilities.CreateTask(_output);
-                t.Sources = sources;
-                t.StateFile = stateFile;
-                Utilities.ExecuteTask(t);
-
-                Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
-            }
-
-            {
-                // Run again to ensure all files are up to date.
-                GenerateResource t = Utilities.CreateTask(_output);
-                t.Sources = sources;
-                t.StateFile = stateFile;
-                t.FailIfNotIncremental = true;
-                Utilities.ExecuteTask(t);
-            }
-
+            // Run again to ensure all files are up to date.
+            GenerateResource t5 = Utilities.CreateTask(_output);
+            t5.Sources = sources;
+            t5.StateFile = stateFile;
+            t5.FailIfNotIncremental = true;
+            Utilities.ExecuteTask(t5);
         }
 
         /// <summary>
