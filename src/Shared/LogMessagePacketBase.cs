@@ -145,6 +145,26 @@ namespace Microsoft.Build.Shared
         /// Event is an AssemblyLoadBuildEventArgs
         /// </summary>
         AssemblyLoadEvent = 21,
+
+        /// <summary>
+        /// Event is <see cref="ExtendedCustomBuildEventArgs"/>
+        /// </summary>
+        ExtendedCustomEvent = 24,
+
+        /// <summary>
+        /// Event is <see cref="ExtendedBuildErrorEventArgs"/>
+        /// </summary>
+        ExtendedBuildErrorEvent = 25,
+
+        /// <summary>
+        /// Event is <see cref="ExtendedBuildWarningEventArgs"/>
+        /// </summary>
+        ExtendedBuildWarningEvent = 26,
+
+        /// <summary>
+        /// Event is <see cref="ExtendedBuildMessageEventArgs"/>
+        /// </summary>
+        ExtendedBuildMessageEvent = 27,
     }
     #endregion
 
@@ -536,6 +556,10 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.ProjectImportedEvent => new ProjectImportedEventArgs(),
                 LoggingEventType.TargetSkipped => new TargetSkippedEventArgs(),
                 LoggingEventType.Telemetry => new TelemetryEventArgs(),
+                LoggingEventType.ExtendedCustomEvent => new ExtendedCustomBuildEventArgs(),
+                LoggingEventType.ExtendedBuildErrorEvent => new ExtendedBuildErrorEventArgs(),
+                LoggingEventType.ExtendedBuildWarningEvent => new ExtendedBuildWarningEventArgs(),
+                LoggingEventType.ExtendedBuildMessageEvent => new ExtendedBuildMessageEventArgs(),
 #endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -597,6 +621,22 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(AssemblyLoadBuildEventArgs))
             {
                 return LoggingEventType.AssemblyLoadEvent;
+            }
+            else if (eventType == typeof(ExtendedCustomBuildEventArgs))
+            {
+                return LoggingEventType.ExtendedCustomEvent;
+            }
+            else if (eventType == typeof(ExtendedBuildErrorEventArgs))
+            {
+                return LoggingEventType.ExtendedBuildErrorEvent;
+            }
+            else if (eventType == typeof(ExtendedBuildWarningEventArgs))
+            {
+                return LoggingEventType.ExtendedBuildWarningEvent;
+            }
+            else if (eventType == typeof(ExtendedBuildMessageEventArgs))
+            {
+                return LoggingEventType.ExtendedBuildMessageEvent;
             }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))

@@ -156,6 +156,7 @@ namespace Microsoft.Build.Logging
                     TaskCommandLine
                     TaskParameter
                     UninitializedPropertyRead
+                    ExtendedMessage
                 BuildStatus
                     TaskStarted
                     TaskFinished
@@ -168,11 +169,13 @@ namespace Microsoft.Build.Logging
                     ProjectEvaluationStarted
                     ProjectEvaluationFinished
                 BuildError
+                    ExtendedBuildError
                 BuildWarning
+                    ExtendedBuildWarning
                 CustomBuild
                     ExternalProjectStarted
                     ExternalProjectFinished
-
+                    ExtendedCustomBuild
         */
 
         private void WriteCore(BuildEventArgs e)
