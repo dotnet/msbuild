@@ -191,7 +191,9 @@
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyResources.cs" />
-    <Compile Include="ChangeWavesStub.cs" />
+    <Compile Include="..\Framework\ChangeWaves.cs">
+      <Link>ChangeWaves.cs</Link>
+    </Compile>
     <Compile Include="Concurrent\ConcurrentDictionary.cs" />
     <Compile Include="Concurrent\ConcurrentQueue.cs" />
     <Compile Include="Immutable\ImmutableDictionary.cs" />

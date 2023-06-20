@@ -41,20 +41,6 @@
     <Compile Include="..\Shared\BinaryWriterExtensions.cs">
       <Link>Shared\BinaryWriterExtensions.cs</Link>
     </Compile>
-    <!--
-    <Compile Include="..\Shared\ErrorUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-      <Link>Shared\ErrorUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ResourceUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-      <Link>Shared\ResourceUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-      <Link>Shared\FileUtilities.cs</Link>
-    </Compile>
-    -->
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
