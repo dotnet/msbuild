@@ -40,7 +40,7 @@ variables:
   - name: _DotNetValidationArtifactsCategory
     value: .NETCoreValidation
   - name: EnableReleaseOneLocBuild
-    value: false
+    value: true
   - name: Codeql.Enabled
     value: true
 
