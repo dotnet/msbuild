@@ -572,6 +572,20 @@ namespace Microsoft.Build.Execution
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
                 _nodeEndpoint.SendData(packet);
+                if (packet is LogMessagePacketBase logMessage)
+                {
+                    if (logMessage.EventType == LoggingEventType.CustomEvent)
+                    {
+                        BuildEventArgs buildEvent = logMessage.NodeBuildEvent.Value.Value;
+
+                        // Serializing unknown CustomEvent which has to use unsecure BinaryFormatter by TranslateDotNet<T>
+                        // Since BinaryFormatter is going to be deprecated, log warning so users can use new Extended*EventArgs instead of custom
+                        // EventArgs derived from existing EventArgs.
+                        _loggingService.LogWarning(buildEvent?.BuildEventContext ?? BuildEventContext.Invalid, null, BuildEventFileInfo.Empty,
+                            "DeprecatedEventSerialization",
+                            buildEvent?.GetType().Name ?? string.Empty);
+                    }
+                }
             }
         }
 

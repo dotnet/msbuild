@@ -22,6 +22,11 @@
         <target state="translated">MSB4008: タスク アセンブリ "{0}" に対して競合しているアセンブリが "{1}" で見つかりました。</target>
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
       </trans-unit>
+      <trans-unit id="DeprecatedEventSerialization">
+        <source>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <target state="new">Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
         <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
         <target state="translated">イベントの種類 "{0}" は .NET シリアライザーを使用してシリアル化可能であることが想定されていましたが、シリアル化可能でなかったため無視されました。</target>

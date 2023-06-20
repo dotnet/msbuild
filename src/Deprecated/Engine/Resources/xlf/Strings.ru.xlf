@@ -605,6 +605,11 @@
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
+      <trans-unit id="DeprecatedEventSerialization">
+        <source>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/metadata-self-ref</source>
+        <target state="new">Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/metadata-self-ref</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DollarSignInTaskOutputPropertyName">
         <source>MSB4080: The value "{0}" of the "PropertyName" attribute in element &lt;Output&gt; contains a "$" character. If you intended to use a property name then remove the $( ) around the property name.</source>
         <target state="translated">MSB4080: значение "{0}" атрибута PropertyName в элементе &lt;Output&gt; содержит знак "$". Если вы хотите использовать имя свойства, удалите $( ) с двух сторон имени свойства.</target>

@@ -66,6 +66,9 @@
   <data name="ExpectedEventToBeSerializable" Visibility="Public">
     <value>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</value>
   </data>
+  <data name="DeprecatedEventSerialization" Visibility="Public">
+    <value>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</value>
+  </data>
   <data name="FileLocation" Visibility="Public">
     <value>{0} ({1},{2})</value>
     <comment>A file location to be embedded in a string.</comment>

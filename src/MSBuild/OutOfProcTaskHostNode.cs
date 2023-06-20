@@ -1156,7 +1156,21 @@ namespace Microsoft.Build.CommandLine
                     return;
                 }
 
-                _nodeEndpoint.SendData(new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e)));
+                LogMessagePacket logMessage = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
+                _nodeEndpoint.SendData(logMessage);
+
+                if (logMessage.EventType == LoggingEventType.CustomEvent)
+                {
+                    BuildEventArgs buildEvent = logMessage.NodeBuildEvent.Value.Value;
+
+                    // Serializing unknown CustomEvent which has to use unsecure BinaryFormatter by TranslateDotNet<T>
+                    // Since BinaryFormatter is going to be deprecated, log warning so users can use new Extended*EventArgs instead of custom
+                    // EventArgs derived from existing EventArgs.
+                    LogWarningFromResource(
+                        "DeprecatedEventSerialization",
+                        buildEvent?.GetType().Name ?? string.Empty);
+                }
+
             }
         }
 
