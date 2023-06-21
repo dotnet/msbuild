@@ -6,8 +6,13 @@ using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.BuildException;
 using Shouldly;
 using Xunit;
 
@@ -20,6 +25,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class BinaryTranslator_Tests
     {
+        static BinaryTranslator_Tests()
+        {
+            SerializationContractInitializer.Initialize();
+        }
+
         /// <summary>
         /// Tests the SerializationMode property
         /// </summary>
@@ -27,7 +37,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializationMode()
         {
             MemoryStream stream = new MemoryStream();
-            using ITranslator readTranslator = BinaryTranslator.GetReadTranslator(stream, null);
+            using ITranslator readTranslator = BinaryTranslator.GetReadTranslator(stream, InterningBinaryReader.PoolingBuffer);
             Assert.Equal(TranslationDirection.ReadFromStream, readTranslator.Mode);
 
             using ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(stream);
@@ -183,7 +193,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ArgumentNullException deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDotNet(ref deserializedValue);
 
-            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
         }
 
         /// <summary>
@@ -198,7 +208,125 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ArgumentNullException deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDotNet(ref deserializedValue);
 
-            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
+        }
+
+        [Fact]
+        public void TestSerializeException()
+        {
+            Exception value = new ArgumentNullException("The argument was null");
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
+        }
+
+        [Fact]
+        public void TestSerializeException_NestedWithStack()
+        {
+            Exception value = null;
+            try
+            {
+                // Intentionally throw a nested exception with a stack trace.
+                value = value.InnerException;
+            }
+            catch (Exception e)
+            {
+                value = new ArgumentNullException("The argument was null", e);
+            }
+
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
+        }
+
+        [Fact]
+        public void TestSerializeBuildException_NestedWithStack()
+        {
+            Exception value = null;
+            try
+            {
+                throw new InvalidProjectFileException("sample message");
+            }
+            catch (Exception e)
+            {
+                try
+                {
+                    throw new ArgumentNullException("The argument was null", e);
+                }
+                catch (Exception exception)
+                {
+                    value = new InternalErrorException("Another message", exception);
+                }
+            }
+
+            Assert.NotNull(value);
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
+        }
+
+        public static IEnumerable<object[]> GetBuildExceptionsAsTestData()
+            => AppDomain
+                .CurrentDomain
+                .GetAssemblies()
+                // TaskHost is copying code files - so has a copy of types with identical names.
+                .Where(a => !a.FullName!.StartsWith("MSBuildTaskHost", StringComparison.CurrentCultureIgnoreCase))
+                .SelectMany(s => s.GetTypes())
+                .Where(BuildExceptionSerializationHelper.IsSupportedExceptionType)
+                .Select(t => new object[] { t });
+
+        [Theory]
+        [MemberData(nameof(GetBuildExceptionsAsTestData))]
+        public void TestSerializationOfBuildExceptions(Type exceptionType)
+        {
+            Exception e = (Exception)Activator.CreateInstance(exceptionType, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.CreateInstance | BindingFlags.Instance, null, new object[]{"msg", new GenericBuildTransferredException() }, System.Globalization.CultureInfo.CurrentCulture);
+            Exception remote;
+            try
+            {
+                throw e;
+            }
+            catch (Exception exception)
+            {
+                remote = exception;
+            }
+
+            Assert.NotNull(remote);
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref remote);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(remote, deserializedValue, out string diffReason, true), $"Exception type {exceptionType.FullName} not properly de/serialized: {diffReason}");
+        }
+
+        [Fact]
+        public void TestInvalidProjectFileException_NestedWithStack()
+        {
+            Exception value = null;
+            try
+            {
+                throw new InvalidProjectFileException("sample message", new InternalErrorException("Another message"));
+            }
+            catch (Exception e)
+            {
+                value = e;
+            }
+
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason, true), diffReason);
         }
 
         /// <summary>
