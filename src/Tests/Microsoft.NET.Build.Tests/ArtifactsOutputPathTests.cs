@@ -20,6 +20,7 @@ using Xunit.Sdk;
 
 namespace Microsoft.NET.Build.Tests
 {
+    using System.Runtime.InteropServices;
     using ArtifactsTestExtensions;
 
     public class ArtifactsOutputPathTests : SdkTest
@@ -525,9 +526,19 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .OnlyHaveFiles(new[] { "MSBuildSdk.dll" });
 
-            new DirectoryInfo(Path.Combine(testAsset.Path, "artifacts", "PackageReference", ToolsetInfo.CurrentTargetFramework))
-                .Should()
-                .OnlyHaveFiles(new[] { "PackageReference.dll", $"PackageReference{EnvironmentInfo.ExecutableExtension}" });
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                //  Microsoft.Build.Artifacts doesn't appear to copy the (extensionless) executable to the artifacts folder on non-Windows platforms
+                new DirectoryInfo(Path.Combine(testAsset.Path, "artifacts", "PackageReference", ToolsetInfo.CurrentTargetFramework))
+                    .Should()
+                    .OnlyHaveFiles(new[] { "PackageReference.dll", $"PackageReference{EnvironmentInfo.ExecutableExtension}" });
+            }
+            else
+            {
+                new DirectoryInfo(Path.Combine(testAsset.Path, "artifacts", "PackageReference", ToolsetInfo.CurrentTargetFramework))
+                    .Should()
+                    .OnlyHaveFiles(new[] { "PackageReference.dll" });
+            }
 
             //  Verify that default bin and obj folders still exist (which wouldn't be the case if using the .NET SDKs artifacts output functianality
             new FileInfo(Path.Combine(testAsset.Path, "MSBuildSdk", "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "MSBuildSdk.dll")).Should().Exist();
