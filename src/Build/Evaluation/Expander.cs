@@ -2583,12 +2583,9 @@ namespace Microsoft.Build.Evaluation
                             {
                                 metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                             }
-                            catch (ArgumentException ex) // Blank metadata name
+                            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                             {
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                            }
-                            catch (InvalidOperationException ex)
-                            {
+                                // Blank metadata name
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                             }
 
@@ -2788,12 +2785,9 @@ namespace Microsoft.Build.Evaluation
                         {
                             metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                         }
-                        catch (ArgumentException ex) // Blank metadata name
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
+                            // Blank metadata name
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                         }
 
@@ -2826,12 +2820,9 @@ namespace Microsoft.Build.Evaluation
                         {
                             metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                         }
-                        catch (ArgumentException ex) // Blank metadata name
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
+                            // Blank metadata name
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                         }
 
@@ -2862,12 +2853,9 @@ namespace Microsoft.Build.Evaluation
                         {
                             metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                         }
-                        catch (ArgumentException ex) // Blank metadata name
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
+                            // Blank metadata name
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                         }
 
@@ -2901,12 +2889,9 @@ namespace Microsoft.Build.Evaluation
                             {
                                 metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                             }
-                            catch (ArgumentException ex) // Blank metadata name
+                            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                             {
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                            }
-                            catch (InvalidOperationException ex)
-                            {
+                                // Blank metadata name
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                             }
 
