@@ -14,7 +14,7 @@ public static class ContainerBuilder
         string baseImageName,
         string baseImageTag,
         string[] entrypoint,
-        string[]? entrypointArgs,
+        string[]? cmd,
         string imageName,
         string[] imageTags,
         string? outputRegistry,
@@ -65,7 +65,7 @@ public static class ContainerBuilder
         Layer newLayer = Layer.FromDirectory(publishDirectory.FullName, workingDir, imageBuilder.IsWindows);
         imageBuilder.AddLayer(newLayer);
         imageBuilder.SetWorkingDirectory(workingDir);
-        imageBuilder.SetEntryPoint(entrypoint, entrypointArgs);
+        imageBuilder.SetEntrypointAndCmd(entrypoint, cmd ?? Array.Empty<string>());
         foreach (KeyValuePair<string, string> label in labels)
         {
             // labels are validated by System.CommandLine API

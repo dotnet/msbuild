@@ -87,9 +87,12 @@ internal sealed class ImageBuilder
     internal void SetWorkingDirectory(string workingDirectory) => _baseImageConfig.SetWorkingDirectory(workingDirectory);
 
     /// <summary>
-    /// Sets an entry point for the image.
+    /// Sets the ENTRYPOINT and CMD for the image.
     /// </summary>
-    internal void SetEntryPoint(string[] executableArgs, string[]? args = null) => _baseImageConfig.SetEntryPoint(executableArgs, args);
+    internal void SetEntrypointAndCmd(string[] entrypoint, string[] cmd) => _baseImageConfig.SetEntrypointAndCmd(entrypoint, cmd);
 
+    /// <summary>
+    /// Sets the USER for the image.
+    /// </summary>
     internal void SetUser(string user) => _baseImageConfig.SetUser(user);
 }

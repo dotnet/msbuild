@@ -12,6 +12,21 @@
         <target state="translated">CONTAINER2008: Ambos {0} e {1} foram fornecidos, mas apenas um ou outro é permitido.</target>
         <note>{StrBegin="CONTAINER2008: "}</note>
       </trans-unit>
+      <trans-unit id="AppCommandArgsSetNoAppCommand">
+        <source>CONTAINER2025: ContainerAppCommandArgs are provided without specifying a ContainerAppCommand.</source>
+        <target state="new">CONTAINER2025: ContainerAppCommandArgs are provided without specifying a ContainerAppCommand.</target>
+        <note>{StrBegin="CONTAINER2025: "}</note>
+      </trans-unit>
+      <trans-unit id="AppCommandSetNotUsed">
+        <source>CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is '{0}'.</source>
+        <target state="new">CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is '{0}'.</target>
+        <note>{StrBegin="CONTAINER2026: "}</note>
+      </trans-unit>
+      <trans-unit id="BaseEntrypointOverwritten">
+        <source>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</source>
+        <target state="new">CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</target>
+        <note>{StrBegin="CONTAINER2022: "}</note>
+      </trans-unit>
       <trans-unit id="BaseImageNameParsingFailed">
         <source>CONTAINER2009: Could not parse {0}: {1}</source>
         <target state="translated">CONTAINER2009: não foi possível analisar {0}: {1}</target>
@@ -71,6 +86,31 @@
         <source>CONTAINER4004: Items '{0}' contain empty item(s) which will be ignored.</source>
         <target state="translated">CONTAINER4004: Os itens '{0}' contêm itens vazios que serão ignorados.</target>
         <note>{StrBegin="CONTAINER4004: "}</note>
+      </trans-unit>
+      <trans-unit id="EntrypointAndAppCommandArgsSetNoAppCommandInstruction">
+        <source>CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
+        <target state="new">CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</target>
+        <note>{StrBegin="CONTAINER2023: "}</note>
+      </trans-unit>
+      <trans-unit id="EntrypointSetNoAppCommandInstruction">
+        <source>CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</source>
+        <target state="new">CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</target>
+        <note>{StrBegin="CONTAINER2027: "}</note>
+      </trans-unit>
+      <trans-unit id="EntrypointArgsSetNoEntrypoint">
+        <source>CONTAINER2024: ContainerEntrypointArgs are provided without specifying a ContainerEntrypoint.</source>
+        <target state="new">CONTAINER2024: ContainerEntrypointArgs are provided without specifying a ContainerEntrypoint.</target>
+        <note>{StrBegin="CONTAINER2024: "}</note>
+      </trans-unit>
+      <trans-unit id="EntrypointArgsSetPreferAppCommandArgs">
+        <source>CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for arguments that can be overridden when the container is created.</source>
+        <target state="new">CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for arguments that can be overridden when the container is created.</target>
+        <note>{StrBegin="CONTAINER2029: "}</note>
+      </trans-unit>
+      <trans-unit id="EntrypointConflictAppCommand">
+        <source>CONTAINER2028: ContainerEntrypoint can not be combined with ContainerAppCommandInstruction '{0}'.</source>
+        <target state="new">CONTAINER2028: ContainerEntrypoint can not be combined with ContainerAppCommandInstruction '{0}'.</target>
+        <note>{StrBegin="CONTAINER2028: "}</note>
       </trans-unit>
       <trans-unit id="FailedRetrievingCredentials">
         <source>CONTAINER1008: Failed retrieving credentials for "{0}": {1}</source>
@@ -211,6 +251,11 @@
         <source>CONTAINER1006: Too many retries, stopping.</source>
         <target state="translated">CONTAINER1006: Muitas tentativas, parando.</target>
         <note>{StrBegin="CONTAINER1006: "}</note>
+      </trans-unit>
+      <trans-unit id="UnknownAppCommandInstruction">
+        <source>CONTAINER2021: Unknown AppCommandInstruction '{0}'. Valid instructions are {1}.</source>
+        <target state="new">CONTAINER2021: Unknown AppCommandInstruction '{0}'. Valid instructions are {1}.</target>
+        <note>{StrBegin="CONTAINER2021: "}</note>
       </trans-unit>
       <trans-unit id="UnknownLocalRegistryType">
         <source>CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry types are {1}.</source>

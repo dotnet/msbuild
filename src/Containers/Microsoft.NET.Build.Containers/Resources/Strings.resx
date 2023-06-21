@@ -295,6 +295,42 @@
     <value>CONTAINER2001: Unrecognized mediaType '{0}'.</value>
     <comment>{StrBegin="CONTAINER2001: "}</comment>
   </data>
+  <data name="UnknownAppCommandInstruction" xml:space="preserve">
+    <value>CONTAINER2021: Unknown AppCommandInstruction '{0}'. Valid instructions are {1}.</value>
+    <comment>{StrBegin="CONTAINER2021: "}</comment>
+  </data>
+  <data name="BaseEntrypointOverwritten" xml:space="preserve">
+    <value>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</value>
+    <comment>{StrBegin="CONTAINER2022: "}</comment>
+  </data>
+  <data name="EntrypointAndAppCommandArgsSetNoAppCommandInstruction" xml:space="preserve">
+    <value>CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</value>
+    <comment>{StrBegin="CONTAINER2023: "}</comment>
+  </data>
+  <data name="EntrypointArgsSetNoEntrypoint" xml:space="preserve">
+    <value>CONTAINER2024: ContainerEntrypointArgs are provided without specifying a ContainerEntrypoint.</value>
+    <comment>{StrBegin="CONTAINER2024: "}</comment>
+  </data>
+  <data name="AppCommandArgsSetNoAppCommand" xml:space="preserve">
+    <value>CONTAINER2025: ContainerAppCommandArgs are provided without specifying a ContainerAppCommand.</value>
+    <comment>{StrBegin="CONTAINER2025: "}</comment>
+  </data>
+  <data name="AppCommandSetNotUsed" xml:space="preserve">
+    <value>CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is '{0}'.</value>
+    <comment>{StrBegin="CONTAINER2026: "}</comment>
+  </data>
+  <data name="EntrypointSetNoAppCommandInstruction" xml:space="preserve">
+    <value>CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</value>
+    <comment>{StrBegin="CONTAINER2027: "}</comment>
+  </data>
+  <data name="EntrypointConflictAppCommand" xml:space="preserve">
+    <value>CONTAINER2028: ContainerEntrypoint can not be combined with ContainerAppCommandInstruction '{0}'.</value>
+    <comment>{StrBegin="CONTAINER2028: "}</comment>
+  </data>
+  <data name="EntrypointArgsSetPreferAppCommandArgs" xml:space="preserve">
+    <value>CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for arguments that can be overridden when the container is created.</value>
+    <comment>{StrBegin="CONTAINER2029: "}</comment>
+  </data>
   <data name="_Test" xml:space="preserve">
     <value>CONTAINER0000: Value for unit test {0}</value>
     <comment>Used only for unit tests</comment>

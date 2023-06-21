@@ -66,15 +66,15 @@ internal class ContainerizeCommand : RootCommand
 
     internal Option<string[]> EntrypointOption { get; } = new Option<string[]>(
             name: "--entrypoint",
-            description: "The entrypoint application of the container.")
+            description: "The Entrypoint of the container image.")
             {
                 IsRequired = true,
                 AllowMultipleArgumentsPerToken = true
             };
 
-    internal Option<string[]> EntrypointArgsOption { get; } = new Option<string[]>(
-            name: "--entrypointargs",
-            description: "Arguments to pass alongside Entrypoint.")
+    internal Option<string[]> CmdOption { get; } = new Option<string[]>(
+            aliases: new[] { "--entrypointargs", "--cmd" },
+            description: "The Cmd of the container image.")
             {
                 AllowMultipleArgumentsPerToken = true
             };
@@ -178,7 +178,7 @@ internal class ContainerizeCommand : RootCommand
         this.AddOption(ImageTagsOption);
         this.AddOption(WorkingDirectoryOption);
         this.AddOption(EntrypointOption);
-        this.AddOption(EntrypointArgsOption);
+        this.AddOption(CmdOption);
         this.AddOption(LabelsOption);
         this.AddOption(PortsOption);
         this.AddOption(EnvVarsOption);
@@ -198,7 +198,7 @@ internal class ContainerizeCommand : RootCommand
             string[] _tags = context.ParseResult.GetValue(ImageTagsOption)!;
             string _workingDir = context.ParseResult.GetValue(WorkingDirectoryOption)!;
             string[] _entrypoint = context.ParseResult.GetValue(EntrypointOption)!;
-            string[]? _entrypointArgs = context.ParseResult.GetValue(EntrypointArgsOption);
+            string[]? _cmdArgs = context.ParseResult.GetValue(CmdOption);
             Dictionary<string, string> _labels = context.ParseResult.GetValue(LabelsOption) ?? new Dictionary<string, string>();
             Port[]? _ports = context.ParseResult.GetValue(PortsOption);
             Dictionary<string, string> _envVars = context.ParseResult.GetValue(EnvVarsOption) ?? new Dictionary<string, string>();
@@ -213,7 +213,7 @@ internal class ContainerizeCommand : RootCommand
                 _baseName,
                 _baseTag,
                 _entrypoint,
-                _entrypointArgs,
+                _cmdArgs,
                 _name,
                 _tags,
                 _outputReg,

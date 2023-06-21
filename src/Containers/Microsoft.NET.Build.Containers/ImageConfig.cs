@@ -16,7 +16,8 @@ internal sealed class ImageConfig
     private readonly HashSet<Port> _exposedPorts;
     private readonly Dictionary<string, string> _environmentVariables;
     private string? _newWorkingDirectory;
-    private (string[] ExecutableArgs, string[]? Args)? _newEntryPoint;
+    private string[]? _newEntrypoint;
+    private string[]? _newCmd;
     private string? _user;
 
     /// <summary>
@@ -31,8 +32,6 @@ internal sealed class ImageConfig
     /// Gets a value indicating whether the base image is has a Windows operating system.
     /// </summary>
     public bool IsWindows => "windows".Equals(_os, StringComparison.OrdinalIgnoreCase);
-
-    public string? User => _user;
 
     internal ImageConfig(string imageConfigJson) : this(JsonNode.Parse(imageConfigJson)!)
     {
@@ -54,9 +53,14 @@ internal sealed class ImageConfig
         _os = GetOs();
         _history = GetHistory();
         _user = GetUser();
+        _newEntrypoint = GetEntrypoint();
+        _newCmd = GetCmd();
     }
 
-    private string? GetUser() => _config["config"]?["User"]?.ToString();
+    // Return values from the base image config.
+    internal string? GetUser() => _config["config"]?["User"]?.ToString();
+    internal string[]? GetEntrypoint() => _config["config"]?["Entrypoint"]?.AsArray()?.Select(node => node!.GetValue<string>())?.ToArray();
+    private string[]? GetCmd() => _config["config"]?["Entrypoint"]?.AsArray()?.Select(node => node!.GetValue<string>())?.ToArray();
     private List<HistoryEntry> GetHistory() => _config["history"]?.AsArray().Select(node => node.Deserialize<HistoryEntry>()!).ToList() ?? new List<HistoryEntry>();
     private string GetOs() => _config["os"]?.ToString() ?? throw new ArgumentException("Base image configuration should contain an 'os' property.");
     private string GetArchitecture() => _config["architecture"]?.ToString() ?? throw new ArgumentException("Base image configuration should contain an 'architecture' property.");
@@ -86,18 +90,14 @@ internal sealed class ImageConfig
             newConfig["WorkingDir"] = _newWorkingDirectory;
         }
 
-        if (_newEntryPoint.HasValue)
+        if (_newEntrypoint?.Length > 0)
         {
-            newConfig["Entrypoint"] = ToJsonArray(_newEntryPoint.Value.ExecutableArgs);
+            newConfig["Entrypoint"] = ToJsonArray(_newEntrypoint);
+        }
 
-            if (_newEntryPoint.Value.Args is null)
-            {
-                newConfig.Remove("Cmd");
-            }
-            else
-            {
-                newConfig["Cmd"] = ToJsonArray(_newEntryPoint.Value.Args);
-            }
+        if (_newCmd?.Length > 0)
+        {
+            newConfig["Cmd"] = ToJsonArray(_newCmd);
         }
 
         if (_user is not null)
@@ -201,9 +201,10 @@ internal sealed class ImageConfig
         _newWorkingDirectory = workingDirectory;
     }
 
-    internal void SetEntryPoint(string[] executableArgs, string[]? args = null)
+    internal void SetEntrypointAndCmd(string[] entrypoint, string[] cmd)
     {
-        _newEntryPoint = (executableArgs, args);
+        _newEntrypoint = entrypoint;
+        _newCmd = cmd;
     }
 
     internal void AddLayer(Layer l)

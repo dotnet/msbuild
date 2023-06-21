@@ -101,12 +101,12 @@
       <ContainerWorkingDirectory Condition="'$(ContainerWorkingDirectory)' == '' and $(_ContainerIsTargetingWindows) ">C:\app</ContainerWorkingDirectory>
     </PropertyGroup>
 
-    <ItemGroup Label="Entrypoint Assignment">
+    <ItemGroup Label="AppCommand Assignment" Condition="'$(ContainerAppCommandInstruction)' != 'None'">
       <!-- For non-apphosts, we need to invoke `dotnet` `app` as separate args -->
-      <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' != 'true'" Include="dotnet;$(TargetFileName)" />
+      <ContainerAppCommand Condition="'$(ContainerAppCommand)' == '' and '$(UseAppHost)' != 'true'" Include="dotnet;$(TargetFileName)" />
       <!-- For apphosts, we need to invoke `app` as a single arg -->
-      <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' == 'true' and !$(_ContainerIsTargetingWindows)" Include="$(ContainerWorkingDirectory)/$(AssemblyName)$(_NativeExecutableExtension)" />
-      <ContainerEntrypoint Condition="'$(ContainerEntrypoint)' == '' and '$(UseAppHost)' == 'true' and $(_ContainerIsTargetingWindows)" Include="$(AssemblyName)$(_NativeExecutableExtension)" />
+      <ContainerAppCommand Condition="'$(ContainerAppCommand)' == '' and '$(UseAppHost)' == 'true' and !$(_ContainerIsTargetingWindows)" Include="$(ContainerWorkingDirectory)/$(AssemblyName)$(_NativeExecutableExtension)" />
+      <ContainerAppCommand Condition="'$(ContainerAppCommand)' == '' and '$(UseAppHost)' == 'true' and $(_ContainerIsTargetingWindows)" Include="$(AssemblyName)$(_NativeExecutableExtension)" />
     </ItemGroup>
 
     <!-- We only set a default user when the base image is Microsoft-authored, and we're targeting a version of those images that supports a nonroot user -->
@@ -212,6 +212,10 @@
                     WorkingDirectory="$(ContainerWorkingDirectory)"
                     Entrypoint="@(ContainerEntrypoint)"
                     EntrypointArgs="@(ContainerEntrypointArgs)"
+                    AppCommand="@(ContainerAppCommand)"
+                    AppCommandArgs="@(ContainerAppCommandArgs)"
+                    AppCommandInstruction="$(ContainerAppCommandInstruction)"
+                    DefaultArgs="@(ContainerDefaultArgs)"
                     Labels="@(ContainerLabel)"
                     ExposedPorts="@(ContainerPort)"
                     ContainerEnvironmentVariables="@(ContainerEnvironmentVariables)"

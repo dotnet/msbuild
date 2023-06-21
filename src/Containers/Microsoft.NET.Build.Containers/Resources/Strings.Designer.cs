@@ -473,5 +473,59 @@ namespace Microsoft.NET.Build.Containers.Resources {
                 return ResourceManager.GetString("UnrecognizedMediaType", resourceCulture);
             }
         }
+
+        internal static string UnknownAppCommandInstruction {
+            get {
+                return ResourceManager.GetString("UnknownAppCommandInstruction", resourceCulture);
+            }
+        }
+
+        internal static string BaseEntrypointOverwritten {
+            get {
+                return ResourceManager.GetString("BaseEntrypointOverwritten", resourceCulture);
+            }
+        }
+
+        internal static string EntrypointAndAppCommandArgsSetNoAppCommandInstruction {
+            get {
+                return ResourceManager.GetString("EntrypointAndAppCommandArgsSetNoAppCommandInstruction", resourceCulture);
+            }
+        }
+
+        internal static string EntrypointArgsSetNoEntrypoint {
+            get {
+                return ResourceManager.GetString("EntrypointArgsSetNoEntrypoint", resourceCulture);
+            }
+        }
+
+        internal static string AppCommandArgsSetNoAppCommand {
+            get {
+                return ResourceManager.GetString("AppCommandArgsSetNoAppCommand", resourceCulture);
+            }
+        }
+
+        internal static string AppCommandSetNotUsed {
+            get {
+                return ResourceManager.GetString("AppCommandSetNotUsed", resourceCulture);
+            }
+        }
+
+        internal static string EntrypointSetNoAppCommandInstruction {
+            get {
+                return ResourceManager.GetString("EntrypointSetNoAppCommandInstruction", resourceCulture);
+            }
+        }
+
+        internal static string EntrypointConflictAppCommand {
+            get {
+                return ResourceManager.GetString("EntrypointConflictAppCommand", resourceCulture);
+            }
+        }
+
+        internal static string EntrypointArgsSetPreferAppCommandArgs {
+            get {
+                return ResourceManager.GetString("EntrypointArgsSetPreferAppCommandArgs", resourceCulture);
+            }
+        }
     }
 }
