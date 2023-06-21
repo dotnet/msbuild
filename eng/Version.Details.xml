@@ -46,15 +46,15 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
       <Sha>5b20af47d99620150c53eaf5db8636fdf730b126</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="17.7.0-preview-23320-09">
+    <Dependency Name="Microsoft.Build" Version="17.7.0-preview-23321-01">
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>d30eef85d29102bdc0be8d1ad3ed7dd321341fa6</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="17.7.0-preview-23320-09">
+    <Dependency Name="Microsoft.Build.Localization" Version="17.7.0-preview-23321-01">
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>d30eef85d29102bdc0be8d1ad3ed7dd321341fa6</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.msbuild" Version="17.7.0-preview-23320-09">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.msbuild" Version="17.7.0-preview-23321-01">
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>d30eef85d29102bdc0be8d1ad3ed7dd321341fa6</Sha>
     </Dependency>
