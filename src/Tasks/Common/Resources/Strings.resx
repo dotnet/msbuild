@@ -280,7 +280,7 @@
     <comment>{StrBegin="NETSDK1044: "}</comment>
   </data>
   <data name="UnsupportedTargetFrameworkVersion" xml:space="preserve">
-    <value>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</value>
+    <value>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}. Download the .NET SDK from https://aka.ms/download-dotnet</value>
     <comment>{StrBegin="NETSDK1045: "}</comment>
   </data>
   <data name="TargetFrameworkWithSemicolon" xml:space="preserve">
@@ -898,5 +898,9 @@ You may need to build the project on another operating system or architecture, o
   <data name="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework" xml:space="preserve">
     <value>NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</value>
     <comment>{StrBegin="NETSDK1205: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</comment>
+  </data>
+  <data name="UnsupportedVisualStudioVersion" xml:space="preserve">
+    <value>NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</value>
+    <comment>{StrBegin="NETSDK1209: "}</comment>
   </data>
 </root>
