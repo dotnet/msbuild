@@ -1150,7 +1150,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(projectDirectory, "Pack", "PackageLibraryDirectDependency");
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute();
+            var result = pack.Execute("/bl");
 
             result.Should().Pass();
 
@@ -1381,7 +1381,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             pack.WithWorkingDirectory(projectDirectory.Path);
-            var result = pack.Execute();
+            var result = pack.Execute("/bl");
 
             result.Should().Pass();
 

@@ -28,6 +28,8 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
         [Required]
         public string BasePath { get; set; }
 
+        public string AssetMergeSource { get; set; }
+
         [Output]
         public ITaskItem[] DiscoveredStaticWebAssets { get; set; }
 
@@ -67,6 +69,8 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
                         BasePath = BasePath,
                         RelativePath = candidateRelativePath,
                         AssetMode = StaticWebAsset.AssetModes.All,
+                        AssetMergeSource = AssetMergeSource,
+                        AssetMergeBehavior = StaticWebAsset.MergeBehaviors.PreferTarget,
                         CopyToOutputDirectory = candidate.GetMetadata(nameof(StaticWebAsset.CopyToOutputDirectory)),
                         CopyToPublishDirectory = candidate.GetMetadata(nameof(StaticWebAsset.CopyToPublishDirectory))
                     };

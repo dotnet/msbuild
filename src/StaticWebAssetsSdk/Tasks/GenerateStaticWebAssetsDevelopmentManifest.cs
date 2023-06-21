@@ -50,7 +50,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 
                 var manifest = ComputeDevelopmentManifest(
                     Assets.Select(a => StaticWebAsset.FromTaskItem(a)),
-                    DiscoveryPatterns.Select(StaticWebAssetsManifest.DiscoveryPattern.FromTaskItem));
+                    DiscoveryPatterns.Select(StaticWebAssetsDiscoveryPattern.FromTaskItem));
 
                 PersistManifest(manifest);
             }
@@ -63,7 +63,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 
         public StaticWebAssetsDevelopmentManifest ComputeDevelopmentManifest(
             IEnumerable<StaticWebAsset> assets,
-            IEnumerable<StaticWebAssetsManifest.DiscoveryPattern> discoveryPatterns)
+            IEnumerable<StaticWebAssetsDiscoveryPattern> discoveryPatterns)
         {
             var assetsWithPathSegments = ComputeManifestAssets(assets).ToArray();
 
@@ -137,7 +137,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 
         private StaticWebAssetsDevelopmentManifest CreateManifest(
             SegmentsAssetPair[] assetsWithPathSegments,
-            IEnumerable<(string[], IEnumerable<StaticWebAssetsManifest.DiscoveryPattern> values)> discoveryPatternsByBasePath)
+            IEnumerable<(string[], IEnumerable<StaticWebAssetsDiscoveryPattern> values)> discoveryPatternsByBasePath)
         {
             var contentRootIndex = new Dictionary<string, int>();
             var root = new StaticWebAssetNode() { };

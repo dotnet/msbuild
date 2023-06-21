@@ -1,0 +1,187 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.StaticWebAssets.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project ToolsVersion="14.0">
+
+  <Target Name="_CleanupReferencedProjectItemGroups" BeforeTargets="GetCopyToPublishDirectoryItems" DependsOnTargets="ResolveStaticWebAssetsConfiguration">
+    <ReadStaticWebAssetsManifestFile ManifestPath="$(StaticWebAssetBuildManifestPath)">
+      <Output TaskParameter="Assets" ItemName="_CleanupStaticWebAsset" />
+    </ReadStaticWebAssetsManifestFile>
+
+    <ItemGroup>
+      <Content Remove="@(_CleanupStaticWebAsset->'%(OriginalItemSpec)')" />
+      <ContentWithTargetPath Remove="@(_CleanupStaticWebAsset->'%(OriginalItemSpec)')" />
+      <None Remove="@(_CleanupStaticWebAsset->'%(OriginalItemSpec)')" />
+      <_NoneWithTargetPath Remove="@(_CleanupStaticWebAsset->'%(OriginalItemSpec)')" />
+      <ResolvedFileToPublish Remove="@(_CleanupStaticWebAsset->'%(OriginalItemSpec)')" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ResolveReferencedProjectsStaticWebAssetsConfiguration" DependsOnTargets="ResolveStaticWebAssetsConfiguration;PrepareProjectReferences">
+    <ItemGroup>
+      <!-- It is explicitly ok to take a dependency on _MSBuildProjectReferenceExistent as it is
+        something many other products already take a dependency on. -->
+      <_StaticWebAssetProjectReference Include="@(_MSBuildProjectReferenceExistent)" Condition="'%(BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != ''" />
+    </ItemGroup>
+
+    <MSBuild
+      Condition="'@(_StaticWebAssetProjectReference)' != ''"
+      Targets="GetStaticWebAssetsProjectConfiguration"
+      Properties="%(_StaticWebAssetProjectReference.SetConfiguration);%(_StaticWebAssetProjectReference.SetPlatform);%(_StaticWebAssetProjectReference.SetTargetFramework)"
+      RemoveProperties="%(_StaticWebAssetProjectReference.GlobalPropertiesToRemove);$(_GlobalPropertiesToRemoveFromProjectReferences)"
+      Projects="@(_StaticWebAssetProjectReference)"
+      BuildInParallel="$(BuildInParallel)"
+      ContinueOnError="!$(BuildingProject)"
+      SkipNonexistentTargets="true">
+
+      <Output TaskParameter="TargetOutputs" ItemName="_ReferencedProjectsConfiguration" />
+    </MSBuild>
+
+    <MergeConfigurationProperties
+      CandidateConfigurations="@(_ReferencedProjectsConfiguration)"
+      ProjectReferences="@(_StaticWebAssetProjectReference)">
+
+      <Output TaskParameter="ProjectConfigurations" ItemName="StaticWebAssetProjectConfiguration" />
+    </MergeConfigurationProperties>
+
+  </Target>
+
+  <!--
+    The static web asset configuration defines the following metadata:
+    Version: Version of the contract supported by this project, it can be 1 or 2.
+    Source: The package id of the project.
+    GetBuildAssetsTargets: The targets to run to get the build assets.
+    GetPublishAssetsTargets: The targets to run to get the publish assets.
+    AdditionalBuildProperties: Additional properties to pass to the build assets targets.
+    AdditionalBuildPropertiesToRemove: Additional properties to remove from the build assets targets.
+    AdditionalPublishProperties: Additional properties to pass to the publish assets targets.
+    AdditionalPublishPropertiesToRemove: Additional properties to remove from the publish assets targets.
+    TargetFramework: The target framework associated with the current configuration.
+  -->
+  <Target Name="GetStaticWebAssetsProjectConfiguration" Returns="@(_StaticWebAssetThisProjectConfiguration)" DependsOnTargets="ResolveStaticWebAssetsConfiguration">
+      <PropertyGroup>
+        <StaticWebAssetsGetPublishAssetsTargets Condition="'$(StaticWebAssetsGetPublishAssetsTargets)' == ''">ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems</StaticWebAssetsGetPublishAssetsTargets>
+        <StaticWebAssetsGetBuildAssetsTargets Condition="'$(StaticWebAssetsGetBuildAssetsTargets)' == ''">GetCurrentProjectBuildStaticWebAssetItems</StaticWebAssetsGetBuildAssetsTargets>
+      </PropertyGroup>
+      <ItemGroup>
+        <_StaticWebAssetThisProjectConfiguration Include="$(MSBuildProjectFullPath)">
+          <Version>2</Version>
+          <Source>$(PackageId)</Source>
+          <TargetFramework>$(TargetFramework)</TargetFramework>
+          <!-- Build -->
+          <GetBuildAssetsTargets>$(StaticWebAssetsGetBuildAssetsTargets)</GetBuildAssetsTargets>
+          <AdditionalBuildProperties>$(StaticWebAssetsAdditionalBuildProperties)</AdditionalBuildProperties>
+          <AdditionalBuildPropertiesToRemove>$(StaticWebAssetsAdditionalBuildPropertiesToRemove)</AdditionalBuildPropertiesToRemove>
+          <!-- Publish -->
+          <GetPublishAssetsTargets>$(StaticWebAssetsGetPublishAssetsTargets)</GetPublishAssetsTargets>
+          <AdditionalPublishProperties>$(StaticWebAssetsAdditionalPublishProperties)</AdditionalPublishProperties>
+          <AdditionalPublishPropertiesToRemove>$(StaticWebAssetsAdditionalPublishPropertiesToRemove)</AdditionalPublishPropertiesToRemove>
+        </_StaticWebAssetThisProjectConfiguration>
+      </ItemGroup>
+  </Target>
+
+  <Target Name="ResolveReferencedProjectsStaticWebAssets" DependsOnTargets="ResolveReferencedProjectsStaticWebAssetsConfiguration">
+
+      <MSBuild
+        Condition="'@(StaticWebAssetProjectConfiguration)' != ''"
+        Targets="%(StaticWebAssetProjectConfiguration.GetBuildAssetsTargets)"
+        Properties="%(StaticWebAssetProjectConfiguration.AdditionalBuildProperties)"
+        RemoveProperties="%(StaticWebAssetProjectConfiguration.AdditionalBuildPropertiesToRemove);$(_GlobalPropertiesToRemoveFromProjectReferences)"
+        Projects="@(StaticWebAssetProjectConfiguration)"
+        BuildInParallel="$(BuildInParallel)"
+        ContinueOnError="!$(BuildingProject)"
+        SkipNonexistentTargets="false"
+      >
+        <Output TaskParameter="TargetOutputs" ItemName="_ReferencedProjectBuildStaticWebAssetsItems" />
+      </MSBuild>
+
+      <ItemGroup>
+
+        <StaticWebAsset
+          Include="@(_ReferencedProjectBuildStaticWebAssetsItems)"
+          Condition="'%(_ReferencedProjectBuildStaticWebAssetsItems.ResultType)' == 'StaticWebAsset'"
+          KeepMetadata="@(_StaticWebAssetCanonicalMetadata)" />
+
+        <StaticWebAssetDiscoveryPattern
+          Include="@(_ReferencedProjectBuildStaticWebAssetsItems)"
+          Condition="'%(_ReferencedProjectBuildStaticWebAssetsItems.ResultType)' == 'StaticWebAssetDiscoveryPattern'"
+          KeepMetadata="@(_StaticWebAssetDiscoveryPatternCanonicalMetadata)" />
+      </ItemGroup>
+
+  </Target>
+
+  <Target Name="GetCurrentProjectBuildStaticWebAssetItems" DependsOnTargets="ResolveStaticWebAssetsConfiguration" Returns="@(_CachedBuildStaticWebAssetItems)">
+
+      <PropertyGroup>
+        <_ShouldReadBuildManifestAndUpdateItemGroup>false</_ShouldReadBuildManifestAndUpdateItemGroup>
+        <_ShouldReadBuildManifestAndUpdateItemGroup Condition="@(_CachedBuildStaticWebAssets) == '' and @(_CachedBuildStaticWebAssetDiscoveryPatterns) == ''">true</_ShouldReadBuildManifestAndUpdateItemGroup>
+      </PropertyGroup>
+
+      <ReadStaticWebAssetsManifestFile ManifestPath="$(StaticWebAssetBuildManifestPath)"
+        Condition="'$(_ShouldReadBuildManifestAndUpdateItemGroup)' == 'true'">
+        <Output TaskParameter="Assets" ItemName="_CachedBuildStaticWebAssets" />
+        <Output TaskParameter="DiscoveryPatterns" ItemName="_CachedBuildStaticWebAssetDiscoveryPatterns" />
+      </ReadStaticWebAssetsManifestFile>
+
+      <ComputeReferenceStaticWebAssetItems
+        Assets="@(_CachedBuildStaticWebAssets)"
+        Patterns="@(_CachedBuildStaticWebAssetDiscoveryPatterns)"
+        ProjectMode="$(StaticWebAssetProjectMode)"
+        AssetKind="Build"
+        Source="$(PackageId)"
+      >
+        <Output TaskParameter="StaticWebAssets" ItemName="_CachedBuildReferencedStaticWebAsset" />
+        <Output TaskParameter="DiscoveryPatterns" ItemName="_CachedBuildReferencedStaticWebAssetDiscoveryPatterns" />
+      </ComputeReferenceStaticWebAssetItems>
+
+      <ItemGroup>
+        <_CachedBuildStaticWebassetItems Include="@(_CachedBuildReferencedStaticWebAsset)">
+          <ResultType>StaticWebAsset</ResultType>
+        </_CachedBuildStaticWebassetItems>
+        <_CachedBuildStaticWebassetItems Include="@(_CachedBuildReferencedStaticWebAssetDiscoveryPatterns)">
+          <ResultType>StaticWebAssetDiscoveryPattern</ResultType>
+        </_CachedBuildStaticWebassetItems>
+      </ItemGroup>
+
+  </Target>
+
+  <Target Name="GetCurrentProjectPublishStaticWebAssetItems" DependsOnTargets="ResolveStaticWebAssetsConfiguration" Returns="@(_CachedPublishStaticWebAssetItems)">
+
+      <PropertyGroup>
+        <_ShouldReadPublishManifestAndUpdateItemGroup>false</_ShouldReadPublishManifestAndUpdateItemGroup>
+        <_ShouldReadPublishManifestAndUpdateItemGroup Condition="@(_CachedPublishStaticWebAssets) == '' and @(_CachedPublishStaticWebAssetDiscoveryPatterns) == ''">true</_ShouldReadPublishManifestAndUpdateItemGroup>
+      </PropertyGroup>
+
+      <ReadStaticWebAssetsManifestFile ManifestPath="$(StaticWebAssetPublishManifestPath)"
+        Condition="'$(_ShouldReadPublishManifestAndUpdateItemGroup)' == 'true'">
+        <Output TaskParameter="Assets" ItemName="_CachedPublishStaticWebAssets" />
+        <Output TaskParameter="DiscoveryPatterns" ItemName="_CachedPublishStaticWebAssetDiscoveryPatterns" />
+      </ReadStaticWebAssetsManifestFile>
+
+      <ComputeReferenceStaticWebAssetItems
+        Assets="@(_CachedPublishStaticWebAssets)"
+        ProjectMode="$(StaticWebAssetProjectMode)"
+        AssetKind="Publish"
+        Source="$(PackageId)"
+      >
+        <Output TaskParameter="StaticWebAssets" ItemName="_CachedPublishReferencedStaticWebAsset" />
+      </ComputeReferenceStaticWebAssetItems>
+
+      <ItemGroup>
+        <_CachedPublishStaticWebassetItems Include="@(_CachedPublishReferencedStaticWebAsset)">
+          <ResultType>StaticWebAsset</ResultType>
+        </_CachedPublishStaticWebassetItems>
+      </ItemGroup>
+
+  </Target>
+
+</Project>

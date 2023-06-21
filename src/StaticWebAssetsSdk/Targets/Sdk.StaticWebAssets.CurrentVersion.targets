@@ -115,23 +115,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CompressionEnabled Condition="'$(CompressionEnabled)' == '' and '$(StaticWebAssetsEnabled)' == 'true'">$(_TargetingNET60OrLater)</CompressionEnabled>
   </PropertyGroup>
 
-  <!-- These targets are not imported in the outer multi targeting build. This happens alredy because 'StaticWebAssetsEnabled' will be false, but even if the user turns it
-       on unconditionally in their csproj file (very rare, undocumented, but possible), these targets should not be imported in the outer cross targeting build.
-  -->
-  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.5_0.targets" Condition="'$(UseStaticWebAssetsV2)' != 'true' And '$(StaticWebAssetsEnabled)' == 'true' And '$(IsCrossTargetingBuild)' != 'true'" />
-  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.targets" Condition="'$(UseStaticWebAssetsV2)' == 'true' And '$(StaticWebAssetsEnabled)' == 'true' And '$(IsCrossTargetingBuild)' != 'true'" />
+  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.SingleTargeting.targets" Condition="'$(StaticWebAssetsEnabled)' == 'true' And '$(IsCrossTargetingBuild)' != 'true'" />
 
-  <!-- These targets are only included on multi targeting builds and will be imported even if static web assets are disabled. Even though the file is imported,
-       the targets inside will no-op as all their work depends on nested MSBuild calls to the project where static web assets will not be enabled.
-  -->
-  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.Pack.CrossTargeting.targets" Condition="'$(IsCrossTargetingBuild)' == 'true'" />
-
-  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.ScopedCss.5_0.targets" Condition="'$(UsingMicrosoftNETSdkRazor)' == 'true' And '$(UseStaticWebAssetsV2)' != 'true' And '$(ScopedCssEnabled)' == 'true'" />
-  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.ScopedCss.targets" Condition="'$(UsingMicrosoftNETSdkRazor)' == 'true' And '$(UseStaticWebAssetsV2)' == 'true' And '$(ScopedCssEnabled)' == 'true'" />
-
-  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.JSModules.targets" Condition="'$(JSModulesEnabled)' == 'true'" />
-
-  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.Compression.targets" Condition="'$(CompressionEnabled)' == 'true'" />
+  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.CrossTargeting.targets" Condition="'$(IsCrossTargetingBuild)' == 'true'" />
 
   <!--
     This is a hook to import a set of targets after the StaticWebAssets targets. By default this is unused.

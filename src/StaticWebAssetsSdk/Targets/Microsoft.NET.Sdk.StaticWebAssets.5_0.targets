@@ -685,4 +685,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.ScopedCss.5_0.targets" Condition="'$(UsingMicrosoftNETSdkRazor)' == 'true' And '$(ScopedCssEnabled)' == 'true'" />
+
 </Project>

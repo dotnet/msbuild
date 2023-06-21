@@ -31,6 +31,10 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 
         public string AssetRole { get; set; }
 
+        public string AssetMergeBehavior { get; set; }
+
+        public string AssetMergeSource { get; set; }
+
         public string RelatedAsset { get; set; }
 
         public string AssetTraitName { get; set; }
@@ -94,7 +98,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
             }
         }
 
-        internal static bool ValidateAssetGroup(string path, StaticWebAsset [] group, string assetKind, out string reason)
+        internal static bool ValidateAssetGroup(string path, IReadOnlyList<StaticWebAsset> group, out string reason)
         {
             StaticWebAsset prototypeItem = null;
             StaticWebAsset build = null;
@@ -164,6 +168,8 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
                 AssetKind = item.GetMetadata(nameof(AssetKind)),
                 AssetMode = item.GetMetadata(nameof(AssetMode)),
                 AssetRole = item.GetMetadata(nameof(AssetRole)),
+                AssetMergeSource = item.GetMetadata(nameof(AssetMergeSource)),
+                AssetMergeBehavior = item.GetMetadata(nameof(AssetMergeBehavior)),
                 RelatedAsset = item.GetMetadata(nameof(RelatedAsset)),
                 AssetTraitName = item.GetMetadata(nameof(AssetTraitName)),
                 AssetTraitValue = item.GetMetadata(nameof(AssetTraitValue)),
@@ -208,6 +214,8 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
             result.SetMetadata(nameof(AssetKind), AssetKind);
             result.SetMetadata(nameof(AssetMode), AssetMode);
             result.SetMetadata(nameof(AssetRole), AssetRole);
+            result.SetMetadata(nameof(AssetMergeSource), AssetMergeSource);
+            result.SetMetadata(nameof(AssetMergeBehavior), AssetMergeBehavior);
             result.SetMetadata(nameof(RelatedAsset), RelatedAsset);
             result.SetMetadata(nameof(AssetTraitName), AssetTraitName);
             result.SetMetadata(nameof(AssetTraitValue), AssetTraitValue);
@@ -227,7 +235,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
                 case SourceTypes.Package:
                     break;
                 default:
-                    throw new InvalidOperationException($"Unknown source type '{SourceType}' for '{Identity}'.");
+                    throw new InvalidOperationException($"Unknown mergeTarget type '{SourceType}' for '{Identity}'.");
             };
 
             if (string.IsNullOrEmpty(SourceId))
@@ -306,6 +314,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
             string assetKind,
             string assetMode,
             string assetRole,
+            string assetMergeSource,
             string relatedAsset,
             string assetTraitName,
             string assetTraitValue,
@@ -324,6 +333,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
                 AssetKind = assetKind,
                 AssetMode = assetMode,
                 AssetRole = assetRole,
+                AssetMergeSource = assetMergeSource,
                 RelatedAsset = relatedAsset,
                 AssetTraitName = assetTraitName,
                 AssetTraitValue = assetTraitValue,
@@ -458,6 +468,8 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
                    AssetKind == asset.AssetKind &&
                    AssetMode == asset.AssetMode &&
                    AssetRole == asset.AssetRole &&
+                   AssetMergeSource == asset.AssetMergeSource &&
+                   AssetMergeBehavior == asset.AssetMergeBehavior &&
                    RelatedAsset == asset.RelatedAsset &&
                    AssetTraitName == asset.AssetTraitName &&
                    AssetTraitValue == asset.AssetTraitValue &&
@@ -512,6 +524,14 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
                 => string.Equals(assetRole, Primary, StringComparison.Ordinal);
         }
 
+        public static class MergeBehaviors
+        {
+            public const string Exclude = nameof(Exclude);
+            public const string PreferTarget = nameof(PreferTarget);
+            public const string PreferSource = nameof(PreferSource);
+            public const string None = nameof(None);
+        }
+
         internal static bool HasSourceId(ITaskItem asset, string source) =>
             string.Equals(asset.GetMetadata(nameof(SourceId)), source, StringComparison.Ordinal);
 
@@ -533,6 +553,8 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
             $"AssetKind: {AssetKind}, " +
             $"AssetMode: {AssetMode}, " +
             $"AssetRole: {AssetRole}, " +
+            $"AssetRole: {AssetMergeSource}, " +
+            $"AssetRole: {AssetMergeBehavior}, " +
             $"RelatedAsset: {RelatedAsset}, " +
             $"AssetTraitName: {AssetTraitName}, " +
             $"AssetTraitValue: {AssetTraitValue}, " +
@@ -553,6 +575,8 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
             hash.Add(AssetKind);
             hash.Add(AssetMode);
             hash.Add(AssetRole);
+            hash.Add(AssetMergeSource);
+            hash.Add(AssetMergeBehavior);
             hash.Add(RelatedAsset);
             hash.Add(AssetTraitName);
             hash.Add(AssetTraitValue);
@@ -571,6 +595,8 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AssetKind);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AssetMode);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AssetRole);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AssetMergeSource);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AssetMergeBehavior);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(RelatedAsset);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AssetTraitName);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AssetTraitValue);

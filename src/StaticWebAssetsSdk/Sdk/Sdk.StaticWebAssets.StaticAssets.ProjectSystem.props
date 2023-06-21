@@ -53,4 +53,18 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </ItemGroup>
 
+  <ItemGroup Condition="'$([MSBuild]::GetTargetPlatformIdentifier($(TargetFramework)))' != 'browser'">
+    <Content Remove="**\**\*.Browser.cs" />
+    <!-- <None Include="**\**\*.Browser.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" /> -->
+    <Content Remove="**\Browser\**\*.cs" />
+    <!-- <None Include="**\Browser\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" /> -->
+  </ItemGroup>
+
+  <ItemGroup Condition="'$([MSBuild]::GetTargetPlatformIdentifier($(TargetFramework)))' != ''">
+    <Content Remove="**\**\*.Server.cs" />
+    <!-- <None Include="**\**\*.Server.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" /> -->
+    <Content Remove="**\Server\**\*.cs" />
+    <!-- <None Include="**\Server\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" /> -->
+  </ItemGroup>
+
 </Project>

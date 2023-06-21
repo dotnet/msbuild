@@ -101,6 +101,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       SourceId="$(PackageId)"
       ContentRoot="$(TargetDir)wwwroot\"
       BasePath="$(StaticWebAssetBasePath)"
+      AssetMergeSource="$(StaticWebAssetMergeTarget)"
       >
       <Output TaskParameter="Assets" ItemName="_ServiceWorkerStaticWebAsset" />
       <Output TaskParameter="CopyCandidates" ItemName="_ServiceWorkerCopyCandidates" />

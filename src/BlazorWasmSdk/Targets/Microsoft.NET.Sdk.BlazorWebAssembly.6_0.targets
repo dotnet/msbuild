@@ -111,6 +111,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       SourceId="$(PackageId)"
       SourceType="Computed"
       AssetKind="All"
+      AssetMergeSource="$(StaticWebAssetMergeTarget)"
       AssetRole="Primary"
       AssetTraitName="WasmResource"
       AssetTraitValue="boot"

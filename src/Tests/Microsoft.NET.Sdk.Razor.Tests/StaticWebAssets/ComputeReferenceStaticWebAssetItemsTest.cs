@@ -378,7 +378,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             string pattern,
             string source)
         {
-            var result = new StaticWebAssetsManifest.DiscoveryPattern()
+            var result = new StaticWebAssetsDiscoveryPattern()
             {
                 Name = name,
                 BasePath = basePath,

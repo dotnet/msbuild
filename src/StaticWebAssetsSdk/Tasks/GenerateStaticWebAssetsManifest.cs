@@ -55,7 +55,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
                 var assetsByTargetPath = assets.GroupBy(a => a.ComputeTargetPath("", '/'), StringComparer.OrdinalIgnoreCase);
                 foreach (var group in assetsByTargetPath)
                 {
-                    if (!StaticWebAsset.ValidateAssetGroup(group.Key, group.ToArray(), ManifestType, out var reason))
+                    if (!StaticWebAsset.ValidateAssetGroup(group.Key, group.ToArray(), out var reason))
                     {
                         Log.LogError(reason);
                         return false;
@@ -64,7 +64,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 
                 var discoveryPatterns = DiscoveryPatterns
                     .OrderBy(a => a.ItemSpec)
-                    .Select(StaticWebAssetsManifest.DiscoveryPattern.FromTaskItem)
+                    .Select(StaticWebAssetsDiscoveryPattern.FromTaskItem)
                     .ToArray();
 
                 var referencedProjectsConfiguration = ReferencedProjectsConfigurations.OrderBy(a => a.ItemSpec)

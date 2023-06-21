@@ -24,6 +24,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Static web assets defaults -->
     <StaticWebAssetsAdditionalPublishProperties>$(StaticWebAssetsAdditionalPublishProperties);_PublishingBlazorWasmProject=true</StaticWebAssetsAdditionalPublishProperties>
+    <StaticWebAssetsAdditionalEmbeddedPublishProperties>$(StaticWebAssetsAdditionalEmbeddedPublishProperties);_PublishingBlazorWasmProject=true</StaticWebAssetsAdditionalEmbeddedPublishProperties>
+
+    <StaticWebAssetsGetEmbeddedPublishAssetsTargets>ComputeFilesToPublish;GetCurrentProjectEmbeddedPublishStaticWebAssetItems</StaticWebAssetsGetEmbeddedPublishAssetsTargets>
   </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.props" />

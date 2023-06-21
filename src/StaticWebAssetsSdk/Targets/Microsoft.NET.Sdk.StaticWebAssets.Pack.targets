@@ -34,11 +34,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
 
-    <GenerateStaticWebAssetsManifestDependsOn>
-      $(GenerateStaticWebAssetsManifestDependsOn);
-      GenerateStaticWebAssetsPackFiles;
-    </GenerateStaticWebAssetsManifestDependsOn>
-
     <!-- IsInnerBuild is only set up when we are in the context of a cross targeting build and we are building a given
          target framework. There are specific targets to handle packing within cross targeting builds, so we avoid packing
          in this case.
@@ -75,7 +70,7 @@ Copyright (c) .NET Foundation. All rights reserved.
        targets into their packages are expected to disable the generation of $(PackageId).props files and
        to manually import build\Microsoft.AspNetCore.StaticWebAssets.props in their custom props files.
    -->
-  <Target Name="GenerateStaticWebAssetsPackFiles">
+  <Target Name="GenerateStaticWebAssetsPackFiles" AfterTargets="GenerateStaticWebAssetsManifest">
 
     <ItemGroup>
 

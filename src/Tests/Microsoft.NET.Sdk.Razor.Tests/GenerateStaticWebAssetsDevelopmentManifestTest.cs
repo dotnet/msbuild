@@ -60,7 +60,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             };
 
             var assets = new[] { CreateAsset("index.html", "index.html", assetKind: StaticWebAsset.AssetKinds.Build) };
-            var patterns = Array.Empty<StaticWebAssetsManifest.DiscoveryPattern>();
+            var patterns = Array.Empty<StaticWebAssetsDiscoveryPattern>();
 
             // Act
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
@@ -89,7 +89,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             };
 
             var assets = new[] { CreateAsset("index.html", "index.html", assetKind: StaticWebAsset.AssetKinds.All) };
-            var patterns = Array.Empty<StaticWebAssetsManifest.DiscoveryPattern>();
+            var patterns = Array.Empty<StaticWebAssetsDiscoveryPattern>();
 
             // Act
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
@@ -116,7 +116,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             };
 
             var assets = new[] { CreateAsset("index.html", "index.html", assetKind: StaticWebAsset.AssetKinds.Publish) };
-            var patterns = Array.Empty<StaticWebAssetsManifest.DiscoveryPattern>();
+            var patterns = Array.Empty<StaticWebAssetsDiscoveryPattern>();
 
             // Act
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
@@ -144,7 +144,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             };
 
             var assets = new[] { CreateAsset("index.html", "index.html", assetMode: StaticWebAsset.AssetModes.Reference) };
-            var patterns = Array.Empty<StaticWebAssetsManifest.DiscoveryPattern>();
+            var patterns = Array.Empty<StaticWebAssetsDiscoveryPattern>();
 
             // Act
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
@@ -177,7 +177,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 CreateAsset("index.build.html", "index.html", assetKind: StaticWebAsset.AssetKinds.Build),
                 CreateAsset("index.html", "index.html", assetKind: StaticWebAsset.AssetKinds.All)
             };
-            var patterns = Array.Empty<StaticWebAssetsManifest.DiscoveryPattern>();
+            var patterns = Array.Empty<StaticWebAssetsDiscoveryPattern>();
 
             // Act
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
@@ -209,7 +209,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var assets = new[] {
                 CreateAsset(Path.Combine("some", "subfolder", "index.build.html"), "index.html"),
             };
-            var patterns = Array.Empty<StaticWebAssetsManifest.DiscoveryPattern>();
+            var patterns = Array.Empty<StaticWebAssetsDiscoveryPattern>();
 
             // Act
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
@@ -241,7 +241,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var assets = new[] {
                 CreateAsset(Path.Combine("some", "subfolder", "index.build.html"), "index.html", contentRoot: Path.Combine("bin", "debug", "wwwroot")),
             };
-            var patterns = Array.Empty<StaticWebAssetsManifest.DiscoveryPattern>();
+            var patterns = Array.Empty<StaticWebAssetsDiscoveryPattern>();
 
             // Act
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
@@ -413,7 +413,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 CreateAsset(Path.Combine(Environment.CurrentDirectory, "js", "index.js"), "js/index.js")
             };
 
-            var patterns = Array.Empty<StaticWebAssetsManifest.DiscoveryPattern>();
+            var patterns = Array.Empty<StaticWebAssetsDiscoveryPattern>();
 
             // Act
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
@@ -449,7 +449,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 CreateAsset(Path.Combine(Environment.CurrentDirectory, "CSS", "site.css"), "CSS/site.css"),
             };
 
-            var patterns = Array.Empty<StaticWebAssetsManifest.DiscoveryPattern>();
+            var patterns = Array.Empty<StaticWebAssetsDiscoveryPattern>();
 
             // Act
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
@@ -493,7 +493,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                     contentRoot: Path.GetFullPath("otherProject")),
             };
 
-            var patterns = Array.Empty<StaticWebAssetsManifest.DiscoveryPattern>();
+            var patterns = Array.Empty<StaticWebAssetsDiscoveryPattern>();
 
             // Act
             var manifest = task.ComputeDevelopmentManifest(assets, patterns);
@@ -502,7 +502,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             manifest.Should().BeEquivalentTo(expectedManifest);
         }
 
-        private static StaticWebAssetsManifest.DiscoveryPattern CreatePattern(
+        private static StaticWebAssetsDiscoveryPattern CreatePattern(
             string name = null,
             string contentRoot = null,
             string pattern = null,

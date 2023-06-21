@@ -273,10 +273,10 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var discoveryPattern = task.DiscoveryPatterns[0];
 
             discoveryPattern.ItemSpec.Should().BeEquivalentTo(Path.Combine("AnotherClassLib", "wwwroot"));
-            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.Source)).Should().BeEquivalentTo("AnotherClassLib");
-            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.ContentRoot)).Should().BeEquivalentTo($"{contentRoot}");
-            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.BasePath)).Should().BeEquivalentTo("_content/AnotherClassLib");
-            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.Pattern)).Should().BeEquivalentTo("**");
+            discoveryPattern.GetMetadata(nameof(StaticWebAssetsDiscoveryPattern.Source)).Should().BeEquivalentTo("AnotherClassLib");
+            discoveryPattern.GetMetadata(nameof(StaticWebAssetsDiscoveryPattern.ContentRoot)).Should().BeEquivalentTo($"{contentRoot}");
+            discoveryPattern.GetMetadata(nameof(StaticWebAssetsDiscoveryPattern.BasePath)).Should().BeEquivalentTo("_content/AnotherClassLib");
+            discoveryPattern.GetMetadata(nameof(StaticWebAssetsDiscoveryPattern.Pattern)).Should().BeEquivalentTo("**");
         }
 
         [Fact]

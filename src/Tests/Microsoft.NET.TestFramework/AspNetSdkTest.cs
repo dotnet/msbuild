@@ -39,10 +39,16 @@ namespace Microsoft.NET.TestFramework
                 {
                     var ns = project.Root.Name.Namespace;
                     var targetFramework = project.Descendants()
-                       .Single(e => e.Name.LocalName == "TargetFramework");
-                    if (targetFramework.Value == "$(AspNetTestTfm)")
+                       .SingleOrDefault(e => e.Name.LocalName == "TargetFramework");
+                    if (targetFramework?.Value == "$(AspNetTestTfm)")
                     {
                         targetFramework.Value = overrideTfm ?? DefaultTfm;
+                    }
+                    var targetFrameworks = project.Descendants()
+                        .SingleOrDefault(e => e.Name.LocalName == "TargetFrameworks");
+                    if (targetFrameworks != null)
+                    {
+                        targetFrameworks.Value = targetFrameworks.Value.Replace("$(AspNetTestTfm)", overrideTfm ?? DefaultTfm);
                     }
                 });
             return projectDirectory;
