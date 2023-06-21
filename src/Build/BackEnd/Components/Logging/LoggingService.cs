@@ -1478,13 +1478,13 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
 
-            if (buildEventArgs is BuildErrorEventArgs errorEventValue)
+            if (buildEventArgs is BuildErrorEventArgs errorEvent)
             {
                 // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
-                _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEventValue.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
+                _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
             }
 
-            if (loggingEvent is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
+            if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
             {
                 int key = GetWarningsAsErrorOrMessageKey(projectFinishedEvent);
                 _warningsAsErrorsByProject?.Remove(key);
@@ -1492,13 +1492,14 @@ namespace Microsoft.Build.BackEnd.Logging
                 _warningsAsMessagesByProject?.Remove(key);
             }
 
-            if (loggingEvent is BuildEventArgs loggingEventBuildArgs)
+            if (buildEventArgs is BuildEventArgs loggingEventBuildArgs)
             {
                 RouteBuildEvent(loggingEventBuildArgs);
             }
             else if (loggingEvent is KeyValuePair<int, BuildEventArgs> loggingEventKeyValuePair)
             {
-                RouteBuildEvent(loggingEventKeyValuePair);
+                var loggingEventNewKeyValuePair = new KeyValuePair<int, BuildEventArgs>(loggingEventKeyValuePair.Key, buildEventArgs);
+                RouteBuildEvent(loggingEventNewKeyValuePair);
             }
         }
 
