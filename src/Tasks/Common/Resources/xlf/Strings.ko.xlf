@@ -13,9 +13,9 @@
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AotNotSupported">
-        <source>NETSDK1195: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
-        <target state="translated">NETSDK1195: SDK는 Ahead of Time 컴파일을 지원하지 않습니다. PublishAot 속성을 false로 설정합니다.</target>
-        <note>{StrBegin="NETSDK1195: "}</note>
+        <source>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
+        <target state="translated">NETSDK1196: SDK는 미리 컴파일을 지원하지 않습니다. PublishAot 속성을 false로 설정하세요.</target>
+        <note>{StrBegin="NETSDK1196: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
@@ -96,6 +96,11 @@
         <source>NETSDK1001: At least one possible target framework must be specified.</source>
         <target state="translated">NETSDK1001: 가능한 대상 프레임워크를 하나 이상 지정해야 합니다.</target>
         <note>{StrBegin="NETSDK1001: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework">
+        <source>NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</source>
+        <target state="translated">NETSDK1205: Microsoft.Net.Compilers.Toolset.Framework 패키지를 직접 설정해서는 안 됩니다. 필요한 경우 대신 'BuildWithNetFrameworkHostedCompiler' 속성을 'true'로 설정하세요.</target>
+        <note>{StrBegin="NETSDK1205: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</note>
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>

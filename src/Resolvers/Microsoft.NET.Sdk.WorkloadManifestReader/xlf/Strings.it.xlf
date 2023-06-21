@@ -109,7 +109,7 @@
       </trans-unit>
       <trans-unit id="SpecifiedWorkloadSetNotFound">
         <source>Specified workload set was not found: {0}</source>
-        <target state="new">Specified workload set was not found: {0}</target>
+        <target state="translated">Il set di carico di lavoro specificato non è stato trovato: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">

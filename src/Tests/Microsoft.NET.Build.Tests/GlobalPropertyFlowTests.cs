@@ -153,7 +153,7 @@ namespace Microsoft.NET.Build.Tests
         public void TestGlobalPropertyFlowToLibraryWithRuntimeIdentifier(bool passSelfContained, bool passRuntimeIdentifier)
         {
             //  Set a RuntimeIdentifier in the referenced project that is different from what is passed in on the command line
-            _referencedProject.RuntimeIdentifier = "win7-x64";
+            _referencedProject.RuntimeIdentifier = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64";
 
             var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: passSelfContained.ToString() + "_" + passRuntimeIdentifier);
 

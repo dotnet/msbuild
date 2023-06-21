@@ -13,9 +13,9 @@
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AotNotSupported">
-        <source>NETSDK1195: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
-        <target state="translated">NETSDK1195: Zestaw SDK nie obsługuje kompilacji z wyprzedzeniem. Ustaw właściwość PublishAot na wartość false.</target>
-        <note>{StrBegin="NETSDK1195: "}</note>
+        <source>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
+        <target state="translated">NETSDK1196: Zestaw SDK nie obsługuje kompilacji z wyprzedzeniem. Ustaw właściwość PublishAot na wartość false.</target>
+        <note>{StrBegin="NETSDK1196: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
@@ -96,6 +96,11 @@
         <source>NETSDK1001: At least one possible target framework must be specified.</source>
         <target state="translated">NETSDK1001: Należy określić co najmniej jedną możliwą platformę docelową.</target>
         <note>{StrBegin="NETSDK1001: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework">
+        <source>NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</source>
+        <target state="translated">NETSDK1205: Pakiet Microsoft.Net.Compilers.Toolset.Framework nie powinien być ustawiany bezpośrednio. Zamiast tego ustaw właściwość „BuildWithNetFrameworkHostedCompiler” na wartość „prawda”, jeśli jest to potrzebne.</target>
+        <note>{StrBegin="NETSDK1205: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</note>
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>

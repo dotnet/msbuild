@@ -869,7 +869,7 @@ You may need to build the project on another operating system or architecture, o
   </data>
   <data name="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed" xml:space="preserve">
     <value>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</value>
-      <comment>{StrBegin="NETSDK1191: "}</comment>
+    <comment>{StrBegin="NETSDK1191: "}</comment>
   </data>
   <data name="Net7NotCompatibleWithDev173" xml:space="preserve">
     <value>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</value>
@@ -884,8 +884,8 @@ You may need to build the project on another operating system or architecture, o
     <comment>{StrBegin="NETSDK1194: "}{Locked="--output"}</comment>
   </data>
   <data name="AotNotSupported" xml:space="preserve">
-    <value>NETSDK1195: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</value>
-    <comment>{StrBegin="NETSDK1195: "}</comment>
+    <value>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</value>
+    <comment>{StrBegin="NETSDK1196: "}</comment>
   </data>
   <data name="PublishProfileNotPresent" xml:space="preserve">
     <value>NETSDK1198: A publish profile with the name '{0}' was not found in the project. Set the PublishProfile property to a valid file name.</value>
@@ -894,5 +894,9 @@ You may need to build the project on another operating system or architecture, o
   <data name="WorkloadIsEol" xml:space="preserve">
     <value>NETSDK1202: The workload '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</value>
     <comment>{StrBegin="NETSDK1202: "}</comment>
+  </data>
+  <data name="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework" xml:space="preserve">
+    <value>NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</value>
+    <comment>{StrBegin="NETSDK1205: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</comment>
   </data>
 </root>

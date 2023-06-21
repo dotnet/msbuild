@@ -13,9 +13,9 @@
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AotNotSupported">
-        <source>NETSDK1195: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
-        <target state="translated">NETSDK1195: SDK 不支援提前編譯。請將 PublishAot 屬性設定為 false。</target>
-        <note>{StrBegin="NETSDK1195: "}</note>
+        <source>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
+        <target state="translated">NETSDK1196: SDK 不支援提前編譯。請將 PublishAot 屬性設定為 false。</target>
+        <note>{StrBegin="NETSDK1196: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
@@ -96,6 +96,11 @@
         <source>NETSDK1001: At least one possible target framework must be specified.</source>
         <target state="translated">NETSDK1001: 至少必須指定一個可能的目標架構。</target>
         <note>{StrBegin="NETSDK1001: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework">
+        <source>NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</source>
+        <target state="translated">NETSDK1205: 不應直接設定 Microsoft.Net.Compilers.Toolset.Framework 套件。而是在您需要時，將屬性 'BuildWithNetFrameworkHostedCompiler' 設為 'true'。</target>
+        <note>{StrBegin="NETSDK1205: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</note>
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
