@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using System.Xml;
 
 using Microsoft.Build.Shared;
@@ -30,7 +31,9 @@ namespace Microsoft.Build.Tasks
                 // see https://github.com/dotnet/msbuild/issues/4335 for details.
                 appConfigFile = FileUtilities.NormalizePath(appConfigFile);
 
-                reader = XmlReader.Create(appConfigFile, readerSettings);
+                // Need a filestream as the XmlReader doesn't support nonstandard unicode characters in path
+                using FileStream fs = File.OpenRead(appConfigFile);
+                reader = XmlReader.Create(fs, readerSettings);
                 Read(reader);
             }
             catch (XmlException e)
