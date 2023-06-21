@@ -566,7 +566,7 @@ namespace Microsoft.Build.Evaluation
             {
                 return false;
             }
-            _lookahead = new Token(Token.TokenType.ItemList, _expression.Substring(start, _parsePoint - start));
+            _lookahead = new Token(Token.TokenType.ItemList, Microsoft.NET.StringTools.Strings.WeakIntern(_expression.AsSpan(start, _parsePoint - start)));
             return true;
         }
 
@@ -599,7 +599,7 @@ namespace Microsoft.Build.Evaluation
                     // If it's %(a.b) the name is just 'b'
                     if (_parsePoint + 3 < _expression.Length)
                     {
-                        name = _expression.Substring(_parsePoint + 2, endOfName - _parsePoint - 2 + 1);
+                        name = Microsoft.NET.StringTools.Strings.WeakIntern(_expression.AsSpan(_parsePoint + 2, endOfName - _parsePoint - 2 + 1));
                     }
 
                     if (!CheckForUnexpectedMetadata(name))
@@ -649,7 +649,7 @@ namespace Microsoft.Build.Evaluation
                 // Not useful to set unexpectedlyFound here. By definition it got to the end of the string.
                 return false;
             }
-            string originalTokenString = _expression.Substring(start, _parsePoint - start);
+            string originalTokenString = Microsoft.NET.StringTools.Strings.WeakIntern(_expression.AsSpan(start, _parsePoint - start));
 
             _lookahead = new Token(Token.TokenType.String, originalTokenString, expandable);
             _parsePoint++;

@@ -75,12 +75,17 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             EnsureNotDisposed();
 
+            if (_globalProjectCacheDescriptor != null)
+            {
+                _ = GetProjectCachePluginAsync(_globalProjectCacheDescriptor, projectGraph, buildRequestConfiguration: null, cancellationToken);
+            }
+
             Parallel.ForEach(
                 projectGraph.ProjectNodes,
                 s_parallelOptions,
                 node =>
                 {
-                    foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(node.ProjectInstance))
+                    foreach (ProjectCacheDescriptor projectCacheDescriptor in node.ProjectInstance.ProjectCacheDescriptors)
                     {
                         // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
                         _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph, buildRequestConfiguration: null, cancellationToken)

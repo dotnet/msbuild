@@ -707,7 +707,7 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        private static ImmutableList<string> ExpandDefaultTargets(ImmutableList<string> targets, List<string> defaultTargets, ProjectItemInstance graphEdge)
+        private static ImmutableList<string> ExpandDefaultTargets(ImmutableList<string> targets, List<string> defaultTargets, ProjectReferenceSnapshot graphEdge)
         {
             var i = 0;
             while (i < targets.Count)
@@ -721,7 +721,7 @@ namespace Microsoft.Build.Graph
                 }
                 else if (targets[i].Equals(MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker, StringComparison.OrdinalIgnoreCase))
                 {
-                    var targetsString = graphEdge.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+                    var targetsString = graphEdge.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName); ;
 
                     var expandedTargets = string.IsNullOrEmpty(targetsString)
                         ? defaultTargets

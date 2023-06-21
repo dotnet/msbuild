@@ -21,13 +21,13 @@ namespace Microsoft.Build.Graph
 {
     internal sealed class ProjectInterpretation
     {
-        private const string FullPathMetadataName = "FullPath";
-        private const string ToolsVersionMetadataName = "ToolsVersion";
-        private const string SetConfigurationMetadataName = "SetConfiguration";
-        private const string SetPlatformMetadataName = "SetPlatform";
-        private const string SetTargetFrameworkMetadataName = "SetTargetFramework";
-        private const string GlobalPropertiesToRemoveMetadataName = "GlobalPropertiesToRemove";
-        private const string ProjectReferenceTargetIsOuterBuildMetadataName = "OuterBuild";
+        internal const string FullPathMetadataName = "FullPath";
+        internal const string ToolsVersionMetadataName = "ToolsVersion";
+        internal const string SetConfigurationMetadataName = "SetConfiguration";
+        internal const string SetPlatformMetadataName = "SetPlatform";
+        internal const string SetTargetFrameworkMetadataName = "SetTargetFramework";
+        internal const string GlobalPropertiesToRemoveMetadataName = "GlobalPropertiesToRemove";
+        internal const string ProjectReferenceTargetIsOuterBuildMetadataName = "OuterBuild";
         private const string InnerBuildReferenceItemName = "_ProjectSelfReference";
         internal static string TransitiveReferenceItemName = "_TransitiveProjectReference";
         internal const string AddTransitiveProjectReferencesInStaticGraphPropertyName = "AddTransitiveProjectReferencesInStaticGraph";
@@ -35,9 +35,9 @@ namespace Microsoft.Build.Graph
         private const string PlatformMetadataName = "Platform";
         private const string PlatformsMetadataName = "Platforms";
         internal const string EnableDynamicPlatformResolutionPropertyName = "EnableDynamicPlatformResolution";
-        private const string OverridePlatformNegotiationValue = "OverridePlatformNegotiationValue";
+        internal const string OverridePlatformNegotiationValue = "OverridePlatformNegotiationValue";
         private const string ShouldUnsetParentConfigurationAndPlatformPropertyName = "ShouldUnsetParentConfigurationAndPlatform";
-        private const string ProjectMetadataName = "Project";
+        internal const string ProjectMetadataName = "Project";
         private const string ConfigurationMetadataName = "Configuration";
 
         private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
@@ -57,7 +57,7 @@ namespace Microsoft.Build.Graph
             NonMultitargeting,
         }
 
-        internal readonly record struct ReferenceInfo(ConfigurationMetadata ReferenceConfiguration, ProjectItemInstance ProjectReferenceItem);
+        internal readonly record struct ReferenceInfo(ConfigurationMetadata ReferenceConfiguration, ProjectReferenceSnapshot ProjectReferenceItem);
 
         private readonly struct TargetSpecification
         {
@@ -78,23 +78,23 @@ namespace Microsoft.Build.Graph
             public bool SkipIfNonexistent { get; }
         }
 
-        public IEnumerable<ReferenceInfo> GetReferences(ProjectInstance requesterInstance, ProjectCollection projectCollection, ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory)
+        public IEnumerable<ReferenceInfo> GetReferences(ProjectInstanceSnapshot requesterInstance, ProjectCollection projectCollection, ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory)
         {
-            IEnumerable<ProjectItemInstance> projectReferenceItems;
+            IEnumerable<ProjectReferenceSnapshot> projectReferenceItems;
             IEnumerable<GlobalPropertiesModifier> globalPropertiesModifiers = null;
 
-            switch (GetProjectType(requesterInstance))
+            switch (requesterInstance.ProjectType)
             {
                 case ProjectType.OuterBuild:
                     projectReferenceItems = ConstructInnerBuildReferences(requesterInstance);
                     break;
                 case ProjectType.InnerBuild:
                     globalPropertiesModifiers = ModifierForNonMultitargetingNodes.Add((parts, reference) => parts.AddPropertyToUndefine(GetInnerBuildPropertyName(requesterInstance)));
-                    projectReferenceItems = requesterInstance.GetItems(ItemTypeNames.ProjectReference);
+                    projectReferenceItems = requesterInstance.ProjectReferenceByTargets;
                     break;
                 case ProjectType.NonMultitargeting:
                     globalPropertiesModifiers = ModifierForNonMultitargetingNodes;
-                    projectReferenceItems = requesterInstance.GetItems(ItemTypeNames.ProjectReference);
+                    projectReferenceItems = requesterInstance.ProjectReferenceByTargets;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -107,7 +107,7 @@ namespace Microsoft.Build.Graph
                 solutionConfiguration = new SolutionConfiguration(solutionConfigurationXml);
             }
 
-            foreach (ProjectItemInstance projectReferenceItem in projectReferenceItems)
+            foreach (ProjectReferenceSnapshot projectReferenceItem in projectReferenceItems)
             {
                 if (!String.IsNullOrEmpty(projectReferenceItem.GetMetadataValue(ToolsVersionMetadataName)))
                 {
@@ -165,7 +165,7 @@ namespace Microsoft.Build.Graph
                 }
 
                 // Note: Dynamic platform resolution is not enabled for sln-based builds.
-                else if (!projectReferenceItem.HasMetadata(SetPlatformMetadataName) && enableDynamicPlatformResolution)
+                else if (string.IsNullOrEmpty(projectReferenceItem.GetMetadataValue(SetPlatformMetadataName)) && enableDynamicPlatformResolution)
                 {
                     string requesterPlatform = requesterInstance.GetPropertyValue("Platform");
                     string requesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");
@@ -185,6 +185,7 @@ namespace Microsoft.Build.Graph
                     }
                     else
                     {
+                        // referenceGlobalProperties[PlatformMetadataName] = selectedPlatform;
                         SetProperty(referenceGlobalProperties, PlatformMetadataName, selectedPlatform);
                     }
                 }
@@ -201,33 +202,19 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        internal static string GetInnerBuildPropertyValue(ProjectInstance project)
+        internal static string GetInnerBuildPropertyValue(ProjectInstanceSnapshot project)
         {
             return project.GetPropertyValue(GetInnerBuildPropertyName(project));
         }
 
-        internal static string GetInnerBuildPropertyName(ProjectInstance project)
+        internal static string GetInnerBuildPropertyName(ProjectInstanceSnapshot project)
         {
             return project.GetPropertyValue(PropertyNames.InnerBuildProperty);
         }
 
-        internal static string GetInnerBuildPropertyValues(ProjectInstance project)
+        internal static string GetInnerBuildPropertyValues(ProjectInstanceSnapshot project)
         {
             return project.GetPropertyValue(project.GetPropertyValue(PropertyNames.InnerBuildPropertyValues));
-        }
-
-        internal static ProjectType GetProjectType(ProjectInstance project)
-        {
-            var isOuterBuild = String.IsNullOrWhiteSpace(GetInnerBuildPropertyValue(project)) && !String.IsNullOrWhiteSpace(GetInnerBuildPropertyValues(project));
-            var isInnerBuild = !String.IsNullOrWhiteSpace(GetInnerBuildPropertyValue(project));
-
-            ErrorUtilities.VerifyThrow(!(isOuterBuild && isInnerBuild), $"A project cannot be an outer and inner build at the same time: ${project.FullPath}");
-
-            return isOuterBuild
-                ? ProjectType.OuterBuild
-                : isInnerBuild
-                    ? ProjectType.InnerBuild
-                    : ProjectType.NonMultitargeting;
         }
 
         /// <summary>
@@ -242,7 +229,7 @@ namespace Microsoft.Build.Graph
             {
                 ProjectGraphNode outerBuild = node.Value.GraphNode;
 
-                if (GetProjectType(outerBuild.ProjectInstance) == ProjectType.OuterBuild && outerBuild.ReferencingProjects.Count != 0)
+                if (outerBuild.ProjectInstance.ProjectType == ProjectType.OuterBuild && outerBuild.ReferencingProjects.Count != 0)
                 {
                     foreach (ProjectGraphNode innerBuild in outerBuild.ProjectReferences)
                     {
@@ -252,7 +239,7 @@ namespace Microsoft.Build.Graph
                             // Decided to use the outerBuildBuildReferencingProject -> outerBuild edge in order to preserve any extra metadata
                             // information that may be present on the edge, like the "Targets" metadata which specifies what
                             // targets to call on the references.
-                            ProjectItemInstance newInnerBuildEdge = graphBuilder.Edges[(outerBuildReferencingProject, outerBuild)];
+                            ProjectReferenceSnapshot newInnerBuildEdge = graphBuilder.Edges[(outerBuildReferencingProject, outerBuild)];
 
                             if (outerBuildReferencingProject.ProjectReferences.Contains(innerBuild))
                             {
@@ -273,7 +260,7 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        private static IEnumerable<ProjectItemInstance> ConstructInnerBuildReferences(ProjectInstance outerBuild)
+        private static IEnumerable<ProjectReferenceSnapshot> ConstructInnerBuildReferences(ProjectInstanceSnapshot outerBuild)
         {
             var globalPropertyName = GetInnerBuildPropertyName(outerBuild);
             var globalPropertyValues = GetInnerBuildPropertyValues(outerBuild);
@@ -283,12 +270,18 @@ namespace Microsoft.Build.Graph
 
             foreach (var globalPropertyValue in ExpressionShredder.SplitSemiColonSeparatedList(globalPropertyValues))
             {
-                yield return new ProjectItemInstance(
-                    project: outerBuild,
-                    itemType: InnerBuildReferenceItemName,
-                    includeEscaped: outerBuild.FullPath,
-                    directMetadata: new[] { new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}") },
-                    definingFileEscaped: outerBuild.FullPath);
+                var prSnapshot = new ProjectReferenceSnapshot(new Dictionary<string, string>()
+                {
+                    { FullPathMetadataName, outerBuild.FullPath },
+                    { ItemMetadataNames.PropertiesMetadataName , $"{globalPropertyName}={globalPropertyValue}" },
+                    { "ToolsVersion", "" },
+                })
+                {
+                    ItemType = InnerBuildReferenceItemName,
+                    EvaluatedInclude = outerBuild.FullPath
+                };
+
+                yield return prSnapshot;
             }
         }
 
@@ -300,7 +293,7 @@ namespace Microsoft.Build.Graph
         /// </remarks>
         private static GlobalPropertyPartsForMSBuildTask ProjectReferenceGlobalPropertiesModifier(
             GlobalPropertyPartsForMSBuildTask defaultParts,
-            ProjectItemInstance projectReference)
+            ProjectReferenceSnapshot projectReference)
         {
             // ProjectReference defines yet another metadata name containing properties to undefine. Merge it in if non empty.
             var globalPropertiesToRemove = SplitPropertyNames(projectReference.GetMetadataValue(GlobalPropertiesToRemoveMetadataName));
@@ -360,7 +353,7 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        private delegate GlobalPropertyPartsForMSBuildTask GlobalPropertiesModifier(GlobalPropertyPartsForMSBuildTask defaultParts, ProjectItemInstance projectReference);
+        private delegate GlobalPropertyPartsForMSBuildTask GlobalPropertiesModifier(GlobalPropertyPartsForMSBuildTask defaultParts, ProjectReferenceSnapshot projectReference);
 
         /// <summary>
         ///     Gets the effective global properties for an item that will get passed to <see cref="MSBuild.Projects"/>.
@@ -370,7 +363,7 @@ namespace Microsoft.Build.Graph
         ///     and the <paramref name="globalPropertyModifiers"/> parameter can contain other mutations done at build time in targets / tasks
         /// </remarks>
         private static PropertyDictionary<ProjectPropertyInstance> GetGlobalPropertiesForItem(
-            ProjectItemInstance projectReference,
+            ProjectReferenceSnapshot projectReference,
             PropertyDictionary<ProjectPropertyInstance> requesterGlobalProperties,
             bool allowCollectionReuse,
             IEnumerable<GlobalPropertiesModifier> globalPropertyModifiers)
@@ -482,16 +475,16 @@ namespace Microsoft.Build.Graph
             /// <param name="project">Project containing the PRT protocol</param>
             /// <param name="entryTargets">Targets with which <paramref name="project"/> will get called</param>
             /// <returns></returns>
-            public static TargetsToPropagate FromProjectAndEntryTargets(ProjectInstance project, ImmutableList<string> entryTargets)
+            public static TargetsToPropagate FromProjectAndEntryTargets(ProjectInstanceSnapshot project, ImmutableList<string> entryTargets)
             {
                 ImmutableList<TargetSpecification>.Builder targetsForOuterBuild = ImmutableList.CreateBuilder<TargetSpecification>();
                 ImmutableList<TargetSpecification>.Builder targetsForInnerBuild = ImmutableList.CreateBuilder<TargetSpecification>();
 
-                ICollection<ProjectItemInstance> projectReferenceTargets = project.GetItems(ItemTypeNames.ProjectReferenceTargets);
+                var projectReferenceTargets = project.ProjectReferenceByTargets;
 
                 foreach (string entryTarget in entryTargets)
                 {
-                    foreach (ProjectItemInstance projectReferenceTarget in projectReferenceTargets)
+                    foreach (var projectReferenceTarget in projectReferenceTargets)
                     {
                         if (projectReferenceTarget.EvaluatedInclude.Equals(entryTarget, StringComparison.OrdinalIgnoreCase))
                         {
@@ -515,18 +508,18 @@ namespace Microsoft.Build.Graph
                 return new TargetsToPropagate(targetsForOuterBuild.ToImmutable(), targetsForInnerBuild.ToImmutable());
             }
 
-            public ImmutableList<string> GetApplicableTargetsForReference(ProjectInstance reference)
+            public ImmutableList<string> GetApplicableTargetsForReference(ProjectInstanceSnapshot reference)
             {
                 ImmutableList<string> RemoveNonexistentTargetsIfSkippable(ImmutableList<TargetSpecification> targets)
                 {
                     // Keep targets that are non-skippable or that exist but are skippable.
                     return targets
-                        .Where(t => !t.SkipIfNonexistent || reference.Targets.ContainsKey(t.Target))
+                        .Where(t => !t.SkipIfNonexistent || reference.Targets.Contains(t.Target))
                         .Select(t => t.Target)
                         .ToImmutableList();
                 }
 
-                return GetProjectType(reference) switch
+                return reference.ProjectType switch
                 {
                     ProjectType.InnerBuild => RemoveNonexistentTargetsIfSkippable(_allTargets),
                     ProjectType.OuterBuild => RemoveNonexistentTargetsIfSkippable(_outerBuildTargets),
@@ -536,10 +529,10 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        public bool RequiresTransitiveProjectReferences(ProjectInstance projectInstance)
+        public bool RequiresTransitiveProjectReferences(ProjectInstanceSnapshot projectInstance)
         {
             // Outer builds do not get edges based on ProjectReference or their transitive closure, only inner builds do.
-            if (GetProjectType(projectInstance) == ProjectType.OuterBuild)
+            if (projectInstance.ProjectType == ProjectType.OuterBuild)
             {
                 return false;
             }

@@ -3,15 +3,166 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Evaluation;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Shared;
+using static Microsoft.Build.Graph.ProjectInterpretation;
 
 #nullable disable
 
 namespace Microsoft.Build.Graph
 {
+    public class ProjectReferenceSnapshot
+    {
+        public string EvaluatedInclude = "";
+        public string ItemType = "";
+
+        private Dictionary<string, string> Metadata;
+
+        public ProjectReferenceSnapshot(Dictionary<string, string> metadata)
+        {
+            Metadata = metadata;
+        }
+
+        public ProjectReferenceSnapshot(ProjectItemInstance projectReferenceTarget)
+        {
+            Metadata = new()
+            {
+                { ItemMetadataNames.ProjectReferenceTargetsMetadataName, projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName) },
+                { "SkipNonexistentTargets" , projectReferenceTarget.GetMetadataValue("SkipNonexistentTargets") },
+                { ProjectReferenceTargetIsOuterBuildMetadataName, projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName) },
+                { ItemMetadataNames.PropertiesMetadataName , projectReferenceTarget.GetMetadataValue(ItemMetadataNames.PropertiesMetadataName) },
+                { ItemMetadataNames.AdditionalPropertiesMetadataName , projectReferenceTarget.GetMetadataValue(ItemMetadataNames.AdditionalPropertiesMetadataName) },
+                { ItemMetadataNames.UndefinePropertiesMetadataName , projectReferenceTarget.GetMetadataValue(ItemMetadataNames.UndefinePropertiesMetadataName) },
+                { FullPathMetadataName , projectReferenceTarget.GetMetadataValue(FullPathMetadataName) },
+                { ProjectMetadataName , projectReferenceTarget.GetMetadataValue(ProjectMetadataName) },
+                { ToolsVersionMetadataName ,projectReferenceTarget.GetMetadataValue(ToolsVersionMetadataName) },
+                { SetPlatformMetadataName , projectReferenceTarget.GetMetadataValue(SetPlatformMetadataName) },
+                { GlobalPropertiesToRemoveMetadataName , projectReferenceTarget.GetMetadataValue(GlobalPropertiesToRemoveMetadataName) },
+                { OverridePlatformNegotiationValue , projectReferenceTarget.GetMetadataValue(OverridePlatformNegotiationValue) },
+                { SetConfigurationMetadataName , projectReferenceTarget.GetMetadataValue(SetConfigurationMetadataName) },
+                { SetTargetFrameworkMetadataName ,projectReferenceTarget.GetMetadataValue(SetTargetFrameworkMetadataName) },
+            };
+        }
+
+        public string GetMetadataValue(string metadataName)
+        {
+            if (Metadata.TryGetValue(metadataName, out string result))
+            {
+                return result;
+            }
+
+            return string.Empty;
+            // throw new System.Exception($"Metadata Not Found {metadataName} in {ItemType}::{EvaluatedInclude} snapshot.");
+        }
+
+        public void SetMetadata(string key, string value)
+        {
+            Metadata[key] = value;
+        }
+    }
+
+    public class ProjectInstanceSnapshot
+    {
+        public ProjectInstanceSnapshot(ProjectInstance instance)
+        {
+            FullPath = instance.FullPath;
+            DefaultTargets = instance.DefaultTargets;
+            ProjectFileLocation = instance.ProjectFileLocation;
+            GlobalPropertiesDictionary = instance.GlobalPropertiesDictionary;
+            GlobalProperties = instance.GlobalProperties;
+            ToolsVersion = instance.ToolsVersion;
+
+            var innerBuildPropName = instance.GetPropertyValue(PropertyNames.InnerBuildProperty);
+            var innerBuildPropValue = instance.GetPropertyValue(innerBuildPropName);
+
+            instance.GetPropertyValue(instance.GetPropertyValue(PropertyNames.InnerBuildPropertyValues));
+
+            var innerBuildPropValues1 = instance.GetPropertyValue(PropertyNames.InnerBuildPropertyValues);
+            var innerBuildPropValues2 = instance.GetPropertyValue(innerBuildPropValues1);
+            var isOuterBuild = string.IsNullOrWhiteSpace(innerBuildPropValue) && !string.IsNullOrWhiteSpace(innerBuildPropValues2);
+            var isInnerBuild = !string.IsNullOrWhiteSpace(innerBuildPropValue);
+
+            ProjectType = isOuterBuild
+                ? ProjectType.OuterBuild
+                : isInnerBuild
+                    ? ProjectType.InnerBuild
+                    : ProjectType.NonMultitargeting;
+
+            Targets = instance.Targets.Keys.ToList();
+            Properties = new()
+                {
+                    { AddTransitiveProjectReferencesInStaticGraphPropertyName, instance.GetPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName) },
+                    { EnableDynamicPlatformResolutionPropertyName, instance.GetPropertyValue(EnableDynamicPlatformResolutionPropertyName) },
+                    { "TargetFrameworks", instance.GetPropertyValue("TargetFrameworks") },
+                    { PropertyNames.InnerBuildProperty, innerBuildPropName },
+                    { PropertyNames.InnerBuildPropertyValues, innerBuildPropValues1 },
+                    { "UsingMicrosoftNETSdk", instance.GetPropertyValue("UsingMicrosoftNETSdk") },
+                    { "DisableTransitiveProjectReferences", instance.GetPropertyValue("DisableTransitiveProjectReferences") },
+                    { SolutionProjectGenerator.CurrentSolutionConfigurationContents, instance.GetPropertyValue(SolutionProjectGenerator.CurrentSolutionConfigurationContents) },
+                    { "Platform", instance.GetPropertyValue("Platform") },
+                    { "Configuration", instance.GetPropertyValue("Configuration") },
+                    { "PlatformLookupTable", instance.GetPropertyValue("PlatformLookupTable") },
+                };
+
+            Properties[innerBuildPropValue] = innerBuildPropValue;
+            Properties[innerBuildPropValues1] = innerBuildPropValues2;
+
+            var projectReferenceTargets = instance.GetItems(ItemTypeNames.ProjectReference).ToList();
+
+            ProjectReferenceByTargets = new(projectReferenceTargets.Count) { };
+
+            foreach (ProjectItemInstance projectReferenceTarget in instance.GetItems(ItemTypeNames.ProjectReference))
+            {
+                ProjectReferenceByTargets.Add(new ProjectReferenceSnapshot(projectReferenceTarget)
+                {
+                    ItemType = projectReferenceTarget.ItemType,
+                    EvaluatedInclude = projectReferenceTarget.EvaluatedInclude,
+                });
+            }
+
+            var items = instance.GetItems(ItemTypeNames.ProjectCachePlugin);
+            ProjectCacheDescriptors = new(items.Count);
+            foreach (ProjectItemInstance item in items)
+            {
+                string pluginPath = FileUtilities.NormalizePath(System.IO.Path.Combine(item.Project.Directory, item.EvaluatedInclude));
+
+                var pluginSettings = new Dictionary<string, string>(System.StringComparer.OrdinalIgnoreCase);
+                foreach (ProjectMetadataInstance metadatum in item.Metadata)
+                {
+                    pluginSettings.Add(metadatum.Name, metadatum.EvaluatedValue);
+                }
+
+                ProjectCacheDescriptors.Add(ProjectCacheDescriptor.FromAssemblyPath(pluginPath, pluginSettings));
+            }
+        }
+
+        public string FullPath;
+        public string ToolsVersion;
+        public List<string> Targets;
+        internal ProjectType ProjectType;
+        public List<string> DefaultTargets;
+        public Construction.ElementLocation ProjectFileLocation;
+        internal Collections.PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary;
+        public IDictionary<string, string> GlobalProperties;
+        public Dictionary<string, string> Properties;
+        public List<ProjectReferenceSnapshot> ProjectReferenceByTargets;
+        public List<ProjectCacheDescriptor> ProjectCacheDescriptors;
+
+        public string GetPropertyValue(string propertyName)
+        {
+            if (Properties.TryGetValue(propertyName, out string result))
+            {
+                return result;
+            }
+
+            throw new System.Exception($"Property Not Found {propertyName} in snapshot.");
+        }
+    }
+
     /// <summary>
     /// Represents the node for a particular project in a project graph.
     /// A node is defined by (ProjectPath, ToolsVersion, GlobalProperties).
@@ -26,7 +177,7 @@ namespace Microsoft.Build.Graph
         internal ProjectGraphNode(ProjectInstance projectInstance)
         {
             ErrorUtilities.VerifyThrowInternalNull(projectInstance, nameof(projectInstance));
-            ProjectInstance = projectInstance;
+            ProjectInstance = new(projectInstance);
         }
 
         /// <summary>
@@ -39,97 +190,21 @@ namespace Microsoft.Build.Graph
         /// </summary>
         public IReadOnlyCollection<ProjectGraphNode> ReferencingProjects => _referencingProjects;
 
-        internal class ProjectInstanceSnapshot
-        {
-            public ProjectInstanceSnapshot(ProjectInstance instance)
-            {
-                FullPath = instance.FullPath;
-                DefaultTargets = instance.DefaultTargets;
-                ProjectFileLocation = instance.ProjectFileLocation;
-                GlobalPropertiesDictionary = instance.GlobalPropertiesDictionary;
-
-                var innerBuildPropValue = instance.GetPropertyValue(PropertyNames.InnerBuildProperty);
-                Properties = new()
-                {
-                    { ProjectInterpretation.AddTransitiveProjectReferencesInStaticGraphPropertyName, instance.GetPropertyValue(ProjectInterpretation.AddTransitiveProjectReferencesInStaticGraphPropertyName) },
-                    { ProjectInterpretation.EnableDynamicPlatformResolutionPropertyName, instance.GetPropertyValue(ProjectInterpretation.EnableDynamicPlatformResolutionPropertyName) },
-                    { PropertyNames.InnerBuildProperty, innerBuildPropValue },
-                    { innerBuildPropValue, instance.GetPropertyValue(innerBuildPropValue) },
-                    { "UsingMicrosoftNETSdk", instance.GetPropertyValue("UsingMicrosoftNETSdk") },
-                    { "DisableTransitiveProjectReferences", instance.GetPropertyValue("DisableTransitiveProjectReferences") },
-                    { "UsingMicrosoftNETSdk", instance.GetPropertyValue("UsingMicrosoftNETSdk") },
-                };
-
-                foreach(ProjectItemInstance projectItemInstance in instance.GetItems(ItemTypeNames.ProjectReferenceTargets))
-                {
-                    string targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
-                    bool skipNonexistentTargets = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue("SkipNonexistentTargets"));
-                    bool targetsAreForOuterBuild = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName));
-                    TargetSpecification[] targets = ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue)
-                        .Select(t => new TargetSpecification(t, skipNonexistentTargets)).ToArray();
-
-                    ProjectReferenceByTargets.Add(item)
-
-                }
-
-                ProjectReferenceByTargets = new()
-                {
-
-                };
-
-                // GetItems + ItemTypeNames.ProjectCachePlugin
-                /*
-                 *             if (string.IsNullOrWhiteSpace(projectInstance.GetPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName)) &&
-                MSBuildStringIsTrue(projectInstance.GetPropertyValue("UsingMicrosoftNETSdk")) &&
-                MSBuildStringIsFalse(projectInstance.GetPropertyValue("DisableTransitiveProjectReferences")))
-            {
-                return true;
-            }
-
-                project.GetItems(ItemTypeNames.ProjectReferenceTargets);
-
-            return MSBuildStringIsTrue(
-                projectInstance.GetPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName));
-
-                requesterInstance.GetItems(ItemTypeNames.ProjectReference);
-                 */
-            }
-
-            public string FullPath;
-            public List<string> DefaultTargets;
-            public Construction.ElementLocation ProjectFileLocation;
-            public Collections.PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary;
-            public Dictionary<string,string> GlobalProperties;
-            public Dictionary<string, string> Properties;
-            public List<ProjectReferenceItem> ProjectReferenceByTargets;
-
-            public class ProjectReferenceItem
-            {
-                public string Identity;
-                public string Targets;
-                public string 
-            }
-
-            public string GetPropertyValue(string propertyName)
-            {
-                return Properties[propertyName];
-            }
-        }
 
         /// <summary>
         /// Gets the evaluated project instance represented by this node in the graph.
         /// </summary>
-        public ProjectInstance ProjectInstance { get; }
+        public ProjectInstanceSnapshot ProjectInstance { get; }
 
         private string DebugString()
         {
             var truncatedProjectFile = FileUtilities.TruncatePathToTrailingSegments(ProjectInstance.FullPath, 2);
 
             return
-                $"{truncatedProjectFile}, #GlobalProps={ProjectInstance.GlobalProperties.Count}, #Props={ProjectInstance.Properties.Count}, #Items={ProjectInstance.Items.Count}, #in={ReferencingProjects.Count}, #out={ProjectReferences.Count}";
+                $"{truncatedProjectFile}, #GlobalProps={ProjectInstance.GlobalProperties.Count}, #Props={ProjectInstance.Properties.Count}, #in={ReferencingProjects.Count}, #out={ProjectReferences.Count}";
         }
 
-        internal void AddProjectReference(ProjectGraphNode reference, ProjectItemInstance projectReferenceItem, GraphBuilder.GraphEdges edges)
+        internal void AddProjectReference(ProjectGraphNode reference, ProjectReferenceSnapshot projectReferenceItem, GraphBuilder.GraphEdges edges)
         {
             _projectReferences.Add(reference);
             reference._referencingProjects.Add(this);

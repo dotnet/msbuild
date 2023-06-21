@@ -3294,7 +3294,7 @@ namespace Microsoft.Build.Evaluation
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionStaticMethodSyntax", expressionFunction, String.Empty);
                     }
 
-                    var typeName = expressionRoot.Slice(1, typeEndIndex - 1).ToString();
+                    var typeName = Strings.WeakIntern(expressionRoot.Slice(1, typeEndIndex - 1));
                     var methodStartIndex = typeEndIndex + 1;
 
                     if (expressionRoot.Length > methodStartIndex + 2 && expressionRoot[methodStartIndex] == ':' && expressionRoot[methodStartIndex + 1] == ':')
@@ -3352,7 +3352,7 @@ namespace Microsoft.Build.Evaluation
                     var rootEndIndex = expressionRoot.IndexOf('.');
 
                     // If this is an instance function rather than a static, then we'll capture the name of the property referenced
-                    var functionReceiver = expressionRoot.Slice(0, rootEndIndex).Trim().ToString();
+                    var functionReceiver = Strings.WeakIntern(expressionRoot.Slice(0, rootEndIndex).Trim());
 
                     // If propertyValue is null (we're not recursing), then we're expecting a valid property name
                     if (propertyValue == null && !IsValidPropertyName(functionReceiver))
