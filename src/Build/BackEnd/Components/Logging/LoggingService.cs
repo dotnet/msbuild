@@ -1492,7 +1492,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 _warningsAsMessagesByProject?.Remove(key);
             }
 
-            if (buildEventArgs is BuildEventArgs loggingEventBuildArgs)
+            if (loggingEvent is BuildEventArgs loggingEventBuildArgs)
             {
                 RouteBuildEvent(loggingEventBuildArgs);
             }
