@@ -509,6 +509,31 @@ namespace Microsoft.NET.Build.Tests
                 .And
                 .HaveStdOutContaining("NETSDK1200");
         }
+
+        [Fact]
+        public void ItCanBuildWithMicrosoftBuildArtifactsSdk()
+        {
+            var testAsset = _testAssetsManager.CopyTestAsset("ArtifactsSdkTest")
+                .WithSource();
+
+            new DotnetBuildCommand(testAsset)
+                .Execute(Path.Combine(testAsset.Path, "ArtifactsSdkTest.sln"))
+                .Should()
+                .Pass();
+
+            new DirectoryInfo(Path.Combine(testAsset.Path, "artifacts", "MSBuildSdk", ToolsetInfo.CurrentTargetFramework))
+                .Should()
+                .OnlyHaveFiles(new[] { "MSBuildSdk.dll" });
+
+            new DirectoryInfo(Path.Combine(testAsset.Path, "artifacts", "PackageReference", ToolsetInfo.CurrentTargetFramework))
+                .Should()
+                .OnlyHaveFiles(new[] { "PackageReference.dll", "PackageReference.exe" });
+
+            //  Verify that default bin and obj folders still exist (which wouldn't be the case if using the .NET SDKs artifacts output functianality
+            new FileInfo(Path.Combine(testAsset.Path, "MSBuildSdk", "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "MSBuildSdk.dll")).Should().Exist();
+            new FileInfo(Path.Combine(testAsset.Path, "MSBuildSdk", "obj", "Debug", ToolsetInfo.CurrentTargetFramework, "MSBuildSdk.dll")).Should().Exist();
+
+        }
     }
 
     namespace ArtifactsTestExtensions

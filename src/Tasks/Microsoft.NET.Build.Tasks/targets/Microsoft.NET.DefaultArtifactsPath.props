@@ -20,7 +20,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
   
   <!-- Setting ArtifactsPath automatically opts in to the artifacts output format -->
-  <PropertyGroup Condition="'$(ArtifactsPath)' != ''">
+  <PropertyGroup Condition="'$(ArtifactsPath)' != '' And '$(UsingMicrosoftArtifactsSdk)' != 'true'">
     <UseArtifactsOutput Condition="'$(UseArtifactsOutput)' == ''">true</UseArtifactsOutput>
     <IncludeProjectNameInArtifactsPaths Condition="'$(IncludeProjectNameInArtifactsPaths)' == ''">true</IncludeProjectNameInArtifactsPaths>
     <_ArtifactsPathLocationType>ExplicitlySpecified</_ArtifactsPathLocationType>
