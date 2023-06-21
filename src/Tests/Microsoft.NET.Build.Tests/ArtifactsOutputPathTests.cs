@@ -517,7 +517,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource();
 
             new DotnetBuildCommand(testAsset)
-                .Execute(Path.Combine(testAsset.Path, "ArtifactsSdkTest.sln"))
+                .Execute()
                 .Should()
                 .Pass();
 
@@ -527,7 +527,7 @@ namespace Microsoft.NET.Build.Tests
 
             new DirectoryInfo(Path.Combine(testAsset.Path, "artifacts", "PackageReference", ToolsetInfo.CurrentTargetFramework))
                 .Should()
-                .OnlyHaveFiles(new[] { "PackageReference.dll", "PackageReference.exe" });
+                .OnlyHaveFiles(new[] { "PackageReference.dll", $"PackageReference{EnvironmentInfo.ExecutableExtension}" });
 
             //  Verify that default bin and obj folders still exist (which wouldn't be the case if using the .NET SDKs artifacts output functianality
             new FileInfo(Path.Combine(testAsset.Path, "MSBuildSdk", "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "MSBuildSdk.dll")).Should().Exist();
