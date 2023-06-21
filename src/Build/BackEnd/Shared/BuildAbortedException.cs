@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Microsoft.Build.Framework.BuildException;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
@@ -21,7 +23,7 @@ namespace Microsoft.Build.Exceptions
     /// If you add fields to this class, add a custom serialization constructor and override GetObjectData().
     /// </remarks>
     [Serializable]
-    public class BuildAbortedException : Exception
+    public class BuildAbortedException : BuildExceptionBase
     {
         /// <summary>
         /// Constructs a standard BuildAbortedException.
@@ -49,11 +51,40 @@ namespace Microsoft.Build.Exceptions
         /// Constructs a BuildAbortedException with an additional message attached and an inner exception.
         /// </summary>
         public BuildAbortedException(string message, Exception innerException)
-            : base(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildAbortedWithMessage", message), innerException)
-        {
-            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "BuildAbortedWithMessage", message);
+            : this(message, innerException, false)
+        { }
 
-            ErrorCode = errorCode;
+        internal static BuildAbortedException CreateFromRemote(string message, Exception innerException)
+        {
+            return new BuildAbortedException(message, innerException, true /* calledFromDeserialization */);
+        }
+
+        private BuildAbortedException(string message, Exception innerException, bool calledFromDeserialization)
+            : base(
+                calledFromDeserialization
+                    ? message
+                    : ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildAbortedWithMessage", message),
+                innerException)
+        {
+            if (!calledFromDeserialization)
+            {
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "BuildAbortedWithMessage", message);
+
+                ErrorCode = errorCode;
+            }
+        }
+
+        protected override IDictionary<string, string> FlushCustomState()
+        {
+            return new Dictionary<string, string>()
+            {
+                { nameof(ErrorCode), ErrorCode }
+            };
+        }
+
+        protected override void InitializeCustomState(IDictionary<string, string> state)
+        {
+            ErrorCode = state[nameof(ErrorCode)];
         }
 
         /// <summary>
@@ -70,7 +101,7 @@ namespace Microsoft.Build.Exceptions
         /// Gets the error code (if any) associated with the exception message.
         /// </summary>
         /// <value>Error code string, or null.</value>
-        public string ErrorCode { get; }
+        public string ErrorCode { get; private set; }
 
         /// <summary>
         /// ISerializable method which we must override since Exception implements this interface

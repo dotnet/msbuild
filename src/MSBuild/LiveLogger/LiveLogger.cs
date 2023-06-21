@@ -234,6 +234,8 @@ internal sealed class LiveLogger : INodeLogger
         }
 
         _buildStartTime = e.Timestamp;
+
+        Terminal.Write(AnsiCodes.SetProgressIndeterminate);
     }
 
     /// <summary>
@@ -268,6 +270,7 @@ internal sealed class LiveLogger : INodeLogger
         }
         finally
         {
+            Terminal.Write(AnsiCodes.RemoveProgress);
             Terminal.EndUpdate();
         }
 
@@ -611,7 +614,7 @@ internal sealed class LiveLogger : INodeLogger
     /// Render Nodes section.
     /// It shows what all build nodes do.
     /// </summary>
-    private void DisplayNodes()
+    internal void DisplayNodes()
     {
         NodesFrame newFrame = new NodesFrame(_nodes, width: Terminal.Width, height: Terminal.Height);
 
@@ -740,21 +743,22 @@ internal sealed class LiveLogger : INodeLogger
                     if (!previous.SequenceEqual(needed))
                     {
                         int commonPrefixLen = previous.CommonPrefixLength(needed);
-                        if (commonPrefixLen == 0)
+
+                        if (commonPrefixLen != 0 && needed.Slice(0, commonPrefixLen).IndexOf('\x1b') == -1)
                         {
-                            // whole string
-                            sb.Append(needed);
+                            // no escape codes, so can trivially skip substrings
+                            sb.Append($"{AnsiCodes.CSI}{commonPrefixLen}{AnsiCodes.MoveForward}");
+                            sb.Append(needed.Slice(commonPrefixLen));
                         }
                         else
                         {
-                            // set cursor to different char
-                            sb.Append($"{AnsiCodes.CSI}{commonPrefixLen}{AnsiCodes.MoveForward}");
-                            sb.Append(needed.Slice(commonPrefixLen));
-                            // Shall we clear rest of line
-                            if (needed.Length < previous.Length)
-                            {
-                                sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInLine}");
-                            }
+                            sb.Append(needed);
+                        }
+
+                        // Shall we clear rest of line
+                        if (needed.Length < previous.Length)
+                        {
+                            sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInLine}");
                         }
                     }
                 }
