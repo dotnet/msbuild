@@ -34,7 +34,7 @@ namespace Microsoft.Build.Graph
         private const string PlatformLookupTableMetadataName = "PlatformLookupTable";
         private const string PlatformMetadataName = "Platform";
         private const string PlatformsMetadataName = "Platforms";
-        private const string EnableDynamicPlatformResolutionPropertyName = "EnableDynamicPlatformResolution";
+        internal const string EnableDynamicPlatformResolutionPropertyName = "EnableDynamicPlatformResolution";
         private const string OverridePlatformNegotiationValue = "OverridePlatformNegotiationValue";
         private const string ShouldUnsetParentConfigurationAndPlatformPropertyName = "ShouldUnsetParentConfigurationAndPlatform";
         private const string ProjectMetadataName = "Project";

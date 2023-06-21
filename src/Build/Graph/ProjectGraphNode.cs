@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
@@ -37,6 +38,83 @@ namespace Microsoft.Build.Graph
         /// Gets a list of graph nodes for projects that have a project reference for this project
         /// </summary>
         public IReadOnlyCollection<ProjectGraphNode> ReferencingProjects => _referencingProjects;
+
+        internal class ProjectInstanceSnapshot
+        {
+            public ProjectInstanceSnapshot(ProjectInstance instance)
+            {
+                FullPath = instance.FullPath;
+                DefaultTargets = instance.DefaultTargets;
+                ProjectFileLocation = instance.ProjectFileLocation;
+                GlobalPropertiesDictionary = instance.GlobalPropertiesDictionary;
+
+                var innerBuildPropValue = instance.GetPropertyValue(PropertyNames.InnerBuildProperty);
+                Properties = new()
+                {
+                    { ProjectInterpretation.AddTransitiveProjectReferencesInStaticGraphPropertyName, instance.GetPropertyValue(ProjectInterpretation.AddTransitiveProjectReferencesInStaticGraphPropertyName) },
+                    { ProjectInterpretation.EnableDynamicPlatformResolutionPropertyName, instance.GetPropertyValue(ProjectInterpretation.EnableDynamicPlatformResolutionPropertyName) },
+                    { PropertyNames.InnerBuildProperty, innerBuildPropValue },
+                    { innerBuildPropValue, instance.GetPropertyValue(innerBuildPropValue) },
+                    { "UsingMicrosoftNETSdk", instance.GetPropertyValue("UsingMicrosoftNETSdk") },
+                    { "DisableTransitiveProjectReferences", instance.GetPropertyValue("DisableTransitiveProjectReferences") },
+                    { "UsingMicrosoftNETSdk", instance.GetPropertyValue("UsingMicrosoftNETSdk") },
+                };
+
+                foreach(ProjectItemInstance projectItemInstance in instance.GetItems(ItemTypeNames.ProjectReferenceTargets))
+                {
+                    string targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+                    bool skipNonexistentTargets = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue("SkipNonexistentTargets"));
+                    bool targetsAreForOuterBuild = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName));
+                    TargetSpecification[] targets = ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue)
+                        .Select(t => new TargetSpecification(t, skipNonexistentTargets)).ToArray();
+
+                    ProjectReferenceByTargets.Add(item)
+
+                }
+
+                ProjectReferenceByTargets = new()
+                {
+
+                };
+
+                // GetItems + ItemTypeNames.ProjectCachePlugin
+                /*
+                 *             if (string.IsNullOrWhiteSpace(projectInstance.GetPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName)) &&
+                MSBuildStringIsTrue(projectInstance.GetPropertyValue("UsingMicrosoftNETSdk")) &&
+                MSBuildStringIsFalse(projectInstance.GetPropertyValue("DisableTransitiveProjectReferences")))
+            {
+                return true;
+            }
+
+                project.GetItems(ItemTypeNames.ProjectReferenceTargets);
+
+            return MSBuildStringIsTrue(
+                projectInstance.GetPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName));
+
+                requesterInstance.GetItems(ItemTypeNames.ProjectReference);
+                 */
+            }
+
+            public string FullPath;
+            public List<string> DefaultTargets;
+            public Construction.ElementLocation ProjectFileLocation;
+            public Collections.PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary;
+            public Dictionary<string,string> GlobalProperties;
+            public Dictionary<string, string> Properties;
+            public List<ProjectReferenceItem> ProjectReferenceByTargets;
+
+            public class ProjectReferenceItem
+            {
+                public string Identity;
+                public string Targets;
+                public string 
+            }
+
+            public string GetPropertyValue(string propertyName)
+            {
+                return Properties[propertyName];
+            }
+        }
 
         /// <summary>
         /// Gets the evaluated project instance represented by this node in the graph.
