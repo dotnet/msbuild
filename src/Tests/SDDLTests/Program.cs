@@ -23,6 +23,11 @@ namespace SDDLTests
     public class SDDLTests
     {
         /// <summary>
+        /// The full path of ProgramData.
+        /// </summary>
+        private static readonly string s_programData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+
+        /// <summary>
         /// Directory under the user's %temp% directory where the test asset will be created.
         /// </summary>
         private static readonly string s_userTestDirectory = Path.Combine(Path.GetTempPath(), "SDDLTest");
@@ -38,14 +43,20 @@ namespace SDDLTests
         private static readonly string s_SDDL_Pattern = @"O:(?<O_SID>.*?(?=G:))G:(?<G_SID>.*?(?=D:|S:|$))(D:(?<DACL_FLAGS>.*?(?=\())(?<DACL>\(.*?\))*)?(S:(?<SACL_FLAGS>.*?(?=\())(?<SACL>\(.*?\))*)?";
 
         /// <summary>
-        /// The root directory of the cache under ProgramData.
+        /// The .NET directory under ProgramData. Typically this would be named 'dotnet'. 
         /// </summary>
-        private static readonly string s_cacheRootDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "SDDLTest");
+        private static readonly string s_cacheRootDirectory = Path.Combine(s_programData, "SDDLTest");
 
         /// <summary>
-        /// The path of the directory under the cache root where the test asset will be placed.
+        /// The root directory under ProgramData where workload related files are stored.
         /// </summary>
-        private static readonly string s_cacheDirectory = Path.Combine(s_cacheRootDirectory, "a");
+        private static readonly string s_workloadsCacheDirectory = Path.Combine(s_cacheRootDirectory, "workloads");
+
+        /// <summary>
+        /// The path of the directory under the cache root where the test asset will be placed. For workload packs this would
+        /// typically include the package ID and version.
+        /// </summary>
+        private static readonly string s_workloadPackCacheDirectory = Path.Combine(s_workloadsCacheDirectory, "test.workload.pack", "1.2.3-preview5");
 
         /// <summary>
         /// The full path to the test asset under the user temp directory.
@@ -55,7 +66,7 @@ namespace SDDLTests
         /// <summary>
         /// The full path to the test asset under the cache directory.
         /// </summary>
-        private static readonly string s_cachedTestAssetPath = Path.Combine(s_cacheDirectory, s_testAsset);
+        private static readonly string s_cachedTestAssetPath = Path.Combine(s_workloadPackCacheDirectory, s_testAsset);
 
         /// <summary>
         /// Access control sections to retrieve from security descriptors: owner, group and access control lists.
@@ -145,8 +156,7 @@ namespace SDDLTests
         /// </summary>
         private static void RelocateAndSecureAsset()
         {
-            MsiPackageCache.CreateSecureDirectory(s_cacheRootDirectory, true);
-            MsiPackageCache.CreateSecureDirectory(s_cacheDirectory);
+            MsiPackageCache.CreateSecureDirectory(s_workloadPackCacheDirectory);
             MsiPackageCache.MoveAndSecureFile(s_userTestAssetPath, s_cachedTestAssetPath);
         }
 
@@ -213,8 +223,15 @@ namespace SDDLTests
         /// </summary>
         private static void VerifyDescriptors()
         {
+            // Dump the descriptor of ProgramData since it's useful for analyzing.
+            DirectorySecurity ds = new DirectorySecurity(s_programData, s_accessControlSections);
+            string descriptor = ds.GetSecurityDescriptorSddlForm(s_accessControlSections);
+            Console.WriteLine($" Directory: {s_programData}");
+            Console.WriteLine($"Descriptor: {descriptor}");
+
             VerifyDirectorySecurityDescriptor(s_cacheRootDirectory, "BA", "BA", 4, "A;OICI;0x1200a9;;;WD", "A;OICI;FA;;;SY", "A;OICI;FA;;;BA", "A;OICI;0x1200a9;;;BU");
-            VerifyDirectorySecurityDescriptor(s_cacheDirectory, "BA", "BA", 4, "A;OICIID;0x1200a9;;;WD", "A;OICIID;FA;;;SY", "A;OICIID;FA;;;BA", "A;OICIID;0x1200a9;;;BU");
+            VerifyDirectorySecurityDescriptor(s_workloadsCacheDirectory, "BA", "BA", 4, "A;OICIID;0x1200a9;;;WD", "A;OICIID;FA;;;SY", "A;OICIID;FA;;;BA", "A;OICIID;0x1200a9;;;BU");
+            VerifyDirectorySecurityDescriptor(s_workloadPackCacheDirectory, "BA", "BA", 4, "A;OICIID;0x1200a9;;;WD", "A;OICIID;FA;;;SY", "A;OICIID;FA;;;BA", "A;OICIID;0x1200a9;;;BU");
             VerifyFileSecurityDescriptor(s_cachedTestAssetPath, "BA", "BA", 4, "A;ID;0x1200a9;;;WD", "A;ID;FA;;;SY", "A;ID;FA;;;BA", "A;ID;0x1200a9;;;BU");
         }
 

@@ -92,48 +92,13 @@ namespace Microsoft.DotNet.Installer.Windows
         /// and files to inherit access control entries. 
         /// </summary>
         /// <param name="path">The path of the directory to create.</param>
-        /// <param name="resetAccessRules">When <see langword="true"/>, all existing access rules are removed before
-        /// setting up new rules.
-        /// </param>
-        /// <param name="log">The underlying setup log to use.</param>
-        public static void CreateSecureDirectory(string path, bool resetAccessRules = false, ISetupLogger log = null)
+        public static void CreateSecureDirectory(string path)
         {
             if (!Directory.Exists(path))
             {
-                // Create the directory with the desired access rights if it doesn't exist. We don't use
-                // Directory.CreateDirectory as that can cause problems with inherited ACEs from
-                // the parent folders as access rules become cumulative. The acccess rules for the directory should all have
-                // object and container inheritance set to ensure access rights are inherited when creating files.
                 DirectorySecurity ds = new();
                 SetDirectoryAccessRules(ds);
                 ds.CreateDirectory(path);
-            }
-            else if (resetAccessRules)
-            {
-                // Best effort to reset the DACL and remove unnecessary ACEs. This will
-                // help to address some issues that may arise from older .NET versions that created
-                // the cache with permissions that were too restrictive.
-                try
-                {
-                    DirectorySecurity ds = new(path, AccessControlSections.Access);
-
-                    ds.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
-
-                    foreach (FileSystemAccessRule ace in ds.GetAccessRules(includeExplicit: true,
-                        includeInherited: true, typeof(NTAccount)))
-                    {
-                        ds.PurgeAccessRules(ace.IdentityReference);
-                    }
-
-                    SetDirectoryAccessRules(ds);
-                    DirectoryInfo di = new DirectoryInfo(path);
-                    di.SetAccessControl(ds);
-                }
-                catch (Exception ex)
-                {
-                    // Record the error, but don't fail the operation if we couldn't reset the access rules.
-                    log?.LogMessage($"Failed to reset access rules for '{path}'. Error: {ex.Message}");
-                }
             }
         }
 
@@ -154,10 +119,6 @@ namespace Microsoft.DotNet.Installer.Windows
 
             if (IsElevated)
             {
-                // Create the root directory. If the directory already exists then we'll try to
-                // reset the DACL to conform to our expectations.
-                CreateSecureDirectory(PackageCacheRoot, resetAccessRules: true, Log);
-
                 string packageDirectory = GetPackageDirectory(packageId, packageVersion);
 
                 // Delete the package directory and create a new one that's secure. If all the files were properly
@@ -209,8 +170,12 @@ namespace Microsoft.DotNet.Installer.Windows
         {
             if (!File.Exists(destinationFile))
             {
-                FileAccessRetrier.RetryOnMoveAccessFailure(() => File.Move(sourceFile, destinationFile));
-
+                FileAccessRetrier.RetryOnMoveAccessFailure(() =>
+                {
+                    // Moving the file preserves the owner SID and fails to inherit the WD ACE.
+                    File.Copy(sourceFile, destinationFile, overwrite: true);
+                    File.Delete(sourceFile);
+                });
                 log?.LogMessage($"Moved '{sourceFile}' to '{destinationFile}'");
 
                 FileInfo fi = new(destinationFile);
@@ -237,8 +202,7 @@ namespace Microsoft.DotNet.Installer.Windows
             string packageCacheDirectory = GetPackageDirectory(packageId, packageVersion);
             payload = default;
 
-            string msiPath;
-            if (!TryGetMsiPathFromPackageData(packageCacheDirectory, out msiPath, out string manifestPath))
+            if (!TryGetMsiPathFromPackageData(packageCacheDirectory, out string msiPath, out string manifestPath))
             {
                 return false;
             }
