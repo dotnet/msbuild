@@ -27,7 +27,7 @@ public interface IExtendedBuildEventArgs
     /// <summary>
     /// Transparent data as string.
     /// Custom code is responsible to serialize and deserialize this string to structured data - if needed.
-    /// Custom code can use any serialization they deem safe, though we expect json mostly. In case on binary data, base64 can be used.
+    /// Custom code can use any serialization they deem safe - e.g. json for textual data, base64 for binary data...
     /// </summary>
     string? ExtendedData { get; set; }
 }
