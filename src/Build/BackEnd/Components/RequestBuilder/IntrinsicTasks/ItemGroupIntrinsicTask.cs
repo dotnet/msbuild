@@ -184,7 +184,17 @@ namespace Microsoft.Build.BackEnd
 
                 if (condition)
                 {
-                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, ExpanderOptions.ExpandAll, metadataInstance.Location, loggingContext);
+                    ExpanderOptions expanderOptions = ExpanderOptions.ExpandAll;
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) &&
+                        // If multiple buckets were expanded - we do not want to repeat same error for same metadatum on a same line
+                        bucket.BucketSequenceNumber == 0 &&
+                        // Referring to unqualified metadata of other item (transform) is fine.
+                        child.Include.IndexOf("@(", StringComparison.Ordinal) == -1)
+                    {
+                        expanderOptions |= ExpanderOptions.LogOnItemMetadataSelfReference;
+                    }
+
+                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, expanderOptions, metadataInstance.Location, loggingContext);
 
                     // This both stores the metadata so we can add it to all the items we just created later, and 
                     // exposes this metadata to further metadata evaluations in subsequent loop iterations.
@@ -612,7 +622,7 @@ namespace Microsoft.Build.BackEnd
         /// 1. The metadata table created for the bucket, may be null.
         /// 2. The metadata table derived from the item definition group, may be null.
         /// </summary>
-        private class NestedMetadataTable : IMetadataTable
+        private class NestedMetadataTable : IMetadataTable, IItemTypeDefinition
         {
             /// <summary>
             /// The table for all metadata added during expansion
@@ -722,6 +732,8 @@ namespace Microsoft.Build.BackEnd
             {
                 _addTable[name] = value;
             }
+
+            string IItemTypeDefinition.ItemType => _itemType;
         }
     }
 }

@@ -624,6 +624,11 @@
         <target state="translated">MSB3094: "{2}" 參考 {0} 個項目，"{3}" 則參考 {1} 個項目。兩者參考的項目數目必須相同。</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+        <source>Creating binding redirection file "{0}".</source>
+        <target state="new">Creating binding redirection file "{0}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GenerateBindingRedirects.MissingConfigurationNode">
         <source>MSB3831: The application configuration file must have root configuration element.</source>
         <target state="translated">MSB3831: 應用程式組態檔必須有根組態項目。</target>
@@ -1039,6 +1044,13 @@
         <target state="translated">MSB3190: ClickOnce 不支援要求執行層級 '{0}'。</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.BinaryFormatterUse">
+        <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/msbuild/net8-binaryformatter</source>
+        <target state="new">MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/msbuild/net8-binaryformatter</target>
+        <note>{StrBegin="MSB3825: "}</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
         <source>MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</source>
         <target state="translated">MSB3824: 若要使用 .NET Core 建置，資源輸入必須採用 .txt 或 .resx 格式。</target>
@@ -1068,6 +1080,11 @@
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
         <target state="translated">MSB3821: 因為檔案 {0} 位於網際網路或是限制區域上，或是檔案上標有 Web 字樣，所以無法處理該檔案。若希望處理這些檔案，請移除 Web 字樣。</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
+        <source>MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</source>
+        <target state="new">MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</target>
+        <note>{StrBegin="MSB3826: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.OutputDoesntExist">
         <source>Output file "{0}" does not exist.</source>
@@ -2108,9 +2125,9 @@
         <target state="translated">TargetFramework 設定檔清單資訊:</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader">
+      <trans-unit id="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
         <source>TargetFramework Profile List Paths:</source>
-        <target state="translated">TargetFramework 設定檔清單資路徑:</target>
+        <target state="new">TargetFramework Profile List Paths:</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">
@@ -2131,6 +2148,11 @@
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
         <target state="translated">可轉散發套件清單檔 "{0}" 在 FileList 項目中的 Redist 名稱為 null 或空白。請確認 Redist 名稱不為 null 或空白。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
+        <source>Updating assembly cache file "{0}".</source>
+        <target state="new">Updating assembly cache file "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -2786,6 +2808,11 @@
         <source>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</source>
         <target state="translated">MSB3705: 在使用 .NET Core 建置時，不支援 XslCompiledDllPath。</target>
         <note>{StrBegin="MSB3705: "}</note>
+      </trans-unit>
+      <trans-unit id="XslTransform.SecuritySettingsViaUseTrustedSettings">
+        <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
+        <target state="new">You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</target>
+        <note />
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
         <source>MSB3702: Unable to process the XsltParameters argument for the XslTransformation task. {0}</source>

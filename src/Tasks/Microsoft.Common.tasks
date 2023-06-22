@@ -16,9 +16,9 @@
   <UsingTask TaskName="Microsoft.Build.Tasks.AssignTargetPath"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.CallTarget"                            AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.CombinePath"                           AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <UsingTask TaskName="Microsoft.Build.Tasks.ConvertToAbsolutePath"                 AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.CombineTargetFrameworkInfoProperties"  AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.CombineXmlElements"                    AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.ConvertToAbsolutePath"                 AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.Copy"                                  AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.CreateCSharpManifestResourceName"      AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.CreateItem"                            AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -32,7 +32,6 @@
   <UsingTask TaskName="Microsoft.Build.Tasks.FindAppConfigFile"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.FindInList"                            AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.FindInvalidProjectReferences"          AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-
   <UsingTask TaskName="Microsoft.Build.Tasks.FindUnderPath"                         AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.FormatUrl"                             AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.FormatVersion"                         AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -53,8 +52,9 @@
   <UsingTask TaskName="Microsoft.Build.Tasks.GetFileHash"                           AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.GetFrameworkPath"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.GetFrameworkSdkPath"                   AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.GetInstalledSDKLocations"              AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.GetReferenceAssemblyPaths"             AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <UsingTask TaskName="Microsoft.Build.Tasks.SetRidAgnosticValueForProjects"        AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.GetSDKReferenceFiles"                  AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.Hash"                                  AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.LC"                                    AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.MakeDir"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -72,15 +72,13 @@
   <UsingTask TaskName="Microsoft.Build.Tasks.RequiresFramework35SP1Assembly"        AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.ResolveAssemblyReference"              AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.ResolveCodeAnalysisRuleSet"            AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <UsingTask TaskName="Microsoft.Build.Tasks.ResolveSDKReference"                   AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <UsingTask TaskName="Microsoft.Build.Tasks.ResolveSDKReference"                   AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <UsingTask TaskName="Microsoft.Build.Tasks.GetInstalledSDKLocations"              AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <UsingTask TaskName="Microsoft.Build.Tasks.GetSDKReferenceFiles"                  AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.ResolveComReference"                   AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.ResolveKeySource"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.ResolveManifestFiles"                  AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.ResolveNativeReference"                AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.ResolveNonMSBuildProjectOutput"        AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.ResolveSDKReference"                   AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.SetRidAgnosticValueForProjects"        AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.SGen"                                  AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.SignFile"                              AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.Telemetry"                             AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -90,21 +88,21 @@
   <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"                    AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Runtime="CLR4" Condition="'$(DisableOutOfProcTaskHost)' == '' and '$(MSBuildRuntimeType)' != 'Core'" />
   <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"                    AssemblyName="Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Runtime="CLR2" Condition="'$(DisableOutOfProcTaskHost)' == '' and '$(MSBuildRuntimeType)' != 'Core'" />
 
-  <UsingTask TaskName="Microsoft.Build.Tasks.UpdateManifest"                        AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.Unzip"                                 AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.UpdateManifest"                        AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.VerifyFileHash"                        AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.Warning"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.WinMDExp"                              AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.WriteCodeFragment"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.WriteLinesToFile"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.XmlPeek"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.XmlPoke"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.XslTransformation"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <UsingTask TaskName="Microsoft.Build.Tasks.WinMDExp"                              AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.ZipDirectory"                          AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
 
   <!-- Roslyn tasks are now in an assembly owned and shipped by Roslyn -->
+  <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.CopyRefAssembly"           AssemblyFile="$(RoslynTargetsPath)\Microsoft.Build.Tasks.CodeAnalysis.dll" />
   <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Csc"                       AssemblyFile="$(RoslynTargetsPath)\Microsoft.Build.Tasks.CodeAnalysis.dll" />
   <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Vbc"                       AssemblyFile="$(RoslynTargetsPath)\Microsoft.Build.Tasks.CodeAnalysis.dll" />
-  <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.CopyRefAssembly"           AssemblyFile="$(RoslynTargetsPath)\Microsoft.Build.Tasks.CodeAnalysis.dll" />
 
 </Project>

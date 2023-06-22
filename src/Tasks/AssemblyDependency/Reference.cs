@@ -226,7 +226,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// A dependee may be removed because it or its dependee's are in the black list
+        /// A dependee may be removed because it or its dependee's are in the deny list
         /// </summary>
         internal void RemoveDependee(Reference dependeeToRemove)
         {
@@ -234,7 +234,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// A dependency may be removed because it may not be referenced any more due this reference being in the black list or being removed due to it depending on something in the black list
+        /// A dependency may be removed because it may not be referenced any more due this reference being in the deny list or being removed due to it depending on something in the deny list
         /// </summary>
         internal void RemoveDependency(Reference dependencyToRemove)
         {
@@ -1140,7 +1140,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// There are a number of properties which are set when we generate exclusion lists and it is useful to have this information on the references so that
-        /// the correct reasons can be logged for these references being in the black list.
+        /// the correct reasons can be logged for these references being in the deny list.
         /// </summary>
         internal class ExclusionListProperties
         {

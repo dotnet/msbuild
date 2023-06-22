@@ -48,6 +48,9 @@
 
     <PackageVersion Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
     <PackageVersion Update="System.Security.Cryptography.X509Certificates" Condition="'$(SystemSecurityCryptographyX509CertificatesVersion)' != ''" Version="$(SystemSecurityCryptographyX509CertificatesVersion)" />
+
+    <PackageVersion Include="Verify.Xunit" Version="19.14.1" />
+    <PackageVersion Update="Verify.XUnit" Condition="'$(VerifyXUnitVersion)' != ''" Version="$(VerifyXUnitVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true' AND $(ProjectIsDeprecated) != 'true'">

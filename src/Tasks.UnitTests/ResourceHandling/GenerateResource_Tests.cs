@@ -1940,6 +1940,48 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
         }
 
+        [Fact]
+        public void GenerateResourceWarnsWhenUsingBinaryFormatter()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile resource = env.CreateFile(".resx", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<root>
+  <data name=""$this.Icon"" type=""System.Drawing.Icon, System.Drawing"" mimetype=""application/x-microsoft.net.object.binary.base64"">
+    <value>
+        AAABAAEAEBAAAAAAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAQAQAAAAAAAAAAAAAAAAAAAAA
+        AAD///8BoqKiDaKiotmioqL5oqKiK////wH///8B////Af///wH///8B////AaKioiGioqLxoqKi5aKi
+        ohn///8B////AbS0tBW0tLTz29vb/7Ozsu18Wi+Be1gswXtYLO17WCzte1gswXtYLIGzs7Lz2dnZ/7S0
+        tPu0tLQj////Af///wH///8BxsbGQdPT0//Cv739nGs7/6ZsNf+ubzf/rm83/6ZsNf+hdkr/xcTD/8bG
+        xf/GxsY/////Af///wH///8B////AYxlNmejiGn1r3hE/7uMXv/Ck3H/xJF0/8OPcf+/kGz/uIpd/7SG
+        Wf+hhWT1jGU2Z////wH///8B////AZZtOzWWbTvVs31G/8KZcf/Yqon/79/P//r28//69fP/79/R/9en
+        hf++lGz/s31G/5ZtO9WWbTs1////Af///wGhdUGBsIBK/8abb//Zqoj///7r///67v///fL///7y///8
+        7////ev/2aN6/8KZbP+wgEr/oXVBgf///wH///8BrH5Iwb+PWP/No4H/8NvB///35v/68uP/xcC2//Ht
+        3v///Oj///Xf/+/Ur//ImXL/v49Y/6x+SMH///8B////AbeHTu3JnGb/z5+A//rz4v/99un/8vDj/42M
+        hP+Bf3f/0s/C///76//67Mz/x5Bt/8mcZv+3h07t////Af///wHCkFTtzqZx/9Glif/69un//fju////
+        +f+BgHn/sa6k/4F/d//Jxrr/+vDT/8mWcv/OpnH/wpBU7f///wH///8BzZlbwdOsdf/Zt5j/8ePW//77
+        9f/19fP/n56V//Dw6f/4+PL/vrmt//Dawv/Sqof/06x1/82ZW8H///8B////AbOddIvTrXf/38Sa/969
+        qv//////8PDu/+fl2v////f////3///+8//ctJj/28CW/8Kqfv/Gn2qF////AQCZ3T0KmtjZLpzF9d6/
+        iv/iyaf/37+u//Hj3P/z8ez/9PHr//Hi2f/cuqP/38Oe/4yxqf84ptH5DprWzwCZ3ScAoON9fNHy7WHD
+        6O86pMb74seS/+bRqf/gwqb/1a6W/9Wrkv/evaD/5M+m/7/Bnv9Hstf9q+P2/Smw6NkAoOMnAKfpe13J
+        8eW16Pn/Ycfr7zqqzPPsxIj/6cuU/+fQnf/n0J3/6cuU/97Cjv8yqtD1gdPw9XPQ8+sAp+nNAKfpBQCu
+        7wUAru+LW8v05b/s+v9cy/HpTbLJxfq8dMH6vHTt+rx07fq8dMFRssjDac/y7XzW9u0Aru/JAK7vHf//
+        /wH///8BALX0AwC19IEAtfTRALX0ywC19Af///8B////Af///wH///8BALX0FwC19NEAtfTJALX0J///
+        /wH///8BAAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA
+        //8AAP//AAD//w==
+</value>
+  </data>
+</root>
+");
+
+            GenerateResource gr = Utilities.CreateTask(_output, usePreserialized: true, env: env);
+            gr.Sources = new ITaskItem[] { new TaskItem(resource.Path) };
+            gr.WarnOnBinaryFormatterUse = true;
+
+            gr.Execute().ShouldBeTrue();
+
+            Utilities.AssertLogContainsResource(gr, "GenerateResource.BinaryFormatterUse", "$this.Icon", "System.Drawing.Icon, System.Drawing");
+        }
+
         /// <summary>
         ///  Cause failures in ResourceReader
         /// </summary>

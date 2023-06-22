@@ -2,9 +2,8 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <PropertyGroup>
-    <VersionPrefix>17.6.9</VersionPrefix>
-    <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
-    <PackageValidationBaselineVersion>17.5.0</PackageValidationBaselineVersion>
+    <VersionPrefix>17.7.0</VersionPrefix>
+    <PackageValidationBaselineVersion>17.6.3</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
@@ -57,6 +56,7 @@
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemTextJsonVersion>7.0.0</SystemTextJsonVersion>
     <SystemThreadingTasksDataflowVersion>7.0.0</SystemThreadingTasksDataflowVersion>
+    <XunitVersion>2.4.2</XunitVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386

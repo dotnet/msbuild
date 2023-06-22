@@ -202,6 +202,7 @@ namespace Microsoft.Build.Evaluation
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
+            IDirectoryCacheFactory directoryCacheFactory,
             ProjectRootElementCacheBase projectRootElementCache,
             ISdkResolverService sdkResolverService,
             int submissionId,
@@ -231,7 +232,7 @@ namespace Microsoft.Build.Evaluation
 
             // If the host wishes to provide a directory cache for this evaluation, create a new EvaluationContext with the right file system.
             _evaluationContext = evaluationContext;
-            IDirectoryCache directoryCache = project?.GetDirectoryCacheForEvaluation(_evaluationLoggingContext.BuildEventContext.EvaluationId);
+            IDirectoryCache directoryCache = directoryCacheFactory?.GetDirectoryCacheForEvaluation(_evaluationLoggingContext.BuildEventContext.EvaluationId);
             if (directoryCache is not null)
             {
                 IFileSystem fileSystem = new DirectoryCacheFileSystemWrapper(evaluationContext.FileSystem, directoryCache);
@@ -308,6 +309,7 @@ namespace Microsoft.Build.Evaluation
             ILoggingService loggingService,
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
+            IDirectoryCacheFactory directoryCacheFactory,
             ProjectRootElementCacheBase projectRootElementCache,
             BuildEventContext buildEventContext,
             ISdkResolverService sdkResolverService,
@@ -326,6 +328,7 @@ namespace Microsoft.Build.Evaluation
                 environmentProperties,
                 itemFactory,
                 toolsetProvider,
+                directoryCacheFactory,
                 projectRootElementCache,
                 sdkResolverService,
                 submissionId,
@@ -1313,12 +1316,12 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Is the property we are currently setting in the list of properties which have been used but not initialized
                     IElementLocation elementWhichUsedProperty;
-                    bool isPropertyInList = _expander.UsedUninitializedProperties.Properties.TryGetValue(propertyElement.Name, out elementWhichUsedProperty);
+                    bool isPropertyInList = _expander.UsedUninitializedProperties.TryGetPropertyElementLocation(propertyElement.Name, out elementWhichUsedProperty);
 
                     if (isPropertyInList)
                     {
                         // Once we are going to warn for a property once, remove it from the list so we do not add it again.
-                        _expander.UsedUninitializedProperties.Properties.Remove(propertyElement.Name);
+                        _expander.UsedUninitializedProperties.RemoveProperty(propertyElement.Name);
                         _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(propertyElement.Location), "UsedUninitializedProperty", propertyElement.Name, elementWhichUsedProperty.LocationString);
                     }
                 }

@@ -114,14 +114,14 @@ namespace Microsoft.Build.Tasks
             // Check if OutputPath has same number of parameters as xmlInputPaths.
             if (XmlInputPaths != null && XmlInputPaths.Length != _outputPaths.Length)
             {
-                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, XmlInputPaths.Length, "XmlContent", "XmlInputPaths");
+                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, XmlInputPaths.Length, "OutputPaths", "XmlInputPaths");
                 return false;
             }
 
             // Check if OutputPath has 1 parameter if xmlString is specified.
             if (XmlContent != null && _outputPaths.Length != 1)
             {
-                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, 1, "XmlContent", "OutputPaths");
+                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, 1, "OutputPaths", "XmlContent");
                 return false;
             }
 
@@ -159,13 +159,18 @@ namespace Microsoft.Build.Tasks
             // Do the transformation.
             try
             {
+                if (UseTrustedSettings)
+                {
+                    Log.LogMessageFromResources(MessageImportance.High, "XslTransform.SecuritySettingsViaUseTrustedSettings");
+                }
+
                 for (int i = 0; i < xmlinput.Count; i++)
                 {
                     using (XmlWriter xmlWriter = XmlWriter.Create(_outputPaths[i].ItemSpec, xslct.OutputSettings))
                     {
                         using (XmlReader xr = xmlinput.CreateReader(i))
                         {
-                            xslct.Transform(xr, arguments, xmlWriter);
+                            xslct.Transform(xr, arguments, xmlWriter, new XmlUrlResolver());
                         }
 
                         xmlWriter.Close();
@@ -174,7 +179,9 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                Log.LogErrorWithCodeFromResources("XslTransform.TransformError", e.Message);
+                string flattenedMessage = TaskLoggingHelper.GetInnerExceptionMessageString(e);
+                Log.LogErrorWithCodeFromResources("XslTransform.TransformError", flattenedMessage);
+                Log.LogMessage(MessageImportance.Low, e.ToString());
                 return false;
             }
 

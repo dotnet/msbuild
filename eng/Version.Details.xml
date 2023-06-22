@@ -1,10 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
+  <ProductDependencies>
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="7.0.0-alpha.1.23219.1">
+      <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
+      <Sha>525b6c35cc5c5c9b80b47044be2e4e77858d505a</Sha>
+      <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
+    </Dependency>
+    <!-- Necessary for source-build. This allows the packages to be retrieved from previously-source-built artifacts
+      and flow in as dependencies of the packages produced by msbuild. -->
+    <Dependency Name="System.Configuration.ConfigurationManager" Version="7.0.0">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    </Dependency>
+    <Dependency Name="System.Security.Cryptography.Pkcs" Version="7.0.0">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    </Dependency>
+  </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.23313.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>91616785a1a6578c83f7e93d98c34a1eb83d6223</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
+    </Dependency>
+    <Dependency Name="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-21480-02" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
+      <Uri>https://github.com/dotnet/sourcelink</Uri>
+      <Sha>8031e5220baf2acad991e661d8308b783d2acf3e</Sha>
+      <SourceBuild RepoName="sourcelink" ManagedOnly="true" />
+    </Dependency>
+    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.21431.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
+      <Uri>https://github.com/dotnet/xliff-tasks</Uri>
+      <Sha>bc3233146e1fcd393ed471d5005333c83363e0fe</Sha>
+      <SourceBuild RepoName="xliff-tasks" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="6.7.0-preview.2.51">
       <Uri>https://github.com/nuget/nuget.client</Uri>
