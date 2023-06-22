@@ -185,9 +185,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Writes the contents of this object out to the specified file.
         /// </summary>
-        internal override void SerializeCache(string stateFile, TaskLoggingHelper log)
+        internal override void SerializeCache(string stateFile, TaskLoggingHelper log, bool serializeEmptyState = false)
         {
-            base.SerializeCache(stateFile, log);
+            base.SerializeCache(stateFile, log, serializeEmptyState);
             _isDirty = false;
         }
 
