@@ -35,6 +35,7 @@ public static class ContainerBuilder
             throw new ArgumentException(string.Format(Resource.GetString(nameof(Strings.PublishDirectoryDoesntExist)), nameof(publishDirectory), publishDirectory.FullName));
         }
         ILogger logger = loggerFactory.CreateLogger("Containerize");
+        logger.LogTrace("Trace logging: enabled.");
 
         bool isDaemonPull = string.IsNullOrEmpty(baseRegistry);
         Registry? sourceRegistry = isDaemonPull ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(baseRegistry), logger);
