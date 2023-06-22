@@ -88,41 +88,17 @@ namespace Microsoft.DotNet.Installer.Windows
         }
 
         /// <summary>
-        /// Creates the root package cache directory if it does not exist and configures the directory's ACLs. ACLs are still configured
-        /// if the directory exists.
-        /// </summary>
-        private void CreateRootDirectory()
-        {
-            CreateSecureDirectory(PackageCacheRoot);
-        }
-
-        /// <summary>
-        /// Creates the specified directory and secures it by configuring access rules (ACLs). If the parent
-        /// of the directory does not exist, it recursively walks the path back to ensure each parent directory
-        /// is created with the proper ACLs and inheritance settings.
+        /// Creates the specified directory and secures it by configuring access rules (ACLs) that allow sub-directories
+        /// and files to inherit access control entries. 
         /// </summary>
         /// <param name="path">The path of the directory to create.</param>
-        private void CreateSecureDirectory(string path)
+        public static void CreateSecureDirectory(string path)
         {
             if (!Directory.Exists(path))
             {
-                CreateSecureDirectory(Directory.GetParent(path).FullName);
-
-                DirectorySecurity directorySecurity = new();
-
-                // Only set the owner and use its default group. If the machine is domain joined, this should create
-                // a descriptor like O:BAG:DU by selecting SDDL_DOMAIN_USERS. On non-domain joined machines and Windows Sandbox,
-                // the group SID will be different and the descriptor will end up as O:BAG:S-1-5-21-2047949552-857980807-821054962-513.
-                directorySecurity.SetOwner(s_AdministratorsSid);
-                directorySecurity.SetAccessRule(s_AdministratorRule);
-                directorySecurity.SetAccessRule(s_LocalSystemRule);
-                directorySecurity.SetAccessRule(s_UsersRule);
-                directorySecurity.SetAccessRule(s_EveryoneRule);
-
-                // Don't use Directory.CreateDirectory as that can cause problems with inherited ACEs from
-                // the parent folders as access rules become cumulative. The acccess rules for the directory should all have
-                // object and container inheritance set to ensure access rights are inherited when creating files.
-                directorySecurity.CreateDirectory(path);
+                DirectorySecurity ds = new();
+                SetDirectoryAccessRules(ds);
+                ds.CreateDirectory(path);
             }
         }
 
@@ -143,12 +119,10 @@ namespace Microsoft.DotNet.Installer.Windows
 
             if (IsElevated)
             {
-                CreateRootDirectory();
-
                 string packageDirectory = GetPackageDirectory(packageId, packageVersion);
 
-                // Delete the directory and create a new one that's secure. If the files were properly
-                // cached, the client won't request this action.
+                // Delete the package directory and create a new one that's secure. If all the files were properly
+                // cached, the client would not request this action.
                 if (Directory.Exists(packageDirectory))
                 {
                     Directory.Delete(packageDirectory, recursive: true);
@@ -165,8 +139,8 @@ namespace Microsoft.DotNet.Installer.Windows
                 string cachedMsiPath = Path.Combine(packageDirectory, Path.GetFileName(msiPath));
                 string cachedManifestPath = Path.Combine(packageDirectory, Path.GetFileName(manifestPath));
 
-                MoveAndSecureFile(manifestPath, cachedManifestPath);
-                MoveAndSecureFile(msiPath, cachedMsiPath);
+                MoveAndSecureFile(manifestPath, cachedManifestPath, Log);
+                MoveAndSecureFile(msiPath, cachedMsiPath, Log);
             }
             else if (IsClient)
             {
@@ -191,23 +165,27 @@ namespace Microsoft.DotNet.Installer.Windows
         /// </summary>
         /// <param name="sourceFile">The source file to move.</param>
         /// <param name="destinationFile">The destination where the source file will be moved.</param>
-        private void MoveAndSecureFile(string sourceFile, string destinationFile)
+        /// <param name="log">The underlying setup log to use.</param>
+        public static void MoveAndSecureFile(string sourceFile, string destinationFile, ISetupLogger log = null)
         {
             if (!File.Exists(destinationFile))
             {
-                // See https://github.com/dotnet/sdk/issues/28450
-                FileAccessRetrier.RetryOnMoveAccessFailure(() => File.Move(sourceFile, destinationFile));
-                Log?.LogMessage($"Moved '{sourceFile}' to '{destinationFile}'");
+                FileAccessRetrier.RetryOnMoveAccessFailure(() =>
+                {
+                    // Moving the file preserves the owner SID and fails to inherit the WD ACE.
+                    File.Copy(sourceFile, destinationFile, overwrite: true);
+                    File.Delete(sourceFile);
+                });
+                log?.LogMessage($"Moved '{sourceFile}' to '{destinationFile}'");
 
                 FileInfo fi = new(destinationFile);
                 FileSecurity fs = new();
 
-                // Only set the owner, everything else should be inherited. Assuming the parent folder was not
-                // modified externally, the file's descriptor should either be
-                // O:BAG:DUD:(A;ID;0x1200a9;;;WD)(A;ID;FA;;;SY)(A;ID;FA;;;BA)(A;ID;0x1200a9;;;BU) or
-                // O:BAG:S-1-5-21-2047949552-857980807-821054962-513D:(A;ID;0x1200a9;;;WD)(A;ID;FA;;;SY)(A;ID;FA;;;BA)(A;ID;0x1200a9;;;BU)
-                // Note that all the access entries include the ID flag indicating they were inherited from the container.
+                // Set the owner and group to built-in administrators (BA). All other ACE values are inherited from
+                // the parent directory. See https://github.com/dotnet/sdk/issues/28450. If the directory's descriptor
+                // is correctly configured, we should end up with an inherited ACE for Everyone: (A;ID;0x1200a9;;;WD)
                 fs.SetOwner(s_AdministratorsSid);
+                fs.SetGroup(s_AdministratorsSid);
                 fi.SetAccessControl(fs);
             }
         }
@@ -224,8 +202,7 @@ namespace Microsoft.DotNet.Installer.Windows
             string packageCacheDirectory = GetPackageDirectory(packageId, packageVersion);
             payload = default;
 
-            string msiPath;
-            if (!TryGetMsiPathFromPackageData(packageCacheDirectory, out msiPath, out string manifestPath))
+            if (!TryGetMsiPathFromPackageData(packageCacheDirectory, out string msiPath, out string manifestPath))
             {
                 return false;
             }
@@ -263,6 +240,22 @@ namespace Microsoft.DotNet.Installer.Windows
 
             msiPath = possibleMsiPath;
             return true;
+        }
+
+        /// <summary>
+        /// Apply a standard set of access rules to the directory security descriptor. The owner and group will
+        /// be set to built-in Administrators. Full access is granted to built-in administators and SYSTEM with
+        /// read, execute, synchronize permssions for built-in users and Everyone.
+        /// </summary>
+        /// <param name="ds">The security descriptor to update.</param>
+        private static void SetDirectoryAccessRules(DirectorySecurity ds)
+        {
+            ds.SetOwner(s_AdministratorsSid);
+            ds.SetGroup(s_AdministratorsSid);
+            ds.SetAccessRule(s_AdministratorRule);
+            ds.SetAccessRule(s_LocalSystemRule);
+            ds.SetAccessRule(s_UsersRule);
+            ds.SetAccessRule(s_EveryoneRule);
         }
 
         /// <summary>
