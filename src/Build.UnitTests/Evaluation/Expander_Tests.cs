@@ -2806,6 +2806,38 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(expectedExpansion, result);
         }
 
+        [WindowsFullFrameworkOnlyTheory]
+        [InlineData("windows")]
+        [InlineData("linux")]
+        [InlineData("macos")]
+        [InlineData("osx")]
+        public void IsOSPlatformFullFramework(string platform)
+        {
+            string propertyFunction = $"$([System.OperatingSystem]::IsOSPlatform('{platform}'))";
+            string expected = platform.Equals("windows", StringComparison.OrdinalIgnoreCase) ? "True" : "False";
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expected);
+        }
+
+        [DotNetOnlyTheory]
+        [InlineData("windows")]
+        [InlineData("linux")]
+        [InlineData("macos")]
+        [InlineData("osx")]
+        public void IsOSPlatformDotNet(string platform)
+        {
+            string propertyFunction = $"$([System.OperatingSystem]::IsOSPlatform('{platform}'))";
+            bool result = false;
+#if NET5_0_OR_GREATER
+            result = System.OperatingSystem.IsOSPlatform(platform);
+#endif
+            string expected = result ? "True" : "False";
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expected);
+        }
+
         [Theory]
         [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('x', 1))", "3")]
         [InlineData("AString", "x12x456789x11", "$(AString.IndexOf('x45', 1))", "3")]

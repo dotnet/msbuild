@@ -365,6 +365,14 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("Microsoft.Build.Utilities.ToolLocationHelper", new Tuple<string, Type>("Microsoft.Build.Utilities.ToolLocationHelper, Microsoft.Build.Utilities.Core, Version=" + MSBuildConstants.CurrentAssemblyVersion + ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", null));
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.RuntimeInformation", runtimeInformationType);
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.OSPlatform", osPlatformType);
+#if !NET5_0_OR_GREATER
+                        // Add alternate type for System.OperatingSystem static methods.
+                        var operatingSystemType = new Tuple<string, Type>("Microsoft.Build.Framework.OperatingSystem, Microsoft.Build.Framework, Version=" + MSBuildConstants.CurrentAssemblyVersion + ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", null);
+                        availableStaticMethods.TryAdd("System.OperatingSystem", operatingSystemType);
+                        availableStaticMethods.TryAdd("Microsoft.Build.Framework.OperatingSystem", operatingSystemType);
+#else
+                        availableStaticMethods.TryAdd("System.OperatingSystem", new Tuple<string, Type>(null, typeof(OperatingSystem)));
+#endif
 
                         s_availableStaticMethods = availableStaticMethods;
                     }
