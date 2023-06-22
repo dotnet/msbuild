@@ -141,7 +141,7 @@
     </Dependency>
     <Dependency Name="System.ServiceProcess.ServiceController" Version="7.0.1">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
-      <Sha>f39e05a73c5b5394caf493ee1205af9b64024a47</Sha>
+      <Sha>5b20af47d99620150c53eaf5db8636fdf730b126</Sha>
     </Dependency>
     <Dependency Name="System.Text.Encoding.CodePages" Version="7.0.0">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
