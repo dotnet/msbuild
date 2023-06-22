@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -130,28 +131,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="indent">Depth to indent.</param>
         internal string IndentString(string s, int indent)
         {
-            // It's possible the event has a null message
-            if (s == null)
-            {
-                return string.Empty;
-            }
-
-            // This will never return an empty array.  The returned array will always
-            // have at least one non-null element, even if "s" is totally empty.
-            String[] subStrings = SplitStringOnNewLines(s);
-
-            StringBuilder result = new StringBuilder(
-                (subStrings.Length * indent) +
-                (subStrings.Length * Environment.NewLine.Length) +
-                s.Length);
-
-            for (int i = 0; i < subStrings.Length; i++)
-            {
-                result.Append(' ', indent).Append(subStrings[i]);
-                result.AppendLine();
-            }
-
-            return result.ToString();
+            return OptimizedStringIndenter.IndentString(s, indent);
         }
 
         /// <summary>
@@ -909,6 +889,195 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Helper class to indent all the lines of a potentially multi-line string with
+        /// minimal CPU and memory overhead.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="IndentString"/> is a functional replacement for the following code:
+        /// <code>
+        ///     string IndentString(string s, int indent)
+        ///     {
+        ///         string[] newLines = { "\r\n", "\n" };
+        ///         string[] subStrings = s.Split(newLines, StringSplitOptions.None);
+        ///     
+        ///         StringBuilder result = new StringBuilder(
+        ///             (subStrings.Length * indent) +
+        ///             (subStrings.Length * Environment.NewLine.Length) +
+        ///             s.Length);
+        ///     
+        ///         for (int i = 0; i &lt; subStrings.Length; i++)
+        ///         {
+        ///             result.Append(' ', indent).Append(subStrings[i]);
+        ///             result.AppendLine();
+        ///         }
+        ///     
+        ///         return result.ToString();
+        ///     }
+        /// </code>
+        /// On net472, benchmarks show that the optimized version runs in about 50-60% of the time
+        /// and has about 15% of the memory overhead of the code that it replaces.
+        /// <para>
+        /// On net7.0 (which has more optimizations than net472), the optimized version runs in
+        /// about 70-75% of the time and has about 30% of the memory overhead of the code that it
+        /// replaces.
+        /// </para>
+        /// </remarks>
+        private static class OptimizedStringIndenter
+        {
+#nullable enable
+            internal static string IndentString(string? s, int indent)
+            {
+                if (s is null)
+                {
+                    return string.Empty;
+                }
+
+                string newLine = Environment.NewLine;
+
+                using PooledSpan<StringSegment> segments = GetStringSegments(s);
+                int indentedStringLength = ComputeIndentedStringLength(segments, newLine, indent);
+                string indented = new string('\0', indentedStringLength);
+
+                unsafe
+                {
+#pragma warning disable SA1519 // Braces should not be omitted from multi-line child statement
+                    fixed (char* pInput = s)
+                    fixed (char* pIndented = indented)
+                    {
+                        char* pSegment = pInput;
+                        char* pOutput = pIndented;
+
+                        foreach (var segment in segments)
+                        {
+                            // append indent
+                            for (int i = 0; i < indent; i++)
+                            {
+                                *pOutput++ = ' ';
+                            }
+
+                            // append string segment
+                            int byteCount = segment.Length * sizeof(char);
+                            Buffer.MemoryCopy(pSegment, pOutput, byteCount, byteCount);
+                            pOutput += segment.Length;
+
+                            // append newLine
+                            for (int i = 0; i < newLine.Length; i++)
+                            {
+                                *pOutput++ = newLine[i];
+                            }
+
+                            // move to next segment
+                            pSegment += segment.TotalLength;
+                        }
+                    }
+#pragma warning restore SA1519 // Braces should not be omitted from multi-line child statement
+                }
+
+                return indented;
+
+                // local method
+                static int ComputeIndentedStringLength(PooledSpan<StringSegment> segments, string newLine, int indent)
+                {
+                    int indentedLength = segments.Length * (newLine.Length + indent);
+
+                    foreach (var segment in segments)
+                    {
+                        indentedLength += segment.Length;
+                    }
+
+                    return indentedLength;
+                }
+            }
+
+            private static PooledSpan<StringSegment> GetStringSegments(string input)
+            {
+                if (input.Length == 0)
+                {
+                    PooledSpan<StringSegment> emptyResult = new(1);
+                    emptyResult.Span[0] = new StringSegment(0, 0);
+                    return emptyResult;
+                }
+
+                int segmentCount = 1;
+                for (int i = 0; i < input.Length; i++)
+                {
+                    if (input[i] == '\n')
+                    {
+                        segmentCount++;
+                    }
+                }
+
+                PooledSpan<StringSegment> segments = new(segmentCount);
+                int start = 0;
+                int index = 0;
+
+                for (int i = 0; i < segmentCount; i++)
+                {
+                    while (index < input.Length && input[index] != '\n')
+                    {
+                        index++;
+                    }
+
+                    // the input string didn't end with a newline
+                    if (index == input.Length)
+                    {
+                        segments[i] = new StringSegment(index - start, 0);
+                        break;
+                    }
+
+                    int newLineLength = 1;
+                    bool endedWithReturnNewline = (index > 0) && (input[index - 1] == '\r');
+
+                    if (endedWithReturnNewline)
+                    {
+                        newLineLength++;
+                        index--;
+                    }
+
+                    segments[i] = new StringSegment(index - start, newLineLength);
+
+                    start = index += newLineLength;
+                }
+
+                return segments;
+            }
+
+            private readonly record struct StringSegment(int Length, int NewLineLength)
+            {
+                public int TotalLength => Length + NewLineLength;
+            }
+
+            private ref struct PooledSpan<T>
+            {
+                private static readonly ArrayPool<T> Pool = ArrayPool<T>.Shared;
+                private readonly T[] _pooledArray;
+
+                public PooledSpan(int length)
+                {
+                    _pooledArray = Pool.Rent(length);
+                    Array.Clear(_pooledArray, 0, length);
+                    Span = _pooledArray.AsSpan(0, length);
+                }
+
+                public void Dispose()
+                {
+                    Pool.Return(_pooledArray);
+                }
+
+                public Span<T> Span { get; }
+                public int Length => Span.Length;
+                public Span<T>.Enumerator GetEnumerator() => Span.GetEnumerator();
+
+                public T this[int index]
+                {
+                    get => Span[index];
+                    set => Span[index] = value;
+                }
+            }
+#nullable restore
         }
 
         #region eventHandlers
