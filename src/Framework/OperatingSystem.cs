@@ -22,41 +22,17 @@ namespace Microsoft.Build.Framework
         public static bool IsOSPlatformVersionAtLeast(string platform, int major, int minor = 0, int build = 0, int revision = 0)
             => IsOSPlatform(platform) && IsOSVersionAtLeast(major, minor, build, revision);
 
-        public static bool IsBrowser() => false;
-
-        public static bool IsWasi() => false;
-
         public static bool IsLinux() => false;
 
         public static bool IsFreeBSD() => false;
 
         public static bool IsFreeBSDVersionAtLeast(int major, int minor = 0, int build = 0, int revision = 0) => false;
 
-        public static bool IsAndroid() => false;
-
-        public static bool IsAndroidVersionAtLeast(int major, int minor = 0, int build = 0, int revision = 0) => false;
-
-        public static bool IsIOS() => false;
-
-        public static bool IsIOSVersionAtLeast(int major, int minor = 0, int build = 0) => false;
-
         public static bool IsMacOS() => false;
 
         public static bool IsOSXLike() => false;
 
         public static bool IsMacOSVersionAtLeast(int major, int minor = 0, int build = 0) => false;
-
-        public static bool IsMacCatalyst() => false;
-
-        public static bool IsMacCatalystVersionAtLeast(int major, int minor = 0, int build = 0) => false;
-
-        public static bool IsTvOS() => false;
-
-        public static bool IsTvOSVersionAtLeast(int major, int minor = 0, int build = 0) => false;
-
-        public static bool IsWatchOS() => false;
-
-        public static bool IsWatchOSVersionAtLeast(int major, int minor = 0, int build = 0) => false;
 
         public static bool IsWindows() => true;
 
