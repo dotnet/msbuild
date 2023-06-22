@@ -8,7 +8,7 @@ using System;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// System.OperatingSystem static methods were added in .Net 5.0.
+    /// System.OperatingSystem static methods were added in net5.0.
     /// This class create stand-in methods for net472 builds.
     /// Assumes only Windows is supported.
     /// </summary>
