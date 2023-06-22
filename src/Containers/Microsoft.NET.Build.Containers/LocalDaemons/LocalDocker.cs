@@ -8,17 +8,18 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.Logging;
 using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers;
 
 internal sealed class LocalDocker : ILocalDaemon
 {
-    private readonly Action<string> logger;
+    private readonly ILogger _logger;
 
-    public LocalDocker(Action<string> logger)
+    public LocalDocker(ILogger logger)
     {
-        this.logger = logger;
+        _logger = logger;
     }
 
     public async Task LoadAsync(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, CancellationToken cancellationToken)
@@ -80,13 +81,14 @@ internal sealed class LocalDocker : ILocalDaemon
             {
                 // we have errors, turn them into a string and log them
                 string messages = string.Join(Environment.NewLine, errorProperty.EnumerateArray());
-                logger($"The daemon server reported errors: {messages}");
+                _logger.LogInformation(Strings.LocalDocker_LocalDaemonErrors, messages);
                 return false;
             }
         }
         catch (Exception ex)
         {
-            logger($"Error while reading daemon config: {ex}");
+            _logger.LogInformation(Strings.LocalDocker_FailedToGetConfig, ex.Message);
+            _logger.LogTrace("Full information: {0}", ex);
             return false;
         }
     }

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.Logging;
 using Microsoft.NET.Build.Containers.Resources;
 using NuGet.RuntimeModel;
 using System.Diagnostics;
@@ -46,6 +47,9 @@ internal sealed class Registry
 
     private static readonly int s_defaultChunkSizeBytes = 1024 * 64;
 
+    private readonly HttpClient _client;
+    private readonly ILogger _logger;
+
     /// <summary>
     /// The name of the registry, which is the host name, optionally followed by a colon and the port number.
     /// This is used in user-facing error messages, and it should match what the user would manually enter as
@@ -53,9 +57,10 @@ internal sealed class Registry
     /// </summary>
     public string RegistryName { get; init; }
 
-    public Registry(Uri baseUri)
+    public Registry(Uri baseUri, ILogger logger)
     {
         BaseUri = baseUri;
+        _logger = logger;
         RegistryName = DeriveRegistryName(baseUri);
         _client = CreateClient();
     }
@@ -360,9 +365,14 @@ internal sealed class Registry
         int chunkCount = 0;
         int chunkStart = 0;
 
+        _logger.LogTrace("Uploading {0} bytes of content in chunks of {1} bytes.", contents.Length, chunkBackingStore.Length);
+
         while (contents.Position < contents.Length)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            _logger.LogTrace("Processing next chunk because current position {0} < content size {1}, chunk size: {2}.", contents.Position, contents.Length, chunkBackingStore.Length);
+
             int bytesRead = await contents.ReadAsync(chunkBackingStore, cancellationToken).ConfigureAwait(false);
 
             ByteArrayContent content = new (chunkBackingStore, offset: 0, count: bytesRead);
@@ -371,6 +381,8 @@ internal sealed class Registry
             // manual because ACR throws an error with the .NET type {"Range":"bytes 0-84521/*","Reason":"the Content-Range header format is invalid"}
             //    content.Headers.Add("Content-Range", $"0-{contents.Length - 1}");
             Debug.Assert(content.Headers.TryAddWithoutValidation("Content-Range", $"{chunkStart}-{chunkStart + bytesRead - 1}"));
+            
+            _logger.LogTrace("Uploading {0} bytes of content at {1}", bytesRead, patchUri);
 
             HttpRequestMessage patchMessage = new(HttpMethod.Patch, patchUri)
             {
@@ -379,12 +391,13 @@ internal sealed class Registry
             patchMessage.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
             HttpResponseMessage patchResponse = await client.SendAsync(patchMessage, cancellationToken).ConfigureAwait(false);
 
+            _logger.LogTrace("Received status code '{0}' from upload.", patchResponse.StatusCode);
+
             // Fail the upload if the response code is not Accepted (202) or if uploading to Amazon ECR which returns back Created (201).
             if (!(patchResponse.StatusCode == HttpStatusCode.Accepted || (IsAmazonECRRegistry && patchResponse.StatusCode == HttpStatusCode.Created)))
             {
-                var headers = patchResponse.Headers.ToString();
-                var detail = await patchResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-                string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"Chunked PATCH {patchUri}", patchResponse.StatusCode, headers + Environment.NewLine + detail);
+                await patchResponse.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
+                string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"PATCH {patchUri}", patchResponse.StatusCode);
                 throw new ApplicationException(errorMessage);
             }
 
@@ -427,9 +440,8 @@ internal sealed class Registry
         // Fail the upload if the response code is not Accepted (202) or if uploading to Amazon ECR which returns back Created (201).
         if (!(patchResponse.StatusCode == HttpStatusCode.Accepted || (IsAmazonECRRegistry && patchResponse.StatusCode == HttpStatusCode.Created)))
         {
-            var headers = patchResponse.Headers.ToString();
-            var detail = await patchResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"Whole PATCH {uploadUri}", patchResponse.StatusCode, headers + Environment.NewLine + detail);
+            await patchResponse.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
+            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"PATCH {uploadUri}", patchResponse.StatusCode);
             throw new ApplicationException(errorMessage);
         }
         return GetNextLocation(patchResponse);
@@ -444,9 +456,8 @@ internal sealed class Registry
 
         if (pushResponse.StatusCode != HttpStatusCode.Accepted)
         {
-            var headers = pushResponse.Headers.ToString();
-            var detail = await pushResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"POST {startUploadUri}", pushResponse.StatusCode, headers + Environment.NewLine + detail);
+            await pushResponse.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
+            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"POST {startUploadUri}", pushResponse.StatusCode);
             throw new ApplicationException(errorMessage);
         }
         cancellationToken.ThrowIfCancellationRequested();
@@ -474,7 +485,7 @@ internal sealed class Registry
         }
     }
 
-    private static async Task FinishUploadSessionAsync(string digest, HttpClient client, UriBuilder uploadUri, CancellationToken cancellationToken)
+    private async Task FinishUploadSessionAsync(string digest, HttpClient client, UriBuilder uploadUri, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -489,9 +500,8 @@ internal sealed class Registry
 
         if (finalizeResponse.StatusCode != HttpStatusCode.Created)
         {
-            var headers = finalizeResponse.Headers.ToString();
-            var detail = await finalizeResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"PUT {putUri}", finalizeResponse.StatusCode, headers + Environment.NewLine + detail);
+            await finalizeResponse.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
+            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"PUT {putUri}", finalizeResponse.StatusCode);
             throw new ApplicationException(errorMessage);
         }
     }
@@ -511,12 +521,16 @@ internal sealed class Registry
         // * start an upload session
         cancellationToken.ThrowIfCancellationRequested();
         var uploadUri = await StartUploadSessionAsync(repository, digest, client, cancellationToken).ConfigureAwait(false);
+        _logger.LogTrace("Started upload session for {0}", digest);
+
         // * upload the blob
         cancellationToken.ThrowIfCancellationRequested();
         var finalChunkUri = await UploadBlobContentsAsync(repository, digest, contents, client, uploadUri, cancellationToken).ConfigureAwait(false);
+        _logger.LogTrace("Uploaded content for {0}", digest);
         // * finish the upload session
         cancellationToken.ThrowIfCancellationRequested();
         await FinishUploadSessionAsync(digest, client, finalChunkUri, cancellationToken).ConfigureAwait(false);
+        _logger.LogTrace("Finalized upload session for {0}", digest);
 
     }
 
@@ -527,8 +541,6 @@ internal sealed class Registry
 
         return response.StatusCode == HttpStatusCode.OK;
     }
-
-    private readonly HttpClient _client;
 
     private HttpClient GetClient()
     {
@@ -571,10 +583,10 @@ internal sealed class Registry
             cancellationToken.ThrowIfCancellationRequested();
             string digest = descriptor.Digest;
 
-            logProgressMessage($"Uploading layer {digest} to {destinationRegistry.RegistryName}");
+            _logger.LogInformation(Strings.Registry_LayerUploadStarted, digest, destinationRegistry.RegistryName);
             if (await destinationRegistry.BlobAlreadyUploadedAsync(destination.Repository, digest, client, cancellationToken).ConfigureAwait(false))
             {
-                logProgressMessage($"Layer {digest} already existed");
+                _logger.LogInformation(Strings.Registry_LayerExists, digest);
                 return;
             }
 
@@ -591,7 +603,7 @@ internal sealed class Registry
                     await sourceRegistry.DownloadBlobAsync(source.Repository, descriptor, cancellationToken).ConfigureAwait(false);
                     // Then push it to the destination registry
                     await destinationRegistry.PushAsync(Layer.FromDescriptor(descriptor), destination.Repository, logProgressMessage, cancellationToken).ConfigureAwait(false);
-                    logProgressMessage($"Finished uploading layer {digest} to {destinationRegistry.RegistryName}");
+                    _logger.LogInformation(Strings.Registry_LayerUploaded, digest, destinationRegistry.RegistryName);
                 }
                 else {
                     throw new NotImplementedException(Resource.GetString(nameof(Strings.MissingLinkToRegistry)));
@@ -615,14 +627,14 @@ internal sealed class Registry
         using (MemoryStream stringStream = new MemoryStream(Encoding.UTF8.GetBytes(builtImage.Config)))
         {
             var configDigest = builtImage.ImageDigest;
-            logProgressMessage($"Uploading config to registry at blob {configDigest}");
+            _logger.LogInformation(Strings.Registry_ConfigUploadStarted, configDigest);
             await UploadBlobAsync(destination.Repository, configDigest, stringStream, cancellationToken).ConfigureAwait(false);
-            logProgressMessage($"Uploaded config to registry");
+            _logger.LogInformation(Strings.Registry_ConfigUploaded);
         }
 
         cancellationToken.ThrowIfCancellationRequested();
         var manifestDigest = builtImage.Manifest.GetDigest();
-        logProgressMessage($"Uploading manifest to registry {RegistryName} as blob {manifestDigest}");
+        _logger.LogInformation(Strings.Registry_ManifestUploadStarted, RegistryName, manifestDigest);
         string jsonString = JsonSerializer.SerializeToNode(builtImage.Manifest)?.ToJsonString() ?? "";
         HttpContent manifestUploadContent = new StringContent(jsonString);
         manifestUploadContent.Headers.ContentType = new MediaTypeHeaderValue(DockerManifestV2);
@@ -632,10 +644,10 @@ internal sealed class Registry
         {
             throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryPushFailed)), putResponse.RequestMessage?.RequestUri?.ToString(), jsonString);
         }
-        logProgressMessage($"Uploaded manifest to {RegistryName}");
+        _logger.LogInformation(Strings.Registry_ManifestUploaded, RegistryName);
 
         cancellationToken.ThrowIfCancellationRequested();
-        logProgressMessage($"Uploading tag {destination.Tag} to {RegistryName}");
+        _logger.LogInformation(Strings.Registry_TagUploadStarted, destination.Tag, RegistryName);
         var putResponse2 = await client.PutAsync(new Uri(BaseUri, $"/v2/{destination.Repository}/manifests/{destination.Tag}"), manifestUploadContent, cancellationToken).ConfigureAwait(false);
 
         if (!putResponse2.IsSuccessStatusCode)
@@ -643,6 +655,6 @@ internal sealed class Registry
             throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryPushFailed)), putResponse2.RequestMessage?.RequestUri?.ToString(), jsonString);
         }
 
-        logProgressMessage($"Uploaded tag {destination.Tag} to {RegistryName}");
+        _logger.LogInformation(Strings.Registry_TagUploaded, destination.Tag, RegistryName);
     }
 }
