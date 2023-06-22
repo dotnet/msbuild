@@ -24,7 +24,6 @@ namespace Microsoft.DotNet.Cli
         public static readonly string DOTNET_CLI_FORCE_UTF8_ENCODING = nameof(DOTNET_CLI_FORCE_UTF8_ENCODING);
         public static readonly string TELEMETRY_OPTOUT = "DOTNET_CLI_TELEMETRY_OPTOUT";
         public static readonly string DOTNET_ROOT = "DOTNET_ROOT";
-		
         public static readonly string DOTNET_MSBUILD_SDK_RESOLVER_ENABLE_LOG = "DOTNET_MSBUILD_SDK_RESOLVER_ENABLE_LOG";
         public static readonly string DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR = "DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR";
         public static readonly string DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER = "DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER";
