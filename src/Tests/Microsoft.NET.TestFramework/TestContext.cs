@@ -98,6 +98,10 @@ namespace Microsoft.NET.TestFramework
                 
                 testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets"), AppContext.BaseDirectory);
             }
+            else
+            {
+                testContext.TestAssetsDirectory = Path.Combine(AppContext.BaseDirectory, "Assets");
+            }
 
             string repoRoot = null;
 #if DEBUG
