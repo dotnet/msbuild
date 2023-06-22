@@ -44,6 +44,8 @@ namespace Microsoft.Build.Framework
 
         internal override void WriteToStream(BinaryWriter writer)
         {
+            base.WriteToStream(writer);
+
             writer.Write7BitEncodedInt((int)LoadingContext);
             writer.WriteTimestamp(RawTimestamp);
             writer.WriteOptionalBuildEventContext(BuildEventContext);
@@ -56,6 +58,8 @@ namespace Microsoft.Build.Framework
 
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
+            base.CreateFromStream(reader, version);
+
             LoadingContext = (AssemblyLoadingContext)reader.Read7BitEncodedInt();
             RawTimestamp = reader.ReadTimestamp();
             BuildEventContext = reader.ReadOptionalBuildEventContext();
