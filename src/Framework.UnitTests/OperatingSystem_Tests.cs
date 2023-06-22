@@ -40,6 +40,7 @@ namespace Microsoft.Build.Framework.UnitTests
         public void IsWindowsVersionAtLeast()
         {
             Microsoft.Build.Framework.OperatingSystem.IsWindowsVersionAtLeast(4).ShouldBeTrue();
+            Microsoft.Build.Framework.OperatingSystem.IsWindowsVersionAtLeast(999).ShouldBeFalse();
         }
 
         [WindowsFullFrameworkOnlyFact]
