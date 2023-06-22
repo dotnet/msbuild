@@ -9,7 +9,7 @@ namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// System.OperatingSystem static methods were added in net5.0.
-    /// This class create stand-in methods for net472 builds.
+    /// This class creates stand-in methods for net472 builds.
     /// Assumes only Windows is supported.
     /// </summary>
     internal static class OperatingSystem
