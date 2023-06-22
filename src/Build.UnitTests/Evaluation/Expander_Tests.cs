@@ -2806,31 +2806,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(expectedExpansion, result);
         }
 
-        [WindowsFullFrameworkOnlyTheory]
+        [Theory]
         [InlineData("windows")]
         [InlineData("linux")]
         [InlineData("macos")]
         [InlineData("osx")]
-        public void IsOSPlatformFullFramework(string platform)
-        {
-            string propertyFunction = $"$([System.OperatingSystem]::IsOSPlatform('{platform}'))";
-            string expected = platform.Equals("windows", StringComparison.OrdinalIgnoreCase) ? "True" : "False";
-            var pg = new PropertyDictionary<ProjectPropertyInstance>();
-            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
-            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expected);
-        }
-
-        [DotNetOnlyTheory]
-        [InlineData("windows")]
-        [InlineData("linux")]
-        [InlineData("macos")]
-        [InlineData("osx")]
-        public void IsOSPlatformDotNet(string platform)
+        public void IsOSPlatform(string platform)
         {
             string propertyFunction = $"$([System.OperatingSystem]::IsOSPlatform('{platform}'))";
             bool result = false;
 #if NET5_0_OR_GREATER
             result = System.OperatingSystem.IsOSPlatform(platform);
+#else
+            result = Microsoft.Build.Framework.OperatingSystem.IsOSPlatform(platform);
 #endif
             string expected = result ? "True" : "False";
             var pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2838,38 +2826,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
             expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expected);
         }
 
-        [WindowsFullFrameworkOnlyTheory]
-        [InlineData("windows", 4)]
-        [InlineData("linux", 0)]
-        [InlineData("macos", 10)]
-        [InlineData("macos", 999)]
-        [InlineData("osx", 0)]
-        public void IsOSPlatformVersionAtLeastFullFramework(string platform, int major)
-        {
-            string propertyFunction = $"$([System.OperatingSystem]::IsOSPlatformVersionAtLeast('{platform}', {major}, 0, 0, 0))";
-            bool result = false;
-#if !NET5_0_OR_GREATER
-            result = Microsoft.Build.Framework.OperatingSystem.IsOSPlatformVersionAtLeast(platform, major, 0, 0, 0);
-#endif
-            string expected = result ? "True" : "False";
-            var pg = new PropertyDictionary<ProjectPropertyInstance>();
-            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
-            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expected);
-        }
-
-        [DotNetOnlyTheory]
+        [Theory]
         [InlineData("windows", 4)]
         [InlineData("windows", 999)]
         [InlineData("linux", 0)]
         [InlineData("macos", 10)]
         [InlineData("macos", 999)]
         [InlineData("osx", 0)]
-        public void IsOSPlatformVersionAtLeastDotNet(string platform, int major)
+        public void IsOSPlatformVersionAtLeast(string platform, int major)
         {
             string propertyFunction = $"$([System.OperatingSystem]::IsOSPlatformVersionAtLeast('{platform}', {major}, 0, 0, 0))";
             bool result = false;
 #if NET5_0_OR_GREATER
             result = System.OperatingSystem.IsOSPlatformVersionAtLeast(platform, major, 0, 0, 0);
+#else
+            result = Microsoft.Build.Framework.OperatingSystem.IsOSPlatformVersionAtLeast(platform, major, 0, 0, 0);
 #endif
             string expected = result ? "True" : "False";
             var pg = new PropertyDictionary<ProjectPropertyInstance>();
