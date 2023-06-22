@@ -26,7 +26,7 @@ internal sealed class Registry
     /// <remarks>
     /// Relates to https://github.com/dotnet/sdk-container-builds/pull/383#issuecomment-1466408853
     /// </remarks>
-    private static readonly bool s_chunkedUploadEnabled = Env.GetEnvironmentVariableAsBool(ContainerHelpers.ChunkedUploadEnabled, defaultValue: false);
+    private static readonly bool s_ForceChunkedUploadEnabled = Env.GetEnvironmentVariableAsBool(ContainerHelpers.ForceChunkedUploadEnabled, defaultValue: false);
 
     /// <summary>
     /// When chunking is enabled, allows explicit control over the size of the chunks uploaded
@@ -129,11 +129,6 @@ internal sealed class Registry
     public bool IsGoogleArtifactRegistry {
         get => RegistryName.EndsWith("-docker.pkg.dev", StringComparison.Ordinal);
     }
-
-    /// <summary>
-    /// Google Artifact Registry doesn't support chunked upload, but Amazon ECR, GitHub Packages, and DockerHub do. We want the capability check to be agnostic to the target.
-    /// </summary>
-    private bool SupportsChunkedUpload => (!IsGoogleArtifactRegistry || IsAmazonECRRegistry || IsGithubPackageRegistry || IsDockerHub) && s_chunkedUploadEnabled;
 
     /// <summary>
     /// Pushing to ECR uses a much larger chunk size. To avoid getting too many socket disconnects trying to do too many
@@ -461,6 +456,13 @@ internal sealed class Registry
     private Task<UriBuilder> UploadBlobContentsAsync(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+
+        if (s_ForceChunkedUploadEnabled)
+        {
+            //the chunked upload was forced in configuration
+            return UploadBlobChunkedAsync(repository, digest, contents, client, uploadUri, cancellationToken);
+        }
+
         try
         {
             return UploadBlobWholeAsync(repository, digest, contents, client, uploadUri, cancellationToken);
