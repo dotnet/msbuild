@@ -99,7 +99,6 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 throw new GlobalJsonFormatException(Strings.IncompleteDocument);
             }
 
-
             /// <summary>
             /// this expects the reader to be before the value token, and leaves it on the last token of the value
             /// </summary>
