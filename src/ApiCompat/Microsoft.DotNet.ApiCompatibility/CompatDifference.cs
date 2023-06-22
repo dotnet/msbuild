@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// </summary>
         /// <param name="left">The metadata information of the left comparison side.</param>
         /// <param name="right">The metadata information of the right comparison side.</param>
-        /// <param name="id"><see cref="string"/> representing the diagnostic ID.</param>
+        /// <param name="diagnosticId"><see cref="string"/> representing the diagnostic ID.</param>
         /// <param name="message"><see cref="string"/> message describing the difference.</param>
         /// <param name="type"><see cref="DifferenceType"/> to describe the type of the difference.</param>
         /// <param name="member"><see cref="ISymbol"/> for which the difference is associated to.</param>
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// </summary>
         /// <param name="left">The metadata information of the left comparison side.</param>
         /// <param name="right">The metadata information of the right comparison side.</param>
-        /// <param name="id"><see cref="string"/> representing the diagnostic ID.</param>
+        /// <param name="diagnosticId"><see cref="string"/> representing the diagnostic ID.</param>
         /// <param name="message"><see cref="string"/> message describing the difference.</param>
         /// <param name="type"><see cref="DifferenceType"/> to describe the type of the difference.</param>
         /// <param name="memberId"><see cref="string"/> containing the member ID for which the difference is associated to.</param>

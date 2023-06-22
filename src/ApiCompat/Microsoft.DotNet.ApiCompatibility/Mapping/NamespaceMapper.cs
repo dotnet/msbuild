@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
@@ -16,27 +16,29 @@ namespace Microsoft.DotNet.ApiCompatibility.Mapping
     {
         private readonly Dictionary<ITypeSymbol, ITypeMapper> _types;
         private bool _expandedTree = false;
-        private readonly bool _typeforwardsOnly;
+        private readonly bool _typeForwardsOnly;
 
         /// <inheritdoc />
         public IAssemblyMapper ContainingAssembly { get; }
 
         /// <summary>
-        /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
+        /// Instantiates a namespace mapper.
         /// </summary>
-        /// <param name="settings">The settings used to diff the elements in the mapper.</param>
+        /// <param name="ruleRunner">The <see cref="IRuleRunner"/> that compares the namespace mapper elements.</param>
+        /// <param name="settings">The <see cref="IMapperSettings"/> used to compare the namespace mapper elements.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
-        /// <param name="typeforwardsOnly">Indicates if <see cref="GetTypes"/> should only return type forwards.</param>
+        /// <param name="containingAssembly">The containing <see cref="IAssemblyMapper"/>.</param>
+        /// <param name="typeForwardsOnly">Indicates if <see cref="GetTypes"/> should return forwarded types only.</param>
         public NamespaceMapper(IRuleRunner ruleRunner,
             IMapperSettings settings,
             int rightSetSize,
             IAssemblyMapper containingAssembly,
-            bool typeforwardsOnly = false)
+            bool typeForwardsOnly = false)
             : base(ruleRunner, settings, rightSetSize)
         {
             ContainingAssembly = containingAssembly;
             _types = new Dictionary<ITypeSymbol, ITypeMapper>(Settings.SymbolEqualityComparer);
-            _typeforwardsOnly = typeforwardsOnly;
+            _typeForwardsOnly = typeForwardsOnly;
         }
 
         /// <inheritdoc />
@@ -44,12 +46,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Mapping
         {
             if (!_expandedTree)
             {
-                // if the typeforwardsOnly flag is specified it means this namespace is already
+                // if the _typeForwardsOnly flag is specified it means this namespace is already
                 // populated with the resolved type forwards by the assembly mapper and that we 
                 // didn't find this namespace in the initial assembly. So we avoid getting the types
                 // as that would return the types defined in the assembly where the type forwards
                 // were resolved from.
-                if (!_typeforwardsOnly)
+                if (!_typeForwardsOnly)
                 {
                     AddOrCreateMappers(Left, ElementSide.Left);
                     for (int i = 0; i < Right.Length; i++)

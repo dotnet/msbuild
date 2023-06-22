@@ -2,7 +2,7 @@ export function receiveHotReload() {
   return BINDING.js_to_mono_obj(new Promise((resolve) => receiveHotReloadAsync().then(resolve(0))));
 }
 
-async function receiveHotReloadAsync() {
+export async function receiveHotReloadAsync() {
   const cache = window.sessionStorage.getItem('blazor-webassembly-cache');
   let headers;
   if (cache) {
@@ -17,7 +17,7 @@ async function receiveHotReloadAsync() {
       } catch (error) {
         console.warn(error);
         return;
-      } 
+      }
     }
   }
 }

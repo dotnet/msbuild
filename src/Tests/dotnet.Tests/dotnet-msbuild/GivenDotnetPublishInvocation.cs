@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using System.Linq;
@@ -28,11 +28,13 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [Theory]
         [InlineData(new string[] { }, "")]
         [InlineData(new string[] { "-r", "<rid>" }, "-property:RuntimeIdentifier=<rid> -property:_CommandLineDefinedRuntimeIdentifier=true")]
+        [InlineData(new string[] { "-r", "linux-amd64" }, "-property:RuntimeIdentifier=linux-x64 -property:_CommandLineDefinedRuntimeIdentifier=true")]
         [InlineData(new string[] { "--runtime", "<rid>" }, "-property:RuntimeIdentifier=<rid> -property:_CommandLineDefinedRuntimeIdentifier=true")]
         [InlineData(new string[] { "--use-current-runtime" }, "-property:UseCurrentRuntimeIdentifier=True")]
         [InlineData(new string[] { "--ucr" }, "-property:UseCurrentRuntimeIdentifier=True")]
         [InlineData(new string[] { "-o", "<publishdir>" }, "-property:PublishDir=<cwd><publishdir> -property:_CommandLineDefinedOutputPath=true")]
         [InlineData(new string[] { "--output", "<publishdir>" }, "-property:PublishDir=<cwd><publishdir> -property:_CommandLineDefinedOutputPath=true")]
+        [InlineData(new string[] { "--artifacts-path", "foo" }, "-property:ArtifactsPath=<cwd>foo")]
         [InlineData(new string[] { "-c", "<config>" }, "-property:Configuration=<config> -property:DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE=true")]
         [InlineData(new string[] { "--configuration", "<config>" }, "-property:Configuration=<config> -property:DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE=true")]
         [InlineData(new string[] { "--version-suffix", "<versionsuffix>" }, "-property:VersionSuffix=<versionsuffix>")]

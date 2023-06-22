@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
@@ -25,6 +25,7 @@ using Xunit.Abstractions;
 using Microsoft.NET.Build.Tasks;
 using NuGet.Versioning;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -612,40 +613,53 @@ public static class Program
             outputDirectory.Should().HaveFile(Path.Combine("fr", "Humanizer.resources.dll"));
         }
 
-        [Fact]
-        public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path(bool useStandardOutputPaths)
         {
             var testProject = new TestProject()
             {
                 Name = "OutputPathCasing",
-                TargetFrameworks = "ignored",
+                //  Force the actual TargetFramework to be included in the artifact pivots
+                TargetFrameworks = "ignored;ignored2",
                 IsExe = true
             };
 
             string[] extraArgs = new[] { $"/p:TargetFramework={ToolsetInfo.CurrentTargetFramework.ToUpper()}" };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: useStandardOutputPaths.ToString());
 
             var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
+                .WithEnvironmentVariable("UseStandardOutputPaths", useStandardOutputPaths.ToString())
                 .Execute(extraArgs)
                 .Should()
                 .Pass();
 
-            string outputFolderWithConfiguration = Path.Combine(buildCommand.ProjectRootPath, "bin", "Debug");
+            if (useStandardOutputPaths)
+            {
+                buildCommand.GetOutputDirectory().Should().Exist();
 
-            Directory.GetDirectories(outputFolderWithConfiguration)
-                .Select(Path.GetFileName)
-                .Should()
-                .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
+                buildCommand.GetIntermediateDirectory().Should().Exist();
+            }
+            else
+            {
+                string outputFolderWithConfiguration = Path.Combine(buildCommand.ProjectRootPath, "bin", "Debug");
 
-            string intermediateFolderWithConfiguration = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "Debug");
+                Directory.GetDirectories(outputFolderWithConfiguration)
+                    .Select(Path.GetFileName)
+                    .Should()
+                    .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
 
-            Directory.GetDirectories(intermediateFolderWithConfiguration)
-                .Select(Path.GetFileName)
-                .Should()
-                .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
+                string intermediateFolderWithConfiguration = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "Debug");
+
+                Directory.GetDirectories(intermediateFolderWithConfiguration)
+                    .Select(Path.GetFileName)
+                    .Should()
+                    .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
+            }
         }
 
         [Fact]
@@ -819,7 +833,8 @@ class Program
                 Name = "GenerateFilesTest",
                 TargetFrameworks = TFM,
                 RuntimeIdentifier = runtimeIdentifier,
-                IsExe = true
+                IsExe = true,
+                SelfContained = "true"
             };
 
             var testAsset = _testAssetsManager
@@ -909,6 +924,108 @@ class Program
                 File.Exists(refPath)
                     .Should()
                     .BeTrue();
+            }
+        }
+
+        [Theory]
+        // Non-portable RID should warn
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "ubuntu.22.04-x64" }, true, true, null, true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "ubuntu.22.04-x64" }, true, false, null, true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "ubuntu.22.04-x64" }, false, true, null, true)]
+        // Non-portable and portable RIDs should warn
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "ubuntu.22.04-x64", "win7-x86", "unix" }, true, true, null, true)]
+        // Portable RIDs only should not warn
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "win-x86", "linux", "linux-musl-x64", "osx-arm64", "unix" }, true, true, null, false)]
+        // No RID assets should not warn
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new string[] { }, false, false, null, false)]
+        // Below .NET 8 should not warn
+        [InlineData("net7.0", new string[] { "ubuntu.22.04-x64", "win7-x86" }, true, true, null, false)]
+        // Explicitly set to use RID graph should not warn
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "alpine-x64" }, true, true, true, false)]
+        // Explicitly set to not use RID graph should warn
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "alpine-x64" }, true, true, false, true)]
+        public void It_warns_on_nonportable_rids(string targetFramework, string[] rids, bool addLibAssets, bool addNativeAssets, bool? useRidGraph, bool shouldWarn)
+        {
+            var packageProject = new TestProject()
+            {
+                Name = "WithRidAssets",
+                TargetFrameworks = targetFramework,
+            };
+
+            // Add assets for each RID. The test just needs the asset to exist, so it can just copy same output assembly.
+            foreach (string rid in rids)
+            {
+                if (addLibAssets)
+                {
+                    packageProject.AddItem("None",
+                        new Dictionary<string, string>()
+                        {
+                        { "Include", $"$(TargetPath)" },
+                        { "Pack", "true" },
+                        { "PackagePath", $@"runtimes\{rid}\lib\$(TargetFramework)" }
+                        });
+                }
+
+                if (addNativeAssets)
+                {
+                    packageProject.AddItem("None",
+                        new Dictionary<string, string>()
+                        {
+                            { "Include", $"$(TargetPath)" },
+                            { "Pack", "true" },
+                            { "PackagePath", $@"runtimes\{rid}\native" }
+                        });
+                }
+            }
+
+            // Identifer based on test inputs to create test assets that are unique for each test case
+            string assetIdentifier = $"{targetFramework}{string.Join(null, rids)}{addLibAssets}{addNativeAssets}{useRidGraph}{shouldWarn}";
+
+            var packCommand = new PackCommand(_testAssetsManager.CreateTestProject(packageProject, assetIdentifier));
+            packCommand.Execute().Should().Pass();
+            var package = new TestPackageReference(packageProject.Name, "1.0.0", packCommand.GetNuGetPackage());
+
+            var testProject = new TestProject()
+            {
+                Name = "NonPortableRid",
+                TargetFrameworks = targetFramework,
+                IsExe = true
+            };
+
+            // Reference the package, add it to restore sources, and use a test-specific packages folder 
+            testProject.PackageReferences.Add(package);
+            testProject.AdditionalProperties["RestoreAdditionalProjectSources"] = Path.GetDirectoryName(package.NupkgPath);
+            testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
+
+            // The actual list comes from BundledVersions.props. For testing, we conditionally add a
+            // subset of the list if it isn't already defined (so running on an older version)
+            testProject.AddItem("_KnownRuntimeIdentiferPlatforms",
+                new Dictionary<string, string>()
+                {
+                    { "Include", "unix" },
+                    { "Condition", "'@(_KnownRuntimeIdentiferPlatforms)'==''" }
+                });
+
+            if (useRidGraph.HasValue)
+            {
+                testProject.AddItem("RuntimeHostConfigurationOption",
+                    new Dictionary<string, string>()
+                    {
+                    { "Include", "System.Runtime.Loader.UseRidGraph" },
+                    { "Value", useRidGraph.Value.ToString() },
+                    });
+            }
+
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject, assetIdentifier);
+            var result = new BuildCommand(testAsset).Execute();
+            result.Should().Pass();
+            if (shouldWarn)
+            {
+                result.Should().HaveStdOutMatching($"NETSDK1206.*{package.ID}");
+            }
+            else
+            {
+                result.Should().NotHaveStdOutContaining("NETSDK1206");
             }
         }
     }

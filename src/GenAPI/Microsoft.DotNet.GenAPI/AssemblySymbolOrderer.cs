@@ -9,48 +9,38 @@ using Microsoft.CodeAnalysis;
 namespace Microsoft.DotNet.GenAPI
 {
     /// <summary>
-    /// Provides ordering for namespaces, types and members.
+    /// Provides extension methods for ordering namespace, type and member symbols.
     /// </summary>
     public static class AssemblySymbolOrderer
     {
         /// <summary>
-        /// Sorts the elements of a INamespaceSymbol.
+        /// Sorts <see cref="INamespaceSymbol" /> elements.
         /// </summary>
-        /// <param name="namespaces">List of namespaces to be sorted.</param>
+        /// <param name="namespaceSymbols">List of namespaces to be sorted.</param>
         /// <returns>Returns namespaces in sorted order.</returns>
-        public static IEnumerable<INamespaceSymbol> Order(this IEnumerable<INamespaceSymbol> namespaces)
-        {
-            return namespaces.OrderBy(s => s.GetDocumentationCommentId(), StringComparer.OrdinalIgnoreCase);
-        }
+        public static IEnumerable<INamespaceSymbol> Order(this IEnumerable<INamespaceSymbol> namespaceSymbols) =>
+            namespaceSymbols.OrderBy(s => s.GetDocumentationCommentId(), StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Sorts the elements of a ITypeSymbol.
+        /// Sorts <see cref="ITypeSymbol" /> elements.
         /// </summary>
-        /// <param name="namespaces">List of TypeMembers to be sorted.</param>
+        /// <param name="typeSymbols">List of TypeMembers to be sorted.</param>
         /// <returns>Returns TypeMembers in sorted order.</returns>
-        public static IEnumerable<T> Order<T>(this IEnumerable<T> symbols) where T : ITypeSymbol
-        {
-            return symbols.OrderBy(s => s.GetDocumentationCommentId(), StringComparer.OrdinalIgnoreCase);
-        }
+        public static IEnumerable<T> Order<T>(this IEnumerable<T> typeSymbols) where T : ITypeSymbol =>
+            typeSymbols.OrderBy(s => s.GetDocumentationCommentId(), StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Sorts the elements of a ISymbol.
+        /// Sorts <see cref="ISymbol" /> elements.
         /// </summary>
-        /// <param name="namespaces">List of Members to be sorted.</param>
-        /// <returns>Returns Members in sorted order.</returns>
-        public static IEnumerable<ISymbol> Order(this IEnumerable<ISymbol> members)
-        {
-            if (members is IOrderedEnumerable<ITypeSymbol> orderedTypeDefinitionMembers)
-            {
-                return orderedTypeDefinitionMembers.ThenBy(s => s.GetDocumentationCommentId(), StringComparer.OrdinalIgnoreCase);
-            }
+        /// <param name="symbols">List of symbols to be sorted.</param>
+        /// <returns>Returns symbols in sorted order.</returns>
+        public static IEnumerable<ISymbol> Order(this IEnumerable<ISymbol> symbols) =>
+            symbols is IOrderedEnumerable<ITypeSymbol> orderedTypeDefinitionMembers ?
+            orderedTypeDefinitionMembers.ThenBy(s => s.GetDocumentationCommentId(), StringComparer.OrdinalIgnoreCase) :
+            symbols.OrderBy(s => (GetMemberOrder(s), s.GetDocumentationCommentId(), StringComparer.OrdinalIgnoreCase));
 
-            return members.OrderBy(s => (GetMemberOrder(s), s.GetDocumentationCommentId(), StringComparer.OrdinalIgnoreCase));
-        }
-
-        private static int GetMemberOrder(ISymbol symbol)
-        {
-            return symbol switch
+        private static int GetMemberOrder(ISymbol symbol) =>
+            symbol switch
             {
                 IFieldSymbol fieldSymbol when fieldSymbol.ContainingType.TypeKind == TypeKind.Enum
                     => (int)Convert.ToInt64(fieldSymbol.ConstantValue),
@@ -61,6 +51,5 @@ namespace Microsoft.DotNet.GenAPI
                 IMethodSymbol => 4,
                 _ => 5
             };
-        }
     }
 }

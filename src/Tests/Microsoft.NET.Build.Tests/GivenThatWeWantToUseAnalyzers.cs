@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using Microsoft.NET.TestFramework;
@@ -41,6 +41,28 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
+            VerifyRequestDelegateGeneratorIsUsed(asset, isEnabled);
+            VerifyInterceptorsFeatureEnabled(asset, isEnabled);
+        }
+
+        [Fact]
+        public void It_enables_requestdelegategenerator_for_PublishAot()
+        {
+            var asset = _testAssetsManager
+                .CopyTestAsset("WebApp")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    project.Root.Add(new XElement(ns + "PropertyGroup", new XElement("PublishAot", "true")));
+                });
+
+            VerifyRequestDelegateGeneratorIsUsed(asset, expectEnabled: true);
+            VerifyInterceptorsFeatureEnabled(asset, expectEnabled: true);
+        }
+
+        private void VerifyRequestDelegateGeneratorIsUsed(TestAsset asset, bool? expectEnabled)
+        {
             var command = new GetValuesCommand(
                 Log,
                 asset.Path,
@@ -55,7 +77,26 @@ namespace Microsoft.NET.Build.Tests
 
             var analyzers = command.GetValues();
 
-            Assert.Equal(isEnabled ?? false, analyzers.Any(analyzer => analyzer.Contains("Microsoft.AspNetCore.Http.Generators.dll")));
+            Assert.Equal(expectEnabled ?? false, analyzers.Any(analyzer => analyzer.Contains("Microsoft.AspNetCore.Http.RequestDelegateGenerator.dll")));
+        }
+
+        private void VerifyInterceptorsFeatureEnabled(TestAsset asset, bool? expectEnabled)
+        {
+            var command = new GetValuesCommand(
+                Log,
+                asset.Path,
+                ToolsetInfo.CurrentTargetFramework,
+                "Features",
+                GetValuesCommand.ValueType.Property);
+
+            command
+                .WithWorkingDirectory(asset.Path)
+                .Execute()
+                .Should().Pass();
+
+            var features = command.GetValues();
+
+            Assert.Equal(expectEnabled ?? false, features.Any(feature => feature.Contains("InterceptorsPreview")));
         }
 
         [Theory]
@@ -89,7 +130,7 @@ namespace Microsoft.NET.Build.Tests
 
             command
                 .WithWorkingDirectory(asset.Path)
-                .Execute("/bl")
+                .Execute()
                 .Should().Pass();
 
             var analyzers = command.GetValues();
@@ -108,7 +149,8 @@ namespace Microsoft.NET.Build.Tests
                                 ("microsoft.dependencyvalidation.analyzers", "0.9.0", "analyzers/dotnet/Microsoft.DependencyValidation.Analyzers.dll"),
                                 ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/Microsoft.Interop.LibraryImportGenerator.dll"),
                                 ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/Microsoft.Interop.JavaScript.JSImportGenerator.dll"),
-                                ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/Microsoft.Interop.SourceGeneration.dll")
+                                ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/Microsoft.Interop.SourceGeneration.dll"),
+                                ("microsoft.netcore.app.ref", (string)null, "analyzers/dotnet/cs/Microsoft.Interop.ComInterfaceGenerator.dll")
                             }
                         );
                     break;

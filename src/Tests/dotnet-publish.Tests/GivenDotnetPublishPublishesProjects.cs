@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "publish", $"{testAppName}.dll");
+            var outputDll = Path.Combine(OutputPathCalculator.FromProject(testProjectDirectory).GetPublishDirectory(configuration: configuration), $"{testAppName}.dll");
 
             new DotnetCommand(Log)
                 .Execute(outputDll)
@@ -309,7 +309,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
-            return new DirectoryInfo(Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, rid ?? "", "publish"));
+            return new DirectoryInfo(OutputPathCalculator.FromProject(testProjectDirectory).GetPublishDirectory(configuration: configuration, runtimeIdentifier: rid));
         }
 
         [Fact]
@@ -331,7 +331,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
-            var outputProgram = Path.Combine(rootDir, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "publish", $"TestAppSimple.dll");
+            var outputProgram = Path.Combine(OutputPathCalculator.FromProject(rootDir).GetPublishDirectory(configuration: configuration), $"TestAppSimple.dll");
 
             new DotnetCommand(Log, outputProgram)
                 .Execute()
@@ -383,7 +383,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
-            var outputProgram = Path.Combine(rootPath, "bin", configuration, ToolsetInfo.CurrentTargetFramework, rid, "publish", $"TestAppSimple.dll");
+            var outputProgram = Path.Combine(OutputPathCalculator.FromProject(rootPath).GetPublishDirectory(configuration: configuration, runtimeIdentifier: rid), $"TestAppSimple.dll");
 
             new DotnetCommand(Log, outputProgram)
                 .Execute()

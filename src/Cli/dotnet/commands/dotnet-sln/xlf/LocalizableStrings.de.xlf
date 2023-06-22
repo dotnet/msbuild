@@ -32,6 +32,11 @@
         <target state="translated">Platzieren Sie das Projekt im Stamm der Projektmappe, statt einen Projektmappenordner zu erstellen.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ListSolutionFoldersArgumentDescription">
+        <source>Display solution folder paths.</source>
+        <target state="new">Display solution folder paths.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>Remove one or more projects from a solution file.</source>
         <target state="translated">Entfernt ein oder mehrere Projekte von einer Projektmappendatei.</target>
@@ -90,6 +95,11 @@
       <trans-unit id="SolutionFolderAndInRootMutuallyExclusive">
         <source>The --solution-folder and --in-root options cannot be used together; use only one of the options.</source>
         <target state="translated">Die Optionen "--solution-folder" und "--in-root" können nicht zusammen verwendet werden; verwenden Sie nur eine der Optionen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFolderHeader">
+        <source>Solution Folder(s)</source>
+        <target state="new">Solution Folder(s)</target>
         <note />
       </trans-unit>
     </body>

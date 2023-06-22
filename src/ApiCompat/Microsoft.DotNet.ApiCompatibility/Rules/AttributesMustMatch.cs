@@ -1,11 +1,13 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.ApiSymbolExtensions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -70,12 +72,16 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             MetadataInformation leftMetadata,
             MetadataInformation rightMetadata,
             string itemRef,
-            IList<AttributeData> left,
-            IList<AttributeData> right,
+            ImmutableArray<AttributeData> left,
+            ImmutableArray<AttributeData> right,
             IList<CompatDifference> differences)
         {
+            // See discussion in https://github.com/dotnet/sdk/pull/27774. ApiCompat intentionally considers non excluded attribute arguments.
+            left = left.ExcludeNonVisibleOutsideOfAssembly(_settings.SymbolFilter, excludeWithTypeArgumentsNotVisibleOutsideOfAssembly: false);
+            right = right.ExcludeNonVisibleOutsideOfAssembly(_settings.SymbolFilter, excludeWithTypeArgumentsNotVisibleOutsideOfAssembly: false);
+
             // No attributes, nothing to do. Exit early.
-            if (left.Count == 0 && right.Count == 0)
+            if (left.Length == 0 && right.Length == 0)
             {
                 return;
             }
@@ -88,8 +94,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             //   public void F() {}
             // would give you a set like
             //   { { Foo("a"), Foo("b") }, { Bar } }
-            AttributeSet leftAttributeSet = new(_settings, left);
-            AttributeSet rightAttributeSet = new(_settings, right);
+            AttributeSet leftAttributeSet = new(_settings.SymbolEqualityComparer, left);
+            AttributeSet rightAttributeSet = new(_settings.SymbolEqualityComparer, right);
 
             foreach (AttributeGroup leftGroup in leftAttributeSet)
             {
@@ -290,25 +296,23 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             // We use a List instead of a HashSet because in practice, the number of attributes
             // on a declaration is going to be extremely small (on the order of 1-3).
             private readonly List<AttributeGroup> _set = new();
-            private readonly IRuleSettings _settings;
+            private readonly IEqualityComparer<ISymbol> _symbolEqualityComparer;
 
-            public AttributeSet(IRuleSettings settings, IList<AttributeData> attributes)
+            public AttributeSet(IEqualityComparer<ISymbol> symbolEqualityComparer,
+                IList<AttributeData> attributes)
             {
-                _settings = settings;
+                _symbolEqualityComparer = symbolEqualityComparer;
                 for (int i = 0; i < attributes.Count; i++)
                 {
                     Add(attributes[i]);
                 }
             }
 
-            public void Add(AttributeData attributeData)
+            private void Add(AttributeData attributeData)
             {
-                if (attributeData.AttributeClass != null && !_settings.SymbolFilter.Include(attributeData.AttributeClass))
-                    return;
-
                 foreach (AttributeGroup group in _set)
                 {
-                    if (_settings.SymbolEqualityComparer.Equals(group.Representative.AttributeClass!, attributeData.AttributeClass!))
+                    if (_symbolEqualityComparer.Equals(group.Representative.AttributeClass!, attributeData.AttributeClass!))
                     {
                         group.Add(attributeData);
                         return;
@@ -322,7 +326,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             {
                 foreach (AttributeGroup group in _set)
                 {
-                    if (_settings.SymbolEqualityComparer.Equals(group.Representative.AttributeClass!, attributeData.AttributeClass!))
+                    if (_symbolEqualityComparer.Equals(group.Representative.AttributeClass!, attributeData.AttributeClass!))
                     {
                         attributeGroup = group;
                         return true;

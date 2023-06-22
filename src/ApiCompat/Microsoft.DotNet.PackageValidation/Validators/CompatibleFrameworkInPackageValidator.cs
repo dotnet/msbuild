@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators
         /// <summary>
         /// Validates that the compatible frameworks have compatible surface area.
         /// </summary>
-        /// <param name="options">The options to configure the validator.</param>
+        /// <param name="options"><see cref="PackageValidatorOption"/> to configure the compatible framework in package validation.</param>
         public void Validate(PackageValidatorOption options)
         {
             ApiCompatRunnerOptions apiCompatOptions = new(options.EnableStrictMode);

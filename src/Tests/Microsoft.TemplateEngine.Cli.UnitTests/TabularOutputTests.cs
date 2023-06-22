@@ -1,6 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Reflection;
 using Microsoft.TemplateEngine.Cli.Commands;
@@ -152,12 +151,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact]
         public void CanShowAllColumns()
         {
-            TabularOutputSettings outputSettings = new(
-                        new MockEnvironment()
-                        {
-                            ConsoleBufferWidth = 100
-                        },
-                        displayAllColumns: true);
+            TabularOutputSettings outputSettings = new(new MockEnvironment() { ConsoleBufferWidth = 10 }, displayAllColumns: true);
 
             IEnumerable<Tuple<string, string, string>> data = new List<Tuple<string, string, string>>()
             {
@@ -179,13 +173,32 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         }
 
         [Fact]
+        public void CanCenterAlign()
+        {
+            TabularOutputSettings outputSettings = new(new MockEnvironment() { ConsoleBufferWidth = 10 });
+
+            IEnumerable<Tuple<string, string>> data = new List<Tuple<string, string>>()
+            {
+                new Tuple<string, string>("Monday", "Wednesday"),
+                new Tuple<string, string>("Tuesday", "Sunday")
+            };
+
+            string expectedOutput = $"Column 1   Column 2{Environment.NewLine}--------  ---------{Environment.NewLine}Monday    Wednesday{Environment.NewLine}Tuesday     Sunday {Environment.NewLine}";
+
+            TabularOutput<Tuple<string, string>> formatter =
+             TabularOutput.TabularOutput
+                 .For(outputSettings, data)
+                 .DefineColumn(t => t.Item1, "Column 1")
+                 .DefineColumn(t => t.Item2, "Column 2", textAlign: TextAlign.Center);
+
+            string result = formatter.Layout();
+            Assert.Equal(expectedOutput, result);
+        }
+
+        [Fact]
         public void CanRightAlign()
         {
-            TabularOutputSettings outputSettings = new(
-                            new MockEnvironment()
-                            {
-                                ConsoleBufferWidth = 10
-                            });
+            TabularOutputSettings outputSettings = new(new MockEnvironment() { ConsoleBufferWidth = 10 });
 
             IEnumerable<Tuple<string, string>> data = new List<Tuple<string, string>>()
             {
@@ -196,10 +209,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             string expectedOutput = $"Column 1   Column 2{Environment.NewLine}--------  ---------{Environment.NewLine}Monday    Wednesday{Environment.NewLine}Tuesday      Sunday{Environment.NewLine}";
 
             TabularOutput<Tuple<string, string>> formatter =
-             TabularOutput.TabularOutput
-                 .For(outputSettings, data)
-                 .DefineColumn(t => t.Item1, "Column 1")
-                 .DefineColumn(t => t.Item2, "Column 2", rightAlign: true);
+            TabularOutput.TabularOutput
+                .For(outputSettings, data)
+                .DefineColumn(t => t.Item1, "Column 1")
+                .DefineColumn(t => t.Item2, "Column 2", textAlign: TextAlign.Right);
 
             string result = formatter.Layout();
             Assert.Equal(expectedOutput, result);

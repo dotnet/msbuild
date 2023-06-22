@@ -1,6 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
@@ -9,6 +10,7 @@ using System.Linq;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.List;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+using Microsoft.TemplateEngine.Cli.Commands;
 using CommonStrings = Microsoft.DotNet.Workloads.Workload.LocalizableStrings;
 using IReporter = Microsoft.DotNet.Cli.Utils.IReporter;
 
@@ -28,12 +30,20 @@ namespace Microsoft.DotNet.Cli
             return Command;
         }
 
-        internal static void ShowWorkloadsInfo(IWorkloadInfoHelper workloadInfoHelper = null, IReporter reporter = null)
+        internal static void ShowWorkloadsInfo(ParseResult parseResult = null, IWorkloadInfoHelper workloadInfoHelper = null, IReporter reporter = null, string dotnetDir = null)
         {
-            workloadInfoHelper ??= new WorkloadInfoHelper();
+            if(workloadInfoHelper != null)
+            {
+                workloadInfoHelper ??= new WorkloadInfoHelper(parseResult != null ? parseResult.HasOption(SharedOptions.InteractiveOption) : false);
+            }
+            else
+            {
+                workloadInfoHelper ??= new WorkloadInfoHelper(false);
+            }
             IEnumerable<WorkloadId> installedList = workloadInfoHelper.InstalledSdkWorkloadIds;
             InstalledWorkloadsCollection installedWorkloads = workloadInfoHelper.AddInstalledVsWorkloads(installedList);
             reporter ??= Cli.Utils.Reporter.Output;
+            string dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
 
             if (!installedList.Any())
             {
@@ -65,9 +75,8 @@ namespace Microsoft.DotNet.Cli
                 reporter.WriteLine($"       {workloadManifest.ManifestPath,align}");
 
                 reporter.Write($"{separator}{CommonStrings.WorkloadInstallTypeColumn}:");
-                reporter.WriteLine($"       {WorkloadInstallerFactory.GetWorkloadInstallType(new SdkFeatureBand(workloadFeatureBand), workloadManifest.ManifestPath).ToString(),align}"
+                reporter.WriteLine($"       {WorkloadInstallerFactory.GetWorkloadInstallType(new SdkFeatureBand(workloadFeatureBand), dotnetPath),align}"
                 );
-                reporter.WriteLine("");
             }
         }
 
@@ -75,7 +84,8 @@ namespace Microsoft.DotNet.Cli
         {
             if (parseResult.HasOption(InfoOption) && parseResult.RootSubCommandResult() == "workload")
             {
-                ShowWorkloadsInfo();
+                ShowWorkloadsInfo(parseResult);
+                Cli.Utils.Reporter.Output.WriteLine("");
                 return 0;
             }
             return parseResult.HandleMissingCommand();
@@ -92,6 +102,7 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(WorkloadUninstallCommandParser.GetCommand());
             command.AddCommand(WorkloadRepairCommandParser.GetCommand());
             command.AddCommand(WorkloadRestoreCommandParser.GetCommand());
+            command.AddCommand(WorkloadCleanCommandParser.GetCommand());
             command.AddCommand(WorkloadElevateCommandParser.GetCommand());
 
             command.SetHandler((parseResult) => ProcessArgs(parseResult));

@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -186,6 +186,7 @@ namespace Microsoft.NET.Publish.Tests
                "artifact.xml",
                "newtonsoft.json/9.0.2-beta2/lib/netstandard1.1/Newtonsoft.Json.dll",
                "newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
+               "newtonsoft.json/13.0.1/lib/netstandard2.0/Newtonsoft.Json.dll",
                "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.Core.dll",
                "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.dll",
                "fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll",
@@ -201,7 +202,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var knownpackage = new HashSet<PackageIdentity>
             {
-                new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("9.0.1")),
+                new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("13.0.1")),
                 new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("9.0.2-beta2")),
                 new PackageIdentity("FluentAssertions.Json", NuGetVersion.Parse("4.12.0"))
             };
@@ -291,7 +292,7 @@ namespace Microsoft.NET.Publish.Tests
             }
             else
             {
-                var newtonsoftSymbolsFolder = symbolsFolder.Sub("newtonsoft.json").Sub("9.0.1").Sub("lib").Sub("netstandard1.0");
+                var newtonsoftSymbolsFolder = symbolsFolder.Sub("newtonsoft.json").Sub("13.0.1").Sub("lib").Sub("netstandard2.0");
                 newtonsoftSymbolsFolder.Should().Exist();
 
                 var newtonsoftSymbolsFiles = newtonsoftSymbolsFolder.GetFiles().ToArray();

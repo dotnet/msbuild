@@ -1,13 +1,14 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Restore;
+using Microsoft.TemplateEngine.Cli.Commands;
 using LocalizableStrings = Microsoft.DotNet.Tools.Restore.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -73,7 +74,7 @@ namespace Microsoft.DotNet.Cli
             {
                 command.AddOption(option);
             }
-
+            command.AddOption(CommonOptions.ArchitectureOption);
             command.SetHandler(RestoreCommand.Run);
 
             return command;
@@ -85,6 +86,24 @@ namespace Microsoft.DotNet.Cli
             {
                 command.AddOption(option);
             }
+        }
+        private static string GetOsFromRid(string rid) => rid.Substring(0, rid.LastIndexOf("-"));
+        private static string GetArchFromRid(string rid) => rid.Substring(rid.LastIndexOf("-") + 1, rid.Length - rid.LastIndexOf("-") - 1);
+        public static string RestoreRuntimeArgFunc(IEnumerable<string> rids) 
+        {
+            List<string> convertedRids = new();
+            foreach (string rid in rids)
+            {
+                if (GetArchFromRid(rid.ToString()) == "amd64")
+                {
+                    convertedRids.Add($"{GetOsFromRid(rid.ToString())}-x64");
+                }
+                else
+                {
+                    convertedRids.Add($"{rid}");
+                }
+            }
+            return $"-property:RuntimeIdentifiers={string.Join("%3B", convertedRids)}";
         }
 
         private static Option[] ImplicitRestoreOptions(bool showHelp, bool useShortOptions, bool includeRuntimeOption, bool includeNoDependenciesOption)
@@ -149,7 +168,7 @@ namespace Microsoft.DotNet.Cli
                     {
                         ArgumentHelpName = LocalizableStrings.CmdRuntimeOption,
                         IsHidden = !showHelp
-                    }.ForwardAsSingle(o => $"-property:RuntimeIdentifiers={string.Join("%3B", o)}")
+                    }.ForwardAsSingle(RestoreRuntimeArgFunc)
                     .AllowSingleArgPerToken()
                     .AddCompletions(Complete.RunTimesFromProjectFile)
                 ).ToArray();

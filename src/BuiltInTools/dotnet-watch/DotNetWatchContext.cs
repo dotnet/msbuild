@@ -1,7 +1,8 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
+
+using System.Collections.Generic;
 
 using Microsoft.Build.Graph;
 using Microsoft.Extensions.Tools.Internal;
@@ -10,11 +11,13 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     internal sealed class DotNetWatchContext
     {
+        public required bool HotReloadEnabled { get; init; }
+
         public IReporter Reporter { get; init; } = NullReporter.Singleton;
 
-        public ProcessSpec ProcessSpec { get; init; } = default!;
+        public ProcessSpec? ProcessSpec { get; init; } = default!;
 
-        public FileSet FileSet { get; set; } = default!;
+        public FileSet? FileSet { get; set; }
 
         public int Iteration { get; set; } = -1;
 
@@ -29,5 +32,9 @@ namespace Microsoft.DotNet.Watcher.Tools
         public LaunchSettingsProfile LaunchSettingsProfile { get; init; } = default!;
 
         public ProjectGraph? ProjectGraph { get; set; }
+
+        public string? TargetFramework { get; init; }
+
+        public IReadOnlyList<(string name, string value)>? BuildProperties { get; init; }
     }
 }

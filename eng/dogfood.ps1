@@ -39,7 +39,7 @@ try {
 
   $TestDotnetRoot = Join-Path $ArtifactsDir "bin\redist\$configuration\dotnet"
 
-  $testDotnetVersion = (Get-Childitem -Directory "$TestDotnetRoot\sdk")[0]
+  $testDotnetVersion = (Get-Childitem -Directory "$TestDotnetRoot\sdk")[-1]
   $env:DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR = Join-Path $TestDotnetRoot "sdk\$testDotnetVersion\Sdks"
   $env:MicrosoftNETBuildExtensionsTargets = Join-Path $ArtifactsDir "bin\$configuration\Sdks\Microsoft.NET.Build.Extensions\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\Microsoft.NET.Build.Extensions.targets"
 

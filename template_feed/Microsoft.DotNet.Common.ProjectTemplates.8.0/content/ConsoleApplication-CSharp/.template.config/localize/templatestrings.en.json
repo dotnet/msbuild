@@ -15,6 +15,9 @@
   "symbols/UseProgramMain/description": "Whether to generate an explicit Program class and Main method instead of top-level statements.",
   "symbols/UseProgramMain/displayName": "Do not use _top-level statements",
   "_symbols/UseProgramMain/displayName.comment": "Use '_' as accelerator key when translating.",
+  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
+  "symbols/NativeAot/displayName": "Enable _native AOT publish",
+  "_symbols/NativeAot/displayName.comment": "Use '_' as accelerator key when translating.",
   "postActions/restore/description": "Restore NuGet packages required by this project.",
   "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
   "postActions/open-file/description": "Opens Program.cs in the editor"

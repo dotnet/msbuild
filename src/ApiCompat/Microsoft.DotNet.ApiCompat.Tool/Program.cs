@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -9,6 +9,8 @@ using System.CommandLine.Parsing;
 using System.IO;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiSymbolExtensions.Logging;
+using Microsoft.DotNet.PackageValidation;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ApiCompat.Tool
 {
@@ -199,7 +201,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             {
                 ArgumentHelpName = "nupkg"
             };
-            Option<Dictionary<string, string[]>?> packageAssemblyReferencesOption = new("--package-assembly-references",
+            Option<Dictionary<NuGetFramework, IEnumerable<string>>?> packageAssemblyReferencesOption = new("--package-assembly-references",
                 description: "Paths to assembly references or their underlying directories for a specific target framework in the package. Values must be separated by commas: ','.",
                 parseArgument: ParsePackageAssemblyReferenceArgument)
             {
@@ -207,7 +209,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 Arity = ArgumentArity.ZeroOrMore,
                 ArgumentHelpName = "tfm=file1,file2,..."
             };
-            Option<Dictionary<string, string[]>?> baselinePackageAssemblyReferencesOption = new("--baseline-package-assembly-references",
+            Option<Dictionary<NuGetFramework, IEnumerable<string>>?> baselinePackageAssemblyReferencesOption = new("--baseline-package-assembly-references",
                 description: "Paths to assembly references or their underlying directories for a specific target framework in the baseline package. Values must be separated by commas: ','.",
                 parseArgument: ParsePackageAssemblyReferenceArgument)
             {
@@ -250,8 +252,8 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 bool enableStrictModeForBaselineValidation = context.ParseResult.GetValue(enableStrictModeForBaselineValidationOption);
                 string? baselinePackage = context.ParseResult.GetValue(baselinePackageOption);
                 string? runtimeGraph = context.ParseResult.GetValue(runtimeGraphOption);
-                Dictionary<string, string[]>? packageAssemblyReferences = context.ParseResult.GetValue(packageAssemblyReferencesOption);
-                Dictionary<string, string[]>? baselinePackageAssemblyReferences = context.ParseResult.GetValue(baselinePackageAssemblyReferencesOption);
+                Dictionary<NuGetFramework, IEnumerable<string>>? packageAssemblyReferences = context.ParseResult.GetValue(packageAssemblyReferencesOption);
+                Dictionary<NuGetFramework, IEnumerable<string>>? baselinePackageAssemblyReferences = context.ParseResult.GetValue(baselinePackageAssemblyReferencesOption);
 
                 Func<ISuppressionEngine, SuppressableConsoleLog> logFactory = (suppressionEngine) => new(suppressionEngine, verbosity);
                 ValidatePackage.Run(logFactory,
@@ -320,31 +322,50 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             return patterns;
         }
 
-        private static Dictionary<string, string[]>? ParsePackageAssemblyReferenceArgument(ArgumentResult argumentResult)
+        private static Dictionary<NuGetFramework, IEnumerable<string>>? ParsePackageAssemblyReferenceArgument(ArgumentResult argumentResult)
         {
-            Dictionary<string, string[]> args = new();
+            const string invalidPackageAssemblyReferenceFormatMessage = "Invalid package assembly reference format {TargetFrameworkMoniker(+TargetPlatformMoniker)=assembly1,assembly2,assembly3,...}";
+
+            Dictionary<NuGetFramework, IEnumerable<string>> packageAssemblyReferencesDict = new(argumentResult.Tokens.Count);
             foreach (Token token in argumentResult.Tokens)
             {
                 string[] parts = token.Value.Split('=');
                 if (parts.Length != 2)
                 {
-                    argumentResult.ErrorMessage = "Invalid package assembly reference format {tfm=assembly1,assembly2,assembly3,...}";
+                    argumentResult.ErrorMessage = invalidPackageAssemblyReferenceFormatMessage;
                     continue;
                 }
 
-                string tfm = parts[0];
-                string[] assemblies = parts[1].Split(',');
+                string tfmInformation = parts[0];
+                string referencePath = parts[1];
 
-                if (args.TryGetValue(tfm, out _))
+                string[] tfmInformationParts = tfmInformation.Split('+');
+                if (tfmInformationParts.Length < 1 || tfmInformationParts.Length > 2)
                 {
-                    argumentResult.ErrorMessage = $"Package assembly references for tfm '{tfm}' are already provided.";
+                    argumentResult.ErrorMessage = invalidPackageAssemblyReferenceFormatMessage;
+                }
+
+                string targetFrameworkMoniker = tfmInformationParts[0];
+                string targetPlatformMoniker = tfmInformationParts.Length == 2 ?
+                    tfmInformationParts[1] :
+                    string.Empty;
+
+                // The TPM is null when the assembly doesn't target a platform.
+                if (targetFrameworkMoniker == string.Empty || referencePath == string.Empty)
+                    continue;
+
+                NuGetFramework nuGetFramework = NuGetFramework.ParseComponents(targetFrameworkMoniker, targetPlatformMoniker);
+                // Skip duplicate frameworks which could be passed in when using TFM aliases.
+                if (packageAssemblyReferencesDict.ContainsKey(nuGetFramework))
+                {
                     continue;
                 }
 
-                args.Add(tfm, assemblies);
+                string[] references = referencePath.Split(',');
+                packageAssemblyReferencesDict.Add(nuGetFramework, references);
             }
 
-            return args;
+            return packageAssemblyReferencesDict;
         }
     }
 }

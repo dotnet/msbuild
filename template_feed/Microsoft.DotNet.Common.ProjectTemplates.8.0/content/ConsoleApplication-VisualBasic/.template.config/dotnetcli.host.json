@@ -16,6 +16,10 @@
     "langVersion": {
       "longName": "langVersion",
       "shortName": ""
+    },
+    "NativeAot": {
+      "longName": "aot",
+      "shortName": ""
     }
   },
   "usageExamples": [

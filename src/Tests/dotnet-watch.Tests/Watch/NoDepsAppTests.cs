@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -25,8 +25,8 @@ namespace Microsoft.DotNet.Watcher.Tests
                 .WithSource()
                 .Path;
 
-            await App.StartWatcherAsync(testAsset, new[] { "--no-exit" });
-            var processIdentifier = await App.ReadProcessIdentifierFromOutput();
+            await App.StartWatcherAsync(testAsset, new[] { "--no-hot-reload", "--no-exit" });
+            var processIdentifier = await App.AssertOutputLineStartsWith("Process identifier =");
 
             // Then wait for it to restart when we change a file
             var fileToChange = Path.Combine(testAsset, "Program.cs");
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Watcher.Tests
             await App.AssertRestarted();
             Assert.DoesNotContain(App.Process.Output, l => l.StartsWith("Exited with error code"));
 
-            var processIdentifier2 = await App.ReadProcessIdentifierFromOutput();
+            var processIdentifier2 = await App.AssertOutputLineStartsWith("Process identifier =");
             Assert.NotEqual(processIdentifier, processIdentifier2);
         }
 
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Watcher.Tests
                 .Path;
 
             await App.StartWatcherAsync(testAsset);
-            var processIdentifier = await App.ReadProcessIdentifierFromOutput();
+            var processIdentifier = await App.AssertOutputLineStartsWith("Process identifier =");
             await App.AssertExited(); // process should exit after run
             await App.AssertWaitingForFileChange();
 
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Watcher.Tests
                 await App.AssertRestarted();
             }
 
-            var processIdentifier2 = await App.ReadProcessIdentifierFromOutput();
+            var processIdentifier2 = await App.AssertOutputLineStartsWith("Process identifier =");
             Assert.NotEqual(processIdentifier, processIdentifier2);
             await App.AssertExited(); // process should exit after run
         }

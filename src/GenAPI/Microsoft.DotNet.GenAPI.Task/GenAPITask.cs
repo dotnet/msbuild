@@ -40,19 +40,24 @@ namespace Microsoft.DotNet.GenAPI.Task
         public string? ExceptionMessage { get; set; }
 
         /// <summary>
+        /// The path to one or more api exclusion files with types in DocId format.
+        /// </summary>
+        public string[]? ExcludeApiFiles { get; set; }
+
+        /// <summary>
         /// The path to one or more attribute exclusion files with types in DocId format.
         /// </summary>
         public string[]? ExcludeAttributesFiles { get; set; }
 
         /// <summary>
-        /// Include internal API's. Default is false.
+        /// If true, includes both internal and public API.
         /// </summary>
-        public bool IncludeVisibleOutsideOfAssembly { get; set; }
+        public bool RespectInternals { get; set; }
 
         /// <summary>
         /// Includes assembly attributes which are values that provide information about an assembly.
         /// </summary>
-        public bool IncludeAssemblyAttributes { get; }
+        public bool IncludeAssemblyAttributes { get; set; }
 
         protected override void ExecuteCore()
         {
@@ -62,8 +67,9 @@ namespace Microsoft.DotNet.GenAPI.Task
                 OutputPath,
                 HeaderFile,
                 ExceptionMessage,
+                ExcludeApiFiles,
                 ExcludeAttributesFiles,
-                IncludeVisibleOutsideOfAssembly,
+                RespectInternals,
                 IncludeAssemblyAttributes
             ));
         }

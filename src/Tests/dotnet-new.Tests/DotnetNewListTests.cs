@@ -1,6 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
@@ -539,6 +538,34 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("Basic FSharp +template-grouping +\\[C#],F# +item +Author1 +Test Asset +\\r?\\n +Q# +item,project +Author2 +Test Asset");
+        }
+
+        [Theory]
+        [InlineData("author", "Author", "Microsoft")]
+        [InlineData("type", "Type", "")]
+        [InlineData("tags", "Tags", "Solution")]
+        [InlineData("language", "Language", "")]
+        public void TemplateWithSpecifiedColumnOutput(string columnName, string columnHeader, string columnValue)
+        {
+            string home = CreateTemporaryFolder(folderName: "Home");
+            string workingDirectory = CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "--install", "Microsoft.DotNet.Web.ProjectTemplates.5.0")
+                  .WithCustomHive(home)
+                  .WithWorkingDirectory(workingDirectory)
+                  .Execute()
+                  .Should()
+                  .ExitWith(0);
+
+            new DotnetNewCommand(_log, "list", "--columns", columnName)
+                .WithCustomHive(home)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
+                .And.HaveStdOutMatching($"Template Name\\s+Short Name\\s+{columnHeader}")
+                .And.HaveStdOutMatching($"Solution File\\s+sln,solution\\s+{columnValue}");
         }
 
         [Theory]

@@ -6,5 +6,11 @@
       "add": [],
       "remove": [ "Common" ]
     }
+  ],
+  "symbolInfo": [
+    {
+      "id": "NativeAot",
+      "isVisible": true
+    }
   ]
 }

@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
@@ -260,7 +260,8 @@ namespace Microsoft.NET.Build.Tests
             {
                 IsExe = true,
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(),
+                SelfContained = "true"
             };
 
             //  Set up test FrameworkReference that will use workload manifest to resolve versions
@@ -350,7 +351,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.4.0.51802")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_can_publish_runtime_specific_apps_with_library_dependencies_self_contained(string targetFramework)
         {
 
@@ -381,6 +382,78 @@ namespace Microsoft.NET.Build.Tests
             var createdAppProject = _testAssetsManager.CreateTestProject(appProject);
             var publishCommand = new PublishCommand(createdAppProject);
             publishCommand.Execute(new[] { "-property:SelfContained=true", "-property:_CommandLineDefinedSelfContained=true", $"-property:RuntimeIdentifier={rid}", "-property:_CommandLineDefinedRuntimeIdentifier=true" }).Should().Pass().And.NotHaveStdOutContaining("warning");
+        }
+
+        [Theory]
+        [InlineData("net7.0")]
+        [InlineData("net8.0")]
+        public void It_does_or_doesnt_imply_SelfContained_based_on_RuntimeIdentifier_and_TargetFramework(string targetFramework)
+        {
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            bool resultShouldBeSelfContained = targetFramework == "net7.0" ? true : false;
+            var testProject = new TestProject("MainProject")
+            {
+                TargetFrameworks = targetFramework,
+                IsExe = true
+            };
+
+            testProject.RecordProperties("SelfContained");
+            testProject.AdditionalProperties["RuntimeIdentifier"] = runtimeIdentifier;
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+            new DotnetBuildCommand(Log)
+                .WithWorkingDirectory(Path.Combine(testAsset.Path, "MainProject"))
+                .Execute()
+                .Should()
+                .Pass();
+
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
+            Assert.Equal(bool.Parse(properties["SelfContained"]), resultShouldBeSelfContained);
+        }
+
+        [Theory]
+        [InlineData("net7.0", true)]
+        [InlineData("net7.0", false)]
+        [InlineData("net8.0", false)]
+        public void It_does_or_doesnt_warn_based_on_SelfContained_and_TargetFramework_breaking_RID_change(string targetFramework, bool defineSelfContained)
+        {
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld", identifier: targetFramework + defineSelfContained.ToString())
+                .WithSource()
+                .WithTargetFramework(targetFramework)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", runtimeIdentifier));
+                    if (defineSelfContained)
+                    {
+                        propertyGroup.Add(new XElement(ns + "SelfContained", "true"));
+                    }
+                });
+
+            var buildCommand = new DotnetBuildCommand(Log, "/bl");
+            var commandResult = buildCommand
+                .WithWorkingDirectory(testAsset.Path)
+                .Execute();
+
+            if (targetFramework == "net7.0" && !defineSelfContained)
+            {
+                commandResult
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOutContaining(Strings.RuntimeIdentifierWillNoLongerImplySelfContained);
+            }
+            else
+            {
+                commandResult
+                    .Should()
+                    .Pass()
+                    .And
+                    .NotHaveStdOutContaining(Strings.RuntimeIdentifierWillNoLongerImplySelfContained);
+            }
         }
 
         [Fact]
@@ -438,7 +511,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("net7.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_builds_a_runnable_output_with_Prefer32Bit(string targetFramework)
         {
             if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))

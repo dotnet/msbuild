@@ -6,6 +6,7 @@ These templates matched your input:
 
 Template Name                                 Short Name                  Language    Tags                            
 --------------------------------------------  --------------------------  ----------  --------------------------------
+API Controller                                apicontroller               [C#]        Web/ASP.NET                     
 ASP.NET Core API                              api                         [C#]        Web/API                         
 ASP.NET Core Empty                            web                         [C#],F#     Web/Empty                       
 ASP.NET Core gRPC Service                     grpc                        [C#]        Web/gRPC                        
@@ -16,6 +17,7 @@ ASP.NET Core with Angular                     angular                     [C#]  
 ASP.NET Core with React.js                    react                       [C#]        Web/MVC/SPA                     
 Blazor Server App                             blazorserver                [C#]        Web/Blazor                      
 Blazor Server App Empty                       blazorserver-empty          [C#]        Web/Blazor/Empty                
+Blazor Web App                                blazor                      [C#]        Web/Blazor/WebAssembly/PWA      
 Blazor WebAssembly App                        blazorwasm                  [C#]        Web/Blazor/WebAssembly/PWA      
 Blazor WebAssembly App Empty                  blazorwasm-empty            [C#]        Web/Blazor/WebAssembly/PWA/Empty
 Class Library                                 classlib                    [C#],F#,VB  Common/Library                  
@@ -28,6 +30,7 @@ MSBuild Directory.Build.props file            buildprops                        
 MSBuild Directory.Build.targets file          buildtargets                            MSBuild/props                   
 MSTest Playwright Test Project                mstest-playwright           [C#]        Test/MSTest/Playwright          
 MSTest Test Project                           mstest                      [C#],F#,VB  Test/MSTest                     
+MVC Controller                                mvccontroller               [C#]        Web/ASP.NET                     
 MVC ViewImports                               viewimports                 [C#]        Web/ASP.NET                     
 MVC ViewStart                                 viewstart                   [C#]        Web/ASP.NET                     
 NuGet Config                                  nugetconfig,nuget.config                Config                          
@@ -38,6 +41,7 @@ Protocol Buffer File                          proto                             
 Razor Class Library                           razorclasslib               [C#]        Web/Razor/Library               
 Razor Component                               razorcomponent              [C#]        Web/ASP.NET                     
 Razor Page                                    page                        [C#]        Web/ASP.NET                     
+Razor View                                    view                        [C#]        Web/ASP.NET                     
 Solution File                                 sln,solution                            Solution                        
 Web Config                                    webconfig                               Config                          
 Windows Forms App                             winforms                    [C#],VB     Common/WinForms                 

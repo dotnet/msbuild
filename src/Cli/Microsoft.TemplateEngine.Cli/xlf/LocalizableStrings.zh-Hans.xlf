@@ -258,6 +258,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">包</target>
         <note />
       </trans-unit>
+      <trans-unit id="ColumnNamePackageNameAndOwners">
+        <source>Package Name / Owners</source>
+        <target state="new">Package Name / Owners</target>
+        <note>information about NuGet package: its name and owner</note>
+      </trans-unit>
       <trans-unit id="ColumnNamePrecedence">
         <source>Precedence</source>
         <target state="translated">优先顺序</target>
@@ -282,6 +287,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <source>Downloads</source>
         <target state="translated">下载</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameTrusted">
+        <source>Trusted</source>
+        <target state="new">Trusted</target>
+        <note>information about NuGet package origin; if a package has PrefixReserved indicator </note>
       </trans-unit>
       <trans-unit id="ColumnNameType">
         <source>Type</source>
@@ -696,6 +706,31 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">是否要运行此操作 [{0}(是)|{1}(否)]?</target>
         <note />
       </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_ArgumentNotConfigured">
+        <source>Post action argument '{0}' is mandatory, but not configured.</source>
+        <target state="new">Post action argument '{0}' is mandatory, but not configured.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_MultipleJsonFiles">
+        <source>More than one file found that matches '{0}'.</source>
+        <target state="new">More than one file found that matches '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_NoJsonFile">
+        <source>Unable to find the json file in the solution</source>
+        <target state="new">Unable to find the json file in the solution</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_ParentPropertyPathInvalid">
+        <source>Parent property path '{0}' could not be traversed.</source>
+        <target state="new">Parent property path '{0}' could not be traversed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Succeeded">
+        <source>Successfully modified {0}.</source>
+        <target state="new">Successfully modified {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
         <source>Failed to run the command: argument 'executable' is missing in post action configuration.</source>
         <target state="translated">无法运行命令: 在发布操作配置中缺少参数“可执行”。</target>
@@ -827,6 +862,16 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">若要使用内置模板包，请按照以下方法卸载手动安装的模板包:</target>
         <note>followed by command to uninstall package</note>
       </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Download_Error_VulnerablePackage">
+        <source>Failed to install {0}, due to detected vulnerabilities:</source>
+        <target state="new">Failed to install {0}, due to detected vulnerabilities:</target>
+        <note>{0} - template package name.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Download_VulnerablePackage">
+        <source>Installed package has the following vulnerabilities:</source>
+        <target state="new">Installed package has the following vulnerabilities:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
         <target state="translated">找不到包含模板“{0}”的模板包</target>
@@ -860,6 +905,11 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="TemplatePackageCoordinator_Install_Error_SameInstallRequests">
         <source>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</source>
         <target state="translated">该命令正在尝试安装模板包“{0}”两次，请检查参数，然后重试。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Error_VulnerablePackageTip">
+        <source>In order to install this package, run:</source>
+        <target state="new">In order to install this package, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
@@ -917,6 +967,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">卸载命令:</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage">
+        <source>The package {0} contains vulnerabilities:</source>
+        <target state="new">The package {0} contains vulnerabilities:</target>
+        <note>{0} - template package name.</note>
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_GenericError">
         <source>Failed to check update for {0}: {1}.</source>
         <target state="translated">无法检查 {0} 的更新: {1}。</target>
@@ -935,6 +990,16 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="TemplatePackageCoordinator_Update_Error_PackageNotSupported">
         <source>Failed to check update for {0}: the package is not supported.</source>
         <target state="translated">无法检查 {0} 的更新: 不支持该包。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackage">
+        <source>The package {0} was not updated due to detected vulnerabilities:</source>
+        <target state="new">The package {0} was not updated due to detected vulnerabilities:</target>
+        <note>{0} - template package name.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackageTip">
+        <source>In order to update this package, run:</source>
+        <target state="new">In order to update this package, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate">
@@ -971,6 +1036,26 @@ The header is followed by the list of parameters and their errors (might be seve
         <source>Failed to initialize NuGet credential service, details: {0}.</source>
         <target state="translated">无法初始化 NuGet 凭据服务，详细信息: {0}。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Critical">
+        <source>Critical</source>
+        <target state="new">Critical</target>
+        <note>represents nuget api severity of level 3.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_High">
+        <source>High</source>
+        <target state="new">High</target>
+        <note>represents nuget api severity of level 2.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Low">
+        <source>Low</source>
+        <target state="new">Low</target>
+        <note>represents nuget api severity of level 0.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Moderate">
+        <source>Moderate</source>
+        <target state="new">Moderate</target>
+        <note>represents nuget api severity of level 1.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled">
         <source>{0} is already installed.</source>

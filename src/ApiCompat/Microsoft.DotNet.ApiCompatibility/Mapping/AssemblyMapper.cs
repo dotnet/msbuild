@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
@@ -24,11 +24,12 @@ namespace Microsoft.DotNet.ApiCompatibility.Mapping
         public IEnumerable<CompatDifference> AssemblyLoadErrors => _assemblyLoadErrors;
 
         /// <summary>
-        /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
+        /// Instantiates an assembly mapper.
         /// </summary>
-        /// <param name="settings">The settings used to diff the elements in the mapper.</param>
+        /// <param name="ruleRunner">The <see cref="IRuleRunner"/> that compares the assembly mapper elements.</param>
+        /// <param name="settings">The <see cref="IMapperSettings"/> used to compare the assembly mapper elements.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
-        /// <param name="containingAssemblySet">The containing assembly set. Null, if the assembly isn't part of a set.</param>
+        /// <param name="containingAssemblySet">The containing <see cref="IAssemblySetMapper"/>. Null, if the assembly isn't part of a set.</param>
         public AssemblyMapper(IRuleRunner ruleRunner,
             IMapperSettings settings,
             int rightSetSize,
@@ -99,7 +100,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Mapping
                     {
                         if (!_namespaces.TryGetValue(ns, out INamespaceMapper? mapper))
                         {
-                            mapper = new NamespaceMapper(RuleRunner, Settings, Right.Length, this, typeforwardsOnly: typeForwardsOnly);
+                            mapper = new NamespaceMapper(RuleRunner, Settings, Right.Length, this, typeForwardsOnly: typeForwardsOnly);
                             _namespaces.Add(ns, mapper);
                         }
                         else if (checkIfExists && mapper.GetElement(side, setIndex) != null)

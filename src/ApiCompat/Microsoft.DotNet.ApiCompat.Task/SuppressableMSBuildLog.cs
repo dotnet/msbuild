@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiSymbolExtensions.Logging;
@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.ApiCompat.Task
         private readonly ISuppressionEngine _suppressionEngine;
 
         /// <inheritdoc />
-        public bool HasLoggedSuppressions { get; private set; }
+        public bool HasLoggedErrorSuppressions { get; private set; }
 
         public SuppressableMSBuildLog(NET.Build.Tasks.Logger log,
             ISuppressionEngine suppressionEngine)
@@ -29,8 +29,8 @@ namespace Microsoft.DotNet.ApiCompat.Task
             if (_suppressionEngine.IsErrorSuppressed(suppression))
                 return false;
 
-            HasLoggedSuppressions = true;
-            base.LogError(code, message);
+            HasLoggedErrorSuppressions = true;
+            LogError(code, message);
 
             return true;
         }
@@ -41,8 +41,7 @@ namespace Microsoft.DotNet.ApiCompat.Task
             if (_suppressionEngine.IsErrorSuppressed(suppression))
                 return false;
 
-            HasLoggedSuppressions = true;
-            base.LogWarning(code, message);
+            LogWarning(code, message);
 
             return true;
         }

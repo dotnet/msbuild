@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Linq;
@@ -55,6 +55,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = $"EolOnlyNetCore",
                 TargetFrameworks = $"netcoreapp1.0;{ToolsetInfo.CurrentTargetFramework};net472",
+                IsExe = true,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -96,6 +97,89 @@ namespace Microsoft.NET.Build.Tests
                 .Pass()
                 .And
                 .NotHaveStdOutContaining("NETSDK1138");
+        }
+
+        [Fact]
+        public void It_does_not_warn_when_target_library()
+        {
+            var testProject = new TestProject()
+            {
+                Name = $"EolNoWarning",
+                TargetFrameworks = "netcoreapp1.0",
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            var result = buildCommand
+                .Execute();
+
+            result
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("NETSDK1138");
+        }
+
+        [Fact]
+        public void It_warns_for_workloads_out_of_support()
+        {
+            var testProject = new TestProject()
+            {
+                Name = $"EolWorkloads",
+                TargetFrameworks = "net6.0"
+            };
+
+            testProject.AddItem("EolWorkload", new()
+            {
+                { "Include", "android" },
+                { "Url", "https://aka.ms/maui-support-policy" }
+            });
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            var result = buildCommand
+                .Execute();
+
+            result
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("NETSDK1202");
+        }
+
+        [Fact]
+        public void It_does_not_warn_when_deactivating_workloads_check()
+        {
+            var testProject = new TestProject()
+            {
+                Name = $"EolWorkloadsNoWarning",
+                TargetFrameworks = "net6.0"
+            };
+
+            testProject.AdditionalProperties["CheckEolWorkloads"] = "false";
+
+            testProject.AddItem("EolWorkload", new()
+            {
+                { "Include", "android" },
+                { "Url", "https://aka.ms/maui-support-policy" }
+            });
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            var result = buildCommand
+                .Execute();
+
+            result
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("NETSDK1202");
         }
     }
 }

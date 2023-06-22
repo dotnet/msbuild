@@ -2,9 +2,24 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="ArchArgumentName">
+        <source>ARCH</source>
+        <target state="new">ARCH</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ArchitectureOptionDescription">
         <source>The target architecture.</source>
         <target state="translated">目标体系结构。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArtifactsPathArgumentName">
+        <source>ARTIFACTS_DIR</source>
+        <target state="new">ARTIFACTS_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArtifactsPathOptionDescription">
+        <source>The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</source>
+        <target state="new">The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotResolveRuntimeIdentifier">
@@ -40,6 +55,11 @@
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">“{0}”中找不到任何项目。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DidYouMean">
+        <source>Did you mean the following command?</source>
+        <target state="new">Did you mean the following command?</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
@@ -110,9 +130,19 @@ EOF
         <target state="translated">将应用程序发布为依赖框架的应用程序。目标计算机上必须安装兼容的 .NET 运行时才能运行该应用程序。</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildAdditionalOptionTitle">
+        <source>.NET Cli Options:</source>
+        <target state="new">.NET Cli Options:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">在“{0}”中找到多个项目。请指定使用哪一个。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OSArgumentName">
+        <source>OS</source>
+        <target state="new">OS</target>
         <note />
       </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
@@ -182,19 +212,24 @@ EOF
       </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
-        <target state="translated">“--自包含”和“--非自包含”选项不能一起使用。</target>
-        <note />
+        <target state="translated">"--self-contained"和 "--no-self-contained" 选项不能一起使用。</target>
+        <note>{Locked="--self-contained"}{Locked="--no-self-contained"}</note>
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">随应用程序一起发布 .NET 运行时，这样就不需要在目标计算机上安装运行时。
+The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">随应用程序一起发布 .NET 运行时，这样就不需要在目标计算机上安装运行时。
 如果指定了运行时标识符，则默认值为 "true"。</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">
         <source>Solution</source>
         <target state="translated">解决方案</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionArgumentMisplaced">
+        <source>Solution argument '{0}' is misplaced.</source>
+        <target state="new">Solution argument '{0}' is misplaced.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">
@@ -240,6 +275,11 @@ The default is 'true' if a runtime identifier is specified.</source>
       <trans-unit id="Delete">
         <source>Delete</source>
         <target state="translated">删除</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFolderAlreadyContainsProject">
+        <source>Solution {0} already contains project {1} in solution folder {2}.</source>
+        <target state="new">Solution {0} already contains project {1} in solution folder {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">

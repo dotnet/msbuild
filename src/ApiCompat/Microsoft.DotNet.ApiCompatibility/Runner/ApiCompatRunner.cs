@@ -115,10 +115,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner
             ApiCompatRunnerOptions options,
             out bool resolvedExternallyProvidedAssemblyReferences)
         {
-            // In order to enable reference support for baseline suppression we need a better way
-            // to resolve references for the baseline package. Let's not enable it for now.
             string[] aggregatedReferences = metadataInformation.Where(m => m.References != null).SelectMany(m => m.References!).Distinct().ToArray();
-            resolvedExternallyProvidedAssemblyReferences = !options.IsBaselineComparison && aggregatedReferences.Length > 0;
+            resolvedExternallyProvidedAssemblyReferences = aggregatedReferences.Length > 0;
 
             IAssemblySymbolLoader loader = _assemblySymbolLoaderFactory.Create(resolvedExternallyProvidedAssemblyReferences);
             if (resolvedExternallyProvidedAssemblyReferences)

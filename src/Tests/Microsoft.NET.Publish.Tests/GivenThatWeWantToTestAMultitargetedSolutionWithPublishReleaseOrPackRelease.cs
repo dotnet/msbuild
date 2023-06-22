@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -15,6 +15,7 @@ using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -44,9 +45,10 @@ namespace Microsoft.NET.Publish.Tests
         /// <param name="PReleaseProperty">The value of the property to set, PublishRelease or PackRelease in this case.</param>
         /// <param name="exePReleaseValue">If "", the property will not be added. This does not undefine the property.</param>
         /// <param name="libraryPReleaseValue">If "", the property will not be added. This does not undefine the property.</param>
-        /// <param name="testPath">Use to set a unique folder name for the test, like other test infrastructure code.</param>
+        /// <param name="callingMethod">Use to set a unique folder name for the test, like other test infrastructure code.</param>
         /// <returns></returns>
-        internal (TestSolution testSolution, List<TestProject> testProjects) Setup(ITestOutputHelper log, List<string> exeProjTfms, List<string> libraryProjTfms, string PReleaseProperty, string exePReleaseValue, string libraryPReleaseValue, [CallerMemberName] string testPath = "")
+        internal (TestAsset testAsset, List<TestProject> testProjects) Setup(List<string> exeProjTfms, List<string> libraryProjTfms, string PReleaseProperty,
+            string exePReleaseValue, string libraryPReleaseValue, [CallerMemberName] string callingMethod = "", string identifier = "")
         {
             // Project Setup
             List<TestProject> testProjects = new List<TestProject>();
@@ -60,7 +62,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 testProject.AdditionalProperties[PReleaseProperty] = exePReleaseValue;
             }
-            var mainProject = _testAssetsManager.CreateTestProject(testProject, callingMethod: testPath, identifier: string.Join("", exeProjTfms) + PReleaseProperty);
 
             var libraryProject = new TestProject("LibraryProject")
             {
@@ -72,18 +73,13 @@ namespace Microsoft.NET.Publish.Tests
             {
                 libraryProject.AdditionalProperties[PReleaseProperty] = libraryPReleaseValue;
             }
-            var secondProject = _testAssetsManager.CreateTestProject(libraryProject, callingMethod: testPath, identifier: string.Join("", libraryProjTfms) + PReleaseProperty);
 
-            List<TestAsset> projects = new List<TestAsset> { mainProject, secondProject };
-
-            // Solution Setup
-            var sln = new TestSolution(log, mainProject.TestRoot, projects);
             testProjects.Add(testProject);
             testProjects.Add(libraryProject);
-            return new(sln, testProjects);
+            var testAsset = _testAssetsManager.CreateTestProjects(testProjects, callingMethod: callingMethod, identifier: identifier);
+
+            return (testAsset, testProjects);
         }
-
-
 
         [InlineData("-f", $"{ToolsetInfo.CurrentTargetFramework}")]
         [InlineData($"-p:TargetFramework={ToolsetInfo.CurrentTargetFramework}")]
@@ -94,20 +90,19 @@ namespace Microsoft.NET.Publish.Tests
             var expectedConfiguration = Release;
             var expectedTfm = "net8.0";
 
-            var solutionAndProjects = Setup(Log, new List<string> { "net6.0", "net7.0", "net8.0" }, new List<string> { secondProjectTfm }, PublishRelease, "", "");
-            var sln = solutionAndProjects.Item1;
+            var (testAsset, testProjects) = Setup(new List<string> { "net6.0", "net7.0", "net8.0" }, new List<string> { secondProjectTfm }, PublishRelease, "", "", identifier: string.Join('-', args));
 
             var dotnetCommand = new DotnetCommand(Log, publish);
             dotnetCommand
-                .Execute(args.Append(sln.SolutionPath))
+                .Execute(args.Append(testAsset.Path))
                 .Should()
                 .Pass();
 
-            var finalPropertyResults = sln.ProjectProperties(new()
-               {
-                   new(expectedTfm, expectedConfiguration),
-                   new(expectedTfm, expectedConfiguration),
-               });
+            var finalPropertyResults = new List<Dictionary<string, string>>();
+            foreach (var testProject in testProjects)
+            {
+                finalPropertyResults.Add(testProject.GetPropertyValues(testAsset.Path, expectedTfm, expectedConfiguration));
+            }
 
             VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
         }
@@ -117,20 +112,19 @@ namespace Microsoft.NET.Publish.Tests
         {
             var expectedConfiguration = Debug;
 
-            var solutionAndProjects = Setup(Log, new List<string> { "net8.0" }, new List<string> { "net7.0", "net8.0" }, PackRelease, "false", "false");
-            var sln = solutionAndProjects.Item1;
+            var (testAsset, testProjects) = Setup(new List<string> { "net8.0" }, new List<string> { "net7.0", "net8.0" }, PackRelease, "false", "false");
 
             var dotnetCommand = new DotnetCommand(Log, pack);
             dotnetCommand
-                .Execute(sln.SolutionPath)
+                .Execute(testAsset.Path)
                 .Should()
                 .Pass();
 
-            var finalPropertyResults = sln.ProjectProperties(new()
-               {
-                   new ("net8.0", expectedConfiguration),
-                   new ("net8.0", expectedConfiguration),
-               });
+            var finalPropertyResults = new List<Dictionary<string, string>>();
+            foreach (var testProject in testProjects)
+            {
+                finalPropertyResults.Add(testProject.GetPropertyValues(testAsset.Path, "net8.0", expectedConfiguration));
+            }
 
             VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
         }
@@ -142,20 +136,19 @@ namespace Microsoft.NET.Publish.Tests
             var secondProjectTfm = ToolsetInfo.CurrentTargetFramework;
             var expectedConfiguration = Release;
 
-            var solutionAndProjects = Setup(Log, new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, PackRelease, "", "");
-            var sln = solutionAndProjects.Item1;
+            var (testAsset, testProjects) = Setup(new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, PackRelease, "", "");
 
             var dotnetCommand = new DotnetCommand(Log, pack);
             dotnetCommand
-                .Execute(sln.SolutionPath)
+                .Execute(testAsset.Path)
                 .Should()
                 .Pass();
 
-            var finalPropertyResults = sln.ProjectProperties(new()
-               {
-                   new (firstProjectTfm, expectedConfiguration),
-                   new (secondProjectTfm, expectedConfiguration),
-               });
+            var finalPropertyResults = new List<Dictionary<string, string>>();
+            foreach (var testProject in testProjects)
+            {
+                finalPropertyResults.Add(testProject.GetPropertyValues(testAsset.Path, testProject == testProjects[0] ? firstProjectTfm : secondProjectTfm, expectedConfiguration));
+            }
 
             VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
         }
@@ -168,20 +161,19 @@ namespace Microsoft.NET.Publish.Tests
             var expectedTfm = "net7.0";
             var expectedConfiguration = Debug;
 
-            var solutionAndProjects = Setup(Log, new List<string> { "net6.0", "net7.0" }, new List<string> { "net7.0", "net8.0" }, PublishRelease, "", "");
-            var sln = solutionAndProjects.Item1;
+            var (testAsset, testProjects) = Setup(new List<string> { "net6.0", "net7.0" }, new List<string> { "net7.0", "net8.0" }, PublishRelease, "", "");
 
             var dotnetCommand = new DotnetCommand(Log, publish);
             dotnetCommand
-                .Execute(passDashF ? "-f" : "", args, sln.SolutionPath)
+                .Execute(passDashF ? "-f" : "", args, testAsset.Path)
                 .Should()
                 .Pass();
 
-            var finalPropertyResults = sln.ProjectProperties(new()
-               {
-                   new (expectedTfm, expectedConfiguration),
-                   new (expectedTfm, expectedConfiguration),
-               });
+            var finalPropertyResults = new List<Dictionary<string, string>>();
+            foreach (var testProject in testProjects)
+            {
+                finalPropertyResults.Add(testProject.GetPropertyValues(testAsset.Path, expectedTfm, expectedConfiguration));
+            }
 
             VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
         }
@@ -193,20 +185,19 @@ namespace Microsoft.NET.Publish.Tests
             var secondProjectTfm = ToolsetInfo.CurrentTargetFramework;
             var expectedConfiguration = Release;
 
-            var solutionAndProjects = Setup(Log, new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, PublishRelease, "true", "");
-            var sln = solutionAndProjects.Item1;
+            var (testAsset, testProjects) = Setup(new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, PublishRelease, "true", "");
 
             var dotnetCommand = new DotnetCommand(Log, publish);
             dotnetCommand
-                .Execute(sln.SolutionPath)
+                .Execute(testAsset.Path)
                 .Should()
                 .Pass();
 
-            var finalPropertyResults = sln.ProjectProperties(new()
-               {
-                   new(firstProjectTfm, expectedConfiguration),
-                   new(secondProjectTfm, expectedConfiguration),
-               });
+            var finalPropertyResults = new List<Dictionary<string, string>>();
+            foreach (var testProject in testProjects)
+            {
+                finalPropertyResults.Add(testProject.GetPropertyValues(testAsset.Path, testProject == testProjects[0] ? firstProjectTfm : secondProjectTfm, expectedConfiguration));
+            }
 
             VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
         }
@@ -230,14 +221,13 @@ namespace Microsoft.NET.Publish.Tests
                 expectedConfiguration = Debug;
             }
 
-            var solutionAndProjects = Setup(Log, new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, property, "", releasePropertyValue);
-            var sln = solutionAndProjects.Item1;
+            var (testAsset, testProjects) = Setup(new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, property, "", releasePropertyValue, identifier: property + releasePropertyValue);
 
             if (releasePropertyValue == "false" && property == PackRelease)
             {
                 var dotnetCommand = new DotnetCommand(Log);
                 dotnetCommand
-                    .Execute("pack", sln.SolutionPath)
+                    .Execute("pack", testAsset.Path)
                     .Should()
                     .Fail();
             }
@@ -245,15 +235,15 @@ namespace Microsoft.NET.Publish.Tests
             {
                 var dotnetCommand = new DotnetCommand(Log);
                 dotnetCommand
-                    .Execute(property == PublishRelease ? "publish" : "pack", sln.SolutionPath)
+                    .Execute(property == PublishRelease ? "publish" : "pack", testAsset.Path)
                     .Should()
                     .Pass();
 
-                var finalPropertyResults = sln.ProjectProperties(new()
-               {
-                   new(firstProjectTfm, expectedConfiguration),
-                   new(secondProjectTfm, expectedConfiguration),
-               });
+                var finalPropertyResults = new List<Dictionary<string, string>>();
+                foreach (var testProject in testProjects)
+                {
+                    finalPropertyResults.Add(testProject.GetPropertyValues(testAsset.Path, testProject == testProjects[0] ? firstProjectTfm : secondProjectTfm, expectedConfiguration));
+                }
 
                 VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
             }
@@ -268,13 +258,12 @@ namespace Microsoft.NET.Publish.Tests
             var firstProjectTfm = "net7.0";
             var secondProjectTfm = ToolsetInfo.CurrentTargetFramework; // This should work for Net8+, test name is for brevity
 
-            var solutionAndProjects = Setup(Log, new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, PublishRelease, "", publishReleaseValue);
-            var sln = solutionAndProjects.Item1;
-
+            var (testAsset, testProjects) = Setup(new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, PublishRelease, "", publishReleaseValue, identifier: publishReleaseValue);
+        
             var dotnetCommand = new DotnetPublishCommand(Log);
             dotnetCommand
                 .WithEnvironmentVariable("DOTNET_CLI_LAZY_PUBLISH_AND_PACK_RELEASE_FOR_SOLUTIONS", "true")
-                .Execute(sln.SolutionPath)
+                .Execute(testAsset.Path)
                 .Should()
                 .Fail()
                 .And
@@ -287,12 +276,11 @@ namespace Microsoft.NET.Publish.Tests
             var firstProjectTfm = "net7.0";
             var secondProjectTfm = ToolsetInfo.CurrentTargetFramework; // This should work for Net8+, test name is for brevity
 
-            var solutionAndProjects = Setup(Log, new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, PublishRelease, "false", "");
-            var sln = solutionAndProjects.Item1;
+            var (testAsset, _) = Setup(new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, PublishRelease, "false", "");
 
             var dotnetCommand = new DotnetCommand(Log, publish);
             dotnetCommand
-                .Execute(sln.SolutionPath)
+                .Execute(testAsset.Path)
                 .Should()
                 .Fail()
                 .And
@@ -305,12 +293,11 @@ namespace Microsoft.NET.Publish.Tests
             var firstProjectTfm = "net7.0";
             var secondProjectTfm = "net6.0";
 
-            var solutionAndProjects = Setup(Log, new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, PublishRelease, "", "");
-            var sln = solutionAndProjects.Item1;
+            var (testAsset, _) = Setup(new List<string> { firstProjectTfm }, new List<string> { secondProjectTfm }, PublishRelease, "", "");
 
             var dotnetCommand = new DotnetCommand(Log, publish);
             dotnetCommand
-                .Execute(sln.SolutionPath)
+                .Execute(testAsset.Path)
                 .Should()
                 .Pass();
         }
@@ -321,13 +308,12 @@ namespace Microsoft.NET.Publish.Tests
         public void It_fails_with_conflicting_PublishRelease_or_PackRelease_values_in_solution_file(string pReleaseVar)
         {
             var tfm = ToolsetInfo.CurrentTargetFramework;
-            var solutionAndProjects = Setup(Log, new List<string> { tfm }, new List<string> { tfm }, pReleaseVar, "true", "false");
-            var sln = solutionAndProjects.Item1;
+            var (testAsset, _) = Setup(new List<string> { tfm }, new List<string> { tfm }, pReleaseVar, "true", "false");
 
             var expectedError = string.Format(Strings.SolutionProjectConfigurationsConflict, pReleaseVar, "");
 
             new DotnetCommand(Log)
-                .Execute("dotnet", pReleaseVar == PublishRelease ? "publish" : "pack", sln.SolutionPath)
+                .Execute("dotnet", pReleaseVar == PublishRelease ? "publish" : "pack", testAsset.Path)
                 .Should()
                 .Fail()
                 .And
@@ -338,12 +324,11 @@ namespace Microsoft.NET.Publish.Tests
         public void It_sees_PublishRelease_values_of_hardcoded_sln_argument()
         {
             var tfm = ToolsetInfo.CurrentTargetFramework;
-            var solutionAndProjects = Setup(Log, new List<string> { tfm }, new List<string> { tfm }, PublishRelease, "true", "false");
-            var sln = solutionAndProjects.Item1;
+            var (testAsset, _) = Setup(new List<string> { tfm }, new List<string> { tfm }, PublishRelease, "true", "false");
 
             new DotnetPublishCommand(Log)
-                .WithWorkingDirectory(Directory.GetParent(sln.SolutionPath).FullName) // code under test looks in CWD, ensure coverage outside this scenario
-                .Execute(sln.SolutionPath)
+                .WithWorkingDirectory(Directory.GetParent(testAsset.Path).FullName) // code under test looks in CWD, ensure coverage outside this scenario
+                .Execute(testAsset.Path)
                 .Should()
                 .Fail()
                 .And
@@ -355,20 +340,19 @@ namespace Microsoft.NET.Publish.Tests
         {
             var expectedConfiguration = Debug;
             var tfm = ToolsetInfo.CurrentTargetFramework;
-            var solutionAndProjects = Setup(Log, new List<string> { tfm }, new List<string> { tfm }, PublishRelease, "true", "false");
-            var sln = solutionAndProjects.Item1;
+            var (testAsset, testProjects) = Setup(new List<string> { tfm }, new List<string> { tfm }, PublishRelease, "true", "false");
 
             new DotnetPublishCommand(Log)
                 .WithEnvironmentVariable("DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE", "true")
-                .Execute(sln.SolutionPath) // This property won't be set in VS, make sure the error doesn't occur because of this by mimicking behavior.
+                .Execute(testAsset.Path) // This property won't be set in VS, make sure the error doesn't occur because of this by mimicking behavior.
                 .Should()
                 .Pass();
 
-            var finalPropertyResults = sln.ProjectProperties(new()
-               {
-                   new(tfm, expectedConfiguration),
-                   new(tfm, expectedConfiguration),
-               });
+            var finalPropertyResults = new List<Dictionary<string, string>>();
+            foreach (var testProject in testProjects)
+            {
+                finalPropertyResults.Add(testProject.GetPropertyValues(testAsset.Path, tfm, expectedConfiguration));
+            }
 
             VerifyCorrectConfiguration(finalPropertyResults, expectedConfiguration);
 

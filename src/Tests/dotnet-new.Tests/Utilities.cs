@@ -1,6 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
@@ -50,7 +49,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             }
         }
 
-        //Provides thread safe Dictionary for creating critical section
+        // Provides a thread safe Dictionary for creating critical section
         internal class NamedMonitor
         {
             private readonly ConcurrentDictionary<string, object> _dictionary = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);

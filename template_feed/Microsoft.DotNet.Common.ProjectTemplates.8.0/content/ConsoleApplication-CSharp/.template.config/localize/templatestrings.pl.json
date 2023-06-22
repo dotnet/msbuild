@@ -14,6 +14,8 @@
   "symbols/skipRestore/displayName": "Pomiń przywracanie",
   "symbols/UseProgramMain/description": "Określa, czy wygenerować jawną klasę Program i metodę Main zamiast instrukcji najwyższego poziomu.",
   "symbols/UseProgramMain/displayName": "Nie używaj ins_trukcji najwyższego poziomu",
+  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
+  "symbols/NativeAot/displayName": "Enable _native AOT publish",
   "postActions/restore/description": "Przywróć pakiety NuGet wymagane przez ten projekt.",
   "postActions/restore/manualInstructions/default/text": "Uruchom polecenie \"dotnet restore\"",
   "postActions/open-file/description": "Otwiera plik Program.cs w edytorze"

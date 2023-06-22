@@ -2,9 +2,24 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="ArchArgumentName">
+        <source>ARCH</source>
+        <target state="new">ARCH</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ArchitectureOptionDescription">
         <source>The target architecture.</source>
         <target state="translated">A arquitetura de destino.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArtifactsPathArgumentName">
+        <source>ARTIFACTS_DIR</source>
+        <target state="new">ARTIFACTS_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArtifactsPathOptionDescription">
+        <source>The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</source>
+        <target state="new">The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotResolveRuntimeIdentifier">
@@ -40,6 +55,11 @@
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">Não foi possível encontrar nenhum projeto em ‘{0}’.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DidYouMean">
+        <source>Did you mean the following command?</source>
+        <target state="new">Did you mean the following command?</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
@@ -110,9 +130,19 @@ export PATH="$PATH:{0}"
         <target state="translated">Publique o seu aplicativo como um aplicativo dependente de estrutura. Um runtime do .NET compatível precisa ser instalado no computador de destino para executar o aplicativo.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildAdditionalOptionTitle">
+        <source>.NET Cli Options:</source>
+        <target state="new">.NET Cli Options:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">Foi encontrado mais de um projeto em ‘{0}’. Especifique qual deve ser usado.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OSArgumentName">
+        <source>OS</source>
+        <target state="new">OS</target>
         <note />
       </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
@@ -182,19 +212,24 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
-        <target state="translated">As opções '--auto--contidas ' e '--não-independentes ' não podem ser usadas juntas.</target>
-        <note />
+        <target state="translated">As opções '--self-contained' e '--no-self-contained' não podem ser usadas juntas.</target>
+        <note>{Locked="--self-contained"}{Locked="--no-self-contained"}</note>
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Publique o runtime do .NET com seu aplicativo para que ele não precise estar instalado no computador de destino.
+The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">Publique o runtime do .NET com seu aplicativo para que ele não precise estar instalado no computador de destino.
 O padrão é 'true' se um identificador de runtime for especificado.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">
         <source>Solution</source>
         <target state="translated">Solução</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionArgumentMisplaced">
+        <source>Solution argument '{0}' is misplaced.</source>
+        <target state="new">Solution argument '{0}' is misplaced.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">
@@ -240,6 +275,11 @@ O padrão é 'true' se um identificador de runtime for especificado.</target>
       <trans-unit id="Delete">
         <source>Delete</source>
         <target state="translated">Excluir</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFolderAlreadyContainsProject">
+        <source>Solution {0} already contains project {1} in solution folder {2}.</source>
+        <target state="new">Solution {0} already contains project {1} in solution folder {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">

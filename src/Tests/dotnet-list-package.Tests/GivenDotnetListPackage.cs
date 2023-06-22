@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.CommandLine;
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
             var projectDirectory = testAsset.Path;
 
             var packageName = "Newtonsoft.Json";
-            var packageVersion = "9.0.1";
+            var packageVersion = "13.0.1";
             var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
                 .Execute("add", "package", packageName, "--version", packageVersion);
@@ -314,8 +314,10 @@ class Program
         [InlineData(false, "--outdated", "--highest-minor")]
         [InlineData(false, "--outdated", "--highest-patch")]
         [InlineData(false, "--config")]
+        [InlineData(false, "--configfile")]
         [InlineData(false, "--source")]
         [InlineData(false, "--config", "--deprecated")]
+        [InlineData(false, "--configfile", "--deprecated")]
         [InlineData(false, "--source", "--vulnerable")]
         [InlineData(true, "--vulnerable", "--deprecated")]
         [InlineData(true, "--vulnerable", "--outdated")]
@@ -333,6 +335,28 @@ class Program
             {
                 checkRules(); // Test for no throw
             }
+        }
+
+        [UnixOnlyFact]
+        public void ItRunsInCurrentDirectoryWithPoundInPath()
+        {
+            // Regression test for https://github.com/dotnet/sdk/issues/19654
+            var testAssetName = "TestAppSimple";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(testAssetName, "C#")
+                .WithSource();
+            var projectDirectory = testAsset.Path;
+
+            new RestoreCommand(testAsset)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new ListPackageCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
         }
     }
 }

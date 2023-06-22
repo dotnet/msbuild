@@ -14,6 +14,11 @@
     <BuildHelixPayload Condition="'$(RunAoTTests)' != 'true'">false</BuildHelixPayload>
   </PropertyGroup>
 
+  <!-- Based on .NET 8 breaking change: Add SC like old behavior if RID is defined. -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != '' and '$(SelfContained)' == ''">
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
   </ItemGroup>
@@ -23,7 +28,7 @@
       <_Parameter1>AspNetTestTfm</_Parameter1>
       <_Parameter2>$(SdkTargetFramework)</_Parameter2>
     </AssemblyAttribute>
-    <!-- 
+    <!--
       We use these to templatize the output from our build/publish tests to ensure the right set of
       files gets published in all circumstances.
     -->
@@ -38,10 +43,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Microsoft.NET.Sdk.BlazorWebAssembly.Tests\BootJsonData.cs" Link="BootJsonData.cs" />
     <Compile Include="..\Microsoft.NET.Sdk.BlazorWebAssembly.Tests\WasmPublishIntegrationTestBase.cs" Link="WasmPublishIntegrationTestBase.cs" />
     <Compile Include="..\Microsoft.NET.Sdk.BlazorWebAssembly.Tests\ServiceWorkerAssert.cs" Link="ServiceWorkerAssert.cs" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkPackageVersion)" />

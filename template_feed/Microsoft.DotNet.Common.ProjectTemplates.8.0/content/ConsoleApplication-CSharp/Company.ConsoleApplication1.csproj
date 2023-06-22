@@ -8,6 +8,10 @@
     <LangVersion Condition="'$(langVersion)' != ''">$(ProjectLanguageVersion)</LangVersion>
     <ImplicitUsings Condition="'$(csharpFeature_ImplicitUsings)' == 'true'">enable</ImplicitUsings>
     <Nullable Condition="'$(csharpFeature_Nullable)' == 'true'">enable</Nullable>
+    <!--#if (NativeAot) -->
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!--#endif -->
   </PropertyGroup>
 
 </Project>

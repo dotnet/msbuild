@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
@@ -7,6 +7,10 @@ using Microsoft.DotNet.ApiSymbolExtensions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
+    /// <summary>
+    /// This rule validates that base types and interfaces aren't removed from the right.
+    /// In strict mode, it also validates that the right doesn't add base types and interfaces.
+    /// </summary>
     public class CannotRemoveBaseTypeOrInterface : IRule
     {
         private readonly IRuleSettings _settings;
@@ -88,7 +92,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
                 // Ignore non visible interfaces based on the run Settings
                 // If TypeKind == Error it means the Roslyn couldn't resolve it,
-                // so we are running with a missing assembly reference to where that typeref is defined.
+                // so we are running with a missing assembly reference to where that type ef is defined.
                 // However we still want to consider it as Roslyn does resolve it's name correctly.
                 if (!leftInterface.IsVisibleOutsideOfAssembly(_settings.IncludeInternalSymbols) && leftInterface.TypeKind != TypeKind.Error)
                     return;

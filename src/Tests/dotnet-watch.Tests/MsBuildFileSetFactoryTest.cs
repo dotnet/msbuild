@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -328,7 +328,7 @@ $@"<ItemGroup>
 
             var output = new OutputSink();
             var options = GetWatchOptions();
-            var filesetFactory = new MsBuildFileSetFactory(options, _reporter, _muxerPath, projectA, output, waitOnError: false, trace: true);
+            var filesetFactory = new MsBuildFileSetFactory(options, _reporter, _muxerPath, projectA, targetFramework: null, buildProperties: null, output, waitOnError: false, trace: true);
 
             var fileset = await filesetFactory.CreateAsync(CancellationToken.None);
 
@@ -363,11 +363,11 @@ $@"<ItemGroup>
         private Task<FileSet> GetFileSet(string projectPath)
         {
             DotNetWatchOptions options = GetWatchOptions();
-            return new MsBuildFileSetFactory(options, _reporter, _muxerPath, projectPath, new OutputSink(), waitOnError: false, trace: false).CreateAsync(CancellationToken.None);
+            return new MsBuildFileSetFactory(options, _reporter, _muxerPath, projectPath, targetFramework: null, buildProperties: null, new OutputSink(), waitOnError: false, trace: false).CreateAsync(CancellationToken.None);
         }
 
         private static DotNetWatchOptions GetWatchOptions() => 
-            new DotNetWatchOptions(false, false, false, false, false, false);
+            new DotNetWatchOptions(false, false, false, false, false, TestFlags.None);
 
         private static string GetTestProjectPath(TestAsset target) => Path.Combine(GetTestProjectDirectory(target), target.TestProject.Name + ".csproj");
 

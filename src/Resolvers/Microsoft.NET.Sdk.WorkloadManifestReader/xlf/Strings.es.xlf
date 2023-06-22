@@ -62,6 +62,11 @@
         <target state="translated">Versión no válida: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">Error al analizar la versión \"{1}\" para el id. de manifiesto de carga de trabajo \"{0}\"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">No se ha encontrado la dependencia del manifiesto de carga de trabajo '{0}' requerida por el manifiesto '{1}' [{2}]</target>
@@ -95,6 +100,16 @@
       <trans-unit id="RedirectWorkloadHasOtherKeys">
         <source>Redirect workload '{0}' has keys other than 'redirect-to'</source>
         <target state="translated">La carga de trabajo de redireccionamiento '{0}' tiene claves distintas que las de 'redirect-to'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedManifestNotFound">
+        <source>Specified workload manifest was not found: {0}</source>
+        <target state="translated">No se encontró el manifiesto de carga de trabajo especificado: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedWorkloadSetNotFound">
+        <source>Specified workload set was not found: {0}</source>
+        <target state="translated">No se encontró el conjunto de cargas de trabajo especificado: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">

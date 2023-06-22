@@ -171,4 +171,10 @@
   <data name="SolutionFolderAndInRootMutuallyExclusive" xml:space="preserve">
     <value>The --solution-folder and --in-root options cannot be used together; use only one of the options.</value>
   </data>
+  <data name="ListSolutionFoldersArgumentDescription" xml:space="preserve">
+    <value>Display solution folder paths.</value>
+  </data>
+  <data name="SolutionFolderHeader" xml:space="preserve">
+    <value>Solution Folder(s)</value>
+  </data>
 </root>

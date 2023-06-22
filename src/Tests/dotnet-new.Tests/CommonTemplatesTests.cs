@@ -1,6 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -49,7 +48,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("EditorConfig file", "editorconfig", new[] { "--empty" })]
         [InlineData("EditorConfig file", ".editorconfig", null)]
         [InlineData("EditorConfig file", ".editorconfig", new[] { "--empty" })]
-        [InlineData("MSBuild Directory.Build.props file", "buildprops", new[] { "--inherit" })]
+        [InlineData("MSBuild Directory.Build.props file", "buildprops", new[] { "--inherit", "--use-artifacts" })]
         [InlineData("MSBuild Directory.Build.targets file", "buildtargets", new[] { "--inherit" })]
         public async void AllCommonItemsCreate(string expectedTemplateName, string templateShortName, string[]? args)
         {
@@ -160,6 +159,66 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .Should()
                 .ExitWith(0)
                 .And.HaveStdOutMatching("^-rw-------.*nuget.config$", RegexOptions.Multiline);
+
+            Directory.Delete(workingDir, true);
+        }
+
+        [Theory]
+        [InlineData(new object[] { "console", "C#" })]
+        [InlineData(new object[] { "console", "VB" })]
+        public async void AotVariants(string name, string language)
+        {
+            // "net8.0";
+            string currentDefaultFramework = $"net{Environment.Version.Major}.{Environment.Version.Minor}";
+
+            string workingDir = CreateTemporaryFolder(folderName: $"{name}-{language}");
+            string outputDir = "MyProject";
+            string projName = name;
+
+            List<string> args = new() { "-o", outputDir };
+            // VB build would fail for name 'console' (root namespace would conflict with BCL namespace)
+            if (language.Equals("VB") == true && name.Equals("console"))
+            {
+                projName = "vb-console";
+                args.Add("-n");
+                args.Add(projName);
+            }
+            args.Add("--aot");
+
+            // Do not bother restoring. This would need to restore the AOT compiler.
+            // We would need a nuget.config for that and it's a waste of time anyway.
+            args.Add("--no-restore");
+
+            string extension = language == "VB" ? "vbproj" : "csproj";
+
+            string projectDir = Path.Combine(workingDir, outputDir);
+            string finalProjectName = Path.Combine(projectDir, $"{projName}.{extension}");
+
+            Dictionary<string, string> environmentUnderTest = new() { ["DOTNET_NOLOGO"] = false.ToString() };
+            TestContext.Current.AddTestEnvironmentVariables(environmentUnderTest);
+
+            TemplateVerifierOptions options = new TemplateVerifierOptions(templateName: name)
+            {
+                TemplateSpecificArgs = args,
+                SnapshotsDirectory = "Approvals",
+                OutputDirectory = workingDir,
+                SettingsDirectory = _fixture.HomeDirectory,
+                VerifyCommandOutput = true,
+                DoNotPrependTemplateNameToScenarioName = false,
+                DoNotAppendTemplateArgsToScenarioName = true,
+                ScenarioName = language.Replace('#', 's').ToLower(),
+                VerificationExcludePatterns = new[] { "*/stderr.txt", "*\\stderr.txt" },
+                DotnetExecutablePath = TestContext.Current.ToolsetUnderTest.DotNetHostPath,
+            }
+            .WithCustomEnvironment(environmentUnderTest)
+            .WithCustomScrubbers(
+                ScrubbersDefinition.Empty
+                    .AddScrubber(sb => sb.Replace($"<TargetFramework>{currentDefaultFramework}</TargetFramework>", "<TargetFramework>%FRAMEWORK%</TargetFramework>"))
+                    .AddScrubber(sb => sb.Replace(finalProjectName, "%PROJECT_PATH%").UnixifyDirSeparators().ScrubByRegex("(^  Restored .* \\()(.*)(\\)\\.)", "$1%DURATION%$3", RegexOptions.Multiline), "txt")
+            );
+
+            VerificationEngine engine = new VerificationEngine(_logger);
+            await engine.Execute(options).ConfigureAwait(false);
 
             Directory.Delete(workingDir, true);
         }
@@ -345,6 +404,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 DoNotAppendTemplateArgsToScenarioName = true,
                 ScenarioName =
                     $"Nullable-{supportsNullable}#TopLevel-{supportsTopLevel}#ImplicitUsings-{supportsImplicitUsings}#FileScopedNs-{supportsFileScopedNs}"
+                    + (string.IsNullOrEmpty(framework) ? string.Empty : $"#Framework-{framework}")
                     + '#' + (language == null ? "cs" : language.Replace('#', 's').ToLower())
                     + (langVersion == null ? "#NoLangVer" : (langVersionUnsupported ? "#UnsuportedLangVer" : null)),
                 VerificationExcludePatterns = new[] { "*/stderr.txt", "*\\stderr.txt" },

@@ -12,6 +12,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <Import Project="Microsoft.NET.Sdk.Common.targets"/>
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.SourceLink.targets" Condition="'$(SuppressImplicitGitSourceLink)' != 'true'"/>
 
   <!--
   ============================================================
@@ -24,7 +25,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   ============================================================
    -->
   <Target Name="Publish" Condition=" '$(IsPublishable)' != 'false' ">
-    <NETSdkError ResourceName="PublishUnsupportedWithoutTargetFramework"/>
+    <ItemGroup>
+      <_PublishTargetFrameworks Include="$(TargetFrameworks)" />
+    </ItemGroup>
+    <NETSdkError ResourceName="PublishUnsupportedWithoutTargetFramework"
+      FormatArguments="@(_PublishTargetFrameworks, ', ')" />
   </Target>
 
   <!--

@@ -1,23 +1,22 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Common;
 using NuGet.Versioning;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
@@ -291,7 +290,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return packs.Select(p => new WorkloadDownload(p.Id, p.ResolvedPackageId, p.Version)).ToList();
         }
 
-        public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null)
+        public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null, bool cleanAllPacks = false)
         {
             var installedSdkFeatureBands = _installationRecordRepository.GetFeatureBandsWithInstallationRecords();
             _reporter.WriteLine(string.Format(LocalizableStrings.GarbageCollectingSdkFeatureBandsMessage, string.Join(" ", installedSdkFeatureBands)));
@@ -307,30 +306,49 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 foreach (var packVersionDir in Directory.GetDirectories(packIdDir))
                 {
-                    var bandRecords = Directory.GetFileSystemEntries(packVersionDir);
+                    var bandPackRecordPaths = Directory.GetFileSystemEntries(packVersionDir);
 
-                    var unneededBandRecords = bandRecords
-                        .Where(recordPath => !installedSdkFeatureBands.Contains(new SdkFeatureBand(Path.GetFileName(recordPath))));
+                    var unneededBandRecordPaths = bandPackRecordPaths
+                        .Where(recordPath =>
+                            {
+                                var thisRecordFeatureBand = new SdkFeatureBand(Path.GetFileName(recordPath));
 
-                    var currentBandRecordPath = Path.Combine(packVersionDir, _sdkFeatureBand.ToString());
-                    if (bandRecords.Contains(currentBandRecordPath) && !currentBandInstallRecords.Contains(currentBandRecordPath))
-                    {
-                        unneededBandRecords = unneededBandRecords.Append(currentBandRecordPath);
-                    }
+                                // Mark the pack record for garbage collection if we're cleaning all packs.
+                                if (cleanAllPacks)
+                                {
+                                    return true;
+                                }
 
-                    if (!unneededBandRecords.Any())
+                                // Mark the pack record for garbage collection if the feature band is not installed/has no workloads installed.
+                                if (!installedSdkFeatureBands.Contains(thisRecordFeatureBand))
+                                {
+                                    return true;
+                                }
+
+                                // Mark the pack record for garbage collection if the pack has no corresponding workload installation record and has the current SDK feature band.
+                                if (thisRecordFeatureBand.Equals(_sdkFeatureBand) && !currentBandInstallRecords.Contains(recordPath))
+                                {
+                                    return true;
+                                }
+
+                                return false;
+                            }
+                    );
+
+                    if (!unneededBandRecordPaths.Any())
                     {
                         continue;
                     }
 
                     // Save the pack info in case we need to delete the pack
-                    var jsonPackInfo = File.ReadAllText(unneededBandRecords.First());
-                    foreach (var unneededRecord in unneededBandRecords)
+                    var jsonPackInfo = File.ReadAllText(unneededBandRecordPaths.First());
+                    foreach (var unneededPackRecord in unneededBandRecordPaths)
                     {
-                        File.Delete(unneededRecord);
+                        File.Delete(unneededPackRecord);
                     }
 
-                    if (!bandRecords.Except(unneededBandRecords).Any())
+                    // If there are no pack records left in the directory we garbage collected, we need to delete the pack and its director(ies).
+                    if (!bandPackRecordPaths.Except(unneededBandRecordPaths).Any())
                     {
                         Directory.Delete(packVersionDir);
                         var deletablePack = GetPackInfo(packVersionDir);
@@ -346,6 +364,29 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 if (!Directory.GetFileSystemEntries(packIdDir).Any())
                 {
                     Directory.Delete(packIdDir);
+                }
+            }
+
+            if (cleanAllPacks)
+            {
+                DeleteAllWorkloadInstallationRecords();
+            }
+        }
+
+        /// <summary>
+        /// Remove all workload installation records that aren't from Visual Studio.
+        /// </summary>
+        private void DeleteAllWorkloadInstallationRecords()
+        {
+            FileBasedInstallationRecordRepository workloadRecordRepository = new(_workloadMetadataDir);
+            var allFeatureBands = workloadRecordRepository.GetFeatureBandsWithInstallationRecords();
+
+            foreach (SdkFeatureBand potentialBandToClean in allFeatureBands)
+            {
+                var workloadInstallationRecordIds = workloadRecordRepository.GetInstalledWorkloads(potentialBandToClean);
+                foreach (WorkloadId workloadInstallationRecordId in workloadInstallationRecordIds)
+                {
+                    workloadRecordRepository.DeleteWorkloadInstallationRecord(workloadInstallationRecordId, potentialBandToClean);
                 }
             }
         }

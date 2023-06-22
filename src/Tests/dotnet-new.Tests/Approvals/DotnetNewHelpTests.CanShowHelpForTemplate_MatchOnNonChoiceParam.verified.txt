@@ -30,6 +30,9 @@ Template options:
   --use-program-main                      Whether to generate an explicit Program class and Main method instead of top-level statements.
                                           Type: bool
                                           Default: false
+  --aot                                   Whether to enable the project for publishing as native AOT.
+                                          Type: bool
+                                          Default: false
 
 To see help for other template languages (F#, VB), use --language option:
    dotnet new console -h --language F#

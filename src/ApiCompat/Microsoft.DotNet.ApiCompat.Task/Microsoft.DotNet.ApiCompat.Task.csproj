@@ -3,13 +3,15 @@
   <PropertyGroup>
     <TargetFrameworks>net6.0;net472</TargetFrameworks>
     <TargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net8.0;net472</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <StrongNameKeyId>Open</StrongNameKeyId>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
     <IsPackable>true</IsPackable>
     <IsShippingPackage>true</IsShippingPackage>
-    <StrongNameKeyId>Open</StrongNameKeyId>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <!-- This package doesn't contain any lib or ref assemblies because it's a tooling package.-->
     <NoWarn>$(NoWarn);NU5128</NoWarn>
-    <Nullable>enable</Nullable>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddBuildOutputToPackageCore;_AddBuildOutputToPackageDesktop</TargetsForTfmSpecificContentInPackage>
     <PackageDescription>MSBuild tasks and targets to perform api compatibility checks on assemblies and packages.</PackageDescription>
   </PropertyGroup>
@@ -36,7 +38,7 @@
   <ItemGroup>
     <!-- ExcludeAssets="Runtime" is being set to avoid adding package references and dependencies of package and project references into the package. -->
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildPackageVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCoreVersion)" ExcludeAssets="Runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" ExcludeAssets="Runtime" />
     <ProjectReference Include="..\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" ExcludeAssets="Runtime" />
     <ProjectReference Include="..\Microsoft.DotNet.ApiCompatibility\Microsoft.DotNet.ApiCompatibility.csproj" ExcludeAssets="Runtime" />
     <!-- We carry NuGet as part of the package in case the package is used with an older SDKs or with full framework MSBuild. -->

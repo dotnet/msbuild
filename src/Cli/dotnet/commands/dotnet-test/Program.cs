@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -106,6 +106,21 @@ namespace Microsoft.DotNet.Tools.Test
             exitCode |= RunArtifactPostProcessingIfNeeded(testSessionCorrelationId, parseResult, FeatureFlag.Instance);
 
             return exitCode;
+        }
+
+        public static TestCommand FromArgs(string[] args, string testSessionCorrelationId = null, string msbuildPath = null)
+        {
+            var parser = Microsoft.DotNet.Cli.Parser.Instance;
+            var parseResult = parser.ParseFrom("dotnet test", args);
+
+            // settings parameters are after -- (including --), these should not be considered by the parser
+            string[] settings = args.SkipWhile(a => a != "--").ToArray();
+            if (string.IsNullOrEmpty(testSessionCorrelationId))
+            {
+                testSessionCorrelationId = $"{Environment.ProcessId}_{Guid.NewGuid()}";
+            }
+            
+            return FromParseResult(parseResult, settings, testSessionCorrelationId, msbuildPath);
         }
 
         private static TestCommand FromParseResult(ParseResult result, string[] settings, string testSessionCorrelationId, string msbuildPath = null)

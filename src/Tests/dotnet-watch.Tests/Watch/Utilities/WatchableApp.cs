@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -44,11 +44,11 @@ namespace Microsoft.DotNet.Watcher.Tests
         /// <summary>
         /// Asserts that the watched process outputs a line starting with <paramref name="expectedPrefix"/> and returns the remainder of that line.
         /// </summary>
-        public async Task<string> AssertOutputLineStartsWith(string expectedPrefix)
+        public async Task<string> AssertOutputLineStartsWith(string expectedPrefix, Predicate<string> failure = null)
         {
             var line = await Process.GetOutputLineAsync(
                 success: line => line.StartsWith(expectedPrefix, StringComparison.Ordinal),
-                failure: line => line.Contains(WatchErrorOutputEmoji, StringComparison.Ordinal));
+                failure: failure ?? new Predicate<string>(line => line.Contains(WatchErrorOutputEmoji, StringComparison.Ordinal)));
 
             Assert.StartsWith(expectedPrefix, line, StringComparison.Ordinal);
 
@@ -73,38 +73,7 @@ namespace Microsoft.DotNet.Watcher.Tests
             await AssertOutputLineStartsWith(WatchExitedMessage);
         }
 
-        // Process ID is insufficient because PID's may be reused. Process identifier also includes other info to distinguish
-        // between different process instances.
-        public async Task<string> ReadProcessIdentifierFromOutput()
-            => await AssertOutputLineStartsWith("Process identifier =");
-
-        public void Start(IEnumerable<string> arguments, string workingDirectory, [CallerMemberName] string name = null)
-        {
-            var args = new List<string>
-            {
-                "watch",
-            };
-            args.AddRange(DotnetWatchArgs);
-            args.AddRange(arguments);
-
-            var commandSpec = new DotnetCommand(Logger, args.ToArray())
-            {
-                WorkingDirectory = workingDirectory,
-            };
-
-            commandSpec.WithEnvironmentVariable("DOTNET_USE_POLLING_FILE_WATCHER", "true");
-            commandSpec.WithEnvironmentVariable("__DOTNET_WATCH_RUNNING_AS_TEST", "true");
-
-            foreach (var env in EnvironmentVariables)
-            {
-                commandSpec.WithEnvironmentVariable(env.Key, env.Value);
-            }
-
-            Process = new AwaitableProcess(commandSpec, Logger);
-            Process.Start();
-        }
-
-        public void Prepare(string projectRootPath)
+        private void Prepare(string projectRootPath)
         {
             if (_prepared)
             {
@@ -117,17 +86,48 @@ namespace Microsoft.DotNet.Watcher.Tests
             _prepared = true;
         }
 
-        public async Task StartWatcherAsync(string projectRootPath, IEnumerable<string> arguments = null, string workingDirectory = null, [CallerMemberName] string name = null)
+        public void Start(string projectRootPath, IEnumerable<string> arguments, string workingDirectory = null, TestFlags testFlags = TestFlags.RunningAsTest, string name = null)
         {
             Prepare(projectRootPath);
 
-            var args = new[] { "run", "--" };
-            if (arguments != null)
+            var args = new List<string>
             {
-                args = args.Concat(arguments).ToArray();
+                "watch",
+            };
+            args.AddRange(DotnetWatchArgs);
+            args.AddRange(arguments);
+
+            var commandSpec = new DotnetCommand(Logger, args.ToArray())
+            {
+                WorkingDirectory = workingDirectory ?? projectRootPath,
+            };
+
+            commandSpec.WithEnvironmentVariable("DOTNET_USE_POLLING_FILE_WATCHER", "true");
+            commandSpec.WithEnvironmentVariable("__DOTNET_WATCH_TEST_FLAGS", testFlags.ToString());
+
+            foreach (var env in EnvironmentVariables)
+            {
+                commandSpec.WithEnvironmentVariable(env.Key, env.Value);
             }
 
-            Start(args, workingDirectory ?? projectRootPath, name);
+            Process = new AwaitableProcess(commandSpec, Logger);
+            Process.Start();
+        }
+
+        public async Task StartWatcherAsync(
+            string projectRootPath,
+            IEnumerable<string> applicationArguments = null,
+            string workingDirectory = null,
+            TestFlags testFlags = TestFlags.RunningAsTest,
+            [CallerMemberName] string name = null)
+        {
+            var args = new[] { "run", "--" };
+            if (applicationArguments != null)
+            {
+                args = args.Concat(applicationArguments).ToArray();
+            }
+
+            Start(projectRootPath, args, workingDirectory, testFlags, name);
 
             await AssertOutputLineStartsWith(WatchStartedMessage);
         }

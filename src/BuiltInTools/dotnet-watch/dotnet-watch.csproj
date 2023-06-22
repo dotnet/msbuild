@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(RepoRoot)\src\Layout\redist\targets\PublishDotnetWatch.targets"/>
+  <Import Project="$(RepoRoot)\src\Layout\redist\targets\PublishDotnetWatch.targets" />
 
   <PropertyGroup>
     <TargetFramework>$(SdkTargetFramework)</TargetFramework>
@@ -9,6 +9,7 @@
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <UseAppHost>false</UseAppHost>
     <RuntimeIdentifier />
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-The template "Console App" was created successfully.
+﻿The template "Console App" was created successfully.
 
 Processing post-creation actions...
 Restoring %PROJECT_PATH%:

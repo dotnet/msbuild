@@ -1,11 +1,13 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
-using Microsoft.NET.Build.Tasks;
 using Microsoft.DotNet.ApiCompatibility.Logging;
+using Microsoft.DotNet.PackageValidation;
+using Microsoft.NET.Build.Tasks;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ApiCompat.Task
 {
@@ -95,7 +97,7 @@ namespace Microsoft.DotNet.ApiCompat.Task
         public string[]? SuppressionFiles { get; set; }
 
         /// <summary>
-        /// The path to the suppression output file that is written to, when <see cref="GenerateCompatibilitySuppressionFile"/> is true.
+        /// The path to the suppression output file that is written to, when <see cref="GenerateSuppressionFile"/> is true.
         /// </summary>
         public string? SuppressionOutputFile { get; set; }
 
@@ -124,22 +126,6 @@ namespace Microsoft.DotNet.ApiCompat.Task
 
         protected override void ExecuteCore()
         {
-            Dictionary<string, string[]>? packageAssemblyReferences = null;
-
-            if (PackageAssemblyReferences != null)
-            {
-                packageAssemblyReferences = new Dictionary<string, string[]>(PackageAssemblyReferences.Length);
-                foreach (ITaskItem taskItem in PackageAssemblyReferences)
-                {
-                    string tfm = taskItem.GetMetadata("Identity");
-                    string? referencePath = taskItem.GetMetadata("ReferencePath");
-                    if (string.IsNullOrEmpty(referencePath))
-                        continue;
-
-                    packageAssemblyReferences.Add(tfm, referencePath.Split(','));
-                }
-            }
-
             Func<ISuppressionEngine, SuppressableMSBuildLog> logFactory = (suppressionEngine) => new(Log, suppressionEngine);
             ValidatePackage.Run(logFactory,
                 GenerateSuppressionFile,
@@ -161,20 +147,31 @@ namespace Microsoft.DotNet.ApiCompat.Task
                 ParsePackageAssemblyReferences(BaselinePackageAssemblyReferences));
         }
 
-        private static Dictionary<string, string[]>? ParsePackageAssemblyReferences(ITaskItem[]? packageAssemblyReferences)
+        private static Dictionary<NuGetFramework, IEnumerable<string>>? ParsePackageAssemblyReferences(ITaskItem[]? packageAssemblyReferences)
         {
             if (packageAssemblyReferences == null || packageAssemblyReferences.Length == 0)
                 return null;
 
-            Dictionary<string, string[]>? packageAssemblyReferencesDict = new(packageAssemblyReferences.Length);
+            Dictionary<NuGetFramework, IEnumerable<string>>? packageAssemblyReferencesDict = new(packageAssemblyReferences.Length);
             foreach (ITaskItem taskItem in packageAssemblyReferences)
             {
-                string tfm = taskItem.GetMetadata("Identity");
-                string? referencePath = taskItem.GetMetadata("ReferencePath");
-                if (string.IsNullOrEmpty(referencePath))
+                string targetFrameworkMoniker = taskItem.GetMetadata("TargetFrameworkMoniker");
+                string targetPlatformMoniker = taskItem.GetMetadata("TargetPlatformMoniker");
+                string referencePath = taskItem.GetMetadata("ReferencePath");
+
+                // The TPM is null when the assembly doesn't target a platform.
+                if (targetFrameworkMoniker == string.Empty || referencePath == string.Empty)
                     continue;
 
-                packageAssemblyReferencesDict.Add(tfm, referencePath.Split(','));
+                NuGetFramework nuGetFramework = NuGetFramework.ParseComponents(targetFrameworkMoniker, targetPlatformMoniker);
+                // Skip duplicate frameworks which could be passed in when using TFM aliases.
+                if (packageAssemblyReferencesDict.ContainsKey(nuGetFramework))
+                {
+                    continue;
+                }
+
+                string[] references = referencePath.Split(',');
+                packageAssemblyReferencesDict.Add(nuGetFramework, references);
             }
 
             return packageAssemblyReferencesDict;

@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators
 {
     /// <summary>
     /// Validates that there are compile time and runtime assets for all the compatible frameworks.
-    /// Queues the apicompat between the applicable compile and runtime assemblies for these frameworks.
+    /// Queues APICompat work items for the applicable compile and runtime assemblies for these frameworks.
     /// </summary>
     public class CompatibleTfmValidator : IPackageValidator
     {
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.PackageValidation.Validators
         /// Validates that there are compile time and runtime assets for all the compatible frameworks.
         /// Validates that the surface between compile time and runtime assets is compatible.
         /// </summary>
-        /// <param name="package">Nuget Package that needs to be validated.</param>
+        /// <param name="options"><see cref="PackageValidatorOption"/> to configure the compatible TFM package validation.</param>
         public void Validate(PackageValidatorOption options)
         {
             ApiCompatRunnerOptions apiCompatOptions = new(options.EnableStrictMode);

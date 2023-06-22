@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -463,30 +463,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     throw new ArgumentException(string.Format(LocalizableStrings.RollbackDefinitionFileDoesNotExist, rollbackDefinitionFilePath));
                 }
             }
-            return JsonSerializer.Deserialize<IDictionary<string, string>>(fileContent)
-                .Select(manifest =>
-                {
-                    ManifestVersion manifestVersion;
-                    SdkFeatureBand manifestFeatureBand;
-                    var parts = manifest.Value.Split('/');
 
-                    string manifestVersionString = (parts[0]);
-                    if (!FXVersion.TryParse(manifestVersionString, out FXVersion version))
-                    {
-                        throw new FormatException(String.Format(LocalizableStrings.InvalidVersionForWorkload, manifest.Key, manifestVersionString));
-                    }
-
-                    manifestVersion = new ManifestVersion(parts[0]);
-                    if (parts.Length == 1)
-                    {
-                        manifestFeatureBand = _sdkFeatureBand;
-                    }
-                    else
-                    {
-                        manifestFeatureBand = new SdkFeatureBand(parts[1]);
-                    }
-                    return (new ManifestId(manifest.Key), manifestVersion, manifestFeatureBand);
-                });
+            return WorkloadSet.FromJson(fileContent, _sdkFeatureBand).ManifestVersions
+                .Select(kvp => (kvp.Key, kvp.Value.Version, kvp.Value.FeatureBand));
         }
 
         private bool BackgroundUpdatesAreDisabled() =>

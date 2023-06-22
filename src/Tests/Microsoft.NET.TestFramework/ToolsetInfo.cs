@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,6 +15,7 @@ using System.Reflection;
 using Xunit.Abstractions;
 using Microsoft.Build.Utilities;
 using NuGet.Versioning;
+using System.CommandLine;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -24,7 +28,7 @@ namespace Microsoft.NET.TestFramework
 
         public const string LatestWinRuntimeIdentifier = "win10";
         public const string LatestLinuxRuntimeIdentifier = "ubuntu.22.04";
-        public const string LatestMacRuntimeIdentifier = "osx.12";
+        public const string LatestMacRuntimeIdentifier = "osx.13";
         public const string LatestRuntimeIdentifiers = $"{LatestWinRuntimeIdentifier}-x64;{LatestWinRuntimeIdentifier}-x86;osx.10.10-x64;osx.10.11-x64;osx.10.12-x64;osx.10.14-x64;{LatestMacRuntimeIdentifier}-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;ubuntu.16.10-x64;ubuntu.18.04-x64;ubuntu.20.04-x64;{LatestLinuxRuntimeIdentifier}-x64;centos.9-x64;rhel.9-x64;debian.9-x64;fedora.37-x64;opensuse.42.3-x64;linux-musl-x64";
 
         public string DotNetRoot { get; }
@@ -271,7 +275,14 @@ namespace Microsoft.NET.TestFramework
             }
             else
             {
-                dotnetRoot = Path.GetDirectoryName(ResolveCommand("dotnet"));
+                if (TryResolveCommand("dotnet", out string pathToDotnet))
+                {
+                    dotnetRoot = Path.GetDirectoryName(pathToDotnet);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Could not resolve path to dotnet");
+                }
                 hostNotFoundReason = "";
             }
 
@@ -289,7 +300,14 @@ namespace Microsoft.NET.TestFramework
             }
             else if (commandLine.UseFullFrameworkMSBuild)
             {
-                ret.FullFrameworkMSBuildPath = ResolveCommand("MSBuild");
+                if (TryResolveCommand("MSBuild", out string pathToMSBuild))
+                {
+                    ret.FullFrameworkMSBuildPath = Path.GetDirectoryName(pathToMSBuild);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Could not resolve path to MSBuild");
+                }
             }
 
             var microsoftNETBuildExtensionsTargetsFromEnvironment = Environment.GetEnvironmentVariable("MicrosoftNETBuildExtensionsTargets");
@@ -334,8 +352,15 @@ namespace Microsoft.NET.TestFramework
             return ret;
         }
 
-        private static string ResolveCommand(string command)
+        /// <summary>
+        /// Attempts to resolve full path to command from PATH/PATHEXT environment variable.
+        /// </summary>
+        /// <param name="command">The command to resolve.</param>
+        /// <param name="fullExePath">The full path to the command</param>
+        /// <returns><see langword="true"/> when command can be resolved, <see langword="false"/> otherwise.</returns>
+        public static bool TryResolveCommand(string command, out string fullExePath)
         {
+            fullExePath = null;
             char pathSplitChar;
             string[] extensions = new string[] { string.Empty };
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -356,10 +381,11 @@ namespace Microsoft.NET.TestFramework
 
             if (result == null)
             {
-                throw new InvalidOperationException("Could not resolve path to " + command);
+                return false;
             }
 
-            return result;
+            fullExePath = result;
+            return true;
         }
 
         private static string FindFileInTree(string relativePath, string startPath, bool throwIfNotFound = true)

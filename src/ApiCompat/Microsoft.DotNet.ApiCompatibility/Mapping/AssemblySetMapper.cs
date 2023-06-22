@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
@@ -18,9 +18,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Mapping
         public int AssemblyCount => _assemblies != null ? _assemblies.Count : 0;
 
         /// <summary>
-        /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
+        /// Instantiates an assembly set mapper.
         /// </summary>
-        /// <param name="settings">The settings used to diff the elements in the mapper.</param>
+        /// <param name="ruleRunner">The <see cref="IRuleRunner"/> that compares the assembly set mapper elements.</param>
+        /// <param name="settings">The <see cref="IMapperSettings"/> used to compare the assembly set mapper elements.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
         public AssemblySetMapper(IRuleRunner ruleRunner,
             IMapperSettings settings,

@@ -198,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">Makinede bekleyen bir yeniden başlatma işlemi var. Yükleme devam edecek ancak yeniden başlatmanız gerekebilir.</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">Makinede bekleyen bir yeniden başlatma işlemi var. Yükleme devam edecek ancak yeniden başlatmanız gerekebilir.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">

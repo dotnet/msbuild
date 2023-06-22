@@ -3,14 +3,14 @@
   <PropertyGroup>
     <TargetFrameworks>net6.0;net472</TargetFrameworks>
     <TargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net8.0;net472</TargetFrameworks>
-    <IsPackable>true</IsPackable>
     <StrongNameKeyId>Open</StrongNameKeyId>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <IsPackable>true</IsPackable>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <!-- This package doesn't contain any lib or ref assemblies because it's a tooling package.-->
     <NoWarn>$(NoWarn);NU5128</NoWarn>
-    <Nullable>enable</Nullable>
-    <_MicrosoftCodeAnalysisVersion>$(MicrosoftCodeAnalysisWorkspacesGenAPIPackageVersion)</_MicrosoftCodeAnalysisVersion>
-    <_MicrosoftCodeAnalysisVersion Condition="'$(DotNetBuildFromSource)' == 'true'">$(MicrosoftCodeAnalysisPackageVersion)</_MicrosoftCodeAnalysisVersion>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddBuildOutputToPackageCore;_AddBuildOutputToPackageDesktop</TargetsForTfmSpecificContentInPackage>
     <PackageDescription>MSBuild tasks and targets to emit Roslyn based source code from input assemblies.</PackageDescription>
   </PropertyGroup>
@@ -33,9 +33,9 @@
   <ItemGroup>
     <!-- ExcludeAssets="Runtime" is being set to avoid adding package references and dependencies of package and project references into the package. -->
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildPackageVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCoreVersion)" ExcludeAssets="Runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" ExcludeAssets="Runtime" />
     <ProjectReference Include="..\Microsoft.DotNet.GenAPI\Microsoft.DotNet.GenAPI.csproj" ExcludeAssets="Runtime" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(_MicrosoftCodeAnalysisVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion)" />
     <!-- We carry NuGet as part of the package in case the package is used with an older SDKs or with full framework MSBuild. -->
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetBuildTasksPackageVersion)" />
     <PackageReference Include="NuGet.Packaging" Version="$(NuGetBuildTasksPackageVersion)" />

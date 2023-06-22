@@ -14,6 +14,8 @@
   "symbols/skipRestore/displayName": "Пропустить восстановление",
   "symbols/UseProgramMain/description": "Следует ли создавать явный класс Program и метод Main вместо операторов верхнего уровня.",
   "symbols/UseProgramMain/displayName": "Не использовать _операторы верхнего уровня",
+  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
+  "symbols/NativeAot/displayName": "Enable _native AOT publish",
   "postActions/restore/description": "Восстановление пакетов NuGet, необходимых для этого проекта.",
   "postActions/restore/manualInstructions/default/text": "Выполнить команду \"dotnet restore\"",
   "postActions/open-file/description": "Открывает файл Program.cs в редакторе"

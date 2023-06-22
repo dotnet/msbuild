@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Xunit;
@@ -142,6 +142,19 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 .Execute(command, "--arch", RuntimeInformation.ProcessArchitecture.Equals(Architecture.Arm64) ? "arm64" : Environment.Is64BitOperatingSystem ? "x64" : "x86")
                 .Should()
                 .Pass();
+        }
+
+        [Fact]
+        public void ArchOptionsAMD64toX64()
+        {
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
+            {
+                var msbuildPath = "<msbuildpath>";
+                var command = BuildCommand.FromArgs(new string[] { "--arch", "amd64", "--os", "os" }, msbuildPath);
+                command.GetArgumentsToMSBuild()
+                    .Should()
+                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-x64 -property:SelfContained=false");
+            });
         }
     }
 }

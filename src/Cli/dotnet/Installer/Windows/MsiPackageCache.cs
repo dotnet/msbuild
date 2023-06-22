@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -79,16 +79,6 @@ namespace Microsoft.DotNet.Installer.Windows
         /// </summary>
         public readonly string PackageCacheRoot;
 
-        /// <summary>
-        /// SDDL string for files inside the package cache. The owner is set to built-in administrators (O:BA), the group is domain users (G:DU).
-        /// DACL is auto-inherit with the following ACE definitions: Full control for NT AUTHORITY\SYSTEM (A;ID;FA;;;SY),
-        /// full control for BUILTIN\Administators (A;ID;FA;;;BA), read and execute for BUILTIN\Users (A;ID;0x1200a9;;;BU) and
-        /// and Everyone (A;ID;0x1200a9;;;WD).
-        /// </summary>
-        /// <remarks>See <see href="https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language">SDDL</see>
-        /// documentation for details.</remarks>
-        private const string FileSecurityDescriptor = "O:BAG:DUD:AI(A;ID;FA;;;SY)(A;ID;FA;;;BA)(A;ID;0x1200a9;;;BU)(A;ID;0x1200a9;;;WD)";
-
         public MsiPackageCache(InstallElevationContextBase elevationContext, ISetupLogger logger,
             bool verifySignatures, string packageCacheRoot = null) : base(elevationContext, logger, verifySignatures)
         {
@@ -119,10 +109,20 @@ namespace Microsoft.DotNet.Installer.Windows
                 CreateSecureDirectory(Directory.GetParent(path).FullName);
 
                 DirectorySecurity directorySecurity = new();
+
+                // Only set the owner and use its default group. If the machine is domain joined, this should create
+                // a descriptor like O:BAG:DU by selecting SDDL_DOMAIN_USERS. On non-domain joined machines and Windows Sandbox,
+                // the group SID will be different and the descriptor will end up as O:BAG:S-1-5-21-2047949552-857980807-821054962-513.
+                directorySecurity.SetOwner(s_AdministratorsSid);
                 directorySecurity.SetAccessRule(s_AdministratorRule);
-                directorySecurity.SetGroup(s_LocalSystemSid);
+                directorySecurity.SetAccessRule(s_LocalSystemRule);
+                directorySecurity.SetAccessRule(s_UsersRule);
+                directorySecurity.SetAccessRule(s_EveryoneRule);
+
+                // Don't use Directory.CreateDirectory as that can cause problems with inherited ACEs from
+                // the parent folders as access rules become cumulative. The acccess rules for the directory should all have
+                // object and container inheritance set to ensure access rights are inherited when creating files.
                 directorySecurity.CreateDirectory(path);
-                SecureDirectory(path);
             }
         }
 
@@ -201,7 +201,13 @@ namespace Microsoft.DotNet.Installer.Windows
 
                 FileInfo fi = new(destinationFile);
                 FileSecurity fs = new();
-                fs.SetSecurityDescriptorSddlForm(FileSecurityDescriptor);
+
+                // Only set the owner, everything else should be inherited. Assuming the parent folder was not
+                // modified externally, the file's descriptor should either be
+                // O:BAG:DUD:(A;ID;0x1200a9;;;WD)(A;ID;FA;;;SY)(A;ID;FA;;;BA)(A;ID;0x1200a9;;;BU) or
+                // O:BAG:S-1-5-21-2047949552-857980807-821054962-513D:(A;ID;0x1200a9;;;WD)(A;ID;FA;;;SY)(A;ID;FA;;;BA)(A;ID;0x1200a9;;;BU)
+                // Note that all the access entries include the ID flag indicating they were inherited from the container.
+                fs.SetOwner(s_AdministratorsSid);
                 fi.SetAccessControl(fs);
             }
         }
@@ -317,22 +323,6 @@ namespace Microsoft.DotNet.Installer.Windows
             {
                 Log?.LogMessage($"Skipping signature verification for {msiPath}.");
             }
-        }
-
-        /// <summary>
-        /// Secures the target directory by applying multiple ACLs. Administrators and local SYSTEM
-        /// receive full control. Users and Everyone receive read and execute permissions.
-        /// </summary>
-        /// <param name="path">The directory to secure.</param>
-        private void SecureDirectory(string path)
-        {
-            DirectoryInfo directoryInfo = new DirectoryInfo(path);
-            DirectorySecurity directorySecurity = directoryInfo.GetAccessControl();
-            directorySecurity.SetAccessRule(s_AdministratorRule);
-            directorySecurity.SetAccessRule(s_EveryoneRule);
-            directorySecurity.SetAccessRule(s_LocalSystemRule);
-            directorySecurity.SetAccessRule(s_UsersRule);
-            directoryInfo.SetAccessControl(directorySecurity);
         }
     }
 }

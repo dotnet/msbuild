@@ -6,5 +6,9 @@
 <!--#endif-->
   <PropertyGroup>
 
+<!--#if useArtifacts -->
+    <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+<!--#endif-->
+
   </PropertyGroup>
 </Project>

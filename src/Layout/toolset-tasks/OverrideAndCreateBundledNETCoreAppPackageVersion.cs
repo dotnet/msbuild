@@ -1,6 +1,5 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -36,10 +35,6 @@ namespace Microsoft.DotNet.Build.Tasks
 
         [Required] public string MicrosoftNETCoreAppRefPackageVersion { get; set; }
 
-        // TODO: remove this once linker packages are produced from dotnet/runtime
-        // and replace it with MicrosoftNETCoreAppRefPackageVersion.
-        [Required] public string MicrosoftNETILLinkTasksPackageVersion { get; set; }
-
         [Required] public string NewSDKVersion { get; set; }
 
         [Required] public string OutputPath { get; set; }
@@ -50,7 +45,6 @@ namespace Microsoft.DotNet.Build.Tasks
                 ExecuteInternal(
                     File.ReadAllText(Stage0MicrosoftNETCoreAppRefPackageVersionPath),
                     MicrosoftNETCoreAppRefPackageVersion,
-                    MicrosoftNETILLinkTasksPackageVersion,
                     NewSDKVersion));
             return true;
         }
@@ -58,7 +52,6 @@ namespace Microsoft.DotNet.Build.Tasks
         public static string ExecuteInternal(
             string stage0MicrosoftNETCoreAppRefPackageVersionContent,
             string microsoftNETCoreAppRefPackageVersion,
-            string microsoftNETILLinkTasksPackageVersion,
             string newSDKVersion)
         {
             var projectXml = XDocument.Parse(stage0MicrosoftNETCoreAppRefPackageVersionContent);
@@ -123,9 +116,8 @@ namespace Microsoft.DotNet.Build.Tasks
                 .Elements(ns + "KnownCrossgen2Pack").First().Attribute("Crossgen2PackVersion"));
             CheckAndReplaceAttribute(itemGroup
                 .Elements(ns + "KnownILCompilerPack").First().Attribute("ILCompilerPackVersion"));
-
-            // TODO: replace this with CheckAndReplaceAttribute once linker packages are produced from dotnet/runtime.
-            itemGroup.Elements(ns + "KnownILLinkPack").First().Attribute("ILLinkPackVersion").Value = microsoftNETILLinkTasksPackageVersion;
+            CheckAndReplaceAttribute(itemGroup
+                .Elements(ns + "KnownILLinkPack").First().Attribute("ILLinkPackVersion"));
 
             CheckAndReplaceAttribute(itemGroup
                 .Elements(ns + "KnownRuntimePack").First().Attribute("LatestRuntimeFrameworkVersion"));

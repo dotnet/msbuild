@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Cli.Utils;
 using System;
@@ -22,6 +22,8 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public string ProjectFile { get; }
 
+        public TestAsset TestAsset { get; }
+
         public string FullPathProjectFile => Path.Combine(ProjectRootPath, ProjectFile);
 
         public MSBuildCommand(ITestOutputHelper log, string target, string projectRootPath, string relativePathToProject = null)
@@ -37,6 +39,7 @@ namespace Microsoft.NET.TestFramework.Commands
         public MSBuildCommand(TestAsset testAsset, string target, string relativePathToProject = null)
             : this(testAsset.Log, target, testAsset.TestRoot, relativePathToProject ?? testAsset.TestProject?.Name)
         {
+            TestAsset = testAsset;
         }
 
         internal static string FindProjectFile(ref string projectRootPath, string relativePathToProject)
@@ -72,8 +75,13 @@ namespace Microsoft.NET.TestFramework.Commands
             return buildProjectFiles[0];
         }
 
-        public virtual DirectoryInfo GetOutputDirectory(string targetFramework, string configuration = "Debug", string runtimeIdentifier = "")
+        public virtual DirectoryInfo GetOutputDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = null)
         {
+            if (TestAsset != null)
+            {
+                return new DirectoryInfo(OutputPathCalculator.FromProject(ProjectFile, TestAsset).GetOutputDirectory(targetFramework, configuration, runtimeIdentifier));
+            }
+
             targetFramework = targetFramework ?? string.Empty;
             configuration = configuration ?? string.Empty;
             runtimeIdentifier = runtimeIdentifier ?? string.Empty;
@@ -82,13 +90,29 @@ namespace Microsoft.NET.TestFramework.Commands
             return new DirectoryInfo(output);
         }
 
-        public virtual DirectoryInfo GetIntermediateDirectory(string targetFramework, string configuration = "Debug", string runtimeIdentifier = "")
+        public virtual DirectoryInfo GetIntermediateDirectory(string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = null)
         {
+            if (TestAsset != null)
+            {
+                return new DirectoryInfo(OutputPathCalculator.FromProject(ProjectFile, TestAsset).GetIntermediateDirectory(targetFramework, configuration, runtimeIdentifier));
+            }
+
             targetFramework = targetFramework ?? string.Empty;
             configuration = configuration ?? string.Empty;
             runtimeIdentifier = runtimeIdentifier ?? string.Empty;
 
             string output = Path.Combine(ProjectRootPath, "obj", configuration, targetFramework, runtimeIdentifier);
+            return new DirectoryInfo(output);
+        }
+
+        public DirectoryInfo GetPackageDirectory(string configuration = "Debug")
+        {
+            if (TestAsset != null)
+            {
+                return new DirectoryInfo(OutputPathCalculator.FromProject(ProjectFile, TestAsset).GetPackageDirectory(configuration));
+            }
+
+            string output = Path.Combine(ProjectRootPath, "bin", configuration);
             return new DirectoryInfo(output);
         }
 

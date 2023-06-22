@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -31,7 +31,6 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
                 .WithSource()
-                .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"))
                 .WithProjectChanges((projectPath, project) => AddBuildProperty(projectPath, project, "EnableManagedpackageReferenceSupport", "true"));
 
             // build projects separately with BuildProjectReferences=false to simulate VS build behavior
@@ -40,12 +39,14 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            new BuildCommand(testAsset, "CSConsoleApp")
+            var buildCommand = new BuildCommand(testAsset, "CSConsoleApp");
+            buildCommand
                 .Execute(new string[] { "-p:Platform=x64", "-p:BuildProjectReferences=false" })
                 .Should()
                 .Pass();
 
-            var exe = Path.Combine( //find the platform directory
+            var exe = Path.Combine(
+                //find the platform directory
                 new DirectoryInfo(Path.Combine(testAsset.TestRoot, "CSConsoleApp", "bin")).GetDirectories().Single().FullName,
                 "Debug",
                 ToolsetInfo.CurrentTargetFramework,
@@ -67,7 +68,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
                 .WithSource()
-                .WithProjectChanges((projectPath, project) => ConfigureProject(projectPath, project, "NewtonSoft.Json", "13.0.1", targetFramework, new string[] { "_EnablePackageReferencesInVCProjects", "IncludeWindowsSDKRefFrameworkReferences" }));
+                .WithProjectChanges((projectPath, project) => ConfigureProject(projectPath, project, targetFramework, new string[] { "_EnablePackageReferencesInVCProjects", "IncludeWindowsSDKRefFrameworkReferences" }));
 
             new BuildCommand(testAsset, "NETCoreCppCliTest")
                 .Execute("-p:Platform=x64")
@@ -85,7 +86,6 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
                 .WithSource()
-                .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"))
                 .WithProjectChanges((projectPath, project) => AddBuildProperty(projectPath, project, "EnableManagedpackageReferenceSupport", "True")); ;
 
             new BuildCommand(testAsset, "NETCoreCppCliTest")
@@ -99,8 +99,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("CppCliLibWithWpfFrameworkReference")
-                .WithSource()
-                .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"));
+                .WithSource();
 
             new BuildCommand(testAsset)
                 .Execute("-p:Platform=x64")
@@ -197,25 +196,13 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        private void ConfigureProject(string projectPath, XDocument project, string package, string version, string targetFramework, string[] properties)
+        private void ConfigureProject(string projectPath, XDocument project, string targetFramework, string[] properties)
         {
             AddBuildProperty(projectPath, project, "EnableManagedpackageReferenceSupport","true");
             ChangeTargetFramework(projectPath, project, targetFramework);
-            AddPackageReference(projectPath, project, package, version);
             RecordProperties(projectPath, project, properties);
         }
 
-        private void AddPackageReference(string projectPath, XDocument project, string package, string version)
-        {
-            if (Path.GetExtension(projectPath) == ".vcxproj")
-            {
-                XNamespace ns = project.Root.Name.Namespace;
-                XElement itemGroup = project.Root.Descendants(ns + "ItemGroup").First();
-                itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", package),
-                                                    new XAttribute("Version", version)));
-
-            }
-        }
         private void AddBuildProperty(string projectPath, XDocument project, string property, string value)
         {
             if (Path.GetExtension(projectPath) == ".vcxproj")

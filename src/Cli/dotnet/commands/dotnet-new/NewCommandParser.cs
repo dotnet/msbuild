@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable enable
 
@@ -119,11 +119,17 @@ namespace Microsoft.DotNet.Cli
                     verbosity = userSetVerbosity;
                 }
                 Reporter.Reset();
-                return CreateHost(disableSdkTemplates, disableProjectContext, projectPath, outputPath, verbosity.ToLogLevel());
+                return CreateHost(disableSdkTemplates, disableProjectContext, projectPath, outputPath, parseResult, verbosity.ToLogLevel());
             }
         }
 
-        private static CliTemplateEngineHost CreateHost(bool disableSdkTemplates, bool disableProjectContext, FileInfo? projectPath, FileInfo? outputPath, LogLevel logLevel)
+        private static CliTemplateEngineHost CreateHost(
+            bool disableSdkTemplates,
+            bool disableProjectContext,
+            FileInfo? projectPath,
+            FileInfo? outputPath,
+            ParseResult parseResult,
+            LogLevel logLevel)
         {
             var builtIns = new List<(Type InterfaceType, IIdentifiedComponent Instance)>();
             builtIns.AddRange(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Components.AllComponents);
@@ -136,7 +142,7 @@ namespace Microsoft.DotNet.Cli
             {
                 (typeof(IPostActionProcessor), new DotnetAddPostActionProcessor()),
                 (typeof(IPostActionProcessor), new DotnetSlnPostActionProcessor()),
-                (typeof(IPostActionProcessor), new DotnetRestorePostActionProcessor()),
+                (typeof(IPostActionProcessor), new DotnetRestorePostActionProcessor())
             });
             if (!disableSdkTemplates)
             {
@@ -151,7 +157,7 @@ namespace Microsoft.DotNet.Cli
             }
 
             builtIns.Add((typeof(IWorkloadsInfoProvider), new WorkloadsInfoProvider(
-                    new Lazy<IWorkloadsRepositoryEnumerator>(() => new WorkloadInfoHelper())))
+                    new Lazy<IWorkloadsRepositoryEnumerator>(() => new WorkloadInfoHelper(parseResult.HasOption(SharedOptions.InteractiveOption)))))
             );
             builtIns.Add((typeof(ISdkInfoProvider), new SdkInfoProvider()));
 

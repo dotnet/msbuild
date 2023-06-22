@@ -1,4 +1,4 @@
-The template "Class Library" was created successfully.
+﻿The template "Class Library" was created successfully.
 
 Processing post-creation actions...
 Restoring %PROJECT_PATH%:

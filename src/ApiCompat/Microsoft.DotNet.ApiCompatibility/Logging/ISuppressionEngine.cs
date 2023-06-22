@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
         /// <param name="target">The target of where the <paramref name="diagnosticId"/> should be applied.</param>
         /// <param name="left">Optional. The left operand in a APICompat error.</param>
         /// <param name="right">Optional. The right operand in a APICompat error.</param>
+        /// <param name="isBaselineSuppression">Optional. <see langword="true"/> if the suppression belongs to a baseline comparison.</param>
         /// <returns><see langword="true"/> if the error is already suppressed. <see langword="false"/> otherwise.</returns>
         bool IsErrorSuppressed(string diagnosticId, string? target, string? left = null, string? right = null, bool isBaselineSuppression = false);
 
@@ -35,6 +36,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
         /// <param name="target">The target of where the <paramref name="diagnosticId"/> should be applied.</param>
         /// <param name="left">Optional. The left operand in a APICompat error.</param>
         /// <param name="right">Optional. The right operand in a APICompat error.</param>
+        /// <param name="isBaselineSuppression">Optional. <see langword="true"/> if the suppression belongs to a baseline comparison.</param>
         void AddSuppression(string diagnosticId, string? target, string? left = null, string? right = null, bool isBaselineSuppression = false);
 
         /// <summary>
@@ -46,8 +48,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
         /// <summary>
         /// Writes all suppressions in collection down to a file, if empty it doesn't write anything.
         /// </summary>
-        /// <param name="supressionFile">The path to the file to be written.</param>
-        /// <returns>Whether it wrote the file.</returns>
+        /// <param name="suppressionOutputFile">The path to the file to be written.</param>
+        /// <returns><see langword="true" /> if the suppression file is written.</returns>
         bool WriteSuppressionsToFile(string suppressionOutputFile);
     }
 }

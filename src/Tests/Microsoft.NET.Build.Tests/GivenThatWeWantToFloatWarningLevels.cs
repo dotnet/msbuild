@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using System.Linq;
@@ -451,6 +451,14 @@ namespace Microsoft.NET.Build.Tests
             var analysisLevel = $"8-{analysisMode}";
             testProject.AdditionalProperties.Add("AnalysisLevel", analysisLevel);
             testProject.AdditionalProperties.Add("CodeAnalysisTreatWarningsAsErrors", codeAnalysisTreatWarningsAsErrors);
+
+            // Don't emit a warning or an error when generators/analyzers can't be loaded.
+            // This can occur when running tests against FullFramework MSBuild
+            // if the build machine has an MSBuild install with an older version of Roslyn
+            // than the generators in the SDK reference. We aren't testing the generators here
+            // and this failure will occur more clearly in other places when it's
+            // actually an important failure, so don't error out here.
+            testProject.AdditionalProperties.Add("NoWarn", "CS9057");
 
             var testAsset = _testAssetsManager
                 .CreateTestProject(testProject, identifier: "analysisLevelConsoleApp" + ToolsetInfo.CurrentTargetFramework + analysisLevel + $"Warnaserror:{codeAnalysisTreatWarningsAsErrors}", targetExtension: ".csproj");

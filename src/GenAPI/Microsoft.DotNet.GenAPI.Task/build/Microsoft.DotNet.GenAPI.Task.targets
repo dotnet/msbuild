@@ -1,5 +1,6 @@
 <!-- Licensed to the .NET Foundation under one or more agreements. The .NET Foundation licenses this file to you under the MIT license. -->
 <Project>
+
   <PropertyGroup>
     <DotNetGenAPITaskAssembly Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)..\tools\net472\Microsoft.DotNet.GenAPI.Task.dll</DotNetGenAPITaskAssembly>
     <DotNetGenAPITaskAssembly Condition="'$(MSBuildRuntimeType)' == 'Core' and Exists('$(MSBuildThisFileDirectory)..\tools\net8.0\Microsoft.DotNet.GenAPI.Task.dll')">$(MSBuildThisFileDirectory)..\tools\net8.0\Microsoft.DotNet.GenAPI.Task.dll</DotNetGenAPITaskAssembly>
@@ -47,10 +48,12 @@
       OutputPath="$(GenAPITargetPath)"
       HeaderFile="$(GenAPIHeaderFile)"
       ExceptionMessage="$(GenAPIExceptionMessage)"
+      ExcludeApiFiles="@(GenAPIExcludeApiList)"
       ExcludeAttributesFiles="@(GenAPIExcludeAttributesList)"
-      IncludeVisibleOutsideOfAssembly="$(GenAPIIncludeVisibleOutsideOfAssembly)"
+      RespectInternals="$(GenAPIRespectInternals)"
       IncludeAssemblyAttributes="$(GenAPIIncludeAssemblyAttributes)" />
 
     <Message Text="Generated reference assembly source code: $(GenAPITargetPath)" Importance="$(GenAPIVerbosity)" />
   </Target>
+
 </Project>

@@ -30,10 +30,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 
   <Target Name="_CheckForSolutionLevelOutputPath"
-          BeforeTargets="Build;Publish;Clean;Pack;Store;VSTest"
+          BeforeTargets="Build;Publish;Clean;Store;VSTest"
           Condition="'$(_CommandLineDefinedOutputPath)' == 'true'">
 
-    <NETSdkError ResourceName="CannotHaveSolutionLevelOutputPath" />
+    <NetSdkWarning ResourceName="CannotHaveSolutionLevelOutputPath" />
 
   </Target>
 

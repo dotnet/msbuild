@@ -1,0 +1,127 @@
+<!--
+***********************************************************************************************
+Sdk.StaticWebAssets.CurrentVersion.targets
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project ToolsVersion="14.0" TreatAsLocalProperty="_RazorSdkTasksTFM;_Targeting30OrNewerRazorLangVersion;_RazorLangVersion">
+
+  <PropertyGroup>
+    <EnableDefaultContentItems Condition=" '$(EnableDefaultContentItems)' == '' ">true</EnableDefaultContentItems>
+  </PropertyGroup>
+
+  <!--
+    Targets supporting Razor MSBuild integration. Contain support for generating C# code using Razor
+    and including the generated code in the project lifecycle, including compiling, publishing and producing
+    nuget packages.
+  -->
+
+  <!--
+    This is a hook to import a set of targets before the Razor targets. By default this is unused.
+  -->
+  <Import Project="$(CustomBeforeStaticWebAssetsSdkTargets)" Condition="'$(CustomBeforeStaticWebAssetsSdkTargets)' != '' and Exists('$(CustomBeforeStaticWebAssetsSdkTargets)')"/>
+
+  <PropertyGroup>
+    <!-- Paths to tools, tasks, and extensions are calculated relative to the StaticWebAssetsSdkDirectoryRoot. This can be modified to test a local build. -->
+    <StaticWebAssetsSdkDirectoryRoot Condition="'$(StaticWebAssetsSdkDirectoryRoot)'==''">$(MSBuildThisFileDirectory)..\</StaticWebAssetsSdkDirectoryRoot>
+    <StaticWebAssetsSdkBuildTasksDirectoryRoot Condition="'$(StaticWebAssetsSdkBuildTasksDirectoryRoot)'==''">$(StaticWebAssetsSdkDirectoryRoot)tasks\</StaticWebAssetsSdkBuildTasksDirectoryRoot>
+    <_StaticWebAssetsSdkTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">net8.0</_StaticWebAssetsSdkTasksTFM>
+    <_StaticWebAssetsSdkTasksTFM Condition=" '$(_StaticWebAssetsSdkTasksTFM)' == ''">net472</_StaticWebAssetsSdkTasksTFM>
+    <StaticWebAssetsSdkBuildTasksAssembly>$(StaticWebAssetsSdkBuildTasksDirectoryRoot)$(_StaticWebAssetsSdkTasksTFM)\Microsoft.NET.Sdk.StaticWebAssets.Tasks.dll</StaticWebAssetsSdkBuildTasksAssembly>
+    <_StaticWebAssetsSdkToolAssembly>$(StaticWebAssetsSdkDirectoryRoot)tools\net8.0\Microsoft.NET.Sdk.StaticWebAssets.Tool.dll</_StaticWebAssetsSdkToolAssembly>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(DOTNET_HOST_PATH)' == ''">
+    <_StaticWebAssetsSdkDotNetHostDirectory>$(NetCoreRoot)</_StaticWebAssetsSdkDotNetHostDirectory>
+    <_StaticWebAssetsSdkDotNetHostFileName>dotnet</_StaticWebAssetsSdkDotNetHostFileName>
+    <_StaticWebAssetsSdkDotNetHostFileName Condition="'$(OS)' == 'Windows_NT'">dotnet.exe</_StaticWebAssetsSdkDotNetHostFileName>
+  </PropertyGroup>
+
+
+  <!-- Resolve the TFM-specific attributes conditionally. -->
+  <Choose>
+    <When Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '7.0')) ">
+      <PropertyGroup>
+        <_TargetingNETCoreApp30OrLater>true</_TargetingNETCoreApp30OrLater>
+        <_TargetingNET50OrLater>true</_TargetingNET50OrLater>
+        <_TargetingNET60OrLater>true</_TargetingNET60OrLater>
+        <_RazorLangVersion Condition="'$(RazorLangVersion)' == '' ">7.0</_RazorLangVersion>
+      </PropertyGroup>
+    </When>
+    <When Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '6.0')) ">
+      <PropertyGroup>
+        <_TargetingNETCoreApp30OrLater>true</_TargetingNETCoreApp30OrLater>
+        <_TargetingNET50OrLater>true</_TargetingNET50OrLater>
+        <_TargetingNET60OrLater>true</_TargetingNET60OrLater>
+        <_RazorLangVersion Condition="'$(RazorLangVersion)' == '' ">6.0</_RazorLangVersion>
+      </PropertyGroup>
+    </When>
+    <When Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '5.0')) ">
+      <PropertyGroup>
+        <_TargetingNETCoreApp30OrLater>true</_TargetingNETCoreApp30OrLater>
+        <_TargetingNET50OrLater>true</_TargetingNET50OrLater>
+        <_RazorLangVersion Condition="'$(RazorLangVersion)' == '' ">5.0</_RazorLangVersion>
+      </PropertyGroup>
+    </When>
+    <When Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '3.0')) ">
+      <PropertyGroup>
+        <_TargetingNETCoreApp30OrLater>true</_TargetingNETCoreApp30OrLater>
+        <_RazorLangVersion Condition="'$(RazorLangVersion)' == '' ">3.0</_RazorLangVersion>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' AND $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '2.1')) ">
+      <PropertyGroup>
+        <_TargetingNETStandard21OrLater>true</_TargetingNETStandard21OrLater>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' AND $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '2.0')) ">
+      <PropertyGroup>
+        <_TargetingNETStandard20OrLater>true</_TargetingNETStandard20OrLater>
+      </PropertyGroup>
+    </When>
+  </Choose>
+
+  <PropertyGroup>
+    <!-- If the razor language version was explicitly specified, use that. -->
+    <_RazorLangVersion Condition="'$(RazorLangVersion)' != ''">$(RazorLangVersion)</_RazorLangVersion>
+
+    <!--
+      In 3.0, we expect RazorLangVersion to either be specified in the template or inferred via TFM. In 2.x, RazorLangVersion is
+      specified via the Razor.Design package. We'll default to a version of 2.1, the earliest version that the SDK supports.
+      A 2.1 version should result in a build warning if the project contains Components.
+    -->
+    <_RazorLangVersion Condition="'$(_RazorLangVersion)' == ''">2.1</_RazorLangVersion>
+
+    <!-- Keep this in sync with RazorLangVersion.cs if we introduce new text based values. -->
+    <_Targeting30OrNewerRazorLangVersion Condition="
+        '$(_RazorLangVersion)' == 'Latest' OR
+        '$(_RazorLangVersion)' == 'Experimental' OR
+        ('$(_RazorLangVersion)' != '' AND '$(_RazorLangVersion)' >= '3.0')">true</_Targeting30OrNewerRazorLangVersion>
+
+    <!-- Controls whether or not the static web assets feature is enabled. By default is enabled for netcoreapp3.0
+        applications and RazorLangVersion 3 or above. -->
+    <StaticWebAssetsEnabled Condition="'$(StaticWebAssetsEnabled)' == ''">$(_Targeting30OrNewerRazorLangVersion)</StaticWebAssetsEnabled>
+
+    <UseStaticWebAssetsV2>$(_TargetingNET60OrLater)</UseStaticWebAssetsV2>
+
+    <!-- Controls whether or not the scoped css feature is enabled. By default is enabled for net5.0 applications and RazorLangVersion 5 or above -->
+    <ScopedCssEnabled Condition="'$(ScopedCssEnabled)' == '' and '$(StaticWebAssetsEnabled)' == 'true'">$(_TargetingNET50OrLater)</ScopedCssEnabled>
+
+    <JSModulesEnabled Condition="'$(JSModulesEnabled)' == '' and '$(StaticWebAssetsEnabled)' == 'true'">$(_TargetingNET60OrLater)</JSModulesEnabled>
+
+    <CompressionEnabled Condition="'$(CompressionEnabled)' == '' and '$(StaticWebAssetsEnabled)' == 'true'">$(_TargetingNET60OrLater)</CompressionEnabled>
+  </PropertyGroup>
+
+  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.SingleTargeting.targets" Condition="'$(StaticWebAssetsEnabled)' == 'true' And '$(IsCrossTargetingBuild)' != 'true'" />
+
+  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.CrossTargeting.targets" Condition="'$(IsCrossTargetingBuild)' == 'true'" />
+
+  <!--
+    This is a hook to import a set of targets after the StaticWebAssets targets. By default this is unused.
+  -->
+  <Import Project="$(CustomAfterStaticWebAssetsSdkTargets)" Condition="'$(CustomAfterStaticWebAssetsSdkTargets)' != '' and Exists('$(CustomAfterStaticWebAssetsSdkTargets)')"/>
+
+</Project>

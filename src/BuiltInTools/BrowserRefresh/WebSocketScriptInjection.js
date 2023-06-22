@@ -65,7 +65,7 @@ setTimeout(async function () {
     if (path && path.endsWith('.css')) {
       updateCssByPath(path);
     } else {
-      console.debug(`File change detected to css file ${path}. Reloading page...`);
+      console.debug(`File change detected to file ${path}. Reloading page...`);
       location.reload();
       return;
     }
@@ -131,20 +131,25 @@ setTimeout(async function () {
     }
 
     let applyFailed = false;
-    deltas.forEach(d => {
-      try {
-        window.Blazor._internal.applyHotReload(d.moduleId, d.metadataDelta, d.ilDelta, d.pdbDelta)
-      } catch (error) {
-        console.warn(error);
-        applyFailed = true;
-      }
-    });
+    if (window.Blazor?._internal?.applyHotReload) {
+      // Only apply hot reload deltas if Blazor has been initialized.
+      // It's possible for Blazor to start after the initial page load, so we don't consider skipping this step
+      // to be a failure. These deltas will get applied later, when Blazor completes initialization.
+      deltas.forEach(d => {
+        try {
+          window.Blazor._internal.applyHotReload(d.moduleId, d.metadataDelta, d.ilDelta, d.pdbDelta)
+        } catch (error) {
+          console.warn(error);
+          applyFailed = true;
+        }
+      }); 
+    }
 
     fetch('/_framework/blazor-hotreload', { method: 'post', headers: { 'content-type': 'application/json' }, body: JSON.stringify(deltas) })
       .then(response => {
         if (response.status == 200) {
           const etag = response.headers['etag'];
-          window.sessionStorage.setItem('blazor-webasssembly-cache', { etag, deltas });
+          window.sessionStorage.setItem('blazor-webassembly-cache', { etag, deltas });
         }
       });
 

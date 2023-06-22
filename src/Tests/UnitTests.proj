@@ -13,6 +13,11 @@
 
   <ItemGroup>
     <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="**\*.Tests.csproj" Exclude="**\*.AoT.Tests.csproj" />
+    <!--containers tests end with UnitTests and IntegrationTests, therefore included manually -->
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="containerize.UnitTests\containerize.UnitTests.csproj" />
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="Microsoft.NET.Build.Containers.IntegrationTests\Microsoft.NET.Build.Containers.IntegrationTests.csproj" />
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="Microsoft.NET.Build.Containers.UnitTests\Microsoft.NET.Build.Containers.UnitTests.csproj" />
+    
     <SDKCustomXUnitProject Condition="'$(RunAoTTests)' == 'true'" Include="**\*.AoT.Tests.csproj" />
     <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true' And $(_AGENTOSNAME) == 'Windows_NT_FullFramework'"  Include="Microsoft.DotNet.MSBuildSdkResolver.Tests\Microsoft.DotNet.MSBuildSdkResolver.Tests.csproj">
       <TargetFramework>net472</TargetFramework>
@@ -56,6 +61,9 @@
 
       <Testpackages Include="$(ArtifactsTmpDir)testpackages\**\*.*"/>
 
+      <!-- include Container artifacts for running test in Helix -->
+      <ContainerFiles Include="$(ArtifactsTmpDir)Container\**\*.*"/>
+
       <!-- Files in testExecutionDirectory to prevent environment interference -->
       <TestExecutionDirectoryFiles Include="$(ArtifactsTmpDir)NuGet.config"/>
       <TestExecutionDirectoryFiles Include="$(ArtifactsTmpDir)Directory.Build.props"/>
@@ -83,6 +91,7 @@
     <Copy SourceFiles="@(TestExecutionDirectoryFiles)" DestinationFiles="@(TestExecutionDirectoryFiles->'$(HelixPayloadOnHost)\TestExecutionDirectoryFiles\%(RecursiveDir)%(DestinationFolder)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(DotnetCliHome)" DestinationFiles="@(DotnetCliHome->'$(HelixPayloadOnHost)\TestExecutionDirectoryFiles\.dotnet\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(Testpackages)" DestinationFiles="@(Testpackages->'$(HelixPayloadOnHost)\TestExecutionDirectoryFiles\Testpackages\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(ContainerFiles)" DestinationFiles="@(ContainerFiles->'$(HelixPayloadOnHost)\TestExecutionDirectoryFiles\Container\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
 
@@ -90,6 +99,7 @@
     <PropertyGroup>
       <HelixPreCommands Condition="!$(IsPosixShell)">call %HELIX_CORRELATION_PAYLOAD%\t\RunTestsOnHelix.cmd $(TestFullMSBuild);$(HelixPreCommands)</HelixPreCommands>
       <HelixPreCommands Condition="$(IsPosixShell)">. $HELIX_CORRELATION_PAYLOAD/t/RunTestsOnHelix.sh;$(HelixPreCommands)</HelixPreCommands>
+      <HelixPostCommands Condition="!$(IsPosixShell)">PowerShell -ExecutionPolicy ByPass "dotnet nuget locals all -l | ForEach-Object { $_.Split(' ')[1]} | Where-Object{$_ -like '*cache'} | Get-ChildItem -Recurse -File -Filter '*.dat' | Measure";$(HelixPostCommands)</HelixPostCommands>
       <TestDotnetRoot>$(RepoRoot)artifacts\bin\redist\$(Configuration)\dotnet</TestDotnetRoot>
       <TestDotnetVersion>$(Version)</TestDotnetVersion>
       <MSBuildSdkResolverDir>$(RepoRoot)artifacts\bin\Microsoft.DotNet.MSBuildSdkResolver</MSBuildSdkResolverDir>
@@ -128,16 +138,16 @@
         <Destination>r</Destination>
       </HelixCorrelationPayload>
 
-      <HelixCorrelationPayload Include="SDKTestPackages.System.zip">
+      <HelixCorrelationPayload Include="SDKTestRunPackages.zip">
         <PayloadDirectory>$(TestDotnetRoot)</PayloadDirectory>
         <Destination>d/.nuget</Destination>
-        <Uri>https://netcorenativeassets.blob.core.windows.net/resource-packages/external/any/sdk-test-assets/SDKTestPackages.System.zip</Uri>
+        <Uri>https://netcorenativeassets.blob.core.windows.net/resource-packages/external/any/sdk-test-assets/SDKTestRunPackages.zip</Uri>
       </HelixCorrelationPayload>
 
-      <HelixCorrelationPayload Include="SDKTestPackages.Runtime.zip">
+      <HelixCorrelationPayload Include="SDKTestRunPackages2.zip">
         <PayloadDirectory>$(TestDotnetRoot)</PayloadDirectory>
         <Destination>d/.nuget</Destination>
-        <Uri>https://netcorenativeassets.blob.core.windows.net/resource-packages/external/any/sdk-test-assets/SDKTestPackages.Runtime.zip</Uri>
+        <Uri>https://netcorenativeassets.blob.core.windows.net/resource-packages/external/any/sdk-test-assets/SDKTestRunPackages2.zip</Uri>
       </HelixCorrelationPayload>
     </ItemGroup>
   </Target>

@@ -28,9 +28,9 @@ namespace Microsoft.DotNet.PackageValidation.Validators
         }
 
         /// <summary>
-        /// Validates the latest nuget package doesnot drop any target framework/rid and does not introduce any breaking changes.
+        /// Validates the latest NuGet package doesn't drop any target framework/rid and does not introduce any breaking changes.
         /// </summary>
-        /// <param name="package">Nuget Package that needs to be validated.</param>
+        /// <param name="options"><see cref="PackageValidatorOption"/> to configure the baseline package validation.</param>
         public void Validate(PackageValidatorOption options)
         {
             if (options.BaselinePackage is null)

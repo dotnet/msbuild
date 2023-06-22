@@ -7,15 +7,25 @@
         <target state="translated">NETSDK1076: AddResource se dá použít jen spolu s celočíselnými typy prostředků.</target>
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
-      <trans-unit id="AotNoValidRuntimePackageError">
-        <source>NETSDK1183: Unable to optimize assemblies for ahead-of-time compilation: a valid runtime package was not found. Either set the PublishAot property to false, or use a supported runtime identifier when publishing. When targeting .NET 7 or higher, make sure to restore packages with the PublishAot property set to true.</source>
-        <target state="translated">NETSDK1183: Sestavení nelze optimalizovat pro kompilaci s předstihem: nebyl nalezen platný balíček modulu runtime. Buď nastavte vlastnost PublishAot na hodnotu false, nebo při publikování použijte podporovaný identifikátor modulu runtime. Při cílení na .NET 7 nebo vyšší nezapomeňte obnovit balíčky s vlastností PublishAot nastavenou na hodnotu true.</target>
-        <note>{StrBegin="NETSDK1183: "}</note>
-      </trans-unit>
       <trans-unit id="AotNotSupported">
         <source>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
-        <target state="needs-review-translation">NETSDK1195: Sada SDK nepodporuje kompilaci s předstihem. Nastavte vlastnost PublishAot na false.</target>
+        <target state="translated">NETSDK1196: Sada SDK nepodporuje kompilaci s předstihem. Nastavte vlastnost PublishAot na false.</target>
         <note>{StrBegin="NETSDK1196: "}</note>
+      </trans-unit>
+      <trans-unit id="AotUnsupportedHostRuntimeIdentifier">
+        <source>NETSDK1204: Ahead-of-time compilation is not supported on the current platform '{0}'.</source>
+        <target state="new">NETSDK1204: Ahead-of-time compilation is not supported on the current platform '{0}'.</target>
+        <note>{StrBegin="NETSDK1204: "}</note>
+      </trans-unit>
+      <trans-unit id="AotUnsupportedTargetFramework">
+        <source>NETSDK1207: Ahead-of-time compilation is not supported for the target framework.</source>
+        <target state="new">NETSDK1207: Ahead-of-time compilation is not supported for the target framework.</target>
+        <note>{StrBegin="NETSDK1207: "}</note>
+      </trans-unit>
+      <trans-unit id="AotUnsupportedTargetRuntimeIdentifier">
+        <source>NETSDK1203: Ahead-of-time compilation is not supported for the target runtime identifier '{0}'.</source>
+        <target state="new">NETSDK1203: Ahead-of-time compilation is not supported for the target runtime identifier '{0}'.</target>
+        <note>{StrBegin="NETSDK1203: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
@@ -51,6 +61,11 @@
         <source>NETSDK1177: Failed to sign apphost with error code {1}: {0}</source>
         <target state="translated">NETSDK1177: Nepovedlo se podepsat hostitele aplikace s kódem chyby {1}: {0}.</target>
         <note>{StrBegin="NETSDK1177: "}</note>
+      </trans-unit>
+      <trans-unit id="ArtifactsPathCannotBeSetInProject">
+        <source>NETSDK1199: The ArtifactsPath and UseArtifactsOutput properties cannot be set in a project file, due to MSBuild ordering constraints. They must be set in a Directory.Build.props file or from the command line. See https://aka.ms/netsdk1199 for more information.</source>
+        <target state="new">NETSDK1199: The ArtifactsPath and UseArtifactsOutput properties cannot be set in a project file, due to MSBuild ordering constraints. They must be set in a Directory.Build.props file or from the command line. See https://aka.ms/netsdk1199 for more information.</target>
+        <note>{StrBegin="NETSDK1199: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
@@ -96,6 +111,11 @@
         <source>NETSDK1001: At least one possible target framework must be specified.</source>
         <target state="translated">NETSDK1001: Je potřeba zadat alespoň jednu možnou cílovou architekturu.</target>
         <note>{StrBegin="NETSDK1001: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework">
+        <source>NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</source>
+        <target state="translated">NETSDK1205: Balíček Microsoft.Net.Compilers.Toolset.Framework by neměl být nastaven přímo. Pokud ho potřebujete, nastavte vlastnost BuildWithNetFrameworkHostedCompiler na hodnotu true.</target>
+        <note>{StrBegin="NETSDK1205: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</note>
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
@@ -148,12 +168,12 @@
         <note>{StrBegin="NETSDK1099: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelOutputPath">
-        <source>NETSDK1194: The "--output" option isn't supported when building a solution.</source>
-        <target state="translated">NETSDK1194: Možnost „--output“ se při sestavování řešení nepodporuje.</target>
-        <note>{StrBegin="NETSDK1194: "}</note>
+        <source>NETSDK1194: The "--output" option isn't supported when building a solution. Specifying a solution-level output path results in all projects copying outputs to the same directory, which can lead to inconsistent builds.</source>
+        <target state="translated">NETSDK1194: Při sestavování řešení se nepodporuje volba “--output“. Zadání výstupní cesty na úrovni řešení vede k tomu, že všechny projekty kopírují výstupy do stejného adresáře, což může vést k nekonzistentnímu sestavení.</target>
+        <note>{StrBegin="NETSDK1194: "}{Locked="--output"}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelRuntimeIdentifier">
-        <source>NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specifiy the RID at the individual project level instead.</source>
+        <source>NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specify the RID at the individual project level instead.</source>
         <target state="translated">NETSDK1134: Vytváření řešení s konkrétním identifikátorem RuntimeIdentifier se nepodporuje. Pokud chcete publikovat pro jedno RID, zadejte místo toho RID na úrovni jednotlivých projektů.</target>
         <note>{StrBegin="NETSDK1134: "}</note>
       </trans-unit>
@@ -460,8 +480,8 @@
         <note>{StrBegin="NETSDK1144: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkNoValidRuntimePackageError">
-        <source>NETSDK1195: Unable to optimize assemblies for size: a valid runtime package was not found. Either set the PublishTrimmed property to false, or use a supported target framework when publishing.</source>
-        <target state="new">NETSDK1195: Unable to optimize assemblies for size: a valid runtime package was not found. Either set the PublishTrimmed property to false, or use a supported target framework when publishing.</target>
+        <source>NETSDK1195: Trimming, or code compatibility analysis for trimming, single-file deployment, or ahead-of-time compilation is not supported for the target framework. For more information, see https://aka.ms/netsdk1195</source>
+        <target state="new">NETSDK1195: Trimming, or code compatibility analysis for trimming, single-file deployment, or ahead-of-time compilation is not supported for the target framework. For more information, see https://aka.ms/netsdk1195</target>
         <note>{StrBegin="NETSDK1195: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
@@ -655,6 +675,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1121: Projekty C++/CLI cílené na rozhraní .NET Core nemůžou používat SelfContained=true.</target>
         <note>{StrBegin="NETSDK1121: "}</note>
       </trans-unit>
+      <trans-unit id="NonPortableRuntimeIdentifierDetected">
+        <source>NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): {0}. Affected libraries: {1}. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details.</source>
+        <target state="new">NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): {0}. Affected libraries: {1}. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details.</target>
+        <note>{StrBegin="NETSDK1206: "}</note>
+      </trans-unit>
       <trans-unit id="NonSelfContainedExeCannotReferenceSelfContained">
         <source>NETSDK1151: The referenced project '{0}' is a self-contained executable.  A self-contained executable cannot be referenced by a non self-contained executable.  For more information, see https://aka.ms/netsdk1151</source>
         <target state="translated">NETSDK1151: odkazovaný projekt {0} je samostatně obsažený spustitelný soubor.  Na samostatně obsažený spustitelný soubor se nedá odkazovat pomocí spustitelného souboru, který není samostatně obsažený. Další informace najdete na https://aka.ms/netsdk1151</target>
@@ -727,7 +752,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PublishProfileNotPresent">
         <source>NETSDK1198: A publish profile with the name '{0}' was not found in the project. Set the PublishProfile property to a valid file name.</source>
-        <target state="new">NETSDK1198: A publish profile with the name '{0}' was not found in the project. Set the PublishProfile property to a valid file name.</target>
+        <target state="translated">NETSDK1198: Profil publikování s názvem {0} se v projektu nenašel. Nastavte vlastnost PublishProfile na platný název souboru.</target>
         <note>{StrBegin="NETSDK1198: "}</note>
       </trans-unit>
       <trans-unit id="PublishReadyToRunRequiresVersion30">
@@ -751,8 +776,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1124: "}</note>
       </trans-unit>
       <trans-unit id="PublishUnsupportedWithoutTargetFramework">
-        <source>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</source>
-        <target state="translated">NETSDK1129: Bez zadané cílové architektury se cíl Publish nepodporuje. Aktuální projekt cílí na několik architektur. Musíte zadat architekturu pro publikovanou aplikaci.</target>
+        <source>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify one of the following frameworks in order to publish: {0}</source>
+        <target state="new">NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify one of the following frameworks in order to publish: {0}</target>
         <note>{StrBegin="NETSDK1129: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
@@ -766,7 +791,7 @@ The following are names of parameters or literal values and should not be transl
         <note />
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
-        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing and make sure to restore packages with the PublishReadyToRun property set to true.</source>
+        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing. When targeting .NET 6 or higher, make sure to restore packages with the PublishReadyToRun property set to true.</source>
         <target state="needs-review-translation">NETSDK1094: Sestavení nelze optimalizovat z hlediska výkonu: nebyl nalezen platný balíček modulu runtime. Buď nastavte vlastnost PublishReadyToRun na hodnotu false, nebo při publikování použijte podporovaný identifikátor modulu runtime. Při cílení na .NET 6 nebo vyšší nezapomeňte obnovit balíčky s vlastností PublishReadyToRun nastavenou na hodnotu true.</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
@@ -789,6 +814,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1028: Specify a RuntimeIdentifier</source>
         <target state="translated">NETSDK1028: Zadejte parametr RuntimeIdentifier.</target>
         <note>{StrBegin="NETSDK1028: "}</note>
+      </trans-unit>
+      <trans-unit id="RuntimeIdentifierWillNoLongerImplySelfContained">
+        <source>NETSDK1201: For projects targeting .NET 8.0 and higher, specifying a RuntimeIdentifier will no longer produce a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use the --self-contained argument.</source>
+        <target state="new">NETSDK1201: For projects targeting .NET 8.0 and higher, specifying a RuntimeIdentifier will no longer produce a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use the --self-contained argument.</target>
+        <note>{StrBegin="NETSDK1201: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeListNotFound">
         <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
@@ -813,7 +843,7 @@ The following are names of parameters or literal values and should not be transl
       <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
         <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
         <target state="translated">NETSDK1179: Při použití příkazu --runtime je vyžadována jedna z možností --self-contained nebo --no-self-contained.</target>
-        <note>{StrBegin="NETSDK1179: "}</note>
+        <note>{StrBegin="NETSDK1179: "}{Locked="--self-contained"}{Locked="--no-self-contained"}{Locked="--runtime"}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
@@ -932,6 +962,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1139: Identifikátor cílové platformy {0} se nerozpoznal.</target>
         <note>{StrBegin="NETSDK1139: "}</note>
       </trans-unit>
+      <trans-unit id="UseArtifactsOutputRequiresDirectoryBuildProps">
+        <source>NETSDK1200: If UseArtifactsPath is set to true and ArtifactsPath is not set, there must be a Directory.Build.props file in order to determine where the artifacts folder should be located.</source>
+        <target state="new">NETSDK1200: If UseArtifactsPath is set to true and ArtifactsPath is not set, there must be a Directory.Build.props file in order to determine where the artifacts folder should be located.</target>
+        <note>{StrBegin="NETSDK1200: "}</note>
+      </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
         <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>
         <target state="translated">NETSDK1107: K sestavování desktopových aplikací pro Windows se vyžaduje Microsoft.NET.Sdk.WindowsDesktop. Aktuální verze sady SDK nepodporuje hodnoty UseWpf a UseWindowsForms.</target>
@@ -981,6 +1016,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</source>
         <target state="translated">NETSDK1148: Odkazované sestavení se zkompilovalo pomocí novější verze Microsoft.Windows.SDK.NET.dll. Pokud chcete odkazovat na toto sestavení, aktualizujte prosím novější sadu .NET SDK.</target>
         <note>{StrBegin="NETSDK1148: "}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadIsEol">
+        <source>NETSDK1202: The workload '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</source>
+        <target state="translated">NETSDK1202: Architektura {0} se nepodporuje a v budoucnu už nebude dostávat aktualizace zabezpečení. Další informace o zásadách podpory najdete tady: {1}.</target>
+        <note>{StrBegin="NETSDK1202: "}</note>
       </trans-unit>
       <trans-unit id="WorkloadNotAvailable">
         <source>NETSDK1178: The project depends on the following workload packs that do not exist in any of the workloads available in this installation: {0}

@@ -1,6 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using System.Linq;
@@ -23,6 +22,12 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
+        private string MainProjectTargetFrameworks = "";
+
+        private string ReferenceProjectTargetFrameworks = "";
+
+        private bool MainRuntimeIdentifier { get; set; }
+
         private bool MainSelfContained { get; set; }
 
         private bool ReferencedSelfContained { get; set; }
@@ -42,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
             MainProject = new TestProject()
             {
                 Name = "MainProject",
-                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                TargetFrameworks = MainProjectTargetFrameworks != "" ? MainProjectTargetFrameworks : ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true,
                 IsExe = true
             };
@@ -74,15 +79,21 @@ if (string.Empty.Length > 0)
 
             MainProject.SourceFiles["Program.cs"] = mainProjectSrc;
 
+            if (MainRuntimeIdentifier)
+            {
+                MainProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid();
+            }
+
             if (MainSelfContained)
             {
                 MainProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid();
+                MainProject.SelfContained = "true";
             }
 
             ReferencedProject = new TestProject()
             {
                 Name = "ReferencedProject",
-                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                TargetFrameworks = ReferenceProjectTargetFrameworks != "" ? ReferenceProjectTargetFrameworks : ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true,
                 IsExe = true,
             };
@@ -90,6 +101,7 @@ if (string.Empty.Length > 0)
             if (ReferencedSelfContained)
             {
                 ReferencedProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid();
+                ReferencedProject.SelfContained = "true";
             }
 
             //  Use a lower version of a library in the referenced project
@@ -214,14 +226,26 @@ public class ReferencedExeProgram
         [Theory]
         [InlineData(true, false, "NETSDK1150")]
         [InlineData(false, true, "NETSDK1151")]
-        public void ReferencedExeFailsToBuild(bool mainSelfContained, bool referencedSelfContained, string expectedFailureCode)
+        public void ReferencedExeFailsToBuildOnOlderTargetFrameworks(bool mainSelfContained, bool referencedSelfContained, string expectedFailureCode)
         {
             MainSelfContained = mainSelfContained;
             ReferencedSelfContained = referencedSelfContained;
+            ReferenceProjectTargetFrameworks = "net7.0";
+            // the main project tfm will be 8.0 or higher to make sure the error uses the tfm of the referenced project and not the main project.
 
             CreateProjects();
 
             RunTest(expectedFailureCode);
+        }
+
+        [Fact]
+        public void ReferencedExeDoesNotFailToBuildWith8PlusTargetFrameworks()
+        {
+            MainSelfContained = false;
+            MainRuntimeIdentifier = true;
+            CreateProjects();
+
+            RunTest();
         }
 
         [Fact]
@@ -238,9 +262,15 @@ public class ReferencedExeProgram
             {
                 var ns = project.Root.Name.Namespace;
 
-                project.Root.Element(ns + "PropertyGroup")
-                    .Add(XElement.Parse($@"<RuntimeIdentifier Condition=""'$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}'"">" + EnvironmentInfo.GetCompatibleRid() + "</RuntimeIdentifier>"));
+                var propertyGroup = new XElement(ns + "PropertyGroup",
+                    new XAttribute("Condition", $"'$(TargetFramework)' == '{ToolsetInfo.CurrentTargetFramework}'"));
+
+                propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", EnvironmentInfo.GetCompatibleRid()));
+                propertyGroup.Add(new XElement(ns + "SelfContained", "true"));
+
+                project.Root.Add(propertyGroup);
             });
+
 
             RunTest();
         }
@@ -296,8 +326,8 @@ public class ReferencedExeProgram
             CreateProjects();
 
             RunTest(callingMethod: System.Reflection.MethodBase.GetCurrentMethod().ToString()
-                .Replace("Void ","")
-                .Replace("Boolean",referenceExeInCode.ToString()));
+                .Replace("Void ", "")
+                .Replace("Boolean", referenceExeInCode.ToString()));
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]

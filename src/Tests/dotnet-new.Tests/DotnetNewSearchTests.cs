@@ -1,6 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
@@ -37,16 +36,16 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: 'console'")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
 
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -78,9 +77,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         }
 
         [Theory]
-        [InlineData("azure --search")]
-        [InlineData("--search azure")]
-        [InlineData("search azure")]
+        [InlineData("azure --search --columns author")]
+        [InlineData("--search azure --columns author")]
+        [InlineData("search azure --columns author")]
         public void ExamplePrefersMicrosoftPackage(string testCase)
         {
             CommandResult commandResult = new DotnetNewCommand(_log, testCase.Split(" "))
@@ -92,15 +91,15 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "azure"), "'Template Name' or 'Short Name' columns do not contain the criteria");
 
-            IEnumerable<List<string>> microsoftPackages = tableOutput.Where(row => row[2] == "Microsoft" && row[4].StartsWith("Microsoft", StringComparison.OrdinalIgnoreCase));
-            IEnumerable<string> installationCommands = microsoftPackages.Select(package => $"new install {package[4]}");
+            IEnumerable<List<string>> microsoftPackages = tableOutput.Where(row => row[2] == "Microsoft" && row[3].StartsWith("Microsoft", StringComparison.OrdinalIgnoreCase));
+            IEnumerable<string> installationCommands = microsoftPackages.Select(package => $"new install {package[3].Split(" /")[0]}").ToList();
 
             bool ContainsOneOfInstallationCommands(string output) => installationCommands.Any(command => output.Contains(command));
             commandResult.Should().HaveStdOutContaining(ContainsOneOfInstallationCommands, "Checks if the output contains one of the expected installation commands");
@@ -124,12 +123,12 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Type", "Tags", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Type", "Tags", "Package Name / Owners", "Trusted", "Downloads" });
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -149,18 +148,18 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: 'console', --tag='Common'")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Tags\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Tags\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Tags", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Tags", "Package Name / Owners", "Trusted", "Downloads" });
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsContain(tableOutput, new[] { "Tags" }, "Common"), "'Tags' column does not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Tags"), "'Tags' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -180,16 +179,16 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: --tag='Common'")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Tags\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Tags\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Tags", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Tags", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Tags" }, "Common"), "'Tags' column does not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Tags"), "'Tags' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -210,18 +209,18 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: 'func', --author='micro'")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Package Name / Owners", "Trusted", "Downloads" });
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "func"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsContain(tableOutput, new[] { "Author" }, "micro"), "'Author' column does not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Author"), "'Author' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -241,17 +240,18 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("These templates matched your input: --author='micro'")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Author" }, "micro"), "'Author' column does not contain the criteria");
             Assert.True(SomeRowsContain(tableOutput, new[] { "Author" }, "Microsoft"), "'Author' column does not contain any rows with 'Microsoft'");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Author"), "'Author' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Trusted"), "'Trusted' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -271,11 +271,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("These templates matched your input: 'console', --language='Q#'")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsContain(tableOutput, new[] { "Language" }, "Q#"), "'Language' column does not contain criteria");
@@ -283,7 +283,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Language"), "'Language' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -304,17 +304,17 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining($"These templates matched your input: {optionName}='Q#'")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Language" }, "Q#"), "'Language' column does not contain criteria");
 
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Language"), "'Language' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -334,11 +334,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("These templates matched your input: 'console', --type='item'")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Type\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Type\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Type", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Type", "Package Name / Owners", "Trusted", "Downloads" });
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsEqual(tableOutput, new[] { "Type" }, "item"), "'Type' column does not contain criteria");
@@ -346,7 +346,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Type"), "'Type' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -365,17 +365,18 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("These templates matched your input: --type='item'")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Type\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Type\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Type", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Type", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AllRowsEqual(tableOutput, new[] { "Type" }, "item"), "'Type' column does not contain criteria");
 
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Type"), "'Type' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Trusted"), "'Trusted' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -395,18 +396,19 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("These templates matched your input: 'console', --package='core'")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
-            Assert.True(AllRowsContain(tableOutput, new[] { "Package" }, "core"), "'Package' column does not contain criteria");
+            Assert.True(AllRowsContain(tableOutput, new[] { "Package Name / Owners" }, "core"), "'Package Name / Owners' column does not contain criteria");
 
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Trusted"), "'Trusted' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -425,15 +427,16 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("These templates matched your input: --package='core'")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
-            Assert.True(AllRowsContain(tableOutput, new[] { "Package" }, "core"), "'Package' column does not contain criteria");
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
+            Assert.True(AllRowsContain(tableOutput, new[] { "Package Name / Owners" }, "core"), "'Package Name / Owners' column does not contain criteria");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name \\/ Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Trusted"), "'Trusted' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -453,9 +456,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads");
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
 
             Assert.True(tableOutput.Count > 2, "At least 2 search hits are expected");
 
@@ -492,15 +495,16 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: 'con', --framework")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Trusted"), "'Trusted' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
 
             commandResult = new DotnetNewCommand(_log, "con", "--search", "-f")
@@ -512,15 +516,15 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: 'con', -f")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
 
             commandResult = new DotnetNewCommand(_log, "--search", "-f")
@@ -532,14 +536,14 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: -f")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -558,15 +562,15 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: 'con', --langVersion")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
 
             commandResult = new DotnetNewCommand(_log, "--search", "--langVersion")
@@ -579,14 +583,14 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: --langVersion")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -605,15 +609,15 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: 'con', --langVersion")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
 
             commandResult = new DotnetNewCommand(_log, "--search", "--langVersion", "smth")
@@ -626,14 +630,14 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: --langVersion")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
@@ -652,15 +656,15 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: 'con', -f='netcoreapp3.1'")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            List<List<string>> tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
 
             commandResult = new DotnetNewCommand(_log, "--search", "-f", "net5.0")
@@ -673,14 +677,14 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.HaveStdOutContaining("Searching for the templates...")
                 .And.HaveStdOutContaining("Matches from template source: NuGet.org")
                 .And.HaveStdOutContaining("These templates matched your input: -f='net5.0'")
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Package Name \\/ Owners\\s+Trusted\\s+Downloads")
                 .And.HaveStdOutContaining("To use the template, run the following command to install the package:")
                 .And.HaveStdOutContaining("   dotnet new install [<package>...]");
 
-            tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+            tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package Name / Owners", "Trusted", "Downloads" });
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
+            Assert.True(AllRowsAreNotEmpty(tableOutput, "Package Name / Owners"), "'Package Name / Owners' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 

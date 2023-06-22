@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Sln.Internal;
@@ -30,7 +30,9 @@ Arguments:
   <SLN_FILE>    The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
+  --solution-folders  Display solution folder paths.
   -?, -h, --help    Show command line help.";
+
 
         public GivenDotnetSlnList(ITestOutputHelper log) : base(log)
         {
@@ -206,6 +208,25 @@ Options:
                 .Execute("sln", "list");
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentTo(expectedOutput);
+        }
+
+        [Fact]
+        public void WhenProjectsInSolutionFoldersPresentInTheSolutionItListsSolutionFolderPaths()
+        {
+            string[] expectedOutput = { $"{CommandLocalizableStrings.SolutionFolderHeader}",
+$"{new string('-', CommandLocalizableStrings.SolutionFolderHeader.Length)}",
+$"{Path.Combine("NestedSolution", "NestedFolder", "NestedFolder")}" };
+
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("SlnFileWithSolutionItemsInNestedFolders")
+                .WithSource()
+                .Path;
+
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("sln", "list", "--solution-folders");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().ContainAll(expectedOutput);
         }
     }
 }

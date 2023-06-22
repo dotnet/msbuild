@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.CodeAnalysis;
 
@@ -10,22 +10,34 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Filtering
     /// </summary>
     public class AccessibilitySymbolFilter : ISymbolFilter
     {
-        private readonly bool _includeInternalSymbols;
-        private readonly bool _includeEffectivelyPrivateSymbols;
-        private readonly bool _includeExplicitInterfaceImplementationSymbols;
+        /// <summary>
+        /// Include internal API.
+        /// </summary>
+        public bool IncludeInternalSymbols { get; }
+
+        /// <summary>
+        /// Include effectively private API.
+        /// </summary>
+        public bool IncludeEffectivelyPrivateSymbols { get; }
+
+        /// <summary>
+        /// Include explicit interface implementation API.
+        /// </summary>
+        public bool IncludeExplicitInterfaceImplementationSymbols { get; }
 
         public AccessibilitySymbolFilter(bool includeInternalSymbols,
             bool includeEffectivelyPrivateSymbols = false,
             bool includeExplicitInterfaceImplementationSymbols = false)
         {
-            _includeInternalSymbols = includeInternalSymbols;
-            _includeEffectivelyPrivateSymbols = includeEffectivelyPrivateSymbols;
-            _includeExplicitInterfaceImplementationSymbols = includeExplicitInterfaceImplementationSymbols;
+            IncludeInternalSymbols = includeInternalSymbols;
+            IncludeEffectivelyPrivateSymbols = includeEffectivelyPrivateSymbols;
+            IncludeExplicitInterfaceImplementationSymbols = includeExplicitInterfaceImplementationSymbols;
         }
 
         /// <inheritdoc />
         public bool Include(ISymbol symbol) =>
-            symbol.IsVisibleOutsideOfAssembly(_includeInternalSymbols,
-                _includeEffectivelyPrivateSymbols, _includeExplicitInterfaceImplementationSymbols);
+            symbol.IsVisibleOutsideOfAssembly(IncludeInternalSymbols,
+                IncludeEffectivelyPrivateSymbols,
+                IncludeExplicitInterfaceImplementationSymbols);
     }
 }

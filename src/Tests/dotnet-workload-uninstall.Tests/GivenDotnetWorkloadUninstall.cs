@@ -1,23 +1,24 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
 using ManifestReaderTests;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Cli.Workload.Install.Tests;
 using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.DotNet.Workloads.Workload.Install;
+using Microsoft.DotNet.Workloads.Workload.Uninstall;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Utilities;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.DotNet.Workloads.Workload.Uninstall;
-using Microsoft.DotNet.Cli.Workload.Install.Tests;
-using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli.Workload.Uninstall.Tests
 {
@@ -25,6 +26,31 @@ namespace Microsoft.DotNet.Cli.Workload.Uninstall.Tests
     {
         private readonly BufferedReporter _reporter;
         private readonly string _manifestPath;
+
+        private string SetUpMockWorkloadToUninstall(string fakeWorkloadNameToInstall, string sdkFeatureVersion, string testDirectory, bool userLocal)
+        {
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var userProfileDir = Path.Combine(testDirectory, "user-profile");
+
+            string installRoot = userLocal ? userProfileDir : dotnetRoot;
+            if (userLocal)
+            {
+                WorkloadFileBasedInstall.SetUserLocal(dotnetRoot, sdkFeatureVersion);
+            }
+
+            InstallWorkload(fakeWorkloadNameToInstall, testDirectory, sdkFeatureVersion);
+
+            // Assert install was successful
+            var installPacks = Directory.GetDirectories(Path.Combine(installRoot, "packs"));
+            installPacks.Count().Should().Be(2);
+            File.Exists(Path.Combine(installRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", fakeWorkloadNameToInstall))
+                .Should().BeTrue();
+            var packRecordDirs = Directory.GetDirectories(Path.Combine(installRoot, "metadata", "workloads", "InstalledPacks", "v1"));
+            packRecordDirs.Count().Should().Be(3);
+
+            return installRoot;
+
+        }
 
         public GivenDotnetWorkloadUninstall(ITestOutputHelper log) : base(log)
         {
@@ -45,37 +71,36 @@ namespace Microsoft.DotNet.Cli.Workload.Uninstall.Tests
         [InlineData(false)]
         public void GivenWorkloadUninstallItCanUninstallWorkload(bool userLocal)
         {
-            var testDirectory = _testAssetsManager.CreateTestDirectory(identifier: userLocal ? "userlocal" : "default").Path;
-            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            var userProfileDir = Path.Combine(testDirectory, "user-profile");
-            var sdkFeatureVersion = "6.0.100";
             var installingWorkload = "mock-1";
+            var sdkFeatureVersion = "6.0.100";
+            var testDirectory = _testAssetsManager.CreateTestDirectory(identifier: userLocal ? "userlocal" : "default").Path;
 
-            string installRoot = userLocal ? userProfileDir : dotnetRoot;
-            if (userLocal)
-            {
-                WorkloadFileBasedInstall.SetUserLocal(dotnetRoot, sdkFeatureVersion);
-            }
-
-            InstallWorkload(installingWorkload, testDirectory, sdkFeatureVersion);
-
-            // Assert install was successful
-            var installPacks = Directory.GetDirectories(Path.Combine(installRoot, "packs"));
-            installPacks.Count().Should().Be(2);
-            File.Exists(Path.Combine(installRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", installingWorkload))
-                .Should().BeTrue();
-            var packRecordDirs = Directory.GetDirectories(Path.Combine(installRoot, "metadata", "workloads", "InstalledPacks", "v1"));
-            packRecordDirs.Count().Should().Be(3);
+            var installRoot = SetUpMockWorkloadToUninstall(installingWorkload, sdkFeatureVersion, testDirectory, userLocal);
 
             UninstallWorkload(installingWorkload, testDirectory, sdkFeatureVersion);
 
             // Assert uninstall was successful
-            installPacks = Directory.GetDirectories(Path.Combine(installRoot, "packs"));
+            var installPacks = Directory.GetDirectories(Path.Combine(installRoot, "packs"));
             installPacks.Count().Should().Be(0);
             File.Exists(Path.Combine(installRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", installingWorkload))
                 .Should().BeFalse();
-            packRecordDirs = Directory.GetDirectories(Path.Combine(installRoot, "metadata", "workloads", "InstalledPacks", "v1"));
+            var packRecordDirs = Directory.GetDirectories(Path.Combine(installRoot, "metadata", "workloads", "InstalledPacks", "v1"));
             packRecordDirs.Count().Should().Be(0);
+        }
+
+        [Fact]
+        public void GivenWorkloadUninstallItWorksWithVerbosityFlag()
+        {
+            bool userLocal = true; // The locality doesnt really matter as we just want to make sure the flag(s) are supported.
+            var installingWorkload = "mock-1";
+            var sdkFeatureVersion = "6.0.100";
+            var testDirectory = _testAssetsManager.CreateTestDirectory(identifier: userLocal ? "userlocal" : "default").Path;
+
+            SetUpMockWorkloadToUninstall(installingWorkload, sdkFeatureVersion, testDirectory, userLocal);
+
+            string[] args = { "--verbosity", "diag" };
+            var exitCode = UninstallWorkload(installingWorkload, testDirectory, sdkFeatureVersion, args);
+            exitCode.Should().Be(0, "The exit code of workload uninstall should be 0 to indicate success when the flag was added.");
         }
 
         [Theory]
@@ -185,17 +210,24 @@ namespace Microsoft.DotNet.Cli.Workload.Uninstall.Tests
             installCommand.Execute();
         }
 
-        private void UninstallWorkload(string uninstallingWorkload, string testDirectory, string sdkFeatureVersion)
+        private int UninstallWorkload(string uninstallingWorkload, string testDirectory, string sdkFeatureVersion, string[] args = null)
         {
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var userProfileDir = Path.Combine(testDirectory, "user-profile");
             bool userLocal = WorkloadFileBasedInstall.IsUserLocal(dotnetRoot, sdkFeatureVersion);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot, userLocal, userProfileDir);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
-            var uninstallParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "uninstall", uninstallingWorkload });
+
+            var command = new List<string> { "dotnet", "workload", "uninstall", uninstallingWorkload};
+            if(args != null)
+            {
+                command.AddRange(args);
+            }
+
+            var uninstallParseResult = Parser.Instance.Parse(command);
             var uninstallCommand = new WorkloadUninstallCommand(uninstallParseResult, reporter: _reporter, workloadResolver, nugetDownloader,
                 dotnetDir: dotnetRoot, version: sdkFeatureVersion, userProfileDir: userProfileDir);
-            uninstallCommand.Execute();
+            return uninstallCommand.Execute();
         }
     }
 }

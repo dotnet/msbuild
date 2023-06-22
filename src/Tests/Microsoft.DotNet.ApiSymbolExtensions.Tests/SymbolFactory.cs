@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -15,9 +15,13 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Tests
 {
     internal static class SymbolFactory
     {
-        public static string EmitAssemblyFromSyntax(string syntax, bool enableNullable = false, byte[] publicKey = null, [CallerMemberName] string assemblyName = "")
+        public static string EmitAssemblyFromSyntax(string syntax,
+            bool enableNullable = false,
+            byte[] publicKey = null,
+            [CallerMemberName] string assemblyName = "",
+            bool allowUnsafe = false)
         {
-            CSharpCompilation compilation = CreateCSharpCompilationFromSyntax(syntax, assemblyName, enableNullable, publicKey);
+            CSharpCompilation compilation = CreateCSharpCompilationFromSyntax(syntax, assemblyName, enableNullable, publicKey, allowUnsafe);
 
             Assert.Empty(compilation.GetDiagnostics());
 
@@ -29,19 +33,44 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Tests
             return assemblyPath;
         }
 
-        public static IAssemblySymbol GetAssemblyFromSyntax(string syntax, bool enableNullable = false, byte[] publicKey = null, [CallerMemberName] string assemblyName = "")
+        public static Stream EmitAssemblyStreamFromSyntax(string syntax,
+            bool enableNullable = false,
+            byte[] publicKey = null,
+            [CallerMemberName] string assemblyName = "",
+            bool allowUnsafe = false)
         {
-            CSharpCompilation compilation = CreateCSharpCompilationFromSyntax(syntax, assemblyName, enableNullable, publicKey);
+            CSharpCompilation compilation = CreateCSharpCompilationFromSyntax(syntax, assemblyName, enableNullable, publicKey, allowUnsafe);
+
+            Assert.Empty(compilation.GetDiagnostics());
+
+            MemoryStream stream = new MemoryStream();
+            compilation.Emit(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
+        }
+
+        public static IAssemblySymbol GetAssemblyFromSyntax(string syntax,
+            bool enableNullable = false,
+            byte[] publicKey = null,
+            [CallerMemberName] string assemblyName = "",
+            bool allowUnsafe = false)
+        {
+            CSharpCompilation compilation = CreateCSharpCompilationFromSyntax(syntax, assemblyName, enableNullable, publicKey, allowUnsafe);
 
             Assert.Empty(compilation.GetDiagnostics());
 
             return compilation.Assembly;
         }
 
-        public static IAssemblySymbol GetAssemblyFromSyntaxWithReferences(string syntax, IEnumerable<string> referencesSyntax, bool enableNullable = false, byte[] publicKey = null, [CallerMemberName] string assemblyName = "")
+        public static IAssemblySymbol GetAssemblyFromSyntaxWithReferences(string syntax,
+            IEnumerable<string> referencesSyntax,
+            bool enableNullable = false,
+            byte[] publicKey = null,
+            [CallerMemberName] string assemblyName = "",
+            bool allowUnsafe = false)
         {
-            CSharpCompilation compilation = CreateCSharpCompilationFromSyntax(syntax, assemblyName, enableNullable, publicKey);
-            CSharpCompilation compilationWithReferences = CreateCSharpCompilationFromSyntax(referencesSyntax, $"{assemblyName}_reference", enableNullable, publicKey);
+            CSharpCompilation compilation = CreateCSharpCompilationFromSyntax(syntax, assemblyName, enableNullable, publicKey, allowUnsafe);
+            CSharpCompilation compilationWithReferences = CreateCSharpCompilationFromSyntax(referencesSyntax, $"{assemblyName}_reference", enableNullable, publicKey, allowUnsafe);
 
             compilation = compilation.AddReferences(compilationWithReferences.ToMetadataReference());
 
@@ -50,15 +79,15 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Tests
             return compilation.Assembly;
         }
 
-        private static CSharpCompilation CreateCSharpCompilationFromSyntax(string syntax, string name, bool enableNullable, byte[] publicKey)
+        private static CSharpCompilation CreateCSharpCompilationFromSyntax(string syntax, string name, bool enableNullable, byte[] publicKey, bool allowUnsafe)
         {
-            CSharpCompilation compilation = CreateCSharpCompilation(name, enableNullable, publicKey);
+            CSharpCompilation compilation = CreateCSharpCompilation(name, enableNullable, publicKey, allowUnsafe);
             return compilation.AddSyntaxTrees(GetSyntaxTree(syntax));
         }
 
-        private static CSharpCompilation CreateCSharpCompilationFromSyntax(IEnumerable<string> syntax, string name, bool enableNullable, byte[] publicKey)
+        private static CSharpCompilation CreateCSharpCompilationFromSyntax(IEnumerable<string> syntax, string name, bool enableNullable, byte[] publicKey, bool allowUnsafe)
         {
-            CSharpCompilation compilation = CreateCSharpCompilation(name, enableNullable, publicKey);
+            CSharpCompilation compilation = CreateCSharpCompilation(name, enableNullable, publicKey, allowUnsafe);
             IEnumerable<SyntaxTree> syntaxTrees = syntax.Select(s => GetSyntaxTree(s));
             return compilation.AddSyntaxTrees(syntaxTrees);
         }
@@ -68,13 +97,14 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Tests
             return CSharpSyntaxTree.ParseText(syntax, ParseOptions);
         }
 
-        private static CSharpCompilation CreateCSharpCompilation(string name, bool enableNullable, byte[] publicKey)
+        private static CSharpCompilation CreateCSharpCompilation(string name, bool enableNullable, byte[] publicKey, bool allowUnsafe)
         {
             bool publicSign = publicKey != null ? true : false;
             var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary,
                                                                   publicSign: publicSign,
                                                                   cryptoPublicKey: publicSign ? publicKey.ToImmutableArray() : default,
                                                                   nullableContextOptions: enableNullable ? NullableContextOptions.Enable : NullableContextOptions.Disable,
+                                                                  allowUnsafe: allowUnsafe, 
                                                                   specificDiagnosticOptions: DiagnosticOptions);
 
             return CSharpCompilation.Create(name, options: compilationOptions, references: DefaultReferences);

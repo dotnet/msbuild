@@ -14,6 +14,8 @@
   "symbols/skipRestore/displayName": "復元のスキップ",
   "symbols/UseProgramMain/description": "最上位レベルのステートメントではなく、明示的な Program クラスと Main メソッドを生成するかどうか。",
   "symbols/UseProgramMain/displayName": "最上位レベルのステートメントを使用しない(_T)",
+  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
+  "symbols/NativeAot/displayName": "Enable _native AOT publish",
   "postActions/restore/description": "このプロジェクトに必要な NuGet パッケージを復元します。",
   "postActions/restore/manualInstructions/default/text": "'dotnet restore' を実行する",
   "postActions/open-file/description": "エディターで Program.cs を開く"

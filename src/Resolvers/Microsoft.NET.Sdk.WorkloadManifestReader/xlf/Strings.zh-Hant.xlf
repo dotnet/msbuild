@@ -62,6 +62,11 @@
         <target state="translated">無效的版本: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">剖析工作負載資訊清單識別碼 '{1}' 的版本 '{0}' 時發生錯誤</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">找不到資訊清單 '{1}' [{2}] 所需的工作負載資訊清單相依性 '{0}'</target>
@@ -95,6 +100,16 @@
       <trans-unit id="RedirectWorkloadHasOtherKeys">
         <source>Redirect workload '{0}' has keys other than 'redirect-to'</source>
         <target state="translated">重新導向工作負載 '{0}' 具有 'redirect-to' 以外的其他金鑰</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedManifestNotFound">
+        <source>Specified workload manifest was not found: {0}</source>
+        <target state="translated">找不到指定的工作負載資訊清單: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedWorkloadSetNotFound">
+        <source>Specified workload set was not found: {0}</source>
+        <target state="translated">找不到指定的工作負載集: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">

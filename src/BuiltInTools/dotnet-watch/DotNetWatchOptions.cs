@@ -1,17 +1,26 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 
 using System;
 
 namespace Microsoft.DotNet.Watcher
 {
+    [Flags]
+    internal enum TestFlags
+    {
+        None = 0,
+        RunningAsTest = 1 << 0,
+        BrowserRequired = 1 << 1,
+    }
+
     internal sealed record DotNetWatchOptions(
         bool SuppressHandlingStaticContentFiles,
         bool SuppressMSBuildIncrementalism,
         bool SuppressLaunchBrowser,
         bool SuppressBrowserRefresh,
         bool SuppressEmojis,
-        bool RunningAsTest)
+        TestFlags TestFlags)
     {
         public static DotNetWatchOptions Default { get; } = new DotNetWatchOptions
         (
@@ -20,15 +29,17 @@ namespace Microsoft.DotNet.Watcher
             SuppressLaunchBrowser: IsEnvironmentSet("DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER"),
             SuppressBrowserRefresh: IsEnvironmentSet("DOTNET_WATCH_SUPPRESS_BROWSER_REFRESH"),
             SuppressEmojis: IsEnvironmentSet("DOTNET_WATCH_SUPPRESS_EMOJIS"),
-            RunningAsTest: IsEnvironmentSet("__DOTNET_WATCH_RUNNING_AS_TEST")
+            TestFlags: Environment.GetEnvironmentVariable("__DOTNET_WATCH_TEST_FLAGS") is { } value ? Enum.Parse<TestFlags>(value) : TestFlags.None
         );
 
         public bool NonInteractive { get; set; }
+        
+        public bool RunningAsTest { get => ((TestFlags & TestFlags.RunningAsTest) != TestFlags.None); }
 
         private static bool IsEnvironmentSet(string key)
         {
             var envValue = Environment.GetEnvironmentVariable(key);
-            return envValue == "1" || envValue == "true";
+            return envValue == "1" || string.Equals(envValue, "true", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

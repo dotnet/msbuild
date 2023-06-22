@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
@@ -33,11 +33,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            new BuildCommand(testAsset)
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = Path.Combine(testRoot, "bin", configuration, ToolsetInfo.CurrentTargetFramework, $"{testAppName}.dll");
+            var outputDll = Path.Combine(buildCommand.GetOutputDirectory(configuration: configuration).FullName, $"{testAppName}.dll");
 
             // Call vstest
             var result = new DotnetTestCommand(Log)

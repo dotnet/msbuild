@@ -55,6 +55,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       RoslynAssembliesPath="$(RoslynAssembliesPath)"
       PackageAssemblyReferences="@(PackageValidationReferencePath)" />
 
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(ApiCompatValidatePackageSemaphoreFile)'))" />
     <Touch Files="$(ApiCompatValidatePackageSemaphoreFile)" AlwaysCreate="true" />
   </Target>
 
@@ -63,7 +64,10 @@ Copyright (c) .NET Foundation. All rights reserved.
           Returns="@(ApiCompatAssemblyReferencesWithTargetFramework)">
     <ItemGroup>
       <ApiCompatAssemblyReferencesWithTargetFramework Include="$(TargetFramework)"
-                                                      ReferencePath="@(ReferencePathWithRefAssemblies, ',')" />
+                                                      TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
+                                                      ReferencePath="@(ReferencePathWithRefAssemblies, ',')">
+          <TargetPlatformMoniker Condition="'$(ApiCompatIgnoreTargetPlatformMoniker)' != 'true'">$(TargetPlatformMoniker)</TargetPlatformMoniker>
+        </ApiCompatAssemblyReferencesWithTargetFramework>
     </ItemGroup>
   </Target>
 

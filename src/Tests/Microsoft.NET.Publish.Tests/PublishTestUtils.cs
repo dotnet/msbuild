@@ -1,6 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.NET.TestFramework;
@@ -35,6 +34,13 @@ namespace Microsoft.NET.Publish.Tests
             new object[] { "net6.0" },
             new object[] { "net7.0" },
             new object[] { ToolsetInfo.CurrentTargetFramework },
+        };
+
+        // This list should contain all supported TFMs after net7.0
+        public static IEnumerable<object[]> Net7Plus { get; } = new List<object[]>
+        {
+            new object[] { "net7.0" },
+            new object[] { ToolsetInfo.CurrentTargetFramework }
         };
 #else
 #error If building for a newer TFM, please update the values above to include both the old and new TFMs.

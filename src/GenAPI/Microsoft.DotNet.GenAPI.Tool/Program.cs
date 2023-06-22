@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.CommandLine;
@@ -32,6 +32,13 @@ namespace Microsoft.DotNet.GenAPI.Tool
                 Arity = ArgumentArity.ZeroOrMore
             };
 
+            Option<string[]?> excludeApiFilesOption = new("--exclude-api-file",
+                description: "The path to one or more api exclusion files with types in DocId format.",
+                parseArgument: ParseAssemblyArgument)
+            {
+                Arity = ArgumentArity.ZeroOrMore
+            };
+
             Option<string[]?> excludeAttributesFilesOption = new("--exclude-attributes-file",
                 description: "The path to one or more attribute exclusion files with types in DocId format.",
                 parseArgument: ParseAssemblyArgument)
@@ -49,8 +56,8 @@ namespace Microsoft.DotNet.GenAPI.Tool
             Option<string?> exceptionMessageOption = new("--exception-message",
                 "If specified - method bodies should throw PlatformNotSupportedException, else `throw null`.");
 
-            Option<bool> includeVisibleOutsideOfAssemblyOption = new("--include-visible-outside",
-                "Include internal API's. Default is false.");
+            Option<bool> respectInternalsOption = new("--respect-internals",
+                "If true, includes both internal and public API.");
 
             Option<bool> includeAssemblyAttributesOption = new("--include-assembly-attributes",
                 "Includes assembly attributes which are values that provide information about an assembly. Default is false.");
@@ -61,11 +68,12 @@ namespace Microsoft.DotNet.GenAPI.Tool
             };
             rootCommand.AddGlobalOption(assembliesOption);
             rootCommand.AddGlobalOption(assemblyReferencesOption);
+            rootCommand.AddGlobalOption(excludeApiFilesOption);
             rootCommand.AddGlobalOption(excludeAttributesFilesOption);
             rootCommand.AddGlobalOption(outputPathOption);
             rootCommand.AddGlobalOption(headerFileOption);
             rootCommand.AddGlobalOption(exceptionMessageOption);
-            rootCommand.AddGlobalOption(includeVisibleOutsideOfAssemblyOption);
+            rootCommand.AddGlobalOption(respectInternalsOption);
             rootCommand.AddGlobalOption(includeAssemblyAttributesOption);
 
             rootCommand.SetHandler((InvocationContext context) =>
@@ -76,8 +84,9 @@ namespace Microsoft.DotNet.GenAPI.Tool
                     context.ParseResult.GetValue(outputPathOption),
                     context.ParseResult.GetValue(headerFileOption),
                     context.ParseResult.GetValue(exceptionMessageOption),
+                    context.ParseResult.GetValue(excludeApiFilesOption),
                     context.ParseResult.GetValue(excludeAttributesFilesOption),
-                    context.ParseResult.GetValue(includeVisibleOutsideOfAssemblyOption),
+                    context.ParseResult.GetValue(respectInternalsOption),
                     context.ParseResult.GetValue(includeAssemblyAttributesOption)
                 ));
             });
@@ -85,10 +94,6 @@ namespace Microsoft.DotNet.GenAPI.Tool
             return rootCommand.Invoke(args);
         }
 
-        /// Splits delimiter separated list of pathes represented as a string to a List of paths.
-        /// </summary>
-        /// <param name="pathSet">Delimiter separated list of paths.</param>
-        /// <returns></returns>
         private static string[] ParseAssemblyArgument(ArgumentResult argumentResult)
         {
             List<string> args = new();

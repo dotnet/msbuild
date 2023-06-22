@@ -270,6 +270,43 @@
   <data name="TemplatePackageCoordinator_Uninstall_Error_GenericError" xml:space="preserve">
     <value>Failed to uninstall {0}, reason: {1}.</value>
   </data>
+  <data name="TemplatePackageCoordinator_Update_Error_VulnerablePackage" xml:space="preserve">
+    <value>The package {0} was not updated due to detected vulnerabilities:</value>
+    <comment>{0} - template package name.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Error_VulnerablePackageTip" xml:space="preserve">
+    <value>In order to update this package, run:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Install_Error_VulnerablePackageTip" xml:space="preserve">
+    <value>In order to install this package, run:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage" xml:space="preserve">
+    <value>The package {0} contains vulnerabilities:</value>
+    <comment>{0} - template package name.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_Download_VulnerablePackage" xml:space="preserve">
+    <value>Installed package has the following vulnerabilities:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Download_Error_VulnerablePackage" xml:space="preserve">
+    <value>Failed to install {0}, due to detected vulnerabilities:</value>
+    <comment>{0} - template package name.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_VulnerabilitySeverity_Low" xml:space="preserve">
+    <value>Low</value>
+    <comment>represents nuget api severity of level 0.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_VulnerabilitySeverity_Moderate" xml:space="preserve">
+    <value>Moderate</value>
+    <comment>represents nuget api severity of level 1.</comment>   
+  </data>
+  <data name="TemplatePackageCoordinator_VulnerabilitySeverity_High" xml:space="preserve">
+    <value>High</value>
+    <comment>represents nuget api severity of level 2.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_VulnerabilitySeverity_Critical" xml:space="preserve">
+    <value>Critical</value>
+    <comment>represents nuget api severity of level 3.</comment>
+  </data>
   <data name="InvalidParameterDefault" xml:space="preserve">
     <value>The default value '{1}' is not a valid value for {0}.</value>
   </data>
@@ -392,6 +429,10 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   </data>
   <data name="ColumnNameAuthor" xml:space="preserve">
     <value>Author</value>
+  </data>
+  <data name="ColumnNamePackageNameAndOwners" xml:space="preserve">
+    <value>Package Name / Owners</value>
+    <comment>information about NuGet package: its name and owner</comment>
   </data>
   <data name="ColumnNamesAreNotSupported" xml:space="preserve">
     <value>The column {0} is/are not supported, the supported columns are: {1}.</value>
@@ -813,5 +854,24 @@ The header is followed by the list of parameters and their errors (might be seve
   </data>
   <data name="UnexpectedResult" xml:space="preserve">
     <value>Template generation ended with unexpected result: '{0}'. Details: {1}</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_ArgumentNotConfigured" xml:space="preserve">
+    <value>Post action argument '{0}' is mandatory, but not configured.</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_MultipleJsonFiles" xml:space="preserve">
+    <value>More than one file found that matches '{0}'.</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_NoJsonFile" xml:space="preserve">
+    <value>Unable to find the json file in the solution</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_ParentPropertyPathInvalid" xml:space="preserve">
+    <value>Parent property path '{0}' could not be traversed.</value>
+  </data>
+  <data name="PostAction_ModifyJson_Succeeded" xml:space="preserve">
+    <value>Successfully modified {0}.</value>
+  </data>
+  <data name="ColumnNameTrusted" xml:space="preserve">
+    <value>Trusted</value>
+    <comment>information about NuGet package origin; if a package has PrefixReserved indicator </comment>
   </data>
 </root>

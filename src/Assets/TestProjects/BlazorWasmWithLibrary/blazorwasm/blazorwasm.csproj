@@ -36,4 +36,8 @@
     <_BlazorBrotliCompressionLevel>NoCompression</_BlazorBrotliCompressionLevel>
   </PropertyGroup>
 
+    <!-- Based on .NET 8 breaking change: Add SC like old behavior if RID is defined. -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != '' and '$(SelfContained)' == ''">
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
 </Project>

@@ -3,15 +3,18 @@ trigger:
   branches:
     include:
     - main
-    - release/*
-    - internal/release/3.*
-    - internal/release/5.*
-    - internal/release/6.*
-    - internal/release/7.*
+    - release/7.0.4xx
+    - release/8.0.1xx-preview*
+    - internal/release/*
     - exp/*
-  paths:
-    exclude:
-    - "*.md"
+
+pr:
+  branches:
+    include:
+    - main
+    - release/*
+    - internal/release/*
+
 
 variables:
   - name: teamName
@@ -94,7 +97,7 @@ stages:
     parameters:
       platform:
         name: 'Managed'
-        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7'
+        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-stream8'
   - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/build.yml
       parameters:
@@ -144,7 +147,7 @@ stages:
             name: $(DncEngInternalBuildPool)
             demands: ImageOverride -equals 1es-ubuntu-2204
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: 'ubuntu.2204.amd64.open@mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-22.04-helix-amd64'
+          helixTargetQueue: ubuntu.2204.amd64.open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
           helixTargetQueue: Ubuntu.2204.Amd64
         strategy:
@@ -161,9 +164,9 @@ stages:
         pool:
           vmImage: 'macOS-latest'
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: OSX.1200.Amd64.Open
+          helixTargetQueue: OSX.13.Amd64.Open
         ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: OSX.1200.Amd64
+          helixTargetQueue: OSX.13.Amd64
         strategy:
           matrix:
             Build_Release:

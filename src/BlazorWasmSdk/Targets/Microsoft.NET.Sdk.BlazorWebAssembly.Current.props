@@ -11,20 +11,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" TreatAsLocalProperty="RuntimeIdentifier">
   <PropertyGroup>
-    <!-- Blazor WASM projects are always browser-wasm -->
-    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
-    <UseMonoRuntime>true</UseMonoRuntime>
-
-    <!-- Avoid having the rid show up in output paths -->
-    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-
     <OutputType>exe</OutputType>
 
-    <IsPackable>false</IsPackable>
-
-    <WarnOnPackingNonPackableProject>false</WarnOnPackingNonPackableProject>
-
-    <!-- Turn off symbol publishing by default -->
+    <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
 
     <!-- Trimmer defaults -->
@@ -33,19 +23,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <TrimmerRemoveSymbols Condition="'$(TrimmerRemoveSymbols)' == ''">false</TrimmerRemoveSymbols>
 
     <!-- Static web assets defaults -->
-    <StaticWebAssetBasePath Condition="'$(StaticWebAssetBasePath)' == ''">/</StaticWebAssetBasePath>
-    <StaticWebAssetProjectMode Condition="'$(StaticWebAssetProjectMode)' == ''">Root</StaticWebAssetProjectMode>    
-    <StaticWebAssetsGetPublishAssetsTargets>ComputeFilesToPublish;GetCurrentProjectPublishStaticWebAssetItems</StaticWebAssetsGetPublishAssetsTargets>
-    <StaticWebAssetsAdditionalPublishProperties>$(StaticWebAssetsAdditionalPublishProperties);BuildProjectReferences=false;ResolveAssemblyReferencesFindRelatedSatellites=true;_PublishingBlazorWasmProject=true</StaticWebAssetsAdditionalPublishProperties>
-    <StaticWebAssetsAdditionalPublishPropertiesToRemove>$(StaticWebAssetsAdditionalPublishPropertiesToRemove);NoBuild;RuntimeIdentifier</StaticWebAssetsAdditionalPublishPropertiesToRemove>
-  </PropertyGroup>
+    <StaticWebAssetsAdditionalPublishProperties>$(StaticWebAssetsAdditionalPublishProperties);_PublishingBlazorWasmProject=true</StaticWebAssetsAdditionalPublishProperties>
+    <StaticWebAssetsAdditionalEmbeddedPublishProperties>$(StaticWebAssetsAdditionalEmbeddedPublishProperties);_PublishingBlazorWasmProject=true</StaticWebAssetsAdditionalEmbeddedPublishProperties>
 
-  <ItemGroup>
-    <ProjectCapability Include="WebAssembly" />
-  </ItemGroup>
+    <StaticWebAssetsGetEmbeddedPublishAssetsTargets>ComputeFilesToPublish;GetCurrentProjectEmbeddedPublishStaticWebAssetItems</StaticWebAssetsGetEmbeddedPublishAssetsTargets>
+  </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.props" />
   <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="Sdk.props" />
   <Import Sdk="Microsoft.NET.Sdk.Publish" Project="Sdk.props" />
+  <Import Sdk="Microsoft.NET.Sdk.WebAssembly" Project="Sdk.props" />
 
 </Project>

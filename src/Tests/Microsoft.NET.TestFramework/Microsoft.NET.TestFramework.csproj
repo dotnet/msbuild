@@ -23,7 +23,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsVersion)" />
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
     <PackageReference Include="xunit" Version="$(XUnitVersion)" />
     <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
   </ItemGroup>
@@ -47,12 +47,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="BuildTestPackages.targets" />
     <None Include="SetupTestRoot.targets" />
   </ItemGroup>
 
   <Import Project="SetupTestRoot.targets" />
-  <Import Project="BuildTestPackages.targets" />
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 

@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.CommandLine;
@@ -65,6 +65,7 @@ namespace Microsoft.DotNet.Cli
             command.AddArgument(SlnOrProjectArgument);
             RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: false, includeNoDependenciesOption: true);
             command.AddOption(OuputOption);
+            command.AddOption(CommonOptions.ArtifactsPathOption);
             command.AddOption(ManifestOption);
             command.AddOption(NoBuildOption);
             command.AddOption(SelfContainedOption);

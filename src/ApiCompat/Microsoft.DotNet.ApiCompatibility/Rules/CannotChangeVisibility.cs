@@ -1,9 +1,8 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Runtime;
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
@@ -57,8 +56,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             };
         }
 
-        private void RunOnSymbol(
-            ISymbol? left,
+        private void RunOnSymbol(ISymbol? left,
             ISymbol? right,
             MetadataInformation leftMetadata,
             MetadataInformation rightMetadata,
@@ -94,15 +92,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             }
         }
 
-        private void RunOnTypeSymbol(
-            ITypeSymbol? left,
+        private void RunOnTypeSymbol(ITypeSymbol? left,
             ITypeSymbol? right,
             MetadataInformation leftMetadata,
             MetadataInformation rightMetadata,
             IList<CompatDifference> differences) => RunOnSymbol(left, right, leftMetadata, rightMetadata, differences);
 
-        private void RunOnMemberSymbol(
-            ISymbol? left,
+        private void RunOnMemberSymbol(ISymbol? left,
             ISymbol? right,
             ITypeSymbol leftContainingType,
             ITypeSymbol rightContainingType,

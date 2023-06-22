@@ -1,4 +1,7 @@
-﻿///--------------------------------------------------------------------------------------------
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+///--------------------------------------------------------------------------------------------
 /// VSMSDeployObject.cs
 ///
 /// Common utility function
@@ -7,11 +10,12 @@
 ///--------------------------------------------------------------------------------------------
 namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 {
-    using Generic = System.Collections.Generic;
+    using System;
+    using Microsoft.NET.Sdk.Publish.Tasks.Properties;
     using Diagnostics = System.Diagnostics;
+    using Generic = System.Collections.Generic;
     // using Deployment = Microsoft.Web.Deployment;
     using RegularExpressions = System.Text.RegularExpressions;
-    using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
     // we need to think of a way to split the MSDeployment to other dll
     // using VSMSDeploySyncOption = Deployment.DeploymentSyncOptions;
@@ -79,7 +83,15 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             baseOptions.PrefetchPayload = vSMSDeployObject.PrefetchPayload;
             baseOptions.IncludeAcls = vSMSDeployObject.IncludeAcls;
             if (!string.IsNullOrEmpty(vSMSDeployObject.AuthenticationType))
+            {
                 baseOptions.AuthenticationType = vSMSDeployObject.AuthenticationType;
+            }
+
+            if (string.Equals(Guid.Empty.ToString(), vSMSDeployObject.UserName, StringComparison.OrdinalIgnoreCase))
+            {
+                baseOptions.AuthenticationType = "Bearer";
+            }
+
             if (!string.IsNullOrEmpty(vSMSDeployObject.EncryptPassword))
                 baseOptions.EncryptPassword = vSMSDeployObject.EncryptPassword;
 

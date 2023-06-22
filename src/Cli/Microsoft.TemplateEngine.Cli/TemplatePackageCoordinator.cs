@@ -1,16 +1,12 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Abstractions.Constraints;
 using Microsoft.TemplateEngine.Abstractions.Installer;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.NuGet;
-using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
@@ -28,15 +24,15 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly TemplatePackageManager _templatePackageManager;
         private readonly TemplateConstraintManager _constraintsManager;
         private readonly HostSpecificDataLoader _hostSpecificDataLoader;
+        private readonly TemplatePackageDisplay _templatePackageDisplay;
 
-        internal TemplatePackageCoordinator(
-            IEngineEnvironmentSettings environmentSettings,
-            TemplatePackageManager templatePackageManager)
+        internal TemplatePackageCoordinator(IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager)
         {
             _engineEnvironmentSettings = environmentSettings ?? throw new ArgumentNullException(nameof(environmentSettings));
             _templatePackageManager = templatePackageManager ?? throw new ArgumentNullException(nameof(templatePackageManager));
             _constraintsManager = new TemplateConstraintManager(_engineEnvironmentSettings);
             _hostSpecificDataLoader = new HostSpecificDataLoader(_engineEnvironmentSettings);
+            _templatePackageDisplay = new TemplatePackageDisplay(Reporter.Output, Reporter.Error);
         }
 
         /// <summary>
@@ -116,8 +112,8 @@ namespace Microsoft.TemplateEngine.Cli
                 return default;
             }
 
-            NuGetVersion managedPackageVersion;
-            NuGetVersion unmanagedPackageVersion;
+            NuGetVersion? managedPackageVersion;
+            NuGetVersion? unmanagedPackageVersion;
 
             if (NuGetVersion.TryParse(managedTemplatePackage.Version, out managedPackageVersion) && NuGetVersion.TryParse(matchingTemplatePackage.Version, out unmanagedPackageVersion))
             {
@@ -127,44 +123,6 @@ namespace Microsoft.TemplateEngine.Cli
                 }
             }
             return default;
-        }
-
-        internal void DisplayUpdateCheckResult(CheckUpdateResult versionCheckResult, ICommandArgs args)
-        {
-            _ = versionCheckResult ?? throw new ArgumentNullException(nameof(versionCheckResult));
-
-            if (versionCheckResult.Success)
-            {
-                if (!versionCheckResult.IsLatestVersion)
-                {
-                    string displayString = $"{versionCheckResult.TemplatePackage?.Identifier}::{versionCheckResult.TemplatePackage?.Version}";         // the package::version currently installed
-                    Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateAvailable, displayString);
-
-                    Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader);
-                    Reporter.Output.WriteCommand(
-                        Example
-                            .For<NewCommand>(args.ParseResult)
-                            .WithSubcommand<InstallCommand>()
-                            .WithArgument(InstallCommand.NameArgument, $"{versionCheckResult.TemplatePackage?.Identifier}::{versionCheckResult.LatestVersion}"));
-                    Reporter.Output.WriteLine();
-                }
-            }
-            else
-            {
-                HandleUpdateCheckErrors(versionCheckResult, ignoreLocalPackageNotFound: true);
-                Reporter.Error.WriteLine();
-            }
-        }
-
-        internal void DisplayBuiltInPackagesCheckResult(string packageId, string version, string provider, ICommandArgs args)
-        {
-            Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_BuiltInCheck_Info_BuiltInPackageAvailable, $"{packageId}::{version}", provider);
-            Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_BuiltInCheck_Info_UninstallPackage);
-            Reporter.Output.WriteCommand(
-                Example
-                 .For<NewCommand>(args.ParseResult)
-                 .WithSubcommand<UninstallCommand>()
-                 .WithArgument(UninstallCommand.NameArgument, packageId));
         }
 
         /// <summary>
@@ -243,7 +201,15 @@ namespace Microsoft.TemplateEngine.Cli
             IReadOnlyList<InstallResult> installResults = await managedSourceProvider.InstallAsync(installRequests, cancellationToken).ConfigureAwait(false);
             foreach (InstallResult result in installResults)
             {
-                await DisplayInstallResultAsync(result.InstallRequest.DisplayName, result, args.ParseResult, cancellationToken).ConfigureAwait(false);
+                await _templatePackageDisplay.DisplayInstallResultAsync(
+                    result.InstallRequest.DisplayName,
+                    result,
+                    args.ParseResult,
+                    args.Force,
+                    _templatePackageManager,
+                    _engineEnvironmentSettings,
+                    _constraintsManager,
+                    cancellationToken).ConfigureAwait(false);
                 if (!result.Success)
                 {
                     resultStatus = result.Error == InstallerErrorCode.PackageNotFound ? NewCommandStatus.NotFound : NewCommandStatus.InstallFailed;
@@ -270,7 +236,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 var provider = packagesGrouping.Key;
                 IReadOnlyList<CheckUpdateResult> checkUpdateResults = await provider.GetLatestVersionsAsync(packagesGrouping, cancellationToken).ConfigureAwait(false);
-                DisplayUpdateCheckResults(checkUpdateResults, commandArgs, showUpdates: !applyUpdates);
+                _templatePackageDisplay.DisplayUpdateCheckResults(_engineEnvironmentSettings, checkUpdateResults, commandArgs, showUpdates: !applyUpdates);
                 if (checkUpdateResults.Any(result => !result.Success))
                 {
                     success = NewCommandStatus.InstallFailed;
@@ -303,7 +269,17 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             success = NewCommandStatus.InstallFailed;
                         }
-                        await DisplayInstallResultAsync(updateResult.UpdateRequest.TemplatePackage.DisplayName, updateResult, commandArgs.ParseResult, cancellationToken).ConfigureAwait(false);
+
+                        await _templatePackageDisplay.DisplayInstallResultAsync(
+                           updateResult.UpdateRequest.TemplatePackage.DisplayName,
+                           updateResult,
+                           commandArgs.ParseResult,
+                           // force is not supported by update flow
+                           force: false,
+                           _templatePackageManager,
+                           _engineEnvironmentSettings,
+                           _constraintsManager,
+                           cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
@@ -328,7 +304,7 @@ namespace Microsoft.TemplateEngine.Cli
             if (args.TemplatePackages == null || args.TemplatePackages.Count <= 0)
             {
                 //display all installed template packages
-                await DisplayInstalledTemplatePackagesAsync(args, cancellationToken).ConfigureAwait(false);
+                await _templatePackageDisplay.DisplayInstalledTemplatePackagesAsync(_templatePackageManager, args, cancellationToken).ConfigureAwait(false);
                 return result;
             }
 
@@ -579,270 +555,6 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 return template.ShortNameList.Contains(sourceIdentifier, StringComparer.OrdinalIgnoreCase);
             });
-        }
-
-        private void DisplayUpdateCheckResults(IEnumerable<CheckUpdateResult> versionCheckResults, GlobalArgs args, bool showUpdates = true)
-        {
-            _ = versionCheckResults ?? throw new ArgumentNullException(nameof(versionCheckResults));
-
-            //handle success
-            if (versionCheckResults.Any(result => result.Success && !result.IsLatestVersion) && showUpdates)
-            {
-                Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateAvailablePackages);
-                IEnumerable<(string Identifier, string? CurrentVersion, string? LatestVersion)> displayableResults = versionCheckResults
-                    .Where(result => result.Success && !result.IsLatestVersion && !string.IsNullOrWhiteSpace(result.LatestVersion))
-                    .Select(result => (result.TemplatePackage.Identifier, result.TemplatePackage.Version, result.LatestVersion));
-
-                var formatter =
-                   TabularOutput.TabularOutput
-                       .For(
-                           new TabularOutputSettings(_engineEnvironmentSettings.Environment),
-                           displayableResults)
-                       .DefineColumn(r => r.Identifier, out object? packageColumn, LocalizableStrings.ColumnNamePackage, showAlways: true)
-                       .DefineColumn(r => r.CurrentVersion ?? string.Empty, LocalizableStrings.ColumnNameCurrentVersion, showAlways: true)
-                       .DefineColumn(r => r.LatestVersion ?? string.Empty, LocalizableStrings.ColumnNameLatestVersion, showAlways: true)
-                       .OrderBy(packageColumn, StringComparer.CurrentCultureIgnoreCase);
-                Reporter.Output.WriteLine(formatter.Layout());
-                Reporter.Output.WriteLine();
-
-                Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader);
-                Reporter.Output.WriteCommand(
-                    Example
-                        .For<NewCommand>(args.ParseResult)
-                        .WithSubcommand<InstallCommand>()
-                        .WithArgument(InstallCommand.NameArgument, $"<package>::<version>"));
-                Reporter.Output.WriteCommand(
-                      Example
-                          .For<NewCommand>(args.ParseResult)
-                          .WithSubcommand<InstallCommand>()
-                          .WithArgument(InstallCommand.NameArgument, $"{displayableResults.First().Identifier}::{displayableResults.First().LatestVersion}"));
-                Reporter.Output.WriteLine();
-                Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateAllCommandHeader);
-                Reporter.Output.WriteCommand(
-                 Example
-                     .For<NewCommand>(args.ParseResult)
-                     .WithSubcommand<UpdateCommand>());
-                Reporter.Output.WriteLine();
-            }
-
-            //handle errors
-            if (versionCheckResults.Any(result => !result.Success))
-            {
-                foreach (CheckUpdateResult result in versionCheckResults.Where(result => !result.Success))
-                {
-                    // explicit check of updates requested - so we do not want to ignore errors for
-                    //  local only packages
-                    HandleUpdateCheckErrors(result, ignoreLocalPackageNotFound: false);
-                }
-                Reporter.Error.WriteLine();
-            }
-        }
-
-        private async Task DisplayInstalledTemplatePackagesAsync(GlobalArgs args, CancellationToken cancellationToken)
-        {
-            _ = args ?? throw new ArgumentNullException(nameof(args));
-            cancellationToken.ThrowIfCancellationRequested();
-
-            IEnumerable<IManagedTemplatePackage> managedTemplatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync(false, cancellationToken).ConfigureAwait(false);
-
-            Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_InstalledItems);
-
-            if (!managedTemplatePackages.Any())
-            {
-                Reporter.Output.WriteLine(LocalizableStrings.NoItems);
-                return;
-            }
-
-            foreach (IManagedTemplatePackage managedSource in managedTemplatePackages)
-            {
-                Reporter.Output.WriteLine($"{managedSource.Identifier}".Indent());
-                if (!string.IsNullOrWhiteSpace(managedSource.Version))
-                {
-                    Reporter.Output.WriteLine($"{LocalizableStrings.Version} {managedSource.Version}".Indent(level: 2));
-                }
-
-                IReadOnlyDictionary<string, string> displayDetails = managedSource.GetDetails();
-                if (displayDetails?.Any() ?? false)
-                {
-                    Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_DetailsHeader.Indent(level: 2));
-                    foreach (KeyValuePair<string, string> detail in displayDetails)
-                    {
-                        Reporter.Output.WriteLine($"{detail.Key}: {detail.Value}".Indent(level: 3));
-                    }
-                }
-
-                IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(managedSource, cancellationToken).ConfigureAwait(false);
-                if (templates.Any())
-                {
-                    Reporter.Output.WriteLine($"{LocalizableStrings.Templates}:".Indent(level: 2));
-                    foreach (ITemplateInfo info in templates)
-                    {
-                        Reporter.Output.WriteLine(info.GetDisplayName().Indent(level: 3));
-                    }
-                }
-
-                // uninstall command:
-                Reporter.Output.WriteLine($"{LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_UninstallCommandHint}".Indent(level: 2));
-                Reporter.Output.WriteCommand(
-                    Example
-                        .For<NewCommand>(args.ParseResult)
-                        .WithSubcommand<UninstallCommand>()
-                        .WithArgument(UninstallCommand.NameArgument, managedSource.Identifier),
-                    indentLevel: 2);
-
-                Reporter.Output.WriteLine();
-            }
-        }
-
-        private async Task DisplayInstallResultAsync(string packageToInstall, InstallerOperationResult result, ParseResult parseResult, CancellationToken cancellationToken)
-        {
-            if (string.IsNullOrWhiteSpace(packageToInstall))
-            {
-                throw new ArgumentException(nameof(packageToInstall));
-            }
-            _ = result ?? throw new ArgumentNullException(nameof(result));
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (result.Success)
-            {
-                if (result.TemplatePackage is null)
-                {
-                    throw new ArgumentException($"{nameof(result.TemplatePackage)} cannot be null when {nameof(result.Success)} is 'true'", nameof(result));
-                }
-                IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(result.TemplatePackage, cancellationToken).ConfigureAwait(false);
-                if (templates.Any())
-                {
-                    Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_lnstall_Info_Success, result.TemplatePackage.DisplayName);
-                    TemplateGroupDisplay.DisplayTemplateList(
-                        _engineEnvironmentSettings,
-                        templates,
-                        new TabularOutputSettings(_engineEnvironmentSettings.Environment),
-                        reporter: Reporter.Output);
-                    await EvaluateAndDisplayConstraintsAsync(templates, cancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package, result.TemplatePackage.DisplayName);
-                }
-            }
-            else
-            {
-                switch (result.Error)
-                {
-                    case InstallerErrorCode.InvalidSource:
-                        Reporter.Error.WriteLine(
-                            string.Format(
-                                LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_InvalidNuGetFeeds,
-                                packageToInstall,
-                                result.ErrorMessage).Bold().Red());
-                        break;
-                    case InstallerErrorCode.PackageNotFound:
-                        Reporter.Error.WriteLine(
-                            string.Format(
-                                LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_PackageNotFound,
-                                packageToInstall).Bold().Red());
-                        break;
-                    case InstallerErrorCode.DownloadFailed:
-                        Reporter.Error.WriteLine(
-                            string.Format(
-                                LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_DownloadFailed,
-                                packageToInstall).Bold().Red());
-                        break;
-                    case InstallerErrorCode.UnsupportedRequest:
-                        Reporter.Error.WriteLine(
-                            string.Format(
-                                LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_UnsupportedRequest,
-                                packageToInstall).Bold().Red());
-                        break;
-                    case InstallerErrorCode.AlreadyInstalled:
-                        Reporter.Error.WriteLine(
-                              string.Format(
-                                  LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled,
-                                  packageToInstall).Bold().Red());
-                        Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled_Hint, InstallCommand.ForceOption.Aliases.First());
-                        Reporter.Error.WriteCommand(Example.For<InstallCommand>(parseResult).WithArgument(BaseInstallCommand.NameArgument, packageToInstall).WithOption(BaseInstallCommand.ForceOption));
-
-                        break;
-                    case InstallerErrorCode.UpdateUninstallFailed:
-                        Reporter.Error.WriteLine(
-                              string.Format(
-                                  LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_UninstallFailed,
-                                  packageToInstall).Bold().Red());
-                        break;
-                    case InstallerErrorCode.InvalidPackage:
-                        Reporter.Error.WriteLine(
-                              string.Format(
-                                  LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_InvalidPackage,
-                                  packageToInstall).Bold().Red());
-                        break;
-                    case InstallerErrorCode.GenericError:
-                    default:
-                        Reporter.Error.WriteLine(
-                            string.Format(
-                                LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_GenericError,
-                                packageToInstall).Bold().Red());
-                        break;
-                }
-            }
-        }
-
-        private async Task EvaluateAndDisplayConstraintsAsync(IEnumerable<ITemplateInfo> templates, CancellationToken cancellationToken)
-        {
-            var evaluationResult = await _constraintsManager.EvaluateConstraintsAsync(templates, cancellationToken).ConfigureAwait(false);
-
-            var restrictedTemplates = evaluationResult.Where(r => r.Result.Any(cr => cr.EvaluationStatus != TemplateConstraintResult.Status.Allowed));
-            if (!restrictedTemplates.Any())
-            {
-                return;
-            }
-
-            Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_ConstraintsNotice);
-
-            foreach (var template in restrictedTemplates)
-            {
-                bool showIdentity = !string.IsNullOrWhiteSpace(template.Template.GroupIdentity) && templates.Count(t => t.GroupIdentity == template.Template.GroupIdentity) > 1;
-                Reporter.Output.WriteLine(template.Template.GetDisplayName(showIdentity: showIdentity));
-                foreach (var constraintResult in template.Result.Where(r => r.EvaluationStatus != TemplateConstraintResult.Status.Allowed))
-                {
-                    Reporter.Output.WriteLine(constraintResult.ToDisplayString().Indent(1));
-                }
-            }
-        }
-
-        private void HandleUpdateCheckErrors(CheckUpdateResult result, bool ignoreLocalPackageNotFound)
-        {
-            switch (result.Error)
-            {
-                case InstallerErrorCode.InvalidSource:
-                    Reporter.Error.WriteLine(
-                        string.Format(
-                            LocalizableStrings.TemplatePackageCoordinator_Update_Error_InvalidNuGetFeeds,
-                            result.TemplatePackage.DisplayName).Bold().Red());
-                    break;
-                case InstallerErrorCode.PackageNotFound:
-                    if (!ignoreLocalPackageNotFound || !result.TemplatePackage.IsLocalPackage)
-                    {
-                        Reporter.Error.WriteLine(
-                            string.Format(
-                                LocalizableStrings.TemplatePackageCoordinator_Update_Error_PackageNotFound,
-                                result.TemplatePackage.DisplayName).Bold().Red());
-                    }
-                    break;
-                case InstallerErrorCode.UnsupportedRequest:
-                    Reporter.Error.WriteLine(
-                        string.Format(
-                            LocalizableStrings.TemplatePackageCoordinator_Update_Error_PackageNotSupported,
-                            result.TemplatePackage.DisplayName).Bold().Red());
-                    break;
-                case InstallerErrorCode.GenericError:
-                default:
-                    Reporter.Error.WriteLine(
-                        string.Format(
-                            LocalizableStrings.TemplatePackageCoordinator_Update_Error_GenericError,
-                            result.TemplatePackage.DisplayName,
-                            result.ErrorMessage).Bold().Red());
-                    break;
-            }
         }
     }
 }

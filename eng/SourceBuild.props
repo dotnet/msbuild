@@ -1,9 +1,13 @@
+<!-- Whenever altering this or other Source Build files, please include @dotnet/source-build-internal as a reviewer. -->
+
 <Project>
 
   <PropertyGroup>
     <GitHubRepositoryName>sdk</GitHubRepositoryName>
     <SourceBuildManagedOnly>true</SourceBuildManagedOnly>
+    <SourceBuildTrimNetFrameworkTargets>true</SourceBuildTrimNetFrameworkTargets>
   </PropertyGroup>
+
   <Target Name="ConfigureInnerBuildArg" BeforeTargets="GetSourceBuildCommandConfiguration">
     <PropertyGroup>
       <InnerBuildArgs>$(InnerBuildArgs) /p:Projects="$(InnerSourceBuildRepoRoot)\source-build.slnf"</InnerBuildArgs>

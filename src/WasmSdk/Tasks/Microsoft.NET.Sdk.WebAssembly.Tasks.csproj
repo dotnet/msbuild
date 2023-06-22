@@ -1,0 +1,77 @@
+<Project>
+
+  <PropertyGroup>
+    <WasmSdkRoot>$(RepoRoot)\src\WasmSdk\</WasmSdkRoot>
+    <PackageId>Microsoft.NET.Sdk.WebAssembly</PackageId>
+    <OutDirName>$(Configuration)\Sdks\$(PackageId)\tools</OutDirName>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!-- MSBuild Task DLLs need to be versioned with every build -->
+    <AutoGenerateAssemblyVersion>true</AutoGenerateAssemblyVersion>
+
+    <OutputPath>$(BaseOutputPath)</OutputPath>
+    <IsPackable>true</IsPackable>
+    <PackageLayoutOutputPath>$(ArtifactsBinDir)$(Configuration)\Sdks\$(PackageId)\</PackageLayoutOutputPath>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Description>SDK for building and publishing WebAssembly applications.</Description>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Microsoft.NET.Sdk.WebAssembly</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalContent Include="$(WasmSdkRoot)Targets\**\*.*">
+      <Pack>true</Pack>
+      <PackagePath>targets</PackagePath>
+    </AdditionalContent>
+    <AdditionalContent Include="$(WasmSdkRoot)Sdk\**\*.*">
+      <Pack>true</Pack>
+      <PackagePath>Sdk</PackagePath>
+    </AdditionalContent>
+  </ItemGroup>
+
+  <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <LayoutFile Include="@(AdditionalContent)" Condition="'%(AdditionalContent.PackagePath)' != '' and '%(AdditionalContent.PackagePath)' != 'Icon.png'">
+        <TargetPath>%(AdditionalContent.PackagePath)\%(AdditionalContent.RecursiveDir)%(AdditionalContent.Filename)%(AdditionalContent.Extension)</TargetPath>
+      </LayoutFile>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CopyAdditionalFilesToLayout"
+          Condition="'$(TargetFramework)' == ''"
+          DependsOnTargets="PrepareAdditionalFilesToLayout"
+          AfterTargets="Build" Inputs="@(LayoutFile)"
+          Outputs="@(LayoutFile-&gt;'$(PackageLayoutOutputPath)%(TargetPath)')">
+    <Copy SourceFiles="@(LayoutFile)" DestinationFiles="@(LayoutFile-&gt;'$(PackageLayoutOutputPath)%(TargetPath)')">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
+    </Copy>
+  </Target>
+
+  <Target Name="PackLayout" DependsOnTargets="CopyAdditionalFilesToLayout" BeforeTargets="$(GenerateNuspecDependsOn)">
+    <ItemGroup>
+      <Content Include="$(PackageLayoutOutputPath)**\*" PackagePath="\" />
+    </ItemGroup>
+  </Target>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

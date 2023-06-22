@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 
 using FluentAssertions;
@@ -595,7 +595,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "OverrideImplicitFrameworkReference",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -765,7 +765,7 @@ public class Class1
             var testProject = new TestProject()
             {
                 Name = "DontIncludeSourceFilesInNone",
-                TargetFrameworks = "net6.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
@@ -818,7 +818,7 @@ public class Class1
             var testProject = new TestProject()
             {
                 Name = "DontIncludeSourceFilesInNone",
-                TargetFrameworks = "net6.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 

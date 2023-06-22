@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -58,7 +58,7 @@ namespace Microsoft.NET.Publish.Tests
             publishResult.Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
-            var outputDirectory = publishDirectory.Parent;
+            var outputDirectory = new BuildCommand(helloWorldAsset).GetOutputDirectory(targetFramework);
 
             var filesPublished = new[] {
                 "HelloWorld.dll",
@@ -97,14 +97,14 @@ namespace Microsoft.NET.Publish.Tests
                 .WithTargetFramework(targetFramework);
 
             var publishCommand = new PublishCommand(helloWorldAsset);
-            var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:CopyLocalLockFileAssemblies=true");
+            var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true", "/p:CopyLocalLockFileAssemblies=true");
 
             publishResult.Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(
                 targetFramework: targetFramework,
                 runtimeIdentifier: rid);
-            var outputDirectory = publishDirectory.Parent;
+            var outputDirectory = new BuildCommand(helloWorldAsset).GetOutputDirectory(targetFramework, runtimeIdentifier: rid);
             var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
 
             var filesPublished = new[] {
@@ -818,7 +818,7 @@ public static class Program
                     throw new ArgumentOutOfRangeException(nameof(type));
             }
 
-            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", "9.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", "13.0.1"));
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: type)
                 .WithProjectChanges(project =>
@@ -884,7 +884,7 @@ public static class Program
   <PropertyGroup>
     <RuntimeIdentifier>{rid}</RuntimeIdentifier>
     {(selfContained.HasValue ? $"<SelfContained>{selfContained}</SelfContained>" : "")}
-    {((!(selfContained ?? true) && useAppHost.HasValue) ? $"<UseAppHost>{useAppHost}</UseAppHost>" : "")}
+    {((!(selfContained ?? false) && useAppHost.HasValue) ? $"<UseAppHost>{useAppHost}</UseAppHost>" : "")}
   </PropertyGroup>
 </Project>
 ");
@@ -904,7 +904,7 @@ public static class Program
                 $"{testProject.Name}.runtimeconfig.json",
             });
 
-            if (selfContained ?? true)
+            if (selfContained ?? false)
             {
                 output.Should().HaveFiles(new[] {
                     $"{FileConstants.DynamicLibPrefix}hostfxr{FileConstants.DynamicLibSuffix}",
@@ -919,7 +919,7 @@ public static class Program
                 });
             }
 
-            if ((selfContained ?? true) || (useAppHost ?? true))
+            if ((selfContained ?? false) || (useAppHost ?? true))
             {
                 output.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
             }

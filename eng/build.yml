@@ -15,13 +15,13 @@ parameters:
   timeoutInMinutes: 180
 
 jobs:
-- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/release/7.0.3xx'), not(contains(parameters.agentOs, 'TemplateEngine'))) }}:
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/release/7.0.4xx'), not(contains(parameters.agentOs, 'TemplateEngine'))) }}:
   - template: /eng/common/templates/job/onelocbuild.yml
     parameters:
       CreatePr: true
       LclSource: lclFilesfromPackage
       LclPackageId: 'LCL-JUNO-PROD-DOTNETSDK'
-      MirrorBranch: release/7.0.3xx
+      MirrorBranch: release/7.0.4xx
       MirrorRepo: sdk
 
 - ${{ if not(contains(parameters.agentOs, 'TemplateEngine')) }}:
@@ -76,6 +76,7 @@ jobs:
                     /p:Test=false
                     $(_InternalRuntimeDownloadArgs)
                     $(_OfficialBuildArgs)
+          continueOnError: false
           displayName: Build
           env:
             BuildConfig: $(_BuildConfig)
@@ -106,6 +107,7 @@ jobs:
                     $(_OfficialBuildIdArgs)
                     $(_InternalRuntimeDownloadArgs)
                     /p:Test=false
+          continueOnError: false
           displayName: Build
           env:
             BuildConfig: $(_BuildConfig)
@@ -149,6 +151,7 @@ jobs:
                     $(_OfficialBuildIdArgs)
                     $(_InternalRuntimeDownloadArgs)
                     -p:Test=false
+          continueOnError: false
           displayName: Build
           env:
             BuildConfig: $(_BuildConfig)
@@ -251,14 +254,13 @@ jobs:
                     $(_OfficialBuildIdArgs)
                     /p:Test=false
                     $(_InternalRuntimeDownloadArgs)
+          continueOnError: false
           displayName: Build
           env:
             BuildConfig: $(_BuildConfig)
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
             HelixAccessToken: ${{ parameters.HelixAccessToken }}
-        - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload install wasm-tools
-          # FIXME: add `--skip-manifest-update` back once the problem in
-          # https://github.com/dotnet/sdk/pull/29406#issuecomment-1341643680 has been resolved.
+        - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload install wasm-tools --skip-manifest-update
           displayName: Install wasm-tools Workload
           continueOnError: false
         - powershell: $(Build.SourcesDirectory)/eng/common/build.ps1
@@ -290,9 +292,7 @@ jobs:
           displayName: Build
           env:
             BuildConfig: $(_BuildConfig)
-        - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload install wasm-tools
-          # FIXME: add `--skip-manifest-update` back once the problem in
-          # https://github.com/dotnet/sdk/pull/29406#issuecomment-1341643680 has been resolved.
+        - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload install wasm-tools --skip-manifest-update
           displayName: Install wasm-tools Workload
           continueOnError: false
         - script: eng/common/build.sh
@@ -404,16 +404,6 @@ jobs:
                 -ci
                 -restore
                 $(_Test)
-                -projects $(Build.SourcesDirectory)\src\Tests\Microsoft.TemplateEngine.Cli.IntegrationTests\Microsoft.TemplateEngine.Cli.IntegrationTests.csproj
-                /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TemplateEngine.Cli.IntegrationTests.binlog
-                $(_InternalRuntimeDownloadArgs)
-          displayName: Run TemplateEngine Cli Integration Tests
-        - powershell: eng\common\build.ps1
-                -configuration $(_BuildConfig)
-                -prepareMachine
-                -ci
-                -restore
-                $(_Test)
                 -projects $(Build.SourcesDirectory)\src\Tests\dotnet-new.Tests\dotnet-new.IntegrationTests.csproj
                 /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\dotnet-new.IntegrationTests.binlog
                 $(_InternalRuntimeDownloadArgs)
@@ -442,16 +432,6 @@ jobs:
                 /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/TemplateEngine.Cli.UnitTests.binlog
                 $(_InternalRuntimeDownloadArgs)
           displayName: Run TemplateEngine Cli Unit Tests
-        - powershell: eng/common/build.sh
-                -configuration $(_BuildConfig)
-                -prepareMachine
-                -ci
-                -restore
-                -test
-                -projects $(Build.SourcesDirectory)/src/Tests/Microsoft.TemplateEngine.Cli.IntegrationTests/Microsoft.TemplateEngine.Cli.IntegrationTests.csproj
-                /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/TemplateEngine.Cli.IntegrationTests.binlog
-                $(_InternalRuntimeDownloadArgs)
-          displayName: Run TemplateEngine Cli Integration Tests
         - powershell: eng/common/build.sh
                 -configuration $(_BuildConfig)
                 -prepareMachine

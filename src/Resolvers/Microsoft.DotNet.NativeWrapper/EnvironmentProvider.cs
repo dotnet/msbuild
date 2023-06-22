@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -62,11 +62,12 @@ namespace Microsoft.DotNet.NativeWrapper
             return commandPath;
         }
 
-        public string GetDotnetExeDirectory()
+        public string GetDotnetExeDirectory(Action<FormattableString> log = null)
         {
             string environmentOverride = _getEnvironmentVariable(Constants.DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR);
             if (!string.IsNullOrEmpty(environmentOverride))
             {
+                log?.Invoke($"GetDotnetExeDirectory: {Constants.DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR} set to {environmentOverride}");
                 return environmentOverride;
             }
 
@@ -87,23 +88,30 @@ namespace Microsoft.DotNet.NativeWrapper
                 if (!string.IsNullOrWhiteSpace(dotnetExeFromPath))
                 {
                     dotnetExe = dotnetExeFromPath;
+                } else {
+                    log?.Invoke($"GetDotnetExeDirectory: dotnet command path not found.  Using current process");
+                    log?.Invoke($"GetDotnetExeDirectory: Path variable: {_getEnvironmentVariable(Constants.PATH)}");
                 }
             }
 
-            return Path.GetDirectoryName(dotnetExe);
+            var dotnetDirectory = Path.GetDirectoryName(dotnetExe);
+
+            log?.Invoke($"GetDotnetExeDirectory: Returning {dotnetDirectory}");
+
+            return dotnetDirectory;
         }
 
-        public static string GetDotnetExeDirectory(Func<string, string> getEnvironmentVariable = null)
+        public static string GetDotnetExeDirectory(Func<string, string> getEnvironmentVariable = null, Action<FormattableString> log = null)
         {
             if (getEnvironmentVariable == null)
             {
                 getEnvironmentVariable = Environment.GetEnvironmentVariable;
             }
             var environmentProvider = new EnvironmentProvider(getEnvironmentVariable);
-            return environmentProvider.GetDotnetExeDirectory();
+            return environmentProvider.GetDotnetExeDirectory(log);
         }
 
-        public static string GetDotnetExeDirectory(Func<string, string> getEnvironmentVariable, Func<string> getCurrentProcessPath)
+        public static string GetDotnetExeDirectory(Func<string, string> getEnvironmentVariable, Func<string> getCurrentProcessPath, Action<FormattableString> log = null)
         {
             getEnvironmentVariable ??= Environment.GetEnvironmentVariable;
             getCurrentProcessPath ??= GetCurrentProcessPath;

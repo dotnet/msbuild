@@ -1,6 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
@@ -26,7 +25,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// </summary>
         /// <param name="templates">the templates of the template group.</param>
         /// <exception cref="ArgumentNullException">when <paramref name="templates"/> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentException">when <paramref name="templates"/> is empty or don't have same <see cref="ITemplateInfo.GroupIdentity"/> defined.</exception>
+        /// <exception cref="ArgumentException">when <paramref name="templates"/> is empty or don't have same <see cref="ITemplateMetadata.GroupIdentity"/> defined.</exception>
         internal TemplateGroup(IEnumerable<CliTemplateInfo> templates)
         {
             _ = templates ?? throw new ArgumentNullException(paramName: nameof(templates));

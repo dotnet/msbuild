@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -186,8 +186,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android"});
 
-            IWorkloadInfoHelper workloadInfoHelper = new WorkloadInfoHelper(workloadResolver: workloadResolver);
-            WorkloadCommandParser.ShowWorkloadsInfo(workloadInfoHelper: workloadInfoHelper, reporter:_reporter);
+            IWorkloadInfoHelper workloadInfoHelper = new WorkloadInfoHelper(isInteractive: false, workloadResolver: workloadResolver);
+            WorkloadCommandParser.ShowWorkloadsInfo(parseResult, workloadInfoHelper: workloadInfoHelper, reporter:_reporter);
             _reporter.Lines.Should().Contain("There are no installed workloads to display.");
         }
 

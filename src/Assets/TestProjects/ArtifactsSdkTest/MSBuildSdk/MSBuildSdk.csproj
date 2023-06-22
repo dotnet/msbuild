@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Microsoft.Build.Artifacts"/>
+
+  <PropertyGroup>
+    <TargetFramework>$(CurrentTargetFramework)</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ArtifactsPath>$(BaseArtifactsPath)\$(MSBuildProjectName)</ArtifactsPath>
+  </PropertyGroup>
+
+</Project>

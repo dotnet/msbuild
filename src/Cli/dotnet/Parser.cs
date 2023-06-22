@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -118,17 +118,8 @@ namespace Microsoft.DotNet.Cli
                 var lines = File.ReadAllLines(filePath);
                 var trimmedLines =
                     lines
-                        // Remove content in the lines that contain #, starting from the point of the #
-                        .Select(line => {
-                            var hashPos = line.IndexOf('#');
-                            if (hashPos == -1) {
-                                return line;
-                            } else if (hashPos == 0) {
-                                return "";
-                            } else {
-                                return line.Substring(0, hashPos).Trim();
-                            }
-                        })
+                        // Remove content in the lines that start with # after trimmer leading whitespace
+                        .Select(line => line.TrimStart().StartsWith('#') ? string.Empty : line)
                         // trim leading/trailing whitespace to not pass along dead spaces
                         .Select(x => x.Trim())
                         // Remove empty lines
@@ -281,6 +272,28 @@ namespace Microsoft.DotNet.Cli
                 }
             }
 
+            public void additionalOption(HelpContext context)
+            {
+                List<TwoColumnHelpRow> options = new();
+                HashSet<Option> uniqueOptions = new();
+                foreach (Option option in context.Command.Options)
+                {
+                    if (!option.IsHidden && uniqueOptions.Add(option))
+                    {
+                        options.Add(context.HelpBuilder.GetTwoColumnRow(option, context));
+                    }
+                }
+
+                if (options.Count <= 0)
+                {
+                    return;
+                }
+
+                context.Output.WriteLine(CommonLocalizableStrings.MSBuildAdditionalOptionTitle);
+                context.HelpBuilder.WriteColumns(options, context);
+                context.Output.WriteLine();
+            }
+
             public override void Write(HelpContext context)
             {
                 var command = context.Command;
@@ -296,6 +309,8 @@ namespace Microsoft.DotNet.Cli
                 else if (command.Name.Equals(MSBuildCommandParser.GetCommand().Name))
                 {
                     new MSBuildForwardingApp(helpArgs).Execute();
+                    context.Output.WriteLine();
+                    additionalOption(context);
                 }
                 else if (command.Name.Equals(VSTestCommandParser.GetCommand().Name))
                 {
@@ -342,6 +357,9 @@ namespace Microsoft.DotNet.Cli
                     base.Write(context);
                 }
             }
+
+
+
         }
     }
 }
