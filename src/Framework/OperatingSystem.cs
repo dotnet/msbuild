@@ -12,7 +12,7 @@ namespace Microsoft.Build.Framework
     /// This class create stand-in methods for net472 builds.
     /// Assumes only Windows is supported.
     /// </summary>
-    public static class OperatingSystem
+    internal static class OperatingSystem
     {
         public static bool IsOSPlatform(string platform)
         {
