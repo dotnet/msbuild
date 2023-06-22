@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// </summary>
         [Theory]
         [InlineData(null)]
-        [InlineData("")]
+        [InlineData("\uE025\uE026")]
         public void Exists(string appConfigNameSuffix)
         {
             // Create the engine.
