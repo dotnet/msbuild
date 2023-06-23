@@ -455,9 +455,9 @@
     </note>
       </trans-unit>
       <trans-unit id="UnhandledMSBuildError">
-        <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled.
+        <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">To jest nieobsługiwany wyjątek w programie MSBuild — POPRZYJ ISTNIEJĄCY PROBLEM LUB ZAREJESTRUJ NOWY NA https://aka.ms/msbuild/unhandled.
+        <target state="needs-review-translation">To jest nieobsługiwany wyjątek w programie MSBuild — POPRZYJ ISTNIEJĄCY PROBLEM LUB ZAREJESTRUJ NOWY NA https://aka.ms/msbuild/unhandled.
     {0}</target>
         <note />
       </trans-unit>
