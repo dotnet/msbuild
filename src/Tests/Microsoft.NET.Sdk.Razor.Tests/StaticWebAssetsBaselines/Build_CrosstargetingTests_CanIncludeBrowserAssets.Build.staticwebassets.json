@@ -33,7 +33,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.AspNetCore.Authorization.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.AspNetCore.Authorization.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.Forms.wasm",
@@ -52,7 +52,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.AspNetCore.Components.Forms.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.AspNetCore.Components.Forms.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.Web.wasm",
@@ -71,7 +71,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.AspNetCore.Components.Web.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.AspNetCore.Components.Web.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.WebAssembly.wasm",
@@ -90,7 +90,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.AspNetCore.Components.WebAssembly.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.AspNetCore.Components.WebAssembly.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.wasm",
@@ -109,7 +109,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.AspNetCore.Components.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.AspNetCore.Components.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.AspNetCore.Metadata.wasm",
@@ -128,7 +128,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.AspNetCore.Metadata.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.AspNetCore.Metadata.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.CSharp.wasm",
@@ -147,7 +147,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.CSharp.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.CSharp.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.Abstractions.wasm",
@@ -166,7 +166,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Configuration.Abstractions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Configuration.Abstractions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.Binder.wasm",
@@ -185,7 +185,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Configuration.Binder.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Configuration.Binder.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.FileExtensions.wasm",
@@ -204,7 +204,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Configuration.FileExtensions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Configuration.FileExtensions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.Json.wasm",
@@ -223,7 +223,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Configuration.Json.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Configuration.Json.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.wasm",
@@ -242,7 +242,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Configuration.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Configuration.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Extensions.DependencyInjection.Abstractions.wasm",
@@ -261,7 +261,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.DependencyInjection.Abstractions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.DependencyInjection.Abstractions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Extensions.DependencyInjection.wasm",
@@ -280,7 +280,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.DependencyInjection.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.DependencyInjection.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Extensions.FileProviders.Abstractions.wasm",
@@ -299,7 +299,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.FileProviders.Abstractions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.FileProviders.Abstractions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Extensions.FileProviders.Physical.wasm",
@@ -318,7 +318,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.FileProviders.Physical.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.FileProviders.Physical.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Extensions.FileSystemGlobbing.wasm",
@@ -337,7 +337,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.FileSystemGlobbing.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.FileSystemGlobbing.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Extensions.Logging.Abstractions.wasm",
@@ -356,7 +356,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Logging.Abstractions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Logging.Abstractions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Extensions.Logging.wasm",
@@ -375,7 +375,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Logging.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Logging.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Extensions.Options.wasm",
@@ -394,7 +394,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Options.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Options.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Extensions.Primitives.wasm",
@@ -413,7 +413,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Primitives.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Extensions.Primitives.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.JSInterop.WebAssembly.wasm",
@@ -432,7 +432,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.JSInterop.WebAssembly.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.JSInterop.WebAssembly.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.JSInterop.wasm",
@@ -451,7 +451,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.JSInterop.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.JSInterop.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.VisualBasic.Core.wasm",
@@ -470,7 +470,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.VisualBasic.Core.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.VisualBasic.Core.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.VisualBasic.wasm",
@@ -489,7 +489,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.VisualBasic.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.VisualBasic.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Win32.Primitives.wasm",
@@ -508,7 +508,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Win32.Primitives.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Win32.Primitives.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\Microsoft.Win32.Registry.wasm",
@@ -527,7 +527,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\Microsoft.Win32.Registry.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\Microsoft.Win32.Registry.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\RazorComponentAppMultitarget.pdb",
@@ -565,7 +565,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\RazorComponentAppMultitarget.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\RazorComponentAppMultitarget.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.AppContext.wasm",
@@ -584,7 +584,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.AppContext.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.AppContext.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Buffers.wasm",
@@ -603,7 +603,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Buffers.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Buffers.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Collections.Concurrent.wasm",
@@ -622,7 +622,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Collections.Concurrent.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Collections.Concurrent.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Collections.Immutable.wasm",
@@ -641,7 +641,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Collections.Immutable.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Collections.Immutable.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Collections.NonGeneric.wasm",
@@ -660,7 +660,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Collections.NonGeneric.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Collections.NonGeneric.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Collections.Specialized.wasm",
@@ -679,7 +679,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Collections.Specialized.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Collections.Specialized.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Collections.wasm",
@@ -698,7 +698,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Collections.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Collections.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.ComponentModel.Annotations.wasm",
@@ -717,7 +717,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.ComponentModel.Annotations.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.ComponentModel.Annotations.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.ComponentModel.DataAnnotations.wasm",
@@ -736,7 +736,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.ComponentModel.DataAnnotations.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.ComponentModel.DataAnnotations.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.ComponentModel.EventBasedAsync.wasm",
@@ -755,7 +755,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.ComponentModel.EventBasedAsync.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.ComponentModel.EventBasedAsync.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.ComponentModel.Primitives.wasm",
@@ -774,7 +774,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.ComponentModel.Primitives.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.ComponentModel.Primitives.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.ComponentModel.TypeConverter.wasm",
@@ -793,7 +793,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.ComponentModel.TypeConverter.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.ComponentModel.TypeConverter.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.ComponentModel.wasm",
@@ -812,7 +812,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.ComponentModel.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.ComponentModel.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Configuration.wasm",
@@ -831,7 +831,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Configuration.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Configuration.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Console.wasm",
@@ -850,7 +850,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Console.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Console.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Core.wasm",
@@ -869,7 +869,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Core.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Core.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Data.Common.wasm",
@@ -888,7 +888,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Data.Common.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Data.Common.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Data.DataSetExtensions.wasm",
@@ -907,7 +907,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Data.DataSetExtensions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Data.DataSetExtensions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Data.wasm",
@@ -926,7 +926,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Data.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Data.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Diagnostics.Contracts.wasm",
@@ -945,7 +945,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.Contracts.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.Contracts.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Diagnostics.Debug.wasm",
@@ -964,7 +964,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.Debug.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.Debug.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Diagnostics.DiagnosticSource.wasm",
@@ -983,7 +983,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.DiagnosticSource.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.DiagnosticSource.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Diagnostics.FileVersionInfo.wasm",
@@ -1002,7 +1002,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.FileVersionInfo.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.FileVersionInfo.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Diagnostics.Process.wasm",
@@ -1021,7 +1021,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.Process.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.Process.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Diagnostics.StackTrace.wasm",
@@ -1040,7 +1040,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.StackTrace.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.StackTrace.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Diagnostics.TextWriterTraceListener.wasm",
@@ -1059,7 +1059,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.TextWriterTraceListener.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.TextWriterTraceListener.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Diagnostics.Tools.wasm",
@@ -1078,7 +1078,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.Tools.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.Tools.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Diagnostics.TraceSource.wasm",
@@ -1097,7 +1097,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.TraceSource.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.TraceSource.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Diagnostics.Tracing.wasm",
@@ -1116,7 +1116,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.Tracing.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Diagnostics.Tracing.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Drawing.Primitives.wasm",
@@ -1135,7 +1135,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Drawing.Primitives.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Drawing.Primitives.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Drawing.wasm",
@@ -1154,7 +1154,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Drawing.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Drawing.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Dynamic.Runtime.wasm",
@@ -1173,7 +1173,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Dynamic.Runtime.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Dynamic.Runtime.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Formats.Asn1.wasm",
@@ -1192,7 +1192,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Formats.Asn1.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Formats.Asn1.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Formats.Tar.wasm",
@@ -1211,7 +1211,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Formats.Tar.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Formats.Tar.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Globalization.Calendars.wasm",
@@ -1230,7 +1230,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Globalization.Calendars.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Globalization.Calendars.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Globalization.Extensions.wasm",
@@ -1249,7 +1249,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Globalization.Extensions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Globalization.Extensions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Globalization.wasm",
@@ -1268,7 +1268,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Globalization.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Globalization.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.Compression.Brotli.wasm",
@@ -1287,7 +1287,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.Compression.Brotli.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.Compression.Brotli.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.Compression.FileSystem.wasm",
@@ -1306,7 +1306,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.Compression.FileSystem.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.Compression.FileSystem.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.Compression.ZipFile.wasm",
@@ -1325,7 +1325,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.Compression.ZipFile.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.Compression.ZipFile.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.Compression.wasm",
@@ -1344,7 +1344,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.Compression.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.Compression.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.FileSystem.AccessControl.wasm",
@@ -1363,7 +1363,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.FileSystem.AccessControl.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.FileSystem.AccessControl.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.FileSystem.DriveInfo.wasm",
@@ -1382,7 +1382,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.FileSystem.DriveInfo.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.FileSystem.DriveInfo.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.FileSystem.Primitives.wasm",
@@ -1401,7 +1401,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.FileSystem.Primitives.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.FileSystem.Primitives.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.FileSystem.Watcher.wasm",
@@ -1420,7 +1420,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.FileSystem.Watcher.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.FileSystem.Watcher.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.FileSystem.wasm",
@@ -1439,7 +1439,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.FileSystem.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.FileSystem.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.IsolatedStorage.wasm",
@@ -1458,7 +1458,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.IsolatedStorage.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.IsolatedStorage.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.MemoryMappedFiles.wasm",
@@ -1477,7 +1477,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.MemoryMappedFiles.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.MemoryMappedFiles.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.Pipelines.wasm",
@@ -1496,7 +1496,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.Pipelines.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.Pipelines.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.Pipes.AccessControl.wasm",
@@ -1515,7 +1515,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.Pipes.AccessControl.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.Pipes.AccessControl.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.Pipes.wasm",
@@ -1534,7 +1534,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.Pipes.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.Pipes.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.UnmanagedMemoryStream.wasm",
@@ -1553,7 +1553,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.UnmanagedMemoryStream.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.UnmanagedMemoryStream.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.IO.wasm",
@@ -1572,7 +1572,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.IO.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.IO.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Linq.Expressions.wasm",
@@ -1591,7 +1591,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Linq.Expressions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Linq.Expressions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Linq.Parallel.wasm",
@@ -1610,7 +1610,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Linq.Parallel.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Linq.Parallel.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Linq.Queryable.wasm",
@@ -1629,7 +1629,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Linq.Queryable.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Linq.Queryable.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Linq.wasm",
@@ -1648,7 +1648,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Linq.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Linq.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Memory.wasm",
@@ -1667,7 +1667,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Memory.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Memory.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.Http.Json.wasm",
@@ -1686,7 +1686,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.Http.Json.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.Http.Json.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.Http.wasm",
@@ -1705,7 +1705,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.Http.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.Http.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.HttpListener.wasm",
@@ -1724,7 +1724,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.HttpListener.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.HttpListener.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.Mail.wasm",
@@ -1743,7 +1743,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.Mail.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.Mail.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.NameResolution.wasm",
@@ -1762,7 +1762,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.NameResolution.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.NameResolution.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.NetworkInformation.wasm",
@@ -1781,7 +1781,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.NetworkInformation.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.NetworkInformation.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.Ping.wasm",
@@ -1800,7 +1800,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.Ping.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.Ping.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.Primitives.wasm",
@@ -1819,7 +1819,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.Primitives.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.Primitives.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.Quic.wasm",
@@ -1838,7 +1838,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.Quic.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.Quic.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.Requests.wasm",
@@ -1857,7 +1857,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.Requests.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.Requests.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.Security.wasm",
@@ -1876,7 +1876,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.Security.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.Security.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.ServicePoint.wasm",
@@ -1895,7 +1895,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.ServicePoint.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.ServicePoint.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.Sockets.wasm",
@@ -1914,7 +1914,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.Sockets.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.Sockets.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.WebClient.wasm",
@@ -1933,7 +1933,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.WebClient.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.WebClient.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.WebHeaderCollection.wasm",
@@ -1952,7 +1952,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.WebHeaderCollection.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.WebHeaderCollection.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.WebProxy.wasm",
@@ -1971,7 +1971,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.WebProxy.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.WebProxy.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.WebSockets.Client.wasm",
@@ -1990,7 +1990,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.WebSockets.Client.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.WebSockets.Client.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.WebSockets.wasm",
@@ -2009,7 +2009,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.WebSockets.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.WebSockets.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Net.wasm",
@@ -2028,7 +2028,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Net.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Net.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Numerics.Vectors.wasm",
@@ -2047,7 +2047,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Numerics.Vectors.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Numerics.Vectors.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Numerics.wasm",
@@ -2066,7 +2066,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Numerics.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Numerics.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.ObjectModel.wasm",
@@ -2085,7 +2085,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.ObjectModel.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.ObjectModel.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Private.CoreLib.wasm",
@@ -2104,7 +2104,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Private.CoreLib.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Private.CoreLib.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Private.DataContractSerialization.wasm",
@@ -2123,7 +2123,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Private.DataContractSerialization.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Private.DataContractSerialization.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Private.Uri.wasm",
@@ -2142,7 +2142,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Private.Uri.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Private.Uri.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Private.Xml.Linq.wasm",
@@ -2161,7 +2161,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Private.Xml.Linq.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Private.Xml.Linq.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Private.Xml.wasm",
@@ -2180,7 +2180,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Private.Xml.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Private.Xml.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Reflection.DispatchProxy.wasm",
@@ -2199,7 +2199,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Reflection.DispatchProxy.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Reflection.DispatchProxy.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Reflection.Emit.ILGeneration.wasm",
@@ -2218,7 +2218,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Reflection.Emit.ILGeneration.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Reflection.Emit.ILGeneration.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Reflection.Emit.Lightweight.wasm",
@@ -2237,7 +2237,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Reflection.Emit.Lightweight.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Reflection.Emit.Lightweight.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Reflection.Emit.wasm",
@@ -2256,7 +2256,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Reflection.Emit.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Reflection.Emit.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Reflection.Extensions.wasm",
@@ -2275,7 +2275,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Reflection.Extensions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Reflection.Extensions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Reflection.Metadata.wasm",
@@ -2294,7 +2294,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Reflection.Metadata.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Reflection.Metadata.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Reflection.Primitives.wasm",
@@ -2313,7 +2313,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Reflection.Primitives.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Reflection.Primitives.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Reflection.TypeExtensions.wasm",
@@ -2332,7 +2332,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Reflection.TypeExtensions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Reflection.TypeExtensions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Reflection.wasm",
@@ -2351,7 +2351,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Reflection.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Reflection.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Resources.Reader.wasm",
@@ -2370,7 +2370,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Resources.Reader.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Resources.Reader.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Resources.ResourceManager.wasm",
@@ -2389,7 +2389,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Resources.ResourceManager.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Resources.ResourceManager.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Resources.Writer.wasm",
@@ -2408,7 +2408,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Resources.Writer.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Resources.Writer.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.CompilerServices.Unsafe.wasm",
@@ -2427,7 +2427,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.CompilerServices.Unsafe.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.CompilerServices.Unsafe.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.CompilerServices.VisualC.wasm",
@@ -2446,7 +2446,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.CompilerServices.VisualC.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.CompilerServices.VisualC.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.Extensions.wasm",
@@ -2465,7 +2465,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Extensions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Extensions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.Handles.wasm",
@@ -2484,7 +2484,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Handles.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Handles.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.InteropServices.JavaScript.wasm",
@@ -2503,7 +2503,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.InteropServices.JavaScript.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.InteropServices.JavaScript.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.InteropServices.RuntimeInformation.wasm",
@@ -2522,7 +2522,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.InteropServices.RuntimeInformation.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.InteropServices.RuntimeInformation.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.InteropServices.wasm",
@@ -2541,7 +2541,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.InteropServices.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.InteropServices.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.Intrinsics.wasm",
@@ -2560,7 +2560,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Intrinsics.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Intrinsics.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.Loader.wasm",
@@ -2579,7 +2579,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Loader.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Loader.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.Numerics.wasm",
@@ -2598,7 +2598,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Numerics.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Numerics.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.Serialization.Formatters.wasm",
@@ -2617,7 +2617,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Serialization.Formatters.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Serialization.Formatters.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.Serialization.Json.wasm",
@@ -2636,7 +2636,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Serialization.Json.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Serialization.Json.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.Serialization.Primitives.wasm",
@@ -2655,7 +2655,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Serialization.Primitives.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Serialization.Primitives.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.Serialization.Xml.wasm",
@@ -2674,7 +2674,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Serialization.Xml.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Serialization.Xml.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.Serialization.wasm",
@@ -2693,7 +2693,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Serialization.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.Serialization.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Runtime.wasm",
@@ -2712,7 +2712,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Runtime.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Runtime.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Security.AccessControl.wasm",
@@ -2731,7 +2731,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Security.AccessControl.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Security.AccessControl.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Security.Claims.wasm",
@@ -2750,7 +2750,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Security.Claims.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Security.Claims.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Security.Cryptography.Algorithms.wasm",
@@ -2769,7 +2769,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.Algorithms.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.Algorithms.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Security.Cryptography.Cng.wasm",
@@ -2788,7 +2788,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.Cng.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.Cng.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Security.Cryptography.Csp.wasm",
@@ -2807,7 +2807,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.Csp.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.Csp.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Security.Cryptography.Encoding.wasm",
@@ -2826,7 +2826,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.Encoding.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.Encoding.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Security.Cryptography.OpenSsl.wasm",
@@ -2845,7 +2845,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.OpenSsl.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.OpenSsl.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Security.Cryptography.Primitives.wasm",
@@ -2864,7 +2864,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.Primitives.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.Primitives.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Security.Cryptography.X509Certificates.wasm",
@@ -2883,7 +2883,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.X509Certificates.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.X509Certificates.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Security.Cryptography.wasm",
@@ -2902,7 +2902,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Security.Cryptography.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Security.Principal.Windows.wasm",
@@ -2921,7 +2921,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Security.Principal.Windows.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Security.Principal.Windows.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Security.Principal.wasm",
@@ -2940,7 +2940,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Security.Principal.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Security.Principal.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Security.SecureString.wasm",
@@ -2959,7 +2959,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Security.SecureString.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Security.SecureString.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Security.wasm",
@@ -2978,7 +2978,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Security.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Security.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.ServiceModel.Web.wasm",
@@ -2997,7 +2997,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.ServiceModel.Web.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.ServiceModel.Web.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.ServiceProcess.wasm",
@@ -3016,7 +3016,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.ServiceProcess.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.ServiceProcess.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Text.Encoding.CodePages.wasm",
@@ -3035,7 +3035,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Text.Encoding.CodePages.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Text.Encoding.CodePages.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Text.Encoding.Extensions.wasm",
@@ -3054,7 +3054,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Text.Encoding.Extensions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Text.Encoding.Extensions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Text.Encoding.wasm",
@@ -3073,7 +3073,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Text.Encoding.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Text.Encoding.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Text.Encodings.Web.wasm",
@@ -3092,7 +3092,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Text.Encodings.Web.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Text.Encodings.Web.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Text.Json.wasm",
@@ -3111,7 +3111,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Text.Json.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Text.Json.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Text.RegularExpressions.wasm",
@@ -3130,7 +3130,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Text.RegularExpressions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Text.RegularExpressions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Threading.Channels.wasm",
@@ -3149,7 +3149,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Threading.Channels.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Threading.Channels.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Threading.Overlapped.wasm",
@@ -3168,7 +3168,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Threading.Overlapped.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Threading.Overlapped.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Threading.Tasks.Dataflow.wasm",
@@ -3187,7 +3187,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Threading.Tasks.Dataflow.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Threading.Tasks.Dataflow.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Threading.Tasks.Extensions.wasm",
@@ -3206,7 +3206,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Threading.Tasks.Extensions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Threading.Tasks.Extensions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Threading.Tasks.Parallel.wasm",
@@ -3225,7 +3225,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Threading.Tasks.Parallel.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Threading.Tasks.Parallel.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Threading.Tasks.wasm",
@@ -3244,7 +3244,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Threading.Tasks.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Threading.Tasks.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Threading.Thread.wasm",
@@ -3263,7 +3263,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Threading.Thread.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Threading.Thread.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Threading.ThreadPool.wasm",
@@ -3282,7 +3282,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Threading.ThreadPool.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Threading.ThreadPool.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Threading.Timer.wasm",
@@ -3301,7 +3301,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Threading.Timer.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Threading.Timer.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Threading.wasm",
@@ -3320,7 +3320,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Threading.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Threading.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Transactions.Local.wasm",
@@ -3339,7 +3339,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Transactions.Local.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Transactions.Local.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Transactions.wasm",
@@ -3358,7 +3358,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Transactions.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Transactions.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.ValueTuple.wasm",
@@ -3377,7 +3377,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.ValueTuple.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.ValueTuple.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Web.HttpUtility.wasm",
@@ -3396,7 +3396,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Web.HttpUtility.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Web.HttpUtility.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Web.wasm",
@@ -3415,7 +3415,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Web.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Web.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Windows.wasm",
@@ -3434,7 +3434,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Windows.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Windows.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Xml.Linq.wasm",
@@ -3453,7 +3453,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Xml.Linq.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Xml.Linq.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Xml.ReaderWriter.wasm",
@@ -3472,7 +3472,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Xml.ReaderWriter.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Xml.ReaderWriter.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Xml.Serialization.wasm",
@@ -3491,7 +3491,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Xml.Serialization.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Xml.Serialization.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Xml.XDocument.wasm",
@@ -3510,7 +3510,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Xml.XDocument.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Xml.XDocument.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Xml.XPath.XDocument.wasm",
@@ -3529,7 +3529,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Xml.XPath.XDocument.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Xml.XPath.XDocument.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Xml.XPath.wasm",
@@ -3548,7 +3548,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Xml.XPath.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Xml.XPath.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Xml.XmlDocument.wasm",
@@ -3567,7 +3567,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Xml.XmlDocument.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Xml.XmlDocument.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Xml.XmlSerializer.wasm",
@@ -3586,7 +3586,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Xml.XmlSerializer.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Xml.XmlSerializer.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.Xml.wasm",
@@ -3605,7 +3605,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.Xml.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.Xml.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\System.wasm",
@@ -3624,7 +3624,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\System.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\System.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\WindowsBase.wasm",
@@ -3643,7 +3643,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\WindowsBase.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\WindowsBase.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\blazor.boot.json",
@@ -3871,7 +3871,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\mscorlib.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\mscorlib.wasm"
     },
     {
       "Identity": "${ProjectPath}\\bin\\Debug\\${Tfm}\\wwwroot\\_framework\\netstandard.wasm",
@@ -3890,7 +3890,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\netstandard.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\netstandard.wasm"
     },
     {
       "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\_framework\\Microsoft.AspNetCore.Authorization.wasm.gz",

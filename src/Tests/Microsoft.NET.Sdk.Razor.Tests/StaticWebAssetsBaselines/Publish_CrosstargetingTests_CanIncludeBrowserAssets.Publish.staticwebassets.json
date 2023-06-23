@@ -356,7 +356,7 @@
       "AssetTraitValue": "br",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\RazorComponentAppMultitarget.wasm.br"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\RazorComponentAppMultitarget.wasm.br"
     },
     {
       "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\RazorComponentAppMultitarget.wasm.gz",
@@ -375,7 +375,7 @@
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\RazorComponentAppMultitarget.wasm.gz"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\RazorComponentAppMultitarget.wasm.gz"
     },
     {
       "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Private.CoreLib.wasm.br",
@@ -394,7 +394,7 @@
       "AssetTraitValue": "br",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\System.Private.CoreLib.wasm.br"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\System.Private.CoreLib.wasm.br"
     },
     {
       "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Private.CoreLib.wasm.gz",
@@ -413,7 +413,7 @@
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\System.Private.CoreLib.wasm.gz"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\System.Private.CoreLib.wasm.gz"
     },
     {
       "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.InteropServices.JavaScript.wasm.br",
@@ -432,7 +432,7 @@
       "AssetTraitValue": "br",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\System.Runtime.InteropServices.JavaScript.wasm.br"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\System.Runtime.InteropServices.JavaScript.wasm.br"
     },
     {
       "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.InteropServices.JavaScript.wasm.gz",
@@ -451,7 +451,7 @@
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\System.Runtime.InteropServices.JavaScript.wasm.gz"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\System.Runtime.InteropServices.JavaScript.wasm.gz"
     },
     {
       "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.wasm.br",
@@ -470,7 +470,7 @@
       "AssetTraitValue": "br",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\System.Runtime.wasm.br"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\System.Runtime.wasm.br"
     },
     {
       "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\System.Runtime.wasm.gz",
@@ -489,7 +489,7 @@
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\System.Runtime.wasm.gz"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\_framework\\System.Runtime.wasm.gz"
     },
     {
       "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\compressed\\publish\\_framework\\blazor.boot.json.br",
@@ -831,7 +831,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\publish\\RazorComponentAppMultitarget.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\RazorComponentAppMultitarget.wasm"
     },
     {
       "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\System.Private.CoreLib.wasm",
@@ -850,7 +850,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\publish\\System.Private.CoreLib.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\System.Private.CoreLib.wasm"
     },
     {
       "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\System.Runtime.InteropServices.JavaScript.wasm",
@@ -869,7 +869,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\publish\\System.Runtime.InteropServices.JavaScript.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\System.Runtime.InteropServices.JavaScript.wasm"
     },
     {
       "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\System.Runtime.wasm",
@@ -888,7 +888,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "obj\\Debug\\${Tfm}\\webcil\\publish\\System.Runtime.wasm"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\webcil\\publish\\System.Runtime.wasm"
     },
     {
       "Identity": "${ProjectPath}\\wwwroot\\test.js",
