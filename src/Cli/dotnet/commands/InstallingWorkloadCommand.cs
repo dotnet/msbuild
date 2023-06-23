@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Workloads.Workload
                 DotnetPath = dotnetDir,
                 UserProfileDir = userProfileDir,
                 GlobalJsonStartDir = null,
-                VersionFromOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.VersionOption),
+                SdkVersionFromOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.VersionOption),
                 VersionForTesting = version,
                 CheckIfFeatureBandManifestExists = !(_printDownloadLinkOnly),    // don't check for manifest existence when print download link is passed
                 WorkloadResolverForTesting = workloadResolver,

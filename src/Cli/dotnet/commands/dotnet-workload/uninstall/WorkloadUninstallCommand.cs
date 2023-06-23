@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Uninstall
                 DotnetPath = dotnetDir,
                 UserProfileDir = userProfileDir,
                 GlobalJsonStartDir = null,
-                VersionFromOption = parseResult.GetValueForOption(WorkloadUninstallCommandParser.VersionOption),
+                SdkVersionFromOption = parseResult.GetValueForOption(WorkloadUninstallCommandParser.VersionOption),
                 VersionForTesting = version,
                 CheckIfFeatureBandManifestExists = true,
                 WorkloadResolverForTesting = workloadResolver,
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Uninstall
             _sdkVersion = creationResult.SdkVersion;
 
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(Reporter, sdkFeatureBand, workloadResolver, Verbosity, userProfileDir, VerifySignatures, PackageDownloader, creationResult.DotnetPath);
+            _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(Reporter, sdkFeatureBand, creationResult.WorkloadResolver, Verbosity, creationResult.UserProfileDir, VerifySignatures, PackageDownloader, creationResult.DotnetPath);
         }
 
         public override int Execute()

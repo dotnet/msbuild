@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
                 DotnetPath = dotnetDir,
                 UserProfileDir = userProfileDir,
                 GlobalJsonStartDir = null,
-                VersionFromOption = parseResult.GetValueForOption(WorkloadRepairCommandParser.VersionOption),
+                SdkVersionFromOption = parseResult.GetValueForOption(WorkloadRepairCommandParser.VersionOption),
                 VersionForTesting = version,
                 CheckIfFeatureBandManifestExists = true,
                 WorkloadResolverForTesting = workloadResolver,
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
 
             _workloadInstaller = workloadInstaller ??
                                  WorkloadInstallerFactory.GetWorkloadInstaller(Reporter, sdkFeatureBand,
-                                     _workloadResolver, Verbosity, userProfileDir, VerifySignatures, PackageDownloader, dotnetDir, TempDirectoryPath,
+                                     _workloadResolver, Verbosity, creationResult.UserProfileDir, VerifySignatures, PackageDownloader, dotnetDir, TempDirectoryPath,
                                      _packageSourceLocation, _parseResult.ToRestoreActionConfig());
         }
 

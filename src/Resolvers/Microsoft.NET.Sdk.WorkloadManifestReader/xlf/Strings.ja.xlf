@@ -133,8 +133,8 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
-        <source>Workload version {0}, which was specified in {1}, was not found</source>
-        <target state="new">Workload version {0}, which was specified in {1}, was not found</target>
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="new">Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</target>
         <note />
       </trans-unit>
     </body>

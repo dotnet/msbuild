@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             public string DotnetPath { get; set; }
             public string UserProfileDir { get; set; }
             public string GlobalJsonStartDir { get; set; }
-            public string VersionFromOption { get; set; }
+            public string SdkVersionFromOption { get; set; }
             public string VersionForTesting { get; set; }
             public bool CheckIfFeatureBandManifestExists { get; set; }
             public IWorkloadResolver WorkloadResolverForTesting { get; set; }
@@ -48,14 +48,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             result.InstalledSdkVersion = new ReleaseVersion(parameters.VersionForTesting ?? Product.Version);
 
             bool manifestsNeedValidation;
-            if (string.IsNullOrEmpty(parameters.VersionFromOption))
+            if (string.IsNullOrEmpty(parameters.SdkVersionFromOption))
             {
                 result.SdkVersion = result.InstalledSdkVersion;
                 manifestsNeedValidation = false;
             }
             else
             {
-                result.SdkVersion = new ReleaseVersion(parameters.VersionFromOption);
+                result.SdkVersion = new ReleaseVersion(parameters.SdkVersionFromOption);
                 manifestsNeedValidation = true;
             }
 
@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
                 catch
                 {
-                    throw new GracefulException(string.Format(LocalizableStrings.IncompatibleManifests, parameters.VersionFromOption), isUserError: false);
+                    throw new GracefulException(string.Format(LocalizableStrings.IncompatibleManifests, parameters.SdkVersionFromOption), isUserError: false);
                 }
             }
 

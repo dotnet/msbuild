@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
                 DotnetPath = null,
                 UserProfileDir = userProfileDir,
                 GlobalJsonStartDir = null,
-                VersionFromOption = result.GetValueForOption(WorkloadSearchCommandParser.VersionOption),
+                SdkVersionFromOption = result.GetValueForOption(WorkloadSearchCommandParser.VersionOption),
                 VersionForTesting = version,
                 CheckIfFeatureBandManifestExists = true,
                 WorkloadResolverForTesting = workloadResolver,
