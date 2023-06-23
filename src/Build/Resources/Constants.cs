@@ -366,7 +366,16 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.RuntimeInformation", runtimeInformationType);
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.OSPlatform", osPlatformType);
 #if NET5_0_OR_GREATER
-                        availableStaticMethods.TryAdd("System.OperatingSystem", new Tuple<string, Type>(null, typeof(OperatingSystem)));
+                        var operatingSystemType = new Tuple<string, Type>(null, typeof(OperatingSystem));
+                        availableStaticMethods.TryAdd("System.OperatingSystem::IsOSPlatform", operatingSystemType);
+                        availableStaticMethods.TryAdd("System.OperatingSystem::IsOSPlatformVersionAtLeast", operatingSystemType);
+                        availableStaticMethods.TryAdd("System.OperatingSystem::IsLinux", operatingSystemType);
+                        availableStaticMethods.TryAdd("System.OperatingSystem::IsFreeBSD", operatingSystemType);
+                        availableStaticMethods.TryAdd("System.OperatingSystem::IsFreeBSDVersionAtLeast", operatingSystemType);
+                        availableStaticMethods.TryAdd("System.OperatingSystem::IsMacOS", operatingSystemType);
+                        availableStaticMethods.TryAdd("System.OperatingSystem::IsMacOSVersionAtLeast", operatingSystemType);
+                        availableStaticMethods.TryAdd("System.OperatingSystem::IsWindows", operatingSystemType);
+                        availableStaticMethods.TryAdd("System.OperatingSystem::IsWindowsVersionAtLeast", operatingSystemType);
 #else
                         // Add alternate type for System.OperatingSystem static methods which aren't available on .NET Framework.
                         var operatingSystemType = new Tuple<string, Type>("Microsoft.Build.Framework.OperatingSystem, Microsoft.Build.Framework, Version=" + MSBuildConstants.CurrentAssemblyVersion + ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", null);
