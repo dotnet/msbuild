@@ -41,7 +41,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         }
 
         // this is a compat wrapper so the source matches the system.text.json impl
-        private ref struct Utf8JsonStreamReader
+        internal ref struct Utf8JsonStreamReader
         {
             public Utf8JsonStreamReader(JsonTextReader reader)
             {

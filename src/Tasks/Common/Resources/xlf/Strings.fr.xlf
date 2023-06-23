@@ -13,9 +13,9 @@
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AotNotSupported">
-        <source>NETSDK1195: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
-        <target state="translated">NETSDK1195: Le Kit de développement logiciel (SDK) ne prend pas en charge la compilation anticipée. Définissez la propriété PublishAot sur false.</target>
-        <note>{StrBegin="NETSDK1195: "}</note>
+        <source>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
+        <target state="translated">NETSDK1196: le SDK ne prend pas en charge la compilation à l’avance. Définissez la propriété PublishAot sur false.</target>
+        <note>{StrBegin="NETSDK1196: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
@@ -99,7 +99,7 @@
       </trans-unit>
       <trans-unit id="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework">
         <source>NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</source>
-        <target state="new">NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</target>
+        <target state="translated">NETSDK1205: le package Microsoft.Net.Compilers.Toolset.Framework ne doit pas être défini directement. Définissez la propriété ’BuildWithNetFrameworkHostedCompiler’ sur « true » à la place si vous en avez besoin.</target>
         <note>{StrBegin="NETSDK1205: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</note>
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
@@ -929,6 +929,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1139: The target platform identifier {0} was not recognized.</source>
         <target state="translated">NETSDK1139: L'identificateur de la plateforme cible {0} n'a pas été reconnu.</target>
         <note>{StrBegin="NETSDK1139: "}</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">
+        <source>NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</source>
+        <target state="new">NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</target>
+        <note>{StrBegin="NETSDK1208: "}</note>
       </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
         <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>

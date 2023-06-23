@@ -21,7 +21,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
             "netstandard",
             "System",
             "Microsoft.CodeAnalysis",
-            "Microsoft.AspNetCore.Razor.Language",
+            "Microsoft.AspNetCore.Razor",
         };
 
         private readonly ExtensionAssemblyLoader _loader;

@@ -106,7 +106,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
 
         SdkDirectoryWorkloadManifestProvider CreateManifestProvider()
         {
-            return new(TestContext.Current.ToolsetUnderTest.DotNetRoot, TestContext.Current.ToolsetUnderTest.SdkVersion, userProfileDir: null);
+            return new(TestContext.Current.ToolsetUnderTest.DotNetRoot, TestContext.Current.ToolsetUnderTest.SdkVersion, userProfileDir: null, globalJsonPath: null);
         }
 
         public IEnumerable<WorkloadManifest> GetManifests(SdkDirectoryWorkloadManifestProvider? manifestProvider = null)

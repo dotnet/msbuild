@@ -40,22 +40,33 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
             string userProfileDir = null)
             : base(parseResult, reporter: reporter, nugetPackageDownloader: nugetPackageDownloader)
         {
-            _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
-            userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(WorkloadRepairCommandParser.VersionOption), version, _dotnetPath, userProfileDir, true);
-
             var configOption = parseResult.GetValueForOption(WorkloadRepairCommandParser.ConfigOption);
             var sourceOption = parseResult.GetValueForOption(WorkloadRepairCommandParser.SourceOption);
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
 
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString(), userProfileDir);
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, _sdkVersion.ToString(), userProfileDir);
+            var creationParameters = new WorkloadResolverFactory.CreationParameters()
+            {
+                DotnetPath = dotnetDir,
+                UserProfileDir = userProfileDir,
+                GlobalJsonStartDir = null,
+                SdkVersionFromOption = parseResult.GetValueForOption(WorkloadRepairCommandParser.VersionOption),
+                VersionForTesting = version,
+                CheckIfFeatureBandManifestExists = true,
+                WorkloadResolverForTesting = workloadResolver,
+                UseInstalledSdkVersionForResolver = false
+            };
+
+            var creationResult = WorkloadResolverFactory.Create(creationParameters);
+
+            _dotnetPath = creationResult.DotnetPath;
+            _sdkVersion = creationResult.SdkVersion;
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            
+            _workloadResolver = creationResult.WorkloadResolver;
+
             _workloadInstaller = workloadInstaller ??
                                  WorkloadInstallerFactory.GetWorkloadInstaller(Reporter, sdkFeatureBand,
-                                     _workloadResolver, Verbosity, userProfileDir, VerifySignatures, PackageDownloader, dotnetDir, TempDirectoryPath,
+                                     _workloadResolver, Verbosity, creationResult.UserProfileDir, VerifySignatures, PackageDownloader, dotnetDir, TempDirectoryPath,
                                      _packageSourceLocation, _parseResult.ToRestoreActionConfig());
         }
 

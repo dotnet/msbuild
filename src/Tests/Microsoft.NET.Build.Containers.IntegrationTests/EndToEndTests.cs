@@ -2,26 +2,28 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Runtime.CompilerServices;
-using Xunit;
-using Xunit.Abstractions;
+using System.Xml.Linq;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Build.Containers.UnitTests;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Microsoft.DotNet.Cli.Utils;
-using System.IO;
-using System.Xml.Linq;
+using Xunit;
+using Xunit.Abstractions;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
 
 [Collection("Docker tests")]
-public class EndToEndTests
+public class EndToEndTests : IDisposable
 {
     private ITestOutputHelper _testOutput;
+    private readonly TestLoggerFactory _loggerFactory;
 
     public EndToEndTests(ITestOutputHelper testOutput)
     {
         _testOutput = testOutput;
+        _loggerFactory = new TestLoggerFactory(testOutput);
     }
 
     public static string NewImageName([CallerMemberName] string callerMemberName = "")
@@ -35,14 +37,20 @@ public class EndToEndTests
         return callerMemberName;
     }
 
+    public void Dispose()
+    {
+        _loggerFactory.Dispose();
+    }
+
     [DockerDaemonAvailableFact]
     public async Task ApiEndToEndWithRegistryPushAndPull()
     {
+        ILogger logger = _loggerFactory.CreateLogger(nameof(ApiEndToEndWithRegistryPushAndPull));
         string publishDirectory = BuildLocalApp();
 
         // Build the image
 
-        Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.LocalRegistry));
+        Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.LocalRegistry), logger);
 
         ImageBuilder imageBuilder = await registry.GetImageManifestAsync(
             DockerRegistryManager.BaseImage,
@@ -81,11 +89,12 @@ public class EndToEndTests
     [DockerDaemonAvailableFact]
     public async Task ApiEndToEndWithLocalLoad()
     {
+        ILogger logger = _loggerFactory.CreateLogger(nameof(ApiEndToEndWithLocalLoad));
         string publishDirectory = BuildLocalApp();
 
         // Build the image
 
-        Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.LocalRegistry));
+        Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.LocalRegistry), logger);
 
         ImageBuilder imageBuilder = await registry.GetImageManifestAsync(
             DockerRegistryManager.BaseImage,
@@ -107,7 +116,7 @@ public class EndToEndTests
         var sourceReference = new ImageReference(registry, DockerRegistryManager.BaseImage, DockerRegistryManager.Net6ImageTag);
         var destinationReference = new ImageReference(registry, NewImageName(), "latest");
 
-        await new LocalDocker(Console.WriteLine).LoadAsync(builtImage, sourceReference, destinationReference, default).ConfigureAwait(false);
+        await new LocalDocker(logger).LoadAsync(builtImage, sourceReference, destinationReference, default).ConfigureAwait(false);
 
         // Run the image
         new RunExeCommand(_testOutput, "docker", "run", "--rm", "--tty", $"{NewImageName()}:latest")
@@ -397,10 +406,11 @@ public class EndToEndTests
     [DockerDaemonAvailableTheory]
     public async Task CanPackageForAllSupportedContainerRIDs(string dockerPlatform, string rid, string workingDir)
     {
+        ILogger logger = _loggerFactory.CreateLogger(nameof(CanPackageForAllSupportedContainerRIDs));
         string publishDirectory = BuildLocalApp(tfm: ToolsetInfo.CurrentTargetFramework, rid: rid);
 
         // Build the image
-        Registry registry = new(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.BaseImageSource));
+        Registry registry = new(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.BaseImageSource), logger);
 
         ImageBuilder? imageBuilder = await registry.GetImageManifestAsync(
             DockerRegistryManager.BaseImage,
@@ -423,7 +433,7 @@ public class EndToEndTests
         // Load the image into the local Docker daemon
         var sourceReference = new ImageReference(registry, DockerRegistryManager.BaseImage, DockerRegistryManager.Net7ImageTag);
         var destinationReference = new ImageReference(registry, NewImageName(), rid);
-        await new LocalDocker(Console.WriteLine).LoadAsync(builtImage, sourceReference, destinationReference, default).ConfigureAwait(false);
+        await new LocalDocker(logger).LoadAsync(builtImage, sourceReference, destinationReference, default).ConfigureAwait(false);
 
         // Run the image
         new RunExeCommand(
