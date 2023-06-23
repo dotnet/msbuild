@@ -307,6 +307,7 @@ namespace Microsoft.Build.Execution
             _nextUnnamedProjectId = 1;
             _componentFactories = new BuildComponentFactoryCollection(this);
             _componentFactories.RegisterDefaultFactories();
+            SerializationContractInitializer.Initialize();
             _projectStartedEvents = new Dictionary<int, BuildEventArgs>();
 
             _projectStartedEventHandler = OnProjectStarted;

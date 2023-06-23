@@ -598,7 +598,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Per node read buffers
             /// </summary>
-            private SharedReadBuffer _sharedReadBuffer;
+            private BinaryReaderFactory _binaryReaderFactory;
 
             /// <summary>
             /// Constructor.
@@ -616,7 +616,7 @@ namespace Microsoft.Build.BackEnd
                 _readBufferMemoryStream = new MemoryStream();
                 _writeBufferMemoryStream = new MemoryStream();
                 _terminateDelegate = terminateDelegate;
-                _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
+                _binaryReaderFactory = InterningBinaryReader.CreateSharedBuffer();
             }
 
             /// <summary>
@@ -982,7 +982,7 @@ namespace Microsoft.Build.BackEnd
                     // Since the buffer is publicly visible dispose right away to discourage outsiders from holding a reference to it.
                     using (var packetStream = new MemoryStream(packetData, 0, packetLength, /*writeable*/ false, /*bufferIsPubliclyVisible*/ true))
                     {
-                        ITranslator readTranslator = BinaryTranslator.GetReadTranslator(packetStream, _sharedReadBuffer);
+                        ITranslator readTranslator = BinaryTranslator.GetReadTranslator(packetStream, _binaryReaderFactory);
                         _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, readTranslator);
                     }
                 }

@@ -43,7 +43,7 @@
     <PackageVersion Include="System.Runtime" Version="4.3.1" />
     <PackageVersion Update="System.Runtime" Condition="'$(SystemRuntimeVersion)' != ''" Version="$(SystemRuntimeVersion)" />
 
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="7.0.0" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="7.0.2" />
     <PackageVersion Update="System.Security.Cryptography.Pkcs" Condition="'$(SystemSecurityCryptographyPkcsVersion)' != ''" Version="$(SystemSecurityCryptographyPkcsVersion)" />
 
     <PackageVersion Include="System.Security.Cryptography.Xml" Version="7.0.1" />

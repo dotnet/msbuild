@@ -8,10 +8,10 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.BuildException;
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Framework.FileAccess;
 #endif
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -25,14 +25,16 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal static class BinaryTranslator
     {
+#nullable enable
         /// <summary>
         /// Returns a read-only serializer.
         /// </summary>
         /// <returns>The serializer.</returns>
-        internal static ITranslator GetReadTranslator(Stream stream, SharedReadBuffer buffer)
+        internal static ITranslator GetReadTranslator(Stream stream, BinaryReaderFactory buffer)
         {
             return new BinaryReadTranslator(stream, buffer);
         }
+#nullable disable
 
         /// <summary>
         /// Returns a write-only serializer.
@@ -59,14 +61,16 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private BinaryReader _reader;
 
+#nullable enable
             /// <summary>
             /// Constructs a serializer from the specified stream, operating in the designated mode.
             /// </summary>
-            public BinaryReadTranslator(Stream packetStream, SharedReadBuffer buffer)
+            public BinaryReadTranslator(Stream packetStream, BinaryReaderFactory buffer)
             {
                 _packetStream = packetStream;
-                _reader = InterningBinaryReader.Create(packetStream, buffer);
+                _reader = buffer.Create(packetStream);
             }
+#nullable disable
 
             /// <summary>
             /// Delegates the Dispose call the to the underlying BinaryReader.
@@ -91,7 +95,7 @@ namespace Microsoft.Build.BackEnd
             {
                 get
                 {
-                    ErrorUtilities.ThrowInternalError("Cannot get writer from reader.");
+                    EscapeHatches.ThrowInternalError("Cannot get writer from reader.");
                     return null;
                 }
             }
@@ -560,7 +564,18 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateException(ref Exception value)
             {
-                TranslateDotNet<Exception>(ref value);
+                if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
+                {
+                    TranslateDotNet<Exception>(ref value);
+                    return;
+                }
+
+                if (!TranslateNullable(value))
+                {
+                    return;
+                }
+
+                value = BuildExceptionBase.ReadExceptionFromTranslator(this);
             }
 
 
@@ -844,7 +859,7 @@ namespace Microsoft.Build.BackEnd
             {
                 get
                 {
-                    ErrorUtilities.ThrowInternalError("Cannot get reader from writer.");
+                    EscapeHatches.ThrowInternalError("Cannot get reader from writer.");
                     return null;
                 }
             }
@@ -1240,7 +1255,18 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateException(ref Exception value)
             {
-                TranslateDotNet<Exception>(ref value);
+                if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
+                {
+                    TranslateDotNet<Exception>(ref value);
+                    return;
+                }
+
+                if (!TranslateNullable(value))
+                {
+                    return;
+                }
+
+                BuildExceptionBase.WriteExceptionToTranslator(this, value);
             }
 
             /// <summary>

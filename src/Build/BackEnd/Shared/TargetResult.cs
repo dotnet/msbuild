@@ -327,7 +327,7 @@ namespace Microsoft.Build.Execution
                 ErrorUtilities.VerifyThrow(buffer != null, "Unexpected null items buffer during translation.");
 
                 using MemoryStream itemsStream = new MemoryStream(buffer, 0, buffer.Length, writable: false, publiclyVisible: true);
-                using var itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, null);
+                using var itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, InterningBinaryReader.PoolingBuffer);
                 _items = new TaskItem[itemsCount];
                 for (int i = 0; i < _items.Length; i++)
                 {
@@ -355,7 +355,7 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), null);
+                return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), InterningBinaryReader.PoolingBuffer);
             }
         }
 
