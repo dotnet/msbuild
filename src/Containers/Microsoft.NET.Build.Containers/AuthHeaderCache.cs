@@ -51,7 +51,7 @@ internal static class AuthHeaderCache
             }
             else
             {
-                finalUri = finalUri = finalUri.Substring(0, index + end.Length);
+                finalUri = finalUri.Substring(0, index + end.Length);
                 break;
             }
         }
