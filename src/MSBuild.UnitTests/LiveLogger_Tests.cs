@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
 
         private VerifySettings _settings = new();
 
-        private static Regex s_elapsedTime = new($@"\(\d+{Regex.Escape(CultureInfo.CurrentUICulture.NumberFormat.NumberDecimalSeparator)}\ds\)", RegexOptions.Compiled);
+        private static Regex s_elapsedTime = new($@"\d+{Regex.Escape(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)}\ds", RegexOptions.Compiled);
 
         public LiveLogger_Tests()
         {
@@ -56,7 +56,7 @@ namespace Microsoft.Build.UnitTests
             {
                 string line = lineBuilder.ToString();
                 lineBuilder.Clear();
-                lineBuilder.Append(s_elapsedTime.Replace(line, "(0.0s)"));
+                lineBuilder.Append(s_elapsedTime.Replace(line, "0.0s"));
             });
         }
 
@@ -245,5 +245,45 @@ namespace Microsoft.Build.UnitTests
         }
 
         #endregion
+
+        [Fact]
+        public void DisplayNodesShowsCurrent()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, async () =>
+            {
+                _liveLogger.DisplayNodes();
+
+                await Verify(_outputWriter.ToString(), _settings);
+            });
+        }
+
+        [Fact]
+        public async Task DisplayNodesOverwritesWithNewTargetFramework()
+        {
+            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+
+            ProjectStartedEventArgs pse = MakeProjectStartedEventArgs(_projectFile, "Build");
+            pse.GlobalProperties = new Dictionary<string, string>() { ["TargetFramework"] = "tfName" };
+
+            ProjectStarted?.Invoke(_eventSender, pse);
+
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build"));
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "Task"));
+
+            _liveLogger.DisplayNodes();
+
+            // This is a bit fast and loose with the events that would be fired
+            // in a real "stop building that TF for the project and start building
+            // a new TF of the same project" situation, but it's enough now.
+            ProjectStartedEventArgs pse2 = MakeProjectStartedEventArgs(_projectFile, "Build");
+            pse2.GlobalProperties = new Dictionary<string, string>() { ["TargetFramework"] = "tf2" };
+
+            ProjectStarted?.Invoke(_eventSender, pse2);
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build"));
+
+            _liveLogger.DisplayNodes();
+
+            await Verify(_outputWriter.ToString(), _settings);
+        }
     }
 }
