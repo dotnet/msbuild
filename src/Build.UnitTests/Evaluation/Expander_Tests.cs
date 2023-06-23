@@ -2827,20 +2827,140 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Theory]
-        [InlineData("windows", 4)]
-        [InlineData("windows", 999)]
-        [InlineData("linux", 0)]
-        [InlineData("macos", 10)]
-        [InlineData("macos", 999)]
-        [InlineData("osx", 0)]
-        public void IsOSPlatformVersionAtLeast(string platform, int major)
+        [InlineData("windows", 4, 0, 0, 0)]
+        [InlineData("windows", 999, 0, 0, 0)]
+        [InlineData("linux", 0, 0, 0, 0)]
+        [InlineData("macos", 10, 15, 0, 0)]
+        [InlineData("macos", 999, 0, 0, 0)]
+        [InlineData("osx", 0, 0, 0, 0)]
+        public void IsOSPlatformVersionAtLeast(string platform, int major, int minor, int build, int revision)
         {
-            string propertyFunction = $"$([System.OperatingSystem]::IsOSPlatformVersionAtLeast('{platform}', {major}, 0, 0, 0))";
+            string propertyFunction = $"$([System.OperatingSystem]::IsOSPlatformVersionAtLeast('{platform}', {major}, {minor}, {build}, {revision}))";
             bool result = false;
 #if NET5_0_OR_GREATER
-            result = System.OperatingSystem.IsOSPlatformVersionAtLeast(platform, major, 0, 0, 0);
+            result = System.OperatingSystem.IsOSPlatformVersionAtLeast(platform, major, minor, build, revision);
 #else
-            result = Microsoft.Build.Framework.OperatingSystem.IsOSPlatformVersionAtLeast(platform, major, 0, 0, 0);
+            result = Microsoft.Build.Framework.OperatingSystem.IsOSPlatformVersionAtLeast(platform, major, minor, build, revision);
+#endif
+            string expected = result ? "True" : "False";
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expected);
+        }
+
+        [Fact]
+        public void IsLinux()
+        {
+            string propertyFunction = $"$([System.OperatingSystem]::IsLinux())";
+            bool result = false;
+#if NET5_0_OR_GREATER
+            result = System.OperatingSystem.IsLinux();
+#else
+            result = Microsoft.Build.Framework.OperatingSystem.IsLinux();
+#endif
+            string expected = result ? "True" : "False";
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expected);
+        }
+
+        [Fact]
+        public void IsFreeBSD()
+        {
+            string propertyFunction = $"$([System.OperatingSystem]::IsFreeBSD())";
+            bool result = false;
+#if NET5_0_OR_GREATER
+            result = System.OperatingSystem.IsFreeBSD();
+#else
+            result = Microsoft.Build.Framework.OperatingSystem.IsFreeBSD();
+#endif
+            string expected = result ? "True" : "False";
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expected);
+        }
+
+        [Theory]
+        [InlineData(0, 0, 0, 0)]
+        [InlineData(999, 0, 0, 0)]
+        public void IsFreeBSDVersionAtLeast(int major, int minor, int build, int revision)
+        {
+            string propertyFunction = $"$([System.OperatingSystem]::IsFreeBSDVersionAtLeast({major}, {minor}, {build}, {revision}))";
+            bool result = false;
+#if NET5_0_OR_GREATER
+            result = System.OperatingSystem.IsFreeBSDVersionAtLeast(major, minor, build, revision);
+#else
+            result = Microsoft.Build.Framework.OperatingSystem.IsFreeBSDVersionAtLeast(major, minor, build, revision);
+#endif
+            string expected = result ? "True" : "False";
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expected);
+        }
+
+        [Fact]
+        public void IsMacOS()
+        {
+            string propertyFunction = $"$([System.OperatingSystem]::IsMacOS())";
+            bool result = false;
+#if NET5_0_OR_GREATER
+            result = System.OperatingSystem.IsMacOS();
+#else
+            result = Microsoft.Build.Framework.OperatingSystem.IsMacOS();
+#endif
+            string expected = result ? "True" : "False";
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expected);
+        }
+
+        [Theory]
+        [InlineData(0, 0, 0)]
+        [InlineData(10, 15, 0)]
+        [InlineData(999, 0, 0)]
+        public void IsMacOSVersionAtLeast(int major, int minor, int build)
+        {
+            string propertyFunction = $"$([System.OperatingSystem]::IsMacOSVersionAtLeast({major}, {minor}, {build}))";
+            bool result = false;
+#if NET5_0_OR_GREATER
+            result = System.OperatingSystem.IsMacOSVersionAtLeast(major, minor, build);
+#else
+            result = Microsoft.Build.Framework.OperatingSystem.IsMacOSVersionAtLeast(major, minor, build);
+#endif
+            string expected = result ? "True" : "False";
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expected);
+        }
+
+        [Fact]
+        public void IsWindows()
+        {
+            string propertyFunction = $"$([System.OperatingSystem]::IsWindows())";
+            bool result = false;
+#if NET5_0_OR_GREATER
+            result = System.OperatingSystem.IsWindows();
+#else
+            result = Microsoft.Build.Framework.OperatingSystem.IsWindows();
+#endif
+            string expected = result ? "True" : "False";
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expected);
+        }
+
+        [Theory]
+        [InlineData(0, 0, 0, 0)]
+        [InlineData(4, 0, 0, 0)]
+        [InlineData(999, 0, 0, 0)]
+        public void IsWindowsVersionAtLeast(int major, int minor, int build, int revision)
+        {
+            string propertyFunction = $"$([System.OperatingSystem]::IsWindowsVersionAtLeast({major}, {minor}, {build}, {revision}))";
+            bool result = false;
+#if NET5_0_OR_GREATER
+            result = System.OperatingSystem.IsWindowsVersionAtLeast(major, minor, build, revision);
+#else
+            result = Microsoft.Build.Framework.OperatingSystem.IsWindowsVersionAtLeast(major, minor, build, revision);
 #endif
             string expected = result ? "True" : "False";
             var pg = new PropertyDictionary<ProjectPropertyInstance>();
