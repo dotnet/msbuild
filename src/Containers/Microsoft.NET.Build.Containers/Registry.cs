@@ -471,15 +471,18 @@ internal sealed class Registry
         if (s_ForceChunkedUploadEnabled)
         {
             //the chunked upload was forced in configuration
+            _logger.LogTrace("Chunked upload is forced in configuration, attempting to upload blob in chunks. Content length: {0}.", contents.Length);
             return UploadBlobChunkedAsync(repository, digest, contents, client, uploadUri, cancellationToken);
         }
 
         try
         {
+            _logger.LogTrace("Attempting to upload whole blob, content length: {0}.", contents.Length);
             return UploadBlobWholeAsync(repository, digest, contents, client, uploadUri, cancellationToken);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogTrace("Errored while uploading whole blob: {0}.\nRetrying with chunked upload. Content length: {1}.", ex, contents.Length);
             contents.Seek(0, SeekOrigin.Begin);
             return UploadBlobChunkedAsync(repository, digest, contents, client, uploadUri, cancellationToken);
         }
