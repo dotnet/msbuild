@@ -30,8 +30,6 @@ namespace Microsoft.Build.Framework
 
         public static bool IsMacOS() => false;
 
-        public static bool IsOSXLike() => false;
-
         public static bool IsMacOSVersionAtLeast(int major, int minor = 0, int build = 0) => false;
 
         public static bool IsWindows() => true;

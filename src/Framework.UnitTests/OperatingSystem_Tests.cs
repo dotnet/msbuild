@@ -51,7 +51,6 @@ namespace Microsoft.Build.Framework.UnitTests
             Microsoft.Build.Framework.OperatingSystem.IsLinux().ShouldBeFalse();
             Microsoft.Build.Framework.OperatingSystem.IsMacOS().ShouldBeFalse();
             Microsoft.Build.Framework.OperatingSystem.IsMacOSVersionAtLeast(0).ShouldBeFalse();
-            Microsoft.Build.Framework.OperatingSystem.IsOSXLike().ShouldBeFalse();
         }
 #endif
     }
