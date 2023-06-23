@@ -38,7 +38,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return ReadLocalizationCatalog(ref localizationReader);
         }
 
-        private ref struct Utf8JsonStreamReader
+        internal ref struct Utf8JsonStreamReader
         {
             static ReadOnlySpan<byte> utf8Bom => new byte[] { 0xEF, 0xBB, 0xBF };
 

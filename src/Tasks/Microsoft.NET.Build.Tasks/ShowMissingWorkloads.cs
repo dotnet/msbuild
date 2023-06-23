@@ -43,7 +43,12 @@ namespace Microsoft.NET.Build.Tasks
             if (MissingWorkloadPacks.Any())
             {
                 string? userProfileDir = CliFolderPathCalculatorCore.GetDotnetUserProfileFolderPath();
-                var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(NetCoreRoot, NETCoreSdkVersion, userProfileDir);
+
+                //  When running MSBuild tasks, the current directory is always the project directory, so we can use that as the
+                //  starting point to search for global.json
+                string globalJsonPath = SdkDirectoryWorkloadManifestProvider.GetGlobalJsonPath(Environment.CurrentDirectory);
+
+                var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(NetCoreRoot, NETCoreSdkVersion, userProfileDir, globalJsonPath);
                 var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, NetCoreRoot, NETCoreSdkVersion, userProfileDir);
 
                 var suggestedWorkloads = workloadResolver.GetWorkloadSuggestionForMissingPacks(

@@ -13,7 +13,7 @@ using Microsoft.NET.Sdk.Localization;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    public class SdkDirectoryWorkloadManifestProvider : IWorkloadManifestProvider
+    public partial class SdkDirectoryWorkloadManifestProvider : IWorkloadManifestProvider
     {
         private const string WorkloadSetsFolderName = "workloadsets";
 
@@ -26,13 +26,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         private readonly WorkloadSet? _workloadSet;
 
-        public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, string? userProfileDir, string? requestedWorkloadSet = null)
-            : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable, userProfileDir, requestedWorkloadSet)
+        public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, string? userProfileDir, string? globalJsonPath)
+            : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable, userProfileDir, globalJsonPath)
         {
-
         }
 
-        internal SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, Func<string, string?> getEnvironmentVariable, string? userProfileDir, string? requestedWorkloadSet = null)
+        internal SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, Func<string, string?> getEnvironmentVariable, string? userProfileDir, string? globalJsonPath = null)
         {
             if (string.IsNullOrWhiteSpace(sdkVersion))
             {
@@ -91,14 +90,20 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _manifestRoots = _manifestRoots ?? Array.Empty<string>();
 
             var availableWorkloadSets = GetAvailableWorkloadSets();
-            if (requestedWorkloadSet != null)
+
+            if (globalJsonPath != null)
             {
-                if (!availableWorkloadSets.TryGetValue(requestedWorkloadSet, out _workloadSet))
+                string? globalJsonWorkloadSetVersion = GlobalJsonReader.GetWorkloadVersionFromGlobalJson(globalJsonPath);
+                if (globalJsonWorkloadSetVersion != null)
                 {
-                    throw new FileNotFoundException(string.Format(Strings.SpecifiedWorkloadSetNotFound, requestedWorkloadSet));
+                    if (!availableWorkloadSets.TryGetValue(globalJsonWorkloadSetVersion, out _workloadSet))
+                    {
+                        throw new FileNotFoundException(string.Format(Strings.WorkloadVersionFromGlobalJsonNotFound, globalJsonWorkloadSetVersion, globalJsonPath));
+                    }
                 }
             }
-            else if (availableWorkloadSets.Any())
+
+            if (_workloadSet == null && availableWorkloadSets.Any())
             {
                 var maxWorkloadSetVersion = availableWorkloadSets.Keys.Select(k => new ReleaseVersion(k)).Max()!;
                 _workloadSet = availableWorkloadSets[maxWorkloadSetVersion.ToString()];
@@ -343,6 +348,21 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         public string GetSdkFeatureBand()
         {
             return _sdkVersionBand.ToString();
+        }
+
+        public static string? GetGlobalJsonPath(string? globalJsonStartDir)
+        {
+            string? directory = globalJsonStartDir;
+            while (directory != null)
+            {
+                string globalJsonPath = Path.Combine(directory, "global.json");
+                if (File.Exists(globalJsonPath))
+                {
+                    return globalJsonPath;
+                }
+                directory = Path.GetDirectoryName(directory);
+            }
+            return null;
         }
     }
 }
