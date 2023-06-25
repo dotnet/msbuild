@@ -1,13 +1,30 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.Extensions.Logging;
 using Microsoft.NET.Build.Containers.UnitTests;
+using Microsoft.NET.TestFramework;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
 
-public class RegistryTests
+public class RegistryTests : IDisposable
 {
+    private ITestOutputHelper _testOutput;
+    private readonly TestLoggerFactory _loggerFactory;
+
+    public RegistryTests(ITestOutputHelper testOutput)
+    {
+        _testOutput = testOutput;
+        _loggerFactory = new TestLoggerFactory(testOutput);
+    }
+
+    public void Dispose()
+    {
+        _loggerFactory.Dispose();
+    }
+
     [InlineData("quay.io/centos/centos")]
     [InlineData("registry.access.redhat.com/ubi8/dotnet-70")]
     [Theory]
@@ -25,7 +42,8 @@ public class RegistryTests
         Assert.NotNull(containerName);
         containerTag ??= "latest";
 
-        Registry registry = new Registry(new Uri($"https://{containerRegistry}"));
+        ILogger logger = _loggerFactory.CreateLogger(nameof(CanReadManifestFromRegistry));
+        Registry registry = new Registry(new Uri($"https://{containerRegistry}"), logger);
 
         var ridgraphfile = ToolsetUtils.GetRuntimeGraphFilePath();
 

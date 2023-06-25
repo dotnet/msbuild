@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.Logging;
 using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers;
@@ -122,7 +123,8 @@ internal sealed class DockerCli : ILocalRegistry
         }
         catch (Exception ex)
         {
-            logger($"Error while reading daemon config: {ex}");
+            _logger.LogInformation(Strings.LocalDocker_FailedToGetConfig, ex.Message);
+            _logger.LogTrace("Full information: {0}", ex);
             return false;
         }
     }
