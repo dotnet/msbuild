@@ -11,10 +11,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
     [Collection(TestConstants.UsesStaticTelemetryState)]
     public class GivenDotnetTestInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
-        private const string ExpectedPrefix =
-            "-maxcpucount -verbosity:m -restore -target:VSTest -nodereuse:false -nologo";
-        private static readonly string WorkingDirectory =
-            TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetTestInvocation));
+        private const string ExpectedPrefix = "-maxcpucount -verbosity:m -restore -target:VSTest -nodereuse:false -nologo";
+        private static readonly string WorkingDirectory = TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetTestInvocation));
 
         [Theory]
         [InlineData(new string[] { "--disable-build-servers" }, "-p:UseRazorBuildServer=false -p:UseSharedCompilation=false /nodeReuse:false -property:VSTestArtifactsProcessingMode=collect -property:VSTestSessionCorrelationId=<testSessionCorrelationId>")]
@@ -30,7 +28,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 var testSessionCorrelationId = "<testSessionCorrelationId>";
                 var msbuildPath = "<msbuildpath>";
-               
+
                 TestCommand.FromArgs(args, testSessionCorrelationId, msbuildPath)
                     .GetArgumentsToMSBuild()
                     .Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
