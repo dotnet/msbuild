@@ -1,7 +1,6 @@
-﻿namespace ClassLib
-{
-    public class TestItem1
-    {
+﻿namespace ClassLib;
 
-    }
+public class TestItem1
+{
+
 }
