@@ -22,8 +22,9 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "-p", "prop1=true", "-p", "prop2=false" }, new string[] { "-p:prop1=true", "-p:prop2=false" })]
         [InlineData(new string[] { "-p:prop1=true;prop2=false" }, new string[] { "-p:prop1=true;prop2=false" })]
         [InlineData(new string[] { "-p", "MyProject.csproj", "-p:prop1=true" }, new string[] { "-p:prop1=true" })]
-        [InlineData(new string[] { "--property", "MyProject.csproj", "-p:prop1=true" }, // The longhand --property option should never be treated as a project
-            new string[] { "-p:MyProject.csproj", "-p:prop1=true" })]
+        // The longhand --property option should never be treated as a project
+        [InlineData(new string[] { "--property", "MyProject.csproj", "-p:prop1=true" }, new string[] { "-p:MyProject.csproj", "-p:prop1=true" })]
+        [InlineData(new string[] { "--disable-build-servers" }, new string[] { "-p:UseRazorBuildServer=false", "-p:UseSharedCompilation=false", "/nodeReuse:false" })]
         public void MsbuildInvocationIsCorrect(string[] args, string[] expectedArgs)
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>

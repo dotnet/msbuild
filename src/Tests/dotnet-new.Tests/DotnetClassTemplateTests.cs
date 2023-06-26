@@ -45,6 +45,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("enum", "10", "net6.0")]
         [InlineData("enum", "", "net7.0")]
         [InlineData("enum", "9.0", "netstandard2.0")]
+        [InlineData("enum", "", "netstandard2.0")]
         public async void DotnetCSharpClassTemplatesTest(
             string templateShortName,
             string langVersion = "",
@@ -89,7 +90,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                        content
                        .UnixifyNewlines()
                        .ScrubAndReplace(
-                           "Warning: Failed to evaluate bind symbol \'langVersion\', it will be skipped.",
+                           "Warning: Failed to evaluate bind symbol \'evaluatedLangVersion\', it will be skipped.",
                            string.Empty);
 
                        content.ScrubAndReplace("\n", string.Empty);
@@ -169,7 +170,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                        content
                        .UnixifyNewlines()
                        .ScrubAndReplace(
-                           "Warning: Failed to evaluate bind symbol \'langVersion\', it will be skipped.",
+                           "Warning: Failed to evaluate bind symbol \'evaluatedLangVersion\', it will be skipped.",
                            string.Empty);
 
                        content.ScrubAndReplace("\n", string.Empty);

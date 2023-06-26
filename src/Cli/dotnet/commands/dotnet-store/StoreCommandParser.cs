@@ -88,7 +88,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
             command.AddOption(CommonOptions.RuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
             command.AddOption(CommonOptions.VerbosityOption);
-			command.AddOption(CommonOptions.CurrentRuntimeOption(LocalizableStrings.CurrentRuntimeOptionDescription));
+            command.AddOption(CommonOptions.CurrentRuntimeOption(LocalizableStrings.CurrentRuntimeOptionDescription));
+            command.AddOption(CommonOptions.DisableBuildServersOption);
 
             command.SetHandler(StoreCommand.Run);
 
