@@ -1,0 +1,81 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.StaticWebAssets.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project ToolsVersion="14.0">
+
+  <UsingTask
+    TaskName="Microsoft.AspNetCore.StaticWebAssets.Tasks.ResolveStaticWebAssetsEmbeddedProjectConfiguration"
+    AssemblyFile="$(StaticWebAssetsSdkBuildTasksAssembly)"
+    Condition="'$(StaticWebAssetsSdkBuildTasksAssembly)' != ''" />
+
+  <Target Name="GetStaticWebAssetsCrossTargetingProjectConfiguration"
+    DependsOnTargets="_ComputeTargetFrameworkItems"
+    Returns="@(StaticWebAssetsCrossTargetingProjectConfiguration)">
+    <MSBuild Projects="@(_InnerBuildProjects)"
+             Condition="'@(_InnerBuildProjects)' != '' "
+             Targets="ResolveStaticWebAssetsEmbeddingRules;GetStaticWebAssetsCrosstargetingProjectConfiguration"
+             SkipNonexistentTargets="true"
+             BuildInParallel="$(BuildInParallel)">
+      <Output ItemName="_ResolvedConfigurationOutputs" TaskParameter="TargetOutputs" />
+    </MSBuild>
+
+    <ItemGroup>
+      <StaticWebAssetsEmbeddedConfiguration
+        Include="@(_ResolvedConfigurationOutputs)"
+        Condition="'%(MSBuildSourceTargetName)' == 'ResolveStaticWebAssetsEmbeddingRules'" RemoveMetadata="MSBuildSourceTargetName" />
+
+      <StaticWebAssetsCrossTargetingProjectConfiguration
+        Include="@(_ResolvedConfigurationOutputs)"
+        Condition="'%(MSBuildSourceTargetName)' == 'GetStaticWebAssetsCrosstargetingProjectConfiguration'" RemoveMetadata="MSBuildSourceTargetName" />
+    </ItemGroup>
+
+  </Target>
+
+  <Target Name="StaticWebAssetsUpdateCrossTargetingBuildProjects"
+    DependsOnTargets="GetStaticWebAssetsCrossTargetingProjectConfiguration"
+    BeforeTargets="DispatchToInnerBuilds">
+
+      <!-- Break down the target framework into its components. We do it here because we can't do it inside the task without
+        referencing additional dlls, which is painful.
+      -->
+      <ItemGroup>
+        <_ExtendedStaticWebAssetsCrossTargetingProjectConfiguration Include="@(StaticWebAssetsCrossTargetingProjectConfiguration)">
+          <TargetFrameworkIdentifier>$([MSBuild]::GetTargetFrameworkIdentifier('%(StaticWebAssetsCrossTargetingProjectConfiguration.TargetFramework)'))</TargetFrameworkIdentifier>
+          <TargetFrameworkVersion>$([MSBuild]::GetTargetFrameworkVersion('%(StaticWebAssetsCrossTargetingProjectConfiguration.TargetFramework)'))</TargetFrameworkVersion>
+          <Platform>$([MSBuild]::GetTargetPlatformIdentifier('%(StaticWebAssetsCrossTargetingProjectConfiguration.TargetFramework)'))</Platform>
+          <PlatformVersion>$([MSBuild]::GetTargetPlatformVersion('%(StaticWebAssetsCrossTargetingProjectConfiguration.TargetFramework)'))</PlatformVersion>
+        </_ExtendedStaticWebAssetsCrossTargetingProjectConfiguration>
+
+        <_StaticWebAssetsTargetFrameworks Include="%(_ExtendedStaticWebAssetsCrossTargetingProjectConfiguration.TargetFramework)" />
+      </ItemGroup>
+
+      <!-- Evaluate the embedding rules for this target framework. -->
+      <ResolveStaticWebAssetsEmbeddedProjectConfiguration
+        Condition="'@(_ExtendedStaticWebAssetsCrossTargetingProjectConfiguration)' != ''"
+        StaticWebAssetProjectConfiguration="@(_ExtendedStaticWebAssetsCrossTargetingProjectConfiguration)"
+        EmbeddingConfiguration="@(StaticWebAssetsEmbeddedConfiguration)"
+        TargetFrameworks="@(_StaticWebAssetsTargetFrameworks)"
+        CrossTargetingBuildConfigurations="@(_InnerBuildProjects)">
+
+        <Output TaskParameter="FilteredCrossTargetingBuildConfigurations" ItemName="_FilteredConfigurations" />
+      </ResolveStaticWebAssetsEmbeddedProjectConfiguration>
+
+      <ItemGroup Condition="'@(_ExtendedStaticWebAssetsCrossTargetingProjectConfiguration)' != ''">
+        <_InnerBuildProjects Remove="@(_InnerBuildProjects)" />
+        <_InnerBuildProjects Include="@(_FilteredConfigurations)" />
+      </ItemGroup>
+
+  </Target>
+
+  <Import Project="Microsoft.NET.Sdk.StaticWebAssets.Pack.CrossTargeting.targets" />
+
+</Project>

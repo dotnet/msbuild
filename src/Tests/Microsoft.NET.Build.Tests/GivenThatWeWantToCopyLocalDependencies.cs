@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -35,15 +35,15 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
-             var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager
+               .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testProjectInstance);
 
@@ -53,13 +53,12 @@ namespace Microsoft.NET.Build.Tests
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
 
-            var expectedFiles = new []
+            var expectedFiles = new[]
             {
                 $"{ProjectName}{Constants.ExeSuffix}",
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
                 $"{ProjectName}.pdb",
-                $"{ProjectName}.runtimeconfig.dev.json",
                 $"{ProjectName}.runtimeconfig.json",
                 "Newtonsoft.Json.dll",
                 "runtimes/linux-x64/native/libsqlite3.so",
@@ -79,7 +78,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -87,8 +86,8 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
-             var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager
+               .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testProjectInstance);
 
@@ -100,7 +99,6 @@ namespace Microsoft.NET.Build.Tests
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
                 $"{ProjectName}.pdb",
-                $"{ProjectName}.runtimeconfig.dev.json",
                 $"{ProjectName}.runtimeconfig.json",
             });
         }
@@ -110,12 +108,12 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "TestProjWithPackageDependencies";
 
-            var rid = EnvironmentInfo.GetCompatibleRid("netcoreapp3.0");
+            var rid = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework);
 
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -124,8 +122,8 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
-             var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager
+               .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testProjectInstance);
 
@@ -140,7 +138,6 @@ namespace Microsoft.NET.Build.Tests
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
                 $"{ProjectName}.pdb",
-                $"{ProjectName}.runtimeconfig.dev.json",
                 $"{ProjectName}.runtimeconfig.json",
                 "Newtonsoft.Json.dll",
                 // NOTE: this may break in the future when the SDK supports platforms that sqlite does not
@@ -156,15 +153,15 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = false
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
-             var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager
+               .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testProjectInstance);
 
@@ -188,7 +185,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = false
             };
 
@@ -196,8 +193,8 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
-             var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager
+               .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testProjectInstance);
 
@@ -232,8 +229,8 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
-             var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager
+               .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testProjectInstance);
 
@@ -265,8 +262,8 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
-             var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager
+               .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testProjectInstance);
 
@@ -301,8 +298,8 @@ namespace Microsoft.NET.Build.Tests
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
-             var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager
+               .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testProjectInstance);
 
@@ -323,21 +320,22 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "TestProjWithPackageDependencies";
 
-            var rid = EnvironmentInfo.GetCompatibleRid("netcoreapp3.0");
+            var rid = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework);
 
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
-                IsExe = true
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+                SelfContained = "true"
             };
 
             testProject.AdditionalProperties.Add("RuntimeIdentifier", rid);
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
-             var testProjectInstance = _testAssetsManager
-                .CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager
+               .CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testProjectInstance);
 
@@ -352,7 +350,6 @@ namespace Microsoft.NET.Build.Tests
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
                 $"{ProjectName}.pdb",
-                $"{ProjectName}.runtimeconfig.dev.json",
                 $"{ProjectName}.runtimeconfig.json",
                 "Newtonsoft.Json.dll",
                 // NOTE: this may break in the future when the SDK supports platforms that sqlite does not

@@ -1,7 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Linq;
 using FluentAssertions;
@@ -26,7 +27,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool restore --tool-manifest folder/my-manifest.format");
 
-            result.GetValueForOption<string>(ToolRestoreCommandParser.ToolManifestOption).Should().Be("folder/my-manifest.format");
+            result.GetValue<string>(ToolRestoreCommandParser.ToolManifestOption).Should().Be("folder/my-manifest.format");
         }
 
         [Fact]
@@ -36,7 +37,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
                 Parser.Instance.Parse(
                     @"dotnet tool restore --configfile C:\TestAssetLocalNugetFeed");
 
-            result.GetValueForOption<string>(ToolRestoreCommandParser.ConfigOption).Should().Be(@"C:\TestAssetLocalNugetFeed");
+            result.GetValue<string>(ToolRestoreCommandParser.ConfigOption).Should().Be(@"C:\TestAssetLocalNugetFeed");
         }
 
         [Fact]
@@ -47,7 +48,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse($"dotnet tool restore --add-source {expectedSourceValue}");
 
-            result.GetValueForOption<string[]>(ToolRestoreCommandParser.AddSourceOption).First().Should().Be(expectedSourceValue);
+            result.GetValue<string[]>(ToolRestoreCommandParser.AddSourceOption).First().Should().Be(expectedSourceValue);
         }
 
         [Fact]
@@ -62,8 +63,8 @@ namespace Microsoft.DotNet.Tests.ParserTests
                     $"--add-source {expectedSourceValue1} " +
                     $"--add-source {expectedSourceValue2}");
 
-            result.GetValueForOption<string[]>(ToolRestoreCommandParser.AddSourceOption)[0].Should().Be(expectedSourceValue1);
-            result.GetValueForOption<string[]>(ToolRestoreCommandParser.AddSourceOption)[1].Should().Be(expectedSourceValue2);
+            result.GetValue<string[]>(ToolRestoreCommandParser.AddSourceOption)[0].Should().Be(expectedSourceValue1);
+            result.GetValue<string[]>(ToolRestoreCommandParser.AddSourceOption)[1].Should().Be(expectedSourceValue2);
         }
 
         [Fact]
@@ -73,7 +74,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             var result = Parser.Instance.Parse($"dotnet tool restore --verbosity {expectedVerbosityLevel}");
 
-            Enum.GetName(result.GetValueForOption<VerbosityOptions>(ToolRestoreCommandParser.VerbosityOption)).Should().Be(expectedVerbosityLevel);
+            Enum.GetName(result.GetValue<VerbosityOptions>(ToolRestoreCommandParser.VerbosityOption)).Should().Be(expectedVerbosityLevel);
         }
 
         [Fact]

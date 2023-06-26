@@ -1,0 +1,33 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.SourceLink.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- C++ projects currently do not import Microsoft.NET.Sdk.props. -->
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.SourceLink.props" Condition="'$(_SourceLinkPropsImported)' != 'true'"/>
+
+  <PropertyGroup>
+    <!-- Workaround for https://github.com/Microsoft/msbuild/issues/3294. -->
+    <_SourceLinkSdkSubDir>build</_SourceLinkSdkSubDir>
+    <_SourceLinkSdkSubDir Condition="'$(IsCrossTargetingBuild)' == 'true'">buildMultiTargeting</_SourceLinkSdkSubDir>
+
+    <EmbedUntrackedSources Condition="'$(EmbedUntrackedSources)' == ''">true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.Build.Tasks.Git\build\Microsoft.Build.Tasks.Git.targets"/>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.SourceLink.Common\$(_SourceLinkSdkSubDir)\Microsoft.SourceLink.Common.targets"/>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.SourceLink.GitHub\build\Microsoft.SourceLink.GitHub.targets"/>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.SourceLink.GitLab\build\Microsoft.SourceLink.GitLab.targets"/>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.SourceLink.AzureRepos.Git\build\Microsoft.SourceLink.AzureRepos.Git.targets"/>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.SourceLink.Bitbucket.Git\build\Microsoft.SourceLink.Bitbucket.Git.targets"/>
+
+</Project>

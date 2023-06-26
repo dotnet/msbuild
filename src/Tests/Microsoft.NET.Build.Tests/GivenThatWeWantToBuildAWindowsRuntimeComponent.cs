@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using System.Linq;
@@ -41,7 +41,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testProject = new TestProject("WinMDClasslibrary")
             {
-                TargetFrameworks = "net5.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Windows.Sdk.Contracts", "10.0.18362.2005"));
 
@@ -63,7 +63,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testProject = new TestProject("WinMDClasslibrary")
             {
-                TargetFrameworks = "net5.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Toolkit.Uwp.Notifications", "6.1.1"));
 
@@ -105,7 +105,7 @@ namespace Microsoft.NET.Build.Tests
             var managedWinRTComponent = new TestProject()
             {
                 Name = "ManagedWinRTComponent",
-                TargetFrameworks = "net5.0-windows10.0.19041.0",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-windows10.0.19041.0",
             };
 
             managedWinRTComponent.AdditionalProperties.Add("CsWinRTWindowsMetadata", "10.0.19041.0");
@@ -241,7 +241,6 @@ class Program
             };
 
             consoleApp.ReferencedProjects.Add(projectionProject);
-            consoleApp.PackageReferences.Add(new TestPackageReference("Microsoft.VCRTForwarders.140", "1.0.6"));
 
             //  Workaround for PrivateAssets
             consoleApp.PackageReferences.Add(new TestPackageReference("Microsoft.Windows.CsWinRT", "1.2.3"));

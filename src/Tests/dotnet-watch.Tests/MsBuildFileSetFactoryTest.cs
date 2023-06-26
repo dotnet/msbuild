@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -21,13 +21,13 @@ namespace Microsoft.DotNet.Watcher.Tools
     {
         private readonly IReporter _reporter;
         private readonly TestAssetsManager _testAssets;
-
-        private static string DotNetHostPath => TestContext.Current.ToolsetUnderTest.DotNetHostPath;
+        private readonly string _muxerPath;
 
         public MsBuildFileSetFactoryTest(ITestOutputHelper output)
         {
             _reporter = new TestReporter(output);
             _testAssets = new TestAssetsManager(output);
+            _muxerPath = TestContext.Current.ToolsetUnderTest.DotNetHostPath;
         }
 
         [Fact]
@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             var project = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = "netcoreapp2.1",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             });
 
             project.WithProjectChanges(d => d.Root.Add(XElement.Parse(
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             var project = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = "netcoreapp2.1",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 AdditionalProperties =
                 {
                     ["BaseIntermediateOutputPath"] = "obj",
@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             var project = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = "netcoreapp2.1;net461",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};net462",
                 AdditionalProperties =
                 {
                     ["EnableDefaultCompileItems"] = "false",
@@ -142,9 +142,9 @@ namespace Microsoft.DotNet.Watcher.Tools
             });
 
             project.WithProjectChanges(d => d.Root.Add(XElement.Parse(
-@"<ItemGroup>
-    <Compile Include=""Class1.netcore.cs"" Condition=""'$(TargetFramework)'=='netcoreapp2.1'"" />
-    <Compile Include=""Class1.desktop.cs"" Condition=""'$(TargetFramework)'=='net461'"" />
+$@"<ItemGroup>
+    <Compile Include=""Class1.netcore.cs"" Condition=""'$(TargetFramework)'=='{ToolsetInfo.CurrentTargetFramework}'"" />
+    <Compile Include=""Class1.desktop.cs"" Condition=""'$(TargetFramework)'=='net462'"" />
 </ItemGroup>")));
 
             WriteFile(project, "Class1.netcore.cs");
@@ -252,7 +252,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var project1 = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = "netcoreapp2.1;net461",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};net462",
                 ReferencedProjects = { project2.TestProject, },
             });
 
@@ -287,7 +287,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var project1 = _testAssets.CreateTestProject(new TestProject("Project1")
             {
-                TargetFrameworks = "netcoreapp2.1;net461",
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework};net462",
                 ReferencedProjects = { project2.TestProject, },
             });
 
@@ -310,7 +310,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.All(fileset, f => Assert.False(f.IsStaticFile, $"File {f.FilePath} should not be a static file."));
         }
 
-        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/29213")]
+        [Fact]
         public async Task ProjectReferences_Graph()
         {
             // A->B,F,W(Watch=False)
@@ -328,9 +328,9 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var output = new OutputSink();
             var options = GetWatchOptions();
-            var filesetFactory = new MsBuildFileSetFactory(options, DotNetHostPath, _reporter, projectA, output, waitOnError: false, trace: true);
+            var filesetFactory = new MsBuildFileSetFactory(options, _reporter, _muxerPath, projectA, targetFramework: null, buildProperties: null, output, waitOnError: false, trace: true);
 
-            var fileset = await GetFileSet(filesetFactory);
+            var fileset = await filesetFactory.CreateAsync(CancellationToken.None);
 
             Assert.NotNull(fileset);
 
@@ -363,20 +363,13 @@ namespace Microsoft.DotNet.Watcher.Tools
         private Task<FileSet> GetFileSet(string projectPath)
         {
             DotNetWatchOptions options = GetWatchOptions();
-            return GetFileSet(new MsBuildFileSetFactory(options, DotNetHostPath, _reporter, projectPath, new OutputSink(), waitOnError: false, trace: false));
+            return new MsBuildFileSetFactory(options, _reporter, _muxerPath, projectPath, targetFramework: null, buildProperties: null, new OutputSink(), waitOnError: false, trace: false).CreateAsync(CancellationToken.None);
         }
 
         private static DotNetWatchOptions GetWatchOptions() => 
-            new DotNetWatchOptions(false, false, false, false, false);
+            new DotNetWatchOptions(false, false, false, false, false, TestFlags.None);
 
         private static string GetTestProjectPath(TestAsset target) => Path.Combine(GetTestProjectDirectory(target), target.TestProject.Name + ".csproj");
-
-        private async Task<FileSet> GetFileSet(MsBuildFileSetFactory filesetFactory)
-        {
-            return await filesetFactory
-                .CreateAsync(CancellationToken.None)
-                .TimeoutAfter(TimeSpan.FromSeconds(30));
-        }
 
         private static string WriteFile(TestAsset testAsset, string name, string contents = "")
         {

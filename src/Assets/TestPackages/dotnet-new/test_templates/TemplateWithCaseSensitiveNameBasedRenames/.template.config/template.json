@@ -1,0 +1,25 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithCaseSensitiveNameBasedRenames",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithCaseSensitiveNameBasedRenames",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithCaseSensitiveNameBasedRenames",
+  "shortName": "TestAssets.TemplateWithCaseSensitiveNameBasedRenames",
+  "sourceName": "RenamePart",
+  "primaryOutputs": [
+    {
+      "path": "Norenamepart/FileNorenamepart.txt"
+    },
+    {
+      "path": "Norenamepart/FileYesRenamePart.txt"
+    },
+    {
+      "path": "YesRenamePart/FileNorenamepart.txt"
+    },
+    {
+      "path": "YesRenamePart/FileYesRenamePart.txt"
+    }
+  ]
+}

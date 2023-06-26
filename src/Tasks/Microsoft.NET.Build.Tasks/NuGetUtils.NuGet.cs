@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -83,19 +83,36 @@ namespace Microsoft.NET.Build.Tasks
         public static string GetBestMatchingRid(RuntimeGraph runtimeGraph, string runtimeIdentifier,
             IEnumerable<string> availableRuntimeIdentifiers, out bool wasInGraph)
         {
+            return GetBestMatchingRidWithExclusion(runtimeGraph, runtimeIdentifier,
+                runtimeIdentifiersToExclude: null,
+                availableRuntimeIdentifiers, out wasInGraph);
+        }
+
+        public static string GetBestMatchingRidWithExclusion(RuntimeGraph runtimeGraph, string runtimeIdentifier,
+            IEnumerable<string> runtimeIdentifiersToExclude,
+            IEnumerable<string> availableRuntimeIdentifiers, out bool wasInGraph)
+        {
             wasInGraph = runtimeGraph.Runtimes.ContainsKey(runtimeIdentifier);
 
-            HashSet<string> availableRids = new HashSet<string>(availableRuntimeIdentifiers);
+            string bestMatch = null;
+
+            HashSet<string> availableRids = new HashSet<string>(availableRuntimeIdentifiers, StringComparer.Ordinal);
+            HashSet<string> excludedRids = runtimeIdentifiersToExclude switch { null => null, _ => new HashSet<string>(runtimeIdentifiersToExclude, StringComparer.Ordinal) };
             foreach (var candidateRuntimeIdentifier in runtimeGraph.ExpandRuntime(runtimeIdentifier))
             {
-                if (availableRids.Contains(candidateRuntimeIdentifier))
+                if (bestMatch == null && availableRids.Contains(candidateRuntimeIdentifier))
                 {
-                    return candidateRuntimeIdentifier;
+                    bestMatch = candidateRuntimeIdentifier;
+                }
+
+                if (excludedRids != null && excludedRids.Contains(candidateRuntimeIdentifier))
+                {
+                    //  Don't treat this as a match
+                    return null;
                 }
             }
 
-            //  No compatible RID found in availableRuntimeIdentifiers
-            return null;
+            return bestMatch;
         }
     }
 }

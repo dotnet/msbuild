@@ -1,10 +1,11 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.Tool.Common;
+using Microsoft.DotNet.Tools.Tool.List;
 using Microsoft.DotNet.Tools.Tool.Restore;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.List.LocalizableStrings;
 
@@ -12,6 +13,12 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ToolListCommandParser
     {
+        public static readonly Argument<string> PackageIdArgument = new Argument<string>(LocalizableStrings.PackageIdArgumentName)
+        {
+            Description = LocalizableStrings.PackageIdArgumentDescription,
+            Arity = ArgumentArity.ZeroOrOne,
+        };
+
         public static readonly Option<bool> GlobalOption = ToolAppliedOption.GlobalOption;
 
         public static readonly Option<bool> LocalOption = ToolAppliedOption.LocalOption;
@@ -29,11 +36,12 @@ namespace Microsoft.DotNet.Cli
         {
             var command = new Command("list", LocalizableStrings.CommandDescription);
 
+            command.AddArgument(PackageIdArgument);
             command.AddOption(GlobalOption.WithHelpDescription(command, LocalizableStrings.GlobalOptionDescription));
             command.AddOption(LocalOption.WithHelpDescription(command, LocalizableStrings.LocalOptionDescription));
             command.AddOption(ToolPathOption.WithHelpDescription(command, LocalizableStrings.ToolPathOptionDescription));
 
-            CommandHandler.Create<ParseResult>((parseResult) => new ToolRestoreCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new ToolListCommand(parseResult).Execute());
 
             return command;
         }

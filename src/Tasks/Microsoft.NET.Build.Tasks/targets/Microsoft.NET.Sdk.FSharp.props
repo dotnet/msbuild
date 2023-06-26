@@ -28,8 +28,4 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
   <Import Condition=" '$(UseBundledFSharpTargets)' == 'true' and Exists('$(FSharpPropsShim)') " Project="$(FSharpPropsShim)" />
 
-  <PropertyGroup>
-    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-  </PropertyGroup>
-
 </Project>

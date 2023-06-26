@@ -6,15 +6,15 @@
       "src\\BlazorWasmSdk\\Tool\\Microsoft.NET.Sdk.BlazorWebAssembly.Tool.csproj",
       "src\\Cli\\Microsoft.DotNet.Cli.Utils\\Microsoft.DotNet.Cli.Utils.csproj",
       "src\\Cli\\Microsoft.DotNet.InternalAbstractions\\Microsoft.DotNet.InternalAbstractions.csproj",
-      "src\\RazorSdk\\SourceGenerators\\Microsoft.NET.Sdk.Razor.SourceGenerators.csproj",
       "src\\RazorSdk\\Tasks\\Microsoft.NET.Sdk.Razor.Tasks.csproj",
       "src\\RazorSdk\\Tool\\Microsoft.NET.Sdk.Razor.Tool.csproj",
       "src\\Resolvers\\Microsoft.DotNet.NativeWrapper\\Microsoft.DotNet.NativeWrapper.csproj",
+      "src\\StaticWebAssetsSdk\\Tasks\\Microsoft.NET.Sdk.StaticWebAssets.Tasks.csproj",
       "src\\Tests\\Microsoft.NET.Sdk.BlazorWebAssembly.Tests\\Microsoft.NET.Sdk.BlazorWebAssembly.Tests.csproj",
-      "src\\Tests\\Microsoft.NET.Sdk.Razor.SourceGenerators.Tests\\Microsoft.NET.Sdk.Razor.SourceGenerators.Tests.csproj",
       "src\\Tests\\Microsoft.NET.Sdk.Razor.Tests\\Microsoft.NET.Sdk.Razor.Tests.csproj",
       "src\\Tests\\Microsoft.NET.Sdk.Razor.Tool.Tests\\Microsoft.NET.Sdk.Razor.Tool.Tests.csproj",
-      "src\\Tests\\Microsoft.NET.TestFramework\\Microsoft.NET.TestFramework.csproj"
+      "src\\Tests\\Microsoft.NET.TestFramework\\Microsoft.NET.TestFramework.csproj",
+      "src\\WasmSdk\\Tasks\\Microsoft.NET.Sdk.WebAssembly.Tasks.csproj"
     ]
   }
 }

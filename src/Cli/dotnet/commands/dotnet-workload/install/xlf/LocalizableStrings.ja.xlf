@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="translated">広告マニフェストを更新できませんでした。{0} 向けマニフェスト パッケージが存在しません。</target>
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">広告マニフェストが更新されません。{0} 向けマニフェスト パッケージが存在しません。</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -15,6 +15,16 @@
       <trans-unit id="CacheMissingPackage">
         <source>Package {0} version {1} doesn't exist in offline cache {2}.</source>
         <target state="translated">パッケージ {0} バージョン {1} がオフラインキャッシュ {2} に存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">{0} オプションと {1} オプションを併用することはできません。ロールバック ファイルからインストールする場合、{0} を削除してください。その他の場合には、{1} を削除します</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">更新されたワークロード マニフェストを確認しています。</target>
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
@@ -37,6 +47,11 @@
         <target state="translated">パック {0} のバージョン {1} をオフライン キャッシュ {2} にダウンロードしています...</target>
         <note />
       </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="translated">パッケージ {0} からの MSI に 1 つのマニフェスト機能バンドとマニフェスト フォルダーが必要です</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
         <source>Failed to update the advertising manifest {0}: {1}.</source>
         <target state="translated">広告マニフェスト {0} を更新できませんでした: {1}。</target>
@@ -47,9 +62,9 @@
         <target state="translated">マニフェスト パッケージ {0} をダウンロードできませんでした。</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToGetPackageManifestUrl">
-        <source>Failed to resolve manifest package URL {0}.</source>
-        <target state="translated">マニフェストパッケージ URL {0} を解決できませんでした。</target>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="translated">MSI から情報を抽出できませんでした: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
@@ -112,6 +127,11 @@
         <target state="translated">サーバーを起動するための十分な特権がありません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">ワークロード マニフェスト ID '{0}' のバージョン '{1}' の解析でエラーが発生しました</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">ワークロードの NuGet パッケージ内の設定ファイルが無効です: {0}</target>
@@ -135,6 +155,16 @@
       <trans-unit id="ManifestDoesNotExist">
         <source>No manifest with ID {0} exists.</source>
         <target state="translated">ID を持つ {0} マニフェストが存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="translated">NuGet パッケージ {0} にマニフェスト MSI が見つかりません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageUrlNotResolved">
+        <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
+        <target state="translated">マニフェスト パッケージが解決されていません。{0} のマニフェスト パッケージまたは URL が存在しません。</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
@@ -168,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">コンピューターの再起動が保留中です。インストールは続行されますが、再起動が必要になる場合があります。</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">コンピューターの再起動が保留中です。インストールは続行されますが、再起動が必要になる場合があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">
@@ -184,7 +214,7 @@
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
         <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
-        <target state="new">Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</target>
+        <target state="translated">無効なロールバック定義。ロールバック定義 {0} のマニフェスト ID が、インストール済みのマニフェスト ID {1} と一致しません。</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">
@@ -205,6 +235,11 @@
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="translated">ワークロード マニフェストの更新をスキップします。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="translated">ワークロード パッケージとインストーラーの署名の認証をスキップします。</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
@@ -278,7 +313,7 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
-        <source>Workload '{0}' is already installed.</source>
+        <source>Workload(s) '{0}' are already installed.</source>
         <target state="translated">ワークロード '{0}' は既にインストールされています。</target>
         <note />
       </trans-unit>
@@ -329,7 +364,7 @@
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
         <source>Workload updates are available. Run `dotnet workload list` for more information.</source>
-        <target state="translated">ワークロードの更新が利用可能です。詳細については、`dotnet ワークロード リスト` を実行してください。</target>
+        <target state="translated">ワークロードの更新が利用可能です。詳細については、`dotnet workload list` を実行してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingPackInstallRecordMessage">

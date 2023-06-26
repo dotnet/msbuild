@@ -1,0 +1,15 @@
+﻿Warning: use of 'dotnet new --install' is deprecated. Use 'dotnet new install' instead.
+For more information, run: 
+   dotnet new install -h
+
+The following template packages will be installed:
+   Microsoft.DotNet.Web.ItemTemplates::5.0.0
+
+Success: Microsoft.DotNet.Web.ItemTemplates::5.0.0 installed the following templates:
+Template Name         Short Name      Language  Tags       
+--------------------  --------------  --------  -----------
+MVC ViewImports       viewimports     [C#]      Web/ASP.NET
+MVC ViewStart         viewstart       [C#]      Web/ASP.NET
+Protocol Buffer File  proto                     Web/gRPC   
+Razor Component       razorcomponent  [C#]      Web/ASP.NET
+Razor Page            page            [C#]      Web/ASP.NET

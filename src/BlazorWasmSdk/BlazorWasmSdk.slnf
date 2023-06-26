@@ -4,7 +4,8 @@
     "projects": [
       "src\\BlazorWasmSdk\\Tasks\\Microsoft.NET.Sdk.BlazorWebAssembly.Tasks.csproj",
       "src\\BlazorWasmSdk\\Tool\\Microsoft.NET.Sdk.BlazorWebAssembly.Tool.csproj",
-      "src\\Tests\\Microsoft.NET.Sdk.BlazorWebAssembly.Tests\\Microsoft.NET.Sdk.BlazorWebAssembly.Tests.csproj"
+      "src\\Tests\\Microsoft.NET.Sdk.BlazorWebAssembly.Tests\\Microsoft.NET.Sdk.BlazorWebAssembly.Tests.csproj",
+      "src\\Tests\\Microsoft.NET.Sdk.BlazorWebAssembly.Tests\\Microsoft.NET.Sdk.BlazorWebAssembly.AoT.Tests.csproj"
     ]
   }
 }

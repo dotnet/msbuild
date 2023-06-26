@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.CommandLine;
@@ -72,10 +72,11 @@ namespace Microsoft.DotNet.Cli
             return symbolResult switch
             {
                 CommandResult commandResult => commandResult.Token,
-                OptionResult optionResult => optionResult.Token ??
-                                             new Token($"--{optionResult.Option.Name}", TokenType.Option),
-                ArgumentResult argResult => new Token(argResult.GetValueOrDefault<string>(), TokenType.Argument),
-                _ => null
+                OptionResult optionResult => optionResult.Token is null ?
+                                             new Token($"--{optionResult.Option.Name}", TokenType.Option, optionResult.Option)
+                                             : optionResult.Token,
+                ArgumentResult argResult => new Token(argResult.GetValueOrDefault<string>(), TokenType.Argument, argResult.Argument),
+                _ => default
             };
         }
     }

@@ -1,0 +1,31 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TestAssets.PostActions.AddJsonProperty.WithSourceNameChangeInJson",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.PostActions.AddJsonProperty.WithSourceNameChangeInJson",
+  "precedence": "100",
+  "identity": "TestAssets.PostActions.AddJsonProperty.WithSourceNameChangeInJson",
+  "shortName": "TestAssets.PostActions.AddJsonProperty.WithSourceNameChangeInJson",
+  "sourceName": "MyTestProject",
+  "primaryOutputs": [
+    {
+      "path": "MyTestProject.csproj"
+    }
+  ],
+  "postActions": [
+    {
+      "description": "Modify JSON file",
+      "manualInstructions": [ { "text": "Modify the JSON file manually." } ],
+      "args": {
+        "jsonFileName": "testfile.json",
+        "parentPropertyPath": "moduleConfiguration:edgeAgent:properties.desired:modules",
+        "newJsonPropertyName": "MyTestProject",
+        "newJsonPropertyValue": "${MODULEDIR<../MyTestProject>}"
+      },
+      "applyFileRenamesToArgs": [ "newJsonPropertyName", "newJsonPropertyValue" ],
+      "actionId": "695A3659-EB40-4FF5-A6A6-C9C4E629FCB0",
+      "continueOnError": true
+    }
+  ]
+}

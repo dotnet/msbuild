@@ -16,7 +16,12 @@ namespace ConsoleApplication
             Console.WriteLine("Started");
             // Process ID is insufficient because PID's may be reused.
             Console.WriteLine($"Process identifier = {Process.GetCurrentProcess().Id}, {Process.GetCurrentProcess().StartTime:hh:mm:ss.FF}");
-            Thread.Sleep(Timeout.Infinite);
+
+            while (true)
+            {
+                Lib.Print();
+                Thread.Sleep(250);
+            }
         }
     }
 }

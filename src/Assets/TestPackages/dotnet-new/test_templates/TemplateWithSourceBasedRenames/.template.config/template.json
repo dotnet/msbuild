@@ -1,0 +1,39 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithSourceBasedRenames",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithSourceBasedRenames",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithSourceBasedRenames",
+  "shortName": "TestAssets.TemplateWithSourceBasedRenames",
+  "sourceName": "foo",
+  "sources": [
+    {
+      "rename": {
+        "foo.cs": "bar.cs"
+      }
+    },
+    {
+      "rename": {
+        "foo.cs": "baz.cs"
+      }
+    }
+  ],
+  "symbols": {
+    "barRename": {
+      "type": "parameter",
+      "dataType": "string",
+      "fileRename": "bar"
+    }
+  },
+  "primaryOutputs": [
+    {
+      "path": "bar.cs"
+    },
+    {
+      "path": "baz.cs"
+    }
+  ]
+}
+

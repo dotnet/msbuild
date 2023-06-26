@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved. 
-// Licensed under the MIT license. See LICENSE file in the project root for full license information. 
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -55,6 +55,7 @@ namespace Microsoft.DotNet.Tests
     {
         public CommandResult FirstDotnetNonVerbUseCommandResult;
         public CommandResult FirstDotnetVerbUseCommandResult;
+        public CommandResult FirstDotnetWorkloadInfoResult;
         public DirectoryInfo NugetFallbackFolder;
         public DirectoryInfo DotDotnetFolder;
         public string TestDirectory;
@@ -112,7 +113,7 @@ namespace Microsoft.DotNet.Tests
                 .StartWith(firstTimeNonVerbUseMessage);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ItShowsTheAppropriateMessageToTheUser()
         {
 
@@ -160,7 +161,7 @@ namespace Microsoft.DotNet.Tests
             homeFolder.Should().NotExist();
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ItShowsTheTelemetryNoticeWhenInvokingACommandAfterInternalReportInstallSuccessHasBeenInvoked()
         {
             var dotnetFirstTime = new DotNetFirstTime();

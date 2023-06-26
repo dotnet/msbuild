@@ -17,7 +17,7 @@
   <PropertyGroup>
     <PackageId>testSdkPack</PackageId>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
   </ItemGroup>
@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
+    <Compile Include="$(RepoRoot)src\Common\EnvironmentVariableNames.cs" LinkBase="Common"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -35,6 +36,7 @@
 
     <!-- Use string resources from tasks in order to validate test output. -->
     <EmbeddedResource Include="..\..\Tasks\Common\Resources\Strings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.NET.Build.Tasks" />
+    <EmbeddedResource Include="..\..\Cli\dotnet\CommonLocalizableStrings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.DotNet.Tools" />
   </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />

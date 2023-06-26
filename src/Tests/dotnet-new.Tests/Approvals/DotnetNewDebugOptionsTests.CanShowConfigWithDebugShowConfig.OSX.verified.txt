@@ -1,0 +1,32 @@
+﻿Current configuration:
+ 
+Mount Point Factories                 Type                                                                        Assembly
+%TABLE HEADER DELIMITER%
+94e92610-cf4c-4f6d-aeb6-9e42dde1899d  Microsoft.TemplateEngine.Edge.Mount.Archive.ZipFileMountPointFactory        Microsoft.TemplateEngine.Edge, Version=<version>, Culture=neutral, PublicKeyToken=<token>
+8c19221b-dea3-4250-86fe-2d4e189a11d2  Microsoft.TemplateEngine.Edge.Mount.FileSystem.FileSystemMountPointFactory  Microsoft.TemplateEngine.Edge, Version=<version>, Culture=neutral, PublicKeyToken=<token>
+
+
+Generators                            Type                                                                             Assembly
+%TABLE HEADER DELIMITER%
+0c434df7-e2cb-4dee-b216-d7c58c8eb4b3  Microsoft.TemplateEngine.Orchestrator.RunnableProjects.RunnableProjectGenerator  Microsoft.TemplateEngine.Orchestrator.RunnableProjects, Version=<version>, Culture=neutral, PublicKeyToken=<token>
+
+
+The 'dotnet new' command creates a .NET project based on a template.
+
+Common templates are:
+Template Name         Short Name    Language    Tags               
+%TABLE HEADER DELIMITER%
+ASP.NET Core Web App  webapp,razor  [C#]        Web/MVC/Razor Pages
+Blazor Server App     blazorserver  [C#]        Web/Blazor         
+Class Library         classlib      [C#],F#,VB  Common/Library     
+Console App           console       [C#],F#,VB  Common/Console     
+
+An example would be:
+   dotnet new console
+
+Display template options with:
+   dotnet new console -h
+Display all installed templates with:
+   dotnet new list
+Display templates available on NuGet.org with:
+   dotnet new search web

@@ -4,6 +4,7 @@
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
     <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />

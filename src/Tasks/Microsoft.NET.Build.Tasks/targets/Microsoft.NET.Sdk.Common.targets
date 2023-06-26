@@ -15,7 +15,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <MicrosoftNETBuildTasksDirectoryRoot>$(MSBuildThisFileDirectory)..\tools\</MicrosoftNETBuildTasksDirectoryRoot>
-    <MicrosoftNETBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">net7.0</MicrosoftNETBuildTasksTFM>
+    <MicrosoftNETBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">net8.0</MicrosoftNETBuildTasksTFM>
     <MicrosoftNETBuildTasksTFM Condition=" '$(MicrosoftNETBuildTasksTFM)' == ''">net472</MicrosoftNETBuildTasksTFM>
     <MicrosoftNETBuildTasksDirectory>$(MicrosoftNETBuildTasksDirectoryRoot)$(MicrosoftNETBuildTasksTFM)\</MicrosoftNETBuildTasksDirectory>
     <MicrosoftNETBuildTasksAssembly>$(MicrosoftNETBuildTasksDirectory)Microsoft.NET.Build.Tasks.dll</MicrosoftNETBuildTasksAssembly>
@@ -42,10 +42,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DotnetCliToolTargetFramework>netcoreapp2.2</DotnetCliToolTargetFramework>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <IncludeBuildOutput Condition=" '$(PackAsTool)' == 'true' ">false</IncludeBuildOutput>
-    <PackageType Condition=" '$(PackAsTool)' == 'true' ">DotnetTool</PackageType>
-    <RuntimeIdentifiers Condition=" '$(PackAsTool)' == 'true' ">$(RuntimeIdentifiers);$(PackAsToolShimRuntimeIdentifiers)</RuntimeIdentifiers>
+  <PropertyGroup Condition=" '$(PackAsTool)' == 'true' ">
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <PackageType>DotnetTool</PackageType>
+    <RuntimeIdentifiers>$(RuntimeIdentifiers);$(PackAsToolShimRuntimeIdentifiers)</RuntimeIdentifiers>
+    <RollForward Condition="'$(RollForward)' == ''">Major</RollForward>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(EnablePreviewFeatures)' == 'true' And '$(IsNetCoreAppTargetingLatestTFM)' == 'true'">

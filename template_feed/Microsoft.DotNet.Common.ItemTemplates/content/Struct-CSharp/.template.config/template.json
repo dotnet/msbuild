@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Microsoft",
+  "classifications": [
+    "Common"
+  ],
+  "name": "Struct",
+  "generatorVersions": "[1.0.0.0-*)",
+  "description": "Creates a new C# struct",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  },
+  "groupIdentity": "DotNet.Common.Struct",
+  "precedence": "0",
+  "identity": "DotNet.Common.Struct.CSharp",
+  "shortName": "struct",
+  "sourceName": "Struct1",
+  "preferDefaultName": true,
+  "defaultName": "Struct1",
+  "primaryOutputs": [
+    {
+      "path": "Struct1.cs"
+    }
+  ],
+  "symbols": {
+    "DefaultNamespace": {
+      "type": "bind",
+      "binding": "msbuild:RootNamespace",
+      "replaces": "Company.ClassLibrary1"
+    },
+    "ImplicitUsings": {
+      "type": "bind",
+      "binding": "msbuild:ImplicitUsings",
+      "datatype": "string",
+      "defaultValue": "disable"
+    },
+    "evaluatedLangVersion": {
+      "type": "bind",
+      "binding": "msbuild:LangVersion",
+      "dataType": "string"
+    },
+    "latestLangVersion": {
+      "type": "generated",
+      "generator": "constant",
+      "parameters": {
+        "value": "latest"
+      }
+    },
+    "langVersion": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "evaluatedLangVersion",
+        "fallbackVariableName": "latestLangVersion"
+      }
+    },
+    "csharp9orOlder": {
+      "type": "generated",
+      "generator": "regexMatch",
+      "datatype": "bool",
+      "parameters": {
+        "pattern": "^(ISO-1|ISO-2|[1-7]|[8-9]|[8-9]\\.0|7\\.[0-3])$",
+        "source": "langVersion"
+      }
+    },
+    "csharp10orLater": {
+      "type": "computed",
+      "value": "!csharp9orOlder"
+    },
+    "csharpFeature_FileScopedNamespaces": {
+      "type": "computed",
+      "value": "csharp10orLater == \"true\""
+    }
+  },
+  "constraints": {
+    "csharp-only": {
+      "type": "project-capability",
+      "args": "CSharp"
+    }
+  }
+}

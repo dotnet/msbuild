@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="translated">無法更新廣告資訊清單。資訊清單套件 {0} 不存在。</target>
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">未更新廣告資訊清單。{0} 的資訊清單封裝並不存在。</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -15,6 +15,16 @@
       <trans-unit id="CacheMissingPackage">
         <source>Package {0} version {1} doesn't exist in offline cache {2}.</source>
         <target state="translated">離線快取 {2} 中並沒有套件 {0} 版本 {1}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">無法同時使用 {0} 與 {1} 選項。如果從復原檔案安裝，請移除 {0}。否則，請移除 {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">正在檢查更新的工作負載資訊清單。</target>
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
@@ -37,6 +47,11 @@
         <target state="translated">正在將套件 {0} 版本 {1} 下載到離線快取 {2}…</target>
         <note />
       </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="translated">MSI 中的預期單一資訊清單級區和資訊清單資料夾來自套件 {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
         <source>Failed to update the advertising manifest {0}: {1}.</source>
         <target state="translated">無法更新廣告資訊清單 {0}: {1}。</target>
@@ -47,9 +62,9 @@
         <target state="translated">無法下載資訊清單套件 {0}。</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToGetPackageManifestUrl">
-        <source>Failed to resolve manifest package URL {0}.</source>
-        <target state="translated">無法解析資訊清單套件 URL {0}。</target>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="translated">無法從 MSI 擷取資訊: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
@@ -112,6 +127,11 @@
         <target state="translated">權限不足，無法啟動伺服器。</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">剖析工作負載資訊清單識別碼 '{1}' 的版本 '{0}' 時發生錯誤</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">工作負載的 NuGet 套件設定檔案無效: {0}</target>
@@ -135,6 +155,16 @@
       <trans-unit id="ManifestDoesNotExist">
         <source>No manifest with ID {0} exists.</source>
         <target state="translated">沒有識別碼為 {0} 的資訊清單。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="translated">在 NuGet 套件 {0} 中找不到資訊清單 MSI</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageUrlNotResolved">
+        <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
+        <target state="translated">未解析資訊清單封裝。{0} 的資訊清單套件或 URL 不存在。</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
@@ -168,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">機器有擱置中的重新開機。安裝將繼續，但您可能需要重新開機。</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">機器有擱置中的重新開機。安裝將繼續，但您可能需要重新開機。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">
@@ -184,7 +214,7 @@
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
         <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
-        <target state="new">Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</target>
+        <target state="translated">無效的復原定義。復原定義 {0} 中的資訊清單識別碼不符合已安裝的資訊清單識別碼 {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">
@@ -205,6 +235,11 @@
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="translated">跳過更新工作負載資訊清單。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="translated">略過工作負載套件和安裝程式的簽章驗證。</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
@@ -278,7 +313,7 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
-        <source>Workload '{0}' is already installed.</source>
+        <source>Workload(s) '{0}' are already installed.</source>
         <target state="translated">已安裝工作負載 '{0}'。</target>
         <note />
       </trans-unit>

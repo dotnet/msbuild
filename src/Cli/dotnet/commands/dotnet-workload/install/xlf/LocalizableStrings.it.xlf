@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="it" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="translated">Non è stato possibile aggiornare il manifesto di pubblicità. Il pacchetto del manifesto {0} non esiste.</target>
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">Manifesto della pubblicità non aggiornato. Il pacchetto del manifesto per {0} non esiste.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -15,6 +15,16 @@
       <trans-unit id="CacheMissingPackage">
         <source>Package {0} version {1} doesn't exist in offline cache {2}.</source>
         <target state="translated">Il pacchetto {0}, versione {1}, non esiste nella cache offline {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">Impossibile utilizzare contemporaneamente le opzioni {0} e {1}. Se si esegue l'installazione da un file di rollback, rimuovere {0}. In caso contrario, rimuovere {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">Verifica della disponibilità di manifesti del carico di lavoro aggiornati.</target>
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
@@ -37,6 +47,11 @@
         <target state="translated">Download in corso del pacchetto {0}, versione {1}, nella cache offline {2}...</target>
         <note />
       </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="translated">È prevista una singola banda di funzionalità del manifesto e una cartella del manifesto nell'identità del servizio gestito dal pacchetto {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
         <source>Failed to update the advertising manifest {0}: {1}.</source>
         <target state="translated">Non è stato possibile scaricare il manifesto di pubblicità {0}: {1}.</target>
@@ -47,9 +62,9 @@
         <target state="translated">Non è stato possibile scaricare il pacchetto del manifesto {0}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToGetPackageManifestUrl">
-        <source>Failed to resolve manifest package URL {0}.</source>
-        <target state="translated">Non è stato possibile risolvere l'URL del pacchetto del manifesto {0}.</target>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="translated">Impossibile estrarre informazioni dall'identità del servizio gestito: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
@@ -112,6 +127,11 @@
         <target state="translated">Privilegio insufficiente per l'avvio del server.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">Errore durante l'analisi della versione '{1}' per l'ID manifesto del carico di lavoro '{0}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">Il file di impostazioni nel pacchetto NuGet del carico di lavoro non è valido: {0}</target>
@@ -135,6 +155,16 @@
       <trans-unit id="ManifestDoesNotExist">
         <source>No manifest with ID {0} exists.</source>
         <target state="translated">Non esiste alcun manifesto con ID {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="translated">L'identità del servizio gestita del manifesto non è stata trovata nel pacchetto NuGet {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageUrlNotResolved">
+        <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
+        <target state="translated">Pacchetto manifesto non risolto. L'URL o il pacchetto manifesto per {0} non esiste.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
@@ -168,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">Il computer ha un riavvio in sospeso. L'installazione continuerà, ma potrebbe essere necessario riavviare.</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">Il computer ha un riavvio in sospeso. L'installazione continuerà, ma potrebbe essere necessario riavviare.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">
@@ -184,7 +214,7 @@
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
         <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
-        <target state="new">Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</target>
+        <target state="translated">Definizione di ripristino dello stato precedente non valida. Gli ID manifesto nella definizione di ripristino dello stato precedente {0} non corrispondono agli ID manifesto installati {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">
@@ -205,6 +235,11 @@
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="translated">Salta l'aggiornamento dei manifesti del carico di lavoro.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="translated">Ignora la verifica della firma dei pacchetti e dei programmi di installazione del carico di lavoro.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
@@ -278,8 +313,8 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
-        <source>Workload '{0}' is already installed.</source>
-        <target state="translated">Il carico di lavoro '{0}' è già installato.</target>
+        <source>Workload(s) '{0}' are already installed.</source>
+        <target state="translated">I carichi di lavoro '{0}' sono già installati.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadCacheDownloadFailed">
@@ -329,7 +364,7 @@
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
         <source>Workload updates are available. Run `dotnet workload list` for more information.</source>
-        <target state="translated">Sono disponibili aggiornamenti del carico di lavoro. Per altre informazioni, eseguire 'dotnet workload list'.</target>
+        <target state="translated">Sono disponibili aggiornamenti del carico di lavoro. Per altre informazioni, eseguire `dotnet workload list`.</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingPackInstallRecordMessage">

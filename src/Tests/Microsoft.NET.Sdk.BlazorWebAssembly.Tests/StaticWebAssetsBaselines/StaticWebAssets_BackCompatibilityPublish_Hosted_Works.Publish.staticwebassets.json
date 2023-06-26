@@ -7,7 +7,7 @@
   "ManifestType": "Publish",
   "ReferencedProjectsConfiguration": [
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\blazorwasm.csproj",
+      "Identity": "${ProjectPath}\\blazorwasm\\blazorwasm.csproj",
       "Version": 1,
       "Source": "blazorwasm",
       "GetPublishAssetsTargets": "",
@@ -18,67 +18,71 @@
       "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework"
     },
     {
-      "Identity": "${ProjectRoot}\\razorclasslibrary\\RazorClassLibrary.csproj",
+      "Identity": "${ProjectPath}\\razorclasslibrary\\RazorClassLibrary.csproj",
       "Version": 1,
       "Source": "RazorClassLibrary",
       "GetPublishAssetsTargets": "",
       "AdditionalPublishProperties": "",
-      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier",
+      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier;SelfContained",
       "GetBuildAssetsTargets": "GetCurrentProjectStaticWebAssetsV2",
       "AdditionalBuildProperties": "",
-      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier"
+      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier;SelfContained"
     }
   ],
   "DiscoveryPatterns": [
     {
       "Name": "RazorClassLibrary\\wwwroot",
       "Source": "RazorClassLibrary",
-      "ContentRoot": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\",
+      "ContentRoot": "${ProjectPath}\\razorclasslibrary\\wwwroot\\",
       "BasePath": "_content/RazorClassLibrary",
       "Pattern": "**"
     },
     {
       "Name": "blazorwasm\\wwwroot",
       "Source": "blazorwasm",
-      "ContentRoot": "${ProjectRoot}\\blazorwasm\\wwwroot\\",
+      "ContentRoot": "${ProjectPath}\\blazorwasm\\wwwroot\\",
       "BasePath": "/",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\styles.css",
+      "Identity": "${ProjectPath}\\razorclasslibrary\\wwwroot\\styles.css",
       "SourceId": "RazorClassLibrary",
       "SourceType": "Project",
-      "ContentRoot": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\",
+      "ContentRoot": "${ProjectPath}\\razorclasslibrary\\wwwroot\\",
       "BasePath": "_content/RazorClassLibrary",
       "RelativePath": "styles.css",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\styles.css"
+      "OriginalItemSpec": "${ProjectPath}\\razorclasslibrary\\wwwroot\\styles.css"
     },
     {
-      "Identity": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\wwwroot\\exampleJsInterop.js",
+      "Identity": "${ProjectPath}\\razorclasslibrary\\wwwroot\\wwwroot\\exampleJsInterop.js",
       "SourceId": "RazorClassLibrary",
       "SourceType": "Project",
-      "ContentRoot": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\",
+      "ContentRoot": "${ProjectPath}\\razorclasslibrary\\wwwroot\\",
       "BasePath": "_content/RazorClassLibrary",
       "RelativePath": "wwwroot/exampleJsInterop.js",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\wwwroot\\exampleJsInterop.js"
+      "OriginalItemSpec": "${ProjectPath}\\razorclasslibrary\\wwwroot\\wwwroot\\exampleJsInterop.js"
     }
   ]
 }

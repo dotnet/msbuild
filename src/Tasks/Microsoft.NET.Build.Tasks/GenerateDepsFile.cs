@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -94,6 +95,12 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool IncludeRuntimeFileVersions { get; set; }
 
+        public bool IncludeProjectsNotInAssetsFile { get; set; }
+
+        // List of runtime identifer (platform part only) to validate for runtime assets
+        // If set, the task will warn on any RIDs that aren't in the list
+        public string[] ValidRuntimeIdentifierPlatformsForAssets { get; set; }
+
         [Required]
         public string RuntimeGraphPath { get; set; }
 
@@ -125,20 +132,19 @@ namespace Microsoft.NET.Build.Tasks
 
         private void WriteDepsFile(string depsFilePath)
         {
-            ProjectContext projectContext;
-            if (AssetsFilePath == null)
-            {
-                projectContext = null;
-            }
-            else
+            ProjectContext projectContext = null;
+            LockFileLookup lockFileLookup = null;
+            if (AssetsFilePath != null)
             {
                 LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
                 projectContext = lockFile.CreateProjectContext(
-                 TargetFramework,
-                 RuntimeIdentifier,
-                 PlatformLibraryName,
-                 RuntimeFrameworks,
-                 IsSelfContained);
+                    TargetFramework,
+                    RuntimeIdentifier,
+                    PlatformLibraryName,
+                    RuntimeFrameworks,
+                    IsSelfContained);
+
+                lockFileLookup = new LockFileLookup(lockFile);
             }
 
             CompilationOptions compilationOptions = CompilationOptionsConverter.ConvertFrom(CompilerOptions);
@@ -156,13 +162,15 @@ namespace Microsoft.NET.Build.Tasks
             IEnumerable<ReferenceInfo> referenceAssemblyInfos =
                 ReferenceInfo.CreateReferenceInfos(ReferenceAssemblies);
 
-            // If there is a generated asset file. The projectContext will have project reference.
-            // So remove it from directReferences to avoid duplication
-            var projectContextHasProjectReferences = projectContext != null;
+            // If there is a generated asset file, the projectContext will contain most of the project references.
+            // So remove any project reference contained within projectContext from directReferences to avoid duplication
             IEnumerable<ReferenceInfo> directReferences =
-                ReferenceInfo.CreateDirectReferenceInfos(ReferencePaths,
+                ReferenceInfo.CreateDirectReferenceInfos(
+                    ReferencePaths,
                     ReferenceSatellitePaths,
-                    projectContextHasProjectReferences, isUserRuntimeAssembly);
+                    lockFileLookup,
+                    isUserRuntimeAssembly,
+                    IncludeProjectsNotInAssetsFile);
 
             IEnumerable<ReferenceInfo> dependencyReferences =
                 ReferenceInfo.CreateDependencyReferenceInfos(ReferenceDependencyPaths, ReferenceSatellitePaths, isUserRuntimeAssembly);
@@ -210,7 +218,7 @@ namespace Microsoft.NET.Build.Tasks
                 RuntimeGraph runtimeGraph =
                     IsSelfContained ? new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath) : null;
 
-                builder = new DependencyContextBuilder(mainProject, IncludeRuntimeFileVersions, runtimeGraph, projectContext);
+                builder = new DependencyContextBuilder(mainProject, IncludeRuntimeFileVersions, runtimeGraph, projectContext, lockFileLookup);
             }
             else
             {
@@ -252,6 +260,42 @@ namespace Microsoft.NET.Build.Tasks
                 writer.Write(dependencyContext, fileStream);
             }
             _filesWritten.Add(new TaskItem(depsFilePath));
+
+            if (ValidRuntimeIdentifierPlatformsForAssets != null)
+            {
+                var affectedLibs = new List<string>();
+                var affectedRids = new List<string>();
+                foreach (var lib in dependencyContext.RuntimeLibraries)
+                {
+                    var warnOnRids = lib.RuntimeAssemblyGroups.Select(g => g.Runtime).Where(ShouldWarnOnRuntimeIdentifer)
+                        .Concat(lib.NativeLibraryGroups.Select(g => g.Runtime).Where(ShouldWarnOnRuntimeIdentifer));
+                    if (warnOnRids.Any())
+                    {
+                        affectedLibs.Add(lib.Name);
+                        affectedRids.AddRange(warnOnRids);
+                    }
+                }
+
+                if (affectedRids.Count > 0)
+                {
+                    affectedLibs.Sort();
+                    affectedRids.Sort();
+                    Log.LogWarning(Strings.NonPortableRuntimeIdentifierDetected, string.Join(", ", affectedRids.Distinct()), string.Join(", ", affectedLibs.Distinct()));
+                }
+            }
+        }
+
+        private bool ShouldWarnOnRuntimeIdentifer(string runtimeIdentifier)
+        {
+            if (string.IsNullOrEmpty(runtimeIdentifier))
+                return false;
+
+            int separator = runtimeIdentifier.LastIndexOf('-');
+            string platform = separator < 0
+                ? runtimeIdentifier
+                : runtimeIdentifier.Substring(0, separator);
+
+            return Array.IndexOf(ValidRuntimeIdentifierPlatformsForAssets, platform.ToLowerInvariant()) == -1;
         }
 
         protected override void ExecuteCore()

@@ -37,11 +37,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableDefaultRazorComponentItems Condition="'$(EnableDefaultRazorComponentItems)'==''">true</EnableDefaultRazorComponentItems>
 
     <!--
-      Set to true to automatically include Razor (.razor.cs) files in @(ScopedCssInput) from @(Content).
-    -->
-    <EnableDefaultScopedCssItems Condition="'$(EnableDefaultScopedCssItems)'==''">true</EnableDefaultScopedCssItems>
-
-    <!--
       Set to true to copy RazorGenerate items (.cshtml) to the publish directory.
 
       Typically Razor files are not needed for a published application if they participate in compilation at build-time
@@ -85,7 +80,5 @@ Copyright (c) .NET Foundation. All rights reserved.
     <None Remove="**\*.cshtml" />
     <None Remove="**\*.razor" />
   </ItemGroup>
-
-  <Import Project="$(MSBuildThisFileDirectory)..\Sdk\Sdk.Razor.StaticAssets.ProjectSystem.props" />
 
 </Project>

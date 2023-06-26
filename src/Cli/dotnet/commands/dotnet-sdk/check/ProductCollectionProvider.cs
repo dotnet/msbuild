@@ -1,8 +1,9 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli.Utils;
 
@@ -14,9 +15,9 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
         {
             try
             {
-                return uri != null ? ProductCollection.GetAsync(uri.ToString()).Result :
-                    filePath != null ? ProductCollection.GetFromFileAsync(filePath, false).Result :
-                    ProductCollection.GetAsync().Result;
+                return uri != null ? Task.Run(() => ProductCollection.GetAsync(uri.ToString())).Result :
+                    filePath != null ? Task.Run(() => ProductCollection.GetFromFileAsync(filePath, false)).Result :
+                    Task.Run(() => ProductCollection.GetAsync()).Result;
             }
             catch (Exception e)
             {

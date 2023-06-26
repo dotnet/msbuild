@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.CommandLine;
@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli
         {
             Description = LocalizableStrings.ProjectPathArgumentDescription,
             Arity = ArgumentArity.OneOrMore,
-        }.AddSuggestions(Suggest.ProjectReferencesFromProjectFile());
+        }.AddCompletions(Complete.ProjectReferencesFromProjectFile);
 
         public static readonly Option<string> FrameworkOption = new Option<string>(new string[] { "-f", "--framework" }, LocalizableStrings.CmdFrameworkDescription)
         {
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli
             command.AddArgument(ProjectPathArgument);
             command.AddOption(FrameworkOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new RemoveProjectToProjectReferenceCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new RemoveProjectToProjectReferenceCommand(parseResult).Execute());
 
             return command;
         }

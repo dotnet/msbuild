@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Microsoft",
+  "classifications": [
+    "Common"
+  ],
+  "name": "Interface",
+  "generatorVersions": "[1.0.0.0-*)",
+  "description": "Creates a new C# interface",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  },
+  "groupIdentity": "DotNet.Common.Interface",
+  "precedence": "0",
+  "identity": "DotNet.Common.Interface.CSharp",
+  "shortName": "interface",
+  "sourceName": "Interface1",
+  "preferDefaultName": true,
+  "defaultName": "Interface1",
+  "primaryOutputs": [
+    {
+      "path": "Interface1.cs"
+    }
+  ],
+  "symbols": {
+    "DefaultNamespace": {
+      "type": "bind",
+      "binding": "msbuild:RootNamespace",
+      "replaces": "Company.ClassLibrary1"
+    },
+    "ImplicitUsings": {
+      "type": "bind",
+      "binding": "msbuild:ImplicitUsings",
+      "datatype": "string",
+      "defaultValue": "disable"
+    },
+    "evaluatedLangVersion": {
+      "type": "bind",
+      "binding": "msbuild:LangVersion",
+      "dataType": "string"
+    },
+    "latestLangVersion": {
+      "type": "generated",
+      "generator": "constant",
+      "parameters": {
+        "value": "latest"
+      }
+    },
+    "langVersion": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "evaluatedLangVersion",
+        "fallbackVariableName": "latestLangVersion"
+      }
+    },
+    "csharp9orOlder": {
+      "type": "generated",
+      "generator": "regexMatch",
+      "datatype": "bool",
+      "parameters": {
+        "pattern": "^(ISO-1|ISO-2|[1-7]|[8-9]|[8-9]\\.0|7\\.[0-3])$",
+        "source": "langVersion"
+      }
+    },
+    "csharp10orLater": {
+      "type": "computed",
+      "value": "!csharp9orOlder"
+    },
+    "csharpFeature_FileScopedNamespaces": {
+      "type": "computed",
+      "value": "csharp10orLater == \"true\""
+    }
+  },
+  "constraints": {
+    "csharp-only": {
+      "type": "project-capability",
+      "args": "CSharp"
+    }
+  }
+}

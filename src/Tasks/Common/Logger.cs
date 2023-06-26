@@ -1,5 +1,10 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+//Microsoft.NET.Build.Extensions.Tasks (net7.0) has nullables disabled
+#pragma warning disable IDE0240 // Remove redundant nullable directive
+#nullable disable
+#pragma warning restore IDE0240 // Remove redundant nullable directive
 
 using System;
 using System.Diagnostics;
@@ -40,8 +45,8 @@ namespace Microsoft.NET.Build.Tasks
     /// Results in LogCore getting a Message instance with Code="NETSDK1234"
     /// and Text="Something is wrong."
     ///
-    /// Pattern inspired by <se cref="TaskLoggingHelper.LogErrorWithCodeFromResources"/>,
-    /// but retains completion via generated <see cref="Strings"/> instead of
+    /// Pattern inspired by TaskLoggingHelper.LogErrorWithCodeFromResources,
+    /// but retains completion via generated Strings instead of
     /// passing resource keys by name.
     ///
     /// All actual logging is deferred to subclass in <see cref="LogCore"/>,
@@ -127,11 +132,14 @@ namespace Microsoft.NET.Build.Tasks
                     break;
 
                 default:
+
                     if (code != null)
                     {
-                       throw new ArgumentException(
-                           "Message is prefixed with NETSDK error, but error codes should not be used for informational messages: "
-                           + $"{code}:{message}");
+                        //  Previously we would throw an error here, but that makes it hard to allow errors to be turned off but still displayed as messages
+                        //  (which ResolveApppHosts does).  So let's just let messages have NETSDK error codes if they want to also.
+                        //throw new ArgumentException(
+                        //    "Message is prefixed with NETSDK error, but error codes should not be used for informational messages: "
+                        //    + $"{code}:{message}");
                     }
                     break;
             }

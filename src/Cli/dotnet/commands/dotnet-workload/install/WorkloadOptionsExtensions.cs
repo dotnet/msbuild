@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal class WorkloadOptionsExtensions
     {
-        internal static ReleaseVersion GetValidatedSdkVersion(string versionOption, string providedVersion, string dotnetPath, string userProfileDir)
+        internal static ReleaseVersion GetValidatedSdkVersion(string versionOption, string providedVersion, string dotnetPath, string userProfileDir, bool checkIfFeatureBandManifestsExist)
         {
 
             if (string.IsNullOrEmpty(versionOption))
@@ -27,18 +27,18 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             else
             {
                 var manifests = new SdkDirectoryWorkloadManifestProvider(dotnetPath, versionOption, userProfileDir).GetManifests();
-                if (!manifests.Any())
+                if (!manifests.Any() && checkIfFeatureBandManifestsExist)
                 {
                     throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, new SdkFeatureBand(versionOption).ToString()), isUserError: false);
                 }
                 try
                 {
-                    foreach ((string manifestId, string informationalPath, Func<Stream> openManifestStream, Func<Stream> openLocalizationStream) in manifests)
+                    foreach (var readableManifest in manifests)
                     {
-                        using (var manifestStream = openManifestStream())
-                        using (var localizationStream = openLocalizationStream())
+                        using (var manifestStream = readableManifest.OpenManifestStream())
+                        using (var localizationStream = readableManifest.OpenLocalizationStream())
                         {
-                            var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream, localizationStream, informationalPath);
+                            var manifest = WorkloadManifestReader.ReadWorkloadManifest(readableManifest.ManifestId, manifestStream, localizationStream, readableManifest.ManifestPath);
                         }
                     }
                 }

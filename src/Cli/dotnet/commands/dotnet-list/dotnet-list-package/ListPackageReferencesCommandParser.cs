@@ -1,10 +1,9 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.List.PackageReferences;
 using LocalizableStrings = Microsoft.DotNet.Tools.List.PackageReferences.LocalizableStrings;
@@ -16,7 +15,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option OutdatedOption = new ForwardedOption<bool>("--outdated", LocalizableStrings.CmdOutdatedDescription)
             .ForwardAs("--outdated");
 
-        public static readonly Option DepreciatedOption = new ForwardedOption<bool>("--deprecated", LocalizableStrings.CmdDeprecatedDescription)
+        public static readonly Option DeprecatedOption = new ForwardedOption<bool>("--deprecated", LocalizableStrings.CmdDeprecatedDescription)
             .ForwardAs("--deprecated");
 
         public static readonly Option VulnerableOption = new ForwardedOption<bool>("--vulnerable", LocalizableStrings.CmdVulnerableDescription)
@@ -40,7 +39,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option HighestMinorOption = new ForwardedOption<bool>("--highest-minor", LocalizableStrings.CmdHighestMinorDescription)
             .ForwardAs("--highest-minor");
 
-        public static readonly Option ConfigOption = new ForwardedOption<string>("--config", LocalizableStrings.CmdConfigDescription)
+        public static readonly Option ConfigOption = new ForwardedOption<string>(new string[] { "--config", "--configfile"}, LocalizableStrings.CmdConfigDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdConfig
         }.ForwardAsMany(o => new[] { "--config", o });
@@ -61,6 +60,12 @@ namespace Microsoft.DotNet.Cli
                 ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
             }.ForwardAsSingle(o => $"--verbosity:{o}");
 
+        public static readonly Option FormatOption = new ForwardedOption<ReportOutputFormat>("--format", LocalizableStrings.CmdFormatDescription)
+        { }.ForwardAsSingle(o => $"--format:{o}");
+
+        public static readonly Option OutputVersionOption = new ForwardedOption<int>("--output-version", LocalizableStrings.CmdOutputVersionDescription)
+        { }.ForwardAsSingle(o => $"--output-version:{o}");
+
         private static readonly Command Command = ConstructCommand();
 
         public static Command GetCommand()
@@ -74,7 +79,7 @@ namespace Microsoft.DotNet.Cli
 
             command.AddOption(VerbosityOption);
             command.AddOption(OutdatedOption);
-            command.AddOption(DepreciatedOption);
+            command.AddOption(DeprecatedOption);
             command.AddOption(VulnerableOption);
             command.AddOption(FrameworkOption);
             command.AddOption(TransitiveOption);
@@ -84,8 +89,10 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ConfigOption);
             command.AddOption(SourceOption);
             command.AddOption(InteractiveOption);
+            command.AddOption(FormatOption);
+            command.AddOption(OutputVersionOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ListPackageReferencesCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new ListPackageReferencesCommand(parseResult).Execute());
 
             return command;
         }

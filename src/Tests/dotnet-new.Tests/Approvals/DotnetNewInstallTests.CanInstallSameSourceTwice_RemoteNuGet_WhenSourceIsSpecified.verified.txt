@@ -1,0 +1,10 @@
+﻿The following template packages will be installed:
+   Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0
+
+Microsoft.DotNet.Common.ProjectTemplates.5.0 (version 5.0.0) is already installed, it will be replaced with version 5.0.0.
+Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0 was successfully uninstalled.
+Success: Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0 installed the following templates:
+Template Name        Short Name  Language    Tags          
+-------------------  ----------  ----------  --------------
+Class library        classlib    [C#],F#,VB  Common/Library
+Console Application  console     [C#],F#,VB  Common/Console

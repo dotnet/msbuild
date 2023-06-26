@@ -7,25 +7,15 @@
         <target state="translated">Jsou k dispozici seznamy úloh.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadIdColumn">
-        <source>Installed Workload Ids</source>
-        <target state="translated">ID nainstalovaných úloh</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WorkloadListFooter">
         <source>Use `dotnet workload search` to find additional workloads to install.</source>
-        <target state="translated">Pokud chcete najít další úlohy, které se mají nainstalovat, použijte vyhledávání úloh dotnet.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadListHeader">
-        <source>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</source>
-        <target state="translated">Tento příkaz vypíše pouze úlohy nainstalované prostřednictvím instalace úlohy dotnet v této verzi sady SDK a ne ty, které byly nainstalovány prostřednictvím sady Visual Studio.</target>
-        <note />
+        <target state="translated">Pokud chcete najít další úlohy, které se mají nainstalovat, použijte `dotnet workload search`.</target>
+        <note>{Locked="dotnet workload search"}</note>
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
-        <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
-        <target state="translated">Jsou k dispozici aktualizace pro následující úlohy: {0}. Pokud chcete získat nejnovější verzi, spusťte aktualizaci úlohy dotnet.</target>
-        <note />
+        <source>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
+        <target state="translated">Aktualizace jsou k dispozici pro následující úlohy: {0}. Pokud chcete získat nejnovější verzi, spusťte aktualizaci úlohy dotnet (`dotnet workload update`).</target>
+        <note>{Locked="dotnet workload update"}</note>
       </trans-unit>
     </body>
   </file>

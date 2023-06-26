@@ -1,8 +1,9 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,9 +28,9 @@ namespace Microsoft.DotNet.Tools.BuildServer.Shutdown
             IReporter reporter = null)
             : base(result)
         {
-            bool msbuild = result.GetValueForOption(ServerShutdownCommandParser.MSBuildOption);
-            bool vbcscompiler = result.GetValueForOption(ServerShutdownCommandParser.VbcsOption);
-            bool razor = result.GetValueForOption(ServerShutdownCommandParser.RazorOption);
+            bool msbuild = result.GetValue(ServerShutdownCommandParser.MSBuildOption);
+            bool vbcscompiler = result.GetValue(ServerShutdownCommandParser.VbcsOption);
+            bool razor = result.GetValue(ServerShutdownCommandParser.RazorOption);
             bool all = !msbuild && !vbcscompiler && !razor;
 
             _enumerationFlags = ServerEnumerationFlags.None;
@@ -146,7 +147,7 @@ namespace Microsoft.DotNet.Tools.BuildServer.Shutdown
                         exception.InnerException.Message).Red());
             }
 
-            if (Reporter.IsVerbose)
+            if (CommandLoggingContext.IsVerbose)
             {
                 Reporter.Verbose.WriteLine(exception.ToString().Red());
             }

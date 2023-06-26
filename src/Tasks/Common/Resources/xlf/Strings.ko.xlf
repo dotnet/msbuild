@@ -7,6 +7,26 @@
         <target state="translated">NETSDK1076: AddResource는 정수 리소스 형식에만 사용할 수 있습니다.</target>
         <note>{StrBegin="NETSDK1076: "}</note>
       </trans-unit>
+      <trans-unit id="AotNotSupported">
+        <source>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
+        <target state="translated">NETSDK1196: SDK는 미리 컴파일을 지원하지 않습니다. PublishAot 속성을 false로 설정하세요.</target>
+        <note>{StrBegin="NETSDK1196: "}</note>
+      </trans-unit>
+      <trans-unit id="AotUnsupportedHostRuntimeIdentifier">
+        <source>NETSDK1204: Ahead-of-time compilation is not supported on the current platform '{0}'.</source>
+        <target state="new">NETSDK1204: Ahead-of-time compilation is not supported on the current platform '{0}'.</target>
+        <note>{StrBegin="NETSDK1204: "}</note>
+      </trans-unit>
+      <trans-unit id="AotUnsupportedTargetFramework">
+        <source>NETSDK1207: Ahead-of-time compilation is not supported for the target framework.</source>
+        <target state="new">NETSDK1207: Ahead-of-time compilation is not supported for the target framework.</target>
+        <note>{StrBegin="NETSDK1207: "}</note>
+      </trans-unit>
+      <trans-unit id="AotUnsupportedTargetRuntimeIdentifier">
+        <source>NETSDK1203: Ahead-of-time compilation is not supported for the target runtime identifier '{0}'.</source>
+        <target state="new">NETSDK1203: Ahead-of-time compilation is not supported for the target runtime identifier '{0}'.</target>
+        <note>{StrBegin="NETSDK1203: "}</note>
+      </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
         <target state="translated">NETSDK1070: 애플리케이션 구성 파일에는 루트 구성 요소가 있어야 합니다.</target>
@@ -41,6 +61,11 @@
         <source>NETSDK1177: Failed to sign apphost with error code {1}: {0}</source>
         <target state="translated">NETSDK1177: apphost에 서명하지 못했습니다(오류 코드 {1}: {0})</target>
         <note>{StrBegin="NETSDK1177: "}</note>
+      </trans-unit>
+      <trans-unit id="ArtifactsPathCannotBeSetInProject">
+        <source>NETSDK1199: The ArtifactsPath and UseArtifactsOutput properties cannot be set in a project file, due to MSBuild ordering constraints. They must be set in a Directory.Build.props file or from the command line. See https://aka.ms/netsdk1199 for more information.</source>
+        <target state="new">NETSDK1199: The ArtifactsPath and UseArtifactsOutput properties cannot be set in a project file, due to MSBuild ordering constraints. They must be set in a Directory.Build.props file or from the command line. See https://aka.ms/netsdk1199 for more information.</target>
+        <note>{StrBegin="NETSDK1199: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
@@ -86,6 +111,11 @@
         <source>NETSDK1001: At least one possible target framework must be specified.</source>
         <target state="translated">NETSDK1001: 가능한 대상 프레임워크를 하나 이상 지정해야 합니다.</target>
         <note>{StrBegin="NETSDK1001: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework">
+        <source>NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</source>
+        <target state="translated">NETSDK1205: Microsoft.Net.Compilers.Toolset.Framework 패키지를 직접 설정해서는 안 됩니다. 필요한 경우 대신 'BuildWithNetFrameworkHostedCompiler' 속성을 'true'로 설정하세요.</target>
+        <note>{StrBegin="NETSDK1205: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</note>
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
@@ -137,9 +167,14 @@
         <target state="translated">NETSDK1099: 실행 가능한 애플리케이션의 경우에만 단일 파일에 게시할 수 있습니다.</target>
         <note>{StrBegin="NETSDK1099: "}</note>
       </trans-unit>
+      <trans-unit id="CannotHaveSolutionLevelOutputPath">
+        <source>NETSDK1194: The "--output" option isn't supported when building a solution. Specifying a solution-level output path results in all projects copying outputs to the same directory, which can lead to inconsistent builds.</source>
+        <target state="translated">NETSDK1194: 솔루션을 빌드할 때 "--output" 옵션이 지원되지 않습니다. 솔루션 수준 출력 경로를 지정하면 모든 프로젝트가 동일한 디렉터리에 출력을 복사하게 되어 일관성 없는 빌드가 발생할 수 있습니다.</target>
+        <note>{StrBegin="NETSDK1194: "}{Locked="--output"}</note>
+      </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelRuntimeIdentifier">
-        <source>NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specifiy the RID at the individual project level instead.</source>
-        <target state="translated">NETSDK1134: 특정 RuntimeIdentifier를 사용한 솔루션 빌드는 지원되지 않습니다. 단일 RID에 대해 게시하려면 대신 개별 프로젝트 수준에서 RID를 지정하세요.</target>
+        <source>NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specify the RID at the individual project level instead.</source>
+        <target state="translated">NETSDK1134: 특정 RuntimeIdentifier를 사용하여 솔루션을 빌드하는 것은 지원되지 않습니다. 단일 RID에 대해 게시하려는 경우 개별 프로젝트 수준에서 RID를 대신 지정합니다.</target>
         <note>{StrBegin="NETSDK1134: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSupportedOSPlatformVersionHigherThanTargetPlatformVersion">
@@ -223,9 +258,9 @@
         <note>{StrBegin="NETSDK1167: "}</note>
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequiresSelfContained">
-        <source>NETSDK1174: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
-        <target state="translated">NETSDK1174: 자체 포함 애플리케이션이 게시된 경우 단일 파일 번들의 압축만 지원됩니다.</target>
-        <note>{StrBegin="NETSDK1174: "}</note>
+        <source>NETSDK1176: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
+        <target state="translated">NETSDK1176: 자체 포함 애플리케이션이 게시된 경우 단일 파일 번들의 압축만 지원됩니다.</target>
+        <note>{StrBegin="NETSDK1176: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
         <source>NETSDK1133: There was conflicting information about runtime packs available for {0}:
@@ -444,15 +479,30 @@
         <target state="translated">NETSDK1144: 어셈블리의 크기를 최적화하지 못했습니다. PublishTrimmed 속성을 false로 설정하여 최적화를 사용하지 않도록 설정할 수 있습니다.</target>
         <note>{StrBegin="NETSDK1144: "}</note>
       </trans-unit>
+      <trans-unit id="ILLinkNoValidRuntimePackageError">
+        <source>NETSDK1195: Trimming, or code compatibility analysis for trimming, single-file deployment, or ahead-of-time compilation is not supported for the target framework. For more information, see https://aka.ms/netsdk1195</source>
+        <target state="new">NETSDK1195: Trimming, or code compatibility analysis for trimming, single-file deployment, or ahead-of-time compilation is not supported for the target framework. For more information, see https://aka.ms/netsdk1195</target>
+        <note>{StrBegin="NETSDK1195: "}</note>
+      </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
         <source>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</source>
         <target state="translated">NETSDK1102: 선택한 게시 구성에서는 크기에 대한 어셈블리 최적화가 지원되지 않습니다. 자체 포함 앱을 게시하고 있는지 확인하세요.</target>
         <note>{StrBegin="NETSDK1102: "}</note>
       </trans-unit>
-      <trans-unit id="ILLink_Info">
-        <source>Optimizing assemblies for size, which may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="translated">크기에 대한 어셈블리 최적화로 앱의 동작이 변경될 수 있습니다. 게시 후 테스트하세요. 참조: https://aka.ms/dotnet-illink</target>
+      <trans-unit id="ILLinkOptimizedAssemblies">
+        <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
+        <target state="translated">크기에 맞게 어셈블리를 최적화하면 앱의 동작이 변경될 수 있습니다. 퍼블리싱 후 꼭 테스트 해보세요. 참조: https://aka.ms/dotnet-illink</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ILLinkRunning">
+        <source>Optimizing assemblies for size. This process might take a while.</source>
+        <target state="translated">크기에 맞게 어셈블리 최적화. 이 프로세스는 시간이 걸릴 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">
+        <source>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</source>
+        <target state="translated">NETSDK1191: '{0}' 속성의 런타임 식별자를 유추할 수 없습니다. RID를 명시적으로 지정하세요.</target>
+        <note>{StrBegin="NETSDK1191: "}</note>
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
         <source>NETSDK1020: Package Root {0} was incorrectly given for Resolved library {1}</source>
@@ -508,8 +558,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1173: "}</note>
       </trans-unit>
       <trans-unit id="InvalidTypeLibraryId">
-        <source>NETSDK1170: The provided type library ID '{0}' for type libary '{1}' is invalid. The ID must be a positive integer less than 65536.</source>
-        <target state="translated">NETSDK1170: 형식 라이브러리 '{1}'에 대해 제공된 형식 라이브러리 ID '{0}'이(가) 잘못되었습니다. ID는 65536보다 작은 양의 정수여야 합니다.</target>
+        <source>NETSDK1170: The provided type library ID '{0}' for type library '{1}' is invalid. The ID must be a positive integer less than 65536.</source>
+        <target state="translated">NETSDK1170: '{1}' 형식 라이브러리에 대해 제공된 형식 라이브러리 ID '{0}'이(가) 잘못되었습니다. ID는 65536보다 작은 양의 정수여야 합니다.</target>
         <note>{StrBegin="NETSDK1170: "}</note>
       </trans-unit>
       <trans-unit id="JitLibraryNotFound">
@@ -561,9 +611,14 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
-        <source>NETSDK1182: Targeting .NET 6.0 in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: Visual Studio 2019에서 .NET 6.0을 대상으로 지정하는 것은 지원되지 않습니다.</target>
+        <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
+        <target state="translated">NETSDK1182: Visual Studio 2019에서 .NET 6.0 이상을 대상으로 하는 것은 지원되지 않습니다.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
+      </trans-unit>
+      <trans-unit id="Net7NotCompatibleWithDev173">
+        <source>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</source>
+        <target state="translated">NETSDK1192: Visual Studio 2022 17.3에서 .NET 7.0 이상을 대상으로 하는 것은 지원되지 않습니다.</target>
+        <note>{StrBegin="NETSDK1192: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
         <source>NETSDK1084: There is no application host available for the specified RuntimeIdentifier '{0}'.</source>
@@ -620,6 +675,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1121: .NET Core를 대상으로 하는 C++/CLI 프로젝트는 SelfContained=true를 사용할 수 없습니다.</target>
         <note>{StrBegin="NETSDK1121: "}</note>
       </trans-unit>
+      <trans-unit id="NonPortableRuntimeIdentifierDetected">
+        <source>NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): {0}. Affected libraries: {1}. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details.</source>
+        <target state="new">NETSDK1206: Found version-specific or distribution-specific runtime identifier(s): {0}. Affected libraries: {1}. In .NET 8.0 and higher, assets for version-specific and distribution-specific runtime identifiers will not be found by default. See https://aka.ms/dotnet/rid-usage for details.</target>
+        <note>{StrBegin="NETSDK1206: "}</note>
+      </trans-unit>
       <trans-unit id="NonSelfContainedExeCannotReferenceSelfContained">
         <source>NETSDK1151: The referenced project '{0}' is a self-contained executable.  A self-contained executable cannot be referenced by a non self-contained executable.  For more information, see https://aka.ms/netsdk1151</source>
         <target state="translated">NETSDK1151: 참조된 프로젝트 '{0}'은(는) self-contained 실행 파일입니다. self-contained 실행 파일은 self-contained가 아닌 실행 파일에서 참조할 수 없습니다. 자세한 내용은 https://aka.ms/netsdk1151을 참조하세요</target>
@@ -640,6 +700,16 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1146: PackAsTool은 설정 중인 TargetPlatformIdentifier를 지원하지 않습니다. 예를 들어, TargetFramework는 net5.0-windows를 사용할 수 없으며 net5.0만 지원합니다. 또한 PackAsTool은 .NET 5 이상을 대상으로 하는 경우 UseWPF 또는 UseWindowsForms를 지원하지 않습니다.</target>
         <note>{StrBegin="NETSDK1146: "}</note>
       </trans-unit>
+      <trans-unit id="PackageContainsIncorrectlyCasedLocale">
+        <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
+        <target state="translated">NETSDK1187: 패키지 {0} {1}에 로캘이 '{2}'인 리소스가 있습니다. 이 로캘은 빌드에서 대/소문자 문제를 방지하기 위해 표준 형식 '{3}'(으)로 정규화되었습니다. 패키지 작성자에게 이 대/소문자 문제에 대해 알리는 것이 좋습니다.</target>
+        <note>Error code is NETSDK1187. 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
+      </trans-unit>
+      <trans-unit id="PackageContainsUnknownLocale">
+        <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
+        <target state="translated">NETSDK1188: 패키지 {0} {1}에는 로캘이 '{2}'인 리소스가 있습니다. 이 로캘은 .NET에서 인식할 수 없습니다. 패키지 작성자에게 잘못된 로캘을 사용하는 것 같다고 알리는 것이 좋습니다.</target>
+        <note>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
+      </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
         <target state="translated">NETSDK1064: 패키지 {0}, 버전 {1}을(를) 찾을 수 없습니다. NuGet 복원 이후 삭제되었을 수 있습니다. 아니면, 최대 경로 길이 제한으로 인해 NuGet 복원이 부분적으로만 완료되었을 수 있습니다.</target>
@@ -656,9 +726,14 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1071: "}</note>
       </trans-unit>
       <trans-unit id="PlaceholderRunCommandProjectAbbreviationDeprecated">
-        <source>NETSDK1176: Placeholder</source>
-        <target state="translated">NETSDK1176: 자리 표시자</target>
-        <note>{StrBegin="NETSDK1176: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
+        <source>NETSDK1174: Placeholder</source>
+        <target state="translated">NETSDK1174: 자리 표시자</target>
+        <note>{StrBegin="NETSDK1174: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
+      </trans-unit>
+      <trans-unit id="Prefer32BitIgnoredForNetCoreApp">
+        <source>NETSDK1189: Prefer32Bit is not supported and has no effect for netcoreapp target.</source>
+        <target state="translated">NETSDK1189: Prefer32Bit는 지원되지 않으며 netcoreapp 대상에는 영향을 주지 않습니다.</target>
+        <note>{StrBegin="NETSDK1189: "}</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
@@ -675,10 +750,20 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1093: 프로젝트 도구(DotnetCliTool)는 .NET Core 2.2 이하를 대상으로 하는 경우만 지원합니다.</target>
         <note>{StrBegin="NETSDK1093: "}</note>
       </trans-unit>
+      <trans-unit id="PublishProfileNotPresent">
+        <source>NETSDK1198: A publish profile with the name '{0}' was not found in the project. Set the PublishProfile property to a valid file name.</source>
+        <target state="translated">NETSDK1198: 이름이 '{0}'인 게시 프로필을 프로젝트에서 찾을 수 없습니다. PublishProfile 속성을 유효한 파일 이름으로 설정합니다.</target>
+        <note>{StrBegin="NETSDK1198: "}</note>
+      </trans-unit>
       <trans-unit id="PublishReadyToRunRequiresVersion30">
         <source>NETSDK1122: ReadyToRun compilation will be skipped because it is only supported for .NET Core 3.0 or higher.</source>
         <target state="translated">NETSDK1122: ReadyToRun 컴파일은 .NET Core 3.0 이상에서만 지원되므로 건너뜁니다.</target>
         <note>{StrBegin="NETSDK1122: "}</note>
+      </trans-unit>
+      <trans-unit id="PublishSelfContainedMustBeBool">
+        <source>NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</source>
+        <target state="translated">NETSDK1193: PublishSelfContained가 설정된 경우 true 또는 false여야 합니다. 지정된 값은 '{0}'입니다.</target>
+        <note>{StrBegin="NETSDK1193: "}</note>
       </trans-unit>
       <trans-unit id="PublishSingleFileRequiresVersion30">
         <source>NETSDK1123: Publishing an application to a single-file requires .NET Core 3.0 or higher.</source>
@@ -691,8 +776,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1124: "}</note>
       </trans-unit>
       <trans-unit id="PublishUnsupportedWithoutTargetFramework">
-        <source>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify the framework for the published application.</source>
-        <target state="translated">NETSDK1129: 대상 프레임워크를 지정하지 않고 'Publish' 대상을 사용할 수 없습니다. 현재 프로젝트가 여러 프레임워크를 대상으로 하므로 게시된 애플리케이션의 프레임워크를 지정해야 합니다.</target>
+        <source>NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify one of the following frameworks in order to publish: {0}</source>
+        <target state="new">NETSDK1129: The 'Publish' target is not supported without specifying a target framework. The current project targets multiple frameworks, you must specify one of the following frameworks in order to publish: {0}</target>
         <note>{StrBegin="NETSDK1129: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunCompilationFailed">
@@ -706,8 +791,8 @@ The following are names of parameters or literal values and should not be transl
         <note />
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
-        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing.</source>
-        <target state="translated">NETSDK1094: 성능 향상을 위해 어셈블리를 최적화할 수 없습니다. 유효한 런타임 패키지를 찾을 수 없습니다. PublishReadyToRun 속성을 false로 설정하거나, 게시할 때 지원되는 런타임 식별자를 사용하세요.</target>
+        <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing. When targeting .NET 6 or higher, make sure to restore packages with the PublishReadyToRun property set to true.</source>
+        <target state="needs-review-translation">NETSDK1094: 성능을 위해 어셈블리를 최적화할 수 없습니다. 유효한 런타임 패키지를 찾을 수 없습니다. PublishReadyToRun 속성을 false로 설정하거나 게시할 때 지원되는 런타임 식별자를 사용하세요. .NET 6 이상을 대상으로 하는 경우 PublishReadyToRun 속성이 true로 설정된 패키지를 복원해야 합니다.</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSupportedError">
@@ -730,6 +815,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1028: RuntimeIdentifier 지정</target>
         <note>{StrBegin="NETSDK1028: "}</note>
       </trans-unit>
+      <trans-unit id="RuntimeIdentifierWillNoLongerImplySelfContained">
+        <source>NETSDK1201: For projects targeting .NET 8.0 and higher, specifying a RuntimeIdentifier will no longer produce a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use the --self-contained argument.</source>
+        <target state="new">NETSDK1201: For projects targeting .NET 8.0 and higher, specifying a RuntimeIdentifier will no longer produce a self contained app by default. To continue building self-contained apps, set the SelfContained property to true or use the --self-contained argument.</target>
+        <note>{StrBegin="NETSDK1201: "}</note>
+      </trans-unit>
       <trans-unit id="RuntimeListNotFound">
         <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
         <target state="translated">NETSDK1109: 런타임 목록 파일 '{0}'을(를) 찾을 수 없습니다. https://aka.ms/dotnet-sdk-issue에서 .NET 팀에 이 오류를 보고하세요.</target>
@@ -740,6 +830,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1112: {0}용 런타임 팩이 다운로드되지 않았습니다. RuntimeIdentifier '{1}'을(를) 사용하여 NuGet 복원을 실행해 보세요.</target>
         <note>{StrBegin="NETSDK1112: "}</note>
       </trans-unit>
+      <trans-unit id="RuntimePackNotRestored_TransitiveDisabled">
+        <source>NETSDK1185: The Runtime Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
+        <target state="translated">NETSDK1185: FrameworkReference '{0}'용 런타임 팩을 사용할 수 없습니다. DisableTransitiveFrameworkReferenceDownloads가 true로 설정되었기 때문일 수 있습니다.</target>
+        <note>{StrBegin="NETSDK1185: "}</note>
+      </trans-unit>
       <trans-unit id="SelfContainedExeCannotReferenceNonSelfContained">
         <source>NETSDK1150: The referenced project '{0}' is a non self-contained executable.  A non self-contained executable cannot be referenced by a self-contained executable.  For more information, see https://aka.ms/netsdk1150</source>
         <target state="translated">NETSDK1150: 참조된 프로젝트 '{0}'은(는) self-contained가 아닌 실행 파일입니다. self-contained가 아닌  실행 파일은 self-contained 실행 파일에서 참조할 수 없습니다. 자세한 내용은 https://aka.ms/netsdk1150을 참조하세요</target>
@@ -747,18 +842,20 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
         <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
-        <target state="translated">NETSDK1179: '--runtime'을 사용하는 경우 '--no-self-contained' 또는 '--no-self-contained' 옵션 중 하나가 필요합니다.</target>
-        <note>{StrBegin="NETSDK1179: "}</note>
-      </trans-unit>
-      <trans-unit id="SingleFileWin7Incompatible">
-        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
-        <target state="translated">NETSDK1180: 지정된 런타임 식별자 '{0}'은(는) Windows 7 호환성을 의미합니다. 단일 파일 게시는 Windows 7과 호환되지 않습니다.</target>
-        <note>{StrBegin="NETSDK1180: "}</note>
+        <target state="translated">NETSDK1179: '--runtime'을 사용하는 경우 '--self-contained' 또는 '--no-self-contained' 옵션 중 하나가 필요합니다.</target>
+        <note>{StrBegin="NETSDK1179: "}{Locked="--self-contained"}{Locked="--no-self-contained"}{Locked="--runtime"}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: GenerateRuntimeConfigurationFiles에 대해 'AdditionalProbingPaths'가 지정되었지만 'RuntimeConfigDevPath'가 비어 있어서 건너뜁니다.</target>
         <note>{StrBegin="NETSDK1048: "}</note>
+      </trans-unit>
+      <trans-unit id="SolutionProjectConfigurationsConflict">
+        <source>NETSDK1197: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set the property for all projects. Conflicting projects:
+{1}</source>
+        <target state="new">NETSDK1197: Multiple solution project(s) contain conflicting '{0}' values; ensure the values match. Consider using a Directory.build.props file to set the property for all projects. Conflicting projects:
+{1}</target>
+        <note>{StrBegin="NETSDK1197: "}</note>
       </trans-unit>
       <trans-unit id="TargetFrameworkIsEol">
         <source>NETSDK1138: The target framework '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</source>
@@ -779,6 +876,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1127: The targeting pack {0} is not installed. Please restore and try again.</source>
         <target state="translated">NETSDK1127: 타기팅 팩 {0}이(가) 설치되어 있지 않습니다. 복원한 후 다시 시도하세요.</target>
         <note>{StrBegin="NETSDK1127: "}</note>
+      </trans-unit>
+      <trans-unit id="TargetingPackNotRestored_TransitiveDisabled">
+        <source>NETSDK1184: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</source>
+        <target state="translated">NETSDK1184: FrameworkReference '{0}'에 대한 대상 지정 팩을 사용할 수 없습니다. DisableTransitiveFrameworkReferenceDownloads가 true로 설정되었기 때문일 수 있습니다.</target>
+        <note>{StrBegin="NETSDK1184: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWindowsFormsIsNotSupported">
         <source>NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
@@ -814,6 +916,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>
         <target state="translated">NETSDK1073: FrameworkReference '{0}'을(를) 인식할 수 없습니다.</target>
         <note>{StrBegin="NETSDK1073: "}</note>
+      </trans-unit>
+      <trans-unit id="UnknownFrameworkReference_MauiEssentials">
+        <source>NETSDK1186: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</source>
+        <target state="translated">NETSDK1186: 이 프로젝트는 프로젝트 또는 NuGet 패키지 참조를 통해 Maui Essentials에 종속되지만 해당 종속성을 명시적으로 선언하지 않습니다. 이 프로젝트를 빌드하려면 UseMauiEssentials 속성을 true로 설정해야 합니다(필요한 경우 Maui 워크로드 설치).</target>
+        <note>{StrBegin="NETSDK1186: "}</note>
       </trans-unit>
       <trans-unit id="UnnecessaryWindowsDesktopSDK">
         <source>NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Consider changing the Sdk attribute of the root Project element to 'Microsoft.NET.Sdk'.</source>
@@ -855,14 +962,19 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1139: 대상 플랫폼 식별자 {0}을(를) 인식할 수 없습니다.</target>
         <note>{StrBegin="NETSDK1139: "}</note>
       </trans-unit>
+      <trans-unit id="UseArtifactsOutputRequiresDirectoryBuildProps">
+        <source>NETSDK1200: If UseArtifactsPath is set to true and ArtifactsPath is not set, there must be a Directory.Build.props file in order to determine where the artifacts folder should be located.</source>
+        <target state="new">NETSDK1200: If UseArtifactsPath is set to true and ArtifactsPath is not set, there must be a Directory.Build.props file in order to determine where the artifacts folder should be located.</target>
+        <note>{StrBegin="NETSDK1200: "}</note>
+      </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
         <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>
         <target state="translated">NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop을 사용하려면 Windows 데스크톱 애플리케이션을 빌드해야 합니다. 'UseWpf' 및 'UseWindowsForms'는 현재 SDK에서 지원하지 않습니다.</target>
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdk_Info">
-        <source>You are using a preview version of .NET. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="translated">.NET의 미리 보기 버전을 사용 중입니다. 참조: https://aka.ms/dotnet-core-preview</target>
+        <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
+        <target state="translated">NETSDK1057: .NET의 미리 보기 버전을 사용하고 있습니다. 참조: https://aka.ms/dotnet-support-policy</target>
         <note />
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">
@@ -891,8 +1003,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1105: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresWindows">
-        <source>NETSDK1100: Windows is required to build Windows desktop applications.</source>
-        <target state="translated">NETSDK1100: Windows 데스크톱 애플리케이션을 빌드하려면 Windows가 필요합니다.</target>
+        <source>NETSDK1100: To build a project targeting Windows on this operating system, set the EnableWindowsTargeting property to true.</source>
+        <target state="translated">NETSDK1100: 이 운영 체제에서 Windows를 대상으로 하는 프로젝트를 빌드하려면 EnableWindowsTargeting 속성을 true로 설정합니다.</target>
         <note>{StrBegin="NETSDK1100: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopTargetPlatformMustBeWindows">
@@ -905,6 +1017,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1148: 참조된 어셈블리가 최신 버전의 Microsoft.Windows.SDK.NET.dll을 사용하여 컴파일되었습니다. 이 어셈블리를 참조하려면 최신 .NET SDK로 업데이트하세요.</target>
         <note>{StrBegin="NETSDK1148: "}</note>
       </trans-unit>
+      <trans-unit id="WorkloadIsEol">
+        <source>NETSDK1202: The workload '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</source>
+        <target state="translated">NETSDK1202: '{0}' 워크로드는 지원되지 않으며 향후 보안 업데이트를 받지 않습니다. 지원 정책에 대한 자세한 내용은 {1}을(를) 참조하세요.</target>
+        <note>{StrBegin="NETSDK1202: "}</note>
+      </trans-unit>
       <trans-unit id="WorkloadNotAvailable">
         <source>NETSDK1178: The project depends on the following workload packs that do not exist in any of the workloads available in this installation: {0}
 You may need to build the project on another operating system or architecture, or update the .NET SDK.</source>
@@ -914,10 +1031,10 @@ You may need to build the project on another operating system or architecture, o
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
-To install these workloads, run the following command: {1}</source>
+To install these workloads, run the following command: dotnet workload restore</source>
         <target state="translated">NETSDK1147: 이 프로젝트를 빌드하려면 다음 워크로드를 설치해야 합니다. {0}
-이러한 워크로드를 설치하려면 다음 명령을 실행하세요: {1}</target>
-        <note>{StrBegin="NETSDK1147: "}</note>
+ 이러한 워크로드를 설치하려면 dotnet workload restore 명령을 실행합니다.</target>
+        <note>{StrBegin="NETSDK1147: "} LOCALIZATION: Do not localize "dotnet workload restore"</note>
       </trans-unit>
     </body>
   </file>

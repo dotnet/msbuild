@@ -1,9 +1,10 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.DotNet.Workloads.Workload.Search;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Search.LocalizableStrings;
 
@@ -18,9 +19,7 @@ namespace Microsoft.DotNet.Cli
                 Description = LocalizableStrings.WorkloadIdStubArgumentDescription
             };
 
-        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.HiddenVerbosityOption;
-
-        public static readonly Option<string> VersionOption = WorkloadInstallCommandParser.VersionOption;
+        public static readonly Option<string> VersionOption = InstallingWorkloadCommandParser.VersionOption;
 
         private static readonly Command Command = ConstructCommand();
 
@@ -33,10 +32,10 @@ namespace Microsoft.DotNet.Cli
         {
             var command = new Command("search", LocalizableStrings.CommandDescription);
             command.AddArgument(WorkloadIdStubArgument);
-            command.AddOption(VerbosityOption);
+            command.AddOption(CommonOptions.HiddenVerbosityOption);
             command.AddOption(VersionOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadSearchCommand(parseResult).Execute());
+            command.SetHandler((parseResult) => new WorkloadSearchCommand(parseResult).Execute());
 
             return command;
         }

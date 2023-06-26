@@ -1,0 +1,7 @@
+﻿{
+  "author": "Майкрософт",
+  "name": "Файл Directory.Build.targets MSBuild",
+  "description": "Пустой файл Directory.Build.targets, который можно использовать для указания задач и целей MSBuild для всей папки",
+  "symbols/inherit/displayName": "Наследовать",
+  "symbols/inherit/description": "Если значение равно \"true\", добавляет импорт для ближайшего Directory.Build.targets в иерархии каталогов файловой системы. Directory.Build.targets не наследуется по умолчанию, поэтому это позволяет создать набор папок настроек по папкам."
+}

@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="translated">Reklam bildirimi güncelleştirilemedi. {0} bildirim paketi yok.</target>
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">Reklam bildirimi güncelleştirilmedi. {0} için bildirim paketi yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -15,6 +15,16 @@
       <trans-unit id="CacheMissingPackage">
         <source>Package {0} version {1} doesn't exist in offline cache {2}.</source>
         <target state="translated">{0} paketi sürüm {1}, çevrimdışı {2} önbelleğinde yok.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">{0} ve {1} seçenekleri birlikte kullanılamıyor. Bir geri alma dosyasından yükleniyorsa {0} seçeneğini kaldırın. Aksi takdirde, {1} seçeneğini kaldırın</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">Güncelleştirilmiş iş yükü bildirimleri denetleniyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
@@ -37,6 +47,11 @@
         <target state="translated">{0} paketi sürüm{1}, çevrimdışı {2} önbelleğine indiriliyor...</target>
         <note />
       </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="translated">MSI'da {0} paketinden tek bildirim özellik bandı ve bildirim klasörü bekleniyor</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
         <source>Failed to update the advertising manifest {0}: {1}.</source>
         <target state="translated">Reklam bildirimi {0} güncelleştirilemedi: {1}.</target>
@@ -47,9 +62,9 @@
         <target state="translated">Bildirim paketi {0} indirilemedi.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToGetPackageManifestUrl">
-        <source>Failed to resolve manifest package URL {0}.</source>
-        <target state="translated">{0} bildirim paketi URL'si çözümlenemedi.</target>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="translated">MSI'dan bilgi ayıklanamadı: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
@@ -112,6 +127,11 @@
         <target state="translated">Sunucuyu başlatmak için yeterli ayrıcalığa sahip değilsiniz.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">İş yükü bildirim kimliği '{0}' için hata ayrıştırma sürümü '{1}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">İş yükünün NuGet paketindeki ayar dosyası geçersiz: {0}</target>
@@ -135,6 +155,16 @@
       <trans-unit id="ManifestDoesNotExist">
         <source>No manifest with ID {0} exists.</source>
         <target state="translated">{0} kimliğine sahip bildirim yok.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="translated">{0} NuGet paketinde bildirim MSI'sı bulunamadı</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageUrlNotResolved">
+        <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
+        <target state="translated">Bildirim paketi çözümlenmedi. {0} için bildirim paketi veya URL yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
@@ -168,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">Makinede bekleyen bir yeniden başlatma işlemi var. Yükleme devam edecek ancak yeniden başlatmanız gerekebilir.</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">Makinede bekleyen bir yeniden başlatma işlemi var. Yükleme devam edecek ancak yeniden başlatmanız gerekebilir.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">
@@ -184,7 +214,7 @@
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
         <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
-        <target state="new">Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</target>
+        <target state="translated">Geri alma tanımı geçersiz. {0} geri alma tanımındaki bildirim kimlikleri yüklü bildirim kimlikleriyle ({1}) eşleşmiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">
@@ -205,6 +235,11 @@
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="translated">İş yükü bildirimlerinin güncelleştirilmesini atlayın.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="translated">İş yükü paketlerinin ve yükleyicilerin imza doğrulamasını atlayın.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
@@ -278,8 +313,8 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
-        <source>Workload '{0}' is already installed.</source>
-        <target state="translated">'{0}' iş yükü zaten yüklü.</target>
+        <source>Workload(s) '{0}' are already installed.</source>
+        <target state="translated">'{0}' iş yükleri zaten yüklü.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadCacheDownloadFailed">

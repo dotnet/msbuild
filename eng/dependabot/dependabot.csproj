@@ -1,0 +1,4 @@
+<!-- This isn't a real project, but Dependabot requires a project. If one
+     exists, it'll update stuff in Packages.props as well, which is all we
+     really want here. -->
+<Project />

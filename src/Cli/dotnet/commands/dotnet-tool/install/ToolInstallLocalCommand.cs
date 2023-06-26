@@ -1,6 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -10,6 +11,8 @@ using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.Common;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using System.Collections.Generic;
+using NuGet.Packaging;
 
 namespace Microsoft.DotNet.Tools.Tool.Install
 {
@@ -22,6 +25,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly IReporter _reporter;
 
         private readonly string _explicitManifestFile;
+        private readonly bool _createManifestIfNeeded;
 
         public ToolInstallLocalCommand(
             ParseResult parseResult,
@@ -29,10 +33,13 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             IToolManifestFinder toolManifestFinder = null,
             IToolManifestEditor toolManifestEditor = null,
             ILocalToolsResolverCache localToolsResolverCache = null,
-            IReporter reporter = null)
+            IReporter reporter = null
+            )
             : base(parseResult)
         {
-            _explicitManifestFile = parseResult.GetValueForOption(ToolAppliedOption.ToolManifestOption);
+            _explicitManifestFile = parseResult.GetValue(ToolAppliedOption.ToolManifestOption);
+
+            _createManifestIfNeeded = parseResult.GetValue(ToolInstallCommandParser.CreateManifestIfNeededOption);
 
             _reporter = (reporter ?? Reporter.Output);
 
@@ -46,7 +53,6 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         public override int Execute()
         {
             FilePath manifestFile = GetManifestFilePath();
-
             return Install(manifestFile);
         }
 
@@ -81,7 +87,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             try
             {
                 return string.IsNullOrWhiteSpace(_explicitManifestFile)
-                    ? _toolManifestFinder.FindFirst()
+                    ? _toolManifestFinder.FindFirst(_createManifestIfNeeded)
                     : new FilePath(_explicitManifestFile);
             }
             catch (ToolManifestCannotBeFoundException e)

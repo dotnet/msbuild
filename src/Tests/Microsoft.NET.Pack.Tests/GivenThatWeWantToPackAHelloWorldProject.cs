@@ -1,11 +1,12 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.NET.Build.Tasks;
 using System.Xml.Linq;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -14,6 +15,8 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.NET.Pack.Tests
 {
@@ -62,7 +65,7 @@ namespace Microsoft.NET.Pack.Tests
             var testProject = new TestProject()
             {
                 Name = "InvokeBuildOnPack",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -83,6 +86,111 @@ namespace Microsoft.NET.Pack.Tests
                 .Fail()
                 .And
                 .HaveStdOutContaining("NETSDK1085");
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_packs_with_release_if_PackRelease_property_set(bool optedOut)
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", identifier: optedOut.ToString())
+               .WithSource();
+
+            File.WriteAllText(Path.Combine(helloWorldAsset.Path, "Directory.Build.props"), "<Project><PropertyGroup><PackRelease>true</PackRelease></PropertyGroup></Project>");
+
+            var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
+
+            packCommand
+                .WithEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE, optedOut.ToString())
+                .Execute()
+                .Should()
+                .Pass();
+
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", optedOut ? "Debug" : "Release", "HelloWorld.1.0.0.nupkg");
+            Assert.True(File.Exists(expectedAssetPath));
+        }
+
+        [Theory]
+        [InlineData("true")]
+        [InlineData("false")]
+        public void It_packs_with_release_if_PackRelease_property_set_in_csproj(string valueOfPackRelease)
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld")
+               .WithSource()
+               .WithProjectChanges(project =>
+               {
+                   var ns = project.Root.Name.Namespace;
+                   var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                   propertyGroup.Add(new XElement(ns + "PackRelease", valueOfPackRelease));
+               });
+
+            var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
+
+            packCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", valueOfPackRelease == "true" ? "Release" : "Debug", "HelloWorld.1.0.0.nupkg");
+            new FileInfo(expectedAssetPath).Should().Exist();
+        }
+
+        [InlineData("")]
+        [InlineData("false")]
+        [Theory]
+        public void It_packs_successfully_with_Multitargeting_where_net_8_and_net_7_project_defines_PackRelease_or_not(string packReleaseValue)
+        {
+            var helloWorldAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld", identifier: packReleaseValue)
+                .WithSource()
+                .WithTargetFrameworks("net8.0;net7.0")
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    if (packReleaseValue != "")
+                    {
+                        propertyGroup
+                            .Add(new XElement(ns + "PackRelease", packReleaseValue));
+                    };
+                });
+
+            var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
+
+            packCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string expectedConfiguration = packReleaseValue == "false" ? "Debug" : "Release";
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", expectedConfiguration, "HelloWorld.1.0.0.nupkg");
+            new FileInfo(expectedAssetPath).Should().Exist();
+        }
+
+        [Fact]
+        public void A_PackRelease_property_does_not_affect_other_commands_besides_pack()
+        {
+            var tfm = "net8.0";
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld")
+               .WithSource()
+               .WithTargetFramework(tfm);
+
+            File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PackRelease>false</PackRelease></PropertyGroup></Project>");
+
+            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
+
+            publishCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var unexpectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Debug", tfm, "HelloWorld.dll");
+            Assert.False(File.Exists(unexpectedAssetPath));
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", tfm, "HelloWorld.dll");
+            Assert.True(File.Exists(expectedAssetPath));
         }
     }
 }

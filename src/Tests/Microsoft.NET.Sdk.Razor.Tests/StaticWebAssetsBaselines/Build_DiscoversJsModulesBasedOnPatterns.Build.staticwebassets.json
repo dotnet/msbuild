@@ -9,15 +9,17 @@
   "DiscoveryPatterns": [],
   "Assets": [
     {
-      "Identity": "${ProjectRoot}\\Components\\Pages\\Counter.razor.js",
+      "Identity": "${ProjectPath}\\Components\\Pages\\Counter.razor.js",
       "SourceId": "ComponentApp",
       "SourceType": "Discovered",
-      "ContentRoot": "${ProjectRoot}\\",
+      "ContentRoot": "${ProjectPath}\\",
       "BasePath": "_content/ComponentApp",
       "RelativePath": "Components/Pages/Counter.razor.js",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
@@ -26,15 +28,17 @@
       "OriginalItemSpec": "Components\\Pages\\Counter.razor.js"
     },
     {
-      "Identity": "${ProjectRoot}\\Pages\\Index.cshtml.js",
+      "Identity": "${ProjectPath}\\Pages\\Index.cshtml.js",
       "SourceId": "ComponentApp",
       "SourceType": "Discovered",
-      "ContentRoot": "${ProjectRoot}\\",
+      "ContentRoot": "${ProjectPath}\\",
       "BasePath": "_content/ComponentApp",
       "RelativePath": "Pages/Index.cshtml.js",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
@@ -43,38 +47,42 @@
       "OriginalItemSpec": "Pages\\Index.cshtml.js"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\ComponentApp.styles.css",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\ComponentApp.styles.css",
       "SourceId": "ComponentApp",
       "SourceType": "Computed",
-      "ContentRoot": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\",
+      "ContentRoot": "${ProjectPath}\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\",
       "BasePath": "_content/ComponentApp",
       "RelativePath": "ComponentApp.styles.css",
       "AssetKind": "All",
       "AssetMode": "CurrentProject",
       "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
       "RelatedAsset": "",
       "AssetTraitName": "ScopedCss",
       "AssetTraitValue": "ApplicationBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\ComponentApp.styles.css"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\ComponentApp.styles.css"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css",
       "SourceId": "ComponentApp",
       "SourceType": "Computed",
-      "ContentRoot": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\",
+      "ContentRoot": "${ProjectPath}\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\",
       "BasePath": "_content/ComponentApp",
       "RelativePath": "ComponentApp.bundle.scp.css",
       "AssetKind": "All",
       "AssetMode": "Reference",
       "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
       "RelatedAsset": "",
       "AssetTraitName": "ScopedCss",
       "AssetTraitValue": "ProjectBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css"
     }
   ]
 }

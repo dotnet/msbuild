@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -55,18 +55,21 @@ namespace Microsoft.DotNet.Configurer
                 _performanceMeasurements?.Add("AddPackageExecutablePath Time", beforeAddPackageExecutablePath.Elapsed.TotalMilliseconds);
             }
 
-            if (ShouldPrintFirstTimeUseNotice())
+            var isFirstTimeUse = ShouldPrintFirstTimeUseNotice();
+            var canShowFirstUseMessages = isFirstTimeUse && !_dotnetFirstRunConfiguration.NoLogo;
+            if (isFirstTimeUse)
             {
                 Stopwatch beforeFirstTimeUseNotice = Stopwatch.StartNew();
-                if (!_dotnetFirstRunConfiguration.NoLogo)
+                // Migrate the nuget state from earlier SDKs
+                NuGet.Common.Migrations.MigrationRunner.Run();
+
+                if (canShowFirstUseMessages)
                 {
                     PrintFirstTimeMessageWelcome();
                     if (ShouldPrintTelemetryMessageWhenFirstTimeUseNoticeIsEnabled())
                     {
                         PrintTelemetryMessage();
                     }
-
-                    PrintFirstTimeMessageMoreInformation();
                 }
 
                 _firstTimeUseNoticeSentinel.CreateIfNotExists();
@@ -77,7 +80,28 @@ namespace Microsoft.DotNet.Configurer
             {
                 Stopwatch beforeGenerateAspNetCertificate = Stopwatch.StartNew();
                 GenerateAspNetCertificate();
+
+                if (canShowFirstUseMessages)
+                {
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        // The instructions in this message only apply to Windows and MacOS.
+                        PrintFirstTimeMessageAspNetCertificate();
+                    }
+                    else
+                    {
+                        // The instructions in this message only apply to Linux (various distros).
+                        // OSPlatform.FreeBSD would also see this message, which is acceptable since we have no specific FreeBSD instructions.
+                        PrintFirstTimeMessageAspNetCertificateLinux();
+                    }
+                }
+
                 _performanceMeasurements?.Add("GenerateAspNetCertificate Time", beforeGenerateAspNetCertificate.Elapsed.TotalMilliseconds);
+            }
+
+            if (canShowFirstUseMessages)
+            {
+                PrintFirstTimeMessageMoreInformation();
             }
         }
 
@@ -130,6 +154,19 @@ namespace Microsoft.DotNet.Configurer
                 DeriveDotnetVersionFromProductVersion(productVersion),
                 productVersion));
         }
+
+        private void PrintFirstTimeMessageAspNetCertificate()
+        {
+            _reporter.WriteLine();
+            _reporter.WriteLine(LocalizableStrings.FirstTimeMessageAspNetCertificate);
+        }
+
+        private void PrintFirstTimeMessageAspNetCertificateLinux()
+        {
+            _reporter.WriteLine();
+            _reporter.WriteLine(LocalizableStrings.FirstTimeMessageAspNetCertificateLinux);
+        }
+
         private void PrintFirstTimeMessageMoreInformation()
         {
             _reporter.WriteLine();

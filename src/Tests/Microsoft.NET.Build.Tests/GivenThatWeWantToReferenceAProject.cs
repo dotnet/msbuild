@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -20,6 +20,7 @@ namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToReferenceAProject : SdkTest
     {
+        const string tfm = ToolsetInfo.CurrentTargetFramework;
         public GivenThatWeWantToReferenceAProject(ITestOutputHelper log) : base(log)
         {
         }
@@ -61,15 +62,15 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netstandard1.2", true, "netstandard1.5", true, false, false)]
-        [InlineData("netcoreapp1.1", true, "net45;netstandard1.5", true, true, true)]
-        [InlineData("netcoreapp1.1", true, "net45;net46", true, false, false)]
-        [InlineData("netcoreapp1.1;net461", true, "netstandard1.4", true, true, true)]
-        [InlineData("netcoreapp1.1;net45", true, "netstandard1.4", true, false, false)]
-        [InlineData("netcoreapp1.1;net46", true, "net45;netstandard1.6", true, true, true)]
-        [InlineData("netcoreapp1.1;net45", true, "net46;netstandard1.6", true, false, false)]
-        [InlineData("v4.5", false, "netstandard1.6", true, true, false)]
-        [InlineData("v4.6.1", false, "netstandard1.6;net461", true, true, true)]
-        [InlineData("v4.5", false, "netstandard1.6;net461", true, true, false)]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}", true, "net45;netstandard1.5", true, true, true)]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework}", true, "net45;net46", true, true, true)]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework};net462", true, "netstandard1.4", true, true, true)]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework};net45", true, "netstandard1.4", true, false, false)]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework};net46", true, "net45;netstandard1.6", true, true, true)]
+        [InlineData($"{ToolsetInfo.CurrentTargetFramework};net45", true, "net46;netstandard1.6", true, false, false)]
+        [InlineData("v4.5.2", false, "netstandard1.6", true, true, false)]
+        [InlineData("v4.7.2", false, "netstandard1.6;net472", true, true, true)]
+        [InlineData("v4.5.2", false, "netstandard1.6;net472", true, true, false)]
         public void It_checks_for_valid_references(string referencerTarget, bool referencerIsSdkProject,
             string dependencyTarget, bool dependencyIsSdkProject,
             bool restoreSucceeds, bool buildSucceeds)
@@ -170,7 +171,6 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(false, false)]
         public void It_disables_copying_conflicting_transitive_content(bool copyConflictingTransitiveContent, bool explicitlySet)
         {
-            var tfm = "netcoreapp3.1";
             var contentName = "script.sh";
             var childProject = new TestProject()
             {
@@ -247,7 +247,7 @@ namespace Microsoft.NET.Build.Tests
         [RequiresMSBuildVersionFact("16.8.0")]
         public void It_copies_content_transitively()
         {
-            var targetFramework = "net5.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var testProjectA = new TestProject()
             {
                 Name = "ProjectA",
@@ -285,9 +285,9 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var contentPath = Path.Combine(testAsset.Path, testProjectC.Name, "bin", "Debug", targetFramework, "a.txt");
+            var contentPath = Path.Combine(testProjectC.GetOutputDirectory(testAsset.Path), "a.txt");
             File.Exists(contentPath).Should().BeTrue();
-            var binDir = new DirectoryInfo(Path.Combine(testAsset.Path, testProjectC.Name, "bin"));
+            var binDir = new DirectoryInfo(Path.GetDirectoryName(contentPath));
             binDir.Delete(true);
 
             buildCommand
@@ -326,7 +326,7 @@ class Program
             {
                 Name = "ProjectC",
                 IsExe = true,
-                TargetFrameworks = "netstandard2.1;netcoreapp3.1"
+                TargetFrameworks = $"netstandard2.1;{tfm}"
             };
             testProjectC.ReferencedProjects.Add(testProjectB);
             testProjectC.SourceFiles.Add("Program.cs", source);
@@ -337,7 +337,7 @@ class Program
                 {
                     var ns = p.Root.Name.Namespace;
                     var itemGroup = new XElement(ns + "ItemGroup",
-                        new XAttribute("Condition", @"'$(TargetFramework)' == 'netcoreapp3.1'"));
+                        new XAttribute("Condition", $@"'$(TargetFramework)' == '{tfm}'"));
                     var projRef = new XElement(ns + "ProjectReference",
                         new XAttribute("Include", Path.Combine(path, "..", "..", testProjectA.Name, $"{testProjectA.Name}.csproj")));
                     itemGroup.Add(projRef);

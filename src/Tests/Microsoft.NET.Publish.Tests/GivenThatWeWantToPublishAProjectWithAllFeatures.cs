@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -47,14 +47,14 @@ namespace Microsoft.NET.Publish.Tests
                 // TestLibrary has a hard dependency on Newtonsoft.Json.
                 // TestApp has a PrivateAssets=All dependency on Microsoft.Extensions.DependencyModel, which depends on Newtonsoft.Json.
                 // This verifies that P2P references get walked correctly when doing PrivateAssets exclusion.
-                VerifyDependency(dependencyContext, "Newtonsoft.Json", "lib/netstandard1.0/", null);
+                VerifyDependency(dependencyContext, "Newtonsoft.Json", targetFramework == "net6.0" ? "lib/netstandard2.0/" : "lib/netstandard1.3/", null);
 
                 // Verify P2P references get created correctly in the .deps.json file.
                 VerifyDependency(dependencyContext, "TestLibrary", "", null,
                     "da", "de", "fr");
 
                 // Verify package reference with satellites gets created correctly in the .deps.json file
-                VerifyDependency(dependencyContext, "Humanizer.Core", "lib/netstandard1.0/", "Humanizer",
+                VerifyDependency(dependencyContext, "Humanizer.Core", targetFramework == "net6.0" ? "lib/netstandard2.0/" : "lib/netstandard1.0/", "Humanizer",
                     "af", "ar", "az", "bg", "bn-BD", "cs", "da", "de", "el", "es", "fa", "fi-FI", "fr", "fr-BE", "he", "hr",
                     "hu", "hy", "id", "it", "ja", "lv", "ms-MY", "mt", "nb", "nb-NO", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sr",
                     "sr-Latn", "sv", "tr", "uk", "uz-Cyrl-UZ", "uz-Latn-UZ", "vi", "zh-CN", "zh-Hans", "zh-Hant");
@@ -83,6 +83,7 @@ namespace Microsoft.NET.Publish.Tests
             ""System.Reflection.NullabilityInfoContext.IsSupported"": false,
             ""System.Resources.ResourceManager.AllowCustomResourceTypes"": false,
             ""System.Resources.UseSystemResourceKeys"": true,
+            ""System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported"": true,
             ""System.Runtime.InteropServices.BuiltInComInterop.IsSupported"": false,
             ""System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting"": false,
             ""System.Runtime.InteropServices.EnableCppCLIHostActivation"": false,
@@ -90,8 +91,10 @@ namespace Microsoft.NET.Publish.Tests
             ""System.Runtime.TieredCompilation"": true,
             ""System.Runtime.TieredCompilation.QuickJit"": true,
             ""System.Runtime.TieredCompilation.QuickJitForLoops"": true,
+            ""System.Runtime.TieredPGO"": true,
             ""System.StartupHookProvider.IsSupported"": false,
             ""System.Text.Encoding.EnableUnsafeUTF7Encoding"": false,
+            ""System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault"": false,
             ""System.Threading.Thread.EnableAutoreleasePool"": false,
             ""System.Threading.ThreadPool.MinThreads"": 2,
             ""System.Threading.ThreadPool.MaxThreads"": 9,
@@ -106,8 +109,8 @@ namespace Microsoft.NET.Publish.Tests
 }");
             baselineConfigJsonObject["runtimeOptions"]["tfm"] = targetFramework;
             baselineConfigJsonObject["runtimeOptions"]["framework"]["version"] =
-                targetFramework == "netcoreapp1.0" ? "1.0.5" : "1.1.2";
-
+                targetFramework == "net6.0" ? "6.0.0" : "1.1.2";
+            
             runtimeConfigJsonObject
                 .Should()
                 .BeEquivalentTo(baselineConfigJsonObject);
@@ -116,7 +119,7 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void It_fails_when_nobuild_is_set_and_build_was_not_performed_previously()
         {
-            var publishCommand = GetPublishCommand("netcoreapp1.0").Execute("/p:NoBuild=true");
+            var publishCommand = GetPublishCommand(ToolsetInfo.CurrentTargetFramework).Execute("/p:NoBuild=true");
             publishCommand.Should().Fail().And.HaveStdOutContaining("MSB3030"); // "Could not copy ___ because it was not found."
         }
 
@@ -244,7 +247,7 @@ namespace Microsoft.NET.Publish.Tests
             get
             {
                 yield return new object[] {
-                    "netcoreapp1.0",
+                    "net6.0",
                     new string[]
                     {
                         "TestApp.dll",
@@ -254,7 +257,6 @@ namespace Microsoft.NET.Publish.Tests
                         "TestLibrary.dll",
                         "TestLibrary.pdb",
                         "Newtonsoft.Json.dll",
-                        "System.Runtime.Serialization.Primitives.dll",
                         "CompileCopyToOutput.cs",
                         "Resource1.resx",
                         "ContentAlways.txt",
@@ -263,28 +265,6 @@ namespace Microsoft.NET.Publish.Tests
                         "NoneCopyOutputPreserveNewest.txt",
                         "CopyToOutputFromProjectReference.txt",
                         "Humanizer.dll",
-                        "System.AppContext.dll",
-                        "System.Buffers.dll",
-                        "System.Collections.Concurrent.dll",
-                        "System.Diagnostics.DiagnosticSource.dll",
-                        "System.IO.Compression.ZipFile.dll",
-                        "System.IO.FileSystem.Primitives.dll",
-                        "System.Linq.dll",
-                        "System.Linq.Expressions.dll",
-                        "System.ObjectModel.dll",
-                        "System.Reflection.Emit.dll",
-                        "System.Reflection.Emit.ILGeneration.dll",
-                        "System.Reflection.Emit.Lightweight.dll",
-                        "System.Reflection.TypeExtensions.dll",
-                        "System.Runtime.InteropServices.RuntimeInformation.dll",
-                        "System.Runtime.Numerics.dll",
-                        "System.Security.Cryptography.OpenSsl.dll",
-                        "System.Security.Cryptography.Primitives.dll",
-                        "System.Text.RegularExpressions.dll",
-                        "System.Threading.dll",
-                        "System.Threading.Tasks.Extensions.dll",
-                        "System.Xml.ReaderWriter.dll",
-                        "System.Xml.XDocument.dll",
                         "da/TestApp.resources.dll",
                         "da/TestLibrary.resources.dll",
                         "de/TestApp.resources.dll",
@@ -335,37 +315,7 @@ namespace Microsoft.NET.Publish.Tests
                         "hy/Humanizer.resources.dll",
                         "ms-MY/Humanizer.resources.dll",
                         "mt/Humanizer.resources.dll",
-                        "runtimes/debian.8-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
-                        "runtimes/fedora.23-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
-                        "runtimes/fedora.24-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
-                        "runtimes/opensuse.13.2-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
-                        "runtimes/opensuse.42.1-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
-                        "runtimes/osx/lib/netstandard1.6/System.Security.Cryptography.Algorithms.dll",
-                        "runtimes/osx.10.10-x64/native/System.Security.Cryptography.Native.Apple.dylib",
-                        "runtimes/osx.10.10-x64/native/System.Security.Cryptography.Native.OpenSsl.dylib",
-                        "runtimes/rhel.7-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
-                        "runtimes/ubuntu.14.04-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
-                        "runtimes/ubuntu.16.04-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
-                        "runtimes/ubuntu.16.10-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
-                        "runtimes/unix/lib/netstandard1.1/System.Runtime.InteropServices.RuntimeInformation.dll",
-                        "runtimes/unix/lib/netstandard1.3/System.Globalization.Extensions.dll",
-                        "runtimes/unix/lib/netstandard1.3/System.IO.Compression.dll",
-                        "runtimes/unix/lib/netstandard1.3/System.Security.Cryptography.Csp.dll",
-                        "runtimes/unix/lib/netstandard1.3/System.Security.Cryptography.Encoding.dll",
-                        "runtimes/unix/lib/netstandard1.6/System.Net.Http.dll",
-                        "runtimes/unix/lib/netstandard1.6/System.Security.Cryptography.Algorithms.dll",
-                        "runtimes/unix/lib/netstandard1.6/System.Security.Cryptography.Cng.dll",
-                        "runtimes/unix/lib/netstandard1.6/System.Security.Cryptography.OpenSsl.dll",
-                        "runtimes/unix/lib/netstandard1.6/System.Security.Cryptography.X509Certificates.dll",
-                        "runtimes/win/lib/netstandard1.1/System.Runtime.InteropServices.RuntimeInformation.dll",
-                        "runtimes/win/lib/netstandard1.3/System.Globalization.Extensions.dll",
-                        "runtimes/win/lib/netstandard1.3/System.IO.Compression.dll",
-                        "runtimes/win/lib/netstandard1.3/System.Net.Http.dll",
-                        "runtimes/win/lib/netstandard1.3/System.Security.Cryptography.Csp.dll",
-                        "runtimes/win/lib/netstandard1.3/System.Security.Cryptography.Encoding.dll",
-                        "runtimes/win/lib/netstandard1.6/System.Security.Cryptography.Algorithms.dll",
-                        "runtimes/win/lib/netstandard1.6/System.Security.Cryptography.Cng.dll",
-                        "runtimes/win/lib/netstandard1.6/System.Security.Cryptography.X509Certificates.dll",
+                        $"TestApp{EnvironmentInfo.ExecutableExtension}",
                     }
                 };
 
@@ -380,6 +330,12 @@ namespace Microsoft.NET.Publish.Tests
                         "TestLibrary.dll",
                         "TestLibrary.pdb",
                         "Newtonsoft.Json.dll",
+                        "System.Collections.NonGeneric.dll",
+                        "System.Collections.Specialized.dll",
+                        "System.ComponentModel.Primitives.dll",
+                        "System.ComponentModel.TypeConverter.dll",
+                        "System.Runtime.Serialization.Formatters.dll",
+                        "System.Xml.XmlDocument.dll",
                         "System.Runtime.Serialization.Primitives.dll",
                         "CompileCopyToOutput.cs",
                         "Resource1.resx",

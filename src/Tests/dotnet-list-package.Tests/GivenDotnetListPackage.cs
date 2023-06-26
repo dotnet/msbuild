@@ -1,8 +1,10 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using FluentAssertions;
@@ -11,6 +13,7 @@ using Microsoft.DotNet.Tools.List.PackageReferences;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -57,7 +60,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
             var projectDirectory = testAsset.Path;
 
             var packageName = "Newtonsoft.Json";
-            var packageVersion = "9.0.1";
+            var packageVersion = "13.0.1";
             var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
                 .Execute("add", "package", packageName, "--version", packageVersion);
@@ -103,7 +106,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .And.HaveStdOutContainingIgnoreSpaces("Microsoft.NETCore.App(A)")
                 .And.HaveStdOutContainingIgnoreSpaces("(A):Auto-referencedpackage");
 
-            void ChangeTargetFrameworkTo2_1(XDocument project)
+            static void ChangeTargetFrameworkTo2_1(XDocument project)
             {
                 project.Descendants()
                        .Single(e => e.Name.LocalName == "TargetFramework")
@@ -148,18 +151,46 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .WithWorkingDirectory(projectDirectory)
                 .Execute()
                 .Should()
-                .Pass()
+                .Fail()
                 .And.HaveStdErr();
         }
 
         [Fact]
         public void ItListsTransitivePackage()
         {
-            var testAssetName = "NewtonSoftDependentProject";
-            var testAsset = _testAssetsManager
-                .CopyTestAsset(testAssetName)
-                .WithSource();
-            var projectDirectory = testAsset.Path;
+            var testProject = new TestProject
+            {
+                Name = "NewtonSoftDependentProject",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+                SourceFiles =
+                {
+["Program.cs"] = @"
+using System;
+using System.Collections;
+using Newtonsoft.Json.Linq;
+
+class Program
+{
+    public static void Main(string[] args)
+    {
+        ArrayList argList = new ArrayList(args);
+        JObject jObject = new JObject();
+
+        foreach (string arg in argList)
+        {
+            jObject[arg] = arg;
+        }
+        Console.WriteLine(jObject.ToString());
+    }
+}
+",
+                }
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", "9.0.1"));
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var projectDirectory = Path.Combine(testAsset.Path, testProject.Name);
 
             new RestoreCommand(testAsset)
                 .Execute()
@@ -283,8 +314,10 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         [InlineData(false, "--outdated", "--highest-minor")]
         [InlineData(false, "--outdated", "--highest-patch")]
         [InlineData(false, "--config")]
+        [InlineData(false, "--configfile")]
         [InlineData(false, "--source")]
         [InlineData(false, "--config", "--deprecated")]
+        [InlineData(false, "--configfile", "--deprecated")]
         [InlineData(false, "--source", "--vulnerable")]
         [InlineData(true, "--vulnerable", "--deprecated")]
         [InlineData(true, "--vulnerable", "--outdated")]
@@ -302,6 +335,28 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
             {
                 checkRules(); // Test for no throw
             }
+        }
+
+        [UnixOnlyFact]
+        public void ItRunsInCurrentDirectoryWithPoundInPath()
+        {
+            // Regression test for https://github.com/dotnet/sdk/issues/19654
+            var testAssetName = "TestAppSimple";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(testAssetName, "C#")
+                .WithSource();
+            var projectDirectory = testAsset.Path;
+
+            new RestoreCommand(testAsset)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new ListPackageCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
         }
     }
 }

@@ -58,13 +58,13 @@
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="PrereleaseDescription">
-        <source>determining whether to include pre-release packages.</source>
-        <target state="translated">определение того, следует ли включать пакеты предварительного выпуска.</target>
+        <source>Include pre-release packages.</source>
+        <target state="needs-review-translation">определение того, следует ли включать пакеты предварительного выпуска.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermArgumentName">
-        <source>Search Term</source>
-        <target state="translated">Условие поиска</target>
+        <source>SEARCH_TERM</source>
+        <target state="needs-review-translation">Условие поиска</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermDescription">

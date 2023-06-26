@@ -1,0 +1,12 @@
+﻿No templates or subcommands found matching: 'uninstal'.
+Did you mean one of the following subcommands?
+   dotnet new uninstall
+   dotnet new install
+
+To list installed templates similar to 'uninstal', run:
+   dotnet new list uninstal
+To search for the templates on NuGet.org, run:
+   dotnet new search uninstal
+
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#103

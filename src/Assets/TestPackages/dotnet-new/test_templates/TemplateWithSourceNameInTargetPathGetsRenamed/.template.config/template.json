@@ -1,0 +1,22 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithSourceNameInTargetPathGetsRenamed",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithSourceNameInTargetPathGetsRenamed",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithSourceNameInTargetPathGetsRenamed",
+  "shortName": "TestAssets.TemplateWithSourceNameInTargetPathGetsRenamed",
+  "sourceName": "foo",
+  "sources": [
+    {
+      "source": "./",
+      "target": "./bar/foo/"
+    }
+  ],
+  "primaryOutputs": [
+    {
+      "path": "bar/foo/foo.cs"
+    }
+  ]
+}

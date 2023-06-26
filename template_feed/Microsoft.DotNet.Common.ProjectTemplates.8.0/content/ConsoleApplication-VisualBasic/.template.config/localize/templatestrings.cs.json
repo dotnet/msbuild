@@ -1,0 +1,20 @@
+{
+  "author": "Microsoft",
+  "name": "Konzolová aplikace",
+  "description": "Projekt pro vytvoření aplikace příkazového řádku, která běží na platformě .NET v systémech Windows, Linux a macOS",
+  "symbols/TargetFrameworkOverride/description": "Přepíše cílovou architekturu.",
+  "symbols/TargetFrameworkOverride/displayName": "Přepsání cílové architektury",
+  "symbols/Framework/description": "Cílová architektura pro projekt",
+  "symbols/Framework/choices/net8.0/description": "Target net8.0",
+  "symbols/Framework/choices/net8.0/displayName": ".NET 8.0",
+  "symbols/Framework/displayName": "Framework",
+  "symbols/langVersion/description": "Nastaví vlastnost LangVersion ve vytvořeném souboru projektu.",
+  "symbols/langVersion/displayName": "Verze jazyka",
+  "symbols/skipRestore/description": "Pokud se tato možnost zadá, přeskočí automatické obnovení projektu při vytvoření.",
+  "symbols/skipRestore/displayName": "Přeskočit obnovení",
+  "symbols/NativeAot/description": "Whether to enable the project for publishing as native AOT.",
+  "symbols/NativeAot/displayName": "Enable _native AOT publish",
+  "postActions/restore/description": "Obnoví balíčky NuGet vyžadované tímto projektem.",
+  "postActions/restore/manualInstructions/default/text": "Spustit dotnet restore",
+  "postActions/open-file/description": "Otevře Program.vb v editoru."
+}

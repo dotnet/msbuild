@@ -19,7 +19,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resources {
@@ -1942,11 +1942,20 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The attempt to publish the ZIP file through {0} failed with HTTP status code {1}..
+        ///   Looks up a localized string similar to The attempt to publish the ZIP file through &apos;{0}&apos; failed with HTTP status code &apos;{1}&apos;..
         /// </summary>
         public static string ZIPDEPLOY_FailedDeploy {
             get {
                 return ResourceManager.GetString("ZIPDEPLOY_FailedDeploy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The attempt to publish the ZIP file through &apos;{0}&apos; failed with HTTP status code &apos;{1}&apos;. See the logs at &apos;{2}&apos;..
+        /// </summary>
+        public static string ZIPDEPLOY_FailedDeployWithLogs {
+            get {
+                return ResourceManager.GetString("ZIPDEPLOY_FailedDeployWithLogs", resourceCulture);
             }
         }
         

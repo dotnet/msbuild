@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="translated">No se pudo actualizar el manifiesto publicitario. El paquete de manifiesto {0} no existe.</target>
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">Manifiesto de publicidad no actualizado. El paquete de manifiesto para {0} no existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -15,6 +15,16 @@
       <trans-unit id="CacheMissingPackage">
         <source>Package {0} version {1} doesn't exist in offline cache {2}.</source>
         <target state="translated">El paquete {0}, versión {1} no existe en la caché sin conexión {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">No se pueden usar las opciones {0} y {1} juntas. Si se instala desde un archivo de reversión, quite {0}. De lo contrario, quite {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">Comprobando si hay manifiestos de carga de trabajo actualizados.</target>
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
@@ -37,6 +47,11 @@
         <target state="translated">Descargando el paquete {0}, versión {1} a la caché sin conexión {2}...</target>
         <note />
       </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="translated">Se esperaba una banda de características de manifiesto único y una carpeta de manifiesto en MSI desde el paquete {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
         <source>Failed to update the advertising manifest {0}: {1}.</source>
         <target state="translated">No se pudo actualizar el manifiesto publicitario {0}: {1}.</target>
@@ -47,9 +62,9 @@
         <target state="translated">No se pudo descargar el paquete de manifiesto {0}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToGetPackageManifestUrl">
-        <source>Failed to resolve manifest package URL {0}.</source>
-        <target state="translated">No se pudo resolver la dirección URL del paquete de manifiesto {0}.</target>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="translated">No se pudo extraer información de MSI: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
@@ -112,6 +127,11 @@
         <target state="translated">Insuficientes privilegios para iniciar el servidor.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">Error al analizar la versión \"{1}\" para el id. de manifiesto de carga de trabajo \"{0}\"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="translated">El archivo de configuración del paquete NuGet de la carga de trabajo no es válido: {0}</target>
@@ -135,6 +155,16 @@
       <trans-unit id="ManifestDoesNotExist">
         <source>No manifest with ID {0} exists.</source>
         <target state="translated">No existe ningún manifiesto con id. {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="translated">No se encontró el MSI del manifiesto en el paquete NuGet {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageUrlNotResolved">
+        <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
+        <target state="translated">Paquete de manifiesto no resuelto. El paquete de manifiesto o la dirección URL de {0} no existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
@@ -168,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">El equipo tiene un reinicio pendiente. La instalación continuará, pero es posible que tenga que reiniciar.</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">El equipo tiene un reinicio pendiente. La instalación continuará, pero es posible que tenga que reiniciar.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">
@@ -184,7 +214,7 @@
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
         <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
-        <target state="new">Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</target>
+        <target state="translated">Definición de reversión no válida. Los id. de manifiesto de la definición de reversión {0} no coinciden con los id. de manifiesto instalados {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">
@@ -205,6 +235,11 @@
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="translated">Omitir la actualización de los manifiestos de carga de trabajo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="translated">Omita la comprobación de firma de los paquetes de carga de trabajo y los instaladores.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
@@ -278,8 +313,8 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
-        <source>Workload '{0}' is already installed.</source>
-        <target state="translated">La carga de trabajo "{0}" ya está instalada.</target>
+        <source>Workload(s) '{0}' are already installed.</source>
+        <target state="translated">Las cargas de trabajo "{0}" ya están instaladas.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadCacheDownloadFailed">

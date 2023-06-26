@@ -51,11 +51,13 @@
     <FileSignInfo Include="xunit.performance.core.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="xunit.performance.execution.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="xunit.performance.metrics.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="Valleysoft.DockerCredsProvider.dll" CertificateName="3PartySHA2" />
   </ItemGroup>
 
   <!-- Filter out any test packages from ItemsToSign -->
   <ItemGroup>
     <ItemsToSignPostBuild Remove="*tests*.nupkg" />
+    <ItemsToSign Remove="$(ArtifactsPackagesDir)**\*tests*.nupkg" />
   </ItemGroup>
 
   <PropertyGroup>

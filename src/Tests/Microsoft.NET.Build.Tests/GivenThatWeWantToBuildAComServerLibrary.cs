@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using System.Linq;
@@ -82,8 +82,8 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("win-x64")]
-        [InlineData("win-x86")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86")]
         public void It_embeds_the_clsidmap_in_the_comhost_when_rid_specified(string rid)
         {
             var testAsset = _testAssetsManager
@@ -157,8 +157,8 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [PlatformSpecificTheory(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
-        [InlineData("win-x64")]
-        [InlineData("win-x86")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86")]
         public void It_fails_to_embed_clsid_when_not_on_windows(string rid)
         {
             var testAsset = _testAssetsManager

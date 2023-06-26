@@ -1,4 +1,5 @@
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -88,7 +89,7 @@ namespace Microsoft.DotNet.Tests
             var tempPath = GetTempPath();
             File.WriteAllText(tempPath, "");
             Action a = () => new RuntimeConfig(tempPath);
-            a.ShouldThrow<System.Text.Json.JsonException>();
+            a.Should().Throw<System.Text.Json.JsonException>();
         }
 
         [Fact]
@@ -132,93 +133,93 @@ namespace Microsoft.DotNet.Tests
         }
 
         private const string Basic =
-            @"{
-  ""runtimeOptions"": {
-    ""tfm"": ""netcoreapp2.1"",
-    ""framework"": {
+            $@"{{
+  ""runtimeOptions"": {{
+    ""tfm"": ""{ToolsetInfo.CurrentTargetFramework}"",
+    ""framework"": {{
       ""name"": ""Microsoft.NETCore.App"",
       ""version"": ""2.1.0""
-    }
-  }
-}";
+    }}
+  }}
+}}";
 
         private const string TrailingComma =
-            @"{
-  ""runtimeOptions"": {
-    ""tfm"": ""netcoreapp2.1"",
-    ""framework"": {
+            $@"{{
+  ""runtimeOptions"": {{
+    ""tfm"": ""{ToolsetInfo.CurrentTargetFramework}"",
+    ""framework"": {{
       ""name"": ""Microsoft.NETCore.App"",
       ""version"": ""2.1.0"",
-    }
-  }
-}";
+    }}
+  }}
+}}";
 
         private const string WithComment =
-            @"{
-  ""runtimeOptions"": {
-    ""tfm"": ""netcoreapp2.1"",
-    ""framework"": {
+            $@"{{
+  ""runtimeOptions"": {{
+    ""tfm"": ""{ToolsetInfo.CurrentTargetFramework}"",
+    ""framework"": {{
       ""name"": ""Microsoft.NETCore.App"",
       ""version"": ""2.1.0"" // with comment
-    }
-  }
-}";
+    }}
+  }}
+}}";
 
         private const string Order =
-            @"{
-  ""runtimeOptions"": {
-    ""framework"": {
+            $@"{{
+  ""runtimeOptions"": {{
+    ""framework"": {{
       ""version"": ""2.1.0"",
       ""name"": ""Microsoft.NETCore.App""
-    },
-    ""tfm"": ""netcoreapp2.1""
-  }
-}";
+    }},
+    ""tfm"": ""{ToolsetInfo.CurrentTargetFramework}""
+  }}
+}}";
 
         private const string CasingOnNameAndVersionField =
-            @"{
-  ""runtimeOptions"": {
-    ""tfm"": ""netcoreapp2.1"",
-    ""framework"": {
+            $@"{{
+  ""runtimeOptions"": {{
+    ""tfm"": ""{ToolsetInfo.CurrentTargetFramework}"",
+    ""framework"": {{
       ""Name"": ""Microsoft.NETCore.App"",
       ""Version"": ""2.1.0""
-    }
-  }
-}";
+    }}
+  }}
+}}";
 
         private const string CasingOnFrameworkField =
-            @"{
-     ""runtimeOptions"": {
-       ""tfm"": ""netcoreapp2.1"",
-       ""Framework"": {
+            $@"{{
+     ""runtimeOptions"": {{
+       ""tfm"": ""{ToolsetInfo.CurrentTargetFramework}"",
+       ""Framework"": {{
          ""name"": ""Microsoft.NETCore.App"",
          ""version"": ""2.1.0""
-       }
-     }
-   }";
+       }}
+     }}
+   }}";
 
         private const string CasingOnRuntimeOptionsField =
-            @"{
-  ""RuntimeOptions"": {
-    ""tfm"": ""netcoreapp2.1"",
-    ""framework"": {
+            $@"{{
+  ""RuntimeOptions"": {{
+    ""tfm"": ""{ToolsetInfo.CurrentTargetFramework}"",
+    ""framework"": {{
       ""name"": ""Microsoft.NETCore.App"",
       ""version"": ""2.1.0""
-    }
-  }
-}";
+    }}
+  }}
+}}";
 
         private const string ExtraField =
-            @"{
-  ""runtimeOptions"": {
-    ""tfm"": ""netcoreapp2.1"",
-    ""framework"": {
+            $@"{{
+  ""runtimeOptions"": {{
+    ""tfm"": ""{ToolsetInfo.CurrentTargetFramework}"",
+    ""framework"": {{
       ""name"": ""Microsoft.NETCore.App"",
       ""version"": ""2.1.0""
-    },
+    }},
     ""extra"": ""field""
-  }
-}";
+  }}
+}}";
 
         private const string Missing =
             @"{

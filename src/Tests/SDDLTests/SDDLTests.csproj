@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TargetFrameworks>$(ToolsetTargetFramework)</TargetFrameworks>
+    <TargetFrameworks Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' ">$(ToolsetTargetFramework)</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <CanRunTestAsTool>false</CanRunTestAsTool>
+    <IsTestProject>false</IsTestProject>
+    <IsUnitTestProject>false</IsUnitTestProject>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Cli\dotnet\dotnet.csproj" />
+    <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit" Version="2.4.1" />
+  </ItemGroup>
+</Project>

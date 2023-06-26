@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -341,7 +341,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
                     if (request.IsShutdownRequest())
                     {
                         // Reply with the PID of this process so that the client can wait for it to exit.
-                        var response = new ShutdownServerResponse(Process.GetCurrentProcess().Id);
+                        var response = new ShutdownServerResponse(Environment.ProcessId);
                         await response.WriteAsync(connection.Stream, cancellationToken);
 
                         // We can safely disconnect the client, then when this connection gets cleaned up by the event loop

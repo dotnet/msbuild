@@ -12,6 +12,11 @@
         <target state="translated">Kullanım dışı bırakılan paketleri listeler. '--vulnerable' veya '--outdated' seçenekleriyle birleştirilemez.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdFormatDescription">
+        <source>Specifies the output format type for the list packages command.</source>
+        <target state="translated">Liste paketleri komutunun çıkış biçimi türünü belirtir.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
         <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>
@@ -25,6 +30,11 @@
       <trans-unit id="CmdOutdatedDescription">
         <source>Lists packages that have newer versions. Cannot be combined with '--deprecated' or '--vulnerable' options.</source>
         <target state="translated">Daha yeni sürümlere sahip paketleri listeler. '--deprecated' veya '--vulnerable' seçenekleriyle birleştirilemez.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputVersionDescription">
+        <source>Specifies the version of machine-readable output. Requires the '--format json' option.</source>
+        <target state="translated">Makine tarafından okunabilir çıkışın sürümünü belirtir. '--format json' seçeneğini gerektirir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">

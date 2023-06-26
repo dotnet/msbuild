@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using System.Linq;
 using Xunit.Abstractions;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -188,11 +189,11 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyFact]
         public void It_chooses_lowest_netfx_in_default_atf()
         {
-            var testProjectName = "netcoreapp30_multiple_atf";
+            var testProjectName = $"{ToolsetInfo.CurrentTargetFramework.Replace(".", "")}_multiple_atf";
 
             var (testProjectTestAsset, testPackageReference) = CreateTestAsset(
                testProjectName,
-               "netcoreapp3.0",
+               ToolsetInfo.CurrentTargetFramework,
                "net462;net472",
                new Dictionary<string, string> { ["CopyLocalLockFileAssemblies"] = "true" });
 
@@ -206,7 +207,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testProjectTestAsset);
             buildCommand.Execute().Should().Pass();
 
-            var referencedDll = buildCommand.GetOutputDirectory("netcoreapp3.0").File("net462_net472_pkg.dll").FullName;
+            var referencedDll = buildCommand.GetOutputDirectory().File("net462_net472_pkg.dll").FullName;
             var referencedTargetFramework = AssemblyInfo.Get(referencedDll)["TargetFrameworkAttribute"];
             referencedTargetFramework.Should().Be(".NETFramework,Version=v4.6.2");
         }

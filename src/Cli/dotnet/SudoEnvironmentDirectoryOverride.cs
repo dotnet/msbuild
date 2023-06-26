@@ -1,12 +1,11 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.CommandLine.Parsing;
+using System.CommandLine;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Common;
 using NuGet.Common;
 using NuGet.Configuration;
 
@@ -17,8 +16,6 @@ namespace Microsoft.DotNet.Cli
     /// </summary>
     public static class SudoEnvironmentDirectoryOverride
     {
-        private const string SudoHomeDirectory = "/tmp/dotnet_sudo_home/";
-
         /// <summary>
         /// Not for security use. Detect if command is running under sudo
         /// via if SUDO_UID being set.
@@ -37,22 +34,9 @@ namespace Microsoft.DotNet.Cli
         {
             if (!OperatingSystem.IsWindows() && IsRunningUnderSudo() && IsRunningWorkloadCommand(parseResult))
             {
-                if (!TempHomeIsOnlyRootWritable(SudoHomeDirectory))
-                {
-                    try
-                    {
-                        Directory.Delete(SudoHomeDirectory, recursive: true);
-                    }
-                    catch (DirectoryNotFoundException)
-                    {
-                        // Avoid read after write race condition
-                    }
-                }
-
-                Directory.CreateDirectory(SudoHomeDirectory);
-
+                string sudoHome = PathUtilities.CreateTempSubdirectory();
                 var homeBeforeOverride = Path.Combine(Environment.GetEnvironmentVariable("HOME"));
-                Environment.SetEnvironmentVariable("HOME", SudoHomeDirectory);
+                Environment.SetEnvironmentVariable("HOME", sudoHome);
 
                 CopyUserNuGetConfigToOverriddenHome(homeBeforeOverride);
             }
@@ -106,31 +90,5 @@ namespace Microsoft.DotNet.Cli
 
         private static bool IsRunningWorkloadCommand(ParseResult parseResult) =>
             parseResult.RootSubCommandResult() == (WorkloadCommandParser.GetCommand().Name);
-
-        private static bool TempHomeIsOnlyRootWritable(string path)
-        {
-            if (StatInterop.LStat(path, out StatInterop.FileStatus fileStat) != 0)
-            {
-                return false;
-            }
-
-            return IsOwnedByRoot(fileStat) && GroupCannotWrite(fileStat) &&
-                   OtherUserCannotWrite(fileStat);
-        }
-
-        private static bool OtherUserCannotWrite(StatInterop.FileStatus fileStat)
-        {
-            return (fileStat.Mode & (int) StatInterop.Permissions.S_IWOTH) == 0;
-        }
-
-        private static bool GroupCannotWrite(StatInterop.FileStatus fileStat)
-        {
-            return (fileStat.Mode & (int) StatInterop.Permissions.S_IWGRP) == 0;
-        }
-
-        private static bool IsOwnedByRoot(StatInterop.FileStatus fileStat)
-        {
-            return fileStat.Uid == 0;
-        }
     }
 }

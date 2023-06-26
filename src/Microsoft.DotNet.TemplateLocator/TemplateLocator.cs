@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -17,9 +17,10 @@ namespace Microsoft.DotNet.TemplateLocator
         private IWorkloadResolver? _workloadResolver;
         private readonly Lazy<NETCoreSdkResolver> _netCoreSdkResolver;
         private readonly Func<string, string> _getEnvironmentVariable;
+        private readonly Func<string>? _getCurrentProcessPath;
 #nullable disable
         public TemplateLocator()
-            : this(Environment.GetEnvironmentVariable, VSSettings.Ambient, null, null)
+            : this(Environment.GetEnvironmentVariable, null, VSSettings.Ambient, null, null)
         {
         }
 #nullable restore
@@ -27,7 +28,7 @@ namespace Microsoft.DotNet.TemplateLocator
         /// <summary>
         /// Test constructor
         /// </summary>
-        public TemplateLocator(Func<string, string> getEnvironmentVariable, VSSettings vsSettings,
+        public TemplateLocator(Func<string, string> getEnvironmentVariable, Func<string>? getCurrentProcessPath, VSSettings vsSettings,
             IWorkloadManifestProvider? workloadManifestProvider, IWorkloadResolver? workloadResolver)
         {
             _netCoreSdkResolver =
@@ -36,6 +37,7 @@ namespace Microsoft.DotNet.TemplateLocator
             _workloadManifestProvider = workloadManifestProvider;
             _workloadResolver = workloadResolver;
             _getEnvironmentVariable = getEnvironmentVariable;
+            _getCurrentProcessPath = getCurrentProcessPath;
         }
 
         public IReadOnlyCollection<IOptionalSdkTemplatePackageInfo> GetDotnetSdkTemplatePackages(
@@ -63,7 +65,7 @@ namespace Microsoft.DotNet.TemplateLocator
 
         public bool TryGetDotnetSdkVersionUsedInVs(string vsVersion, out string? sdkVersion)
         {
-            string dotnetExeDir = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable);
+            string dotnetExeDir = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable, _getCurrentProcessPath);
 
             if (!Version.TryParse(vsVersion, out var parsedVsVersion))
             {

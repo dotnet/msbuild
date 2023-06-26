@@ -36,9 +36,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- WARNING: This pattern is there to ignore folders such as .git and .vs, but it will also match items included with a
          relative path outside the project folder (for example "..\Shared\Shared.cs").  So be sure only to apply it to items
-         that are in the project folder. -->
-    <DefaultExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);**/.*/**</DefaultExcludesInProjectFolder>
-
+         that are in the project folder. Support both DefaultItemExcludesInProjectFolder and DefaultExcludesInProjectFolder
+         properties because of a naming mistake. -->
+    <DefaultExcludesInProjectFolder>$(DefaultExcludesInProjectFolder);$(DefaultItemExcludesInProjectFolder);**/.*/**</DefaultExcludesInProjectFolder>
   </PropertyGroup>
 
   <!-- Set the default versions of the NETStandard.Library or Microsoft.NETCore.App packages to reference.
@@ -134,6 +134,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NetSdkWarning ResourceName="Net6NotCompatibleWithDev16"/>
   </Target>
 
+  <Target Name="_WarnWhenUsingNET7AndVSPriorTo174"
+        BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+        Condition="$([MSBuild]::VersionLessThan($(MSBuildVersion), '17.4.0')) and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '7.0'))">
+    <NetSdkWarning ResourceName="Net7NotCompatibleWithDev173"/>
+  </Target>
+
   <Target Name="_CheckForInvalidWindowsDesktopTargetingConfiguration"
         BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
         Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and ('$(UseWindowsForms)' == 'true' or '$(UseWPF)' == 'true')">
@@ -145,6 +151,23 @@ Copyright (c) .NET Foundation. All rights reserved.
         BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
         Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and '$(_MicrosoftWindowsDesktopSdkImported)' == 'true' and '$(TargetFrameworks)' == ''">
     <NETSdkWarning ResourceName="UnnecessaryWindowsDesktopSDK" />
+  </Target>
+
+  <!-- Default the value of PublishRelease for 8.0+ TFMs. Note that this is pre-evaluated by the CLI in an evaluation before evaluation (see ReleasePropertyProjectLocator.cs).-->
+  <PropertyGroup Condition="'$(PublishRelease)' == '' and '$(_TargetFrameworkVersionWithoutV)' >= '8.0'">
+    <PublishRelease>true</PublishRelease>
+  </PropertyGroup>
+
+  <!-- This verifies that the configuration between projects in a solution set by PackRelease agree.
+  PackRelease only affects the CLI since VS has its own Configuration UI and it's not possible to detect like this in MSBuild.
+  _IsPacking will only be set if packing in the CLI, so that's fine here. The pack targets are all outside of the SDK, which is why this is here.-->
+  <Target Name="_VerifyPackReleaseConfigurations"
+          BeforeTargets="PrepareForBuild"
+          Condition="'$(_IsPacking)' == 'true' and '$(DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE)' != 'true' and '$(DOTNET_CLI_LAZY_PUBLISH_AND_PACK_RELEASE_FOR_SOLUTIONS)' == 'true'">
+    <NETSdkError Condition="'$(SolutionExt)' == '.sln' and
+                            '$(_SolutionLevelPackRelease)' != '$(PackRelease)'"
+          ResourceName="SolutionProjectConfigurationsConflict"
+          FormatArguments="PackRelease;$(ProjectName)"/>
   </Target>
 
 </Project>

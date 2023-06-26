@@ -1,0 +1,282 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CapabilityExpressionEvaluator_Exception_InvalidExpression">
+        <source>Invalid expression, position: {0}.</source>
+        <target state="translated">Neplatný výraz, pozice: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Diagnostics_OptionDescription">
+        <source>Enables diagnostic output.</source>
+        <target state="translated">Povolí diagnostický výstup.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DisableProjectContextEval_OptionDescription">
+        <source>Disables evaluating project context using MSBuild.</source>
+        <target state="translated">Zakáže vyhodnocování kontextu projektu pomocí nástroje MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DisableSdkTemplates_OptionDescription">
+        <source>If present, prevents templates bundled in the SDK from being presented.</source>
+        <target state="translated">Pokud je k dispozici, zabrání zobrazení šablon, které jsou součástí sady SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildEvaluationResult_Error_NoProjectFound">
+        <source>No project was found at the path: {0}.</source>
+        <target state="translated">Žádný projekt se nepodařilo najít v cestě: {0}.</target>
+        <note>{0} - the file path where project was expected to be found.</note>
+      </trans-unit>
+      <trans-unit id="MSBuildEvaluationResult_Error_NotRestored">
+        <source>{0} is not restored.</source>
+        <target state="translated">{0} se neobnovil.</target>
+        <note>{0} - the full path to the project.</note>
+      </trans-unit>
+      <trans-unit id="MSBuildEvaluator_Error_NoTargetFramework">
+        <source>Project '{0}' is a SDK-style project, but does not specify the framework.</source>
+        <target state="translated">Projekt {0} je projekt ve stylu sady SDK, ale neurčuje architekturu.</target>
+        <note>{0} - the full path to the project.</note>
+      </trans-unit>
+      <trans-unit id="MultipleProjectsEvaluationResult_Error">
+        <source>Multiple projects found: {0}.</source>
+        <target state="translated">Našlo se více projektů: {0}.</target>
+        <note>{0} - semi-colon separated list of path to projects found.</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified">
+        <source>Add project reference to solution action is not configured correctly in the template.
+    The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</source>
+        <target state="translated">Akce přidání odkazu na projekt do řešení není v šabloně správně nakonfigurovaná.
+    SolutionFolder a inRoot se nedají použít společně; použijte jen jednu z těchto možností.</target>
+        <note>do not translate: 'solutionFolder', 'inRoot'</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
+        <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
+        <target state="translated">Akce Přidat odkaz na projekt do řešení není v šabloně správně nakonfigurovaná. Nedají se určit soubory projektu, které se mají přidat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_NoSolutionFile">
+        <source>Unable to determine which solution file to add the reference to.</source>
+        <target state="translated">Nedá se určit, do kterého souboru řešení se má odkaz přidat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Failed">
+        <source>Failed to add project(s) to the solution: {0}</source>
+        <target state="translated">Do řešení se nepovedlo přidat projekty: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Failed_NoReason">
+        <source>Failed to add project(s) to a solution file.</source>
+        <target state="translated">Přidání projektu/ů do souboru řešení se nezdařilo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_InRoot_Running">
+        <source>Adding
+    project(s): {0}
+    in the root of solution file: {1}</source>
+        <target state="translated">Přidává se
+    projekt (nebo projekty): {0}
+    do kořenového adresáře souboru řešení: {1}</target>
+        <note>{0} - list of file paths to projects to add,
+{1} - the path to target solution file</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Running">
+        <source>Adding
+    project(s): {0}
+    to solution file: {1}
+    solution folder: {2}</source>
+        <target state="translated">Přidávání
+    projektu/ů: {0}
+    do souboru řešení: {1}
+    složka řešení: {2}</target>
+        <note>{0} - list of file paths to projects to add,
+{1} - the path to target solution file,
+{2} - the solution folder inside solution to add the projects to.</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Succeeded">
+        <source>Successfully added project(s) to a solution file.</source>
+        <target state="translated">Projekt(y) se úspěšně přidal(y) do souboru řešení.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddPackageReference">
+        <source>Adding a package reference {0} to project file {1}:</source>
+        <target state="translated">Přidávání reference balíčku {0} do souboru projektu {1}:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddPackageReference_Failed">
+        <source>Failed to add package reference: {0}</source>
+        <target state="translated">Nepovedlo se přidat odkaz na balíček: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddPackageReference_WithVersion">
+        <source>Adding a package reference {0} (version: {1}) to project file {2}:</source>
+        <target state="translated">Přidávání reference balíčku {0} (verze: {1}) do souboru projektu {2}:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddProjectReference">
+        <source>Adding a project reference {0} to project file {1}:</source>
+        <target state="translated">Přidávání reference projektu {0} do souboru projektu {1}:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddProjectReference_Failed">
+        <source>Failed to add project reference: {0}</source>
+        <target state="translated">Nepovedlo se přidat odkaz na projekt: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_ActionMisconfigured">
+        <source>Add reference action is not configured correctly in the template.</source>
+        <target state="translated">V šabloně není správně nakonfigurovaná akce pro přidání odkazu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_FrameworkNotSupported">
+        <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
+        <target state="translated">Do projektu se nedá automaticky přidat odkaz na rozhraní {0}. Pokud ho chcete přidat, upravte soubor projektu ručně.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_ProjFileListHeader">
+        <source>Project files found:</source>
+        <target state="translated">Nalezené soubory projektu:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_UnresolvedProjFile">
+        <source>Unable to determine which project file to add the reference to.</source>
+        <target state="translated">Nepovedlo se určit, do kterého souboru projektu se má odkaz přidat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_UnsupportedRefType">
+        <source>Adding reference type {0} is not supported.</source>
+        <target state="translated">Přidávání typu odkazu {0} se nepodporuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Failed">
+        <source>Failed to add a reference to the project file.</source>
+        <target state="translated">Přidání reference do souboru projektu se nezdařilo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Succeeded">
+        <source>Successfully added a reference to the project file.</source>
+        <target state="translated">Reference se úspěšně přidala do souboru projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Error_FailedToDetermineProjectToRestore">
+        <source>Couldn't determine files to restore.</source>
+        <target state="translated">Soubory k obnovení se nepodařilo určit.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Error_NoProjectsToRestore">
+        <source>No projects are configured to restore. Check primary outputs configuration in template.json.</source>
+        <target state="translated">Nejsou nakonfigurovány žádné projekty k obnovení. Ověřte konfiguraci primárních výstupů v template.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Failed">
+        <source>Restore failed.</source>
+        <target state="translated">Obnovení neproběhlo úspěšně.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_RestoreFailed">
+        <source>Failed to perform restore: {0}</source>
+        <target state="translated">Nepovedlo se provést obnovení: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Running">
+        <source>Restoring {0}:</source>
+        <target state="translated">Obnovování {0}:</target>
+        <note>{0} - path to a project to restore</note>
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Succeeded">
+        <source>Restore succeeded.</source>
+        <target state="translated">Obnovení proběhlo úspěšně.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraintFactory_Exception_EvaluationFailed">
+        <source>Failed to create constraint '{0}': failed to evaluate the project: {1}</source>
+        <target state="translated">Nepovedlo se vytvořit omezení {0}: Nepovedlo se vyhodnotit projekt: {1}</target>
+        <note>{0} - type of constraint (non-localizable), {1} - localized reason why evaluation failed, ends with period.</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraintFactory_Exception_NoEvaluator">
+        <source>Failed to create constraint '{0}': {1} component is not available.</source>
+        <target state="translated">Nepovedlo se vytvořit omezení {0}: Komponenta {1} není k dispozici.</target>
+        <note>{0} - type of constraint (non-localizable), {1} - name of required component (non-localizable).</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_DisplayName">
+        <source>Project capabiltities</source>
+        <target state="translated">Schopnosti projektu</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_ArgumentShouldBeString">
+        <source>argument should be a string</source>
+        <target state="translated">argument musí být řetězec</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_ArgumentShouldNotBeEmpty">
+        <source>arguments should not contain empty values</source>
+        <target state="translated">argumenty by neměly obsahovat prázdné hodnoty</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_InvalidConstraintConfiguration">
+        <source>Invalid constraint configuration</source>
+        <target state="translated">Neplatná konfigurace omezení</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_InvalidJson">
+        <source>invalid JSON</source>
+        <target state="translated">neplatný JSON</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_EvaluationFailed_Message">
+        <source>Failed to evaluate project context: {0}</source>
+        <target state="translated">Nepovedlo se vyhodnotit kontext projektu: {0}</target>
+        <note>{0} - failure reason</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_Message">
+        <source>The template needs project capability '{0}', and current project ({1}) does not satisfy it.</source>
+        <target state="translated">Šablona potřebuje schopnost projektu {0} a aktuální projekt ({1}) ji nesplňuje.</target>
+        <note>{0} - project capability expression (non-localizable), {1} - path to the project.</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_MultipleProjectsFound_CTA">
+        <source>Specify the project to use using {0} option.</source>
+        <target state="translated">Zadejte projekt, který se má použít s možností {0}.</target>
+        <note>{0} - option to use - non localizable</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_NoProjectFound_CTA">
+        <source>This template can only be created inside the project.</source>
+        <target state="translated">Tuto šablonu je možné vytvořit jenom v rámci projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_NonSDKStyle_Message">
+        <source>The project {0} is not an SDK style project, and is not supported for evaluation. It is only possible to use this template with SDK-style projects.</source>
+        <target state="translated">Projekt {0} není projekt ve stylu sady SDK a není podporován pro hodnocení. Tuto šablonu je možné použít jenom s projekty ve stylu sady SDK.</target>
+        <note>{0} - path to the project</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_NotRestored_CTA">
+        <source>Run 'dotnet restore {0}' to restore the project.</source>
+        <target state="translated">Spuštěním příkazu dotnet restore {0} projekt obnovíte.</target>
+        <note>{Locked="dotnet restore {0}"}</note>
+      </trans-unit>
+      <trans-unit id="ProjectContextSymbolSource_DisplayName">
+        <source>Project context</source>
+        <target state="translated">Kontext projektu</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkInfoProvider_Message_InstallSdk">
+        <source>Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</source>
+        <target state="translated">Přejděte na aka.ms/get-dotnet a nainstalujte některou z podporovaných verzí sady SDK:{0}.</target>
+        <note>{0} is the list of supported versions.</note>
+      </trans-unit>
+      <trans-unit id="SdkInfoProvider_Message_SwitchSdk">
+        <source>You have other SDK version(s) installed that can be used to run this template. Switch to any of the following SDK(s) on your system to run this template: '{0}'. Details on selecting SDK version to run: https://docs.microsoft.com/dotnet/core/tools/global-json.</source>
+        <target state="translated">Máte nainstalované další verze sady SDK, které se dají použít ke spuštění této šablony. Pokud chcete spustit tuto šablonu, přepněte na některou z následujících sad SDK ve vašem systému: {0}. Podrobnosti o výběru verze sady SDK, která se má spustit: https://docs.microsoft.com/dotnet/core/tools/global-json.</target>
+        <note>{0} is the list of installed and supported versions.</note>
+      </trans-unit>
+      <trans-unit id="Verbosity_OptionDescription">
+        <source>Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</source>
+        <target state="translated">Nastaví úroveň podrobností. Povolené hodnoty jsou: q[uiet], m[inimal], n[ormal] a diag[nostic].</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
+        <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
+        <target state="translated">Spuštěním příkazu dotnet workload search vyhledejte úlohy, které jsou k dispozici pro instalaci ve vaší sadě SDK.</target>
+        <note>{Locked="dotnet workload search"}</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

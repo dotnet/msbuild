@@ -9,7 +9,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
-<Project ToolsVersion="14.0" TreatAsLocalProperty="RuntimeIdentifier">
+<Project ToolsVersion="14.0">
   <PropertyGroup>
     <UsingMicrosoftNETSdkBlazorWebAssembly>true</UsingMicrosoftNETSdkBlazorWebAssembly>
   </PropertyGroup>

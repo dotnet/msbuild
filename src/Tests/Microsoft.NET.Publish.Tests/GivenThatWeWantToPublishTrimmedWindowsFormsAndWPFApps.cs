@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using System.Linq;
@@ -23,7 +23,7 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_builds_windows_Forms_app_with_error()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WinformsBuildErrorFailTest",
@@ -45,7 +45,7 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_builds_windows_Forms_app_with_error_suppressed()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WinformsBuildErrorSuppressPassTest",
@@ -69,15 +69,15 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_publishes_windows_Forms_app_with_error()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WinformsErrorPresentFailTest",
                 TargetFrameworks = targetFramework,
-                IsWinExe = true
+                IsWinExe = true,
+                SelfContained = "true"
             };
             testProject.AdditionalProperties["UseWindowsForms"] = "true";
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -93,15 +93,15 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_publishes_windows_Forms_app_with_error_suppressed()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WinformsErrorSuppressedPassTest",
                 TargetFrameworks = targetFramework,
-                IsWinExe = true
+                IsWinExe = true,
+                SelfContained = "true"
             };
             testProject.AdditionalProperties["UseWindowsForms"] = "true";
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
             testProject.AdditionalProperties["_SuppressWinFormsTrimError"] = "true";
@@ -120,7 +120,7 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_builds_wpf_app_with_error()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WpfErrorPresentFailTest",
@@ -142,7 +142,7 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_builds_wpf_app_with_error_suppressed()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WpfErrorSuppressedPassTest",
@@ -166,15 +166,15 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_publishes_wpf_app_with_error()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WpfErrorPresentPassTest",
                 TargetFrameworks = targetFramework,
-                IsWinExe = true
+                IsWinExe = true,
+                SelfContained = "true"
             };
             testProject.AdditionalProperties["UseWPF"] = "true";
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -190,15 +190,15 @@ namespace Microsoft.NET.Publish.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_publishes_wpf_app_with_error_Suppressed()
         {
-            var targetFramework = "net6.0-windows";
+            var targetFramework = $"{ToolsetInfo.CurrentTargetFramework}-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WpfPassTest",
                 TargetFrameworks = targetFramework,
-                IsWinExe = true
+                IsWinExe = true,
+                SelfContained = "true"
             };
             testProject.AdditionalProperties["UseWPF"] = "true";
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             testProject.AdditionalProperties["_SuppressWpfTrimError"] = "true";
             testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";

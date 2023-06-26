@@ -1,10 +1,9 @@
-# zsh parameter completion for the dotnet CLI
+#compdef dotnet
 
-_dotnet_zsh_complete() 
-{
-  local completions=("$(dotnet complete "$words")")
-
-  reply=( "${(ps:\n:)completions}" )
+_dotnet_completion() {
+  local -a completions=("${(@f)$(dotnet complete "${words}")}")
+  compadd -a completions
+  _files
 }
 
-compctl -K _dotnet_zsh_complete dotnet
+compdef _dotnet_completion dotnet

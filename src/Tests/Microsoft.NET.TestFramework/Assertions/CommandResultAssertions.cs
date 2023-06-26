@@ -1,9 +1,10 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -115,10 +116,28 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
+        public AndConstraint<CommandResultAssertions> HaveStdErr(string expectedOutput)
+        {
+            Execute.Assertion.ForCondition(_commandResult.StdErr.Equals(expectedOutput, StringComparison.Ordinal))
+                .FailWith(AppendDiagnosticsTo($"Command did not output the expected output to StdErr.{Environment.NewLine}Expected: {expectedOutput}{Environment.NewLine}Actual:   {_commandResult.StdErr}"));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
         public AndConstraint<CommandResultAssertions> HaveStdErrContaining(string pattern)
         {
             Execute.Assertion.ForCondition(_commandResult.StdErr.Contains(pattern))
                 .FailWith(AppendDiagnosticsTo($"The command error output did not contain expected result: {pattern}{Environment.NewLine}"));
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
+        public AndConstraint<CommandResultAssertions> HaveStdErrContainingOnce(string pattern)
+        {
+            var lines = _commandResult.StdErr.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            var matchingLines = lines.Where(line => line.Contains(pattern)).Count();
+            Execute.Assertion.ForCondition(matchingLines == 0)
+                .FailWith(AppendDiagnosticsTo($"The command error output did not contain expected result: {pattern}{Environment.NewLine}"));
+            Execute.Assertion.ForCondition(matchingLines != 1)
+                .FailWith(AppendDiagnosticsTo($"The command error output was expected to contain the pattern '{pattern}' once, but found it {matchingLines} times.{Environment.NewLine}"));
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
@@ -153,8 +172,8 @@ namespace Microsoft.NET.TestFramework.Assertions
         private string AppendDiagnosticsTo(string s)
         {
             return s + $"{Environment.NewLine}" +
-                       $"File Name: {_commandResult.StartInfo.FileName}{Environment.NewLine}" +
-                       $"Arguments: {_commandResult.StartInfo.Arguments}{Environment.NewLine}" +
+                       $"File Name: {_commandResult.StartInfo?.FileName}{Environment.NewLine}" +
+                       $"Arguments: {_commandResult.StartInfo?.Arguments}{Environment.NewLine}" +
                        $"Exit Code: {_commandResult.ExitCode}{Environment.NewLine}" +
                        $"StdOut:{Environment.NewLine}{_commandResult.StdOut}{Environment.NewLine}" +
                        $"StdErr:{Environment.NewLine}{_commandResult.StdErr}{Environment.NewLine}"; ;

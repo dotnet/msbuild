@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tools.Tool.Common
                 options.Add(LocalOption.Name);
             }
 
-            if (!String.IsNullOrWhiteSpace(parseResult.GetValueForOption(ToolPathOption)))
+            if (!String.IsNullOrWhiteSpace(parseResult.GetValue(ToolPathOption)))
             {
                 options.Add(ToolPathOption.Name);
             }
@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Tools.Tool.Common
         internal static void EnsureToolManifestAndOnlyLocalFlagCombination(ParseResult parseResult)
         {
             if (GlobalOrToolPath(parseResult) &&
-                !string.IsNullOrWhiteSpace(parseResult.GetValueForOption(ToolManifestOption)))
+                !string.IsNullOrWhiteSpace(parseResult.GetValue(ToolManifestOption)))
             {
                 throw new GracefulException(
                     string.Format(
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Tools.Tool.Common
         private static bool GlobalOrToolPath(ParseResult parseResult)
         {
             return parseResult.HasOption(GlobalOption) ||
-                   !string.IsNullOrWhiteSpace(parseResult.GetValueForOption(ToolPathOption));
+                   !string.IsNullOrWhiteSpace(parseResult.GetValue(ToolPathOption));
         }
     }
 }

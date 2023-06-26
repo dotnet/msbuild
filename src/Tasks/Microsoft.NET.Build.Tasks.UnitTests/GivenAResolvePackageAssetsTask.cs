@@ -1,10 +1,9 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.Build.Framework;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -117,6 +116,82 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             new CacheWriter(task); // Should not error
         }
 
+        private static string AssetsFileWithInvalidLocale(string tfm, string locale) => @"
+{
+  `version`: 3,
+  `targets`: {
+    `{tfm}`: {
+      `JavaScriptEngineSwitcher.Core/3.3.0`: {
+        `type`: `package`,
+        `compile`: {
+          `lib/netstandard2.0/JavaScriptEngineSwitcher.Core.dll`: {}
+        },
+        `runtime`: {
+          `lib/netstandard2.0/JavaScriptEngineSwitcher.Core.dll`: {}
+        },
+        `resource`: {
+          `lib/netstandard2.0/ru-ru/JavaScriptEngineSwitcher.Core.resources.dll`: {
+            `locale`: `{locale}`
+          }
+        }
+      }
+    }
+  },
+  `project`: {
+    `version`: `1.0.0`,
+    `frameworks`: {
+      `{tfm}`: {
+        `targetAlias`: `{tfm}`
+      }
+    }
+  }
+}".Replace("`", "\"").Replace("{tfm}", tfm).Replace("{locale}", locale);
+
+        [InlineData("net7.0", true)]
+        [InlineData("net6.0", false)]
+        [Theory]
+        public void It_warns_on_invalid_culture_codes_of_resources(string tfm, bool shouldHaveWarnings)
+        {
+            string projectAssetsJsonPath = Path.GetTempFileName();
+            var assetsContent = AssetsFileWithInvalidLocale(tfm, "what is this even");
+            File.WriteAllText(projectAssetsJsonPath, assetsContent);
+            var task = InitializeTask(out _);
+            task.ProjectAssetsFile = projectAssetsJsonPath;
+            task.TargetFramework = tfm;
+            var writer = new CacheWriter(task, new MockPackageResolver());
+            writer.WriteToMemoryStream();
+            var engine = task.BuildEngine as MockBuildEngine;
+
+            var invalidContextWarnings = engine.Warnings.Where(msg => msg.Code == "NETSDK1188");
+            invalidContextWarnings.Should().HaveCount(shouldHaveWarnings ? 1 : 0);
+
+            var invalidContextMessages = engine.Messages.Where(msg => msg.Code == "NETSDK1188");
+            invalidContextMessages.Should().HaveCount(shouldHaveWarnings ? 0 : 1);
+
+        }
+
+        [InlineData("net7.0", true)]
+        [InlineData("net6.0", false)]
+        [Theory]
+        public void It_warns_on_incorrectly_cased_culture_codes_of_resources(string tfm, bool shouldHaveWarnings)
+        {
+            string projectAssetsJsonPath = Path.GetTempFileName();
+            var assetsContent = AssetsFileWithInvalidLocale(tfm, "ru-ru");
+            File.WriteAllText(projectAssetsJsonPath, assetsContent);
+            var task = InitializeTask(out _);
+            task.ProjectAssetsFile = projectAssetsJsonPath;
+            task.TargetFramework = tfm;
+            var writer = new CacheWriter(task, new MockPackageResolver());
+            writer.WriteToMemoryStream();
+            var engine = task.BuildEngine as MockBuildEngine;
+
+            var invalidContextWarnings = engine.Warnings.Where(msg => msg.Code == "NETSDK1187");
+            invalidContextWarnings.Should().HaveCount(shouldHaveWarnings ? 1 : 0);
+
+            var invalidContextMessages = engine.Messages.Where(msg => msg.Code == "NETSDK1187");
+            invalidContextMessages.Should().HaveCount(shouldHaveWarnings ? 0 : 1);
+        }
+
         private ResolvePackageAssets InitializeTask(out IEnumerable<PropertyInfo> inputProperties)
         {
             inputProperties = typeof(ResolvePackageAssets)
@@ -129,7 +204,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 .Where(p => p.IsDefined(typeof(RequiredAttribute)));
 
             var task = new ResolvePackageAssets();
-
             // Initialize all required properties as a genuine task invocation would. We do this
             // because HashSettings need not defend against required parameters being null.
             foreach (var property in requiredProperties)
@@ -140,6 +214,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
                 property.SetValue(task, "_");
             }
+            
+            task.BuildEngine = new MockBuildEngine();
 
             return task;
         }

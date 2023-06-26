@@ -1,0 +1,282 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CapabilityExpressionEvaluator_Exception_InvalidExpression">
+        <source>Invalid expression, position: {0}.</source>
+        <target state="translated">잘못된 식, 위치: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Diagnostics_OptionDescription">
+        <source>Enables diagnostic output.</source>
+        <target state="translated">진단 출력을 사용하도록 설정합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DisableProjectContextEval_OptionDescription">
+        <source>Disables evaluating project context using MSBuild.</source>
+        <target state="translated">MSBuild를 사용하여 프로젝트 컨텍스트 평가를 사용하지 않도록 설정합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DisableSdkTemplates_OptionDescription">
+        <source>If present, prevents templates bundled in the SDK from being presented.</source>
+        <target state="translated">있는 경우 SDK에 번들로 제공되는 템플릿이 표시되지 않도록 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildEvaluationResult_Error_NoProjectFound">
+        <source>No project was found at the path: {0}.</source>
+        <target state="translated">경로 {0}에서 프로젝트를 찾을 수 없습니다.</target>
+        <note>{0} - the file path where project was expected to be found.</note>
+      </trans-unit>
+      <trans-unit id="MSBuildEvaluationResult_Error_NotRestored">
+        <source>{0} is not restored.</source>
+        <target state="translated">{0}은(는) 복원되지 않습니다.</target>
+        <note>{0} - the full path to the project.</note>
+      </trans-unit>
+      <trans-unit id="MSBuildEvaluator_Error_NoTargetFramework">
+        <source>Project '{0}' is a SDK-style project, but does not specify the framework.</source>
+        <target state="translated">프로젝트 '{0}'은(는) SDK 스타일 프로젝트이지만 프레임워크를 지정하지 않습니다.</target>
+        <note>{0} - the full path to the project.</note>
+      </trans-unit>
+      <trans-unit id="MultipleProjectsEvaluationResult_Error">
+        <source>Multiple projects found: {0}.</source>
+        <target state="translated">여러 프로젝트를 찾았습니다: {0}.</target>
+        <note>{0} - semi-colon separated list of path to projects found.</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified">
+        <source>Add project reference to solution action is not configured correctly in the template.
+    The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</source>
+        <target state="translated">솔루션 작업에 대한 프로젝트 참조 추가가 템플릿에 올바르게 구성되지 않았습니다.
+    'solutionFolder' 및 'inRoot'는 함께 사용할 수 없습니다. 옵션 중 하나만 사용하세요.</target>
+        <note>do not translate: 'solutionFolder', 'inRoot'</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
+        <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
+        <target state="translated">솔루션 작업에 프로젝트 참조 추가가 템플릿에서 올바르게 구성되지 않았습니다. 추가할 프로젝트 파일을 확인할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_NoSolutionFile">
+        <source>Unable to determine which solution file to add the reference to.</source>
+        <target state="translated">참조를 추가할 솔루션 파일을 확인할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Failed">
+        <source>Failed to add project(s) to the solution: {0}</source>
+        <target state="translated">솔루션에 프로젝트 추가 실패: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Failed_NoReason">
+        <source>Failed to add project(s) to a solution file.</source>
+        <target state="translated">솔루션 파일에 프로젝트를 추가하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_InRoot_Running">
+        <source>Adding
+    project(s): {0}
+    in the root of solution file: {1}</source>
+        <target state="translated">
+    프로젝트 추가 중: {0}
+    솔루션 파일의 루트에서: {1}</target>
+        <note>{0} - list of file paths to projects to add,
+{1} - the path to target solution file</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Running">
+        <source>Adding
+    project(s): {0}
+    to solution file: {1}
+    solution folder: {2}</source>
+        <target state="translated">
+    프로젝트 추가 {0}
+    대상 솔루션 파일: {1}
+    솔루션 폴더: {2}</target>
+        <note>{0} - list of file paths to projects to add,
+{1} - the path to target solution file,
+{2} - the solution folder inside solution to add the projects to.</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Succeeded">
+        <source>Successfully added project(s) to a solution file.</source>
+        <target state="translated">솔루션 파일에 프로젝트를 추가했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddPackageReference">
+        <source>Adding a package reference {0} to project file {1}:</source>
+        <target state="translated">{1} 프로젝트 파일에 {0} 패키지 참조를 추가하는 중:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddPackageReference_Failed">
+        <source>Failed to add package reference: {0}</source>
+        <target state="translated">패키지 참조 추가 실패: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddPackageReference_WithVersion">
+        <source>Adding a package reference {0} (version: {1}) to project file {2}:</source>
+        <target state="translated">{2} 프로젝트 파일에 {0} 패키지 참조(버전: {1})를 추가하는 중:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddProjectReference">
+        <source>Adding a project reference {0} to project file {1}:</source>
+        <target state="translated">{1} 프로젝트 파일에 {0} 프로젝트 참조를 추가하는 중:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddProjectReference_Failed">
+        <source>Failed to add project reference: {0}</source>
+        <target state="translated">프로젝트 참조 추가 실패: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_ActionMisconfigured">
+        <source>Add reference action is not configured correctly in the template.</source>
+        <target state="translated">템플릿에서 참조 추가 작업이 올바르게 구성되지 않았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_FrameworkNotSupported">
+        <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
+        <target state="translated">프레임워크 참조 {0}을(를) 프로젝트에 자동으로 추가할 수 없습니다. 프로젝트 파일을 수동으로 편집하여 추가하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_ProjFileListHeader">
+        <source>Project files found:</source>
+        <target state="translated">찾은 프로젝트 파일 :</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_UnresolvedProjFile">
+        <source>Unable to determine which project file to add the reference to.</source>
+        <target state="translated">참조를 추가할 프로젝트 파일을 확인할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_UnsupportedRefType">
+        <source>Adding reference type {0} is not supported.</source>
+        <target state="translated">참조 형식 {0} 추가는 지원되지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Failed">
+        <source>Failed to add a reference to the project file.</source>
+        <target state="translated">프로젝트 파일에 참조를 추가하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Succeeded">
+        <source>Successfully added a reference to the project file.</source>
+        <target state="translated">프로젝트 파일에 참조를 추가했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Error_FailedToDetermineProjectToRestore">
+        <source>Couldn't determine files to restore.</source>
+        <target state="translated">복원할 파일을 확인할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Error_NoProjectsToRestore">
+        <source>No projects are configured to restore. Check primary outputs configuration in template.json.</source>
+        <target state="translated">복원하도록 구성된 프로젝트가 없습니다. template.json에서 기본 출력 구성을 확인하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Failed">
+        <source>Restore failed.</source>
+        <target state="translated">복원하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_RestoreFailed">
+        <source>Failed to perform restore: {0}</source>
+        <target state="translated">복원 수행 실패: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Running">
+        <source>Restoring {0}:</source>
+        <target state="translated">{0} 복원 중:</target>
+        <note>{0} - path to a project to restore</note>
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Succeeded">
+        <source>Restore succeeded.</source>
+        <target state="translated">복원에 성공했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraintFactory_Exception_EvaluationFailed">
+        <source>Failed to create constraint '{0}': failed to evaluate the project: {1}</source>
+        <target state="translated">제약 조건 '{0}' 생성 실패: 프로젝트 평가 실패: {1}</target>
+        <note>{0} - type of constraint (non-localizable), {1} - localized reason why evaluation failed, ends with period.</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraintFactory_Exception_NoEvaluator">
+        <source>Failed to create constraint '{0}': {1} component is not available.</source>
+        <target state="translated">제약 조건 '{0}' 생성 실패: {1} 구성 요소를 사용할 수 없습니다.</target>
+        <note>{0} - type of constraint (non-localizable), {1} - name of required component (non-localizable).</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_DisplayName">
+        <source>Project capabiltities</source>
+        <target state="translated">프로젝트 능력</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_ArgumentShouldBeString">
+        <source>argument should be a string</source>
+        <target state="translated">인수는 문자열이어야 합니다.</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_ArgumentShouldNotBeEmpty">
+        <source>arguments should not contain empty values</source>
+        <target state="translated">인수에는 빈 값이 포함되어서는 안 됩니다.</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_InvalidConstraintConfiguration">
+        <source>Invalid constraint configuration</source>
+        <target state="translated">잘못된 제약 조건 구성</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_InvalidJson">
+        <source>invalid JSON</source>
+        <target state="translated">잘못된 JSON</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_EvaluationFailed_Message">
+        <source>Failed to evaluate project context: {0}</source>
+        <target state="translated">프로젝트 컨텍스트 평가 실패: {0}</target>
+        <note>{0} - failure reason</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_Message">
+        <source>The template needs project capability '{0}', and current project ({1}) does not satisfy it.</source>
+        <target state="translated">템플릿에 프로젝트 기능 '{0}'이(가) 필요하며 현재 프로젝트({1})가 이를 충족하지 않습니다.</target>
+        <note>{0} - project capability expression (non-localizable), {1} - path to the project.</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_MultipleProjectsFound_CTA">
+        <source>Specify the project to use using {0} option.</source>
+        <target state="translated">{0} 옵션을 사용하여 사용할 프로젝트를 지정합니다.</target>
+        <note>{0} - option to use - non localizable</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_NoProjectFound_CTA">
+        <source>This template can only be created inside the project.</source>
+        <target state="translated">이 템플릿은 프로젝트 내에서만 만들 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_NonSDKStyle_Message">
+        <source>The project {0} is not an SDK style project, and is not supported for evaluation. It is only possible to use this template with SDK-style projects.</source>
+        <target state="translated">프로젝트 {0}은(는) SDK 스타일 프로젝트가 아니며 평가가 지원되지 않습니다. 이 템플릿은 SDK 스타일 프로젝트에서만 사용할 수 있습니다.</target>
+        <note>{0} - path to the project</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_NotRestored_CTA">
+        <source>Run 'dotnet restore {0}' to restore the project.</source>
+        <target state="translated">프로젝트를 복원하려면 'dotnet restore {0}'을(를) 실행하세요.</target>
+        <note>{Locked="dotnet restore {0}"}</note>
+      </trans-unit>
+      <trans-unit id="ProjectContextSymbolSource_DisplayName">
+        <source>Project context</source>
+        <target state="translated">프로젝트 컨텍스트</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkInfoProvider_Message_InstallSdk">
+        <source>Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</source>
+        <target state="translated">aka.ms/get-dotnet으로 이동하여 지원되는 SDK 버전 '{0}'을(를) 설치합니다.</target>
+        <note>{0} is the list of supported versions.</note>
+      </trans-unit>
+      <trans-unit id="SdkInfoProvider_Message_SwitchSdk">
+        <source>You have other SDK version(s) installed that can be used to run this template. Switch to any of the following SDK(s) on your system to run this template: '{0}'. Details on selecting SDK version to run: https://docs.microsoft.com/dotnet/core/tools/global-json.</source>
+        <target state="translated">이 템플릿을 실행하는 데 사용할 수 있는 다른 SDK 버전이 설치되어 있습니다. 이 템플릿을 실행하려면 시스템에서 다음 SDK 중 하나로 전환하세요. '{0}'. 실행할 SDK 버전 선택에 대한 세부 정보: https://docs.microsoft.com/dotnet/core/tools/global-json.</target>
+        <note>{0} is the list of installed and supported versions.</note>
+      </trans-unit>
+      <trans-unit id="Verbosity_OptionDescription">
+        <source>Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</source>
+        <target state="translated">세부 정보 표시 수준을 설정합니다. 허용되는 값은 q[uiet], m[inimal], n[ormal] 및 diag[nostic]입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
+        <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
+        <target state="translated">'dotnet workload search'을 실행하여 SDK에 설치할 수 있는 워크로드를 검색합니다.</target>
+        <note>{Locked="dotnet workload search"}</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

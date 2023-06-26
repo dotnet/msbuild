@@ -1,33 +1,34 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Tests;
+using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 using Xunit;
 
-namespace Microsoft.DotNet.ApiCompatibility.Tests
+namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 {
     public class CannotAddAbstractMemberTests
     {
+        private static readonly TestRuleFactory s_ruleFactory = new((settings, context) => new CannotAddAbstractMember(settings, context));
+
         [Theory]
         [MemberData(nameof(AddedAbstractMemberIsReportedData))]
         public void AddedAbstractMemberIsReported(string leftSyntax, string rightSyntax, bool includeInternals)
         {
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(includeInternalSymbols: includeInternals));
 
-            ApiComparer differ = new();
-            differ.IncludeInternalSymbols = includeInternals;
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
-            CompatDifference[] expected = new[]
+            CompatDifference[] expected =
             {
-                new CompatDifference(DiagnosticIds.CannotAddAbstractMember, string.Empty, DifferenceType.Added, "M:CompatTests.First.SecondAbstract")
+                CompatDifference.CreateWithDefaultMetadata(DiagnosticIds.CannotAddAbstractMember, string.Empty, DifferenceType.Added, "M:CompatTests.First.SecondAbstract")
             };
-
             Assert.Equal(expected, differences);
         }
 
@@ -37,8 +38,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
         {
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory);
 
-            ApiComparer differ = new();
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             Assert.Empty(differences);
@@ -50,8 +51,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
         {
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory);
 
-            ApiComparer differ = new();
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             Assert.Empty(differences);
@@ -66,9 +67,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
 
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new(s_ruleFactory, new ApiComparerSettings(strictMode: true));
 
-            ApiComparer differ = new();
-            differ.StrictMode = true;
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             foreach (CompatDifference difference in differences)
@@ -95,7 +95,6 @@ namespace CompatTests
   }
 }
 ";
-
             string[] rightSyntaxes = new[]
             { @"
 namespace CompatTests
@@ -144,30 +143,19 @@ namespace CompatTests
   }
 }
 "};
+            ElementContainer<IAssemblySymbol> left = new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax),
+                new MetadataInformation(string.Empty, "ref"));
+            IReadOnlyList<ElementContainer<IAssemblySymbol>> right = SymbolFactoryExtensions.GetElementContainersFromSyntaxes(rightSyntaxes);
+            ApiComparer differ = new(s_ruleFactory);
 
-            ApiComparer differ = new();
-            ElementContainer<IAssemblySymbol> left =
-                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, string.Empty, "ref"));
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
-            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
-
-            IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
-                differ.GetDifferences(left, right);
-
-            CompatDifference[][] expectedDiffs =
+            CompatDifference[] expectedDiffs =
             {
-                Array.Empty<CompatDifference>(),
-                new[]
-                {
-                    new CompatDifference(DiagnosticIds.CannotAddAbstractMember, string.Empty, DifferenceType.Added, "M:CompatTests.First.FirstNested.SecondNested.SomeAbstractMethod"),
-                },
-                new[]
-                {
-                    new CompatDifference(DiagnosticIds.CannotAddAbstractMember, string.Empty, DifferenceType.Added, "M:CompatTests.First.FirstNested.FirstNestedAbstract"),
-                },
+                new CompatDifference(left.MetadataInformation, right[1].MetadataInformation, DiagnosticIds.CannotAddAbstractMember, string.Empty, DifferenceType.Added, "M:CompatTests.First.FirstNested.SecondNested.SomeAbstractMethod"),
+                new CompatDifference(left.MetadataInformation, right[2].MetadataInformation, DiagnosticIds.CannotAddAbstractMember, string.Empty, DifferenceType.Added, "M:CompatTests.First.FirstNested.FirstNestedAbstract"),
             };
-
-            AssertExtensions.MultiRightResult(left.MetadataInformation, expectedDiffs, differences);
+            Assert.Equal(expectedDiffs, differences);
         }
 
         public static IEnumerable<object[]> AddedToUnsealedTypeInRightNotReportedData()

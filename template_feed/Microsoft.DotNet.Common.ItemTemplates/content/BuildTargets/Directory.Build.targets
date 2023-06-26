@@ -1,0 +1,10 @@
+<Project>
+<!--#if inherit -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.targets', '$(MSBuildThisFileDirectory)../'))"
+          Condition="$([MSBuild]::GetPathOfFileAbove('Directory.Build.targets', '$(MSBuildThisFileDirectory)../')) != ''" />
+<!--#endif-->
+  <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
+  <Target Name="CustomAfterBuildTarget" AfterTargets="Build">
+      <Message Text="Hello from CustomAfterBuildTarget" Importance="high" />
+  </Target>
+</Project>

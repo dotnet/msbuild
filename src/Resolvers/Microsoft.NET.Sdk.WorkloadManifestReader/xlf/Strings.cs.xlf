@@ -57,6 +57,16 @@
         <target state="translated">Dokument předčasně ukončen</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">Neplatná verze: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">Chyba při analýze verze {1} pro ID manifestu úlohy {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">Nebyla nalezena závislost manifestu úlohy {0} požadovaná manifestem {1} [{2}].</target>
@@ -90,6 +100,16 @@
       <trans-unit id="RedirectWorkloadHasOtherKeys">
         <source>Redirect workload '{0}' has keys other than 'redirect-to'</source>
         <target state="translated">Přesměrování úlohy {0} má jiné klíče než redirect-to.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedManifestNotFound">
+        <source>Specified workload manifest was not found: {0}</source>
+        <target state="translated">Zadaný manifest úlohy se nenašel: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifiedWorkloadSetNotFound">
+        <source>Specified workload set was not found: {0}</source>
+        <target state="translated">Zadaná sada úloh se nenašla: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">

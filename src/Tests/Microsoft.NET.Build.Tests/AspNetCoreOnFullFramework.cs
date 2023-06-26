@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -26,7 +29,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "AssemblyPartDiscovery",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = true
             };
 
@@ -51,7 +54,7 @@ public class Program
             TestProject referencedProjectWithPart = new TestProject()
             {
                 Name = "ReferencedProjectWithPart",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = false
             };
 
@@ -68,7 +71,7 @@ class Class1
             {
                 Name = "ReferencedProjectWithMVC",
                 ProjectSdk = "Microsoft.NET.Sdk.Web",
-                TargetFrameworks = "net461",
+                TargetFrameworks = "net462",
                 IsExe = false
             };
 
@@ -94,7 +97,7 @@ class Class1
             {
                 FileName = exePath
             };
-            TestContext.Current.AddTestEnvironmentVariables(toolCommandSpec);
+            TestContext.Current.AddTestEnvironmentVariables(toolCommandSpec.Environment);
 
             ICommand toolCommand = toolCommandSpec.ToCommand().CaptureStdOut();
 

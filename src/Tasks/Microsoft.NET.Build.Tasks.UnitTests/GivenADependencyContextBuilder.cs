@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using FluentAssertions.Json;
@@ -40,6 +40,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             object[] resolvedNuGetFiles)
         {
             LockFile lockFile = TestLockFiles.GetLockFile(mainProjectName);
+            LockFileLookup lockFileLookup = new LockFileLookup(lockFile);
 
             SingleProjectInfo mainProject = SingleProjectInfo.Create(
                 "/usr/Path",
@@ -52,8 +53,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 ReferenceInfo.CreateDirectReferenceInfos(
                     referencePaths ?? new ITaskItem[] { },
                     referenceSatellitePaths ?? new ITaskItem[] { },
-                    projectContextHasProjectReferences: false,
-                    i => true);
+                    lockFileLookup: lockFileLookup,
+                    i => true,
+                    true);
 
             ProjectContext projectContext = lockFile.CreateProjectContext(
                 FrameworkConstants.CommonFrameworks.NetCoreApp10.GetShortFolderName(),
@@ -67,7 +69,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 resolvedNuGetFiles = Array.Empty<ResolvedFile>();
             }
 
-            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, includeRuntimeFileVersions: false, runtimeGraph: null, projectContext: projectContext)
+            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, includeRuntimeFileVersions: false, runtimeGraph: null, projectContext: projectContext, libraryLookup: lockFileLookup)
                 .WithDirectReferences(directReferences)
                 .WithCompilationOptions(compilationOptions)
                 .WithResolvedNuGetFiles((ResolvedFile[]) resolvedNuGetFiles)
@@ -263,7 +265,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 useCompilationOptions ? CreateCompilationOptions() :
                 null;
 
-            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, includeRuntimeFileVersions: false, runtimeGraph: null, projectContext: projectContext)
+            DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, includeRuntimeFileVersions: false, runtimeGraph: null, projectContext: projectContext, libraryLookup: new LockFileLookup(lockFile))
                 .WithReferenceAssemblies(ReferenceInfo.CreateReferenceInfos(referencePaths))
                 .WithCompilationOptions(compilationOptions)
                 .Build();
@@ -324,7 +326,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             void CheckRuntimeFallbacks(string runtimeIdentifier, int fallbackCount)
             {
                 projectContext.LockFileTarget.RuntimeIdentifier = runtimeIdentifier;
-                var dependencyContextBuilder = new DependencyContextBuilder(mainProject, includeRuntimeFileVersions: false, runtimeGraph, projectContext);
+                var dependencyContextBuilder = new DependencyContextBuilder(mainProject, includeRuntimeFileVersions: false, runtimeGraph, projectContext, libraryLookup: new LockFileLookup(lockFile));
                 var runtimeFallbacks = dependencyContextBuilder.Build().RuntimeGraph;
 
                 runtimeFallbacks

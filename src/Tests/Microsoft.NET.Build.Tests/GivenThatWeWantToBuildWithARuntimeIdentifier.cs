@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Xml.Linq;
 using Microsoft.NET.TestFramework;
@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot, "App.sln");
             buildCommand
-                .Execute("/p:RuntimeIdentifier=win-x64")
+                .Execute($"/p:RuntimeIdentifier={ToolsetInfo.LatestWinRuntimeIdentifier}-x64")
                 .Should()
                 .Fail()
                 .And
@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
                     var ns = project.Root.Name.Namespace;
                     var itemGroup = new XElement(ns + "PropertyGroup");
                     project.Root.Add(itemGroup);
-                    itemGroup.Add(new XElement(ns + "RuntimeIdentifier", "win-x64"));
+                    itemGroup.Add(new XElement(ns + "RuntimeIdentifier", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64"));
                 });
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot, "App.sln");

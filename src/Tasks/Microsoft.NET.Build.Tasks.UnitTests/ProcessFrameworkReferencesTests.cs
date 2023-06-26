@@ -1,8 +1,12 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using Microsoft.NET.TestFramework;
 using Xunit;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
@@ -47,7 +51,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             task.EnableTargetingPackDownload = true;
             task.TargetFrameworkIdentifier = ".NETCoreApp";
-            task.TargetFrameworkVersion = "3.0";
+            task.TargetFrameworkVersion = ToolsetInfo.CurrentTargetFrameworkVersion;
             task.FrameworkReferences = new[]
             {
                 new MockTaskItem("Microsoft.AspNetCore.App", new Dictionary<string, string>())
@@ -58,7 +62,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 new MockTaskItem("Microsoft.AspNetCore.App",
                     new Dictionary<string, string>()
                     {
-                        {"TargetFramework", "netcoreapp3.0"},
+                        {"TargetFramework", ToolsetInfo.CurrentTargetFramework},
                         {"RuntimeFrameworkName", "Microsoft.AspNetCore.App"},
                         {"DefaultRuntimeFrameworkVersion", "1.9.5"},
                         {"LatestRuntimeFrameworkVersion", "1.9.6"},
@@ -83,7 +87,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             task.EnableTargetingPackDownload = true;
             task.TargetFrameworkIdentifier = ".NETCoreApp";
-            task.TargetFrameworkVersion = "3.0";
+            task.TargetFrameworkVersion = ToolsetInfo.CurrentTargetFrameworkVersion;
             task.TargetPlatformIdentifier = "Windows";
             task.TargetPlatformVersion = "10.0.18362";
             task.FrameworkReferences = new[]
@@ -96,7 +100,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 new MockTaskItem("Microsoft.AspNetCore.App",
                     new Dictionary<string, string>()
                     {
-                        {"TargetFramework", "netcoreapp3.0"},
+                        {"TargetFramework", ToolsetInfo.CurrentTargetFramework},
                         {"RuntimeFrameworkName", "Microsoft.AspNetCore.App"},
                         {"DefaultRuntimeFrameworkVersion", "1.9.5"},
                         {"LatestRuntimeFrameworkVersion", "1.9.6"},

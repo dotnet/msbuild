@@ -1,10 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Pack;
 using LocalizableStrings = Microsoft.DotNet.Tools.Pack.LocalizableStrings;
@@ -58,6 +56,7 @@ namespace Microsoft.DotNet.Cli
 
             command.AddArgument(SlnOrProjectArgument);
             command.AddOption(OutputOption);
+            command.AddOption(CommonOptions.ArtifactsPathOption);
             command.AddOption(NoBuildOption);
             command.AddOption(IncludeSymbolsOption);
             command.AddOption(IncludeSourceOption);
@@ -68,9 +67,10 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(CommonOptions.VersionSuffixOption);
             command.AddOption(ConfigurationOption);
+            command.AddOption(CommonOptions.DisableBuildServersOption);
             RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: true, includeNoDependenciesOption: true);
 
-            command.Handler = CommandHandler.Create<ParseResult>(PackCommand.Run);
+            command.SetHandler(PackCommand.Run);
 
             return command;
         }

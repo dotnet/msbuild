@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,6 +28,8 @@ namespace Microsoft.NET.Build.Tasks
         public bool GenerateErrorForMissingTargetingPacks { get; set; }
 
         public bool NuGetRestoreSupported { get; set; } = true;
+
+        public bool DisableTransitiveFrameworkReferenceDownloads { get; set; }
 
         public string NetCoreTargetingPackRoot { get; set; }
 
@@ -78,12 +83,17 @@ namespace Microsoft.NET.Build.Tasks
             }
             else
             {
-                results = Resolve(inputs, Log, BuildEngine4);
+                results = Resolve(inputs, BuildEngine4);
 
                 if (s_allowCacheLookup)
                 {
                     BuildEngine4?.RegisterTaskObject(cacheKey, results, RegisteredTaskObjectLifetime.AppDomain, allowEarlyCollection: true);
                 }
+            }
+
+            foreach (var error in results.Errors)
+            {
+                Log.LogError(error);
             }
 
             ReferencesToAdd = results.ReferencesToAdd;
@@ -100,16 +110,18 @@ namespace Microsoft.NET.Build.Tasks
                         RuntimeFrameworks,
                         GenerateErrorForMissingTargetingPacks,
                         NuGetRestoreSupported,
+                        DisableTransitiveFrameworkReferenceDownloads,
                         NetCoreTargetingPackRoot,
                         ProjectLanguage);
 
-        private static ResolvedAssetsCacheEntry Resolve(StronglyTypedInputs inputs, Logger log, IBuildEngine4 buildEngine)
+        private static ResolvedAssetsCacheEntry Resolve(StronglyTypedInputs inputs, IBuildEngine4 buildEngine)
         {
             List<TaskItem> referencesToAdd = new List<TaskItem>();
             List<TaskItem> analyzersToAdd = new List<TaskItem>();
             List<TaskItem> platformManifests = new List<TaskItem>();
             List<TaskItem> packageConflictOverrides = new List<TaskItem>();
             List<string> preferredPackages = new List<string>();
+            List<string> errors = new List<string>();
 
             var resolvedTargetingPacks = inputs.ResolvedTargetingPacks
                 .ToDictionary(
@@ -129,24 +141,36 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         if (!foundTargetingPack)
                         {
-                            log.LogError(Strings.UnknownFrameworkReference, frameworkReference.Name);
-                        }
-                        else
-                        {
-                            if (inputs.NuGetRestoreSupported)
+                            if (frameworkReference.Name.Equals("Microsoft.Maui.Essentials", StringComparison.OrdinalIgnoreCase))
                             {
-                                log.LogError(Strings.TargetingPackNeedsRestore, frameworkReference.Name);
+                                errors.Add(Strings.UnknownFrameworkReference_MauiEssentials);
                             }
                             else
                             {
-                                log.LogError(
+                                errors.Add(string.Format(Strings.UnknownFrameworkReference, frameworkReference.Name));
+                            }
+                            
+                        }
+                        else
+                        {
+                            if (inputs.DisableTransitiveFrameworkReferences)
+                            {
+                                errors.Add(string.Format(Strings.TargetingPackNotRestored_TransitiveDisabled, frameworkReference.Name));
+                            }
+                            else if (inputs.NuGetRestoreSupported)
+                            {
+                                errors.Add(string.Format(Strings.TargetingPackNeedsRestore, frameworkReference.Name));
+                            }
+                            else
+                            {
+                                errors.Add(string.Format(
                                     Strings.TargetingApphostPackMissingCannotRestore,
                                     "Targeting",
                                     $"{inputs.NetCoreTargetingPackRoot}\\{targetingPack.NuGetPackageId ?? ""}",
                                     targetingPack.TargetFramework ?? "",
                                     targetingPack.NuGetPackageId ?? "",
                                     targetingPack.NuGetPackageVersion ?? ""
-                                    );
+                                    ));
                             }
                         }
                     }
@@ -229,6 +253,7 @@ namespace Microsoft.NET.Build.Tasks
                 UsedRuntimeFrameworks = inputs.RuntimeFrameworks.Where(rf => frameworkReferenceNames.Contains(rf.FrameworkName))
                     .Select(rf => rf.Item)
                     .ToArray(),
+                Errors = errors.ToArray(),
             };
             return newCacheEntry;
         }
@@ -336,12 +361,15 @@ namespace Microsoft.NET.Build.Tasks
                 string itemType = fileElement.Attribute("Type")?.Value;
                 bool isAnalyzer = itemType?.Equals("Analyzer", StringComparison.OrdinalIgnoreCase) ?? false;
 
+                string assemblyName = fileElement.Attribute("AssemblyName").Value;
+
                 string dllPath = usePathElementsInFrameworkListAsFallBack || isAnalyzer ?
                     Path.Combine(definition.TargetingPackRoot, fileElement.Attribute("Path").Value) :
-                    GetDllPathViaAssemblyName(definition.TargetingPackDllFolder, fileElement);
+                    GetDllPathViaAssemblyName(definition.TargetingPackDllFolder, assemblyName);
 
                 var item = CreateItem(dllPath, definition.FrameworkReferenceName, definition.NuGetPackageId, definition.NuGetPackageVersion);
 
+                item.SetMetadata("AssemblyName", assemblyName);
                 item.SetMetadata("AssemblyVersion", fileElement.Attribute("AssemblyVersion").Value);
                 item.SetMetadata("FileVersion", fileElement.Attribute("FileVersion").Value);
                 item.SetMetadata("PublicKeyToken", fileElement.Attribute("PublicKeyToken").Value);
@@ -411,6 +439,11 @@ namespace Microsoft.NET.Build.Tasks
         private static string GetDllPathViaAssemblyName(string targetingPackDllFolder, XElement fileElement)
         {
             string assemblyName = fileElement.Attribute("AssemblyName").Value;
+            return GetDllPathViaAssemblyName(targetingPackDllFolder, assemblyName);
+        }
+
+        private static string GetDllPathViaAssemblyName(string targetingPackDllFolder, string assemblyName)
+        {
             var dllPath = Path.Combine(targetingPackDllFolder, assemblyName + ".dll");
             return dllPath;
         }
@@ -446,6 +479,7 @@ namespace Microsoft.NET.Build.Tasks
             public RuntimeFramework[] RuntimeFrameworks {get; private set;}
             public bool GenerateErrorForMissingTargetingPacks {get; private set;}
             public bool NuGetRestoreSupported {get; private set;}
+            public bool DisableTransitiveFrameworkReferences { get; private set; }
             public string NetCoreTargetingPackRoot {get; private set;}
             public string ProjectLanguage {get; private set;}
 
@@ -455,6 +489,7 @@ namespace Microsoft.NET.Build.Tasks
                 ITaskItem[] runtimeFrameworks,
                 bool generateErrorForMissingTargetingPacks,
                 bool nuGetRestoreSupported,
+                bool disableTransitiveFrameworkReferences,
                 string netCoreTargetingPackRoot,
                 string projectLanguage)
             {
@@ -473,6 +508,7 @@ namespace Microsoft.NET.Build.Tasks
                 RuntimeFrameworks = runtimeFrameworks.Select(item => new RuntimeFramework(item.ItemSpec, item.GetMetadata(MetadataKeys.FrameworkName), item)).ToArray();
                 GenerateErrorForMissingTargetingPacks = generateErrorForMissingTargetingPacks;
                 NuGetRestoreSupported = nuGetRestoreSupported;
+                DisableTransitiveFrameworkReferences = disableTransitiveFrameworkReferences;
                 NetCoreTargetingPackRoot = netCoreTargetingPackRoot;
                 ProjectLanguage = projectLanguage;
             }
@@ -500,6 +536,7 @@ namespace Microsoft.NET.Build.Tasks
 
                 cacheKeyBuilder.AppendLine($"{nameof(GenerateErrorForMissingTargetingPacks)}={GenerateErrorForMissingTargetingPacks}");
                 cacheKeyBuilder.AppendLine($"{nameof(NuGetRestoreSupported)}={NuGetRestoreSupported}");
+                cacheKeyBuilder.AppendLine($"{nameof(DisableTransitiveFrameworkReferences)}={DisableTransitiveFrameworkReferences}");
 
                 cacheKeyBuilder.AppendLine($"{nameof(NetCoreTargetingPackRoot)}={NetCoreTargetingPackRoot}");
 
@@ -595,7 +632,7 @@ namespace Microsoft.NET.Build.Tasks
 
             public string CacheKey()
             {
-                return $"{nameof(RuntimeFramework)}: {Name} ({FrameworkName})";
+                return $"{nameof(RuntimeFramework)}: {Name} ({FrameworkName} {Item?.GetMetadata(MetadataKeys.Version)})";
             }
         }
 
@@ -661,6 +698,7 @@ namespace Microsoft.NET.Build.Tasks
             public string PackageConflictPreferredPackages;
             public ITaskItem[] PackageConflictOverrides;
             public ITaskItem[] UsedRuntimeFrameworks;
+            public string[] Errors;
         }
     }
 }

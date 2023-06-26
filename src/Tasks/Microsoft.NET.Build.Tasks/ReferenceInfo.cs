@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -54,17 +54,49 @@ namespace Microsoft.NET.Build.Tasks
         public static IEnumerable<ReferenceInfo> CreateDirectReferenceInfos(
             IEnumerable<ITaskItem> referencePaths,
             IEnumerable<ITaskItem> referenceSatellitePaths,
-            bool projectContextHasProjectReferences,
-            Func<ITaskItem, bool> isRuntimeAssembly)
+            LockFileLookup lockFileLookup,
+            Func<ITaskItem, bool> isRuntimeAssembly,
+            bool includeProjectsNotInAssetsFile)
         {
-
-            bool filterOutProjectReferenceIfInProjectContextAlready(ITaskItem referencePath)
+            bool lockFileContainsProject(ITaskItem referencePath)
             {
-                return (projectContextHasProjectReferences ? !IsProjectReference(referencePath) : true);
+                if (lockFileLookup == null)
+                {
+                    return false;
+                }
+
+                if (!IsProjectReference(referencePath))
+                {
+                    return false;
+                }
+
+                if (!includeProjectsNotInAssetsFile)
+                {
+                    return true;
+                }
+
+                string projectName;
+                string projectFilePath = referencePath.GetMetadata(MetadataKeys.MSBuildSourceProjectFile);
+                if (!string.IsNullOrEmpty(projectFilePath))
+                {
+                    projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+                }
+                else
+                {
+                    // fall back to using the path to the output DLL
+                    projectName = Path.GetFileNameWithoutExtension(referencePath.ItemSpec);
+                    if (string.IsNullOrEmpty(projectName))
+                    {
+                        // unexpected - let's assume this project was already included in the assets file.
+                        return true;
+                    }
+                }
+
+                return lockFileLookup.GetProject(projectName) != null;
             }
 
             IEnumerable<ITaskItem> directReferencePaths = referencePaths
-                .Where(r => filterOutProjectReferenceIfInProjectContextAlready(r) && !IsNuGetReference(r) && isRuntimeAssembly(r));
+                .Where(r => !lockFileContainsProject(r) && !IsNuGetReference(r) && isRuntimeAssembly(r));
 
             return CreateFilteredReferenceInfos(directReferencePaths, referenceSatellitePaths);
         }
@@ -147,7 +179,7 @@ namespace Microsoft.NET.Build.Tasks
                 if (!string.IsNullOrEmpty(fusionName))
                 {
                     AssemblyName assemblyName = new AssemblyName(fusionName);
-                    version = assemblyName.Version.ToString();
+                    version = assemblyName.Version?.ToString();
                 }
 
                 if (string.IsNullOrEmpty(version))

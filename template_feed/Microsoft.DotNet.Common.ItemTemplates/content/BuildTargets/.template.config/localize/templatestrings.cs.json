@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Soubor MSBuild Directory.Build.targets",
+  "description": "Prázdný soubor Directory.Build.targets, který lze použít k určení úkolů a cílů nástroje MSBuild pro celou složku",
+  "symbols/inherit/displayName": "Zdědit",
+  "symbols/inherit/description": "Při hodnotě true přidá import pro nejbližší soubor Directory.Build.targets v hierarchii adresářů systému souborů. Directory.Build.targets ve výchozím nastavení nedědí, takže můžete vytvořit sadu přizpůsobení pro každou složku zvlášť."
+}

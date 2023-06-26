@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -39,8 +39,6 @@ namespace Microsoft.NET.Build.Tests
             if (!string.IsNullOrEmpty(targetFramework))
             {
                 var parsedTargetFramework = NuGetFramework.Parse(targetFramework);
-                if (parsedTargetFramework.Version.Major >= 5)
-                    expectedFiles.Add($"ref/{testProjectName}.dll");
 
                 if (parsedTargetFramework.Version.Major < 6)
                     expectedFiles.Add($"{testProjectName}.runtimeconfig.dev.json");
@@ -53,10 +51,10 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.1.0.60101")]
         [InlineData("netcoreapp3.1")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_builds_a_runnable_apphost_by_default(string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -80,7 +78,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+            var outputDirectory = buildCommand.GetOutputDirectory();
             var hostExecutable = $"HelloWorld{Constants.ExeSuffix}";
             outputDirectory.Should().OnlyHaveFiles(GetExpectedFilesFromBuild(testAsset, targetFramework));
             new RunExeCommand(Log, Path.Combine(outputDirectory.FullName, hostExecutable))
@@ -97,7 +95,7 @@ namespace Microsoft.NET.Build.Tests
         [PlatformSpecificTheory(TestPlatforms.OSX)]
         [InlineData("netcoreapp3.1")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_can_disable_codesign_if_opt_out(string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -108,7 +106,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute(new string[] {
-                    "/p:_EnableMacOSCodeSign=false",
+                    "/p:_EnableMacOSCodeSign=false;ProduceReferenceAssembly=false",
                 })
                 .Should()
                 .Pass();
@@ -131,10 +129,10 @@ namespace Microsoft.NET.Build.Tests
         [PlatformSpecificTheory(TestPlatforms.OSX)]
         [InlineData("netcoreapp3.1", "win-x64")]
         [InlineData("net5.0", "win-x64")]
-        [InlineData("net6.0", "win-x64")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "win-x64")]
         [InlineData("netcoreapp3.1", "linux-x64")]
         [InlineData("net5.0", "linux-x64")]
-        [InlineData("net6.0", "linux-x64")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, "linux-x64")]
         public void It_does_not_try_to_codesign_non_osx_app_hosts(string targetFramework, string rid)
         {
             var testAsset = _testAssetsManager
@@ -170,7 +168,7 @@ namespace Microsoft.NET.Build.Tests
         [PlatformSpecificTheory(TestPlatforms.OSX)]
         [InlineData("netcoreapp3.1")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_codesigns_a_framework_dependent_app(string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -202,8 +200,8 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp3.1", true)]
         [InlineData("net5.0", false)]
         [InlineData("net5.0", true)]
-        [InlineData("net6.0", false)]
-        [InlineData("net6.0", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
         public void It_codesigns_an_app_targeting_osx(string targetFramework, bool selfContained)
         {
             var testAsset = _testAssetsManager
@@ -272,19 +270,19 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: target)
+                .WithTargetFramework(targetFramework)
                 .WithSource();
 
             var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute(new string[] {
-                    $"/p:TargetFramework={targetFramework}",
                     $"/p:PlatformTarget={target}",
                     $"/p:NETCoreSdkRuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(targetFramework)}"
                 })
                 .Should()
                 .Pass();
 
-            var apphostPath = Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, "HelloWorld.exe");
+            var apphostPath = Path.Combine(buildCommand.GetOutputDirectory().FullName, "HelloWorld.exe");
             if (target == "x86")
             {
                 IsPE32(apphostPath).Should().BeTrue();
@@ -302,7 +300,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyFact]
         public void AppHost_contains_resources_from_the_managed_dll()
         {
-            var targetFramework = "netcoreapp2.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var version = "5.6.7.8";
@@ -323,7 +321,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework, runtimeIdentifier: runtimeIdentifier);
+            var outputDirectory = buildCommand.GetOutputDirectory(runtimeIdentifier: runtimeIdentifier);
             outputDirectory.Should().HaveFiles(new[] { testProject.Name + ".exe" });
 
             string apphostPath = Path.Combine(outputDirectory.FullName, testProject.Name + ".exe");
@@ -331,7 +329,7 @@ namespace Microsoft.NET.Build.Tests
             apphostVersion.Should().Be(version);
         }
 
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/coreclr/issues/27275")]
+        [WindowsOnlyFact]
         public void FSharp_app_can_customize_the_apphost()
         {
             var targetFramework = "netcoreapp3.1";
@@ -369,12 +367,12 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "NoAppHost",
-                TargetFrameworks = "netcoreapp3.1",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 //  Use "any" as RID so that it will fail to find AppHost
                 RuntimeIdentifier = "any",
                 IsExe = true,
+                SelfContained = "false"
             };
-            testProject.AdditionalProperties["SelfContained"] = "false";
             testProject.AdditionalProperties["UseAppHost"] = "false";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -390,12 +388,10 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_retries_on_failure_to_create_apphost()
         {
-            const string TFM = "net5.0";
-
             var testProject = new TestProject()
             {
                 Name = "RetryAppHost",
-                TargetFrameworks = TFM,
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
@@ -410,7 +406,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            var intermediateDirectory = buildCommand.GetIntermediateDirectory(targetFramework: TFM).FullName;
+            var intermediateDirectory = buildCommand.GetIntermediateDirectory().FullName;
 
             File.SetLastWriteTimeUtc(
                 Path.Combine(

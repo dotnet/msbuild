@@ -1,7 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
@@ -31,14 +32,16 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
             string pidDirectory = Path.GetFullPath("var/pids/build");
             string pidFilePath = Path.Combine(pidDirectory, $"{RazorPidFile.FilePrefix}{ProcessId}");
 
+            var serverPath = Path.GetFullPath("path/to/rzc.dll");
+
             var fileSystemMock = new FileSystemMockBuilder()
                 .AddFile(pidFilePath, "")
+                .AddFile(serverPath, "")
                 .UseCurrentSystemTemporaryDirectory()
                 .Build();
 
             fileSystemMock.File.Exists(pidFilePath).Should().BeTrue();
-
-            var serverPath = Path.Combine(fileSystemMock.Directory.CreateTemporaryDirectory().DirectoryPath, "path/to/rzc.dll");
+            fileSystemMock.File.Exists(serverPath).Should().BeTrue();
 
             var server = new RazorServer(
                 pidFile: new RazorPidFile(
@@ -51,7 +54,7 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
 
             Action a = () => server.Shutdown();
 
-            a.ShouldThrow<BuildServerException>().WithMessage(
+            a.Should().Throw<BuildServerException>().WithMessage(
                 string.Format(
                     LocalizableStrings.ShutdownCommandFailed,
                     ErrorMessage));
@@ -68,14 +71,16 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
             string pidDirectory = Path.GetFullPath("var/pids/build");
             string pidFilePath = Path.Combine(pidDirectory, $"{RazorPidFile.FilePrefix}{ProcessId}");
 
+            var serverPath = Path.GetFullPath("path/to/rzc.dll");
+
             var fileSystemMock = new FileSystemMockBuilder()
                 .AddFile(pidFilePath, "")
+                .AddFile(serverPath, "")
                 .UseCurrentSystemTemporaryDirectory()
                 .Build();
 
             fileSystemMock.File.Exists(pidFilePath).Should().BeTrue();
-
-            var serverPath = Path.Combine(fileSystemMock.Directory.CreateTemporaryDirectory().DirectoryPath, "path/to/rzc.dll");
+            fileSystemMock.File.Exists(serverPath).Should().BeTrue();
 
             var server = new RazorServer(
                 pidFile: new RazorPidFile(
@@ -87,6 +92,43 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
                 fileSystem: fileSystemMock);
 
             server.Shutdown();
+
+            fileSystemMock.File.Exists(pidFilePath).Should().BeFalse();
+        }
+
+        [Fact]
+        public void GivenANonExistingRazorServerPathItDeletesPidFileAndDoesNotThrow()
+        {
+            const int ProcessId = 1234;
+            const string PipeName = "some-pipe-name";
+
+            string pidDirectory = Path.GetFullPath("var/pids/build");
+            string pidFilePath = Path.Combine(pidDirectory, $"{RazorPidFile.FilePrefix}{ProcessId}");
+
+            var serverPath = Path.GetFullPath("path/to/rzc.dll");
+
+            var fileSystemMock = new FileSystemMockBuilder()
+                .AddFile(pidFilePath, "")
+                .UseCurrentSystemTemporaryDirectory()
+                .Build();
+
+            fileSystemMock.File.Exists(pidFilePath).Should().BeTrue();
+            fileSystemMock.File.Exists(serverPath).Should().BeFalse();
+
+            var commandFactoryMock = CreateCommandFactoryMock(serverPath, PipeName);
+            var server = new RazorServer(
+                pidFile: new RazorPidFile(
+                    path: new FilePath(pidFilePath),
+                    processId: ProcessId,
+                    serverPath: new FilePath(serverPath),
+                    pipeName: PipeName),
+                commandFactory: commandFactoryMock.Object,
+                fileSystem: fileSystemMock);
+
+            Action a = () => server.Shutdown();
+
+            a.Should().NotThrow();
+            commandFactoryMock.Verify(c => c.Create(It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<NuGetFramework>(), It.IsAny<string>()), Times.Never);
 
             fileSystemMock.File.Exists(pidFilePath).Should().BeFalse();
         }

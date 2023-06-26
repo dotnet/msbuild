@@ -1,8 +1,7 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -126,7 +125,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
 
         protected virtual FileStream WritePidFile()
         {
-            var path = GetPidFilePath(env => Environment.GetEnvironmentVariable(env));
+            var path = GetPidFilePath();
             return WritePidFile(path);
         }
 
@@ -148,7 +147,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
             // <pipename>
 
             const int DefaultBufferSize = 4096;
-            var processId = Process.GetCurrentProcess().Id;
+            var processId = Environment.ProcessId;
             var fileName = $"rzc-{processId}";
 
             // Make sure the directory exists.
@@ -168,12 +167,12 @@ namespace Microsoft.NET.Sdk.Razor.Tool
         }
 
         // Internal for testing.
-        internal virtual string GetPidFilePath(Func<string, string> getEnvironmentVariable)
+        internal static string GetPidFilePath()
         {
-            var path = getEnvironmentVariable("DOTNET_BUILD_PIDFILE_DIRECTORY");
+            var path = Environment.GetEnvironmentVariable("DOTNET_BUILD_PIDFILE_DIRECTORY");
             if (string.IsNullOrEmpty(path))
             {
-                var homePath = CliFolderPathCalculatorCore.GetDotnetHomePath(getEnvironmentVariable);
+                var homePath = CliFolderPathCalculatorCore.GetDotnetHomePath();
                 if (homePath is null)
                 {
                     // Couldn't locate the user profile directory. Bail.

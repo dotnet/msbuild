@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <DisableMSBuildAssemblyCopyCheck>true</DisableMSBuildAssemblyCopyCheck>
+    <IsTestProject>true</IsTestProject>
+    <Nullable>enable</Nullable>
+    <StrongNameKeyId>MicrosoftShared</StrongNameKeyId>
+    <OutputType Condition="'$(TargetFramework)' == '$(SdkTargetFramework)'">Exe</OutputType>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FakeItEasy"  />
+    <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Tasks.Core"  Version="$(MicrosoftBuildTasksCorePackageVersion)"/>
+    <PackageReference Include="Microsoft.Build.Utilities.Core"  Version="$(MicrosoftBuildUtilitiesCorePackageVersion)"/>
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkPackageVersion)"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Containers\Microsoft.NET.Build.Containers\Microsoft.NET.Build.Containers.csproj" />
+    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net472'">
+    <ProjectReference Include="..\Microsoft.NET.Build.Containers.UnitTests\Microsoft.NET.Build.Containers.UnitTests.csproj" />
+  </ItemGroup>
+
+  <!-- net472 builds manually import files to compile -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+    <Compile Remove="**/*.*" />
+    <Compile Include="CommandUtils/*.*" />
+    <Compile Include="FullFramework/*.*" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net472'">
+    <Compile Remove="FullFramework/*.*" />
+  </ItemGroup>
+
+
+</Project>

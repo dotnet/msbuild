@@ -2,10 +2,10 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net46;$(CurrentTargetFramework)</TargetFrameworks>
+    <TargetFrameworks>net462;$(CurrentTargetFramework)</TargetFrameworks>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net462'">
     <DefineConstants>DESKTOP;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 

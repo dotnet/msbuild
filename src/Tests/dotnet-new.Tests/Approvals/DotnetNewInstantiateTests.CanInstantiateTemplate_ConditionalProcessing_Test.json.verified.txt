@@ -1,0 +1,25 @@
+﻿{
+  // This should not be uncommented
+  "DefaultTrueIncluded": 0,
+  //#if defaultTrue
+  "InsideUnknownDirectiveNoEmit": 0,
+  //#endif
+  // This should not be uncommented
+  "DefaultFalseIncluded": 0,
+// Without noEmit the following line will be emitted
+//-:cnd
+  //#if defaultFalse
+  "InsideUnknownDirectiveEmit": 0,
+  //#endif
+//+:cnd
+  // This should be uncommented inside if
+  "UncommentDefaultTrueIncluded": 0,
+  // This should be uncommented inside else
+  "UncommentDefaultFalseIncluded": 0,
+  
+  // This should not be uncommented inside else
+  "NoUncommentNotDefaultTrueIncluded": 0,
+  // This should not be uncommented inside if
+  "NoUncommentNotDefaultFalseIncluded": 0,
+  "end": 0
+}

@@ -1,0 +1,9 @@
+﻿The template "TestAssets.PostActions.AddProjectToSolution.Basic" was created successfully.
+
+Processing post-creation actions...
+Adding
+    project(s): %working directory%/MyProject.csproj
+    to solution file: %working directory%/MySolution.sln
+    solution folder: src
+%CALLBACK OUTPUT%
+Successfully added project(s) to a solution file.

@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../HelpStrings.resx">
+    <body>
+      <trans-unit id="Hint_AmbiguousLanguage">
+        <source>Re-run the command specifying the language to use with --language option.</source>
+        <target state="translated">使用 --语言选项重新运行指定要使用的语言的命令。</target>
+        <note>--language is an option name and should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Hint_AmbiguousType">
+        <source>Re-run the command specifying the type to use with --type option.</source>
+        <target state="translated">使用 --type 选项重新运行指定要使用的类型的命令。</target>
+        <note>--type is an option name and should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Hint_HelpForOtherLanguages">
+        <source>To see help for other template languages ({0}), use --language option:</source>
+        <target state="translated">要查看有关其他模板语言({0})的帮助，请使用 --language 选项:</target>
+        <note>{0} is comma-separated list of supported programming languages by template. --language should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Hint_HelpForOtherTypes">
+        <source>To see help for other template types ({0}), use --type option:</source>
+        <target state="translated">若要查看其他模板类型的帮助 ({0})，请使用 --type 选项:</target>
+        <note>{0} is comma-separated list of supported types by template. --type should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Info_TemplateThirdPartyNotice">
+        <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
+        <target state="translated">此模板包含除 Microsoft 以外其他方的技术，请参阅 {0} 以获取详细信息。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RowHeader_AllowMultiValue">
+        <source>Multiple values are allowed: {0}</source>
+        <target state="translated">允许多个值: {0}</target>
+        <note>{0} is a boolean flag</note>
+      </trans-unit>
+      <trans-unit id="RowHeader_DefaultIfOptionWithoutValue">
+        <source>Default if option is provided without a value: {0}</source>
+        <target state="translated">如果提供的选项没有值，则默认为: {0}</target>
+        <note>{0} is default value if option was provided without a value</note>
+      </trans-unit>
+      <trans-unit id="RowHeader_DefaultValue">
+        <source>Default: {0}</source>
+        <target state="translated">默认: {0}</target>
+        <note>{0} is default value for option</note>
+      </trans-unit>
+      <trans-unit id="RowHeader_Description">
+        <source>Description: {0}</source>
+        <target state="translated">描述: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RowHeader_TemplateAuthor">
+        <source>Author: {0}</source>
+        <target state="translated">作者: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RowHeader_Type">
+        <source>Type: {0}</source>
+        <target state="translated">类型: {0}</target>
+        <note>{0} is option type (string, boolean, etc)</note>
+      </trans-unit>
+      <trans-unit id="SectionHeader_TemplateSpecificOptions">
+        <source>Template options:</source>
+        <target state="translated">模板选项:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TableHeader_AmbiguousTemplatesList">
+        <source>Unable to resolve the template, these templates matched your input:</source>
+        <target state="translated">无法解析模板，这些模板匹配你的输入:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Text_ChoiceArgumentHelpName">
+        <source>choice</source>
+        <target state="translated">选项</target>
+        <note>this text is used as argument help name when list of possible values is too long to fit the screen, " --my-o &lt;choice&gt;"</note>
+      </trans-unit>
+      <trans-unit id="Text_Disabled">
+        <source>Enabled: *false*</source>
+        <target state="translated">已启用: *false*</target>
+        <note>Indication that parameter is not enabled</note>
+      </trans-unit>
+      <trans-unit id="Text_EnabledCondition">
+        <source>Enabled if: {0}</source>
+        <target state="translated">启用条件: {0}</target>
+        <note>{0} is the condition expression</note>
+      </trans-unit>
+      <trans-unit id="Text_NoTemplateOptions">
+        <source>(No options)</source>
+        <target state="translated">(无选项)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Text_Required">
+        <source>Required: *true*</source>
+        <target state="translated">必需: *true*</target>
+        <note>Indication that parameter is always required, do not translate "true".</note>
+      </trans-unit>
+      <trans-unit id="Text_RequiredCondition">
+        <source>Required if: {0}</source>
+        <target state="translated">在此条件下必需: {0}</target>
+        <note>{0} is the condition expression</note>
+      </trans-unit>
+      <trans-unit id="Text_UsageTemplateOptionsPart">
+        <source>[template options]</source>
+        <target state="translated">[模板选项]</target>
+        <note>this text will be used as part of command usage: dotnet new console [options] [template options]</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -7,25 +7,15 @@
         <target state="translated">사용 가능한 워크로드를 나열합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadIdColumn">
-        <source>Installed Workload Ids</source>
-        <target state="translated">설치된 워크로드 ID</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WorkloadListFooter">
         <source>Use `dotnet workload search` to find additional workloads to install.</source>
-        <target state="translated">'dotnet 워크로드 검색'을 사용하여 설치할 추가 워크로드를 찾습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadListHeader">
-        <source>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</source>
-        <target state="translated">이 명령은 이 버전의 SDK에서 'dotnet 워크로드 설치'를 통해 설치된 워크로드만 나열하고 Visual Studio를 통해 설치된 워크로드는 나열하지 않습니다.</target>
-        <note />
+        <target state="translated">`dotnet workload search`을 사용하여 설치할 추가 워크로드를 찾습니다.</target>
+        <note>{Locked="dotnet workload search"}</note>
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
-        <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
-        <target state="translated">다음 워크로드({0})에 대한 업데이트를 사용할 수 있습니다. `dotnet 워크로드 업데이트`를 실행하여 최신 버전을 받으세요.</target>
-        <note />
+        <source>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
+        <target state="translated">다음 워크로드에 대한 업데이트를 사용할 수 있습니다. {0}. 최신 버전을 받으려면 `dotnet workload update`를 실행하세요.</target>
+        <note>{Locked="dotnet workload update"}</note>
       </trans-unit>
     </body>
   </file>

@@ -1,11 +1,11 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
@@ -21,7 +21,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tool
 
             var compressionLevelOption = new Option<CompressionLevel>(
                 "-c",
-                getDefaultValue: () => CompressionLevel.Optimal,
+                defaultValueFactory: () => CompressionLevel.SmallestSize,
                 description: "System.IO.Compression.CompressionLevel for the Brotli compression algorithm.");
             var sourcesOption = new Option<List<string>>(
                 "-s",
@@ -42,26 +42,31 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tool
 
             rootCommand.Add(brotli);
 
-            brotli.Handler = CommandHandler.Create<CompressionLevel, List<string>, List<string>>((c, s, o) =>
+            brotli.SetHandler((InvocationContext context) =>
             {
-                    Parallel.For(0, s.Count, i =>
-                    {
-                        var source = s[i];
-                        var output = o[i];
-                        try
-                        {
-                            using var sourceStream = File.OpenRead(source);
-                            using var fileStream = new FileStream(output, FileMode.Create);
+                var parseResults = context.ParseResult;
+                var c = parseResults.GetValue(compressionLevelOption);
+                var s = parseResults.GetValue(sourcesOption);
+                var o = parseResults.GetValue(outputsOption);
 
-                            using var stream = new BrotliStream(fileStream, c);
-                            sourceStream.CopyTo(stream);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.Error.WriteLine($"Error compressing '{source}' into '{output}'");
-                            Console.Error.WriteLine(ex.ToString());
-                        }
-                    });
+                Parallel.For(0, s.Count, i =>
+                {
+                    var source = s[i];
+                    var output = o[i];
+                    try
+                    {
+                        using var sourceStream = File.OpenRead(source);
+                        using var fileStream = new FileStream(output, FileMode.Create);
+
+                        using var stream = new BrotliStream(fileStream, c);
+                        sourceStream.CopyTo(stream);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"Error compressing '{source}' into '{output}'");
+                        Console.Error.WriteLine(ex.ToString());
+                    }
+                });
             });
 
             return rootCommand.InvokeAsync(args).Result;

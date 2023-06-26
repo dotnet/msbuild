@@ -1,7 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
@@ -26,7 +27,7 @@ namespace Microsoft.DotNet.Tools.Tool.Search
 
         public override int Execute()
         {
-            var isDetailed = _parseResult.GetValueForOption(ToolSearchCommandParser.DetailOption);
+            var isDetailed = _parseResult.GetValue(ToolSearchCommandParser.DetailOption);
             NugetSearchApiParameter nugetSearchApiParameter = new NugetSearchApiParameter(_parseResult);
             IReadOnlyCollection<SearchResultPackage> searchResultPackages =
                 NugetSearchApiResultDeserializer.Deserialize(

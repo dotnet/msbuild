@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if !USE_SYSTEM_TEXT_JSON
 
@@ -15,14 +15,14 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public partial class WorkloadManifestReader
     {
-        public static WorkloadManifest ReadWorkloadManifest(string manifestId, Stream manifestStream, Stream? localizationStream, string? informationalPath = null)
+        public static WorkloadManifest ReadWorkloadManifest(string manifestId, Stream manifestStream, Stream? localizationStream, string manifestPath)
         {
             using var textReader = new StreamReader(manifestStream, System.Text.Encoding.UTF8, true);
             using var jsonReader = new JsonTextReader(textReader);
 
             var manifestReader = new Utf8JsonStreamReader(jsonReader);
 
-            return ReadWorkloadManifest(manifestId, informationalPath, ReadLocalizationCatalog(localizationStream), ref manifestReader); ;
+            return ReadWorkloadManifest(manifestId, manifestPath, ReadLocalizationCatalog(localizationStream), ref manifestReader); ;
         }
 
         private static LocalizationCatalog? ReadLocalizationCatalog(Stream? localizationStream)

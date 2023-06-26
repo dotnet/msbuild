@@ -1,29 +1,55 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
 
 namespace Microsoft.Extensions.HotReload
 {
     internal sealed class HotReloadAgent : IDisposable
     {
+        private delegate void ApplyUpdateDelegate(Assembly assembly, ReadOnlySpan<byte> metadataDelta, ReadOnlySpan<byte> ilDelta, ReadOnlySpan<byte> pdbDelta);
+
         private readonly Action<string> _log;
         private readonly AssemblyLoadEventHandler _assemblyLoad;
         private readonly ConcurrentDictionary<Guid, List<UpdateDelta>> _deltas = new();
         private readonly ConcurrentDictionary<Assembly, Assembly> _appliedAssemblies = new();
+        private readonly ApplyUpdateDelegate? _applyUpdate;
+        private readonly string? _capabilities;
         private volatile UpdateHandlerActions? _handlerActions;
 
         public HotReloadAgent(Action<string> log)
         {
+            var metadataUpdater = Type.GetType("System.Reflection.Metadata.MetadataUpdater, System.Runtime.Loader", throwOnError: false);
+
+            if (metadataUpdater != null)
+            {
+                _applyUpdate = (ApplyUpdateDelegate?)metadataUpdater.GetMethod("ApplyUpdate", BindingFlags.Public | BindingFlags.Static, binder: null,
+                    new[] { typeof(Assembly), typeof(ReadOnlySpan<byte>), typeof(ReadOnlySpan<byte>), typeof(ReadOnlySpan<byte>) }, modifiers: null)?.CreateDelegate(typeof(ApplyUpdateDelegate));
+
+                if (_applyUpdate != null)
+                {
+                    try
+                    {
+                        _capabilities = metadataUpdater.GetMethod("GetCapabilities", BindingFlags.NonPublic | BindingFlags.Static, binder: null, Type.EmptyTypes, modifiers: null)?.
+                            Invoke(obj: null, parameters: null) as string;
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
             _log = log;
             _assemblyLoad = OnAssemblyLoad;
             AppDomain.CurrentDomain.AssemblyLoad += _assemblyLoad;
         }
+
+        public string Capabilities => _capabilities ?? string.Empty;
 
         private void OnAssemblyLoad(object? _, AssemblyLoadEventArgs eventArgs)
         {
@@ -107,7 +133,7 @@ namespace Microsoft.Extensions.HotReload
 
             Action<Type[]?> CreateAction(MethodInfo update)
             {
-                Action<Type[]?> action = update.CreateDelegate<Action<Type[]?>>();
+                var action = (Action<Type[]?>)update.CreateDelegate(typeof(Action<Type[]?>));
                 return types =>
                 {
                     try
@@ -123,7 +149,7 @@ namespace Microsoft.Extensions.HotReload
 
             MethodInfo? GetUpdateMethod(Type handlerType, string name)
             {
-                if (handlerType.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static, new[] { typeof(Type[]) }) is MethodInfo updateMethod &&
+                if (handlerType.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static, binder: null, new[] { typeof(Type[]) }, modifiers: null) is MethodInfo updateMethod &&
                     updateMethod.ReturnType == typeof(void))
                 {
                     return updateMethod;
@@ -178,6 +204,9 @@ namespace Microsoft.Extensions.HotReload
 
         public void ApplyDeltas(IReadOnlyList<UpdateDelta> deltas)
         {
+            Debug.Assert(Capabilities.Length > 0);
+            Debug.Assert(_applyUpdate != null);
+
             for (var i = 0; i < deltas.Count; i++)
             {
                 var item = deltas[i];
@@ -185,7 +214,7 @@ namespace Microsoft.Extensions.HotReload
                 {
                     if (TryGetModuleId(assembly) is Guid moduleId && moduleId == item.ModuleId)
                     {
-                        MetadataUpdater.ApplyUpdate(assembly, item.MetadataDelta, item.ILDelta, ReadOnlySpan<byte>.Empty);
+                        _applyUpdate(assembly, item.MetadataDelta, item.ILDelta, ReadOnlySpan<byte>.Empty);
                     }
                 }
 
@@ -244,11 +273,13 @@ namespace Microsoft.Extensions.HotReload
 
         public void ApplyDeltas(Assembly assembly, IReadOnlyList<UpdateDelta> deltas)
         {
+            Debug.Assert(_applyUpdate != null);
+
             try
             {
                 foreach (var item in deltas)
                 {
-                    MetadataUpdater.ApplyUpdate(assembly, item.MetadataDelta, item.ILDelta, ReadOnlySpan<byte>.Empty);
+                    _applyUpdate(assembly, item.MetadataDelta, item.ILDelta, ReadOnlySpan<byte>.Empty);
                 }
 
                 _log("Deltas applied.");

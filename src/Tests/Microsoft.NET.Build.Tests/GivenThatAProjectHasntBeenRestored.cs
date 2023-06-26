@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -23,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("TestLibrary", null)]
         [InlineData("TestApp", null)]
         [InlineData("TestApp", "netcoreapp2.1")]
-        [InlineData("TestApp", "netcoreapp3.0")]
+        [InlineData("TestApp", ToolsetInfo.CurrentTargetFramework)]
         public void The_build_fails_if_nuget_restore_has_not_occurred(string relativeProjectPath, string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -58,7 +61,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "App",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 

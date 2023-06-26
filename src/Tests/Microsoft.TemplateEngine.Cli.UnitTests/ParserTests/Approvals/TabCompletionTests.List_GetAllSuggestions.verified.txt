@@ -1,0 +1,79 @@
+﻿[
+  {
+    Label: --author,
+    Kind: Keyword,
+    SortText: --author,
+    InsertText: --author,
+    Detail: Filters the templates based on the template author.
+  },
+  {
+    Label: --columns,
+    Kind: Keyword,
+    SortText: --columns,
+    InsertText: --columns,
+    Detail: Specifies the columns to display in the output. 
+  },
+  {
+    Label: --columns-all,
+    Kind: Keyword,
+    SortText: --columns-all,
+    InsertText: --columns-all,
+    Detail: Displays all columns in the output.
+  },
+  {
+    Label: --ignore-constraints,
+    Kind: Keyword,
+    SortText: --ignore-constraints,
+    InsertText: --ignore-constraints,
+    Detail: Disables checking if the template meets the constraints to be run.
+  },
+  {
+    Label: --language,
+    Kind: Keyword,
+    SortText: --language,
+    InsertText: --language,
+    Detail: Filters templates based on language.
+  },
+  {
+    Label: --output,
+    Kind: Keyword,
+    SortText: --output,
+    InsertText: --output,
+    Detail: Location to place the generated output.
+  },
+  {
+    Label: --project,
+    Kind: Keyword,
+    SortText: --project,
+    InsertText: --project,
+    Detail: The project that should be used for context evaluation.
+  },
+  {
+    Label: --tag,
+    Kind: Keyword,
+    SortText: --tag,
+    InsertText: --tag,
+    Detail: Filters the templates based on the tag.
+  },
+  {
+    Label: --type,
+    Kind: Keyword,
+    SortText: --type,
+    InsertText: --type,
+    Detail: Filters templates based on available types. Predefined values are "project" and "item".
+  },
+  {
+    Label: -lang,
+    Kind: Keyword,
+    SortText: -lang,
+    InsertText: -lang,
+    Detail: Filters templates based on language.
+  },
+  {
+    Label: -o,
+    Kind: Keyword,
+    SortText: -o,
+    InsertText: -o,
+    Detail: Location to place the generated output.
+  }
+]

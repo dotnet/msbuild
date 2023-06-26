@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -18,16 +18,19 @@ namespace Microsoft.DotNet.Cli.Telemetry
             Func<string, string> hasher = null,
             Func<string> getMACAddress = null,
             IDockerContainerDetector dockerContainerDetector = null,
-            IUserLevelCacheWriter userLevelCacheWriter = null)
+            IUserLevelCacheWriter userLevelCacheWriter = null,
+            ICIEnvironmentDetector ciEnvironmentDetector = null)
         {
             _getCurrentDirectory = getCurrentDirectory ?? Directory.GetCurrentDirectory;
             _hasher = hasher ?? Sha256Hasher.Hash;
             _getMACAddress = getMACAddress ?? MacAddressGetter.GetMacAddress;
             _dockerContainerDetector = dockerContainerDetector ?? new DockerContainerDetectorForTelemetry();
             _userLevelCacheWriter = userLevelCacheWriter ?? new UserLevelCacheWriter();
+            _ciEnvironmentDetector = ciEnvironmentDetector ?? new CIEnvironmentDetectorForTelemetry();
         }
 
         private readonly IDockerContainerDetector _dockerContainerDetector;
+        private readonly ICIEnvironmentDetector _ciEnvironmentDetector;
         private Func<string> _getCurrentDirectory;
         private Func<string, string> _hasher;
         private Func<string> _getMACAddress;
@@ -49,6 +52,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
         private const string LibcRelease = "Libc Release";
         private const string LibcVersion = "Libc Version";
 
+        private const string CI = "Continuous Integration";
+
         private const string TelemetryProfileEnvironmentVariable = "DOTNET_CLI_TELEMETRY_PROFILE";
         private const string CannotFindMacAddress = "Unknown";
 
@@ -67,9 +72,10 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 {ProductVersion, Product.Version},
                 {TelemetryProfile, Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable)},
                 {DockerContainer, _userLevelCacheWriter.RunWithCache(IsDockerContainerCacheKey, () => _dockerContainerDetector.IsDockerContainer().ToString("G") )},
+                {CI, _ciEnvironmentDetector.IsCIEnvironment().ToString() },
                 {CurrentPathHash, _hasher(_getCurrentDirectory())},
                 {MachineIdOld, _userLevelCacheWriter.RunWithCache(MachineIdCacheKey, GetMachineId)},
-                // we don't want to recalcuate a new id for every new SDK version. Reuse the same path accross versions.
+                // we don't want to recalcuate a new id for every new SDK version. Reuse the same path across versions.
                 // If we change the format of the cache later.
                 // We need to rename the cache from v1 to v2
                 {MachineId,

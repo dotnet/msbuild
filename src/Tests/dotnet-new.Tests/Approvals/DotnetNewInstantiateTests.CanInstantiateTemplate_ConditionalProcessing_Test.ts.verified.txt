@@ -1,0 +1,14 @@
+﻿declare class DefaultTrueIncluded { }
+
+//#if defaultTrue
+declare class InsideUnknownDirectiveNoEmit { }
+//#endif
+
+declare class DefaultFalseIncluded { }
+
+// Without noEmit the following line will be emitted
+//-:cnd
+//#if defaultFalse
+declare class InsideUnknownDirectiveEmit { }
+//#endif
+//+:cnd

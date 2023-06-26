@@ -1,0 +1,9 @@
+﻿No templates or subcommands found matching: 'classli'.
+Did you mean one of the following templates?
+   dotnet new classlib -h
+   dotnet new class -h
+
+To list installed templates similar to 'classli', run:
+   dotnet new list classli
+To search for the templates on NuGet.org, run:
+   dotnet new search classli

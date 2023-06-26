@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Plik Directory.Build.targets platformy MsBuild",
+  "description": "Pusty plik Directory.Build.targets, którego można użyć do określenia zadań i obiektów docelowych platformy MSBuild dla całego folderu",
+  "symbols/inherit/displayName": "Dziedzicz",
+  "symbols/inherit/description": "Jeśli jest prawdą, dodaje import dla najbliższego pliku Directory.Build.targets w hierarchii katalogów systemu plików. Plik Directory.Build.targets nie dziedziczy domyślnie, więc pozwala to na utworzenie zestawu dostosowań dla każdego folderu z osobna."
+}

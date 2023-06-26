@@ -1,0 +1,37 @@
+<!-- Hello There! -->
+<!-- Hi There! -->
+<!-- Hello There. -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.4</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Foo1.cs" Condition="'$(defaultTrue)' == 'true'" />
+    <!--#if (defaultTrue) -->
+    <None Include="Foo2.cs" />
+    <!--#endif -->
+
+    <None Include="Foo3.cs" Condition="'$(defaultFalse)' == 'true'" />
+    <!--#if (defaultFalse) -->
+    <None Include="Foo4.cs" />
+    <!--#endif -->
+
+<!--/-:msbuild-conditional:noEmit -->
+    <None Include="Foo5.cs" Condition="'$(defaultFalse)' == 'true'" />
+<!--/+:msbuild-conditional:noEmit -->
+    <None Include="Foo5.5.cs" Condition="'$(defaultTrue)' == 'true'" />
+
+<!--/-:cnd:noEmit -->
+    <!--#if (defaultFalse) -->
+    <None Include="Foo6.cs" />
+    <!--#endif -->
+<!--/+:cnd:noEmit -->
+    <!--#if (defaultTrue) -->
+    <None Include="Foo6.6.cs" />
+    <!--#endif -->
+
+    <None Include="Things" />
+  </ItemGroup>
+</Project>

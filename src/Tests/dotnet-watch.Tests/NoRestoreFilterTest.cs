@@ -1,7 +1,8 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Threading.Tasks;
+using Microsoft.NET.TestFramework;
 using Xunit;
 
 namespace Microsoft.DotNet.Watcher.Tools
@@ -18,6 +19,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 ProcessSpec = new ProcessSpec
                 {
                     Arguments = _arguments,
@@ -39,6 +41,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
@@ -66,6 +69,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
@@ -93,6 +97,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
@@ -119,10 +124,11 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
-                    Arguments = new[] { "run", "-f", "net5.0", "--", "foo=bar" },
+                    Arguments = new[] { "run", "-f", ToolsetInfo.CurrentTargetFramework, "--", "foo=bar" },
                 }
             };
             await filter.ProcessAsync(context, default);
@@ -134,7 +140,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             await filter.ProcessAsync(context, default);
 
             // Assert
-            Assert.Equal(new[] { "run", "--no-restore", "-f", "net5.0", "--", "foo=bar" }, context.ProcessSpec.Arguments);
+            Assert.Equal(new[] { "run", "--no-restore", "-f", ToolsetInfo.CurrentTargetFramework, "--", "foo=bar" }, context.ProcessSpec.Arguments);
         }
 
         [Fact]
@@ -145,6 +151,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
@@ -172,6 +179,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {

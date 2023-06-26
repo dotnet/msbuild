@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.CommandLine;
@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option<string> OutputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.CmdOutputDirDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdOutputDir
-        }.ForwardAsSingle(o => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(o)}");
+        }.ForwardAsOutputPath("OutputPath");
 
         public static readonly Option<bool> NoLogoOption = new ForwardedOption<bool>("--nologo", LocalizableStrings.CmdNoLogo)
             .ForwardAs("-nologo");
@@ -51,9 +51,11 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.InteractiveMsBuildForwardOption);
             command.AddOption(CommonOptions.VerbosityOption);
             command.AddOption(OutputOption);
+            command.AddOption(CommonOptions.ArtifactsPathOption);
             command.AddOption(NoLogoOption);
+            command.AddOption(CommonOptions.DisableBuildServersOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>(CleanCommand.Run);
+            command.SetHandler(CleanCommand.Run);
 
             return command;
         }

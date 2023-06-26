@@ -52,6 +52,16 @@
         <target state="translated">Nástroj {0} byl úspěšně aktualizován z verze {1} na verzi {2} (soubor manifestu {3}).</target>
         <note />
       </trans-unit>
+      <trans-unit id="UpdateSucceededPreVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest prerelease version (version '{1}').</source>
+        <target state="translated">Nástroj{0}byl znovu nainstalován s nejnovější předběžnou verzí (verze{1}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededStableVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="translated">Nástroj {0} byl přeinstalován nejnovější stabilní verzí (verze {1}).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UpdateToLowerVersion">
         <source>The requested version {0} is lower than existing version {1}.</source>
         <target state="translated">Požadovaná verze {0} je nižší než stávající verze {1}.</target>
@@ -68,8 +78,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Update a global tool.</source>
-        <target state="translated">Aktualizuje globální nástroj.</target>
+        <source>Update a global or local tool.</source>
+        <target state="translated">Aktualizace globálního nebo místního nástroje.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -130,11 +140,6 @@ Nástroje se aktualizují pomocí svého ID balíčku, které se může lišit
 od názvu nástroje, který používáte při volání nástroje. Názvy nástrojů 
 a odpovídající ID balíčků nainstalovaných nástrojů najdete pomocí
 příkazu 'dotnet tool list'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateSucceededVersionNoChange">
-        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
-        <target state="translated">Nástroj {0} byl přeinstalován nejnovější stabilní verzí (verze {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateToolFailed">

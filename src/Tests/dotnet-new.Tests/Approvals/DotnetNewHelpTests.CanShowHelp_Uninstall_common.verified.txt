@@ -1,0 +1,14 @@
+﻿Description:
+  Uninstalls a template package.
+
+Usage:
+  dotnet new uninstall [<package>...] [options]
+
+Arguments:
+  <package>  NuGet package ID (without version) or path to folder to uninstall. 
+             If command is specified without the argument, it lists all the template packages installed.
+
+Options:
+  -v, --verbosity <LEVEL>  Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic]. [default: normal]
+  -d, --diagnostics        Enables diagnostic output.
+  -?, -h, --help           Show command line help.

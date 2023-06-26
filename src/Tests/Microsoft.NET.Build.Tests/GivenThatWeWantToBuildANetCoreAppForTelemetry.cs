@@ -1,4 +1,7 @@
-﻿using FluentAssertions;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -20,7 +23,7 @@ namespace Microsoft.NET.Build.Tests
         [CoreMSBuildOnlyFact]
         public void It_collects_TargetFramework_version_and_other_properties()
         {
-            string targetFramework = "netcoreapp1.0";
+            string targetFramework = ToolsetInfo.CurrentTargetFramework;
             var testProject = new TestProject()
             {
                 Name = "FrameworkTargetTelemetryTest",
@@ -38,13 +41,13 @@ namespace Microsoft.NET.Build.Tests
             buildCommand
                 .Execute(TelemetryTestLogger)
                 .StdOut.Should()
-                .Contain("{\"EventName\":\"targetframeworkeval\",\"Properties\":{\"TargetFrameworkVersion\":\".NETCoreApp,Version=v1.0\",\"RuntimeIdentifier\":\"null\",\"SelfContained\":\"null\",\"UseApphost\":\"null\",\"OutputType\":\"Library\"}");
+                .Contain($"{{\"EventName\":\"targetframeworkeval\",\"Properties\":{{\"TargetFrameworkVersion\":\".NETCoreApp,Version=v{ToolsetInfo.CurrentTargetFrameworkVersion}\",\"RuntimeIdentifier\":\"null\",\"SelfContained\":\"null\",\"UseApphost\":\"null\",\"OutputType\":\"Library\",\"UseArtifactsOutput\":\"null\",\"ArtifactsPathLocationType\":\"null\"}}");
         }
 
         [CoreMSBuildOnlyFact]
         public void It_collects_multi_TargetFramework_version_and_other_properties()
         {
-            string targetFramework = "net46;netcoreapp1.1";
+            string targetFramework = $"net46;{ToolsetInfo.CurrentTargetFramework}";
 
             var testProject = new TestProject()
             {
@@ -60,14 +63,16 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(testAsset);
 
-            buildCommand
-                .Execute(TelemetryTestLogger)
+            var result = buildCommand
+                .Execute(TelemetryTestLogger);
+
+            result
                 .StdOut.Should()
                 .Contain(
-                    "{\"EventName\":\"targetframeworkeval\",\"Properties\":{\"TargetFrameworkVersion\":\".NETFramework,Version=v4.6\",\"RuntimeIdentifier\":\"null\",\"SelfContained\":\"null\",\"UseApphost\":\"null\",\"OutputType\":\"Library\"}")
+                    "{\"EventName\":\"targetframeworkeval\",\"Properties\":{\"TargetFrameworkVersion\":\".NETFramework,Version=v4.6\",\"RuntimeIdentifier\":\"null\",\"SelfContained\":\"null\",\"UseApphost\":\"null\",\"OutputType\":\"Library\",\"UseArtifactsOutput\":\"null\",\"ArtifactsPathLocationType\":\"null\"}")
                 .And
                 .Contain(
-                    "{\"EventName\":\"targetframeworkeval\",\"Properties\":{\"TargetFrameworkVersion\":\".NETCoreApp,Version=v1.1\",\"RuntimeIdentifier\":\"null\",\"SelfContained\":\"null\",\"UseApphost\":\"null\",\"OutputType\":\"Library\"}");
+                    $"{{\"EventName\":\"targetframeworkeval\",\"Properties\":{{\"TargetFrameworkVersion\":\".NETCoreApp,Version=v{ToolsetInfo.CurrentTargetFrameworkVersion}\",\"RuntimeIdentifier\":\"null\",\"SelfContained\":\"null\",\"UseApphost\":\"null\",\"OutputType\":\"Library\",\"UseArtifactsOutput\":\"null\",\"ArtifactsPathLocationType\":\"null\"}}");
         }
     }
 }

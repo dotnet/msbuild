@@ -58,8 +58,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
-        <target state="translated">要用於建置套件的組態。大部分的專案預設為「偵錯」。</target>
+        <source>The configuration to use for building the package. The default is 'Release'.</source>
+        <target state="needs-review-translation">將用以組建套件的設定。預設值為 'Debug'。使用 'PackRelease' 屬性將 'Release' 設定為此命令的預設值。</target>
         <note />
       </trans-unit>
     </body>

@@ -1,14 +1,15 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using Microsoft.Extensions.Internal;
 using Microsoft.NET.TestFramework.Commands;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Watcher.Tools
@@ -23,7 +24,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         private BufferBlock<string> _source;
         private ITestOutputHelper _logger;
         private TaskCompletionSource<int> _exited;
-        private bool _started;
         private bool _disposed;
 
         public AwaitableProcess(DotnetCommand spec, ITestOutputHelper logger)
@@ -41,6 +41,8 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public int Id => _process.Id;
 
+        public Process Process => _process;
+
         public void Start()
         {
             if (_process != null)
@@ -51,6 +53,9 @@ namespace Microsoft.DotNet.Watcher.Tools
             var processStartInfo = _spec.GetProcessStartInfo();
             processStartInfo.RedirectStandardOutput = true;
             processStartInfo.RedirectStandardError = true;
+            processStartInfo.RedirectStandardInput = true;
+            processStartInfo.StandardOutputEncoding = Encoding.UTF8;
+            processStartInfo.StandardErrorEncoding = Encoding.UTF8;
 
             _process = new Process
             {
@@ -64,42 +69,42 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             WriteTestOutput($"{DateTime.Now}: starting process: '{_process.StartInfo.FileName} {_process.StartInfo.Arguments}'");
             _process.Start();
-            _started = true;
             _process.BeginErrorReadLine();
             _process.BeginOutputReadLine();
             WriteTestOutput($"{DateTime.Now}: process started: '{_process.StartInfo.FileName} {_process.StartInfo.Arguments}'");
         }
 
-        public async Task<string> GetOutputLineAsync(string message, TimeSpan timeout)
+        public async Task<string> GetOutputLineAsync(Predicate<string> success, Predicate<string> failure)
         {
-            WriteTestOutput($"Waiting for output line [msg == '{message}']. Will wait for {timeout.TotalSeconds} sec.");
-            var cts = new CancellationTokenSource();
-            cts.CancelAfter(timeout);
-            return await GetOutputLineAsync($"[msg == '{message}']", m => string.Equals(m, message, StringComparison.Ordinal), cts.Token);
-        }
+            bool failed = false;
 
-        public async Task<string> GetOutputLineStartsWithAsync(string message, TimeSpan timeout)
-        {
-            WriteTestOutput($"Waiting for output line [msg.StartsWith('{message}')]. Will wait for {timeout.TotalSeconds} sec.");
-            var cts = new CancellationTokenSource();
-            cts.CancelAfter(timeout);
-            return await GetOutputLineAsync($"[msg.StartsWith('{message}')]", m => m != null && m.StartsWith(message, StringComparison.Ordinal), cts.Token);
-        }
+            using var cancellationOnFailure = new CancellationTokenSource();
 
-        private async Task<string> GetOutputLineAsync(string predicateName, Predicate<string> predicate, CancellationToken cancellationToken)
-        {
-            while (!_source.Completion.IsCompleted)
+            while (!_source.Completion.IsCompleted && !failed)
             {
-                while (await _source.OutputAvailableAsync(cancellationToken))
+                try
                 {
-                    var next = await _source.ReceiveAsync(cancellationToken);
-                    _lines.Add(next);
-                    var match = predicate(next);
-                    WriteTestOutput($"{DateTime.Now}: recv: '{next}'. {(match ? "Matches" : "Does not match")} condition '{predicateName}'.");
-                    if (match)
+                    while (await _source.OutputAvailableAsync(cancellationOnFailure.Token))
                     {
-                        return next;
+                        var line = await _source.ReceiveAsync(cancellationOnFailure.Token);
+                        _lines.Add(line);
+                        if (success(line))
+                        {
+                            return line;
+                        }
+
+                        if (failure(line))
+                        {
+                            failed = true;
+
+                            // Limit the time to collect remaining output after a failure to avoid hangs:
+                            cancellationOnFailure.CancelAfter(TimeSpan.FromSeconds(1));
+                        }
                     }
+                }
+                catch (OperationCanceledException) when (failed)
+                {
+                    break;
                 }
             }
 
@@ -113,9 +118,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             {
                 while (await _source.OutputAvailableAsync(cancellationToken))
                 {
-                    var next = await _source.ReceiveAsync(cancellationToken);
-                    WriteTestOutput($"{DateTime.Now}: recv: '{next}'");
-                    lines.Add(next);
+                    lines.Add(await _source.ReceiveAsync(cancellationToken));
                 }
             }
             return lines;
@@ -146,7 +149,15 @@ namespace Microsoft.DotNet.Watcher.Tools
             _process.WaitForExit();
             _source.Complete();
             _exited.TrySetResult(_process.ExitCode);
-            WriteTestOutput($"Process {_process.Id} has exited");
+
+            try
+            {
+                WriteTestOutput($"Process {_process.Id} has exited");
+            }
+            catch
+            {
+                // test might not be running anymore
+            }
         }
 
         public void Dispose()
@@ -160,18 +171,35 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             if (_process != null)
             {
-                if (_started && !_process.HasExited)
+                try
                 {
                     _process.Kill(entireProcessTree: true);
                 }
+                catch
+                {
+                }
 
-                _process.CancelErrorRead();
-                _process.CancelOutputRead();
+                try
+                {
+                    _process.CancelErrorRead();
+                }
+                catch
+                {
+                }
+
+                try
+                {
+                    _process.CancelOutputRead();
+                }
+                catch
+                {
+                }
 
                 _process.ErrorDataReceived -= OnData;
                 _process.OutputDataReceived -= OnData;
                 _process.Exited -= OnExit;
                 _process.Dispose();
+                _process = null;
             }
         }
     }

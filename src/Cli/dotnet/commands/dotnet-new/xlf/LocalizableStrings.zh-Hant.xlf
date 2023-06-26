@@ -1,0 +1,282 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CapabilityExpressionEvaluator_Exception_InvalidExpression">
+        <source>Invalid expression, position: {0}.</source>
+        <target state="translated">運算式無效，位置: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Diagnostics_OptionDescription">
+        <source>Enables diagnostic output.</source>
+        <target state="translated">啟用診斷輸出。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DisableProjectContextEval_OptionDescription">
+        <source>Disables evaluating project context using MSBuild.</source>
+        <target state="translated">使用 MSBuild 停用評估專案內容。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DisableSdkTemplates_OptionDescription">
+        <source>If present, prevents templates bundled in the SDK from being presented.</source>
+        <target state="translated">如果存在，則會防止顯示 SDK 中套件組合的範本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildEvaluationResult_Error_NoProjectFound">
+        <source>No project was found at the path: {0}.</source>
+        <target state="translated">在路徑 {0} 中找不到任何專案。</target>
+        <note>{0} - the file path where project was expected to be found.</note>
+      </trans-unit>
+      <trans-unit id="MSBuildEvaluationResult_Error_NotRestored">
+        <source>{0} is not restored.</source>
+        <target state="translated">{0} 未還原。</target>
+        <note>{0} - the full path to the project.</note>
+      </trans-unit>
+      <trans-unit id="MSBuildEvaluator_Error_NoTargetFramework">
+        <source>Project '{0}' is a SDK-style project, but does not specify the framework.</source>
+        <target state="translated">專案 '{0}' 是 SDK 樣式專案，但未指定架構。</target>
+        <note>{0} - the full path to the project.</note>
+      </trans-unit>
+      <trans-unit id="MultipleProjectsEvaluationResult_Error">
+        <source>Multiple projects found: {0}.</source>
+        <target state="translated">找到多個專案: {0}。</target>
+        <note>{0} - semi-colon separated list of path to projects found.</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_BothInRootAndSolutionFolderSpecified">
+        <source>Add project reference to solution action is not configured correctly in the template.
+    The 'solutionFolder' and 'inRoot' cannot be used together; use only one of the options.</source>
+        <target state="translated">未在範本中正確設定新增至解決方案動作中的專案參考。
+    'solutionFolder' 和 'inRoot' 不能同時使用; 只使用其中一個選項。</target>
+        <note>do not translate: 'solutionFolder', 'inRoot'</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_NoProjectsToAdd">
+        <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
+        <target state="translated">範本中未正確設定將專案參考新增至方案動作。無法判斷要新增的專案檔案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Error_NoSolutionFile">
+        <source>Unable to determine which solution file to add the reference to.</source>
+        <target state="translated">無法判斷要將參考新增到哪一個解決方案檔。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Failed">
+        <source>Failed to add project(s) to the solution: {0}</source>
+        <target state="translated">無法將專案新增至解決方案: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Failed_NoReason">
+        <source>Failed to add project(s) to a solution file.</source>
+        <target state="translated">無法將專案新增至方案檔。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_InRoot_Running">
+        <source>Adding
+    project(s): {0}
+    in the root of solution file: {1}</source>
+        <target state="translated">正在新增
+    專案: {0}
+    在解決方案檔案的根中: {1}</target>
+        <note>{0} - list of file paths to projects to add,
+{1} - the path to target solution file</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Running">
+        <source>Adding
+    project(s): {0}
+    to solution file: {1}
+    solution folder: {2}</source>
+        <target state="translated">正在新增
+    專案: {0}
+    至解決方案檔案: {1}
+    解決方案資料夾: {2}</target>
+        <note>{0} - list of file paths to projects to add,
+{1} - the path to target solution file,
+{2} - the solution folder inside solution to add the projects to.</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddProjToSln_Succeeded">
+        <source>Successfully added project(s) to a solution file.</source>
+        <target state="translated">成功將專案新增至方案檔。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddPackageReference">
+        <source>Adding a package reference {0} to project file {1}:</source>
+        <target state="translated">正在將套件參考 {0} 新增至專案檔 {1}:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddPackageReference_Failed">
+        <source>Failed to add package reference: {0}</source>
+        <target state="translated">無法新增套件參考: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddPackageReference_WithVersion">
+        <source>Adding a package reference {0} (version: {1}) to project file {2}:</source>
+        <target state="translated">正在將套件參考 {0} (版本: {1}) 新增至專案檔 {2}:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddProjectReference">
+        <source>Adding a project reference {0} to project file {1}:</source>
+        <target state="translated">正在將專案參考 {0} 新增至專案檔 {1}:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_AddProjectReference_Failed">
+        <source>Failed to add project reference: {0}</source>
+        <target state="translated">無法新增專案參考: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_ActionMisconfigured">
+        <source>Add reference action is not configured correctly in the template.</source>
+        <target state="translated">範本中的新增參考動作設定不正確。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_FrameworkNotSupported">
+        <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
+        <target state="translated">無法將架構參考 {0} 自動新增到專案。手動編輯專案檔案以新增。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_ProjFileListHeader">
+        <source>Project files found:</source>
+        <target state="translated">找到的專案檔:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_UnresolvedProjFile">
+        <source>Unable to determine which project file to add the reference to.</source>
+        <target state="translated">無法判斷要將參考新增到哪一個專案檔。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Error_UnsupportedRefType">
+        <source>Adding reference type {0} is not supported.</source>
+        <target state="translated">不支援要新增的專案類型 {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Failed">
+        <source>Failed to add a reference to the project file.</source>
+        <target state="translated">無法將參考新增至專案檔。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_AddReference_Succeeded">
+        <source>Successfully added a reference to the project file.</source>
+        <target state="translated">成功將參考新增至專案檔。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Error_FailedToDetermineProjectToRestore">
+        <source>Couldn't determine files to restore.</source>
+        <target state="translated">無法判斷要還原的檔案。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Error_NoProjectsToRestore">
+        <source>No projects are configured to restore. Check primary outputs configuration in template.json.</source>
+        <target state="translated">未設定要還原的專案。請檢查 template.json 中的主要輸出設定。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Failed">
+        <source>Restore failed.</source>
+        <target state="translated">還原失敗。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_RestoreFailed">
+        <source>Failed to perform restore: {0}</source>
+        <target state="translated">無法執行還原: {0}</target>
+        <note>{0} - the reason why operation failed, normally ends with period</note>
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Running">
+        <source>Restoring {0}:</source>
+        <target state="translated">正在還原 {0}:</target>
+        <note>{0} - path to a project to restore</note>
+      </trans-unit>
+      <trans-unit id="PostAction_Restore_Succeeded">
+        <source>Restore succeeded.</source>
+        <target state="translated">還原成功。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraintFactory_Exception_EvaluationFailed">
+        <source>Failed to create constraint '{0}': failed to evaluate the project: {1}</source>
+        <target state="translated">無法建立限制式 '{0}': 無法評估專案: {1}</target>
+        <note>{0} - type of constraint (non-localizable), {1} - localized reason why evaluation failed, ends with period.</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraintFactory_Exception_NoEvaluator">
+        <source>Failed to create constraint '{0}': {1} component is not available.</source>
+        <target state="translated">無法建立限制式 '{0}': {1} 元件無法使用。</target>
+        <note>{0} - type of constraint (non-localizable), {1} - name of required component (non-localizable).</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_DisplayName">
+        <source>Project capabiltities</source>
+        <target state="translated">專案功能</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_ArgumentShouldBeString">
+        <source>argument should be a string</source>
+        <target state="translated">引數應為字串</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_ArgumentShouldNotBeEmpty">
+        <source>arguments should not contain empty values</source>
+        <target state="translated">引數不應包含空白值</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_InvalidConstraintConfiguration">
+        <source>Invalid constraint configuration</source>
+        <target state="translated">限制式設定無效</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Error_InvalidJson">
+        <source>invalid JSON</source>
+        <target state="translated">JSON 無效</target>
+        <note>part of a sentence</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_EvaluationFailed_Message">
+        <source>Failed to evaluate project context: {0}</source>
+        <target state="translated">無法評估專案內容: {0}</target>
+        <note>{0} - failure reason</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_Message">
+        <source>The template needs project capability '{0}', and current project ({1}) does not satisfy it.</source>
+        <target state="translated">範本需要專案功能 '{0}'，但目前的專案 ({1}) 無法滿足。</target>
+        <note>{0} - project capability expression (non-localizable), {1} - path to the project.</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_MultipleProjectsFound_CTA">
+        <source>Specify the project to use using {0} option.</source>
+        <target state="translated">指定要使用 {0} 選項的專案。</target>
+        <note>{0} - option to use - non localizable</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_NoProjectFound_CTA">
+        <source>This template can only be created inside the project.</source>
+        <target state="translated">此範本只能在專案內建立。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_NonSDKStyle_Message">
+        <source>The project {0} is not an SDK style project, and is not supported for evaluation. It is only possible to use this template with SDK-style projects.</source>
+        <target state="translated">專案 {0} 不是 SDK 樣式專案，因此不支援評估。此範本只能搭配 SDK 樣式專案使用。</target>
+        <note>{0} - path to the project</note>
+      </trans-unit>
+      <trans-unit id="ProjectCapabilityConstraint_Restricted_NotRestored_CTA">
+        <source>Run 'dotnet restore {0}' to restore the project.</source>
+        <target state="translated">執行 'dotnet restore {0}' 以還原專案。</target>
+        <note>{Locked="dotnet restore {0}"}</note>
+      </trans-unit>
+      <trans-unit id="ProjectContextSymbolSource_DisplayName">
+        <source>Project context</source>
+        <target state="translated">專案內容</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkInfoProvider_Message_InstallSdk">
+        <source>Go to aka.ms/get-dotnet and install any of the supported SDK versions: '{0}'.</source>
+        <target state="translated">移至 aka.ms/get-dotnet 並安裝任何支援的 SDK 版本: '{0}'。</target>
+        <note>{0} is the list of supported versions.</note>
+      </trans-unit>
+      <trans-unit id="SdkInfoProvider_Message_SwitchSdk">
+        <source>You have other SDK version(s) installed that can be used to run this template. Switch to any of the following SDK(s) on your system to run this template: '{0}'. Details on selecting SDK version to run: https://docs.microsoft.com/dotnet/core/tools/global-json.</source>
+        <target state="translated">您已安裝其他可用來執行此範本的 SDK 版本。請在系統上切換至下列任一 SDK 以執行此範本: '{0}'。有關選取要執行之 SDK 版本的詳細資料: https://docs.microsoft.com/dotnet/core/tools/global-json。</target>
+        <note>{0} is the list of installed and supported versions.</note>
+      </trans-unit>
+      <trans-unit id="Verbosity_OptionDescription">
+        <source>Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic].</source>
+        <target state="translated">設定詳細資訊層級。允許的值為 q[uiet]、m[inimal]、n[ormal] 和 diag[nostic]。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadInfoProvider_Message_AddWorkloads">
+        <source>Run 'dotnet workload search' to search workloads available to be installed on your SDK.</source>
+        <target state="translated">執行 'dotnet workload search' 以搜尋可安裝在 SDK 上的工作負載。</target>
+        <note>{Locked="dotnet workload search"}</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

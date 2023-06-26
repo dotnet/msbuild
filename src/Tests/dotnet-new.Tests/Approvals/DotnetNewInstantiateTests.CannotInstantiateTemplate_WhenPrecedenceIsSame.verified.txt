@@ -1,0 +1,9 @@
+﻿Unable to resolve the template, the following installed templates are conflicting:
+Identity                                       Template Name   Short Name  Language  Precedence  Author      Package
+%TABLE HEADER DELIMITER%
+TestAssets.SamePrecedenceGroup.BasicTemplate1  Basic Template  basic       C#        100         Test Asset  %TEMPLATE ONE LOCATION%
+TestAssets.SamePrecedenceGroup.BasicTemplate2  Basic Template  basic       C#        100         Test Asset  %TEMPLATE TWO LOCATION%
+
+Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#103

@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
@@ -17,6 +17,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
     {
         private static string _tfm = "netcoreapp3.1";
         private static string _arch = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
+        private static string _defaultConfiguration = "Debug";
 
         public GivenDotnetStoresAndPublishesProjects(ITestOutputHelper log) : base(log)
         {
@@ -51,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute()
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
             var profileFilter = Path.Combine(localAssemblyCache, _arch, _tfm, "artifact.xml");
 
             new DotnetPublishCommand(Log,
@@ -89,7 +90,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute()
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
             new DotnetPublishCommand(Log,
                     "-f", _tfm,
@@ -147,7 +148,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Execute()
                 .Should().Pass();
 
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
+            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
             new DotnetPublishCommand(Log,
                     "-f", _tfm,

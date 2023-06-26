@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>winmdobj</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>$(CurrentTargetFramework)</TargetFramework>
   </PropertyGroup>
 </Project>
