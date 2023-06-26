@@ -144,6 +144,7 @@ namespace Microsoft.Build.Execution
 
             _componentFactories = new BuildComponentFactoryCollection(this);
             _componentFactories.RegisterDefaultFactories();
+            SerializationContractInitializer.Initialize();
             _packetFactory = new NodePacketFactory();
 
             _buildRequestEngine = (this as IBuildComponentHost).GetComponent(BuildComponentType.RequestEngine) as IBuildRequestEngine;

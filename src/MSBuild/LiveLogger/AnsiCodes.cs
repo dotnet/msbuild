@@ -94,6 +94,16 @@ internal static class AnsiCodes
     /// </summary>
     public const string ShowCursor = "\x1b[?25h";
 
+    /// <summary>
+    /// Set progress state to a busy spinner.
+    /// </summary>
+    public const string SetProgressIndeterminate = "\x1b]9;4;3;\x1b\\";
+
+    /// <summary>
+    /// Remove progress state, restoring taskbar status to normal.
+    /// </summary>
+    public const string RemoveProgress = "\x1b]9;4;0;\x1b\\";
+
     public static string Colorize(string? s, TerminalColor color)
     {
         if (string.IsNullOrWhiteSpace(s))
