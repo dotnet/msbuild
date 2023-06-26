@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
                 DotnetPath = dotnetDir,
                 UserProfileDir = userProfileDir,
                 GlobalJsonStartDir = null,
-                SdkVersionFromOption = parseResult.GetValueForOption(WorkloadRepairCommandParser.VersionOption),
+                SdkVersionFromOption = parseResult.GetValue(WorkloadRepairCommandParser.VersionOption),
                 VersionForTesting = version,
                 CheckIfFeatureBandManifestExists = true,
                 WorkloadResolverForTesting = workloadResolver,

@@ -173,6 +173,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             public GlobalJsonFormatException(string messageFormat, params object?[] args) : base(string.Format(messageFormat, args)) { }
             public GlobalJsonFormatException(string message) : base(message) { }
             public GlobalJsonFormatException(string message, Exception inner) : base(message, inner) { }
+        #if NET8_0_OR_GREATER
+            [Obsolete(DiagnosticId = "SYSLIB0051")] // add this attribute to the serialization ctor
+        #endif
             protected GlobalJsonFormatException(SerializationInfo info, StreamingContext context) : base(info, context) { }
         }
     }
