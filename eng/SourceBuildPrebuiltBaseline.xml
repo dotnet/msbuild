@@ -5,7 +5,7 @@
   <IgnorePatterns>
     <UsagePattern IdentityGlob="Microsoft.SourceBuild.Intermediate.*/*" />
 
-    <!-- These dependencies are a result of building for netframework TFMs. These are filtered out 
+    <!-- These dependencies are a result of building for netframework TFMs. These are filtered out
          in full source-build, and would be filtered out if msbuild was using an 8.0 arcade + 8.0 SDK -->
          <UsagePattern IdentityGlob="Microsoft.NETFramework.ReferenceAssemblies/*1.0.3*" />
          <UsagePattern IdentityGlob="Microsoft.NETFramework.ReferenceAssemblies.net472/*1.0.3*" />
@@ -29,7 +29,7 @@
     <UsagePattern IdentityGlob="System.Security.Permissions/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Text.Encoding.CodePages/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Text.Encodings.Web/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Json/*7.0.0*" />
+    <UsagePattern IdentityGlob="System.Text.Json/*7.0.3*" />
     <UsagePattern IdentityGlob="System.Threading.Tasks.Dataflow/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Windows.Extensions/*7.0.0*" />
 
