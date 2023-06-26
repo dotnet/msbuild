@@ -8,7 +8,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -920,85 +922,83 @@ namespace Microsoft.Build.BackEnd.Logging
         /// On net472, benchmarks show that the optimized version runs in about 50-60% of the time
         /// and has about 15% of the memory overhead of the code that it replaces.
         /// <para>
-        /// On net7.0 (which has more optimizations than net472), the optimized version runs in
-        /// about 70-75% of the time and has about 30% of the memory overhead of the code that it
-        /// replaces.
+        /// On net7.0, the optimized version runs in about 45-55% of the time and has about 30%
+        /// of the memory overhead of the code that it replaces.
         /// </para>
         /// </remarks>
         private static class OptimizedStringIndenter
         {
 #nullable enable
-            internal static string IndentString(string? s, int indent)
+#if NET7_0_OR_GREATER
+            [SkipLocalsInit]
+#endif
+            internal static unsafe string IndentString(string? s, int indent)
             {
                 if (s is null)
                 {
                     return string.Empty;
                 }
 
-                string newLine = Environment.NewLine;
+                Span<StringSegment> segments = GetStringSegments(s.AsSpan(), stackalloc StringSegment[128], out StringSegment[]? pooledArray);
 
-                using PooledSpan<StringSegment> segments = GetStringSegments(s);
-                int indentedStringLength = ComputeIndentedStringLength(segments, newLine, indent);
-                string indented = new string('\0', indentedStringLength);
-
-                unsafe
+                int indentedStringLength = segments.Length * (Environment.NewLine.Length + indent);
+                foreach (StringSegment segment in segments)
                 {
-#pragma warning disable SA1519 // Braces should not be omitted from multi-line child statement
-                    fixed (char* pInput = s)
-                    fixed (char* pIndented = indented)
-                    {
-                        char* pSegment = pInput;
-                        char* pOutput = pIndented;
-
-                        foreach (var segment in segments)
-                        {
-                            // append indent
-                            for (int i = 0; i < indent; i++)
-                            {
-                                *pOutput++ = ' ';
-                            }
-
-                            // append string segment
-                            int byteCount = segment.Length * sizeof(char);
-                            Buffer.MemoryCopy(pSegment, pOutput, byteCount, byteCount);
-                            pOutput += segment.Length;
-
-                            // append newLine
-                            for (int i = 0; i < newLine.Length; i++)
-                            {
-                                *pOutput++ = newLine[i];
-                            }
-
-                            // move to next segment
-                            pSegment += segment.TotalLength;
-                        }
-                    }
-#pragma warning restore SA1519 // Braces should not be omitted from multi-line child statement
+                    indentedStringLength += segment.Length;
                 }
 
-                return indented;
-
-                // local method
-                static int ComputeIndentedStringLength(PooledSpan<StringSegment> segments, string newLine, int indent)
+#if NET7_0_OR_GREATER
+#pragma warning disable CS8500
+                string result = string.Create(indentedStringLength, (s, (IntPtr)(&segments), indent), static (output, state) =>
                 {
-                    int indentedLength = segments.Length * (newLine.Length + indent);
-
-                    foreach (var segment in segments)
+                    ReadOnlySpan<char> input = state.s;
+                    foreach (StringSegment segment in *(Span<StringSegment>*)state.Item2)
                     {
-                        indentedLength += segment.Length;
-                    }
+                        // Append indent
+                        output.Slice(0, state.indent).Fill(' ');
+                        output = output.Slice(state.indent);
 
-                    return indentedLength;
+                        // Append string segment
+                        input.Slice(0, segment.Length).CopyTo(output);
+                        input = input.Slice(segment.TotalLength);
+                        output = output.Slice(segment.Length);
+
+                        // Append newline
+                        Environment.NewLine.CopyTo(output);
+                        output = output.Slice(Environment.NewLine.Length);
+                    }
+                });
+#pragma warning restore CS8500
+#else
+                using RentedBuilder rental = RentBuilder(indentedStringLength);
+
+                foreach (StringSegment segment in segments)
+                {
+                    rental.Builder
+                        .Append(' ', indent)
+                        .Append(s, segment.Start, segment.Length)
+                        .AppendLine();
                 }
+
+                string result = rental.Builder.ToString();
+#endif
+
+                if (pooledArray is not null)
+                {
+                    ArrayPool<StringSegment>.Shared.Return(pooledArray);
+                }
+
+                return result;
             }
 
-            private static PooledSpan<StringSegment> GetStringSegments(string input)
+            private static Span<StringSegment> GetStringSegments(ReadOnlySpan<char> input, Span<StringSegment> segments, out StringSegment[]? pooledArray)
             {
-                if (input.Length == 0)
+                if (input.IsEmpty)
                 {
-                    PooledSpan<StringSegment> emptyResult = new(1);
-                    emptyResult.Span[0] = new StringSegment(0, 0);
-                    return emptyResult;
+                    segments = segments.Slice(0, 1);
+                    segments[0] = new StringSegment(0, 0, 0);
+                    pooledArray = null;
+                    return segments;
                 }
 
                 int segmentCount = 1;
@@ -1010,73 +1010,88 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
                 }
 
-                PooledSpan<StringSegment> segments = new(segmentCount);
-                int start = 0;
-                int index = 0;
-
-                for (int i = 0; i < segmentCount; i++)
+                if (segmentCount <= segments.Length)
                 {
-                    while (index < input.Length && input[index] != '\n')
-                    {
-                        index++;
-                    }
+                    pooledArray = null;
+                    segments = segments.Slice(0, segmentCount);
+                }
+                else
+                {
+                    pooledArray = ArrayPool<StringSegment>.Shared.Rent(segmentCount);
+                    segments = pooledArray.AsSpan(0, segmentCount);
+                }
 
-                    // the input string didn't end with a newline
-                    if (index == input.Length)
+                int start = 0;
+                for (int i = 0; i < segments.Length; i++)
+                {
+                    int index = input.IndexOf('\n');
+                    if (index < 0)
                     {
-                        segments[i] = new StringSegment(index - start, 0);
+                        segments[i] = new StringSegment(start, input.Length, 0);
                         break;
                     }
 
                     int newLineLength = 1;
-                    bool endedWithReturnNewline = (index > 0) && (input[index - 1] == '\r');
-
-                    if (endedWithReturnNewline)
+                    if (index > 0 && input[index - 1] == '\r')
                     {
                         newLineLength++;
                         index--;
                     }
 
-                    segments[i] = new StringSegment(index - start, newLineLength);
+                    int totalLength = index + newLineLength;
+                    segments[i] = new StringSegment(start, index, totalLength);
 
-                    start = index += newLineLength;
+                    start += totalLength;
+                    input = input.Slice(totalLength);
                 }
 
                 return segments;
             }
 
-            private readonly record struct StringSegment(int Length, int NewLineLength)
+            private struct StringSegment
             {
-                public int TotalLength => Length + NewLineLength;
+                public StringSegment(int start, int length, int totalLength)
+                {
+                    Start = start;
+                    Length = length;
+                    TotalLength = totalLength;
+                }
+
+                public int Start { get; }
+                public int Length { get; }
+                public int TotalLength { get; }
             }
 
-            private ref struct PooledSpan<T>
-            {
-                private static readonly ArrayPool<T> Pool = ArrayPool<T>.Shared;
-                private readonly T[] _pooledArray;
+#if !NET7_0_OR_GREATER
+            private static RentedBuilder RentBuilder(int capacity) => new RentedBuilder(capacity);
 
-                public PooledSpan(int length)
+            private ref struct RentedBuilder
+            {
+                // The maximum capacity for a StringBuilder that we'll cache.  StringBuilders with
+                // larger capacities will be allowed to be GC'd.
+                private const int MaxStringBuilderCapacity = 512;
+
+                private static StringBuilder? _cachedBuilder;
+
+                public RentedBuilder(int capacity)
                 {
-                    _pooledArray = Pool.Rent(length);
-                    Array.Clear(_pooledArray, 0, length);
-                    Span = _pooledArray.AsSpan(0, length);
+                    Builder = Interlocked.Exchange(ref _cachedBuilder, null) ?? new StringBuilder(capacity);
+                    Builder.EnsureCapacity(capacity);
                 }
 
                 public void Dispose()
                 {
-                    Pool.Return(_pooledArray);
+                    // if builder's capacity is within our limits, return it to the cache
+                    if (Builder.Capacity <= MaxStringBuilderCapacity)
+                    {
+                        Builder.Clear();
+                        Interlocked.Exchange(ref _cachedBuilder, Builder);
+                    }
                 }
 
-                public Span<T> Span { get; }
-                public int Length => Span.Length;
-                public Span<T>.Enumerator GetEnumerator() => Span.GetEnumerator();
-
-                public T this[int index]
-                {
-                    get => Span[index];
-                    set => Span[index] = value;
-                }
+                public StringBuilder Builder { get; }
             }
+#endif
 #nullable restore
         }
 
