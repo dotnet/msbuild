@@ -262,6 +262,8 @@ public class CreateNewImageTests
             .Should().Pass();
 
         CreateNewImage task = new CreateNewImage();
+        var (buildEngine, errors) = SetupBuildEngine();
+        task.BuildEngine = buildEngine;
         task.BaseRegistry = "localhost:5010";
         task.BaseImageName = RootlessBase;
         task.BaseImageTag = "latest";
