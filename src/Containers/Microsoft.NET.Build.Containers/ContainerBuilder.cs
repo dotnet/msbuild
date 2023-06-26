@@ -96,7 +96,7 @@ public static class ContainerBuilder
         {
             if (isLocalPush)
             {
-                ILocalRegistry containerRegistry = KnownLocalRegistryTypes.CreateLocalRegistry(localRegistry, logger);
+                ILocalRegistry containerRegistry = KnownLocalRegistryTypes.CreateLocalRegistry(localRegistry, loggerFactory);
                 if (!(await containerRegistry.IsAvailableAsync(cancellationToken).ConfigureAwait(false)))
                 {
                     Console.WriteLine(DiagnosticMessage.ErrorFromResourceWithCode(nameof(Strings.LocalRegistryNotAvailable)));

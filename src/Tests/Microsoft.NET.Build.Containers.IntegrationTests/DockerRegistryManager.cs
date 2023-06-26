@@ -28,10 +28,9 @@ public class DockerRegistryManager
     public static void StartAndPopulateDockerRegistry(ITestOutputHelper testOutput)
     {
         using TestLoggerFactory loggerFactory = new(testOutput);
-        ILogger logger = loggerFactory.CreateLogger();
 
         testOutput.WriteLine("Spawning local registry");
-        if (!new DockerCli(logger).IsAvailable()) {
+        if (!new DockerCli(loggerFactory).IsAvailable()) {
             throw new InvalidOperationException("Docker is not available, tests cannot run");
         }
         CommandResult processResult = ContainerCli.RunCommand(testOutput, "--rm", "--publish", "5010:5000", "--detach", "docker.io/library/registry:2").Execute();
