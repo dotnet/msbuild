@@ -1494,7 +1494,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (loggingEvent is BuildEventArgs loggingEventBuildArgs)
             {
-                RouteBuildEvent(loggingEventBuildArgs);
+                RouteBuildEvent(buildEventArgs);
             }
             else if (loggingEvent is KeyValuePair<int, BuildEventArgs> loggingEventKeyValuePair)
             {
