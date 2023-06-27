@@ -1029,6 +1029,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("MSB4036");
         }
 
+        /// <summary>
+        /// https://github.com/dotnet/msbuild/issues/8864
+        /// </summary>
+        [Fact]
+        public void TestTaskDictionaryOutputItems()
+        {
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+            MockLogger ml = ObjectModelHelpers.BuildProjectExpectSuccess($"""
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                        <UsingTask TaskName=`TaskThatReturnsDictionaryTaskItem` AssemblyFile=`{customTaskPath}`/>
+                        <Target Name=`Build`>
+                           <TaskThatReturnsDictionaryTaskItem>
+                                <Output TaskParameter="DictionaryTaskItemOutput" ItemName="Outputs"/>
+                            </TaskThatReturnsDictionaryTaskItem>
+                        </Target>
+                    </Project>
+                """);
+        }
         #endregion
 
         #region ITestTaskHost Members
@@ -1423,11 +1441,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Target Name='Skip' Inputs='testProject.proj' Outputs='testProject.proj' />
 
                     <Target Name='Error' >
-                        <ErrorTask1 ContinueOnError='True'/>                    
-                        <ErrorTask2 ContinueOnError='False'/>  
-                        <ErrorTask3 /> 
-                        <OnError ExecuteTargets='Foo'/>                  
-                        <OnError ExecuteTargets='Bar'/>                  
+                        <ErrorTask1 ContinueOnError='True'/>
+                        <ErrorTask2 ContinueOnError='False'/>
+                        <ErrorTask3 />
+                        <OnError ExecuteTargets='Foo'/>
+                        <OnError ExecuteTargets='Bar'/>
                     </Target>
 
                     <Target Name='Foo' Inputs='foo.cpp' Outputs='foo.o'>
@@ -1467,5 +1485,33 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
             return project.CreateProjectInstance();
         }
+    }
+
+    /// <summary>
+    /// Task that returns a custom ITaskItem implementation that has a custom IDictionary type returned from CloneCustomMetadata()
+    /// </summary>
+    public sealed class TaskThatReturnsDictionaryTaskItem : Utilities.Task
+    {
+        public override bool Execute() => true;
+
+        [Output]
+        public ITaskItem DictionaryTaskItemOutput { get => new DictionaryTaskItem(); }
+    }
+
+    internal sealed class DictionaryTaskItem : ITaskItem
+    {
+        public string ItemSpec { get => $"{nameof(DictionaryTaskItem)}spec"; set => throw new NotImplementedException(); }
+
+        public ICollection MetadataNames => throw new NotImplementedException();
+
+        public int MetadataCount => throw new NotImplementedException();
+
+        private Dictionary<string, string> metaData = new() { ["a"] = "b" };
+
+        public IDictionary CloneCustomMetadata() => new Dictionary<string, string>(metaData);
+        public string GetMetadata(string metadataName) => throw new NotImplementedException();
+        public void SetMetadata(string metadataName, string metadataValue) => throw new NotImplementedException();
+        public void RemoveMetadata(string metadataName) => throw new NotImplementedException();
+        public void CopyMetadataTo(ITaskItem destinationItem) => throw new NotImplementedException();
     }
 }
