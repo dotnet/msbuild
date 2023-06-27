@@ -301,7 +301,7 @@
       </trans-unit>
       <trans-unit id="Crossgen2MissingRequiredMetadata">
         <source>NETSDK1158: Required '{0}' metadata missing on Crossgen2Tool item.</source>
-        <target state="translated">NETSDK1158: brak wymaganych metadanych "{0}" w elemencie Crossgen2Tool.</target>
+        <target state="translated">NETSDK1158: brak wymaganych metadanych "{0}" w elemencie Crossgen2Tool.</target>
         <note>{StrBegin="NETSDK1158: "}</note>
       </trans-unit>
       <trans-unit id="Crossgen2RequiresSelfContained">
@@ -321,7 +321,7 @@
       </trans-unit>
       <trans-unit id="Crossgen5CannotEmitSymbolsInCompositeMode">
         <source>NETSDK1166: Cannot emit symbols when publishing for .NET 5 with Crossgen2 using composite mode.</source>
-        <target state="translated">NETSDK1166: nie można emitować symboli podczas publikowania w przypadku platformy .NET 5 z Crossgen2 przy użyciu trybu złożonego.</target>
+        <target state="translated">NETSDK1166: nie można emitować symboli podczas publikowania w przypadku platformy .NET 5 z Crossgen2 przy użyciu trybu złożonego.</target>
         <note>{StrBegin="NETSDK1166: "}</note>
       </trans-unit>
       <trans-unit id="CrossgenToolExecutableNotFound">
@@ -331,7 +331,7 @@
       </trans-unit>
       <trans-unit id="CrossgenToolMissingInPDBCompilationMode">
         <source>NETSDK1153: CrossgenTool not specified in PDB compilation mode.</source>
-        <target state="translated">NETSDK1153: nie określono elementu CrossgenTool w trybie kompilacji pliku PDB.</target>
+        <target state="translated">NETSDK1153: nie określono elementu CrossgenTool w trybie kompilacji pliku PDB.</target>
         <note>{StrBegin="NETSDK1153: "}</note>
       </trans-unit>
       <trans-unit id="CrossgenToolMissingWhenUseCrossgen2IsNotSet">
@@ -371,7 +371,7 @@
       </trans-unit>
       <trans-unit id="DuplicatePublishOutputFiles">
         <source>NETSDK1152: Found multiple publish output files with the same relative path: {0}.</source>
-        <target state="translated">NETSDK1152: znaleziono wiele opublikowanych plików wyjściowych z taką samą ścieżką względną: {0}.</target>
+        <target state="translated">NETSDK1152: znaleziono wiele opublikowanych plików wyjściowych z taką samą ścieżką względną: {0}.</target>
         <note>{StrBegin="NETSDK1152: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
@@ -471,12 +471,12 @@
       </trans-unit>
       <trans-unit id="ILLinkOptimizedAssemblies">
         <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="new">Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
+        <target state="translated">Zestawy są optymalizowane pod kątem rozmiaru, co może spowodować zmianę zachowania aplikacji. Pamiętaj, aby wykonać testy po opublikowaniu. Zobacz: https://aka.ms/dotnet-illink</target>
         <note />
       </trans-unit>
       <trans-unit id="ILLinkRunning">
         <source>Optimizing assemblies for size. This process might take a while.</source>
-        <target state="new">Optimizing assemblies for size. This process might take a while.</target>
+        <target state="translated">Optymalizowanie zestawów pod kątem rozmiaru. Ten proces może trochę potrwać.</target>
         <note />
       </trans-unit>
       <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">
@@ -562,7 +562,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="MissingOutputPDBImagePath">
         <source>NETSDK1164: Missing output PDB path in PDB generation mode (OutputPDBImage metadata).</source>
-        <target state="translated">NETSDK1164: brak ścieżki wyjściowej pliku PDB w trybie generowania pliku PDB (metadane OutputPDBImage).</target>
+        <target state="translated">NETSDK1164: brak ścieżki wyjściowej pliku PDB w trybie generowania pliku PDB (metadane OutputPDBImage).</target>
         <note>{StrBegin="NETSDK1164: "}</note>
       </trans-unit>
       <trans-unit id="MissingOutputR2RImageFileName">

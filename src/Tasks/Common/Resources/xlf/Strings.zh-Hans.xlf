@@ -471,12 +471,12 @@
       </trans-unit>
       <trans-unit id="ILLinkOptimizedAssemblies">
         <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="new">Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
+        <target state="translated">优化程序集以调整大小可能会更改应用的行为。请务必在发布后进行测试。请参阅: https://aka.ms/dotnet-illink</target>
         <note />
       </trans-unit>
       <trans-unit id="ILLinkRunning">
         <source>Optimizing assemblies for size. This process might take a while.</source>
-        <target state="new">Optimizing assemblies for size. This process might take a while.</target>
+        <target state="translated">正在优化程序集以调整大小。此过程可能需要一段时间。</target>
         <note />
       </trans-unit>
       <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">
@@ -932,7 +932,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">
         <source>NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</source>
-        <target state="new">NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</target>
+        <target state="translated">NETSDK1208: 无法识别目标平台标识符 {0}。这是因为 MSBuildEnableWorkloadResolver 设置为 false，这将禁用此标识符所需的 .NET SDK 工作负载。若要启用这些工作负载，请取消设置此环境变量或 MSBuild 属性。</target>
         <note>{StrBegin="NETSDK1208: "}</note>
       </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">

@@ -471,12 +471,12 @@
       </trans-unit>
       <trans-unit id="ILLinkOptimizedAssemblies">
         <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="new">Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</target>
+        <target state="translated">Das Optimieren der Assembly für die Größe kann das Verhalten der App ändern. Stellen Sie sicher, dass nach der Veröffentlichung Tests durchgeführt werden. Informationen finden Sie unter https://aka.ms/dotnet-illink.</target>
         <note />
       </trans-unit>
       <trans-unit id="ILLinkRunning">
         <source>Optimizing assemblies for size. This process might take a while.</source>
-        <target state="new">Optimizing assemblies for size. This process might take a while.</target>
+        <target state="translated">Assemblys werden für die Größe optimiert. Dieser Vorgang kann eine Weile dauern.</target>
         <note />
       </trans-unit>
       <trans-unit id="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed">
@@ -592,7 +592,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
         <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: .NET 6.0 oder höher wird als Ziel in Visual Studio 2019 nicht unterstützt.</target>
+        <target state="translated">NETSDK1182: .NET 6.0 oder höher wird als Ziel in Visual Studio 2019 nicht unterstützt.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="Net7NotCompatibleWithDev173">
@@ -857,7 +857,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="TrimmingWpfIsNotSupported">
         <source>NETSDK1168: WPF is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</source>
-        <target state="translated">NETSDK1168: Windows Presentation Foundation (WPF) wird nicht unterstützt oder empfohlen, wenn das Kürzen aktiviert ist. Weitere Informationen finden Sie unter „https://aka.ms/dotnet-illink/wpf“.</target>
+        <target state="translated">NETSDK1168: Windows Presentation Foundation (WPF) wird nicht unterstützt oder empfohlen, wenn das Kürzen aktiviert ist. Weitere Informationen finden Sie unter „https://aka.ms/dotnet-illink/wpf“.</target>
         <note>{StrBegin="NETSDK1168: "}</note>
       </trans-unit>
       <trans-unit id="TypeLibraryDoesNotExist">
