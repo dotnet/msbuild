@@ -935,7 +935,7 @@ class Program
         // Non-portable and portable RIDs should warn
         [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "ubuntu.22.04-x64", "win7-x86", "unix" }, true, true, null, true)]
         // Portable RIDs only should not warn
-        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "win-x86", "linux", "linux-musl-x64", "osx-arm64", "unix" }, true, true, null, false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "win-x86", "win", "linux", "linux-musl-x64", "osx", "osx-arm64", "unix", "browser", "browser-wasm", "ios-arm64" }, true, true, null, false)]
         // No RID assets should not warn
         [InlineData(ToolsetInfo.CurrentTargetFramework, new string[] { }, false, false, null, false)]
         // Below .NET 8 should not warn
