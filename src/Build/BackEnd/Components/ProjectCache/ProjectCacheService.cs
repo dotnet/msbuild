@@ -357,6 +357,12 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 return false;
             }
 
+            // We need to retrieve the configuration if it's already loaded in order to access the Project property below.
+            if (buildRequestConfiguration.IsCached)
+            {
+                buildRequestConfiguration.RetrieveFromCache();
+            }
+
             // Check if there are any project cache items defined in the project
             return GetProjectCacheDescriptors(buildRequestConfiguration.Project).Any();
         }
@@ -651,6 +657,12 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 return;
             }
 
+            // We need to retrieve the configuration if it's already loaded in order to access the Project property below.
+            if (requestConfiguration.IsCached)
+            {
+                requestConfiguration.RetrieveFromCache();
+            }
+
             // Filter to plugins which apply to the project, if any
             List<ProjectCacheDescriptor> projectCacheDescriptors = GetProjectCacheDescriptors(requestConfiguration.Project).ToList();
             if (projectCacheDescriptors.Count == 0)
@@ -683,7 +695,14 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 tasks[idx++] = Task.Run(
                     async () =>
                     {
-                        ProjectCachePlugin plugin = await _projectCachePlugins[projectCacheDescriptor].Value;
+                        if (!_projectCachePlugins.TryGetValue(projectCacheDescriptor, out Lazy<Task<ProjectCachePlugin>> pluginLazyTask))
+                        {
+                            // The plugin might not be in the collection if it was never initialized, which can happen if there are multiple plugins
+                            // and the first one(s) always handles the cache request so the subsequent one(s) never get lazy initialized.
+                            return;
+                        }
+
+                        ProjectCachePlugin plugin = await pluginLazyTask.Value;
 
                         // Rethrow any initialization exception.
                         plugin.InitializationException?.Throw();
