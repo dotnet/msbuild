@@ -23,7 +23,7 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Sets the given metadata. The operation is equivalent to calling
-        /// <see cref="ITaskItem.SetMetadata"/> on all items, but taking
+        /// <see cref="ITaskItem.SetMetadata"/> on all metadata, but takes
         /// advantage of a faster bulk-set operation where applicable. The
         /// implementation may not perform the same parameter validation
         /// as SetMetadata.
