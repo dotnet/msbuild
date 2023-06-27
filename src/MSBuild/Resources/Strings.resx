@@ -1235,6 +1235,15 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
+  <data name="InvalidLowPriorityValue" UESanitized="true" Visibility="Public">
+    <value>MSBUILD : error MSB1064: Low priority value is not valid. {0}</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1064: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
   <data name="AbortingBuild" UESanitized="true" Visibility="Public">
     <value>Attempting to cancel the build...</value>
   </data>
@@ -1477,7 +1486,7 @@
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1063.
+        Next error code should be MSB1065.
 
         Don't forget to update this comment after using the new code.
   -->

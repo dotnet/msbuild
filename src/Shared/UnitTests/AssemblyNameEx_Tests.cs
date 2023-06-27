@@ -758,7 +758,7 @@ namespace Microsoft.Build.UnitTests
             writeTranslator.Translate(ref assemblyNameOriginal, (ITranslator t) => new AssemblyNameExtension(t));
 
             serializationStream.Seek(0, SeekOrigin.Begin);
-            ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, null);
+            ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, InterningBinaryReader.PoolingBuffer);
 
             readTranslator.Translate(ref assemblyNameDeserialized, (ITranslator t) => new AssemblyNameExtension(t));
 
@@ -782,7 +782,7 @@ namespace Microsoft.Build.UnitTests
             writeTranslator.Translate(ref assemblyNameOriginal, (ITranslator t) => new AssemblyNameExtension(t));
 
             serializationStream.Seek(0, SeekOrigin.Begin);
-            ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, null);
+            ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, InterningBinaryReader.PoolingBuffer);
 
             readTranslator.Translate(ref assemblyNameDeserialized, (ITranslator t) => new AssemblyNameExtension(t));
 

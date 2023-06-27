@@ -24,7 +24,7 @@ namespace Microsoft.Build.Framework
             Guid mvid,
             string? customAppDomainDescriptor,
             MessageImportance importance = MessageImportance.Low)
-            : base(null, null, null, importance, DateTime.UtcNow, assemblyName, assemblyPath, mvid)
+            : base(null, null, null, importance, DateTime.UtcNow, null)
         {
             LoadingContext = loadingContext;
             LoadingInitiator = loadingInitiator;

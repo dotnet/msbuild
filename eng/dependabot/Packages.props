@@ -43,7 +43,7 @@
     <PackageVersion Include="System.Runtime" Version="4.3.1" />
     <PackageVersion Update="System.Runtime" Condition="'$(SystemRuntimeVersion)' != ''" Version="$(SystemRuntimeVersion)" />
 
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="7.0.0" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="7.0.2" />
     <PackageVersion Update="System.Security.Cryptography.Pkcs" Condition="'$(SystemSecurityCryptographyPkcsVersion)' != ''" Version="$(SystemSecurityCryptographyPkcsVersion)" />
 
     <PackageVersion Include="System.Security.Cryptography.Xml" Version="7.0.1" />
@@ -58,7 +58,7 @@
 
   <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true' AND $(ProjectIsDeprecated) != 'true'">
     <GlobalPackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4" />
-    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435" PrivateAssets="all"/>
+    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.507" PrivateAssets="all"/>
     <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 

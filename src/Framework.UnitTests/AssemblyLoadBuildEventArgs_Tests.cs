@@ -29,14 +29,15 @@ namespace Microsoft.Build.Framework.UnitTests
             stream.Position = 0;
             using BinaryReader br = new BinaryReader(stream);
             AssemblyLoadBuildEventArgs argDeserialized = new();
-            argDeserialized.CreateFromStream(br, int.MaxValue /*latest*/);
-
+            int packetVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
+            argDeserialized.CreateFromStream(br, packetVersion);
             argDeserialized.LoadingInitiator.ShouldBe(loadingInitiator);
             argDeserialized.AssemblyName.ShouldBe(assemblyName);
             argDeserialized.AssemblyPath.ShouldBe(assemblyPath);
             argDeserialized.MVID.ShouldBe(mvid);
             argDeserialized.AppDomainDescriptor.ShouldBe(appDomainName);
             argDeserialized.LoadingContext.ShouldBe(context);
+            argDeserialized.Importance.ShouldBe(arg.Importance);
         }
     }
 }

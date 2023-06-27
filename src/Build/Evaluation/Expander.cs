@@ -2581,12 +2581,9 @@ namespace Microsoft.Build.Evaluation
                             {
                                 metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                             }
-                            catch (ArgumentException ex) // Blank metadata name
+                            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                             {
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                            }
-                            catch (InvalidOperationException ex)
-                            {
+                                // Blank metadata name
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                             }
 
@@ -2786,12 +2783,9 @@ namespace Microsoft.Build.Evaluation
                         {
                             metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                         }
-                        catch (ArgumentException ex) // Blank metadata name
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
+                            // Blank metadata name
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                         }
 
@@ -2824,16 +2818,46 @@ namespace Microsoft.Build.Evaluation
                         {
                             metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                         }
-                        catch (ArgumentException ex) // Blank metadata name
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
+                            // Blank metadata name
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                         }
 
                         if (metadataValue != null && String.Equals(metadataValue, metadataValueToFind, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // return a result through the enumerator
+                            yield return new Pair<string, S>(item.Key, item.Value);
+                        }
+                    }
+                }
+
+                /// <summary>
+                /// Intrinsic function that returns those items don't have the given metadata value
+                /// Using a case insensitive comparison.
+                /// </summary>
+                internal static IEnumerable<Pair<string, S>> WithoutMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                {
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
+
+                    string metadataName = arguments[0];
+                    string metadataValueToFind = arguments[1];
+
+                    foreach (Pair<string, S> item in itemsOfType)
+                    {
+                        string metadataValue = null;
+
+                        try
+                        {
+                            metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
+                        }
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
+                        {
+                            // Blank metadata name
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
+                        }
+
+                        if (!String.Equals(metadataValue, metadataValueToFind, StringComparison.OrdinalIgnoreCase))
                         {
                             // return a result through the enumerator
                             yield return new Pair<string, S>(item.Key, item.Value);
@@ -2863,12 +2887,9 @@ namespace Microsoft.Build.Evaluation
                             {
                                 metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                             }
-                            catch (ArgumentException ex) // Blank metadata name
+                            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                             {
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                            }
-                            catch (InvalidOperationException ex)
-                            {
+                                // Blank metadata name
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                             }
 
