@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
 
         private VerifySettings _settings = new();
 
-        private static Regex s_elapsedTime = new($@"\(\d+{Regex.Escape(CultureInfo.CurrentUICulture.NumberFormat.NumberDecimalSeparator)}\ds\)", RegexOptions.Compiled);
+        private static Regex s_elapsedTime = new($@"\d+{Regex.Escape(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)}\ds", RegexOptions.Compiled);
 
         public LiveLogger_Tests()
         {
@@ -56,7 +56,7 @@ namespace Microsoft.Build.UnitTests
             {
                 string line = lineBuilder.ToString();
                 lineBuilder.Clear();
-                lineBuilder.Append(s_elapsedTime.Replace(line, "(0.0s)"));
+                lineBuilder.Append(s_elapsedTime.Replace(line, "0.0s"));
             });
         }
 
