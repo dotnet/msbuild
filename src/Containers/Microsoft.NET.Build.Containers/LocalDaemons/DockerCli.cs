@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.Logging;
 using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers;
@@ -20,10 +21,10 @@ internal sealed class DockerCli : ILocalRegistry
 
     private const string Commands = $"{DockerCommand}/{PodmanCommand}";
 
-    private readonly Action<string> logger;
-    private string? commandPath;
+    private readonly ILogger _logger;
+    private string? _commandPath;
 
-    public DockerCli(string? command, Action<string> logger)
+    public DockerCli(string? command, ILoggerFactory logger)
     {
         if (!(command == null ||
               command == PodmanCommand ||
@@ -32,11 +33,11 @@ internal sealed class DockerCli : ILocalRegistry
             throw new ArgumentException($"{command} is an unknown command.");
         }
 
-        this.commandPath = command;
-        this.logger = logger;
+        this._commandPath = command;
+        this._logger = logger.CreateLogger<DockerCli>();
     }
 
-    public DockerCli(Action<string> logger) : this(null, logger)
+    public DockerCli(ILoggerFactory loggerFactory) : this(null, loggerFactory)
     { }
 
     public async Task LoadAsync(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, CancellationToken cancellationToken)
@@ -82,11 +83,11 @@ internal sealed class DockerCli : ILocalRegistry
 
     public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken)
     {
-        bool commandPathWasUnknown = this.commandPath is null; // avoid running the version command twice.
+        bool commandPathWasUnknown = this._commandPath is null; // avoid running the version command twice.
         string? commandPath = await GetCommandPathAsync(cancellationToken);
         if (commandPath is null)
         {
-            logger($"Cannot find {Commands} executable.");
+            _logger.LogError($"Cannot find {Commands} executable.");
             return false;
         }
 
@@ -110,7 +111,7 @@ internal sealed class DockerCli : ILocalRegistry
                     {
                         // we have errors, turn them into a string and log them
                         string messages = string.Join(Environment.NewLine, errorProperty.EnumerateArray());
-                        logger($"The daemon server reported errors: {messages}");
+                        _logger.LogError($"The daemon server reported errors: {messages}");
                         return false;
                     }
                 }
@@ -122,7 +123,8 @@ internal sealed class DockerCli : ILocalRegistry
         }
         catch (Exception ex)
         {
-            logger($"Error while reading daemon config: {ex}");
+            _logger.LogInformation(Strings.LocalDocker_FailedToGetConfig, ex.Message);
+            _logger.LogTrace("Full information: {0}", ex);
             return false;
         }
     }
@@ -246,9 +248,9 @@ internal sealed class DockerCli : ILocalRegistry
 
     private async ValueTask<string?> GetCommandPathAsync(CancellationToken cancellationToken)
     {
-        if (commandPath != null)
+        if (_commandPath != null)
         {
-            return commandPath;
+            return _commandPath;
         }
 
         // Try to find the docker or podman cli.
@@ -258,12 +260,12 @@ internal sealed class DockerCli : ILocalRegistry
         {
             if (await TryRunVersionCommandAsync(command, cancellationToken))
             {
-                commandPath = command;
+                _commandPath = command;
                 break;
             }
         }
 
-        return commandPath;
+        return _commandPath;
     }
 
     private async Task<bool> TryRunVersionCommandAsync(string command, CancellationToken cancellationToken)

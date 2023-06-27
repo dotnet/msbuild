@@ -107,11 +107,6 @@
         <target state="translated">Nie znaleziono określonego manifestu obciążenia: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifiedWorkloadSetNotFound">
-        <source>Specified workload set was not found: {0}</source>
-        <target state="translated">Nie znaleziono określonego zestawu obciążeń: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">Nieoczekiwany token „{0}” pod przesunięciem {1}</target>
@@ -135,6 +130,11 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Nierozpoznany element docelowy „{0}” przekierowania obciążenia „{1}” w manifeście „{2}” [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="new">Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</target>
         <note />
       </trans-unit>
     </body>

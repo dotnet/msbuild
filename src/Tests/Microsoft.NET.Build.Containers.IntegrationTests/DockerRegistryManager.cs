@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
@@ -24,8 +27,10 @@ public class DockerRegistryManager
 
     public static void StartAndPopulateDockerRegistry(ITestOutputHelper testOutput)
     {
+        using TestLoggerFactory loggerFactory = new(testOutput);
+
         testOutput.WriteLine("Spawning local registry");
-        if (!new DockerCli(testOutput.WriteLine).IsAvailable()) {
+        if (!new DockerCli(loggerFactory).IsAvailable()) {
             throw new InvalidOperationException("Docker is not available, tests cannot run");
         }
         CommandResult processResult = ContainerCli.RunCommand(testOutput, "--rm", "--publish", "5010:5000", "--detach", "docker.io/library/registry:2").Execute();

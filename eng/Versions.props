@@ -57,6 +57,8 @@
     <MicrosoftExtensionsLoggingConsoleVersion>8.0.0-preview.7.23326.5</MicrosoftExtensionsLoggingConsoleVersion>
     <MicrosoftNETILLinkTasksPackageVersion>8.0.0-preview.7.23326.5</MicrosoftNETILLinkTasksPackageVersion>
     <SystemServiceProcessServiceControllerVersion>8.0.0-preview.7.23326.5</SystemServiceProcessServiceControllerVersion>
+    <MicrosoftExtensionsLoggingPackageVersion>8.0.0-preview.7.23326.5</MicrosoftExtensionsLoggingPackageVersion>
+    <MicrosoftExtensionsLoggingAbstractionsPackageVersion>8.0.0-preview.7.23326.5</MicrosoftExtensionsLoggingAbstractionsPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/nuget/nuget.client -->

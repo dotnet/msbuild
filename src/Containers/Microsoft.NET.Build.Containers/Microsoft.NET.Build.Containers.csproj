@@ -34,7 +34,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Nuget.Packaging" Version="$(NuGetPackagingPackageVersion)" />
-    <PackageReference Include="Valleysoft.DockerCredsProvider" Version="2.1.0" />
+    <PackageReference Include="Valleysoft.DockerCredsProvider" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingAbstractionsPackageVersion)" />
   </ItemGroup>
 
   <!-- net472 builds manually import files to compile -->

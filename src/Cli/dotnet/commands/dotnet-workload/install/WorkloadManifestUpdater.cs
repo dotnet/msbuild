@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var reporter = new NullReporter();
             var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
             var sdkVersion = Product.Version;
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, sdkVersion, userProfileDir);
+            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, sdkVersion, userProfileDir, SdkDirectoryWorkloadManifestProvider.GetGlobalJsonPath(Environment.CurrentDirectory));
             var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, sdkVersion, userProfileDir);
             var tempPackagesDir = new DirectoryPath(PathUtilities.CreateTempSubdirectory());
             var nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir,
