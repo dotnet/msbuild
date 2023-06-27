@@ -217,11 +217,39 @@ namespace Microsoft.Build.Construction
                     _solutionFile = value;
                     _solutionFilter = null;
 
-                    SolutionFileDirectory = Path.GetDirectoryName(_solutionFile);
+                    // Only set the value of the SolutionFileDirectory property
+                    // if, and only if, the _solutionFile field is non blank and the 
+                    // _solutionFile field contains the fully-qualified pathname of
+                    // a file that actually exists on the disk.
+                    if (!string.IsNullOrWhiteSpace(_solutionFile)
+                        && File.Exists(_solutionFile)
+                        && IsExtensionValid(_solutionFile))
+                      SolutionFileDirectory = Path.GetDirectoryName(_solutionFile);
                 }
             }
         }
 
+        private static bool IsExtensionValid(string pathname)
+        {
+           var result = false;
+           
+           try
+           {
+             if (string.IsNullOrWhiteSpace(pathname)) return result;
+                          
+             result = ".sln".Equals(Path.GetExtension(pathname))
+                      || ".slnf".Equals(Path.GetExtension(pathname));
+           }
+           catch(Exception ex)
+           {
+              Console.WriteLine(ex);
+              
+              result = false;
+           }
+           
+           return result;
+        }
+  
         /// <summary>
         /// Gets a <see cref="T:System.String" /> containing the fully-qualified
         /// pathname of the folder in which this Solution's file resides.
