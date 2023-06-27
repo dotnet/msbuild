@@ -695,7 +695,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 tasks[idx++] = Task.Run(
                     async () =>
                     {
-                        if (!_projectCachePlugins.TryGetValue(projectCacheDescriptor, out Lazy<Task<ProjectCachePlugin>> pluginLazyTask))
+                        if (!_projectCachePlugins.TryGetValue(projectCacheDescriptor, out Lazy<Task<ProjectCachePlugin>>? pluginLazyTask))
                         {
                             // The plugin might not be in the collection if it was never initialized, which can happen if there are multiple plugins
                             // and the first one(s) always handles the cache request so the subsequent one(s) never get lazy initialized.
