@@ -9,6 +9,8 @@ using System.Security.Permissions;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.BuildException;
+using System.Collections.Generic;
 
 #nullable disable
 
@@ -22,7 +24,7 @@ namespace Microsoft.Build.Exceptions
     // promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type
     // without following certain special FX guidelines, can break both forward and backward compatibility
     [Serializable]
-    public sealed class InternalLoggerException : Exception
+    public sealed class InternalLoggerException : BuildExceptionBase
     {
         #region Unusable constructors
 
@@ -63,9 +65,7 @@ namespace Microsoft.Build.Exceptions
         /// <exception cref="InvalidOperationException"></exception>
         public InternalLoggerException(string message, Exception innerException)
             : base(message, innerException)
-        {
-            ErrorUtilities.ThrowInvalidOperation("InternalLoggerExceptionOnlyThrownByEngine");
-        }
+        { }
 
         #endregion
 
@@ -134,6 +134,23 @@ namespace Microsoft.Build.Exceptions
             info.AddValue("errorCode", errorCode);
             info.AddValue("helpKeyword", helpKeyword);
             info.AddValue("initializationException", initializationException);
+        }
+
+        protected override IDictionary<string, string> FlushCustomState()
+        {
+            return new Dictionary<string, string>()
+            {
+                { nameof(errorCode), errorCode },
+                { nameof(helpKeyword), helpKeyword },
+                { nameof(initializationException), initializationException.ToString() },
+            };
+        }
+
+        protected override void InitializeCustomState(IDictionary<string, string> state)
+        {
+            errorCode = state[nameof(errorCode)];
+            helpKeyword = state[nameof(helpKeyword)];
+            initializationException = bool.Parse(state[nameof(initializationException)]);
         }
 
         /// <summary>
