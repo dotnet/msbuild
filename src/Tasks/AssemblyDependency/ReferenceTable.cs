@@ -2677,41 +2677,6 @@ namespace Microsoft.Build.Tasks
             TaskItem referenceItem = new TaskItem();
             referenceItem.ItemSpec = reference.FullPath;
 
-            // Enumerate common metadata with an iterator to allow using a more efficient bulk-set operation.
-            IEnumerable<KeyValuePair<string, string>> EnumerateCommonMetadata()
-            {
-                yield return new KeyValuePair<string, string>(ItemMetadataNames.resolvedFrom, reference.ResolvedSearchPath);
-
-                // Set the CopyLocal metadata.
-                yield return new KeyValuePair<string, string>(ItemMetadataNames.copyLocal, reference.IsCopyLocal ? "true" : "false");
-
-                // Set the Redist name metadata.
-                if (!string.IsNullOrEmpty(reference.RedistName))
-                {
-                    yield return new KeyValuePair<string, string>(ItemMetadataNames.redist, reference.RedistName);
-                }
-
-                if (Reference.IsFrameworkFile(reference.FullPath, _frameworkPaths) || (_installedAssemblies?.FrameworkAssemblyEntryInRedist(assemblyName) == true))
-                {
-                    if (!IsAssemblyRemovedFromDotNetFramework(assemblyName, reference.FullPath, _frameworkPaths, _installedAssemblies))
-                    {
-                        yield return new KeyValuePair<string, string>(ItemMetadataNames.frameworkFile, "true");
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(reference.ImageRuntime))
-                {
-                    yield return new KeyValuePair<string, string>(ItemMetadataNames.imageRuntime, reference.ImageRuntime);
-                }
-
-                // The redist root is "null" when there was no IsRedistRoot flag in the Redist XML
-                // (or there was no redist XML at all for this item).
-                if (reference.IsRedistRoot != null)
-                {
-                    yield return new KeyValuePair<string, string>(ItemMetadataNames.isRedistRoot, (bool)reference.IsRedistRoot ? "true" : "false");
-                }
-            }
-
             IMetadataContainer referenceItemAsMetadataContainer = referenceItem;
             referenceItemAsMetadataContainer.ImportMetadata(EnumerateCommonMetadata());
 
@@ -2891,6 +2856,41 @@ namespace Microsoft.Build.Tasks
             }
 
             return referenceItem;
+
+            // Enumerate common metadata with an iterator to allow using a more efficient bulk-set operation.
+            IEnumerable<KeyValuePair<string, string>> EnumerateCommonMetadata()
+            {
+                yield return new KeyValuePair<string, string>(ItemMetadataNames.resolvedFrom, reference.ResolvedSearchPath);
+
+                // Set the CopyLocal metadata.
+                yield return new KeyValuePair<string, string>(ItemMetadataNames.copyLocal, reference.IsCopyLocal ? "true" : "false");
+
+                // Set the Redist name metadata.
+                if (!string.IsNullOrEmpty(reference.RedistName))
+                {
+                    yield return new KeyValuePair<string, string>(ItemMetadataNames.redist, reference.RedistName);
+                }
+
+                if (Reference.IsFrameworkFile(reference.FullPath, _frameworkPaths) || (_installedAssemblies?.FrameworkAssemblyEntryInRedist(assemblyName) == true))
+                {
+                    if (!IsAssemblyRemovedFromDotNetFramework(assemblyName, reference.FullPath, _frameworkPaths, _installedAssemblies))
+                    {
+                        yield return new KeyValuePair<string, string>(ItemMetadataNames.frameworkFile, "true");
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(reference.ImageRuntime))
+                {
+                    yield return new KeyValuePair<string, string>(ItemMetadataNames.imageRuntime, reference.ImageRuntime);
+                }
+
+                // The redist root is "null" when there was no IsRedistRoot flag in the Redist XML
+                // (or there was no redist XML at all for this item).
+                if (reference.IsRedistRoot != null)
+                {
+                    yield return new KeyValuePair<string, string>(ItemMetadataNames.isRedistRoot, (bool)reference.IsRedistRoot ? "true" : "false");
+                }
+            }
         }
 
         /// <summary>
