@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+using Microsoft.Build.Framework.BuildException;
 
 #nullable disable
 
@@ -15,7 +16,7 @@ namespace Microsoft.Build.Framework
     /// did wrong.
     /// </summary>
     [Serializable]
-    internal sealed class InternalErrorException : Exception
+    internal sealed class InternalErrorException : BuildExceptionBase
     {
         /// <summary>
         /// Default constructor.
@@ -45,9 +46,27 @@ namespace Microsoft.Build.Framework
         internal InternalErrorException(
             String message,
             Exception innerException) :
-            base("MSB0001: Internal MSBuild Error: " + message + (innerException == null ? String.Empty : ("\n=============\n" + innerException.ToString() + "\n\n")), innerException)
+            this(message, innerException, false)
+        { }
+
+        internal static InternalErrorException CreateFromRemote(string message, Exception innerException)
         {
-            ConsiderDebuggerLaunch(message, innerException);
+            return new InternalErrorException(message, innerException, true /* calledFromDeserialization */);
+        }
+
+        private InternalErrorException(string message, Exception innerException, bool calledFromDeserialization)
+            : base(
+                calledFromDeserialization
+                    ? message
+                    : "MSB0001: Internal MSBuild Error: " + message + (innerException == null
+                        ? String.Empty
+                        : ("\n=============\n" + innerException.ToString() + "\n\n")),
+                innerException)
+        {
+            if (!calledFromDeserialization)
+            {
+                ConsiderDebuggerLaunch(message, innerException);
+            }
         }
 
         #region Serialization (update when adding new class members)

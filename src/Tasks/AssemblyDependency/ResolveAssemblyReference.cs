@@ -2036,7 +2036,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void ReadStateFile(FileExists fileExists)
         {
-            _cache = SystemState.DeserializeCache(_stateFile, Log, typeof(SystemState)) as SystemState;
+            _cache = SystemState.DeserializeCache<SystemState>(_stateFile, Log);
 
             // Construct the cache only if we can't find any caches.
             if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
@@ -2055,12 +2055,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void WriteStateFile()
         {
-            if (!String.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
+            if (!string.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
             {
                 _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log);
             }
-            else if (!String.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
+            else if (!string.IsNullOrEmpty(_stateFile) && (_cache.IsDirty || _cache.instanceLocalOutgoingFileStateCache.Count < _cache.instanceLocalFileStateCache.Count))
             {
+                // Either the cache is dirty (we added or updated an item) or the number of items actually used is less than what
+                // we got by reading the state file prior to execution. Serialize the cache into the state file.
                 if (FailIfNotIncremental)
                 {
                     Log.LogErrorFromResources("ResolveAssemblyReference.WritingCacheFile", _stateFile);
@@ -2313,7 +2315,7 @@ namespace Microsoft.Build.Tasks
                         {
                             // We don't want to perform I/O to see what the actual timestamp on disk is so we return a fixed made up value.
                             // Note that this value makes the file exist per the check in SystemState.FileTimestampIndicatesFileExists.
-                            return DateTime.MaxValue;
+                            return SystemState.FileState.ImmutableFileLastModifiedMarker;
                         }
                         return getLastWriteTime(path);
                     });

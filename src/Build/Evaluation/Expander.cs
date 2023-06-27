@@ -1521,18 +1521,16 @@ namespace Microsoft.Build.Evaluation
                     // We also do not want to add the property to the list if the environment variable is not set, also we do not want to add the property to the list if we are currently
                     // evaluating a condition because a common pattern for msbuild projects is to see if the property evaluates to empty and then set a value as this would cause a considerable number of false positives.   <A Condition="'$(A)' == ''">default</A>
                     //
-                    // Another pattern used is where a property concatonates with other values,  <a>$(a);something</a> however we do not want to add the a element to the list because again this would make a number of
+                    // Another pattern used is where a property concatenates with other values,  <a>$(a);something</a> however we do not want to add the a element to the list because again this would make a number of
                     // false positives. Therefore we check to see what element we are currently evaluating and if it is the same as our property we do not add the property to the list.
                     if (usedUninitializedProperties.Warn && usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName != null)
                     {
                         // Check to see if the property name does not match the property we are currently evaluating, note the property we are currently evaluating in the element name, this means no $( or )
                         if (!MSBuildNameIgnoreCaseComparer.Default.Equals(usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName, propertyName, startIndex, endIndex - startIndex + 1))
                         {
-                            string propertyTrimed = propertyName.Substring(startIndex, endIndex - startIndex + 1);
-                            if (!usedUninitializedProperties.Properties.ContainsKey(propertyTrimed))
-                            {
-                                usedUninitializedProperties.Properties.Add(propertyTrimed, elementLocation);
-                            }
+                            usedUninitializedProperties.TryAdd(
+                                propertyName: propertyName.Substring(startIndex, endIndex - startIndex + 1),
+                                elementLocation);
                         }
                     }
 
@@ -2583,12 +2581,9 @@ namespace Microsoft.Build.Evaluation
                             {
                                 metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                             }
-                            catch (ArgumentException ex) // Blank metadata name
+                            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                             {
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                            }
-                            catch (InvalidOperationException ex)
-                            {
+                                // Blank metadata name
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                             }
 
@@ -2788,12 +2783,9 @@ namespace Microsoft.Build.Evaluation
                         {
                             metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                         }
-                        catch (ArgumentException ex) // Blank metadata name
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
+                            // Blank metadata name
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                         }
 
@@ -2826,16 +2818,46 @@ namespace Microsoft.Build.Evaluation
                         {
                             metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                         }
-                        catch (ArgumentException ex) // Blank metadata name
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
+                            // Blank metadata name
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                         }
 
                         if (metadataValue != null && String.Equals(metadataValue, metadataValueToFind, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // return a result through the enumerator
+                            yield return new Pair<string, S>(item.Key, item.Value);
+                        }
+                    }
+                }
+
+                /// <summary>
+                /// Intrinsic function that returns those items don't have the given metadata value
+                /// Using a case insensitive comparison.
+                /// </summary>
+                internal static IEnumerable<Pair<string, S>> WithoutMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                {
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
+
+                    string metadataName = arguments[0];
+                    string metadataValueToFind = arguments[1];
+
+                    foreach (Pair<string, S> item in itemsOfType)
+                    {
+                        string metadataValue = null;
+
+                        try
+                        {
+                            metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
+                        }
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
+                        {
+                            // Blank metadata name
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
+                        }
+
+                        if (!String.Equals(metadataValue, metadataValueToFind, StringComparison.OrdinalIgnoreCase))
                         {
                             // return a result through the enumerator
                             yield return new Pair<string, S>(item.Key, item.Value);
@@ -2865,12 +2887,9 @@ namespace Microsoft.Build.Evaluation
                             {
                                 metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                             }
-                            catch (ArgumentException ex) // Blank metadata name
+                            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                             {
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                            }
-                            catch (InvalidOperationException ex)
-                            {
+                                // Blank metadata name
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                             }
 
@@ -5279,26 +5298,45 @@ namespace Microsoft.Build.Evaluation
         }
     }
 
+#nullable enable
     /// <summary>
     /// This class wraps information about properties which have been used before they are initialized.
     /// </summary>
-    internal class UsedUninitializedProperties
+    internal sealed class UsedUninitializedProperties
     {
         /// <summary>
-        /// This class wraps information about properties which have been used before they are initialized.
+        /// Lazily allocated collection of properties and the element which used them.
         /// </summary>
-        internal UsedUninitializedProperties()
+        private Dictionary<string, IElementLocation>? _properties;
+
+        internal void TryAdd(string propertyName, IElementLocation elementLocation)
         {
-            Properties = new Dictionary<string, IElementLocation>(StringComparer.OrdinalIgnoreCase);
+            if (_properties is null)
+            {
+                _properties = new(StringComparer.OrdinalIgnoreCase);
+            }
+            else if (_properties.ContainsKey(propertyName))
+            {
+                return;
+            }
+
+            _properties.Add(propertyName, elementLocation);
         }
 
-        /// <summary>
-        /// Hash set of properties which have been used before being initialized.
-        /// </summary>
-        internal IDictionary<string, IElementLocation> Properties
+        internal bool TryGetPropertyElementLocation(string propertyName, [NotNullWhen(returnValue: true)] out IElementLocation? elementLocation)
         {
-            get;
-            set;
+            if (_properties is null)
+            {
+                elementLocation = null;
+                return false;
+            }
+
+            return _properties.TryGetValue(propertyName, out elementLocation);
+        }
+
+        internal void RemoveProperty(string propertyName)
+        {
+            _properties?.Remove(propertyName);
         }
 
         /// <summary>
@@ -5313,7 +5351,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         ///  What is the currently evaluating property element, this is so that we do not add a un initialized property if we are evaluating that property.
         /// </summary>
-        internal string CurrentlyEvaluatingPropertyElementName
+        internal string? CurrentlyEvaluatingPropertyElementName
         {
             get;
             set;

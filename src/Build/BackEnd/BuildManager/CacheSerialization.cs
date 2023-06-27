@@ -121,7 +121,7 @@ namespace Microsoft.Build.Execution
 
                 using (var fileStream = File.OpenRead(inputCacheFile))
                 {
-                    using var translator = BinaryTranslator.GetReadTranslator(fileStream, null);
+                    using var translator = BinaryTranslator.GetReadTranslator(fileStream, InterningBinaryReader.PoolingBuffer);
 
                     translator.Translate(ref configCache);
                     translator.Translate(ref resultsCache);
