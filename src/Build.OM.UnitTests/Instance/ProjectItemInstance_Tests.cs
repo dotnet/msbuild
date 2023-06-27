@@ -116,6 +116,29 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
+        /// ImportMetadata adds and overwrites metadata, does not delete existing metadata
+        /// </summary>
+        [Fact]
+        public void ImportMetadataAddsAndOverwrites()
+        {
+            ProjectItemInstance item = GetItemInstance();
+
+            item.SetMetadata("m1", "v1");
+            item.SetMetadata("m2", "v0");
+
+            ((IMetadataContainer) item).ImportMetadata(new Dictionary<string, string>
+            {
+                { "m2", "v2" },
+                { "m3", "v3" },
+            });
+
+            // m1 was not deleted, m2 was overwritten, m3 was added
+            Assert.Equal("v1", item.GetMetadataValue("m1"));
+            Assert.Equal("v2", item.GetMetadataValue("m2"));
+            Assert.Equal("v3", item.GetMetadataValue("m3"));
+        }
+
+        /// <summary>
         /// Get metadata not present
         /// </summary>
         [Fact]
