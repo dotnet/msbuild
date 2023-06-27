@@ -192,15 +192,14 @@ namespace Microsoft.Build.Construction
         public IReadOnlyDictionary<string, ProjectInSolution> ProjectsByGuid => new ReadOnlyDictionary<string, ProjectInSolution>(_projects);
 
         /// <summary>
-        /// This is the read/write accessor for the solution file which we will parse.  This
-        /// must be set before calling any other methods on this class.
+        /// Gets a <see cref="T:System.String" /> value that contains the fully-qualified pathname of the Solution file that has been parsed.
         /// </summary>
-        /// <value></value>
-        internal string FullPath
+        // NOTE: This is the read/write accessor that is used internally for the Solution file which we will parse.  This must be set before calling any other methods on this class.
+        public string FullPath
         {
             get => _solutionFile;
 
-            set
+            internal set
             {
                 // Should already be canonicalized to a full path
                 ErrorUtilities.VerifyThrowInternalRooted(value);
@@ -223,11 +222,13 @@ namespace Microsoft.Build.Construction
             }
         }
 
-        internal string SolutionFileDirectory
+        /// <summary>
+        /// Gets a <see cref="T:System.String" /> containing the fully-qualified
+        /// pathname of the folder in which this Solution's file resides.
+        /// </summary
+        public string SolutionFileDirectory
         {
-            get;
-            // This setter is only used by the unit tests
-            set;
+            get; internal set; // The setter is only used by unit tests.
         }
 
         /// <summary>
