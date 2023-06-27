@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="new">Build {0} in {1}s</target>
+        <target state="translated">Sestavení {0} za {1}s</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -21,35 +21,35 @@
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
         <source>failed</source>
-        <target state="new">failed</target>
+        <target state="translated">neúspěšné</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with errors</source>
-        <target state="new">failed with errors</target>
+        <target state="translated">selhalo s chybami</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with warnings</source>
-        <target state="new">failed with warnings</target>
+        <target state="translated">selhalo s upozorněními</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_Succeeded">
         <source>succeeded</source>
-        <target state="new">succeeded</target>
+        <target state="translated">úspěšné</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
-        <target state="new">succeeded with warnings</target>
+        <target state="translated">úspěšně dokončeno s upozorněními</target>
         <note>
       Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -80,12 +80,13 @@
                      but isn't up to date.
                      (Short form: -q)
     </source>
-        <target state="new">  -question
-                     (Experimental) Question whether there is any build work.
-                     MSBuild will error out when it detects a target or task
-                     that can be incremental (has inputs and outputs),
-                     but isn't up to date.
-                     (Short form: -q)
+        <target state="translated">  -question
+                     (experimentální) Dotaz, jestli je dochází k práci na sestavení.
+                     MSBuild zobrazí chybu při zjištění cíle nebo úkolu
+,
+                     který může být přírůstkový (obsahuje vstupy a výstupy),
+                     ale není aktuální.
+                     (Krátký tvar: -q)
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -93,9 +94,19 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="InvalidLowPriorityValue">
+        <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1064: Hodnota s nízkou prioritou není platná. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1064: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
-        <target state="new">MSBuild version {0} for {1}</target>
+        <target state="translated">MSBuild verze {0} pro {1}</target>
         <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</note>
       </trans-unit>
       <trans-unit id="CurrentDirectory">
@@ -215,25 +226,28 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -isolateProjects[:True|MessageUponIsolationViolation|False]
-                     Causes MSBuild to build each project in isolation.
+        <target state="translated">  -isolateProjects[:True| MessageUponIsolationViolation| Nepravda]
+                     Způsobí, že MSBuild sestaví každý projekt v izolaci.
 
-                     When set to "MessageUponIsolationViolation" (or its short
-                     form "Message"), only the results from top-level targets
-                     are serialized if the -outputResultsCache switch is
-                     supplied. This is to mitigate the chances of an
-                     isolation-violating target on a dependency project using
-                     incorrect state due to its dependency on a cached target
-                     whose side effects would not be taken into account.
-                     (For example, the definition of a property.)
+Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
+                     tvar „Zpráva“), jsou serializovány pouze výsledky z cílů nejvyšší úrovně
+                     pokud je dodán přepínač -outputResultsCache
+.
+                     Tímto se zmírní pravděpodobnost
+                     cíle porušujícího izolaci v projektu závislosti pomocí
+                     nesprávného stavu kvůli své závislosti na cíli uloženém v mezipaměti
+,
+                     jehož vedlejší účinky by se nezohlednily.
+                     (Například definice vlastnosti.)
 
-                     This is a more restrictive mode of MSBuild as it requires
-                     that the project graph be statically discoverable at
-                     evaluation time, but can improve scheduling and reduce
-                     memory overhead when building a large set of projects.
-                     (Short form: -isolate)
+                    Toto je přísnější režim MSBuildu, protože vyžaduje
+,
+                     aby byl graf projektu staticky zjistitelný v
+                     období vyhodnocování, ale může zlepšit plánování a snížit
+                     režie paměti při sestavování velké sady projektů.
+                     (Krátký tvar: -isolate)
 
-                     This flag is experimental and may not work as intended.
+                     Tento příznak je experimentální a nemusí fungovat podle očekávání.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -348,13 +362,14 @@
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="new">  -warnNotAsError[:code[;code2]]
-                     List of warning codes to treats not treat as errors.
-                     Use a semicolon or a comma to separate
-                     multiple warning codes. Has no effect if the -warnaserror
-                     switch is not set.
+        <target state="translated">  -warnNotAsError[:code[;code2]]
+                     Seznam kódů upozornění, které se nemají považovat za chyby.
+                     K oddělení
+ více kódů upozornění použijte středník 
+                     nebo čárku. Nemá žádný vliv, pokud přepínač -warnaserror
+                     není nastavený.
 
-                     Example:
+                     Příklad:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -510,20 +525,17 @@
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;protok_nást&gt;   Použít daný protokolovací nástroj k protokolování
-                     událostí nástroje MSBuild. Chcete-li zadat více protokolovacích.
-                     nástrojů, musíte je zadat jednotlivě.
-                     Syntaxe hodnoty &lt;protok_nást&gt;:
-                        [&lt;třída_protok_nást&gt;,]&lt;sestavení_protok_nást&gt;
-                        [;&lt;param_protok_nást&gt;]
-                     Syntaxe hodnoty &lt;třída_protok_nást&gt;:
-                        [&lt;část/úpl_obor_názvů&gt;.]&lt;náz_tř_protok_nást&gt;
-                     Syntaxe hodnoty &lt;sestavení_protok_nást&gt;:
-                        {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
+        <target state="translated">  -logger:&lt;logger&gt;   Použít daný protokolovací nástroj k protokolování událostí nástroje MSBuild. Pokud chcete zadat 
+                     více protokolovacích nástrojů, musíte je zadat jednotlivě.
+                     Syntaxe hodnoty &lt;logger&gt; je:
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
+                     Syntaxe hodnoty &lt;logger class&gt; je:
+                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
+                     Syntaxe hodnoty &lt;logger assembly&gt; je:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
-                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se 
-                     protokolovacímu nástroji přesně v tom tvaru, v jakém
-                     byly zadány. (Krátký tvar: -l)
+                     Parametry &lt;logger parameters&gt; jsou volitelné a předávají se
+                     protokolovacímu nástroji přesně v tom tvaru, v jakém byly zadány. (Krátký tvar: -l)
                      Příklady:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -548,11 +560,15 @@
                            is set separately by
                            -fileloggerparameters.
 </source>
-        <target state="needs-review-translation">  -verbosity:&lt;úroveň&gt; Zobrazení daného množství informací v protokolu
-                     událostí. Dostupné úrovně podrobností: q[uiet], m[inimal],
+        <target state="translated">  -verbosity:&lt;level&gt; Zobrazí toto množství informací v protokolu událostí.
+                     Dostupné úrovně podrobnosti: q[uiet], m[inimal],
                      n[ormal], d[etailed] a diag[nostic]. (Krátký tvar: -v)
                      Příklad:
                        -verbosity:quiet
+
+                     Poznámka: Podrobnost protokolování souborů
+                           je nastavena samostatně přes
+                           -fileloggerparameters.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -601,40 +617,40 @@
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Parameters to console logger. (Short form: -clp)
-                     The available parameters are:
-                        PerformanceSummary--Show time spent in tasks, targets
-                            and projects.
-                        Summary--Show error and warning summary at the end.
-                        NoSummary--Don't show error and warning summary at the
-                            end.
-                        ErrorsOnly--Show only errors.
-                        WarningsOnly--Show only warnings.
-                        NoItemAndPropertyList--Don't show list of items and
-                            properties at the start of each project build.
-                        ShowCommandLine--Show TaskCommandLineEvent messages
-                        ShowTimestamp--Display the Timestamp as a prefix to any
-                            message.
-                        ShowEventId--Show eventId for started events, finished
-                            events, and messages
-                        ForceNoAlign--Does not align the text to the size of
-                            the console buffer
-                        DisableConsoleColor--Use the default console colors
-                            for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
-                        EnableMPLogging--Enable the multiprocessor logging
-                            style even when running in non-multiprocessor
-                            mode. This logging style is on by default.
-                        ForceConsoleColor--Use ANSI console colors even if
-                            console does not support it
-                        PreferConsoleColor--Use ANSI console colors only if
-                            target console does support it
-                     Verbosity--overrides the -verbosity setting for this
-                            logger.
-                     Example:
+        <target state="translated">  -consoleloggerparameters:&lt;parameters&gt;
+                     Parametry do protokolovacího nástroje konzoly. (Krátký tvar: -clp)
+                     Dostupné parametry jsou:
+                        PerformanceSummary – zobrazí dobu zpracování úloh, cílů
+                            a projektů.
+                        Summary – zobrazí souhrn chyb a upozornění na konci.
+                        NoSummary – nezobrazí souhrny chyb a upozornění na
+                            konci.
+                        ErrorsOnly – zobrazí jenom chyby.
+                        WarningsOnly – zobrazí jenom upozornění.
+                        NoItemAndPropertyList – nezobrazí na začátku sestavení každého
+                            projektu seznamy položek a vlastností.
+                        ShowCommandLine – zobrazí zprávy TaskCommandLineEvent.
+                        ShowTimestamp – před každou zprávou zobrazí
+                            časové razítko.
+                        ShowEventId – zobrazí ID události pro spuštěné a dokončené
+                            události a zprávy.
+                        ForceNoAlign – nenastav9 text podle velikosti vyrovnávací
+                            paměti konzoly.
+                        DisableConsoleColor – použije výchozí barvy konzoly
+                            pro všechny zprávy protokolování.
+                        DisableMPLogging – zakáže víceprocesorový styl výstupu
+                            protokolování při práci v jiném než víceprocesorovém
+                            režimu.
+                        EnableMPLogging – povolí víceprocesorový styl výstupu
+                            protokolování i při práci v jiném
+                            režimu. Tento styl protokolování je výchozí. 
+                        ForceConsoleColor – použije barvy konzoly ANSI,
+                            i když to konzola nepodporuje.
+                        PreferConsoleColor– použije barvy konzoly ANSI, pouze pokud
+                            to cílová konzola podporuje.
+                        Verbosity – potlačí nastavení -verbosity
+                            pro tento protokolovací nástroj.
+                     Příklad:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
@@ -735,10 +751,10 @@
                      will read build results from. If -isolateProjects is set
                      to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Semicolon separated list of input cache files that MSBuild
-                     will read build results from. If -isolateProjects is set
-                     to False, this sets it to True. (short form: -irc)
+        <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Středníky oddělený seznam vstupních souborů mezipaměti, které MSBuild
+                     načte výsledky sestavení. Pokud je parametr -isolateProjects nastaven
+                     na hodnotu False, toto ho nastaví na hodnotu True. (krátký tvar: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -752,11 +768,11 @@
                      If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="new">  -outputResultsCache:[cacheFile]
-                     Output cache file where MSBuild will write the contents of
-                     its build result caches at the end of the build.
-                     If -isolateProjects is set to False, this sets it to True.
-                     (short form: -orc)
+        <target state="translated">  -outputResultsCache:[cacheFile]
+                     výstupní soubor mezipaměti, do kterého nástroj MSBuild zapíše obsah
+                     mezipaměti výsledků sestavení na konci sestavení.
+                     Pokud je parametr -isolateProjects nastaven na hodnotu False, toto ho                                nastaví na hodnotu True.
+                     (krátký tvar: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -788,23 +804,20 @@
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;                     
-                     Použít zadaný protokolovací nástroj pro protokolování událostí
-                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci 
-                     protokolovacího nástroje. Chcete-li zadat více 
-                     protokolovacích nástrojů, uveďte je jednotlivě. 
+        <target state="translated">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
+                     Použít zadaný protokolovací nástroj pro protokolování událostí z nástroje MSBuild; ke každému uzlu připojit
+                     jinou instanci protokolovacího nástroje. Pokud chcete zadat více
+                     protokolovacích nástrojů, uveďte je jednotlivě.
                      (Krátký tvar: -dl)
-                     Syntaxe hodnoty &lt;protok_nást&gt;:
-                        [&lt;třída_protok_nást&gt;,]&lt;sestav_protok_nást&gt;
-                        [;&lt;param_protok_nást&gt;]
-                     Syntaxe hodnoty &lt;třída_protok_nást&gt;:
-                        [&lt;část/úpl_obor_názvů&gt;.]&lt;náz_tř_protok_nást&gt;
-                     Syntaxe hodnoty &lt;sestav_protok_nást&gt;:
-                        {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
+                     Syntaxe hodnoty &lt;logger&gt; je:
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
+                     Syntaxe hodnoty &lt;logger class&gt; je:
+                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
+                     Syntaxe hodnoty &lt;logger assembly&gt; je:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
                      Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se
-                     protokolovacímu nástroji přesně v zadaném tvaru.
-                     (Krátký tvar: -l)
+                     protokolovacímu nástroji přesně v zadaném tvaru. (Krátký tvar: -l)
                      Příklady:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
@@ -992,7 +1005,7 @@
                                              Verbosity=diagnostic;Encoding=UTF-8
 
                        -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       -flp1:warningsonly;logfile=msbuild.wrn 
+                       -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1384,7 +1397,7 @@
       </trans-unit>
       <trans-unit id="ProjectBuilding_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="new">{0}{1} {2} ({3}s)</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project building.
       {0}: indentation - few spaces to visually indent row
@@ -1395,7 +1408,7 @@
       </trans-unit>
       <trans-unit id="ProjectBuilding_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="new">{0}{1} {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project building including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1407,7 +1420,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="new">{0}{1} {2} ({3}s)</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1418,7 +1431,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
         <source> → {0}</source>
-        <target state="new"> → {0}</target>
+        <target state="translated"> → {0}</target>
         <note>
       Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
       {0}: VT100 coded hyperlink to project output directory
@@ -1426,7 +1439,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="new">{0}{1} {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1485,14 +1498,14 @@
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="new">Restore complete ({0}s)</target>
+        <target state="translated">Obnovení dokončeno ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="new">Restore {0} in {1}s</target>
+        <target state="translated">Obnoví se {0} za {1}s</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1560,7 +1573,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedSwitchForSolutionFiles">
         <source>The '{0}' switch is not supported for solution files.</source>
-        <target state="new">The '{0}' switch is not supported for solution files.</target>
+        <target state="translated">Přepínač „{0}“ se pro soubory řešení nepodporuje.</target>
         <note />
       </trans-unit>
       <trans-unit id="Using35Engine">

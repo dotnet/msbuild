@@ -1120,6 +1120,37 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("[One|Three|Four]");
         }
 
+
+        /// <summary>
+        /// Filter items by WithoutMetadataValue function
+        /// </summary>
+        [Fact]
+        public void WithoutMetadataValue()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess("""
+                <Project>
+                    <ItemGroup>
+                            <_Item Include="One">
+                                <A>true</A>
+                            </_Item>
+                            <_Item Include="Two">
+                                <A>false</A>
+                            </_Item>
+                            <_Item Include="Three">
+                                <A></A>
+                            </_Item>
+                            <_Item Include="Four">
+                                <B></B>
+                            </_Item>
+                    </ItemGroup>
+                    <Target Name="AfterBuild">
+                        <Message Text="[@(_Item->WithoutMetadataValue('a', 'true'),'|')]"/>
+                    </Target>
+                </Project>
+                """);
+
+            logger.AssertLogContains("[Two|Three|Four]");
+        }
         [Fact]
         public void DirectItemMetadataReferenceShouldBeCaseInsensitive()
         {

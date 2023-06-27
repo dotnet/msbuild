@@ -2911,7 +2911,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         /// <param name="appConfigFile"></param>
         /// <param name="redirects"></param>
-        protected static string WriteAppConfig(string redirects)
+        protected static string WriteAppConfig(string redirects, string appConfigNameSuffix = null)
         {
             string appConfigContents =
             "<configuration>\n" +
@@ -2920,7 +2920,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             "    </runtime>\n" +
             "</configuration>";
 
-            string appConfigFile = FileUtilities.GetTemporaryFileName();
+            string appConfigFile = FileUtilities.GetTemporaryFileName() + appConfigNameSuffix;
             File.WriteAllText(appConfigFile, appConfigContents);
             return appConfigFile;
         }

@@ -107,7 +107,7 @@ internal sealed class Terminal : ITerminal
         }
         else
         {
-            Console.Write(text);
+            Output.Write(text);
         }
     }
 

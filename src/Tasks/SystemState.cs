@@ -22,8 +22,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Class is used to cache system state.
     /// </summary>
-    /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
-    [Serializable]
     internal sealed class SystemState : StateFileBase, ITranslatable
     {
         /// <summary>
@@ -33,9 +31,20 @@ namespace Microsoft.Build.Tasks
         private Dictionary<string, FileState> upToDateLocalFileStateCache = new Dictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Cache at the SystemState instance level. It is serialized and reused between instances.
+        /// Cache at the SystemState instance level.
         /// </summary>
+        /// <remarks>
+        /// Before starting execution, RAR attempts to populate this field by deserializing a per-project cache file. During execution,
+        /// <see cref="FileState"/> objects that get actually used are inserted into <see cref="instanceLocalOutgoingFileStateCache"/>.
+        /// After execution, <see cref="instanceLocalOutgoingFileStateCache"/> is serialized and written to disk if it's different from
+        /// what we originally deserialized into this field.
+        /// </remarks>
         internal Dictionary<string, FileState> instanceLocalFileStateCache = new Dictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Cache at the SystemState instance level. It is serialized to disk and reused between instances via <see cref="instanceLocalFileStateCache"/>.
+        /// </summary>
+        internal Dictionary<string, FileState> instanceLocalOutgoingFileStateCache = new Dictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// LastModified information is purely instance-local. It doesn't make sense to
@@ -106,7 +115,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Class that holds the current file state.
         /// </summary>
-        [Serializable]
         internal sealed class FileState : ITranslatable
         {
             /// <summary>
@@ -210,6 +218,16 @@ namespace Microsoft.Build.Tasks
                 get { return frameworkName; }
                 set { frameworkName = value; }
             }
+
+            /// <summary>
+            /// The last-modified value to use for immutable framework files which we don't do I/O on.
+            /// </summary>
+            internal static DateTime ImmutableFileLastModifiedMarker => DateTime.MaxValue;
+
+            /// <summary>
+            /// It is wasteful to persist entries for immutable framework files.
+            /// </summary>
+            internal bool IsWorthPersisting => lastModified != ImmutableFileLastModifiedMarker;
         }
 
         /// <summary>
@@ -248,7 +266,7 @@ namespace Microsoft.Build.Tasks
             }
 
             translator.TranslateDictionary(
-                ref instanceLocalFileStateCache,
+                ref (translator.Mode == TranslationDirection.WriteToStream) ? ref instanceLocalOutgoingFileStateCache : ref instanceLocalFileStateCache,
                 StringComparer.OrdinalIgnoreCase,
                 (ITranslator t) => new FileState(t));
 
@@ -257,8 +275,11 @@ namespace Microsoft.Build.Tasks
             IsDirty = false;
         }
 
+        /// <inheritdoc />
+        internal override bool HasStateToSave => instanceLocalOutgoingFileStateCache.Count > 0;
+
         /// <summary>
-        /// Flag that indicates
+        /// Flag that indicates that <see cref="instanceLocalFileStateCache"/> has been modified.
         /// </summary>
         /// <value></value>
         internal bool IsDirty
@@ -335,11 +356,11 @@ namespace Microsoft.Build.Tasks
             return GetRuntimeVersion;
         }
 
-        private FileState GetFileState(string path)
+        internal FileState GetFileState(string path)
         {
             // Looking up an assembly to get its metadata can be expensive for projects that reference large amounts
             // of assemblies. To avoid that expense, we remember and serialize this information betweeen runs in
-            // XXXResolveAssemblyReferencesInput.cache files in the intermediate directory and also store it in an
+            // <ProjectFileName>.AssemblyReference.cache files in the intermediate directory and also store it in an
             // process-wide cache to share between successive builds.
             //
             // To determine if this information is up-to-date, we use the last modified date of the assembly, however,
@@ -365,19 +386,30 @@ namespace Microsoft.Build.Tasks
             bool isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
             bool isProcessFileStateUpToDate = isCachedInProcess && lastModified == cachedProcessFileState.LastModified;
 
-            // If the process-wide cache contains an up-to-date FileState, always use it
+            // If the process-wide cache contains an up-to-date FileState, always use it.
             if (isProcessFileStateUpToDate)
             {
-                // For the next build, we may be using a different process. Update the file cache.
-                if (!isInstanceFileStateUpToDate)
+                // For the next build, we may be using a different process. Update the file cache if the entry is worth persisting.
+                if (cachedProcessFileState.IsWorthPersisting)
                 {
-                    instanceLocalFileStateCache[path] = cachedProcessFileState;
-                    isDirty = true;
+                    if (!isInstanceFileStateUpToDate)
+                    {
+                        instanceLocalFileStateCache[path] = cachedProcessFileState;
+                        isDirty = true;
+                    }
+
+                    // Remember that this FileState was actually used by adding it to the outgoing dictionary.
+                    instanceLocalOutgoingFileStateCache[path] = cachedProcessFileState;
                 }
                 return cachedProcessFileState;
             }
             if (isInstanceFileStateUpToDate)
             {
+                if (cachedInstanceFileState.IsWorthPersisting)
+                {
+                    // Remember that this FileState was actually used by adding it to the outgoing dictionary.
+                    instanceLocalOutgoingFileStateCache[path] = cachedInstanceFileState;
+                }
                 return s_processWideFileStateCache[path] = cachedInstanceFileState;
             }
 
@@ -399,9 +431,16 @@ namespace Microsoft.Build.Tasks
         private FileState InitializeFileState(string path, DateTime lastModified)
         {
             var fileState = new FileState(lastModified);
-            instanceLocalFileStateCache[path] = fileState;
+
+            // Dirty the instance-local cache only with entries that are worth persisting.
+            if (fileState.IsWorthPersisting)
+            {
+                instanceLocalFileStateCache[path] = fileState;
+                instanceLocalOutgoingFileStateCache[path] = fileState;
+                isDirty = true;
+            }
+
             s_processWideFileStateCache[path] = fileState;
-            isDirty = true;
 
             return fileState;
         }
@@ -450,7 +489,10 @@ namespace Microsoft.Build.Tasks
                 {
                     fileState.Assembly = AssemblyNameExtension.UnnamedAssembly;
                 }
-                isDirty = true;
+                if (fileState.IsWorthPersisting)
+                {
+                    isDirty = true;
+                }
             }
 
             if (fileState.Assembly.IsUnnamedAssembly)
@@ -471,7 +513,10 @@ namespace Microsoft.Build.Tasks
             if (String.IsNullOrEmpty(fileState.RuntimeVersion))
             {
                 fileState.RuntimeVersion = getAssemblyRuntimeVersion(path);
-                isDirty = true;
+                if (fileState.IsWorthPersisting)
+                {
+                    isDirty = true;
+                }
             }
 
             return fileState.RuntimeVersion;
@@ -503,7 +548,10 @@ namespace Microsoft.Build.Tasks
                     out fileState.scatterFiles,
                     out fileState.frameworkName);
 
-                isDirty = true;
+                if (fileState.IsWorthPersisting)
+                {
+                    isDirty = true;
+                }
             }
 
             dependencies = fileState.dependencies;
@@ -527,7 +575,7 @@ namespace Microsoft.Build.Tasks
             foreach (ITaskItem stateFile in stateFiles)
             {
                 // Verify that it's a real stateFile. Log message but do not error if not.
-                SystemState sysState = DeserializeCache(stateFile.ToString(), log, typeof(SystemState)) as SystemState;
+                SystemState sysState = DeserializeCache<SystemState>(stateFile.ToString(), log);
                 if (sysState == null)
                 {
                     continue;
@@ -559,10 +607,10 @@ namespace Microsoft.Build.Tasks
         /// <param name="log">How to log</param>
         internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log)
         {
-            // Save a copy of instanceLocalFileStateCache so we can restore it later. SerializeCacheByTranslator serializes
-            // instanceLocalFileStateCache by default, so change that to the relativized form, then change it back.
-            Dictionary<string, FileState> oldFileStateCache = instanceLocalFileStateCache;
-            instanceLocalFileStateCache = instanceLocalFileStateCache.ToDictionary(kvp => FileUtilities.MakeRelative(Path.GetDirectoryName(stateFile), kvp.Key), kvp => kvp.Value);
+            // Save a copy of instanceLocalOutgoingFileStateCache so we can restore it later. SerializeCacheByTranslator serializes
+            // instanceLocalOutgoingFileStateCache by default, so change that to the relativized form, then change it back.
+            Dictionary<string, FileState> oldFileStateCache = instanceLocalOutgoingFileStateCache;
+            instanceLocalOutgoingFileStateCache = instanceLocalFileStateCache.ToDictionary(kvp => FileUtilities.MakeRelative(Path.GetDirectoryName(stateFile), kvp.Key), kvp => kvp.Value);
 
             try
             {
@@ -574,7 +622,7 @@ namespace Microsoft.Build.Tasks
             }
             finally
             {
-                instanceLocalFileStateCache = oldFileStateCache;
+                instanceLocalOutgoingFileStateCache = oldFileStateCache;
             }
         }
 
