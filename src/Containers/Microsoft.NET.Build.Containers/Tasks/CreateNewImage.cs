@@ -140,7 +140,6 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                             builtImage,
                             sourceImageReference,
                             destinationImageReference,
-                            message => SafeLog(message),
                             cancellationToken).ConfigureAwait(false);
                         SafeLog("Pushed container '{0}' to registry '{1}'", destinationImageReference.RepositoryAndTag, OutputRegistry);
                     }

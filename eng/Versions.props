@@ -191,7 +191,7 @@
     <FluentAssertionsVersion>6.10.0</FluentAssertionsVersion>
     <FluentAssertionsJsonVersion>6.1.0</FluentAssertionsJsonVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>7.0.0-beta.23316.4</MicrosoftDotNetXUnitExtensionsVersion>
-    <MoqPackageVersion>4.8.2</MoqPackageVersion>
+    <MoqPackageVersion>4.18.4</MoqPackageVersion>
     <MicrosoftDotNetInstallerWindowsSecurityTestDataPackageVersion>6.0.0-beta.22262.1</MicrosoftDotNetInstallerWindowsSecurityTestDataPackageVersion>
   </PropertyGroup>
   <PropertyGroup>

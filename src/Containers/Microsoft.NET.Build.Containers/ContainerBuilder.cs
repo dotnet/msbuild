@@ -124,7 +124,6 @@ public static class ContainerBuilder
                             builtImage,
                             sourceImageReference,
                             destinationImageReference,
-                            message => Console.WriteLine($"Containerize: {message}"),
                             cancellationToken)).ConfigureAwait(false);
                         logger.LogInformation(Strings.ContainerBuilder_ImageUploadedToRegistry, destinationImageReference.RepositoryAndTag, destinationImageReference.Registry.RegistryName);
                     }
