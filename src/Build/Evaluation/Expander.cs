@@ -5463,8 +5463,8 @@ namespace Microsoft.Build.Evaluation
         // Otherwise preserve prior behavior of double before long.
         // For reuse, the comparer is cached in a non-generic type.
         // Both comparer instances can be cached to support change wave testing.
-        private static IComparer<MemberInfo> s_comparerLongBeforeDouble;
-        private static IComparer<MemberInfo> s_comparerDoubleBeforeLong;
+        private static IComparer<MemberInfo>? s_comparerLongBeforeDouble;
+        private static IComparer<MemberInfo>? s_comparerDoubleBeforeLong;
 
         internal static IComparer<MemberInfo> IntrinsicFunctionOverloadMethodComparer => IsIntrinsicFunctionOverloadsEnabled() ? LongBeforeDoubleComparer : DoubleBeforeLongComparer;
 
@@ -5479,7 +5479,7 @@ namespace Microsoft.Build.Evaluation
 
         private static TypeCode SelectTypeOfFirstParameter(MemberInfo member)
         {
-            MethodBase method = member as MethodBase;
+            MethodBase? method = member as MethodBase;
             if (method == null)
             {
                 return TypeCode.Empty;
