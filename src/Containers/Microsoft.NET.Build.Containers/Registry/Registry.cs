@@ -98,7 +98,7 @@ internal sealed class Registry
 
         return initialManifestResponse.Content.Headers.ContentType?.MediaType switch
         {
-            SchemaTypes.DockerManifestV2 => await ReadSingleImageAsync(
+            SchemaTypes.DockerManifestV2 or SchemaTypes.OciManifestV1 => await ReadSingleImageAsync(
                 repositoryName,
                 await initialManifestResponse.Content.ReadFromJsonAsync<ManifestV2>(cancellationToken: cancellationToken).ConfigureAwait(false),
                 cancellationToken).ConfigureAwait(false),

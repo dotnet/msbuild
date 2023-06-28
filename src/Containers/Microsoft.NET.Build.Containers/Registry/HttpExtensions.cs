@@ -15,6 +15,7 @@ internal static class HttpExtensions
         request.Headers.Accept.Add(new("application/json"));
         request.Headers.Accept.Add(new(SchemaTypes.DockerManifestListV2));
         request.Headers.Accept.Add(new(SchemaTypes.DockerManifestV2));
+        request.Headers.Accept.Add(new(SchemaTypes.OciManifestV1));
         request.Headers.Accept.Add(new(SchemaTypes.DockerContainerV1));
         return request;
     }
