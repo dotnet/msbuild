@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -103,21 +104,27 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.OSVersion.Version.Major >= 10) // UTF-8 is only officially supported on 10+.
             {
-                try
-                {
-                    using RegistryKey windowsVersionRegistry = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
-                    var buildNumber = windowsVersionRegistry.GetValue("CurrentBuildNumber").ToString();
-                    const int buildNumberThatOfficialySupportsUTF8 = 18363;
-                    return int.Parse(buildNumber) >= buildNumberThatOfficialySupportsUTF8 || ForceUniversalEncodingOptInEnabled();
-                }
-                catch (Exception ex) when (ex is SecurityException || ex is ObjectDisposedException)
-                {
-                    // We don't want to break those in VS on older versions of Windows with a non-en language.
-                    // Allow those without registry permissions to force the encoding, however.
-                    return ForceUniversalEncodingOptInEnabled();
-                }
+                return CurrentPlatformOfficiallySupportsUTF8Encoding();
             }
             return false;
+        }
+
+        private static bool CurrentPlatformOfficiallySupportsUTF8Encoding()
+        {
+            Debug.Assert(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+            try
+            {
+                using RegistryKey windowsVersionRegistry = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+                var buildNumber = windowsVersionRegistry.GetValue("CurrentBuildNumber").ToString();
+                const int buildNumberThatOfficialySupportsUTF8 = 18363;
+                return int.Parse(buildNumber) >= buildNumberThatOfficialySupportsUTF8 || ForceUniversalEncodingOptInEnabled();
+            }
+            catch (Exception ex) when (ex is SecurityException || ex is ObjectDisposedException)
+            {
+                // We don't want to break those in VS on older versions of Windows with a non-en language.
+                // Allow those without registry permissions to force the encoding, however.
+                return ForceUniversalEncodingOptInEnabled();
+            }
         }
 
         private static bool ForceUniversalEncodingOptInEnabled()
