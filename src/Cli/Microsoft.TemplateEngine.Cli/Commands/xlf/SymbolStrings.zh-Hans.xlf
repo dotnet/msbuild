@@ -17,6 +17,15 @@
         <target state="translated">创建或显示定义的别名。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Command_Details_Description">
+        <source>
+      Provides the details for specified template package.
+      The command checks if the package is installed locally, if it was not found, then it searches on the https://www.nuget.org/.</source>
+        <target state="new">
+      Provides the details for specified template package.
+      The command checks if the package is installed locally, if it was not found, then it searches on the https://www.nuget.org/.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Command_Install_Argument_Package">
         <source>NuGet package ID or path to folder or NuGet package to install. 
 To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.

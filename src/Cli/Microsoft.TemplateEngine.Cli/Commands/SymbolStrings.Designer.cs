@@ -88,6 +88,17 @@ namespace Microsoft.TemplateEngine.Cli.Commands {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 
+        ///      Provides the details for specified template package.
+        ///      The command checks if the package is installed locally, if it was not found, then it searches on the https://www.nuget.org/..
+        /// </summary>
+        internal static string Command_Details_Description {
+            get {
+                return ResourceManager.GetString("Command_Details_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to NuGet package ID or path to folder or NuGet package to install. 
         ///To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
         ///.

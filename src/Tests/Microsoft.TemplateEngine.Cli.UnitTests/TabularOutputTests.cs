@@ -295,6 +295,30 @@ Dotnet 本地...  tool-manifest
         }
 
         [Fact]
+        public void CanIndentAllRows()
+        {
+            TabularOutputSettings outputSettings = new(new MockEnvironment() { ConsoleBufferWidth = 10 }, displayAllColumns: true);
+
+            IEnumerable<Tuple<string, string, string>> data = new List<Tuple<string, string, string>>()
+            {
+                new Tuple<string, string, string>("Column 1 data", "Column 2 data", "Column 3 data"),
+                new Tuple<string, string, string>("Column 1 data", "Column 2 data", "Column 3 data")
+            };
+
+            string expectedOutput = $"   Column 1       Column 2       Column 3     {Environment.NewLine}   -------------  -------------  -------------{Environment.NewLine}   Column 1 data  Column 2 data  Column 3 data{Environment.NewLine}   Column 1 data  Column 2 data  Column 3 data{Environment.NewLine}   ";
+
+            TabularOutput<Tuple<string, string, string>> formatter =
+             TabularOutput.TabularOutput
+                 .For(outputSettings, data)
+                 .DefineColumn(t => t.Item1, "Column 1", showAlways: true)
+                 .DefineColumn(t => t.Item2, "Column 2", columnName: "column2") //defaultColumn: true by default
+                 .DefineColumn(t => t.Item3, "Column 3", columnName: "column3", defaultColumn: false);
+
+            string result = formatter.Layout(1);
+            Assert.Equal(expectedOutput, result);
+        }
+
+        [Fact]
         public void VerifyColumnsOptionHasAllColumnNamesDefined()
         {
             var columnOption = SharedOptionsFactory.CreateColumnsOption();

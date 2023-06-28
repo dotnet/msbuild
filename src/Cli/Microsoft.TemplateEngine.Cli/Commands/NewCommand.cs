@@ -28,6 +28,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             this.Add(new SearchCommand(this, hostBuilder));
             this.Add(new ListCommand(this, hostBuilder));
             this.Add(new AliasCommand(hostBuilder));
+            this.Add(new DetailsCommand(hostBuilder));
 
             this.AddGlobalOption(DebugCustomSettingsLocationOption);
             this.AddGlobalOption(DebugVirtualizeSettingsOption);

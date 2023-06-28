@@ -6,10 +6,12 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.Commands;
+using Microsoft.TemplateEngine.Cli.NuGet;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateSearch.Common;
 using Microsoft.TemplateSearch.Common.Abstractions;
+using static Microsoft.TemplateEngine.Cli.NuGet.NugetApiManager;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
@@ -103,6 +105,48 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 return NewCommandStatus.Success;
             }
             return NewCommandStatus.NotFound;
+        }
+
+        internal static async Task<(NugetPackageMetadata?, IReadOnlyList<ITemplateInfo>)> SearchForPackageDetailsAsync(
+            IEngineEnvironmentSettings environmentSettings,
+            NugetApiManager nugetApiManager,
+            string packageIdentifier,
+            string? version,
+            CancellationToken cancellationToken)
+        {
+            var nugetPackage = await nugetApiManager.GetPackageMetadataAsync(packageIdentifier, version, cancellationToken: cancellationToken).ConfigureAwait(false);
+            if (nugetPackage != null)
+            {
+                var packages = await SearchForPackageTemplatesAsync(
+                    environmentSettings,
+                    packageIdentifier,
+                    version,
+                    cancellationToken).ConfigureAwait(false);
+                return (nugetPackage, packages);
+            }
+
+            return (null, new List<ITemplateInfo>());
+        }
+
+        internal static async Task<IReadOnlyList<ITemplateInfo>> SearchForPackageTemplatesAsync(
+            IEngineEnvironmentSettings environmentSettings,
+            string packageIdentifier,
+            string? version,
+            CancellationToken cancellationToken)
+        {
+            var searchResults = await CliTemplateSearchCoordinatorFactory
+                    .CreateCliTemplateSearchCoordinator(environmentSettings)
+                    .SearchAsync(
+                        f => f.Name == packageIdentifier && (string.IsNullOrEmpty(version) || f.Version == version),
+                        t => t.Templates,
+                        cancellationToken).ConfigureAwait(false);
+
+            if (searchResults.Any() && searchResults[0].SearchHits.Any())
+            {
+                return searchResults[0].SearchHits[0].MatchedTemplates;
+            }
+
+            return new List<ITemplateInfo>();
         }
 
         private static string EvaluatePackageToShow(IReadOnlyList<SearchResult> searchResults)

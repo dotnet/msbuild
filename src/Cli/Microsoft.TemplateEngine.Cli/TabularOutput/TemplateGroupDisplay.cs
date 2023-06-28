@@ -65,6 +65,59 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
         }
 
         /// <summary>
+        /// Displays the template languages.
+        /// </summary>
+        internal static string GetLanguagesToDisplay(IEnumerable<ITemplateInfo> templateGroup, string? language, string? defaultLanguage, IEnvironment environment)
+        {
+            var groupedTemplates = GetAuthorBasedGroups(templateGroup);
+
+            List<string> languageGroups = new List<string>();
+            foreach (var templates in groupedTemplates)
+            {
+                List<string> languagesForDisplay = new List<string>();
+                HashSet<string> uniqueLanguages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                string defaultLanguageDisplay = string.Empty;
+                foreach (ITemplateInfo template in templates)
+                {
+                    string? lang = template.GetLanguage();
+                    if (string.IsNullOrWhiteSpace(lang))
+                    {
+                        continue;
+                    }
+
+                    if (!uniqueLanguages.Add(lang))
+                    {
+                        continue;
+                    }
+                    if (string.IsNullOrEmpty(language) && string.Equals(defaultLanguage, lang, StringComparison.OrdinalIgnoreCase))
+                    {
+                        defaultLanguageDisplay = $"[{lang}]";
+                    }
+                    else
+                    {
+                        languagesForDisplay.Add(lang);
+                    }
+                }
+
+                languagesForDisplay.Sort(StringComparer.OrdinalIgnoreCase);
+                if (!string.IsNullOrEmpty(defaultLanguageDisplay))
+                {
+                    languagesForDisplay.Insert(0, defaultLanguageDisplay);
+                }
+                languageGroups.Add(string.Join(",", languagesForDisplay));
+            }
+            return string.Join(environment.NewLine, languageGroups);
+        }
+
+        /// <summary>
+        /// Displays the template authors.
+        /// </summary>
+        internal static string GetAuthorsToDisplay(IEnumerable<ITemplateInfo> templateGroup, IEnvironment environment)
+        {
+            return string.Join(environment.NewLine, GetAuthorBasedGroups(templateGroup).Select(group => group.Key));
+        }
+
+        /// <summary>
         /// Generates the list of template groups for table display.
         /// Except where noted, the values are taken from the highest-precedence template in the group. The info could vary among the templates in the group, but shouldn't. (There is no check that the info doesn't vary.)
         /// - Template Name
@@ -105,6 +158,27 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             }
 
             return templateGroupsForDisplay;
+        }
+
+        /// <summary>
+        /// Displays the template tags.
+        /// </summary>
+        internal static string GetClassificationsToDisplay(IEnumerable<ITemplateInfo> templateGroup, IEnvironment environment)
+        {
+            var groupedTemplates = GetAuthorBasedGroups(templateGroup);
+
+            List<string> classificationGroups = new List<string>();
+            foreach (var templates in groupedTemplates)
+            {
+                classificationGroups.Add(
+                    string.Join(
+                        "/",
+                        templates
+                            .SelectMany(template => template.Classifications)
+                            .Where(classification => !string.IsNullOrWhiteSpace(classification))
+                            .Distinct(StringComparer.OrdinalIgnoreCase)));
+            }
+            return string.Join(environment.NewLine, classificationGroups);
         }
 
         /// <summary>
@@ -172,71 +246,6 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
                 .GroupBy(template => string.IsNullOrWhiteSpace(template.Author) ? string.Empty : template.Author, StringComparer.OrdinalIgnoreCase)
                 .OrderBy(group => group.Key, StringComparer.OrdinalIgnoreCase);
 
-        }
-
-        private static string GetLanguagesToDisplay(IEnumerable<ITemplateInfo> templateGroup, string? language, string? defaultLanguage, IEnvironment environment)
-        {
-            var groupedTemplates = GetAuthorBasedGroups(templateGroup);
-
-            List<string> languageGroups = new List<string>();
-            foreach (var templates in groupedTemplates)
-            {
-                List<string> languagesForDisplay = new List<string>();
-                HashSet<string> uniqueLanguages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                string defaultLanguageDisplay = string.Empty;
-                foreach (ITemplateInfo template in templates)
-                {
-                    string? lang = template.GetLanguage();
-                    if (string.IsNullOrWhiteSpace(lang))
-                    {
-                        continue;
-                    }
-
-                    if (!uniqueLanguages.Add(lang))
-                    {
-                        continue;
-                    }
-                    if (string.IsNullOrEmpty(language) && string.Equals(defaultLanguage, lang, StringComparison.OrdinalIgnoreCase))
-                    {
-                        defaultLanguageDisplay = $"[{lang}]";
-                    }
-                    else
-                    {
-                        languagesForDisplay.Add(lang);
-                    }
-                }
-
-                languagesForDisplay.Sort(StringComparer.OrdinalIgnoreCase);
-                if (!string.IsNullOrEmpty(defaultLanguageDisplay))
-                {
-                    languagesForDisplay.Insert(0, defaultLanguageDisplay);
-                }
-                languageGroups.Add(string.Join(",", languagesForDisplay));
-            }
-            return string.Join(environment.NewLine, languageGroups);
-        }
-
-        private static string GetAuthorsToDisplay(IEnumerable<ITemplateInfo> templateGroup, IEnvironment environment)
-        {
-            return string.Join(environment.NewLine, GetAuthorBasedGroups(templateGroup).Select(group => group.Key));
-        }
-
-        private static string GetClassificationsToDisplay(IEnumerable<ITemplateInfo> templateGroup, IEnvironment environment)
-        {
-            var groupedTemplates = GetAuthorBasedGroups(templateGroup);
-
-            List<string> classificationGroups = new List<string>();
-            foreach (var templates in groupedTemplates)
-            {
-                classificationGroups.Add(
-                    string.Join(
-                        "/",
-                        templates
-                            .SelectMany(template => template.Classifications)
-                            .Where(classification => !string.IsNullOrWhiteSpace(classification))
-                            .Distinct(StringComparer.OrdinalIgnoreCase)));
-            }
-            return string.Join(environment.NewLine, classificationGroups);
         }
 
         private static string GetTypesToDisplay(IEnumerable<ITemplateInfo> templateGroup, IEnvironment environment)

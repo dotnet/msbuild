@@ -118,5 +118,17 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
 
             return Verify(result);
         }
+
+        [Fact]
+        public Task DetailsCommand_GetAllSuggestions()
+        {
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
+            Command myCommand = NewCommandFactory.Create("new", _ => host);
+
+            ParseResult parseResult = myCommand.Parse("new details ");
+            System.CommandLine.Completions.CompletionItem[] result = parseResult.GetCompletions().ToArray();
+
+            return Verify(result);
+        }
     }
 }

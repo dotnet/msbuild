@@ -171,7 +171,7 @@ jobs:
               SYSTEM_ACCESSTOKEN: $(System.AccessToken)
               HelixAccessToken: $(_HelixApiToken)
               RunAoTTests: 'false'
-  
+
       - task: PublishTestResults@2
         displayName: Publish Test Results	
         inputs:	
@@ -181,7 +181,7 @@ jobs:
           buildPlatform: '$(BuildPlatform)'	
           buildConfiguration: '$(_BuildConfig)'	
         condition: always()
-  
+
       - task: CopyFiles@2	
         displayName: Gather Logs	
         inputs:	
