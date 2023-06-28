@@ -98,6 +98,10 @@ namespace Microsoft.NET.TestFramework
                 
                 testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets"), AppContext.BaseDirectory);
             }
+            else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_ASSETS_DIRECTORY")))
+            {
+                testContext.TestAssetsDirectory = Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_ASSETS_DIRECTORY");
+            }
 
             string repoRoot = null;
 #if DEBUG

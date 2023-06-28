@@ -539,7 +539,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="InvalidTypeLibraryId">
         <source>NETSDK1170: The provided type library ID '{0}' for type library '{1}' is invalid. The ID must be a positive integer less than 65536.</source>
-        <target state="translated">NETSDK1170: El identificador de biblioteca de tipos proporcionado "{0}" para la biblioteca de tipos "{1}" no es válido. El identificador debe ser un entero positivo menor de 65 536.</target>
+        <target state="translated">NETSDK1170: El identificador de biblioteca de tipos proporcionado "{0}" para la biblioteca de tipos "{1}" no es válido. El identificador debe ser un entero positivo menor de 65 536.</target>
         <note>{StrBegin="NETSDK1170: "}</note>
       </trans-unit>
       <trans-unit id="JitLibraryNotFound">
@@ -572,7 +572,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="MissingTypeLibraryId">
         <source>NETSDK1171: An integer ID less than 65536 must be provided for type library '{0}' because more than one type library is specified.</source>
-        <target state="translated">NETSDK1171: Un Id. entero menor que 65 536 debe proporcionarse para la biblioteca de tipos "{0}" debido a que se ha especificado más de una biblioteca de tipos.</target>
+        <target state="translated">NETSDK1171: Un Id. entero menor que 65 536 debe proporcionarse para la biblioteca de tipos "{0}" debido a que se ha especificado más de una biblioteca de tipos.</target>
         <note>{StrBegin="NETSDK1171: "}</note>
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
@@ -597,7 +597,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="Net7NotCompatibleWithDev173">
         <source>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</source>
-        <target state="translated">NETSDK1192: No se admite el destino de .NET 7.0 o superior en Visual Studio 2022 17.3.</target>
+        <target state="translated">NETSDK1192: No se admite el destino de .NET 7.0 o superior en Visual Studio 2022 17.3.</target>
         <note>{StrBegin="NETSDK1192: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -677,18 +677,18 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportTargetPlatformIdentifier">
         <source>NETSDK1146: PackAsTool does not support TargetPlatformIdentifier being set. For example, TargetFramework cannot be net5.0-windows, only net5.0. PackAsTool also does not support UseWPF or UseWindowsForms when targeting .NET 5 and higher.</source>
-        <target state="translated">NETSDK1146: PackAsTool no admite que se establezca el valor TargetPlatformIdentifier. Por ejemplo, TargetFramework no puede ser net5.0-windows, solo net5.0. Además, PackAsTool tampoco admite UseWPF ni UseWindowsForms cuando se destina a .NET 5 y versiones posteriores.</target>
+        <target state="translated">NETSDK1146: PackAsTool no admite que se establezca el valor TargetPlatformIdentifier. Por ejemplo, TargetFramework no puede ser net5.0-windows, solo net5.0. Además, PackAsTool tampoco admite UseWPF ni UseWindowsForms cuando se destina a .NET 5 y versiones posteriores.</target>
         <note>{StrBegin="NETSDK1146: "}</note>
       </trans-unit>
       <trans-unit id="PackageContainsIncorrectlyCasedLocale">
         <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
-        <target state="translated">NETSDK1187: El paquete {0} {1} tiene un recurso con la configuración regional "{2}". Esta configuración regional se ha normalizado al formato estándar "{3}" para evitar problemas de uso de mayúsculas y minúsculas en la compilación. Considere la posibilidad de notificar al autor del paquete sobre este problema de uso de mayúsculas y minúsculas.</target>
-        <note>Error code is NETSDK1187. 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
+        <target state="needs-review-translation">NETSDK1187: El paquete {0} {1} tiene un recurso con la configuración regional "{2}". Esta configuración regional se ha normalizado al formato estándar "{3}" para evitar problemas de uso de mayúsculas y minúsculas en la compilación. Considere la posibilidad de notificar al autor del paquete sobre este problema de uso de mayúsculas y minúsculas.</target>
+        <note>{StrBegin="NETSDK1187: "} 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
       </trans-unit>
       <trans-unit id="PackageContainsUnknownLocale">
         <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
-        <target state="translated">NETSDK1188: El paquete {0} {1} tiene un recurso con la configuración regional "{2}". .NET no reconoce esta configuración regional. Considere la posibilidad de notificar al autor del paquete que parece estar usando una configuración regional no válida.</target>
-        <note>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
+        <target state="needs-review-translation">NETSDK1188: El paquete {0} {1} tiene un recurso con la configuración regional "{2}". .NET no reconoce esta configuración regional. Considere la posibilidad de notificar al autor del paquete que parece estar usando una configuración regional no válida.</target>
+        <note>{StrBegin="NETSDK1188: "} 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
@@ -772,7 +772,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
         <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing. When targeting .NET 6 or higher, make sure to restore packages with the PublishReadyToRun property set to true.</source>
-        <target state="translated">NETSDK1094: No se pueden optimizar los ensamblados para mejorar el rendimiento: no se ha encontrado un paquete en tiempo de ejecución válido. Establezca la propiedad PublishReadyToRun en false o use un identificador en tiempo de ejecución compatible al publicar. Cuando el destino sea .NET 6 o una versión posterior, asegúrese de restaurar los paquetes con la propiedad PublishReadyToRun establecida en true.</target>
+        <target state="translated">NETSDK1094: No se pueden optimizar los ensamblados para mejorar el rendimiento: no se ha encontrado un paquete en tiempo de ejecución válido. Establezca la propiedad PublishReadyToRun en false o use un identificador en tiempo de ejecución compatible al publicar. Cuando el destino sea .NET 6 o una versión posterior, asegúrese de restaurar los paquetes con la propiedad PublishReadyToRun establecida en true.</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSupportedError">
@@ -837,7 +837,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="TargetingApphostPackMissingCannotRestore">
         <source>NETSDK1145: The {0} pack is not installed and NuGet package restore is not supported. Upgrade Visual Studio, remove global.json if it specifies a certain SDK version, and uninstall the newer SDK. For more options visit   https://aka.ms/targeting-apphost-pack-missing  Pack Type:{0}, Pack directory: {1}, targetframework: {2}, Pack PackageId: {3}, Pack Package Version: {4}</source>
-        <target state="translated">NETSDK1145: El paquete {0} no está instalado y no se admite la restauración de paquetes NuGet. Actualice Visual Studio, quite global.json si especifica una versión determinada del SDK y desinstale el SDK más reciente. Para ver más opciones, visite https://aka.ms/targeting-apphost-pack-missing. Tipo de paquete: {0}. Directorio del paquete: {1}. Plataforma de destino: {2}. Id. del paquete: {3}. Versión del paquete: {4}</target>
+        <target state="translated">NETSDK1145: El paquete {0} no está instalado y no se admite la restauración de paquetes NuGet. Actualice Visual Studio, quite global.json si especifica una versión determinada del SDK y desinstale el SDK más reciente. Para ver más opciones, visite https://aka.ms/targeting-apphost-pack-missing. Tipo de paquete: {0}. Directorio del paquete: {1}. Plataforma de destino: {2}. Id. del paquete: {3}. Versión del paquete: {4}</target>
         <note>{StrBegin="NETSDK1145: "}</note>
       </trans-unit>
       <trans-unit id="TargetingPackNeedsRestore">
@@ -887,7 +887,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference_MauiEssentials">
         <source>NETSDK1186: This project depends on Maui Essentials through a project or NuGet package reference, but doesn't declare that dependency explicitly. To build this project, you must set the UseMauiEssentials property to true (and install the Maui workload if necessary).</source>
-        <target state="translated">NETSDK1186: Este proyecto depende de Maui Essentials a través de un proyecto o una referencia de paquete NuGet, pero no declara esa dependencia de forma explícita. Para compilar este proyecto, debe establecer la propiedad UseMauiEssentials en true (e instalar la carga de trabajo de Maui, si es necesario).</target>
+        <target state="translated">NETSDK1186: Este proyecto depende de Maui Essentials a través de un proyecto o una referencia de paquete NuGet, pero no declara esa dependencia de forma explícita. Para compilar este proyecto, debe establecer la propiedad UseMauiEssentials en true (e instalar la carga de trabajo de Maui, si es necesario).</target>
         <note>{StrBegin="NETSDK1186: "}</note>
       </trans-unit>
       <trans-unit id="UnnecessaryWindowsDesktopSDK">
@@ -940,10 +940,10 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1107: Se requiere Microsoft.NET.Sdk.WindowsDesktop para compilar las aplicaciones de escritorio de Windows. El SDK actual no admite "UseWpf" ni "UseWindowsForms".</target>
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
-      <trans-unit id="UsingPreviewSdk_Info">
+      <trans-unit id="UsingPreviewSdk">
         <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
-        <target state="translated">NETSDK1057: Está usando una versión preliminar de .NET. Visite: https://aka.ms/dotnet-support-policy</target>
-        <note />
+        <target state="new">NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</target>
+        <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">
         <source>NETSDK1131: Producing a managed Windows Metadata component with WinMDExp is not supported when targeting {0}.</source>
@@ -977,7 +977,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WindowsDesktopTargetPlatformMustBeWindows">
         <source>NETSDK1136: The target platform must be set to Windows (usually by including '-windows' in the TargetFramework property) when using Windows Forms or WPF, or referencing projects or packages that do so.</source>
-        <target state="translated">NETSDK1136: La plataforma de destino debe establecerse en Windows (normalmente, se incluye "-windows" en la propiedad TargetFramework) cuando se use Windows Forms o WPF, o bien cuando se haga referencia a proyectos o paquetes que lo usen.</target>
+        <target state="translated">NETSDK1136: La plataforma de destino debe establecerse en Windows (normalmente, se incluye "-windows" en la propiedad TargetFramework) cuando se use Windows Forms o WPF, o bien cuando se haga referencia a proyectos o paquetes que lo usen.</target>
         <note>{StrBegin="NETSDK1136: "}</note>
       </trans-unit>
       <trans-unit id="WindowsSDKVersionConflicts">

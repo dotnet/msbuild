@@ -33,7 +33,7 @@ namespace Microsoft.NET.Build.Tests
                 .Execute("/p:_NETCoreSdkIsPreview=true")
                 .Should()
                 .Pass()
-                .And.HaveStdOutContaining(Strings.UsingPreviewSdk_Info);
+                .And.HaveStdOutContaining(Strings.UsingPreviewSdk);
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace Microsoft.NET.Build.Tests
                 .Execute("/p:_NETCoreSdkIsPreview=")
                 .Should()
                 .Pass()
-                .And.NotHaveStdOutContaining(Strings.UsingPreviewSdk_Info);
+                .And.NotHaveStdOutContaining(Strings.UsingPreviewSdk);
         }
     }
 }
