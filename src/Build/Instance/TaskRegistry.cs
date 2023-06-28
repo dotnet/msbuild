@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -121,6 +123,12 @@ namespace Microsoft.Build.Execution
         /// task factory UsingTasks
         /// </summary>
         private static string s_potentialTasksCoreLocation = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksCoreFilename);
+
+        /// <summary>
+        /// Monotonically increasing counter for registered tasks.
+        /// It's not guaranteed not to have gaps, but it's purpose is the uniqueness.
+        /// </summary>
+        private static int s_nextRegistrationOrderId = 0;
 
         /// <summary>
         /// Cache of tasks already found using exact matching,
@@ -525,23 +533,11 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> registrations = GetRelevantRegistrations(taskIdentity, exactMatchRequired);
+                IEnumerable<RegisteredTaskRecord> registrations = GetRelevantOrderedRegistrations(taskIdentity, exactMatchRequired);
 
                 // look for the given task name in the registry; if not found, gather all registered task names that partially
                 // match the given name
-                foreach (KeyValuePair<RegisteredTaskIdentity, List<RegisteredTaskRecord>> registration in registrations)
-                {
-                    // if the given task name is longer than the registered task name
-                    // we will use the longer name to help disambiguate between multiple matches
-                    string mostSpecificTaskName = (taskName.Length > registration.Key.Name.Length) ? taskName : registration.Key.Name;
-
-                    taskRecord = GetMatchingRegistration(mostSpecificTaskName, registration.Value, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation);
-
-                    if (taskRecord != null)
-                    {
-                        break;
-                    }
-                }
+                taskRecord = GetMatchingRegistration(taskName, registrations, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation);
             }
 
             // If we didn't find the task but we have a fallback registry in the toolset state, try that one.
@@ -603,36 +599,24 @@ namespace Microsoft.Build.Execution
         /// If no exact match is found, looks for partial matches.
         /// A task name that is not fully qualified may produce several partial matches.
         /// </summary>
-        private Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> GetRelevantRegistrations(RegisteredTaskIdentity taskIdentity, bool exactMatchRequired)
+        private IEnumerable<RegisteredTaskRecord> GetRelevantOrderedRegistrations(RegisteredTaskIdentity taskIdentity, bool exactMatchRequired)
         {
-            Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> relevantTaskRegistrations =
-                new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
-
-            List<RegisteredTaskRecord> taskAssemblies;
-
-            // if we find an exact match
-            if (_taskRegistrations.TryGetValue(taskIdentity, out taskAssemblies))
+            if (_taskRegistrations.TryGetValue(taskIdentity, out List<RegisteredTaskRecord> taskAssemblies))
             {
-                // we're done
-                relevantTaskRegistrations[taskIdentity] = taskAssemblies;
-                return relevantTaskRegistrations;
+                // (records for single key should be ordered by order of registrations - as they are inserted into the list)
+                return taskAssemblies;
             }
 
             if (exactMatchRequired)
             {
-                return relevantTaskRegistrations;
+                return Enumerable.Empty<RegisteredTaskRecord>();
             }
 
             // look through all task declarations for partial matches
-            foreach (KeyValuePair<RegisteredTaskIdentity, List<RegisteredTaskRecord>> taskRegistration in _taskRegistrations)
-            {
-                if (RegisteredTaskIdentity.RegisteredTaskIdentityComparer.IsPartialMatch(taskIdentity, taskRegistration.Key))
-                {
-                    relevantTaskRegistrations[taskRegistration.Key] = taskRegistration.Value;
-                }
-            }
-
-            return relevantTaskRegistrations;
+            return _taskRegistrations
+                .Where(tp => RegisteredTaskIdentity.RegisteredTaskIdentityComparer.IsPartialMatch(taskIdentity, tp.Key))
+                .SelectMany(tp => tp.Value)
+                .OrderBy(r => r.RegistrationOrderId);
         }
 
         // Create another set containing architecture-specific task entries.
@@ -721,23 +705,21 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private RegisteredTaskRecord GetMatchingRegistration(
             string taskName,
-            List<RegisteredTaskRecord> taskRecords,
+            IEnumerable<RegisteredTaskRecord> taskRecords,
             string taskProjectFile,
             IDictionary<string, string> taskIdentityParameters,
             TargetLoggingContext targetLoggingContext,
             ElementLocation elementLocation)
-        {
-            foreach (RegisteredTaskRecord record in taskRecords)
-            {
-                if (record.CanTaskBeCreatedByFactory(taskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation))
-                {
-                    return record;
-                }
-            }
-
-            // Cannot find the task in any of the records
-            return null;
-        }
+            =>
+                taskRecords.FirstOrDefault(r =>
+                    r.CanTaskBeCreatedByFactory(
+                        // if the given task name is longer than the registered task name
+                        // we will use the longer name to help disambiguate between multiple matches
+                        (taskName.Length > r.TaskIdentity.Name.Length) ? taskName : r.TaskIdentity.Name,
+                        taskProjectFile,
+                        taskIdentityParameters,
+                        targetLoggingContext,
+                        elementLocation));
 
         /// <summary>
         /// An object representing the identity of a task -- not just task name, but also
@@ -1116,6 +1098,11 @@ namespace Microsoft.Build.Execution
             private ParameterGroupAndTaskElementRecord _parameterGroupAndTaskBody;
 
             /// <summary>
+            /// The registration order id for this task.  This is used to determine the order in which tasks are registered.
+            /// </summary>
+            private int _registrationOrderId;
+
+            /// <summary>
             /// Constructor
             /// </summary>
             internal RegisteredTaskRecord(string registeredName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, Dictionary<string, string> taskFactoryParameters, ParameterGroupAndTaskElementRecord inlineTask)
@@ -1126,6 +1113,7 @@ namespace Microsoft.Build.Execution
                 _taskFactoryParameters = taskFactoryParameters;
                 _taskIdentity = new RegisteredTaskIdentity(registeredName, taskFactoryParameters);
                 _parameterGroupAndTaskBody = inlineTask;
+                _registrationOrderId = Interlocked.Increment(ref s_nextRegistrationOrderId);
 
                 if (String.IsNullOrEmpty(taskFactory))
                 {
@@ -1205,6 +1193,11 @@ namespace Microsoft.Build.Execution
             /// Identity of this task.
             /// </summary>
             internal RegisteredTaskIdentity TaskIdentity => _taskIdentity;
+
+            /// <summary>
+            /// The registration order id for this task.  This is used to determine the order in which tasks are registered.
+            /// </summary>
+            internal int RegistrationOrderId => _registrationOrderId;
 
             /// <summary>
             /// Ask the question, whether or not the task name can be created by the task factory.
@@ -1765,6 +1758,7 @@ namespace Microsoft.Build.Execution
                 translator.Translate(ref _taskFactoryAssemblyLoadInfo, AssemblyLoadInfo.FactoryForTranslation);
                 translator.Translate(ref _taskFactory);
                 translator.Translate(ref _parameterGroupAndTaskBody);
+                translator.Translate(ref _registrationOrderId);
 
                 IDictionary<string, string> localParameters = _taskFactoryParameters;
                 translator.TranslateDictionary(ref localParameters, count => CreateTaskFactoryParametersDictionary(count));
@@ -1794,6 +1788,8 @@ namespace Microsoft.Build.Execution
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
                 _taskRegistrations = (Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>)copy;
+                // Ensure that mutations of the deserialized task registry are getting unique order ids.
+                s_nextRegistrationOrderId = Math.Max(s_nextRegistrationOrderId, copy?.Count ?? 0);
             }
         }
 
