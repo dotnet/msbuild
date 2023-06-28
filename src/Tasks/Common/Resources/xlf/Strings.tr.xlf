@@ -969,7 +969,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">
         <source>NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</source>
-        <target state="new">NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</target>
+        <target state="translated">NETSDK1208: Hedef {0} platform tanımlayıcısı tanınmadı. Bunun nedeni, MSBuildEnableWorkloadResolver'ın false olarak ayarlanmasıdır ve bu işlem bu tanımlayıcı için gerekli olan .NET SDK İş Yüklerini devre dışı bırakır. İş yüklerini etkinleştirmek için bu ortam değişkeninin veya MSBuild özelliğinin ayarını kaldırın.</target>
         <note>{StrBegin="NETSDK1208: "}</note>
       </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">

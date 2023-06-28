@@ -15,10 +15,13 @@ function InitializeCustomSDKToolset {
   }
 
   $cli = InitializeDotnetCli -install:$true
+  if (-not ($env:PROCESSOR_ARCHITECTURE -like "arm64"))
+  {
   InstallDotNetSharedFramework "1.0.5"
   InstallDotNetSharedFramework "1.1.2"
   InstallDotNetSharedFramework "2.1.0"
   InstallDotNetSharedFramework "2.2.8"
+  }
   InstallDotNetSharedFramework "3.1.0"
   InstallDotNetSharedFramework "5.0.0"
   InstallDotNetSharedFramework "6.0.0"
