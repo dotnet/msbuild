@@ -277,6 +277,10 @@
                      n[ormal], d[etailed], and diag[nostic]. (Short form: -v)
                      Example:
                        -verbosity:quiet
+
+                     Note: File loggers' verbosity
+                           is set separately by
+                           -fileloggerparameters.
 </value>
     <comment>
       LOCALIZATION: The following should not be localized:
@@ -1231,6 +1235,15 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
+  <data name="InvalidLowPriorityValue" UESanitized="true" Visibility="Public">
+    <value>MSBUILD : error MSB1064: Low priority value is not valid. {0}</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1064: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
   <data name="AbortingBuild" UESanitized="true" Visibility="Public">
     <value>Attempting to cancel the build...</value>
   </data>
@@ -1366,10 +1379,114 @@
   <data name="UnsupportedSwitchForSolutionFiles" Visibility="Public">
     <value>The '{0}' switch is not supported for solution files.</value>
   </data>
+  <!-- **** LiveLogger strings begin **** -->
+  <data name="RestoreComplete" xml:space="preserve">
+    <value>Restore complete ({0}s)</value>
+    <comment>
+      {0}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
+  <data name="RestoreCompleteWithMessage" xml:space="preserve">
+    <value>Restore {0} in {1}s</value>
+    <comment>
+      Restore summary when finished with warning or error
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
+  <data name="BuildFinished" xml:space="preserve">
+    <value>Build {0} in {1}s</value>
+    <comment>
+      Overall build summary
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
+  <data name="BuildResult_FailedWithErrors" xml:space="preserve">
+    <value>failed with errors</value>
+    <comment>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_FailedWithWarnings" xml:space="preserve">
+    <value>failed with warnings</value>
+    <comment>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_Failed" xml:space="preserve">
+    <value>failed</value>
+    <comment>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_Succeeded" xml:space="preserve">
+    <value>succeeded</value>
+    <comment>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_SucceededWithWarnings" xml:space="preserve">
+    <value>succeeded with warnings</value>
+    <comment>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="ProjectFinished_NoTF" xml:space="preserve">
+    <value>{0}{1} {2} ({3}s)</value>
+    <comment>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
+  <data name="ProjectFinished_WithTF" xml:space="preserve">
+    <value>{0}{1} {2} {3} ({4}s)</value>
+    <comment>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
+  <data name="ProjectFinished_OutputPath" xml:space="preserve">
+    <value> → {0}</value>
+    <comment>
+      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
+      {0}: VT100 coded hyperlink to project output directory
+    </comment>
+  </data>
+  <data name="ProjectBuilding_NoTF" xml:space="preserve">
+    <value>{0}{1} {2} ({3}s)</value>
+    <comment>
+      Project building.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target
+      {3}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
+  <data name="ProjectBuilding_WithTF" xml:space="preserve">
+    <value>{0}{1} {2} {3} ({4}s)</value>
+    <comment>
+      Project building including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: target
+      {4}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
+  <!-- **** LiveLogger strings end **** -->
+
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1063.
+        Next error code should be MSB1065.
 
         Don't forget to update this comment after using the new code.
   -->

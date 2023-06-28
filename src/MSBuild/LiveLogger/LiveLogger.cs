@@ -42,9 +42,20 @@ internal sealed class LiveLogger : INodeLogger
     {
         public override string ToString()
         {
+            string duration = Stopwatch.Elapsed.TotalSeconds.ToString("F1");
+
             return string.IsNullOrEmpty(TargetFramework)
-                ? $"{Indentation}{Project} {Target} ({Stopwatch.Elapsed.TotalSeconds:F1}s)"
-                : $"{Indentation}{Project} [{TargetFramework}] {Target} ({Stopwatch.Elapsed.TotalSeconds:F1}s)";
+                ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectBuilding_NoTF",
+                    Indentation,
+                    Project,
+                    Target,
+                    duration)
+                : ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectBuilding_WithTF",
+                    Indentation,
+                    Project,
+                    AnsiCodes.Colorize(TargetFramework, TargetFrameworkColor),
+                    Target,
+                    duration);
         }
     }
 
@@ -52,6 +63,8 @@ internal sealed class LiveLogger : INodeLogger
     /// The indentation to use for all build output.
     /// </summary>
     private const string Indentation = "  ";
+
+    private const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
 
     /// <summary>
     /// Protects access to state shared between the logger callbacks and the rendering thread.
@@ -82,6 +95,11 @@ internal sealed class LiveLogger : INodeLogger
     private DateTime _buildStartTime;
 
     /// <summary>
+    /// The working directory when the build starts, to trim relative output paths.
+    /// </summary>
+    private readonly string _initialWorkingDirectory = Environment.CurrentDirectory;
+
+    /// <summary>
     /// True if the build has encountered at least one error.
     /// </summary>
     private bool _buildHasErrors;
@@ -90,6 +108,11 @@ internal sealed class LiveLogger : INodeLogger
     /// True if the build has encountered at least one warning.
     /// </summary>
     private bool _buildHasWarnings;
+
+    /// <summary>
+    /// True if restore failed and this failure has already been reported.
+    /// </summary>
+    private bool _restoreFailed;
 
     /// <summary>
     /// The project build context corresponding to the <c>Restore</c> initial target, or null if the build is currently
@@ -111,6 +134,11 @@ internal sealed class LiveLogger : INodeLogger
     /// The <see cref="Terminal"/> to write console output to.
     /// </summary>
     private ITerminal Terminal { get; }
+
+    /// <summary>
+    /// Should the logger's test environment refresh the console output manually instead of using a background thread?
+    /// </summary>
+    private bool _manualRefresh;
 
     /// <summary>
     /// List of events the logger needs as parameters to the <see cref="ConfigurableForwardingLogger"/>.
@@ -149,6 +177,7 @@ internal sealed class LiveLogger : INodeLogger
     internal LiveLogger(ITerminal terminal)
     {
         Terminal = terminal;
+        _manualRefresh = true;
     }
 
     #region INodeLogger implementation
@@ -198,10 +227,15 @@ internal sealed class LiveLogger : INodeLogger
     /// </summary>
     private void BuildStarted(object sender, BuildStartedEventArgs e)
     {
-        _refresher = new Thread(ThreadProc);
-        _refresher.Start();
+        if (!_manualRefresh)
+        {
+            _refresher = new Thread(ThreadProc);
+            _refresher.Start();
+        }
 
         _buildStartTime = e.Timestamp;
+
+        Terminal.Write(AnsiCodes.SetProgressIndeterminate);
     }
 
     /// <summary>
@@ -217,22 +251,32 @@ internal sealed class LiveLogger : INodeLogger
         Terminal.BeginUpdate();
         try
         {
+            string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
+            string buildResult = RenderBuildResult(e.Succeeded, _buildHasErrors, _buildHasWarnings);
 
             Terminal.WriteLine("");
-            Terminal.Write("Build ");
-
-            PrintBuildResult(e.Succeeded, _buildHasErrors, _buildHasWarnings);
-
-            double duration = (e.Timestamp - _buildStartTime).TotalSeconds;
-            Terminal.WriteLine($" in {duration:F1}s");
+            if (_restoreFailed)
+            {
+                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
+                    buildResult,
+                    duration));
+            }
+            else
+            {
+                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildFinished",
+                    buildResult,
+                    duration));
+            }
         }
         finally
         {
+            Terminal.Write(AnsiCodes.RemoveProgress);
             Terminal.EndUpdate();
         }
 
         _buildHasErrors = false;
         _buildHasWarnings = false;
+        _restoreFailed = false;
     }
 
     /// <summary>
@@ -286,34 +330,7 @@ internal sealed class LiveLogger : INodeLogger
 
         ProjectContext c = new(buildEventContext);
 
-        // First check if we're done restoring.
-        if (_restoreContext is ProjectContext restoreContext && c == restoreContext)
-        {
-            lock (_lock)
-            {
-                _restoreContext = null;
-
-                Stopwatch projectStopwatch = _projects[restoreContext].Stopwatch;
-                double duration = projectStopwatch.Elapsed.TotalSeconds;
-                projectStopwatch.Stop();
-
-                Terminal.BeginUpdate();
-                try
-                {
-                    EraseNodes();
-                    Terminal.WriteLine($"Restore complete ({duration:F1}s)");
-                    DisplayNodes();
-                }
-                finally
-                {
-                    Terminal.EndUpdate();
-                }
-                return;
-            }
-        }
-
-        // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
-        if (_projects.TryGetValue(c, out Project? project) && (project.OutputPath is not null || project.BuildMessages is not null))
+        if (_projects.TryGetValue(c, out Project? project))
         {
             lock (_lock)
             {
@@ -322,53 +339,108 @@ internal sealed class LiveLogger : INodeLogger
                 {
                     EraseNodes();
 
-                    double duration = project.Stopwatch.Elapsed.TotalSeconds;
+                    string duration = project.Stopwatch.Elapsed.TotalSeconds.ToString("F1");
                     ReadOnlyMemory<char>? outputPath = project.OutputPath;
 
-                    Terminal.Write(Indentation);
+                    string projectFile = e.ProjectFile is not null ?
+                        Path.GetFileNameWithoutExtension(e.ProjectFile) :
+                        string.Empty;
 
-                    if (e.ProjectFile is not null)
-                    {
-                        ReadOnlySpan<char> projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile.AsSpan());
-                        Terminal.Write(projectFile);
-                        Terminal.Write(" ");
-                    }
-                    if (!string.IsNullOrEmpty(project.TargetFramework))
-                    {
-                        Terminal.Write($"[{project.TargetFramework}] ");
-                    }
-
-                    // Print 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
+                    // Build result. One of 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
                     // reported during build.
                     bool haveErrors = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Error) == true;
                     bool haveWarnings = project.BuildMessages?.Exists(m => m.Severity == MessageSeverity.Warning) == true;
-                    PrintBuildResult(e.Succeeded, haveErrors, haveWarnings);
 
-                    _buildHasErrors |= haveErrors;
-                    _buildHasWarnings |= haveWarnings;
+                    string buildResult = RenderBuildResult(e.Succeeded, haveErrors, haveWarnings);
 
-                    // Print the output path as a link if we have it.
-                    if (outputPath is not null)
+                    // Check if we're done restoring.
+                    if (c == _restoreContext)
                     {
-                        ReadOnlySpan<char> url = outputPath.Value.Span;
-                        try
+                        if (e.Succeeded)
                         {
-                            // If possible, make the link point to the containing directory of the output.
-                            url = Path.GetDirectoryName(url);
+                            if (haveErrors || haveWarnings)
+                            {
+                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
+                                    buildResult,
+                                    duration));
+                            }
+                            else
+                            {
+                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreComplete",
+                                    duration));
+                            }
                         }
-                        catch
+                        else
                         {
-                            // Ignore any GetDirectoryName exceptions.
+                            // It will be reported after build finishes.
+                            _restoreFailed = true;
                         }
-#if NETCOREAPP
-                        Terminal.WriteLine($" ({duration:F1}s) → {AnsiCodes.LinkPrefix}{url}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}");
-#else
-                        Terminal.WriteLine($" ({duration:F1}s) → {AnsiCodes.LinkPrefix}{url.ToString()}{AnsiCodes.LinkInfix}{outputPath.ToString()}{AnsiCodes.LinkSuffix}");
-#endif
+
+                        _restoreContext = null;
                     }
-                    else
+                    // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
+                    else if (project.OutputPath is not null || project.BuildMessages is not null)
                     {
-                        Terminal.WriteLine($" ({duration:F1}s)");
+                        // Show project build complete and its output
+
+                        if (string.IsNullOrEmpty(project.TargetFramework))
+                        {
+                            Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
+                                Indentation,
+                                projectFile,
+                                buildResult,
+                                duration));
+                        }
+                        else
+                        {
+                            Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
+                                Indentation,
+                                projectFile,
+                                AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                                buildResult,
+                                duration));
+                        }
+
+                        // Print the output path as a link if we have it.
+                        if (outputPath is not null)
+                        {
+                            ReadOnlySpan<char> outputPathSpan = outputPath.Value.Span;
+                            ReadOnlySpan<char> url = outputPathSpan;
+                            try
+                            {
+                                // If possible, make the link point to the containing directory of the output.
+                                url = Path.GetDirectoryName(url);
+                            }
+                            catch
+                            {
+                                // Ignore any GetDirectoryName exceptions.
+                            }
+
+                            // Generates file:// schema url string which is better handled by various Terminal clients than raw folder name.
+                            string urlString = url.ToString();
+                            if (Uri.TryCreate(urlString, UriKind.Absolute, out Uri? uri))
+                            {
+                                urlString = uri.AbsoluteUri;
+                            }
+
+                            // If the output path is under the initial working directory, make the console output relative to that to save space.
+                            if (outputPathSpan.StartsWith(_initialWorkingDirectory.AsSpan(), FileUtilities.PathComparison))
+                            {
+                                if (outputPathSpan.Length > _initialWorkingDirectory.Length
+                                    && (outputPathSpan[_initialWorkingDirectory.Length] == Path.DirectorySeparatorChar
+                                        || outputPathSpan[_initialWorkingDirectory.Length] == Path.AltDirectorySeparatorChar))
+                                {
+                                    outputPathSpan = outputPathSpan.Slice(_initialWorkingDirectory.Length + 1);
+                                }
+                            }
+
+                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
+                                $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{outputPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
+                        }
+                        else
+                        {
+                            Terminal.WriteLine(string.Empty);
+                        }
                     }
 
                     // Print diagnostic output under the Project -> Output line.
@@ -382,9 +454,25 @@ internal sealed class LiveLogger : INodeLogger
                                 MessageSeverity.Error => TerminalColor.Red,
                                 _ => TerminalColor.Default,
                             };
-                            Terminal.WriteColorLine(color, $"{Indentation}{Indentation}{buildMessage.Message}");
+                            char symbol = buildMessage.Severity switch
+                            {
+                                MessageSeverity.Warning => '⚠',
+                                MessageSeverity.Error => '❌',
+                                _ => ' ',
+                            };
+
+                            // The error and warning symbols may be rendered with different width on some terminals. To make sure that the message text
+                            // is always aligned, we print the symbol, move back to the start of the line, then move forward to the desired column, and
+                            // finally print the message text.
+                            int maxSymbolWidth = 2;
+                            int messageStartColumn = Indentation.Length + Indentation.Length + maxSymbolWidth;
+                            Terminal.WriteColorLine(color, $"{Indentation}{Indentation}{symbol}\uFE0E{AnsiCodes.CSI}{messageStartColumn + 1}{AnsiCodes.MoveBackward}" +
+                                $"{AnsiCodes.CSI}{messageStartColumn}{AnsiCodes.MoveForward} {buildMessage.Message}");
                         }
                     }
+
+                    _buildHasErrors |= haveErrors;
+                    _buildHasWarnings |= haveWarnings;
 
                     DisplayNodes();
                 }
@@ -483,7 +571,7 @@ internal sealed class LiveLogger : INodeLogger
         if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             string message = EventArgsFormatting.FormatEventMessage(e, false);
-            project.AddBuildMessage(MessageSeverity.Warning, $"⚠\uFE0E {message}");
+            project.AddBuildMessage(MessageSeverity.Warning, message);
         }
     }
 
@@ -496,7 +584,7 @@ internal sealed class LiveLogger : INodeLogger
         if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
         {
             string message = EventArgsFormatting.FormatEventMessage(e, false);
-            project.AddBuildMessage(MessageSeverity.Error, $"❌\uFE0E {message}");
+            project.AddBuildMessage(MessageSeverity.Error, message);
         }
     }
 
@@ -526,7 +614,7 @@ internal sealed class LiveLogger : INodeLogger
     /// Render Nodes section.
     /// It shows what all build nodes do.
     /// </summary>
-    private void DisplayNodes()
+    internal void DisplayNodes()
     {
         NodesFrame newFrame = new NodesFrame(_nodes, width: Terminal.Width, height: Terminal.Height);
 
@@ -655,21 +743,22 @@ internal sealed class LiveLogger : INodeLogger
                     if (!previous.SequenceEqual(needed))
                     {
                         int commonPrefixLen = previous.CommonPrefixLength(needed);
-                        if (commonPrefixLen == 0)
+
+                        if (commonPrefixLen != 0 && needed.Slice(0, commonPrefixLen).IndexOf('\x1b') == -1)
                         {
-                            // whole string
-                            sb.Append(needed);
+                            // no escape codes, so can trivially skip substrings
+                            sb.Append($"{AnsiCodes.CSI}{commonPrefixLen}{AnsiCodes.MoveForward}");
+                            sb.Append(needed.Slice(commonPrefixLen));
                         }
                         else
                         {
-                            // set cursor to different char
-                            sb.Append($"{AnsiCodes.CSI}{commonPrefixLen}{AnsiCodes.MoveForward}");
-                            sb.Append(needed.Slice(commonPrefixLen));
-                            // Shall we clear rest of line
-                            if (needed.Length < previous.Length)
-                            {
-                                sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInLine}");
-                            }
+                            sb.Append(needed);
+                        }
+
+                        // Shall we clear rest of line
+                        if (needed.Length < previous.Length)
+                        {
+                            sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInLine}");
                         }
                     }
                 }
@@ -708,26 +797,26 @@ internal sealed class LiveLogger : INodeLogger
     /// <param name="succeeded">True if the build completed with success.</param>
     /// <param name="hasError">True if the build has logged at least one error.</param>
     /// <param name="hasWarning">True if the build has logged at least one warning.</param>
-    private void PrintBuildResult(bool succeeded, bool hasError, bool hasWarning)
+    private string RenderBuildResult(bool succeeded, bool hasError, bool hasWarning)
     {
         if (!succeeded)
         {
             // If the build failed, we print one of three red strings.
             string text = (hasError, hasWarning) switch
             {
-                (true, _) => "failed with errors",
-                (false, true) => "failed with warnings",
-                _ => "failed",
+                (true, _) => ResourceUtilities.GetResourceString("BuildResult_FailedWithErrors"),
+                (false, true) => ResourceUtilities.GetResourceString("BuildResult_FailedWithWarnings"),
+                _ => ResourceUtilities.GetResourceString("BuildResult_Failed"),
             };
-            Terminal.WriteColor(TerminalColor.Red, text);
+            return AnsiCodes.Colorize(text, TerminalColor.Red);
         }
         else if (hasWarning)
         {
-            Terminal.WriteColor(TerminalColor.Yellow, "succeeded with warnings");
+            return AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_SucceededWithWarnings"), TerminalColor.Yellow);
         }
         else
         {
-            Terminal.WriteColor(TerminalColor.Green, "succeeded");
+            return AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
         }
     }
 

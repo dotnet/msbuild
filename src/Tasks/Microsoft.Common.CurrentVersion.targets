@@ -1027,6 +1027,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </MSBuild>
   </Target>
 
+  <ItemGroup Condition="'$(IsGraphBuild)' == 'true' and '$(BuildPassReferences)' == 'true'">
+    <ProjectReferenceTargets Include="BuildGenerateSources" Targets="BuildGenerateSources" />
+  </ItemGroup>
+
   <!--
     ============================================================
                                         BuildCompile
@@ -1052,6 +1056,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </MSBuild>
   </Target>
 
+  <ItemGroup Condition="'$(IsGraphBuild)' == 'true' and '$(BuildPassReferences)' == 'true'">
+    <ProjectReferenceTargets Include="BuildCompile" Targets="BuildCompile" />
+  </ItemGroup>
+
   <!--
     ============================================================
                                         BuildLink
@@ -1076,6 +1084,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
     </MSBuild>
   </Target>
+
+  <ItemGroup Condition="'$(IsGraphBuild)' == 'true' and '$(BuildPassReferences)' == 'true'">
+    <ProjectReferenceTargets Include="BuildLink" Targets="BuildLink" />
+  </ItemGroup>
 
   <!--
     ============================================================
@@ -1232,7 +1244,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         RootPath="$(TargetFrameworkRootPath)"
         TargetFrameworkFallbackSearchPaths="$(TargetFrameworkFallbackSearchPaths)"
         BypassFrameworkInstallChecks="$(BypassFrameworkInstallChecks)"
-        >
+        ContinueOnError="!$(BuildingProject)">
       <Output TaskParameter="ReferenceAssemblyPaths" PropertyName="_TargetFrameworkDirectories"/>
       <Output TaskParameter="FullFrameworkReferenceAssemblyPaths" PropertyName="_FullFrameworkReferenceAssemblyPaths"/>
       <Output TaskParameter="TargetFrameworkMonikerDisplayName" PropertyName="TargetFrameworkMonikerDisplayName" Condition="'$(TargetFrameworkMonikerDisplayName)' == ''"/>
@@ -1288,7 +1300,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
                                         AssignLinkMetadata
 
-       For items of a certain set of whitelisted types, make sure that
+       For items of a certain set of allowlisted types, make sure that
        if they are defined in a file other than the project file, that
        they have "Link" metadata set to an appropriate default.
     ============================================================
@@ -2697,6 +2709,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="TargetOutputs" ItemName="TargetPathWithTargetPlatformMoniker" />
     </MSBuild>
   </Target>
+
+  <ItemGroup Condition="'$(IsGraphBuild)' == 'true' and '$(FindInvalidProjectReferences)' == 'true'">
+    <ProjectReferenceTargets Include="Build" Targets="GetTargetPathWithTargetPlatformMoniker" />
+  </ItemGroup>
 
    <!--
     ============================================================

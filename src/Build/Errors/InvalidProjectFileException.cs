@@ -3,10 +3,11 @@
 
 using System;
 using System.Runtime.Serialization;
+using System.Collections.Generic;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
-
+using Microsoft.Build.Framework.BuildException;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -21,7 +22,7 @@ namespace Microsoft.Build.Exceptions
     // promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type
     // without following certain special FX guidelines, can break both forward and backward compatibility
     [Serializable]
-    public sealed class InvalidProjectFileException : Exception
+    public sealed class InvalidProjectFileException : BuildExceptionBase
     {
         #region Basic constructors
 
@@ -120,6 +121,35 @@ namespace Microsoft.Build.Exceptions
             info.AddValue("errorCode", errorCode);
             info.AddValue("helpKeyword", helpKeyword);
             info.AddValue("hasBeenLogged", hasBeenLogged);
+        }
+
+        protected override IDictionary<string, string> FlushCustomState()
+        {
+            return new Dictionary<string, string>()
+            {
+                { nameof(file), file },
+                { nameof(lineNumber), lineNumber.ToString() },
+                { nameof(columnNumber), columnNumber.ToString() },
+                { nameof(endLineNumber), endLineNumber.ToString() },
+                { nameof(endColumnNumber), endColumnNumber.ToString() },
+                { nameof(errorSubcategory), errorSubcategory },
+                { nameof(errorCode), errorCode },
+                { nameof(helpKeyword), helpKeyword },
+                { nameof(hasBeenLogged), hasBeenLogged.ToString() },
+            };
+        }
+
+        protected override void InitializeCustomState(IDictionary<string, string> state)
+        {
+            file = state[nameof(file)];
+            lineNumber = int.Parse(state[nameof(lineNumber)]);
+            columnNumber = int.Parse(state[nameof(columnNumber)]);
+            endLineNumber = int.Parse(state[nameof(endLineNumber)]);
+            endColumnNumber = int.Parse(state[nameof(endColumnNumber)]);
+            errorSubcategory = state[nameof(errorSubcategory)];
+            errorCode = state[nameof(errorCode)];
+            helpKeyword = state[nameof(helpKeyword)];
+            hasBeenLogged = bool.Parse(state[nameof(hasBeenLogged)]);
         }
 
         #endregion

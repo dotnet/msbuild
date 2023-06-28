@@ -61,6 +61,14 @@ internal static class AnsiCodes
     public const string MoveForward = "C";
 
     /// <summary>
+    /// Moves backward (to the left) the specified number of characters.
+    /// </summary>
+    /// <remarks>
+    /// Print <see cref="CSI"/>N<see cref="MoveBackward"/> to move N characters backward.
+    /// </remarks>
+    public const string MoveBackward = "D";
+
+    /// <summary>
     /// Clears everything from cursor to end of screen.
     /// </summary>
     /// <remarks>
@@ -85,4 +93,24 @@ internal static class AnsiCodes
     /// Shows/restores the cursor.
     /// </summary>
     public const string ShowCursor = "\x1b[?25h";
+
+    /// <summary>
+    /// Set progress state to a busy spinner.
+    /// </summary>
+    public const string SetProgressIndeterminate = "\x1b]9;4;3;\x1b\\";
+
+    /// <summary>
+    /// Remove progress state, restoring taskbar status to normal.
+    /// </summary>
+    public const string RemoveProgress = "\x1b]9;4;0;\x1b\\";
+
+    public static string Colorize(string? s, TerminalColor color)
+    {
+        if (string.IsNullOrWhiteSpace(s))
+        {
+            return s ?? "";
+        }
+
+        return $"{CSI}{(int)color}{SetColor}{s}{SetDefaultColor}";
+    }
 }

@@ -157,8 +157,6 @@ namespace Microsoft.Build.Tasks
         private const string attrSetConfiguration = "SetConfiguration";
         private const string attrSetPlatform = "SetPlatform";
 
-        private static readonly char[] s_configPlatformSeparator = { '|' };
-
         private IDictionary<string, string> _vcxToDefaultMap;
         private IDictionary<string, string> _defaultToVcxMap;
         private bool _mappingsPopulated;
@@ -287,14 +285,14 @@ namespace Microsoft.Build.Tasks
                 {
                     if (_defaultToVcxMap.TryGetValue(CurrentProjectPlatform, out transformedPlatform))
                     {
-                        projectConfiguration = CurrentProjectConfiguration + s_configPlatformSeparator[0] + transformedPlatform;
+                        projectConfiguration = CurrentProjectConfiguration + SolutionConfiguration.ConfigPlatformSeparator[0] + transformedPlatform;
                     }
                 }
                 else
                 {
                     if (_vcxToDefaultMap.TryGetValue(CurrentProjectPlatform, out transformedPlatform))
                     {
-                        projectConfiguration = CurrentProjectConfiguration + s_configPlatformSeparator[0] + transformedPlatform;
+                        projectConfiguration = CurrentProjectConfiguration + SolutionConfiguration.ConfigPlatformSeparator[0] + transformedPlatform;
                     }
                 }
             }
@@ -306,7 +304,7 @@ namespace Microsoft.Build.Tasks
                 resolvedProjectWithConfiguration = projectRef;
                 resolvedProjectWithConfiguration.SetMetadata(attrFullConfiguration, projectConfiguration);
 
-                string[] configurationPlatformParts = projectConfiguration.Split(s_configPlatformSeparator);
+                string[] configurationPlatformParts = projectConfiguration.Split(SolutionConfiguration.ConfigPlatformSeparator);
                 resolvedProjectWithConfiguration.SetMetadata(attrSetConfiguration, "Configuration=" + configurationPlatformParts[0]);
                 resolvedProjectWithConfiguration.SetMetadata(attrConfiguration, configurationPlatformParts[0]);
 

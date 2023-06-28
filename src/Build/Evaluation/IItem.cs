@@ -39,7 +39,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Returns the metadata with the specified key.
-        /// Returns null if it does not exist.
+        /// Returns an empty string if it does not exist.
         /// Attempting to get built-in metadata on a value that is not a valid path throws InvalidOperationException.
         /// Metadata value is unescaped.
         /// </summary>
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Returns the metadata with the specified key.
-        /// Returns null if it does not exist.
+        /// Returns an empty string if it does not exist.
         /// Attempting to get built-in metadata on a value that is not a valid path throws InvalidOperationException.
         /// Metadata value is the escaped value initially set.
         /// </summary>

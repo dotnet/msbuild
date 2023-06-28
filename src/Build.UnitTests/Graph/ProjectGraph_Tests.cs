@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
@@ -671,6 +672,160 @@ namespace Microsoft.Build.Graph.UnitTests
                 projectGraph.EntryPointNodes.Count.ShouldBe(3);
                 projectGraph.GraphRoots.Count.ShouldBe(2);
                 projectGraph.GraphRoots.ShouldNotContain(GetFirstNodeWithProjectNumber(projectGraph, 2));
+            }
+        }
+
+        [Fact]
+        public void ConstructGraphWithSolution()
+        {
+            // This test exercises two key features of solution-based builds from AssignProjectConfiguration:
+            // 1. Adding synthetic project references
+            // 2. Resolving project configuration based on the sln
+            // 3. Handling unresolved project references with ShouldUnsetParentConfigurationAndPlatform=true
+            // 4. Handling unresolved project references with ShouldUnsetParentConfigurationAndPlatform=false
+            using (var env = TestEnvironment.Create())
+            {
+                const string SolutionFileContents = """
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 17
+                    VisualStudioVersion = 17.0.31903.59
+                    MinimumVisualStudioVersion = 17.0.31903.59
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "Project1.csproj", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
+                        ProjectSection(ProjectDependencies) = postProject
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98} = {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}
+                        EndProjectSection
+                    EndProject
+                    Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Project2", "Project2.vcxproj", "{D638A8EF-3A48-45F2-913C-88B29FED03CB}"
+                    EndProject
+                    Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "Project3", "Project3.vcxproj", "{52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|Win32 = Debug|Win32
+                            Debug|x64 = Debug|x64
+                            Debug|x86 = Debug|x86
+                            Release|Win32 = Release|Win32
+                            Release|x64 = Release|x64
+                            Release|x86 = Release|x86
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|Win32.ActiveCfg = Debug|x86
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|Win32.Build.0 = Debug|x86
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.Build.0 = Debug|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x86.ActiveCfg = Debug|x86
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x86.Build.0 = Debug|x86
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|Win32.ActiveCfg = Release|x86
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|Win32.Build.0 = Release|x86
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x64.ActiveCfg = Release|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x64.Build.0 = Release|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x86.ActiveCfg = Release|x86
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x86.Build.0 = Release|x86
+                            {D638A8EF-3A48-45F2-913C-88B29FED03CB}.Debug|Win32.ActiveCfg = Debug|Win32
+                            {D638A8EF-3A48-45F2-913C-88B29FED03CB}.Debug|Win32.Build.0 = Debug|Win32
+                            {D638A8EF-3A48-45F2-913C-88B29FED03CB}.Debug|x64.ActiveCfg = Debug|x64
+                            {D638A8EF-3A48-45F2-913C-88B29FED03CB}.Debug|x64.Build.0 = Debug|x64
+                            {D638A8EF-3A48-45F2-913C-88B29FED03CB}.Release|Win32.ActiveCfg = Release|Win32
+                            {D638A8EF-3A48-45F2-913C-88B29FED03CB}.Release|Win32.Build.0 = Release|Win32
+                            {D638A8EF-3A48-45F2-913C-88B29FED03CB}.Release|x64.ActiveCfg = Release|x64
+                            {D638A8EF-3A48-45F2-913C-88B29FED03CB}.Release|x64.Build.0 = Release|x64
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Debug|Win32.ActiveCfg = Debug|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Debug|Win32.Build.0 = Debug|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Debug|x64.ActiveCfg = Debug|x64
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Debug|x64.Build.0 = Debug|x64
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Debug|x86.ActiveCfg = Debug|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Debug|x86.Build.0 = Debug|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|Win32.ActiveCfg = Release|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|Win32.Build.0 = Release|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|x64.ActiveCfg = Release|x64
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|x64.Build.0 = Release|x64
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|x86.ActiveCfg = Release|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|x86.Build.0 = Release|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Debug|Win32.ActiveCfg = Debug|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Debug|Win32.Build.0 = Debug|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Debug|x64.ActiveCfg = Debug|x64
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Debug|x64.Build.0 = Debug|x64
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Debug|x86.ActiveCfg = Debug|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Debug|x86.Build.0 = Debug|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|Win32.ActiveCfg = Release|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|Win32.Build.0 = Release|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|x64.ActiveCfg = Release|x64
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|x64.Build.0 = Release|x64
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|x86.ActiveCfg = Release|Win32
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|x86.Build.0 = Release|Win32
+                        EndGlobalSection
+                        GlobalSection(SolutionProperties) = preSolution
+                            HideSolutionNode = FALSE
+                        EndGlobalSection
+                    EndGlobal
+                    """;
+                TransientTestFile slnFile = env.CreateFile(@"Solution.sln", SolutionFileContents);
+                SolutionFile solutionFile = SolutionFile.Parse(slnFile.Path);
+
+                ProjectRootElement project1Xml = ProjectRootElement.Create();
+
+                // Project 1 depends on Project 2 using ProjectReference but there is a sln-based dependency defined on Project 3 as well.
+                project1Xml.AddItem("ProjectReference", "Project2.vcxproj");
+
+                ProjectRootElement project2Xml = ProjectRootElement.Create();
+
+                // Project 2 depends on Project 4, which is not in the solution and uses ShouldUnsetParentConfigurationAndPlatform=true (the default)
+                project2Xml.AddItem("ProjectReference", "Project4.vcxproj");
+                project2Xml.AddProperty("ShouldUnsetParentConfigurationAndPlatform", "true");
+
+                ProjectRootElement project3Xml = ProjectRootElement.Create();
+
+                // Project 3 depends on Project 5, which is not in the solution and uses ShouldUnsetParentConfigurationAndPlatform=false
+                project3Xml.AddItem("ProjectReference", "Project5.vcxproj");
+                project3Xml.AddProperty("ShouldUnsetParentConfigurationAndPlatform", "false");
+
+                ProjectRootElement project4Xml = ProjectRootElement.Create();
+                ProjectRootElement project5Xml = ProjectRootElement.Create();
+
+                string project1Path = Path.Combine(env.DefaultTestDirectory.Path, "Project1.csproj");
+                string project2Path = Path.Combine(env.DefaultTestDirectory.Path, "Project2.vcxproj");
+                string project3Path = Path.Combine(env.DefaultTestDirectory.Path, "Project3.vcxproj");
+                string project4Path = Path.Combine(env.DefaultTestDirectory.Path, "Project4.vcxproj");
+                string project5Path = Path.Combine(env.DefaultTestDirectory.Path, "Project5.vcxproj");
+
+                project1Xml.Save(project1Path);
+                project2Xml.Save(project2Path);
+                project3Xml.Save(project3Path);
+                project4Xml.Save(project4Path);
+                project5Xml.Save(project5Path);
+
+                var projectGraph = new ProjectGraph(slnFile.Path);
+                projectGraph.EntryPointNodes.Count.ShouldBe(3);
+                projectGraph.GraphRoots.Count.ShouldBe(1);
+                projectGraph.GraphRoots.First().ProjectInstance.FullPath.ShouldBe(project1Path);
+                projectGraph.ProjectNodes.Count.ShouldBe(5);
+
+                ProjectGraphNode project1Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project1Path);
+                project1Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project1Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
+                project1Node.ProjectReferences.Count.ShouldBe(2);
+
+                ProjectGraphNode project2Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project2Path);
+                project2Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project2Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
+                project2Node.ProjectReferences.Count.ShouldBe(1);
+
+                ProjectGraphNode project3Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project3Path);
+                project3Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project3Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
+                project3Node.ProjectReferences.Count.ShouldBe(1);
+
+                // Configuration and Platform get unset
+                ProjectGraphNode project4Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project4Path);
+                project4Node.ProjectInstance.GlobalProperties.ContainsKey("Configuration").ShouldBeFalse();
+                project4Node.ProjectInstance.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
+                project4Node.ProjectReferences.Count.ShouldBe(0);
+
+                // Configuration and Platform are inherited from the referencing project
+                ProjectGraphNode project5Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project5Path);
+                project5Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project5Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
+                project5Node.ProjectReferences.Count.ShouldBe(0);
             }
         }
 

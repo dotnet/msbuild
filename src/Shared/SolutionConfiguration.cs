@@ -17,6 +17,8 @@ namespace Microsoft.Build.Shared
 
         public const string BuildProjectInSolutionAttribute = "BuildProjectInSolution";
 
+        public static readonly char[] ConfigPlatformSeparator = { '|' };
+
         // This field stores pre-cached project elements for project guids for quicker access by project guid
         private readonly Dictionary<string, XmlElement> _cachedProjectElements = new Dictionary<string, XmlElement>(StringComparer.OrdinalIgnoreCase);
 

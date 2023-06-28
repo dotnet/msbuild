@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -58,11 +59,9 @@ namespace Microsoft.Build.Execution
             if (itemDefinition.MetadataCount > 0)
             {
                 _metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
-            }
 
-            foreach (ProjectMetadata originalMetadata in itemDefinition.Metadata)
-            {
-                _metadata.Set(new ProjectMetadataInstance(originalMetadata));
+                IEnumerable<ProjectMetadataInstance> projectMetadataInstances = itemDefinition.Metadata.Select(originalMetadata => new ProjectMetadataInstance(originalMetadata));
+                _metadata.ImportProperties(projectMetadataInstances);
             }
         }
 

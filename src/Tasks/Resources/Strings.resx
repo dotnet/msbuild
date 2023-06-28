@@ -1166,10 +1166,14 @@
   </data>
   <data name="GenerateResource.BinaryFormatterUse">
     <value>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide</value>
+           More information: https://aka.ms/msbuild/net8-binaryformatter</value>
     <comment>{StrBegin="MSB3825: "}</comment>
   </data>
 
+  <data name="GenerateResource.MimeTypeNotSupportedOnCore">
+    <value>MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</value>
+    <comment>{StrBegin="MSB3826: "}</comment>
+  </data>
 
   <!--
         The GetAssemblyIdentity message bucket is: MSB3441 - MSB3450
@@ -1744,7 +1748,7 @@
   <data name="ResolveAssemblyReference.TargetFrameworkSubsetLogHeader">
     <value>TargetFramework Profile List Information:</value>
   </data>
-  <data name="ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader">
+  <data name="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
     <value>TargetFramework Profile List Paths:</value>
   </data>
   <data name="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">
@@ -2329,6 +2333,9 @@
   </data>
   <data name="XslTransform.UseTrustedSettings" xml:space="preserve">
     <value>The usage of the document() method and embedded scripts is prohibited by default, due to risks of foreign code execution.  If "{0}" is a trusted source that requires those constructs, please set the "UseTrustedSettings" parameter to "true" to allow their execution.</value>
+  </data>
+  <data name="XslTransform.SecuritySettingsViaUseTrustedSettings" xml:space="preserve">
+    <value>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</value>
   </data>
     <data name="XslTransform.PrecompiledXsltError" xml:space="preserve">
     <value>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</value>

@@ -7,21 +7,12 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           impossible to load or build your projects from the command-line or the IDE.
 
 This file contains .NET-specific properties, and items. This file is imported for .NET Core, .NET Standard, and .NET Framework projects.
+these two files are used to encapsulate the multi-targeting and framework specific build process.
 
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project>
-
-  <!--
-    ============================================================
-                                        Reference Assemblies
-    Enable the production of a reference assembly by all .NET projects, by default.
-    ============================================================
-  -->
-  <PropertyGroup>
-    <ProduceReferenceAssembly Condition=" '$(ProduceReferenceAssembly)' == '' and '$(ProduceOnlyReferenceAssembly)' != 'true' ">true</ProduceReferenceAssembly>
-  </PropertyGroup>
 
   <!--
     ============================================================

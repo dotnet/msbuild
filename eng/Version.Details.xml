@@ -1,22 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
+  <ProductDependencies>
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="7.0.0-alpha.1.23219.1">
+      <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
+      <Sha>525b6c35cc5c5c9b80b47044be2e4e77858d505a</Sha>
+      <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
+    </Dependency>
+    <!-- Necessary for source-build. This allows the packages to be retrieved from previously-source-built artifacts
+      and flow in as dependencies of the packages produced by msbuild. -->
+    <Dependency Name="System.Configuration.ConfigurationManager" Version="7.0.0">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    </Dependency>
+    <Dependency Name="System.Security.Cryptography.Pkcs" Version="7.0.0">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
+    </Dependency>
+  </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="8.0.0-beta.23213.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>fb14cae30eacbe844468ac297b3d4c61e0bb9dc0</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.5.0-rc.149">
+    <Dependency Name="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-21480-02" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
+      <Uri>https://github.com/dotnet/sourcelink</Uri>
+      <Sha>8031e5220baf2acad991e661d8308b783d2acf3e</Sha>
+      <SourceBuild RepoName="sourcelink" ManagedOnly="true" />
+    </Dependency>
+    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.21431.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
+      <Uri>https://github.com/dotnet/xliff-tasks</Uri>
+      <Sha>bc3233146e1fcd393ed471d5005333c83363e0fe</Sha>
+      <SourceBuild RepoName="xliff-tasks" ManagedOnly="true" />
+    </Dependency>
+    <Dependency Name="NuGet.Build.Tasks" Version="6.7.0-rc.106">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>ca5029046d7b6e55f322c45abb7b342054543710</Sha>
+      <Sha>4b6a87bfe90d247f961eba41d63dbf418a56fdcc</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.6.0-2.23171.5">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.7.0-3.23324.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>48b13597fee9df5ecfbd0b8c0758b3f46bc1d440</Sha>
+      <Sha>d0f4099ffa7f8ff31fd397a4a96f404e1cd7dfc7</Sha>
+      <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="6.0.0-beta.23167.1">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="6.0.0-beta.23313.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>92c39a4f0bacef20812f63e2e1d3f7aa8776038d</Sha>
+      <Sha>91616785a1a6578c83f7e93d98c34a1eb83d6223</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
