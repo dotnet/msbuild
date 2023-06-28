@@ -8,7 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Xml;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -191,11 +190,6 @@ namespace Microsoft.Build.Evaluation
         private Expander<ProjectPropertyInstance, ProjectItemInstance> _expander;
 
         /// <summary>
-        /// Bag of properties for the expander to expand the properties and items in the using tasks files
-        /// </summary>
-        private PropertyDictionary<ProjectPropertyInstance> _propertyBag;
-
-        /// <summary>
         /// SubToolsets that map to this toolset.
         /// </summary>
         private Dictionary<string, SubToolset> _subToolsets;
@@ -369,6 +363,12 @@ namespace Microsoft.Build.Evaluation
         {
             ((ITranslatable)this).Translate(translator);
         }
+
+        /// <summary>
+        ///  Private constructor for cloning.
+        /// </summary>
+        private Toolset()
+        { }
 
         /// <summary>
         /// Returns a ProjectImportPathMatch struct for the first property found in the expression for which
@@ -608,6 +608,25 @@ namespace Microsoft.Build.Evaluation
         {
             get; set;
         }
+
+        public Toolset DeepClone()
+            => new()
+            {
+                _toolsVersion = _toolsVersion,
+                _toolsPath = _toolsPath,
+                _properties = _properties.DeepClone(),
+                _environmentProperties = _environmentProperties.DeepClone(),
+                _globalProperties = _globalProperties.DeepClone(),
+                _subToolsets = _subToolsets.DeepClone(v => v.DeepClone(), StringComparer.OrdinalIgnoreCase),
+                _overrideTasksPath = _overrideTasksPath,
+                _defaultOverrideToolsVersion = _defaultOverrideToolsVersion,
+                _propertySearchPathsTable =
+                    _propertySearchPathsTable.DeepClone(v => v.DeepClone(), StringComparer.OrdinalIgnoreCase),
+                _defaultTasksRegistrationAttempted = _defaultTasksRegistrationAttempted,
+                _overrideTasksRegistrationAttempted = _overrideTasksRegistrationAttempted,
+                _defaultTaskRegistry = _defaultTaskRegistry?.DeepClone(),
+                _overrideTaskRegistry = _overrideTaskRegistry?.DeepClone()
+            };
 
         /// <summary>
         /// Function for serialization.
@@ -901,79 +920,78 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void InitializeProperties(ILoggingService loggingServices, BuildEventContext buildEventContext)
         {
+            if (_expander != null)
+            {
+                return;
+            }
+
             try
             {
-                if (_propertyBag == null)
-                {
-                    List<ProjectPropertyInstance> reservedProperties = new List<ProjectPropertyInstance>();
+                List<ProjectPropertyInstance> reservedProperties = new List<ProjectPropertyInstance>();
 
-                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.binPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
-                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.toolsVersion, ToolsVersion, mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.binPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.toolsVersion, ToolsVersion, mayBeReserved: true));
 
-                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.toolsPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
-                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion, mayBeReserved: true));
-                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild, mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.toolsPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion, mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild, mayBeReserved: true));
 
-                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.msbuildRuntimeType,
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.msbuildRuntimeType,
 #if RUNTIME_TYPE_NETCORE
-                        Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core",
+                    Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core",
 #elif MONO
-                        NativeMethodsShared.IsMono ? "Mono" : "Full");
+                    NativeMethodsShared.IsMono ? "Mono" : "Full");
 #else
-                        "Full",
+                    "Full",
 #endif
-                        mayBeReserved: true));
+                    mayBeReserved: true));
 
 
-                    // Add one for the subtoolset version property -- it may or may not be set depending on whether it has already been set by the
-                    // environment or global properties, but it's better to create a dictionary that's one too big than one that's one too small.
-                    int count = _environmentProperties.Count + reservedProperties.Count + Properties.Values.Count + _globalProperties.Count + 1;
+                // Add one for the subtoolset version property -- it may or may not be set depending on whether it has already been set by the
+                // environment or global properties, but it's better to create a dictionary that's one too big than one that's one too small.
+                int count = _environmentProperties.Count + reservedProperties.Count + Properties.Values.Count + _globalProperties.Count + 1;
 
-                    // GenerateSubToolsetVersion checks the environment and global properties, so it's safe to go ahead and gather the
-                    // subtoolset properties here without fearing that we'll have somehow come up with the wrong subtoolset version.
-                    string subToolsetVersion = this.GenerateSubToolsetVersion();
-                    SubToolset subToolset;
-                    ICollection<ProjectPropertyInstance> subToolsetProperties = null;
+                // GenerateSubToolsetVersion checks the environment and global properties, so it's safe to go ahead and gather the
+                // subtoolset properties here without fearing that we'll have somehow come up with the wrong subtoolset version.
+                string subToolsetVersion = this.GenerateSubToolsetVersion();
+                SubToolset subToolset;
+                ICollection<ProjectPropertyInstance> subToolsetProperties = null;
 
-                    if (subToolsetVersion != null)
-                    {
-                        if (SubToolsets.TryGetValue(subToolsetVersion, out subToolset))
-                        {
-                            subToolsetProperties = subToolset.Properties.Values;
-                            count += subToolsetProperties.Count;
-                        }
-                    }
-
-                    _propertyBag = new PropertyDictionary<ProjectPropertyInstance>(count);
-
-                    // Should be imported in the same order as in the evaluator:
-                    // - Environment
-                    // - Toolset
-                    // - Subtoolset (if any)
-                    // - Global
-                    _propertyBag.ImportProperties(_environmentProperties);
-
-                    _propertyBag.ImportProperties(reservedProperties);
-
-                    _propertyBag.ImportProperties(Properties.Values);
-
-                    if (subToolsetVersion != null)
-                    {
-                        _propertyBag.Set(ProjectPropertyInstance.Create(Constants.SubToolsetVersionPropertyName, subToolsetVersion));
-                    }
-
-                    if (subToolsetProperties != null)
-                    {
-                        _propertyBag.ImportProperties(subToolsetProperties);
-                    }
-
-                    _propertyBag.ImportProperties(_globalProperties);
-                }
-
-                if (_expander == null)
+                if (subToolsetVersion != null)
                 {
-                    _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(_propertyBag, FileSystems.Default);
+                    if (SubToolsets.TryGetValue(subToolsetVersion, out subToolset))
+                    {
+                        subToolsetProperties = subToolset.Properties.Values;
+                        count += subToolsetProperties.Count;
+                    }
                 }
+
+                PropertyDictionary<ProjectPropertyInstance> propertyBag = new PropertyDictionary<ProjectPropertyInstance>(count);
+
+                // Should be imported in the same order as in the evaluator:
+                // - Environment
+                // - Toolset
+                // - Subtoolset (if any)
+                // - Global
+                propertyBag.ImportProperties(_environmentProperties);
+
+                propertyBag.ImportProperties(reservedProperties);
+
+                propertyBag.ImportProperties(Properties.Values);
+
+                if (subToolsetVersion != null)
+                {
+                    propertyBag.Set(ProjectPropertyInstance.Create(Constants.SubToolsetVersionPropertyName, subToolsetVersion));
+                }
+
+                if (subToolsetProperties != null)
+                {
+                    propertyBag.ImportProperties(subToolsetProperties);
+                }
+
+                propertyBag.ImportProperties(_globalProperties);
+
+                _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, FileSystems.Default);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {

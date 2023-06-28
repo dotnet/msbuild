@@ -561,9 +561,12 @@ namespace Microsoft.Build.Execution
             this.CreateTargetsSnapshot(data.Targets, data.DefaultTargets, data.InitialTargets, data.BeforeTargets, data.AfterTargets);
             this.CreateImportsSnapshot(data.ImportClosure, data.ImportClosureWithDuplicates);
 
-            this.Toolset = data.Toolset; // UNDONE: This isn't immutable, should be cloned or made immutable; it currently has a pointer to project collection
             this.SubToolsetVersion = data.SubToolsetVersion;
-            this.TaskRegistry = data.TaskRegistry;
+            this.TaskRegistry = data.TaskRegistry?.DeepClone();
+            // If the task registry uses toolset identical to the one in data instance - deep clone it just once.
+            this.Toolset = data.TaskRegistry?.Toolset == data.Toolset
+                ? this.TaskRegistry?.Toolset
+                : data.Toolset.DeepClone();
 
             this.ProjectRootElementCache = data.Project.ProjectCollection.ProjectRootElementCache;
 
@@ -641,11 +644,12 @@ namespace Microsoft.Build.Execution
                     ProjectItemDefinitionInstance>)this).AfterTargets = CreateCloneDictionary(
                     ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
                         ProjectItemDefinitionInstance>)that).AfterTargets, StringComparer.OrdinalIgnoreCase);
-                this.TaskRegistry =
-                    that.TaskRegistry; // UNDONE: This isn't immutable, should be cloned or made immutable; it currently has a pointer to project collection
 
-                // These are immutable so we don't need to clone them:
-                this.Toolset = that.Toolset;
+                this.TaskRegistry = that.TaskRegistry.DeepClone();
+                // If the task registry uses toolset identical to the one in project instance - deep clone it just once.
+                this.Toolset = that.TaskRegistry?.Toolset == that.Toolset
+                    ? this.TaskRegistry?.Toolset
+                    : that.Toolset.DeepClone();
                 this.SubToolsetVersion = that.SubToolsetVersion;
                 _targets = that._targets;
                 _itemDefinitions = that._itemDefinitions;

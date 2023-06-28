@@ -32,25 +32,34 @@ namespace Microsoft.Build.Framework
             IsAssignableToITask = typeof(ITaskItem).IsAssignableFrom(elementType);
         }
 
+        internal TaskPropertyInfo DeepClone()
+        {
+            return new TaskPropertyInfo(Name, PropertyType, Output, Required)
+            {
+                IsAssignableToITask = IsAssignableToITask,
+                // do not set Initialized - so that Log and LogItemMetadata can be initialized as appropriate
+            };
+        }
+
         /// <summary>
         /// The type of the property
         /// </summary>
-        public Type PropertyType { get; private set; }
+        public Type PropertyType { get; private init; }
 
         /// <summary>
         /// Name of the property
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; private init; }
 
         /// <summary>
         /// This task parameter is an output parameter (analogous to [Output] attribute)
         /// </summary>
-        public bool Output { get; private set; }
+        public bool Output { get; private init; }
 
         /// <summary>
         /// This task parameter is required (analogous to the [Required] attribute)
         /// </summary>
-        public bool Required { get; private set; }
+        public bool Required { get; private init; }
 
         /// <summary>
         /// This task parameter should be logged when LogTaskInputs is set. Defaults to true.
@@ -67,7 +76,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         internal bool Initialized = false;
 
-        internal bool IsValueTypeOutputParameter { get; private set; }
-        internal bool IsAssignableToITask { get; set; }
+        internal bool IsValueTypeOutputParameter { get; private init; }
+        protected internal bool IsAssignableToITask { get; protected init; }
     }
 }

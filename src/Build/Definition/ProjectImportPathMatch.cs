@@ -14,6 +14,10 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal class ProjectImportPathMatch : ITranslatable
     {
+        private string _propertyName;
+        private string _msBuildPropertyFormat;
+        private List<string> _searchPaths;
+
         /// <summary>
         /// ProjectImportPathMatch instance representing no fall-back
         /// </summary>
@@ -24,9 +28,9 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentNull(propertyName, nameof(propertyName));
             ErrorUtilities.VerifyThrowArgumentNull(searchPaths, nameof(searchPaths));
 
-            PropertyName = propertyName;
-            SearchPaths = searchPaths;
-            MsBuildPropertyFormat = $"$({PropertyName})";
+            _propertyName = propertyName;
+            _searchPaths = searchPaths;
+            _msBuildPropertyFormat = $"$({PropertyName})";
         }
 
         public ProjectImportPathMatch(ITranslator translator)
@@ -34,26 +38,29 @@ namespace Microsoft.Build.Evaluation
             ((ITranslatable)this).Translate(translator);
         }
 
+        internal ProjectImportPathMatch DeepClone()
+            => new ProjectImportPathMatch(_propertyName, new List<string>(_searchPaths));
+
         /// <summary>
         /// String representation of the property reference - eg. "MSBuildExtensionsPath32"
         /// </summary>
-        public string PropertyName;
+        public string PropertyName => _propertyName;
 
         /// <summary>
         /// Returns the corresponding property name - eg. "$(MSBuildExtensionsPath32)"
         /// </summary>
-        public string MsBuildPropertyFormat;
+        public string MsBuildPropertyFormat => _msBuildPropertyFormat;
 
         /// <summary>
         /// Enumeration of the search paths for the property.
         /// </summary>
-        public List<string> SearchPaths;
+        public List<string> SearchPaths => _searchPaths;
 
         public void Translate(ITranslator translator)
         {
-            translator.Translate(ref PropertyName);
-            translator.Translate(ref MsBuildPropertyFormat);
-            translator.Translate(ref SearchPaths);
+            translator.Translate(ref _propertyName);
+            translator.Translate(ref _msBuildPropertyFormat);
+            translator.Translate(ref _searchPaths);
         }
 
         /// <summary>

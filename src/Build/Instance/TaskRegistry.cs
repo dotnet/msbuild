@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -742,12 +743,14 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// An object representing the identity of a task -- not just task name, but also
         /// the set of identity parameters
+        /// It is immutable - so it doesn't need a DeepClone method.
         /// </summary>
         [DebuggerDisplay("{Name} ParameterCount = {TaskIdentityParameters.Count}")]
         internal class RegisteredTaskIdentity : ITranslatable
         {
+            // Those are effectively readonly. They cannot be made readonly because of the ITranslatable interface.
             private string _name;
-            private IDictionary<string, string> _taskIdentityParameters;
+            private ReadOnlyDictionary<string, string> _taskIdentityParameters;
 
             /// <summary>
             /// Constructor
@@ -757,24 +760,24 @@ namespace Microsoft.Build.Execution
                 _name = name;
 
                 // The ReadOnlyDictionary is a *wrapper*, the Dictionary is the copy.
-                _taskIdentityParameters = taskIdentityParameters == null ? null : new ReadOnlyDictionary<string, string>(CreateTaskIdentityParametersDictionary(taskIdentityParameters));
+                _taskIdentityParameters = taskIdentityParameters == null ? null : CreateTaskIdentityParametersDictionary(taskIdentityParameters);
             }
 
-            private static IDictionary<string, string> CreateTaskIdentityParametersDictionary(IDictionary<string, string> initialState = null, int? initialCount = null)
+            private static ReadOnlyDictionary<string, string> CreateTaskIdentityParametersDictionary(IDictionary<string, string> initialState = null, int? initialCount = null)
             {
                 ErrorUtilities.VerifyThrowInvalidOperation(initialState == null || initialCount == null, "at most one can be non-null");
 
                 if (initialState != null)
                 {
-                    return new Dictionary<string, string>(initialState, StringComparer.OrdinalIgnoreCase);
+                    return new ReadOnlyDictionary<string, string>(new Dictionary<string, string>(initialState, StringComparer.OrdinalIgnoreCase));
                 }
 
                 if (initialCount != null)
                 {
-                    return new Dictionary<string, string>(initialCount.Value, StringComparer.OrdinalIgnoreCase);
+                    return new ReadOnlyDictionary<string, string>(new Dictionary<string, string>(initialCount.Value, StringComparer.OrdinalIgnoreCase));
                 }
 
-                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                return new ReadOnlyDictionary<string, string>(new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
             }
 
             public RegisteredTaskIdentity()
@@ -792,7 +795,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// The identity parameters
             /// </summary>
-            public IDictionary<string, string> TaskIdentityParameters
+            public IReadOnlyDictionary<string, string> TaskIdentityParameters
             {
                 get { return _taskIdentityParameters; }
             }
@@ -936,7 +939,7 @@ namespace Microsoft.Build.Execution
                 /// Internal so that RegisteredTaskRecord can use this function in its determination of whether the task factory
                 /// supports a certain task identity.
                 /// </summary>
-                private static bool IdentityParametersMatch(IDictionary<string, string> x, IDictionary<string, string> y, bool exactMatchRequired)
+                private static bool IdentityParametersMatch(IReadOnlyDictionary<string, string> x, IReadOnlyDictionary<string, string> y, bool exactMatchRequired)
                 {
                     if (x == null && y == null)
                     {
@@ -1713,6 +1716,15 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
+                public ParameterGroupAndTaskElementRecord DeepClone()
+                    => new()
+                    {
+                        _inlineTaskXmlBody = _inlineTaskXmlBody,
+                        _taskBodyEvaluated = _taskBodyEvaluated,
+                        _usingTaskParameters = _usingTaskParameters?
+                            .DeepClone(v => v.DeepClone(), StringComparer.OrdinalIgnoreCase)
+                    };
+
                 public void Translate(ITranslator translator)
                 {
                     translator.Translate(ref _inlineTaskXmlBody);
@@ -1758,6 +1770,19 @@ namespace Microsoft.Build.Execution
                 }
             }
 
+            public RegisteredTaskRecord DeepClone()
+                => new()
+                {
+                    // task identity is immutable, so we can just copy the reference
+                    _taskIdentity = _taskIdentity,
+                    _registeredName = _registeredName,
+                    // AssemblyLoadInfo is immutable, so we can just copy the reference
+                    _taskFactoryAssemblyLoadInfo = _taskFactoryAssemblyLoadInfo,
+                    _taskFactory = _taskFactory,
+                    _parameterGroupAndTaskBody = _parameterGroupAndTaskBody.DeepClone(),
+                    _taskFactoryParameters = new Dictionary<string, string>(_taskFactoryParameters)
+                };
+
             public void Translate(ITranslator translator)
             {
                 translator.Translate(ref _taskIdentity);
@@ -1783,6 +1808,15 @@ namespace Microsoft.Build.Execution
                 return instance;
             }
         }
+
+        public TaskRegistry DeepClone()
+            => new()
+            {
+                _toolset = _toolset.DeepClone(),
+                _taskRegistrations = this._taskRegistrations?.DeepClone(
+                    v => v.Select(i => i.DeepClone()).ToList(),
+                    RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact)
+            };
 
         public void Translate(ITranslator translator)
         {

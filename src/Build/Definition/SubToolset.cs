@@ -50,6 +50,9 @@ namespace Microsoft.Build.Evaluation
             ((ITranslatable)this).Translate(translator);
         }
 
+        internal SubToolset DeepClone()
+            => new SubToolset(_subToolsetVersion, _properties.DeepClone());
+
         /// <summary>
         /// VisualStudioVersion that corresponds to this subtoolset
         /// </summary>
