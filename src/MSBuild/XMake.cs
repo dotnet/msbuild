@@ -3465,7 +3465,11 @@ namespace Microsoft.Build.CommandLine
             var outVerbosity = verbosity;
             ProcessBinaryLogger(binaryLoggerParameters, loggers, ref outVerbosity);
 
-            ProcessLoggerSwitch(loggerSwitchParameters, loggers, verbosity);
+            // When returning the result of evaluation from the command line, do not use custom loggers.
+            if (!useSimpleErrorLogger)
+            {
+                ProcessLoggerSwitch(loggerSwitchParameters, loggers, verbosity);
+            }
 
             // Add any loggers which have been specified on the commandline
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
