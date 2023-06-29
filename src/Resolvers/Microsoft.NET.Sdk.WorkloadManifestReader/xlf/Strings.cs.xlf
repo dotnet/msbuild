@@ -77,6 +77,16 @@
         <target state="translated">Závislost manifestu úlohy {0} verze {1} je nižší než verze {2} požadovaná manifestem {3} [{4}].</target>
         <note />
       </trans-unit>
+      <trans-unit id="ManifestFromInstallStateNotFound">
+        <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
+        <target state="new">Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestFromWorkloadSetNotFound">
+        <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
+        <target state="new">Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Nepovedlo se najít úlohu {0} rozšířenou podle úlohy {1} v manifestu {2} [{3}].</target>
@@ -100,11 +110,6 @@
       <trans-unit id="RedirectWorkloadHasOtherKeys">
         <source>Redirect workload '{0}' has keys other than 'redirect-to'</source>
         <target state="translated">Přesměrování úlohy {0} má jiné klíče než redirect-to.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SpecifiedManifestNotFound">
-        <source>Specified workload manifest was not found: {0}</source>
-        <target state="translated">Zadaný manifest úlohy se nenašel: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
@@ -135,6 +140,11 @@
       <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
         <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
         <target state="translated">Verze {0} úlohy, která byla zadána v {1}, nebyla nalezena. Spuštěním příkazu dotnet workload restore nainstalujte tuto verzi úlohy.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromInstallStateNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found.</source>
+        <target state="new">Workload version {0}, which was specified in {1}, was not found.</target>
         <note />
       </trans-unit>
     </body>

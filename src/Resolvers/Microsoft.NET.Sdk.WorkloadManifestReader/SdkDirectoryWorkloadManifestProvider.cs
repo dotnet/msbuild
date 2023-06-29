@@ -24,6 +24,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private readonly Dictionary<string, int>? _knownManifestIdsAndOrder;
 
         private readonly WorkloadSet? _workloadSet;
+        private readonly WorkloadSet? _manifestsFromInstallState;
+        private readonly string? _installStateFilePath;
 
         public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, string? userProfileDir, string? globalJsonPath)
             : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable, userProfileDir, globalJsonPath)
@@ -99,6 +101,23 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     {
                         throw new FileNotFoundException(string.Format(Strings.WorkloadVersionFromGlobalJsonNotFound, globalJsonWorkloadSetVersion, globalJsonPath));
                     }
+                }
+            }
+            else
+            {
+                var installStateFilePath = Path.Combine(WorkloadInstallType.GetInstallStateFolder(_sdkVersionBand, _sdkRootPath), "default.json");
+                if (File.Exists(installStateFilePath))
+                {
+                    var installState = InstallStateReader.ReadInstallState(installStateFilePath);
+                    if (!string.IsNullOrEmpty(installState.WorkloadSetVersion))
+                    {
+                        if (!availableWorkloadSets.TryGetValue(installState.WorkloadSetVersion!, out _workloadSet))
+                        {
+                            throw new FileNotFoundException(string.Format(Strings.WorkloadVersionFromInstallStateNotFound, installState.WorkloadSetVersion, installStateFilePath));
+                        }
+                    }
+                    _manifestsFromInstallState = installState.Manifests;
+                    _installStateFilePath = installStateFilePath;
                 }
             }
 
@@ -178,7 +197,28 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             {
                 foreach (var kvp in _workloadSet.ManifestVersions)
                 {
-                    manifestIdsToDirectories[kvp.Key.ToString()] = GetManifestDirectoryFromSpecifier(new ManifestSpecifier(kvp.Key, kvp.Value.Version, kvp.Value.FeatureBand));
+                    var manifestSpecifier = new ManifestSpecifier(kvp.Key, kvp.Value.Version, kvp.Value.FeatureBand);
+                    var manifestDirectory = GetManifestDirectoryFromSpecifier(manifestSpecifier);
+                    if (manifestDirectory == null)
+                    {
+                        throw new FileNotFoundException(string.Format(Strings.ManifestFromWorkloadSetNotFound, manifestSpecifier.ToString(), _workloadSet.Version));
+                    }
+                    manifestIdsToDirectories[kvp.Key.ToString()] = manifestDirectory;
+                }
+            }
+
+            //  Load manifests from install state
+            if (_manifestsFromInstallState != null)
+            {
+                foreach (var kvp in _manifestsFromInstallState.ManifestVersions)
+                {
+                    var manifestSpecifier = new ManifestSpecifier(kvp.Key, kvp.Value.Version, kvp.Value.FeatureBand);
+                    var manifestDirectory = GetManifestDirectoryFromSpecifier(manifestSpecifier);
+                    if (manifestDirectory == null)
+                    {
+                        throw new FileNotFoundException(string.Format(Strings.ManifestFromInstallStateNotFound, manifestSpecifier.ToString(), _installStateFilePath));
+                    }
+                    manifestIdsToDirectories[kvp.Key.ToString()] = manifestDirectory;
                 }
             }
 
@@ -285,7 +325,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
         }
 
-        private string GetManifestDirectoryFromSpecifier(ManifestSpecifier manifestSpecifier)
+        private string? GetManifestDirectoryFromSpecifier(ManifestSpecifier manifestSpecifier)
         {
             foreach (var manifestDirectory in _manifestRoots)
             {
@@ -296,8 +336,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     return specifiedManifestDirectory;
                 }
             }
-
-            throw new FileNotFoundException(string.Format(Strings.SpecifiedManifestNotFound, manifestSpecifier.ToString()));
+            return null;
         }
 
         /// <summary>
