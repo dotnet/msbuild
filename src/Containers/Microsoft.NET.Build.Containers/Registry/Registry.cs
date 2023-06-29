@@ -14,7 +14,6 @@ namespace Microsoft.NET.Build.Containers;
 
 internal sealed class Registry
 {
-    private const string OciManifestV1 = "application/vnd.oci.image.manifest.v1+json"; // https://containers.gitbook.io/build-containers-the-hard-way/#registry-format-oci-image-manifest
     private const string DockerHubRegistry1 = "registry-1.docker.io";
     private const string DockerHubRegistry2 = "registry.hub.docker.com";
     private static readonly int s_defaultChunkSizeBytes = 1024 * 64;
@@ -44,7 +43,6 @@ internal sealed class Registry
         {
             BaseUri = new UriBuilder(BaseUri.ToString()) { Host = DockerHubRegistry1 }.Uri;
         }
-        _client = CreateClient();
     }
 
     private static string DeriveRegistryName(Uri baseUri)
@@ -109,7 +107,7 @@ internal sealed class Registry
 
         return initialManifestResponse.Content.Headers.ContentType?.MediaType switch
         {
-            SchemaTypes.DockerManifestV2 or OciManifestV1 => await ReadSingleImageAsync(
+            SchemaTypes.DockerManifestV2 or SchemaTypes.OciManifestV1 => await ReadSingleImageAsync(
                 repositoryName,
                 await initialManifestResponse.Content.ReadFromJsonAsync<ManifestV2>(cancellationToken: cancellationToken).ConfigureAwait(false),
                 cancellationToken).ConfigureAwait(false),

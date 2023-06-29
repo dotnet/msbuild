@@ -47,6 +47,7 @@ public class RegistryTests : IDisposable
         Assert.Equal("registry-1.docker.io", registry.BaseUri.Host);
     }
     
+    [Fact]
     public async Task RegistriesThatProvideNoUploadSizeAttemptFullUpload()
     {
         ILogger logger = _loggerFactory.CreateLogger(nameof(RegistriesThatProvideNoUploadSizeAttemptFullUpload));
