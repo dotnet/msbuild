@@ -46,5 +46,23 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             return InstallType.FileBased;
         }
+
+        public static string GetInstallStateFolder(SdkFeatureBand sdkFeatureBand, string dotnetDir)
+        {
+            var installType = GetWorkloadInstallType(sdkFeatureBand, dotnetDir);
+
+            if (installType == InstallType.FileBased)
+            {
+                return Path.Combine(dotnetDir, "metadata", "workloads", sdkFeatureBand.ToString(), "InstallState");
+            }
+            else if (installType == InstallType.Msi)
+            {
+                return Path.Combine(Environment.GetEnvironmentVariable("ProgramData")!, "dotnet", "workloads", sdkFeatureBand.ToString(), "InstallState");
+            }
+            else
+            {
+                throw new ArgumentException("Unexpected InstallType: " + installType);
+            }
+        }
     }
 }
