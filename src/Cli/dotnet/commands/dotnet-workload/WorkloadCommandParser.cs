@@ -78,8 +78,9 @@ namespace Microsoft.DotNet.Cli
                 reporter.WriteLine($"       {workloadManifest.ManifestPath,align}");
 
                 reporter.Write($"{separator}{CommonStrings.WorkloadInstallTypeColumn}:");
-                reporter.WriteLine($"       {WorkloadInstallerFactory.GetWorkloadInstallType(new SdkFeatureBand(workloadFeatureBand), dotnetPath),align}"
+                reporter.WriteLine($"       {WorkloadInstallType.GetWorkloadInstallType(new SdkFeatureBand(workloadFeatureBand), dotnetPath).ToString(),align}"
                 );
+                reporter.WriteLine("");
             }
         }
 
