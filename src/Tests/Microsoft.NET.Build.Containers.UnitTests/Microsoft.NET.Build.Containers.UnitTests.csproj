@@ -16,8 +16,4 @@
     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
-  </ItemGroup>
-
 </Project>
