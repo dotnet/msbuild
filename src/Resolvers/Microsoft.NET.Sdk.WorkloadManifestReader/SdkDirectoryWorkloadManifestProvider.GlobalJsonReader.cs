@@ -48,7 +48,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
                 string? workloadVersion = null;
 
-                ConsumeToken(ref reader, JsonTokenType.StartObject);
+                JsonReader.ConsumeToken(ref reader, JsonTokenType.StartObject);
                 while (reader.Read())
                 {
                     switch (reader.TokenType)
@@ -57,7 +57,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                             var propName = reader.GetString();
                             if (string.Equals("sdk", propName, StringComparison.OrdinalIgnoreCase))
                             {
-                                ConsumeToken(ref reader, JsonTokenType.StartObject);
+                                JsonReader.ConsumeToken(ref reader, JsonTokenType.StartObject);
 
                                 bool readingSdk = true;
                                 while (readingSdk && reader.Read())
@@ -68,112 +68,36 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                                             var sdkPropName = reader.GetString();
                                             if (string.Equals("workloadVersion", sdkPropName, StringComparison.OrdinalIgnoreCase))
                                             {
-                                                workloadVersion = ReadString(ref reader);
+                                                workloadVersion = JsonReader.ReadString(ref reader);
                                             }
                                             else
                                             {
-                                                ConsumeValue(ref reader);
+                                                JsonReader.ConsumeValue(ref reader);
                                             }
                                             break;
                                         case JsonTokenType.EndObject:
                                             readingSdk = false;
                                             break;
                                         default:
-                                            throw new GlobalJsonFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
+                                            throw new JsonFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
                                     }
                                 }
                             }
                             else
                             {
-                                ConsumeValue(ref reader);
+                                JsonReader.ConsumeValue(ref reader);
                             }
                             break;
 
                         case JsonTokenType.EndObject:
                             return workloadVersion;
                         default:
-                            throw new GlobalJsonFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
+                            throw new JsonFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
                     }
                 }
 
-                throw new GlobalJsonFormatException(Strings.IncompleteDocument);
+                throw new JsonFormatException(Strings.IncompleteDocument);
             }
-
-            /// <summary>
-            /// this expects the reader to be before the value token, and leaves it on the last token of the value
-            /// </summary>
-            private static bool ConsumeValue(ref Utf8JsonStreamReader reader)
-            {
-                if (!reader.Read())
-                {
-                    return false;
-                }
-
-                var tokenType = reader.TokenType;
-                if (tokenType != JsonTokenType.StartArray && tokenType != JsonTokenType.StartObject)
-                {
-                    return true;
-                }
-
-                var depth = reader.CurrentDepth;
-                do
-                {
-                    if (!reader.Read())
-                    {
-                        return false;
-                    }
-                } while (reader.CurrentDepth > depth);
-
-                return true;
-            }
-
-            private static void ConsumeToken(ref Utf8JsonStreamReader reader, JsonTokenType expected)
-            {
-                if (reader.Read() && expected == reader.TokenType)
-                {
-                    return;
-                }
-                ThrowUnexpectedTokenException(ref reader, expected);
-            }
-
-            private static void ThrowUnexpectedTokenException(ref Utf8JsonStreamReader reader, JsonTokenType expected)
-            {
-                string key;
-                if (expected.IsBool())
-                {
-                    key = Strings.ExpectedBoolAtOffset;
-                }
-                else if (expected.IsInt())
-                {
-                    key = Strings.ExpectedIntegerAtOffset;
-                }
-                else if (expected == JsonTokenType.String)
-                {
-                    key = Strings.ExpectedStringAtOffset;
-                }
-                else
-                {
-                    throw new GlobalJsonFormatException(Strings.ExpectedTokenAtOffset, expected, reader.TokenStartIndex);
-                }
-
-                throw new GlobalJsonFormatException(key, reader.TokenStartIndex);
-            }
-
-            private static string ReadString(ref Utf8JsonStreamReader reader)
-            {
-                ConsumeToken(ref reader, JsonTokenType.String);
-                return reader.GetString();
-            }
-        }
-
-        [Serializable]
-        internal class GlobalJsonFormatException : Exception
-        {
-            public GlobalJsonFormatException() { }
-            public GlobalJsonFormatException(string messageFormat, params object?[] args) : base(string.Format(messageFormat, args)) { }
-            public GlobalJsonFormatException(string message) : base(message) { }
-            public GlobalJsonFormatException(string message, Exception inner) : base(message, inner) { }
-            protected GlobalJsonFormatException(SerializationInfo info, StreamingContext context) : base(info, context) { }
         }
     }
 }
