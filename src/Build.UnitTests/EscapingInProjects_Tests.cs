@@ -868,15 +868,15 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                         <MyUserMacro>foo%3bbar</MyUserMacro>
                     </PropertyGroup>
                     <ItemGroup>
-                        <CrazyList Include=""a"" />
-                        <CrazyList Include=""b%3bc"" />
-                        <CrazyList Include=""$(MyUserMacro)"" />
+                        <DifferentList Include=""a"" />
+                        <DifferentList Include=""b%3bc"" />
+                        <DifferentList Include=""$(MyUserMacro)"" />
                     </ItemGroup>
                 </Project>";
 
             System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
             Project project = new Project(reader);
-            IEnumerable<ProjectItem> items = project.GetItems("CrazyList");
+            IEnumerable<ProjectItem> items = project.GetItems("DifferentList");
 
             Assert.Equal(3, items.Count());
             Assert.Equal("a", items.ElementAt(0).EvaluatedInclude);
@@ -900,15 +900,15 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                         <MyUserMacro>foo;bar</MyUserMacro>
                     </PropertyGroup>
                     <ItemGroup>
-                        <CrazyList Include=""a"" />
-                        <CrazyList Include=""b%3bc"" />
-                        <CrazyList Include=""$(MyUserMacro)"" />
+                        <DifferentList Include=""a"" />
+                        <DifferentList Include=""b%3bc"" />
+                        <DifferentList Include=""$(MyUserMacro)"" />
                     </ItemGroup>
                 </Project>";
 
             System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
             Project project = new Project(reader);
-            IEnumerable<ProjectItem> items = project.GetItems("CrazyList");
+            IEnumerable<ProjectItem> items = project.GetItems("DifferentList");
 
             Assert.Equal(4, items.Count());
             Assert.Equal("a", items.ElementAt(0).EvaluatedInclude);
@@ -1446,11 +1446,11 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
         /// <summary>
         /// Build a .SLN file using MSBuild.  The .SLN and the projects contained within
-        /// have all sorts of crazy characters in their name. There
+        /// have all sorts of different characters in their name. There
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
         [Fact(Skip = "This is a known issue in Roslyn. This test should be enabled if Roslyn is updated for this scenario.")]
-        public void SolutionWithLotsaCrazyCharacters()
+        public void SolutionWithLotsaDifferentCharacters()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
 
@@ -1612,11 +1612,11 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
         /// <summary>
         /// Build a .SLN file using MSBuild.  The .SLN and the projects contained within
-        /// have all sorts of crazy characters in their name. There
+        /// have all sorts of different characters in their name. There
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
         [Fact(Skip = "This is a known issue in Roslyn. This test should be enabled if Roslyn is updated for this scenario.")]
-        public void SolutionWithLotsaCrazyCharacters_UsingTaskHost()
+        public void SolutionWithLotsaDifferentCharacters_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");
 

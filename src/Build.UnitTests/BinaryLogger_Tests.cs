@@ -228,12 +228,24 @@ namespace Microsoft.Build.UnitTests
                 BinaryLogger logger = new();
                 logger.Parameters = _logFile;
                 env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -nr:False -bl:{logger.Parameters}", out bool success);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} -nr:False -bl:{logger.Parameters} -flp1:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic -flp2:logfile={Path.Combine(logFolder.Path, "logFile2.log")};verbosity=normal", out bool success);
                 success.ShouldBeTrue();
-                RunnerUtilities.ExecMSBuild($"{logger.Parameters} -flp:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic", out success);
-                success.ShouldBeTrue();
+
+                string assemblyLoadedEventText =
+                    "Assembly loaded during TaskRun (InlineCode.HelloWorld): System.Diagnostics.Debug";
                 string text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile.log"));
-                text.ShouldContain("Assembly loaded during TaskRun (InlineCode.HelloWorld): System.Diagnostics.Debug");
+                text.ShouldContain(assemblyLoadedEventText);
+                // events should not be in logger with verbosity normal
+                string text2 = File.ReadAllText(Path.Combine(logFolder.Path, "logFile2.log"));
+                text2.ShouldNotContain(assemblyLoadedEventText);
+
+                RunnerUtilities.ExecMSBuild($"{logger.Parameters} -flp1:logfile={Path.Combine(logFolder.Path, "logFile3.log")};verbosity=diagnostic -flp2:logfile={Path.Combine(logFolder.Path, "logFile4.log")};verbosity=normal", out success);
+                success.ShouldBeTrue();
+                text = File.ReadAllText(Path.Combine(logFolder.Path, "logFile3.log"));
+                text.ShouldContain(assemblyLoadedEventText);
+                // events should not be in logger with verbosity normal
+                text2 = File.ReadAllText(Path.Combine(logFolder.Path, "logFile4.log"));
+                text2.ShouldNotContain(assemblyLoadedEventText);
             }
         }
 
@@ -262,7 +274,8 @@ namespace Microsoft.Build.UnitTests
 
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
-            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"));
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"),
+                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
         [RequiresSymbolicLinksFact]
@@ -321,10 +334,14 @@ namespace Microsoft.Build.UnitTests
 
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
-            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"));
-            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(symlinkName));
-            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(symlinkLvl2Name));
-            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(emptyFileName));
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"),
+                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(symlinkName),
+                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(symlinkLvl2Name),
+                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(emptyFileName),
+                () => $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
         [Fact]

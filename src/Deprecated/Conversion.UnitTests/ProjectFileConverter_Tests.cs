@@ -1860,9 +1860,9 @@ namespace Microsoft.Build.UnitTests
                                     HintPath = `D:\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.XML.dll`
                                 />
                                 <Reference
-                                    Name = `Microsoft.My'Crazy;Assemb%ly`
-                                    AssemblyName = `Microsoft.My'Crazy;Assemb%ly`
-                                    HintPath = `D:\myapps\Microsoft.My'Crazy;Assemb%ly.dll`
+                                    Name = `Microsoft.My'Different;Assemb%ly`
+                                    AssemblyName = `Microsoft.My'Different;Assemb%ly`
+                                    HintPath = `D:\myapps\Microsoft.My'Different;Assemb%ly.dll`
                                 />
                             </References>
                         </Build>
@@ -1954,9 +1954,9 @@ namespace Microsoft.Build.UnitTests
                         <ErrorReport>prompt</ErrorReport>
                     </PropertyGroup>
                     <ItemGroup>
-                        <Reference Include=`Microsoft.My%27Crazy%3bAssemb%25ly`>
-                            <Name>Microsoft.My%27Crazy%3bAssemb%25ly</Name>
-                            <HintPath>D:\myapps\Microsoft.My%27Crazy%3bAssemb%25ly.dll</HintPath>
+                        <Reference Include=`Microsoft.My%27Different%3bAssemb%25ly`>
+                            <Name>Microsoft.My%27Different%3bAssemb%25ly</Name>
+                            <HintPath>D:\myapps\Microsoft.My%27Different%3bAssemb%25ly.dll</HintPath>
                         </Reference>
                         <Reference Include=`System`>
                             <Name>System</Name>

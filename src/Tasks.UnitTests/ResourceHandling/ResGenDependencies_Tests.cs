@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
                 cache.IsDirty.ShouldBeFalse();
 
                 // Getting a file that wasn't in the cache is a write operation.
-                cache.GetResXFileInfo(resx, useMSBuildResXReader);
+                cache.GetResXFileInfo(resx, useMSBuildResXReader, null, false);
                 cache.IsDirty.ShouldBeTrue();
 
                 // Add linkedFiles to further test serialization and deserialization.
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests
                 resX2.linkedFiles[1].ShouldBe(resX.linkedFiles[1]);
 
                 // Asking for a file that's in the cache should not dirty the cache.
-                cache2.GetResXFileInfo(resx, useMSBuildResXReader);
+                cache2.GetResXFileInfo(resx, useMSBuildResXReader, null, false);
                 cache2.IsDirty.ShouldBeFalse();
 
                 // Changing UseSourcePath to false should dirty the cache.

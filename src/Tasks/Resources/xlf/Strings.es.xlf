@@ -118,7 +118,7 @@
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.StrongNameUtils.NoPublicKeySpecified">
         <source>MSB3654: Delay signing requires that at least a public key be specified.  Please either supply a public key using the KeyFile or KeyContainer properties, or disable delay signing.</source>
-        <target state="translated">MSB3654: La firma retardada requiere que se especifique al menos una clave pública.  Proporcione una clave pública mediante las propiedades KeyFile o KeyContainer, o deshabilite la firma retardada.</target>
+        <target state="translated">MSB3654: La firma retrasada requiere que se especifique al menos una clave pública.  Proporcione una clave pública mediante las propiedades KeyFile o KeyContainer, o deshabilite la firma retrasada.</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
@@ -188,7 +188,7 @@
       </trans-unit>
       <trans-unit id="Copy.NonWindowsLinkErrorMessage">
         <source>The {0} library call failed with the following error code: {1}.</source>
-        <target state="new">The {0} library call failed with the following error code: {1}.</target>
+        <target state="translated">Error en la llamada a la biblioteca {0} con el siguiente código de error: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
@@ -208,7 +208,7 @@
       </trans-unit>
       <trans-unit id="Copy.RetryingAsSymbolicLink">
         <source>Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</source>
-        <target state="new">Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</target>
+        <target state="translated">No se puede usar un vínculo físico para copiar "{0}" en "{1}". Se va a copiar el archivo en un vínculo simbólico su lugar. {2}</target>
         <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
       </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
@@ -308,22 +308,22 @@
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryCount">
         <source>MSB3028: {0} is an invalid retry count. Value must not be negative.</source>
-        <target state="new">MSB3028: {0} is an invalid retry count. Value must not be negative.</target>
+        <target state="translated">MSB3028: {0} no es un número de reintentos válido. El valor no puede ser negativo.</target>
         <note>{StrBegin="MSB3028: "} LOCALIZATION: {0} is a number.</note>
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryDelay">
         <source>MSB3029: {0} is an invalid retry delay. Value must not be negative.</source>
-        <target state="new">MSB3029: {0} is an invalid retry delay. Value must not be negative.</target>
+        <target state="translated">MSB3029: {0} no es un número de reintentos válido. El valor no puede ser negativo.</target>
         <note>{StrBegin="MSB3029: "} LOCALIZATION: {0} is a number.</note>
       </trans-unit>
       <trans-unit id="Delete.Retrying">
         <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</source>
-        <target state="new">MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</target>
+        <target state="translated">MSB3062: No se pudo eliminar el archivo "{0}". Iniciando reintento {1} en {2}ms. {3}</target>
         <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message.</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
         <source>File "{0}" doesn't exist. Skipping.</source>
-        <target state="translated">El archivo"{0}" no existe. Se omitirá.</target>
+        <target state="translated">El archivo "{0}" no existe. Se omitirá.</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadFile.DidNotDownloadBecauseOfFileMatch">
@@ -541,7 +541,7 @@
       </trans-unit>
       <trans-unit id="General.TaskRequiresWindows">
         <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
-        <target state="translated">MSB3096: La tarea “{0}” solo se admite cuando se compila en Windows.</target>
+        <target state="translated">MSB3096: La tarea "{0}" solo se admite cuando se compila en Windows.</target>
         <note>{StrBegin="MSB3096: "}</note>
       </trans-unit>
       <trans-unit id="General.UndefineProperties">
@@ -623,6 +623,11 @@
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}" hace referencia a {0} elementos y "{3}" hace referencia a {1} elementos. Deben tener el mismo número de elementos.</target>
         <note>{StrBegin="MSB3094: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+        <source>Creating binding redirection file "{0}".</source>
+        <target state="translated">Creando el archivo de redirección de enlace "{0}".</target>
+        <note />
       </trans-unit>
       <trans-unit id="GenerateBindingRedirects.MissingConfigurationNode">
         <source>MSB3831: The application configuration file must have root configuration element.</source>
@@ -1039,6 +1044,13 @@
         <target state="translated">MSB3190: ClickOnce no admite el nivel de ejecución de solicitudes '{0}'.</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.BinaryFormatterUse">
+        <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/msbuild/net8-binaryformatter</source>
+        <target state="translated">MSB3825: El recurso "{0}" de tipo "{1}" se deserializa a través de BinaryFormatter en tiempo de ejecución. BinaryFormatter está en desuso debido a posibles riesgos de seguridad y se quitará con .NET 9. Si desea seguir usándola, establezca la propiedad "GenerateResourceWarnOnBinaryFormatterUse" en falso.
+           Más información: https://aka.ms/msbuild/net8-binaryformatter</target>
+        <note>{StrBegin="MSB3825: "}</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
         <source>MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</source>
         <target state="translated">MSB3824: Para compilar con .NET Core, las entradas de recursos deben estar en formato .txt o .resx.</target>
@@ -1068,6 +1080,11 @@
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
         <target state="translated">MSB3821: No se puede procesar el archivo {0} porque está en Internet o en una zona restringida, o bien tiene la marca de la Web. Quite esta marca si desea procesar los archivos.</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
+        <source>MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</source>
+        <target state="translated">MSB3826: El recurso \"{0}\" de \"{1}\" usa el tipo MIME \"{2}\", que MSBuild no admite cuando se ejecuta en .NET.</target>
+        <note>{StrBegin="MSB3826: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.OutputDoesntExist">
         <source>Output file "{0}" does not exist.</source>
@@ -1273,12 +1290,12 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CannotWriteAssembly">
         <source>MSB3575: GenerateResource cannot write assemblies, only read from them. Cannot create assembly "{0}".</source>
-        <target state="translated">MSB3575: GenerateResource no puede escribir ensamblados, solo leerlos. No se puede crear el ensamblado"{0}".</target>
+        <target state="translated">MSB3575: GenerateResource no puede escribir ensamblados, solo leerlos. No se puede crear el ensamblado "{0}".</target>
         <note>{StrBegin="MSB3575: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CreatingCultureInfoFailed">
         <source>MSB3576: Creating the CultureInfo failed for assembly "{2}". Note the set of cultures supported is Operating System-dependent, and the Operating System has removed some cultures from time to time (ie, some Serbian cultures are split up in Windows 7).  The culture may be a user-defined custom culture that we can't currently load on this machine.  Exception info: {0}: {1}</source>
-        <target state="translated">MSB3576: Error al crear CultureInfo para el ensamblado"{2}". Tenga en cuenta que el conjunto de referencias culturales admitido depende del sistema operativo y este ha quitado algunas referencias culturales de vez en cuando (por ejemplo, en Windows 7, algunas referencias culturales de serbio están divididas).  La referencia cultural puede ser una referencia cultural personalizada definida por el usuario que no se pueda cargar actualmente en este equipo.  Información de la excepción: {0}: {1}</target>
+        <target state="translated">MSB3576: Error al crear CultureInfo para el ensamblado "{2}". Tenga en cuenta que el conjunto de referencias culturales admitido depende del sistema operativo y este ha quitado algunas referencias culturales de vez en cuando (por ejemplo, en Windows 7, algunas referencias culturales de serbio están divididas).  La referencia cultural puede ser una referencia cultural personalizada definida por el usuario que no se pueda cargar actualmente en este equipo.  Información de la excepción: {0}: {1}</target>
         <note>{StrBegin="MSB3576: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.DuplicateOutputFilenames">
@@ -1328,7 +1345,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.CannotLoadAssemblyLoadFromFailed">
         <source>MSB3816: Loading assembly "{0}" failed. {1}</source>
-        <target state="translated">MSB3816: Error al cargar el ensamblado"{0}". {1}</target>
+        <target state="translated">MSB3816: Error al cargar el ensamblado "{0}". {1}</target>
         <note>{StrBegin="MSB3816: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MainAssemblyMissingNeutralResourcesLanguage">
@@ -1388,12 +1405,12 @@
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.NoPlatformsListed">
         <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</source>
-        <target state="new">MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</target>
+        <target state="translated">MSB3982: EnableDynamicPlatformResolution es true, pero el proyecto al que se hace referencia, “{0}”, no tiene establecido ningún conjunto de metadatos “Platforms” o “Platform”. Se compilará sin una plataforma especificada.</target>
         <note>{StrBegin="MSB3982: "}</note>
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
         <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
-        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
+        <target state="translated">La propiedad “Platform” del proyecto al que se hace referencia “{0}” coincide con la plataforma del proyecto actual: “{1}”. El proyecto al que se hace referencia se compilará sin una propiedad de plataforma global.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.SamePlatform">
@@ -1579,7 +1596,7 @@
       </trans-unit>
       <trans-unit id="RemoveDir.EmptyPath">
         <source>MSB3232: An empty directory was passed to RemoveDir and was ignored.</source>
-        <target state="new">MSB3232: An empty directory was passed to RemoveDir and was ignored.</target>
+        <target state="translated">MSB3232: Se pasó un directorio vacío a RemoveDir y se omitió.</target>
         <note>{StrBegin="MSB3232: "}</note>
       </trans-unit>
       <trans-unit id="RemoveDir.Error">
@@ -1639,7 +1656,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoBecauseBadImage">
         <source>This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</source>
-        <target state="new">This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</target>
+        <target state="translated">Esta referencia no es "CopyLocal" porque es una imagen incorrecta. Puede ser un binario nativo o no ser un ensamblado.</target>
         <note>
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
@@ -2108,7 +2125,7 @@
         <target state="translated">Información de listas de perfiles de TargetFramework:</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader">
+      <trans-unit id="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
         <source>TargetFramework Profile List Paths:</source>
         <target state="translated">Rutas de acceso de listas de perfiles de TargetFramework:</target>
         <note />
@@ -2131,6 +2148,11 @@
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
         <target state="translated">El archivo de lista de paquetes redistribuibles "{0}" tiene un nombre Redist NULL o vacío en el elemento FileList. Asegúrese de que el nombre Redist no sea NULL ni esté vacío.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
+        <source>Updating assembly cache file "{0}".</source>
+        <target state="translated">Actualizando el archivo de caché de ensamblado "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -2255,7 +2277,7 @@
       </trans-unit>
       <trans-unit id="ResolveComReference.LoadingDelaySignedAssemblyWithStrongNameVerificationEnabled">
         <source>MSB3295: Failed to load an assembly. Please make sure you have disabled strong name verification for your public key if you want to generate delay signed wrappers. {0}</source>
-        <target state="translated">MSB3295: No se pudo cargar un ensamblado. Asegúrese de que deshabilitó la comprobación de nombres seguros para su clave pública si desea generar contenedores de firma retardada. {0}</target>
+        <target state="translated">MSB3295: No se pudo cargar un ensamblado. Asegúrese de que deshabilitó la comprobación de nombres seguros para su clave pública si desea generar contenedores de firma con retraso. {0}</target>
         <note>{StrBegin="MSB3295: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.MissingOrUnknownComReferenceAttribute">
@@ -2355,7 +2377,7 @@
       </trans-unit>
       <trans-unit id="ResolveKeySource.PfxUnsupported">
         <source>PFX signing not supported on .NET Core.</source>
-        <target state="new">PFX signing not supported on .NET Core.</target>
+        <target state="translated">No se admite la firma PFX en .NET Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveKeySource.ResolvedThumbprintEmpty">
@@ -2464,7 +2486,7 @@
       </trans-unit>
       <trans-unit id="StrongNameUtils.NoPublicKeySpecified">
         <source>MSB3353: Public key necessary for delay signing was not specified.</source>
-        <target state="translated">MSB3353: No se especificó la clave pública necesaria para la firma retardada.</target>
+        <target state="translated">MSB3353: No se especificó la clave pública necesaria para la firma con retraso.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
@@ -2559,12 +2581,12 @@
       </trans-unit>
       <trans-unit id="UnregisterAssembly.UnregisterTlbCantLoadFile">
         <source>MSB3397: Cannot unregister type library "{0}" - cannot load file, check to make sure it's a valid type library.</source>
-        <target state="translated">MSB3397: No se puede anular el registro de la biblioteca de tipos ""{0}"". No se puede cargar el archivo. Asegúrese de que es una biblioteca de tipos válida.</target>
+        <target state="translated">MSB3397: No se puede anular el registro de la biblioteca de tipos "{0}". No se puede cargar el archivo. Asegúrese de que es una biblioteca de tipos válida.</target>
         <note>{StrBegin="MSB3397: "}</note>
       </trans-unit>
       <trans-unit id="UnregisterAssembly.UnregisterTlbFileDoesNotExist">
         <source>Cannot unregister type library "{0}" - file doesn't exist.</source>
-        <target state="translated">No puede anularse el registro de la biblioteca de tipos ""{0}"". El archivo no existe.</target>
+        <target state="translated">No puede anularse el registro de la biblioteca de tipos "{0}". El archivo no existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnregisterAssembly.UnregisterTlbFileNotRegistered">
@@ -2629,7 +2651,7 @@
       </trans-unit>
       <trans-unit id="Unzip.ZipSlipExploit">
         <source>Entry is outside the target directory: "{0}"</source>
-        <target state="new">Entry is outside the target directory: "{0}"</target>
+        <target state="translated">La entrada está fuera del directorio de destino: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
@@ -2709,7 +2731,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
         <source>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</source>
-        <target state="new">'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</target>
+        <target state="translated">El atributo 'WriteOnlyWhenDifferent' de "{0}" solo surte efecto cuando 'Overwrite="true"'.</target>
         <note />
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
@@ -2786,6 +2808,11 @@
         <source>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</source>
         <target state="translated">MSB3705: No se admite XslCompiledDllPath cuando se compila con .NET Core.</target>
         <note>{StrBegin="MSB3705: "}</note>
+      </trans-unit>
+      <trans-unit id="XslTransform.SecuritySettingsViaUseTrustedSettings">
+        <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
+        <target state="translated">Está habilitando la configuración de seguridad XSLT relajada mediante el parámetro UseTrustedSettings. Para obtener más información sobre las implicaciones de seguridad de esta configuración, consulte https://aka.ms/msbuild/xsltransformation-task</target>
+        <note />
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
         <source>MSB3702: Unable to process the XsltParameters argument for the XslTransformation task. {0}</source>

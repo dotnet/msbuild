@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using Microsoft.Build.Framework.BuildException;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -12,7 +13,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     /// This exception is used to wrap an unhandled exception from a project cache plugin. This exception aborts the build, and it can only be
     /// thrown by the MSBuild engine.
     /// </summary>
-    public sealed class ProjectCacheException : Exception
+    public sealed class ProjectCacheException : BuildExceptionBase
     {
         private ProjectCacheException()
         {
@@ -32,6 +33,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
             HasBeenLoggedByProjectCache = hasBeenLoggedByProjectCache;
             ErrorCode = errorCode;
         }
+
+        internal ProjectCacheException(string message, Exception inner)
+            : base(message, inner)
+        { }
 
         /// <summary>
         /// The project cache has already logged this as an error.

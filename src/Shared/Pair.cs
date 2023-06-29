@@ -44,7 +44,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Key
         /// </summary>
-        internal TKey Key
+        internal readonly TKey Key
         {
             get { return _key; }
         }
@@ -52,7 +52,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Value
         /// </summary>
-        internal TValue Value
+        internal readonly TValue Value
         {
             get { return _value; }
         }

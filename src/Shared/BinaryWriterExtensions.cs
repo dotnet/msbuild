@@ -10,7 +10,9 @@ namespace Microsoft.Build.Shared
 {
     internal static class BinaryWriterExtensions
     {
+#if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static void WriteOptionalString(this BinaryWriter writer, string? value)
         {
             if (value == null)
@@ -24,14 +26,34 @@ namespace Microsoft.Build.Shared
             }
         }
 
+#if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static void WriteOptionalInt32(this BinaryWriter writer, int? value)
+        {
+            if (value == null)
+            {
+                writer.Write((byte)0);
+            }
+            else
+            {
+                writer.Write((byte)1);
+                writer.Write(value.Value);
+            }
+        }
+
+#if !TASKHOST
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static void WriteTimestamp(this BinaryWriter writer, DateTime timestamp)
         {
             writer.Write(timestamp.Ticks);
             writer.Write((Int32)timestamp.Kind);
         }
 
+#if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static void Write7BitEncodedInt(this BinaryWriter writer, int value)
         {
             // Write out an int 7 bits at a time.  The high bit of the byte,
@@ -46,6 +68,7 @@ namespace Microsoft.Build.Shared
             writer.Write((byte)v);
         }
 
+#if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteOptionalBuildEventContext(this BinaryWriter writer, BuildEventContext? context)
         {
@@ -71,8 +94,11 @@ namespace Microsoft.Build.Shared
             writer.Write(context.ProjectInstanceId);
             writer.Write(context.EvaluationId);
         }
+#endif
 
+#if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static void WriteGuid(this BinaryWriter writer, Guid value)
         {
             Guid val = value;

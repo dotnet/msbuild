@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
             _serializationStream.Seek(0, SeekOrigin.Begin);
-            return BinaryTranslator.GetReadTranslator(_serializationStream, null);
+            return BinaryTranslator.GetReadTranslator(_serializationStream, InterningBinaryReader.PoolingBuffer);
         }
 
         private ITranslator GetWriteTranslator()

@@ -229,11 +229,7 @@ namespace Microsoft.Build.Experimental
                 CommunicationsUtilities.Trace("Build finished.");
             }
 
-            if (NativeMethodsShared.IsWindows && _originalConsoleMode is not null)
-            {
-                IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
-                NativeMethodsShared.SetConsoleMode(stdOut, _originalConsoleMode.Value);
-            }
+            NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode);
 
             return _exitResult;
         }
@@ -265,9 +261,10 @@ namespace Microsoft.Build.Experimental
                 return true;
             }
 
-            // Check that server is not busy.
-            bool serverWasBusy = ServerWasBusy();
-            if (serverWasBusy)
+            // Check and wait for server to be not busy for some short time to avoid race condition when server reports build is finished but had not released ServerBusy mutex yet.
+            // If during that short time, a script would try to shutdown server, it would be rejected and server would continue to run.
+            bool serverIsBusy = ServerIsBusyWithWaitAndRetry(250);
+            if (serverIsBusy)
             {
                 CommunicationsUtilities.Trace("Server cannot be shut down for it is not idle.");
                 return false;
@@ -289,6 +286,20 @@ namespace Microsoft.Build.Experimental
             ReadPacketsLoop(cancellationToken);
 
             return _exitResult.MSBuildClientExitType == MSBuildClientExitType.Success;
+        }
+
+        private bool ServerIsBusyWithWaitAndRetry(int milliseconds)
+        {
+            bool isBusy = ServerWasBusy();
+            Stopwatch sw = Stopwatch.StartNew();
+            while (isBusy && sw.ElapsedMilliseconds < milliseconds)
+            {
+                CommunicationsUtilities.Trace("Wait for server to be not busy - will retry soon...");
+                Thread.Sleep(100);
+                isBusy = ServerWasBusy();
+            }
+
+            return isBusy;
         }
 
         internal bool ServerIsRunning()
@@ -362,61 +373,11 @@ namespace Microsoft.Build.Experimental
 
         private void ConfigureAndQueryConsoleProperties()
         {
-            var (acceptAnsiColorCodes, outputIsScreen) = QueryIsScreenAndTryEnableAnsiColorCodes();
+            (var acceptAnsiColorCodes, var outputIsScreen, _originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
             int bufferWidth = QueryConsoleBufferWidth();
             ConsoleColor backgroundColor = QueryConsoleBackgroundColor();
 
             _consoleConfiguration = new TargetConsoleConfiguration(bufferWidth, acceptAnsiColorCodes, outputIsScreen, backgroundColor);
-        }
-
-        private (bool acceptAnsiColorCodes, bool outputIsScreen) QueryIsScreenAndTryEnableAnsiColorCodes()
-        {
-            bool acceptAnsiColorCodes = false;
-            bool outputIsScreen = false;
-
-            if (NativeMethodsShared.IsWindows)
-            {
-                try
-                {
-                    IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
-                    if (NativeMethodsShared.GetConsoleMode(stdOut, out uint consoleMode))
-                    {
-                        bool success;
-                        if ((consoleMode & NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING) == NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING)
-                        {
-                            // Console is already in required state
-                            success = true;
-                        }
-                        else
-                        {
-                            _originalConsoleMode = consoleMode;
-                            consoleMode |= NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-                            success = NativeMethodsShared.SetConsoleMode(stdOut, consoleMode);
-                        }
-
-                        if (success)
-                        {
-                            acceptAnsiColorCodes = true;
-                        }
-
-                        uint fileType = NativeMethodsShared.GetFileType(stdOut);
-                        // The std out is a char type(LPT or Console)
-                        outputIsScreen = fileType == NativeMethodsShared.FILE_TYPE_CHAR;
-                        acceptAnsiColorCodes &= outputIsScreen;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    CommunicationsUtilities.Trace("MSBuild client warning: problem during enabling support for VT100: {0}.", ex);
-                }
-            }
-            else
-            {
-                // On posix OSes we expect console always supports VT100 coloring unless it is redirected
-                acceptAnsiColorCodes = outputIsScreen = !Console.IsOutputRedirected;
-            }
-
-            return (acceptAnsiColorCodes: acceptAnsiColorCodes, outputIsScreen: outputIsScreen);
         }
 
         private int QueryConsoleBufferWidth()

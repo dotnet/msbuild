@@ -232,6 +232,11 @@ namespace Microsoft.Build.Tasks
         private readonly string _filename;
 
         /// <summary>
+        /// Holds the full path equivalent of _filename
+        /// </summary>
+        public string FileNameFullPath;
+
+        /// <summary>
         /// Actual file or directory information
         /// </summary>
         private Lazy<FileDirInfo> _data;

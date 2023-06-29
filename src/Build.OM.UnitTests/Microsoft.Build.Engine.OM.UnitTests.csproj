@@ -15,8 +15,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <NuGetCommandLinePackageVersion>4.1.0</NuGetCommandLinePackageVersion>
-</PropertyGroup>
+    <!-- Managed manually since PackageDownload is not supported by dependabot https://github.com/dependabot/dependabot-core/issues/2920 -->
+    <NuGetCommandLinePackageVersion>4.9.6</NuGetCommandLinePackageVersion>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
@@ -28,15 +29,12 @@
 
   <ItemGroup>
     <!-- GeneratePathProperty currently isn't enabled for PackageDownload. -->
-    <Content Condition="'$(MSBuildRuntimeType)' != 'Core' and '$(Configuration)' == 'Release'" Include="$(NuGetPackageRoot)\nuget.commandline\$(NuGetCommandLinePackageVersion)\tools\NuGet.exe" CopyToOutputDirectory="PreserveNewest" Link="nuget\NuGet.exe" />
+    <Content Include="$(NuGetPackageRoot)\nuget.commandline\$(NuGetCommandLinePackageVersion)\tools\NuGet.exe" CopyToOutputDirectory="PreserveNewest" Link="nuget\NuGet.exe" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="..\Shared\EncodingStringWriter.cs">
       <Link>EncodingStringWriter.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\EncodingUtilities.cs">
-      <Link>EncodingUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

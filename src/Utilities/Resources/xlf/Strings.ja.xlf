@@ -62,6 +62,11 @@
         <target state="translated">MSB6003: 指定されたタスク実行可能ファイル "{0}" を実行できませんでした。{1}</target>
         <note>{StrBegin="MSB6003: "}</note>
       </trans-unit>
+      <trans-unit id="ToolTask.NotUpToDate">
+        <source>Unable to skip task because it is not up-to-date.</source>
+        <target state="translated">タスクは最新ではないため、スキップできません。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>
         <target state="translated">MSB6006: "{0}" はコード {1} を伴って終了しました。</target>

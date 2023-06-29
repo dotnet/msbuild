@@ -1,4 +1,4 @@
-⚠ This doc is intended for internal teams.
+⚠ This doc is intended for internal teams. For information about how to deal with MSBuild Change Waves as an MSBuild _user_, see [ChangeWaves.md](ChangeWaves.md).
 
 # What are Change Waves?
 A Change Wave is a set of risky features developed under the same opt-out flag. The purpose of this is to warn developers of risky changes that will become standard functionality down the line. If there's something we think is worth the risk, we found that Change Waves were a good middle ground between making necessary changes and warning customers of what will soon be permanent.
