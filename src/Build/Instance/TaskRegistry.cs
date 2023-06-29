@@ -1815,7 +1815,10 @@ namespace Microsoft.Build.Execution
                 _toolset = _toolset?.DeepClone(),
                 _taskRegistrations = this._taskRegistrations.DeepClone(
                     v => v?.Select(i => i.DeepClone())?.ToList(),
-                    RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact)
+                    RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact),
+                // this is not a deep clone, but it should be ok to share (effectively immutable) -
+                // it's done so even for ProjectInstance DeepClone
+                RootElementCache = this.RootElementCache
             };
 
         public void Translate(ITranslator translator)

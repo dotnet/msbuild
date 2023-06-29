@@ -563,18 +563,12 @@ namespace Microsoft.Build.Execution
 
             this.SubToolsetVersion = data.SubToolsetVersion;
             this.TaskRegistry = data.TaskRegistry?.DeepClone();
-            // todo: temporary hack - should we actually clone? BUT - below we just copy as well
-            if (TaskRegistry != null)
-            {
-                this.TaskRegistry.RootElementCache = data.Project.ProjectCollection.ProjectRootElementCache;
-            }
 
             // If the task registry uses toolset identical to the one in data instance - deep clone it just once.
             this.Toolset = data.TaskRegistry?.Toolset == data.Toolset
                 ? this.TaskRegistry?.Toolset
                 : data.Toolset?.DeepClone();
 
-            // ProjectRootElementCache = new ProjectRootElementCache(autoReloadFromDisk, loadProjectsReadOnly);
             this.ProjectRootElementCache = data.Project.ProjectCollection.ProjectRootElementCache;
 
             this.EvaluatedItemElements = new List<ProjectItemElement>(data.EvaluatedItemElements);
@@ -653,11 +647,6 @@ namespace Microsoft.Build.Execution
                         ProjectItemDefinitionInstance>)that).AfterTargets, StringComparer.OrdinalIgnoreCase);
 
                 this.TaskRegistry = that.TaskRegistry.DeepClone();
-                // todo: temporary hack - should we actually clone? BUT - below we just copy as well
-                if (TaskRegistry != null)
-                {
-                    this.TaskRegistry.RootElementCache = that.ProjectRootElementCache;
-                }
                 // If the task registry uses toolset identical to the one in project instance - deep clone it just once.
                 this.Toolset = that.TaskRegistry?.Toolset == that.Toolset
                     ? this.TaskRegistry?.Toolset
@@ -671,7 +660,6 @@ namespace Microsoft.Build.Execution
                 _importPathsIncludingDuplicates = that._importPathsIncludingDuplicates;
                 ImportPathsIncludingDuplicates = _importPathsIncludingDuplicates.AsReadOnly();
 
-                // todo: is the reference copy fine here?? 
                 this.EvaluatedItemElements = that.EvaluatedItemElements;
 
                 this.ProjectRootElementCache = that.ProjectRootElementCache;
