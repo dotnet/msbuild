@@ -519,7 +519,7 @@ namespace ManifestReaderTests
 }
 """);
 
-            var ex = Assert.Throws<SdkDirectoryWorkloadManifestProvider.GlobalJsonFormatException>(
+            var ex = Assert.Throws<SdkDirectoryWorkloadManifestProvider.JsonFormatException>(
                 () => new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: globalJsonPath));
         }
 
