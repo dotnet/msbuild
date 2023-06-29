@@ -40,7 +40,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             1195,
             1197,
             1199,
-            1200,
             1201,
             1203,
             1204,
