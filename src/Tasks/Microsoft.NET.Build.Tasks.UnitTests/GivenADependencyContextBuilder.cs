@@ -155,8 +155,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             using (JsonTextReader jsonReader = new JsonTextReader(File.OpenText(path)))
             {
-                JsonSerializer serializer = new JsonSerializer();
-                return serializer.Deserialize<JObject>(jsonReader);
+                return JObject.Load(jsonReader);
             }
         }
 
