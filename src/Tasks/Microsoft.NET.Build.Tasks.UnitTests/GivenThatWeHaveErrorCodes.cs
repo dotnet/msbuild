@@ -37,14 +37,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             1101,
             1108,
             1180,
-            1195,
-            1197,
-            1199,
-            1201,
-            1203,
-            1204,
-            1206,
-            1207
+            1183,
+            1190
         };
 
         //ILLink lives in other repos and violated the _info requirement for no error code
