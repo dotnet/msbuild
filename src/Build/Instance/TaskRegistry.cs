@@ -760,24 +760,24 @@ namespace Microsoft.Build.Execution
                 _name = name;
 
                 // The ReadOnlyDictionary is a *wrapper*, the Dictionary is the copy.
-                _taskIdentityParameters = taskIdentityParameters == null ? null : CreateTaskIdentityParametersDictionary(taskIdentityParameters);
+                _taskIdentityParameters = taskIdentityParameters == null ? null : new ReadOnlyDictionary<string, string>(CreateTaskIdentityParametersDictionary(taskIdentityParameters));
             }
 
-            private static ReadOnlyDictionary<string, string> CreateTaskIdentityParametersDictionary(IDictionary<string, string> initialState = null, int? initialCount = null)
+            private static IDictionary<string, string> CreateTaskIdentityParametersDictionary(IDictionary<string, string> initialState = null, int? initialCount = null)
             {
                 ErrorUtilities.VerifyThrowInvalidOperation(initialState == null || initialCount == null, "at most one can be non-null");
 
                 if (initialState != null)
                 {
-                    return new ReadOnlyDictionary<string, string>(new Dictionary<string, string>(initialState, StringComparer.OrdinalIgnoreCase));
+                    return new Dictionary<string, string>(initialState, StringComparer.OrdinalIgnoreCase);
                 }
 
                 if (initialCount != null)
                 {
-                    return new ReadOnlyDictionary<string, string>(new Dictionary<string, string>(initialCount.Value, StringComparer.OrdinalIgnoreCase));
+                    return new Dictionary<string, string>(initialCount.Value, StringComparer.OrdinalIgnoreCase);
                 }
 
-                return new ReadOnlyDictionary<string, string>(new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             }
 
             public RegisteredTaskIdentity()

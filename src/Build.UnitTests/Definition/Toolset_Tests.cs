@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
@@ -13,6 +14,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
 using Xunit.NetCore.Extensions;
+using static Microsoft.Build.Engine.UnitTests.TestComparers.TaskRegistryComparers;
 
 #nullable disable
 
@@ -123,45 +125,7 @@ namespace Microsoft.Build.UnitTests.Definition
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             Toolset t2 = Toolset.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(t.ToolsVersion, t2.ToolsVersion);
-            Assert.Equal(t.ToolsPath, t2.ToolsPath);
-            Assert.Equal(t.OverrideTasksPath, t2.OverrideTasksPath);
-            Assert.Equal(t.Properties.Count, t2.Properties.Count);
-
-            foreach (string key in t.Properties.Values.Select(p => p.Name))
-            {
-                Assert.Equal(t.Properties[key].Name, t2.Properties[key].Name);
-                Assert.Equal(t.Properties[key].EvaluatedValue, t2.Properties[key].EvaluatedValue);
-            }
-
-            Assert.Equal(t.SubToolsets.Count, t2.SubToolsets.Count);
-
-            foreach (string key in t.SubToolsets.Keys)
-            {
-                SubToolset subToolset1 = t.SubToolsets[key];
-                SubToolset subToolset2 = null;
-
-                if (t2.SubToolsets.TryGetValue(key, out subToolset2))
-                {
-                    Assert.Equal(subToolset1.SubToolsetVersion, subToolset2.SubToolsetVersion);
-                    Assert.Equal(subToolset1.Properties.Count, subToolset2.Properties.Count);
-
-                    foreach (string subToolsetPropertyKey in subToolset1.Properties.Values.Select(p => p.Name))
-                    {
-                        Assert.Equal(subToolset1.Properties[subToolsetPropertyKey].Name, subToolset2.Properties[subToolsetPropertyKey].Name);
-                        Assert.Equal(subToolset1.Properties[subToolsetPropertyKey].EvaluatedValue, subToolset2.Properties[subToolsetPropertyKey].EvaluatedValue);
-                    }
-                }
-                else
-                {
-                    Assert.True(false, $"Sub-toolset {key} was lost in translation.");
-                }
-            }
-
-            Assert.Equal(t.DefaultOverrideToolsVersion, t2.DefaultOverrideToolsVersion);
-
-            Assert.NotNull(t2.ImportPropertySearchPathsTable);
-            Assert.Single(t2.ImportPropertySearchPathsTable);
+            Assert.Equal(t, t2, new ToolsetComparer());
             Assert.Equal(@"c:\foo", t2.ImportPropertySearchPathsTable["MSBuildExtensionsPath"].SearchPaths[0]);
         }
 

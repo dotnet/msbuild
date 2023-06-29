@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -136,6 +137,26 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
                         Assert.Equal(xp.Value.Name, yp.Value.Name);
                         Assert.Equal(xp.Value.EvaluatedValue, yp.Value.EvaluatedValue);
                     });
+
+                Helpers.AssertDictionariesEqual(
+                    x.SubToolsets,
+                    y.SubToolsets,
+                    (xp, yp) =>
+                    {
+                        Assert.Equal(xp.Key, yp.Key);
+                        SubToolset subToolset1 = xp.Value;
+                        SubToolset subToolset2 = yp.Value;
+                        Assert.Equal(subToolset1.SubToolsetVersion, subToolset2.SubToolsetVersion);
+                        Assert.Equal(subToolset1.Properties.Count, subToolset2.Properties.Count);
+
+                        foreach (string subToolsetPropertyKey in subToolset1.Properties.Values.Select(p => p.Name))
+                        {
+                            Assert.Equal(subToolset1.Properties[subToolsetPropertyKey].Name, subToolset2.Properties[subToolsetPropertyKey].Name);
+                            Assert.Equal(subToolset1.Properties[subToolsetPropertyKey].EvaluatedValue, subToolset2.Properties[subToolsetPropertyKey].EvaluatedValue);
+                        }
+                    });
+
+                Assert.Equal(x.DefaultOverrideToolsVersion, y.DefaultOverrideToolsVersion);
 
                 return true;
             }

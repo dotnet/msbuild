@@ -9,6 +9,7 @@ using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
+using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -480,8 +481,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance first = GetSampleProjectInstance();
             ProjectInstance second = first.DeepCopy();
 
-            // Task registry object should be immutable
-            first.TaskRegistry.ShouldBeSameAs(second.TaskRegistry);
+            // Task registry object should be cloned
+            Assert.Equal(first.TaskRegistry, second.TaskRegistry, new TaskRegistryComparers.TaskRegistryComparer());
         }
 
         /// <summary>
@@ -530,7 +531,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance first = GetSampleProjectInstance();
             ProjectInstance second = first.DeepCopy();
 
-            second.Toolset.ShouldBe(first.Toolset);
+            Assert.Equal(first.Toolset, second.Toolset, new TaskRegistryComparers.ToolsetComparer());
         }
 
         /// <summary>
