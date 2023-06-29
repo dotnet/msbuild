@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             bool elevationRequired = true)
         {
             dotnetDir = string.IsNullOrWhiteSpace(dotnetDir) ? Path.GetDirectoryName(Environment.ProcessPath) : dotnetDir;
-            var installType = GetWorkloadInstallType(sdkFeatureBand, dotnetDir);
+            var installType = WorkloadInstallType.GetWorkloadInstallType(sdkFeatureBand, dotnetDir);
 
             if (installType == InstallType.Msi)
             {
@@ -59,24 +59,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 verbosity: verbosity,
                 packageSourceLocation: packageSourceLocation,
                 restoreActionConfig: restoreActionConfig);
-        }
-
-        /// <summary>
-        /// Determines the <see cref="InstallType"/> associated with a specific SDK version.
-        /// </summary>
-        /// <param name="sdkFeatureBand">The SDK version to check.</param>
-        /// <returns>The <see cref="InstallType"/> associated with the SDK.</returns>
-        public static InstallType GetWorkloadInstallType(SdkFeatureBand sdkFeatureBand, string dotnetDir)
-        {
-            string installerTypePath = Path.Combine(dotnetDir, "metadata",
-                "workloads", $"{sdkFeatureBand.ToStringWithoutPrerelease()}", "installertype");
-
-            if (File.Exists(Path.Combine(installerTypePath, "msi")))
-            {
-                return InstallType.Msi;
-            }
-
-            return InstallType.FileBased;
         }
 
         private static bool CanWriteToDotnetRoot(string dotnetDir = null)
