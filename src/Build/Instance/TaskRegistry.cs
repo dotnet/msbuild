@@ -126,9 +126,8 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Monotonically increasing counter for registered tasks.
-        /// It's not guaranteed not to have gaps, but it's purpose is the uniqueness.
         /// </summary>
-        private static int s_nextRegistrationOrderId = 0;
+        private int _nextRegistrationOrderId = 0;
 
         /// <summary>
         /// Cache of tasks already found using exact matching,
@@ -199,6 +198,12 @@ namespace Microsoft.Build.Execution
             get
             { return _toolset; }
         }
+
+        /// <summary>
+        /// Access the next registration sequence id.
+        /// FOR UNIT TESTING ONLY.
+        /// </summary>
+        internal int NextRegistrationOrderId => _nextRegistrationOrderId;
 
         /// <summary>
         /// Access list of task registrations.
@@ -657,7 +662,13 @@ namespace Microsoft.Build.Execution
                 _taskRegistrations[taskIdentity] = registeredTaskEntries;
             }
 
-            RegisteredTaskRecord newRecord = new RegisteredTaskRecord(taskName, assemblyLoadInfo, taskFactory, taskFactoryParameters, inlineTaskRecord);
+            RegisteredTaskRecord newRecord = new RegisteredTaskRecord(
+                taskName,
+                assemblyLoadInfo,
+                taskFactory,
+                taskFactoryParameters,
+                inlineTaskRecord,
+                Interlocked.Increment(ref _nextRegistrationOrderId));
 
             if (overrideTask)
             {
@@ -1105,7 +1116,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Constructor
             /// </summary>
-            internal RegisteredTaskRecord(string registeredName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, Dictionary<string, string> taskFactoryParameters, ParameterGroupAndTaskElementRecord inlineTask)
+            internal RegisteredTaskRecord(string registeredName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, Dictionary<string, string> taskFactoryParameters, ParameterGroupAndTaskElementRecord inlineTask, int registrationOrderId)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(assemblyLoadInfo, "AssemblyLoadInfo");
                 _registeredName = registeredName;
@@ -1113,7 +1124,7 @@ namespace Microsoft.Build.Execution
                 _taskFactoryParameters = taskFactoryParameters;
                 _taskIdentity = new RegisteredTaskIdentity(registeredName, taskFactoryParameters);
                 _parameterGroupAndTaskBody = inlineTask;
-                _registrationOrderId = Interlocked.Increment(ref s_nextRegistrationOrderId);
+                _registrationOrderId = registrationOrderId;
 
                 if (String.IsNullOrEmpty(taskFactory))
                 {
@@ -1781,6 +1792,7 @@ namespace Microsoft.Build.Execution
         public void Translate(ITranslator translator)
         {
             translator.Translate(ref _toolset, Toolset.FactoryForDeserialization);
+            translator.Translate(ref _nextRegistrationOrderId);
 
             IDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> copy = _taskRegistrations;
             translator.TranslateDictionary(ref copy, TranslateTaskRegistrationKey, TranslateTaskRegistrationValue, count => CreateRegisteredTaskDictionary(count));
@@ -1788,8 +1800,6 @@ namespace Microsoft.Build.Execution
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
                 _taskRegistrations = (Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>)copy;
-                // Ensure that mutations of the deserialized task registry are getting unique order ids.
-                s_nextRegistrationOrderId = Math.Max(s_nextRegistrationOrderId, copy?.Count ?? 0);
             }
         }
 
