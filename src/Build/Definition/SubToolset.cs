@@ -51,7 +51,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         internal SubToolset DeepClone()
-            => new SubToolset(_subToolsetVersion, _properties.DeepClone());
+            => new SubToolset(_subToolsetVersion, _properties?.DeepClone());
 
         /// <summary>
         /// VisualStudioVersion that corresponds to this subtoolset

@@ -1779,8 +1779,8 @@ namespace Microsoft.Build.Execution
                     // AssemblyLoadInfo is immutable, so we can just copy the reference
                     _taskFactoryAssemblyLoadInfo = _taskFactoryAssemblyLoadInfo,
                     _taskFactory = _taskFactory,
-                    _parameterGroupAndTaskBody = _parameterGroupAndTaskBody.DeepClone(),
-                    _taskFactoryParameters = new Dictionary<string, string>(_taskFactoryParameters)
+                    _parameterGroupAndTaskBody = _parameterGroupAndTaskBody?.DeepClone(),
+                    _taskFactoryParameters = _taskFactoryParameters == null ? null : new Dictionary<string, string>(_taskFactoryParameters)
                 };
 
             public void Translate(ITranslator translator)
@@ -1812,9 +1812,9 @@ namespace Microsoft.Build.Execution
         public TaskRegistry DeepClone()
             => new()
             {
-                _toolset = _toolset.DeepClone(),
-                _taskRegistrations = this._taskRegistrations?.DeepClone(
-                    v => v.Select(i => i.DeepClone()).ToList(),
+                _toolset = _toolset?.DeepClone(),
+                _taskRegistrations = this._taskRegistrations.DeepClone(
+                    v => v?.Select(i => i.DeepClone())?.ToList(),
                     RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact)
             };
 

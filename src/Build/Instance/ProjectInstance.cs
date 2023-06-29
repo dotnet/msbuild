@@ -566,7 +566,7 @@ namespace Microsoft.Build.Execution
             // If the task registry uses toolset identical to the one in data instance - deep clone it just once.
             this.Toolset = data.TaskRegistry?.Toolset == data.Toolset
                 ? this.TaskRegistry?.Toolset
-                : data.Toolset.DeepClone();
+                : data.Toolset?.DeepClone();
 
             this.ProjectRootElementCache = data.Project.ProjectCollection.ProjectRootElementCache;
 
@@ -649,7 +649,7 @@ namespace Microsoft.Build.Execution
                 // If the task registry uses toolset identical to the one in project instance - deep clone it just once.
                 this.Toolset = that.TaskRegistry?.Toolset == that.Toolset
                     ? this.TaskRegistry?.Toolset
-                    : that.Toolset.DeepClone();
+                    : that.Toolset?.DeepClone();
                 this.SubToolsetVersion = that.SubToolsetVersion;
                 _targets = that._targets;
                 _itemDefinitions = that._itemDefinitions;
