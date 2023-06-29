@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="AppHostCreationFailedWithRetry">
         <source>NETSDK1113: Failed to create apphost (attempt {0} out of {1}): {2}</source>
-        <target state="translated">NETSDK1113: La création d'apphost a échoué (tentative {0} sur {1}) : {2}</target>
+        <target state="translated">NETSDK1113: La création d'apphost a échoué (tentative {0} sur {1}) : {2}</target>
         <note>{StrBegin="NETSDK1113: "}</note>
       </trans-unit>
       <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="AppHostNotWindows">
         <source>NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</source>
-        <target state="translated">NETSDK1078: impossible d'utiliser '{0}' en tant qu'exécutable d'hôte d'application, car il ne s'agit pas d'un fichier Windows PE.</target>
+        <target state="translated">NETSDK1078: impossible d'utiliser '{0}' en tant qu'exécutable d'hôte d'application, car il ne s'agit pas d'un fichier Windows PE.</target>
         <note>{StrBegin="NETSDK1078: "}</note>
       </trans-unit>
       <trans-unit id="AppHostNotWindowsCLI">
@@ -69,12 +69,12 @@
       </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
-        <target state="translated">NETSDK1079: le package Microsoft.AspNetCore.All n'est pas pris en charge pour le ciblage de .NET Core 3.0 ou une version ultérieure. Vous devez utiliser à la place un FrameworkReference pour Microsoft.AspNetCore.App. Il est inclus implicitement par Microsoft.NET.Sdk.Web.</target>
+        <target state="translated">NETSDK1079: le package Microsoft.AspNetCore.All n'est pas pris en charge pour le ciblage de .NET Core 3.0 ou une version ultérieure. Vous devez utiliser à la place un FrameworkReference pour Microsoft.AspNetCore.App. Il est inclus implicitement par Microsoft.NET.Sdk.Web.</target>
         <note>{StrBegin="NETSDK1079: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreUsesFrameworkReference">
         <source>NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</source>
-        <target state="translated">NETSDK1080: un PackageReference pour Microsoft.AspNetCore.App n'est pas nécessaire quand vous ciblez .NET Core 3.0 ou une version ultérieure. Si Microsoft.NET.Sdk.Web est utilisé, le framework partagé est automatiquement référencé. Sinon, PackageReference doit être remplacé par FrameworkReference.</target>
+        <target state="translated">NETSDK1080: un PackageReference pour Microsoft.AspNetCore.App n'est pas nécessaire quand vous ciblez .NET Core 3.0 ou une version ultérieure. Si Microsoft.NET.Sdk.Web est utilisé, le framework partagé est automatiquement référencé. Sinon, PackageReference doit être remplacé par FrameworkReference.</target>
         <note>{StrBegin="NETSDK1080: "}</note>
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
@@ -114,7 +114,7 @@
       </trans-unit>
       <trans-unit id="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework">
         <source>NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</source>
-        <target state="translated">NETSDK1205: le package Microsoft.Net.Compilers.Toolset.Framework ne doit pas être défini directement. Définissez la propriété ’BuildWithNetFrameworkHostedCompiler’ sur « true » à la place si vous en avez besoin.</target>
+        <target state="translated">NETSDK1205: le package Microsoft.Net.Compilers.Toolset.Framework ne doit pas être défini directement. Définissez la propriété ’BuildWithNetFrameworkHostedCompiler’ sur « true » à la place si vous en avez besoin.</target>
         <note>{StrBegin="NETSDK1205: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</note>
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
@@ -129,12 +129,12 @@
       </trans-unit>
       <trans-unit id="CannotFindComhost">
         <source>NETSDK1091: Unable to find a .NET Core COM host. The .NET Core COM host is only available on .NET Core 3.0 or higher when targeting Windows.</source>
-        <target state="translated">NETSDK1091: hôte COM .NET Core introuvable. L'hôte COM .NET Core est disponible uniquement sur .NET Core 3.0 ou une version ultérieure quand vous ciblez Windows.</target>
+        <target state="translated">NETSDK1091: hôte COM .NET Core introuvable. L'hôte COM .NET Core est disponible uniquement sur .NET Core 3.0 ou une version ultérieure quand vous ciblez Windows.</target>
         <note>{StrBegin="NETSDK1091: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindIjwhost">
         <source>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.1 or higher when targeting Windows.</source>
-        <target state="translated">NETSDK1114: Hôte IJW .NET Core introuvable. L'hôte IJW .NET Core est disponible uniquement sur .NET Core 3.1 ou ultérieur quand vous ciblez Windows.</target>
+        <target state="translated">NETSDK1114: Hôte IJW .NET Core introuvable. L'hôte IJW .NET Core est disponible uniquement sur .NET Core 3.1 ou ultérieur quand vous ciblez Windows.</target>
         <note>{StrBegin="NETSDK1114: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
@@ -169,7 +169,7 @@
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelOutputPath">
         <source>NETSDK1194: The "--output" option isn't supported when building a solution. Specifying a solution-level output path results in all projects copying outputs to the same directory, which can lead to inconsistent builds.</source>
-        <target state="translated">NETSDK1194: l’option « --output » n’est pas prise en charge lors de la génération d’une solution. Si vous spécifiez un chemin de sortie au niveau de la solution, tous les projets copient les sorties dans le même répertoire, ce qui peut entraîner des builds incohérentes.</target>
+        <target state="translated">NETSDK1194: l’option « --output » n’est pas prise en charge lors de la génération d’une solution. Si vous spécifiez un chemin de sortie au niveau de la solution, tous les projets copient les sorties dans le même répertoire, ce qui peut entraîner des builds incohérentes.</target>
         <note>{StrBegin="NETSDK1194: "}{Locked="--output"}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSolutionLevelRuntimeIdentifier">
@@ -265,7 +265,7 @@
       <trans-unit id="ConflictingRuntimePackInformation">
         <source>NETSDK1133: There was conflicting information about runtime packs available for {0}:
 {1}</source>
-        <target state="translated">NETSDK1133: il existe des informations en conflit relatives aux packs de runtime disponibles pour {0} :
+        <target state="translated">NETSDK1133: il existe des informations en conflit relatives aux packs de runtime disponibles pour {0} :
 {1}</target>
         <note>{StrBegin="NETSDK1133: "}</note>
       </trans-unit>
@@ -311,7 +311,7 @@
       </trans-unit>
       <trans-unit id="CppRequiresTFMVersion31">
         <source>NETSDK1120: C++/CLI projects targeting .NET Core require a target framework of at least 'netcoreapp3.1'.</source>
-        <target state="translated">NETSDK1120: Les projets C++/CLI ciblant .NET Core nécessitent au minimum le framework cible « netcoreapp3.1 ».</target>
+        <target state="translated">NETSDK1120: Les projets C++/CLI ciblant .NET Core nécessitent au minimum le framework cible « netcoreapp3.1 ».</target>
         <note>{StrBegin="NETSDK1120: "}</note>
       </trans-unit>
       <trans-unit id="Crossgen2MissingRequiredMetadata">
@@ -376,7 +376,7 @@
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>NETSDK1022: Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
-        <target state="translated">NETSDK1022: Des éléments '{0}' dupliqués ont été inclus. Le kit .NET SDK inclut les éléments '{0}' de votre répertoire de projet par défaut. Vous pouvez supprimer ces éléments de votre fichier projet ou affecter à la propriété '{1}' la valeur '{2}', si vous souhaitez les inclure explicitement dans votre fichier projet. Pour plus d'informations, consultez {4}. Les éléments dupliqués sont les suivants : {3}</target>
+        <target state="translated">NETSDK1022: Des éléments '{0}' dupliqués ont été inclus. Le kit .NET SDK inclut les éléments '{0}' de votre répertoire de projet par défaut. Vous pouvez supprimer ces éléments de votre fichier projet ou affecter à la propriété '{1}' la valeur '{2}', si vous souhaitez les inclure explicitement dans votre fichier projet. Pour plus d'informations, consultez {4}. Les éléments dupliqués sont les suivants : {3}</target>
         <note>{StrBegin="NETSDK1022: "}</note>
       </trans-unit>
       <trans-unit id="DuplicatePreprocessorToken">
@@ -391,7 +391,7 @@
       </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
         <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="translated">NETSDK1110: Plusieurs composants du pack de runtime ont le même sous-chemin de destination que '{0}'. Signalez cette erreur à l'équipe .NET ici : https://aka.ms/dotnet-sdk-issue.</target>
+        <target state="translated">NETSDK1110: Plusieurs composants du pack de runtime ont le même sous-chemin de destination que '{0}'. Signalez cette erreur à l'équipe .NET ici : https://aka.ms/dotnet-sdk-issue.</target>
         <note>{StrBegin="NETSDK1110: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateTypeLibraryIds">
@@ -421,12 +421,12 @@
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
         <source>NETSDK1060: Error reading assets file: {0}</source>
-        <target state="translated">NETSDK1060: Erreur durant la lecture du fichier de composants : {0}</target>
+        <target state="translated">NETSDK1060: Erreur durant la lecture du fichier de composants : {0}</target>
         <note>{StrBegin="NETSDK1060: "}</note>
       </trans-unit>
       <trans-unit id="FailedToDeleteApphost">
         <source>NETSDK1111: Failed to delete output apphost: {0}</source>
-        <target state="translated">NETSDK1111: échec de la suppression du apphost de sortie : {0}</target>
+        <target state="translated">NETSDK1111: échec de la suppression du apphost de sortie : {0}</target>
         <note>{StrBegin="NETSDK1111: "}</note>
       </trans-unit>
       <trans-unit id="FailedToLockResource">
@@ -436,7 +436,7 @@
       </trans-unit>
       <trans-unit id="FileNameIsTooLong">
         <source>NETSDK1030: Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="translated">NETSDK1030: Le nom de fichier spécifié '{0}' dépasse 1 024 octets</target>
+        <target state="translated">NETSDK1030: Le nom de fichier spécifié '{0}' dépasse 1 024 octets</target>
         <note>{StrBegin="NETSDK1030: "}</note>
       </trans-unit>
       <trans-unit id="FolderAlreadyExists">
@@ -491,7 +491,7 @@
       </trans-unit>
       <trans-unit id="ILLinkOptimizedAssemblies">
         <source>Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink</source>
-        <target state="translated">L'optimisation de la taille des assemblys peut modifier le comportement de l'application. Assurez-vous de tester après la publication. Voir : https://aka.ms/dotnet-illink</target>
+        <target state="translated">L'optimisation de la taille des assemblys peut modifier le comportement de l'application. Assurez-vous de tester après la publication. Voir : https://aka.ms/dotnet-illink</target>
         <note />
       </trans-unit>
       <trans-unit id="ILLinkRunning">
@@ -521,18 +521,18 @@
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>NETSDK1003: Invalid framework name: '{0}'.</source>
-        <target state="translated">NETSDK1003: Nom de framework non valide : '{0}'.</target>
+        <target state="translated">NETSDK1003: Nom de framework non valide : '{0}'.</target>
         <note>{StrBegin="NETSDK1003: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">
         <source>NETSDK1058: Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</source>
-        <target state="translated">NETSDK1058: Valeur non valide pour le paramètre ItemSpecToUse : '{0}'. Cette propriété doit être vide ou doit avoir la valeur 'Left' ou 'Right'</target>
+        <target state="translated">NETSDK1058: Valeur non valide pour le paramètre ItemSpecToUse : '{0}'. Cette propriété doit être vide ou doit avoir la valeur 'Left' ou 'Right'</target>
         <note>{StrBegin="NETSDK1058: "}
 The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</note>
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionString">
         <source>NETSDK1018: Invalid NuGet version string: '{0}'.</source>
-        <target state="translated">NETSDK1018: Chaîne de version NuGet non valide : '{0}'.</target>
+        <target state="translated">NETSDK1018: Chaîne de version NuGet non valide : '{0}'.</target>
         <note>{StrBegin="NETSDK1018: "}</note>
       </trans-unit>
       <trans-unit id="InvalidResourceUpdate">
@@ -548,7 +548,7 @@ The following are names of parameters or literal values and should not be transl
       <trans-unit id="InvalidTargetPlatformVersion">
         <source>NETSDK1140: {0} is not a valid TargetPlatformVersion for {1}. Valid versions include:
 {2}</source>
-        <target state="translated">NETSDK1140: {0} n'est pas un TargetPlatformVersion valide pour {1}. Les versions valides sont :
+        <target state="translated">NETSDK1140: {0} n'est pas un TargetPlatformVersion valide pour {1}. Les versions valides sont :
 {2}</target>
         <note>{StrBegin="NETSDK1140: "}</note>
       </trans-unit>
@@ -702,13 +702,13 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageContainsIncorrectlyCasedLocale">
         <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
-        <target state="translated">NETSDK1187 : package {0} {1} a une ressource avec les paramètres régionaux '{2}'. Ces paramètres régionaux ont été normalisés au format standard '{3}' pour éviter les problèmes de casse dans la build. Envisagez d’avertir l’auteur du package de ce problème de casse.</target>
-        <note>Error code is NETSDK1187. 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
+        <target state="needs-review-translation">NETSDK1187 : package {0} {1} a une ressource avec les paramètres régionaux '{2}'. Ces paramètres régionaux ont été normalisés au format standard '{3}' pour éviter les problèmes de casse dans la build. Envisagez d’avertir l’auteur du package de ce problème de casse.</target>
+        <note>{StrBegin="NETSDK1187: "} 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
       </trans-unit>
       <trans-unit id="PackageContainsUnknownLocale">
         <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
-        <target state="translated">NETSDK1188: Package {0} {1} a une ressource avec les paramètres régionaux '{2}'. Ces paramètres régionaux ne sont pas reconnus par .NET. Envisagez d’avertir l’auteur du package qu’il semble utiliser des paramètres régionaux non valides.</target>
-        <note>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
+        <target state="needs-review-translation">NETSDK1188: Package {0} {1} a une ressource avec les paramètres régionaux '{2}'. Ces paramètres régionaux ne sont pas reconnus par .NET. Envisagez d’avertir l’auteur du package qu’il semble utiliser des paramètres régionaux non valides.</target>
+        <note>{StrBegin="NETSDK1188: "} 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
@@ -747,7 +747,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ProjectToolOnlySupportTFMLowerThanNetcoreapp22">
         <source>NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</source>
-        <target state="translated">NETSDK1093: les outils de projet (DotnetCliTool) prennent uniquement en charge le ciblage de .NET Core 2.2 et des versions antérieures.</target>
+        <target state="translated">NETSDK1093: les outils de projet (DotnetCliTool) prennent uniquement en charge le ciblage de .NET Core 2.2 et des versions antérieures.</target>
         <note>{StrBegin="NETSDK1093: "}</note>
       </trans-unit>
       <trans-unit id="PublishProfileNotPresent">
@@ -757,7 +757,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PublishReadyToRunRequiresVersion30">
         <source>NETSDK1122: ReadyToRun compilation will be skipped because it is only supported for .NET Core 3.0 or higher.</source>
-        <target state="translated">NETSDK1122: la compilation ReadyToRun va être ignorée, car elle est uniquement prise en charge pour .NET Core 3.0 ou une version ultérieure.</target>
+        <target state="translated">NETSDK1122: la compilation ReadyToRun va être ignorée, car elle est uniquement prise en charge pour .NET Core 3.0 ou une version ultérieure.</target>
         <note>{StrBegin="NETSDK1122: "}</note>
       </trans-unit>
       <trans-unit id="PublishSelfContainedMustBeBool">
@@ -767,12 +767,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PublishSingleFileRequiresVersion30">
         <source>NETSDK1123: Publishing an application to a single-file requires .NET Core 3.0 or higher.</source>
-        <target state="translated">NETSDK1123: la publication d'une application sur un seul fichier nécessite .NET Core 3.0 ou une version ultérieure.</target>
+        <target state="translated">NETSDK1123: la publication d'une application sur un seul fichier nécessite .NET Core 3.0 ou une version ultérieure.</target>
         <note>{StrBegin="NETSDK1123: "}</note>
       </trans-unit>
       <trans-unit id="PublishTrimmedRequiresVersion30">
         <source>NETSDK1124: Trimming assemblies requires .NET Core 3.0 or higher.</source>
-        <target state="translated">NETSDK1124: le découpage d'assemblys nécessite .NET Core 3.0 ou une version ultérieure.</target>
+        <target state="translated">NETSDK1124: le découpage d'assemblys nécessite .NET Core 3.0 ou une version ultérieure.</target>
         <note>{StrBegin="NETSDK1124: "}</note>
       </trans-unit>
       <trans-unit id="PublishUnsupportedWithoutTargetFramework">
@@ -792,7 +792,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ReadyToRunNoValidRuntimePackageError">
         <source>NETSDK1094: Unable to optimize assemblies for performance: a valid runtime package was not found. Either set the PublishReadyToRun property to false, or use a supported runtime identifier when publishing. When targeting .NET 6 or higher, make sure to restore packages with the PublishReadyToRun property set to true.</source>
-        <target state="needs-review-translation">NETSDK1094: Impossible d'optimiser les assemblages pour les performances : un package d'exécution valide n'a pas été trouvé. Définissez la propriété PublishReadyToRun sur false ou utilisez un identificateur d'exécution pris en charge lors de la publication. Lorsque vous ciblez .NET 6 ou supérieur, assurez-vous de restaurer les packages avec la propriété PublishReadyToRun définie sur true.</target>
+        <target state="translated">NETSDK1094: Impossible d'optimiser les assemblages pour les performances : un package d'exécution valide n'a pas été trouvé. Définissez la propriété PublishReadyToRun sur false ou utilisez un identificateur d'exécution pris en charge lors de la publication. Lorsque vous ciblez .NET 6 ou supérieur, assurez-vous de restaurer les packages avec la propriété PublishReadyToRun définie sur true.</target>
         <note>{StrBegin="NETSDK1094: "}</note>
       </trans-unit>
       <trans-unit id="ReadyToRunTargetNotSupportedError">
@@ -802,7 +802,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="RollForwardRequiresVersion30">
         <source>NETSDK1103: RollForward setting is only supported on .NET Core 3.0 or higher.</source>
-        <target state="translated">NETSDK1103: le paramètre RollForward est uniquement pris en charge sur .NET Core 3.0 ou version ultérieure.</target>
+        <target state="translated">NETSDK1103: le paramètre RollForward est uniquement pris en charge sur .NET Core 3.0 ou version ultérieure.</target>
         <note>{StrBegin="NETSDK1103: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeIdentifierNotRecognized">
@@ -822,7 +822,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="RuntimeListNotFound">
         <source>NETSDK1109: Runtime list file '{0}' was not found. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
-        <target state="translated">NETSDK1109: Le fichier de liste de runtime '{0}' est introuvable. Signalez cette erreur à l'équipe .NET ici : https://aka.ms/dotnet-sdk-issue.</target>
+        <target state="translated">NETSDK1109: Le fichier de liste de runtime '{0}' est introuvable. Signalez cette erreur à l'équipe .NET ici : https://aka.ms/dotnet-sdk-issue.</target>
         <note>{StrBegin="NETSDK1109: "}</note>
       </trans-unit>
       <trans-unit id="RuntimePackNotDownloaded">
@@ -869,7 +869,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="TargetingApphostPackMissingCannotRestore">
         <source>NETSDK1145: The {0} pack is not installed and NuGet package restore is not supported. Upgrade Visual Studio, remove global.json if it specifies a certain SDK version, and uninstall the newer SDK. For more options visit   https://aka.ms/targeting-apphost-pack-missing  Pack Type:{0}, Pack directory: {1}, targetframework: {2}, Pack PackageId: {3}, Pack Package Version: {4}</source>
-        <target state="translated">NETSDK1145: le pack {0} n'est pas installé et la restauration de package NuGet n'est pas prise en charge. Mettez à niveau Visual Studio, supprimez global.json s'il spécifie une certaine version du kit SDK, puis désinstallez le kit SDK le plus récent. Pour obtenir des options supplémentaires, accédez à https://aka.ms/targeting-apphost-pack-missing. Type du pack :{0}, répertoire du pack : {1}, framework cible : {2}, PackageId du pack : {3}, version de package du pack : {4}</target>
+        <target state="translated">NETSDK1145: le pack {0} n'est pas installé et la restauration de package NuGet n'est pas prise en charge. Mettez à niveau Visual Studio, supprimez global.json s'il spécifie une certaine version du kit SDK, puis désinstallez le kit SDK le plus récent. Pour obtenir des options supplémentaires, accédez à https://aka.ms/targeting-apphost-pack-missing. Type du pack :{0}, répertoire du pack : {1}, framework cible : {2}, PackageId du pack : {3}, version de package du pack : {4}</target>
         <note>{StrBegin="NETSDK1145: "}</note>
       </trans-unit>
       <trans-unit id="TargetingPackNeedsRestore">
@@ -949,7 +949,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>NETSDK1050: The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="translated">NETSDK1050: La version de Microsoft.NET.Sdk utilisée par ce projet ne permet pas de prendre en charge les références aux bibliothèques ciblant .NET Standard 1.5 ou une version ultérieure. Installez la version 2.0 ou une version ultérieure du kit SDK .NET Core.</target>
+        <target state="translated">NETSDK1050: La version de Microsoft.NET.Sdk utilisée par ce projet ne permet pas de prendre en charge les références aux bibliothèques ciblant .NET Standard 1.5 ou une version ultérieure. Installez la version 2.0 ou une version ultérieure du kit SDK .NET Core.</target>
         <note>{StrBegin="NETSDK1050: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
@@ -977,10 +977,10 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1107: vous devez disposer de Microsoft.NET.Sdk.WindowsDesktop pour générer des applications de bureau Windows. 'UseWpf' et 'UseWindowsForms' ne sont pas pris en charge par le kit SDK actuel.</target>
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
-      <trans-unit id="UsingPreviewSdk_Info">
+      <trans-unit id="UsingPreviewSdk">
         <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
-        <target state="translated">NETSDK1057 : vous utilisez une version d'aperçu de .NET. Voir : https://aka.ms/dotnet-support-policy</target>
-        <note />
+        <target state="new">NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</target>
+        <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">
         <source>NETSDK1131: Producing a managed Windows Metadata component with WinMDExp is not supported when targeting {0}.</source>
@@ -1004,7 +1004,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresVersion30">
         <source>NETSDK1105: Windows desktop applications are only supported on .NET Core 3.0 or higher.</source>
-        <target state="translated">NETSDK1105: les applications de bureau Windows sont uniquement prises en charge par .NET Core 3.0 ou une version ultérieure.</target>
+        <target state="translated">NETSDK1105: les applications de bureau Windows sont uniquement prises en charge par .NET Core 3.0 ou une version ultérieure.</target>
         <note>{StrBegin="NETSDK1105: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresWindows">

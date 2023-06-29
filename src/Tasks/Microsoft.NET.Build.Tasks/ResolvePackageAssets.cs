@@ -492,6 +492,7 @@ namespace Microsoft.NET.Build.Tasks
                     }
                     writer.Write(TargetFramework);
                     writer.Write(VerifyMatchingImplicitPackageVersion);
+                    writer.Write(DefaultImplicitPackages ?? "");
                 }
 
                 stream.Position = 0;

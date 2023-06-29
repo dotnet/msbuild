@@ -40,11 +40,11 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 {
                     new object[] {
                         "dotnet.new",
-                        new int[] { 110, 2536, 1, 845, 75 },
+                        new int[] { 110, 2536, 1, 846, 73 },
                     },
                     new object[] {
                         "simple.dependencies",
-                        new int[] { 113, 2613, 1, 877, 96 },
+                        new int[] { 113, 2613, 1, 878, 94 },
                     },
                 };
             }

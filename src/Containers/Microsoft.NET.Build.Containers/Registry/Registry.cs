@@ -6,52 +6,22 @@ using Microsoft.Extensions.Logging;
 using Microsoft.NET.Build.Containers.Resources;
 using NuGet.RuntimeModel;
 using System.Diagnostics;
-using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Microsoft.NET.Build.Containers;
 
 internal sealed class Registry
 {
-    private const string DockerManifestV2 = "application/vnd.docker.distribution.manifest.v2+json";
     private const string OciManifestV1 = "application/vnd.oci.image.manifest.v1+json"; // https://containers.gitbook.io/build-containers-the-hard-way/#registry-format-oci-image-manifest
-    private const string DockerManifestListV2 = "application/vnd.docker.distribution.manifest.list.v2+json";
-    private const string DockerContainerV1 = "application/vnd.docker.container.image.v1+json";
     private const string DockerHubRegistry1 = "registry-1.docker.io";
     private const string DockerHubRegistry2 = "registry.hub.docker.com";
-
-    /// <summary>
-    /// Whether we should upload blobs via chunked upload (enabled by default, but disabled for certain registries in conjunction with the explicit support check below).
-    /// </summary>
-    /// <remarks>
-    /// Relates to https://github.com/dotnet/sdk-container-builds/pull/383#issuecomment-1466408853
-    /// </remarks>
-    private static readonly bool s_ForceChunkedUploadEnabled = Env.GetEnvironmentVariableAsBool(ContainerHelpers.ForceChunkedUploadEnabled, defaultValue: false);
-
-    /// <summary>
-    /// When chunking is enabled, allows explicit control over the size of the chunks uploaded
-    /// </summary>
-    /// <remarks>
-    /// Our default of 64KB is very conservative, so raising this to 1MB or more can speed up layer uploads reasonably well.
-    /// </remarks>
-    private static readonly int? s_chunkedUploadSizeBytes = Env.GetEnvironmentVariableAsNullableInt(ContainerHelpers.ChunkedUploadSizeBytes);
-
-    /// <summary>
-    /// Whether we should upload blobs in parallel (enabled by default, but disabled for certain registries in conjunction with the explicit support check below).
-    /// </summary>
-    /// <remarks>
-    /// Enabling this can swamp some registries, so this is an escape hatch.
-    /// </remarks>
-    private static readonly bool s_parallelUploadEnabled =  Env.GetEnvironmentVariableAsBool(ContainerHelpers.ParallelUploadEnabled, defaultValue: true);
-
     private static readonly int s_defaultChunkSizeBytes = 1024 * 64;
 
-    private readonly HttpClient _client;
     private readonly ILogger _logger;
+    private readonly IRegistryAPI _registryAPI;
+    private readonly RegistrySettings _settings;
 
     /// <summary>
     /// The name of the registry, which is the host name, optionally followed by a colon and the port number.
@@ -60,9 +30,13 @@ internal sealed class Registry
     /// </summary>
     public string RegistryName { get; init; }
 
-    public Registry(Uri baseUri, ILogger logger)
+    internal Registry(Uri baseUri, ILogger logger) : this(baseUri, logger, new DefaultRegistryAPI(baseUri, logger), new RegistrySettings()) { }
+
+    internal Registry(Uri baseUri, ILogger logger, IRegistryAPI registryAPI, RegistrySettings settings)
     {
         _logger = logger;
+        _registryAPI = registryAPI;
+        _settings = settings;
         RegistryName = DeriveRegistryName(baseUri);
         BaseUri = baseUri;
         // "docker.io" is not a real registry. Replace the uri to refer to an actual registry.
@@ -96,32 +70,9 @@ internal sealed class Registry
     /// <remarks>
     /// This varies by registry target, for example Amazon Elastic Container Registry requires 5MB chunks for all but the last chunk.
     /// </remarks>
-    public int MaxChunkSizeBytes => s_chunkedUploadSizeBytes.HasValue ? s_chunkedUploadSizeBytes.Value : (IsAmazonECRRegistry ? 5248080 : s_defaultChunkSizeBytes);
+    public int MaxChunkSizeBytes => _settings.ChunkedUploadSizeBytes.HasValue ? _settings.ChunkedUploadSizeBytes.Value : (IsAmazonECRRegistry ? 5248080 : s_defaultChunkSizeBytes);
 
-    /// <summary>
-    /// Check to see if the registry is for Amazon Elastic Container Registry (ECR).
-    /// </summary>
-    public bool IsAmazonECRRegistry
-    {
-        get
-        {
-            // If this the registry is to public ECR the name will contain "public.ecr.aws".
-            if (RegistryName.Contains("public.ecr.aws"))
-            {
-                return true;
-            }
-
-            // If the registry is to a private ECR the registry will start with an account id which is a 12 digit number and will container either
-            // ".ecr." or ".ecr-" if pushed to a FIPS endpoint.
-            var accountId = RegistryName.Split('.')[0];
-            if ((RegistryName.Contains(".ecr.") || RegistryName.Contains(".ecr-")) && accountId.Length == 12 && long.TryParse(accountId, out _))
-            {
-                return true;
-            }
-
-            return false;
-        }
-    }
+    public bool IsAmazonECRRegistry => BaseUri.IsAmazonECRRegistry();
 
     /// <summary>
     /// Check to see if the registry is GitHub Packages, which always uses ghcr.io.
@@ -149,20 +100,20 @@ internal sealed class Registry
     /// Pushing to ECR uses a much larger chunk size. To avoid getting too many socket disconnects trying to do too many
     /// parallel uploads be more conservative and upload one layer at a time.
     /// </summary>
-    private bool SupportsParallelUploads => !IsAmazonECRRegistry && s_parallelUploadEnabled;
+    private bool SupportsParallelUploads => !IsAmazonECRRegistry && _settings.ParallelUploadEnabled;
 
     public async Task<ImageBuilder> GetImageManifestAsync(string repositoryName, string reference, string runtimeIdentifier, string runtimeIdentifierGraphPath, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var initialManifestResponse = await GetManifestAsync(repositoryName, reference, cancellationToken).ConfigureAwait(false);
+        HttpResponseMessage initialManifestResponse = await _registryAPI.Manifest.GetAsync(repositoryName, reference, cancellationToken).ConfigureAwait(false);
 
         return initialManifestResponse.Content.Headers.ContentType?.MediaType switch
         {
-            DockerManifestV2 or OciManifestV1 => await ReadSingleImageAsync(
+            SchemaTypes.DockerManifestV2 or OciManifestV1 => await ReadSingleImageAsync(
                 repositoryName,
                 await initialManifestResponse.Content.ReadFromJsonAsync<ManifestV2>(cancellationToken: cancellationToken).ConfigureAwait(false),
                 cancellationToken).ConfigureAwait(false),
-            DockerManifestListV2 => await PickBestImageFromManifestListAsync(
+            SchemaTypes.DockerManifestListV2 => await PickBestImageFromManifestListAsync(
                 repositoryName,
                 reference,
                 await initialManifestResponse.Content.ReadFromJsonAsync<ManifestListV2>(cancellationToken: cancellationToken).ConfigureAwait(false),
@@ -181,14 +132,10 @@ internal sealed class Registry
     private async Task<ImageBuilder> ReadSingleImageAsync(string repositoryName, ManifestV2 manifest, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var config = manifest.Config;
+        ManifestConfig config = manifest.Config;
         string configSha = config.digest;
 
-        var blobResponse = await GetBlobAsync(repositoryName, configSha, cancellationToken).ConfigureAwait(false);
-
-        cancellationToken.ThrowIfCancellationRequested();
-        JsonNode? configDoc = JsonNode.Parse(await blobResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
-        Debug.Assert(configDoc is not null);
+        JsonNode configDoc = await _registryAPI.Blob.GetJsonAsync(repositoryName, configSha, cancellationToken).ConfigureAwait(false);
 
         cancellationToken.ThrowIfCancellationRequested();
         return new ImageBuilder(manifest, new ImageConfig(configDoc));
@@ -209,8 +156,8 @@ internal sealed class Registry
         if (bestManifestRid is null) {
             throw new BaseImageNotFoundException(runtimeIdentifier, repositoryName, reference, graphForManifestList.Runtimes.Keys);
         }
-        var matchingManifest = ridDict[bestManifestRid];
-        var manifestResponse = await GetManifestAsync(repositoryName, matchingManifest.digest, cancellationToken).ConfigureAwait(false);
+        PlatformSpecificManifest matchingManifest = ridDict[bestManifestRid];
+        HttpResponseMessage manifestResponse = await _registryAPI.Manifest.GetAsync(repositoryName, matchingManifest.digest, cancellationToken).ConfigureAwait(false);
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -218,29 +165,6 @@ internal sealed class Registry
             repositoryName,
             await manifestResponse.Content.ReadFromJsonAsync<ManifestV2>(cancellationToken: cancellationToken).ConfigureAwait(false),
             cancellationToken).ConfigureAwait(false);
-    }
-
-    private async Task<HttpResponseMessage> GetManifestAsync(string repositoryName, string reference, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        var client = GetClient();
-        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(BaseUri, $"/v2/{repositoryName}/manifests/{reference}"));
-        AddDockerFormatsAcceptHeader(request);
-        var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
-        return response;
-    }
-
-    private async Task<HttpResponseMessage> GetBlobAsync(string repositoryName, string digest, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        var client = GetClient();
-        using var request =
-            new HttpRequestMessage(HttpMethod.Get, new Uri(BaseUri, $"/v2/{repositoryName}/blobs/{digest}"));
-        AddDockerFormatsAcceptHeader(request);
-        var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
-        return response;
     }
 
     private static string? CheckIfRidExistsInGraph(RuntimeGraph graphForManifestList, IEnumerable<string> leafRids, string userRid) => leafRids.FirstOrDefault(leaf => graphForManifestList.AreCompatible(leaf, userRid));
@@ -320,25 +244,11 @@ internal sealed class Registry
         }
 
         // No local copy, so download one
-
-        HttpClient client = GetClient();
-
-        using var request = new HttpRequestMessage(HttpMethod.Get,
-            new Uri(BaseUri, $"/v2/{repository}/blobs/{descriptor.Digest}"));
-        AddDockerFormatsAcceptHeader(request);
-        var response = await client.SendAsync(
-            request,
-            HttpCompletionOption.ResponseHeadersRead,
-            cancellationToken).ConfigureAwait(false);
-
-        cancellationToken.ThrowIfCancellationRequested();
-        response.EnsureSuccessStatusCode();
+        using Stream responseStream = await _registryAPI.Blob.GetStreamAsync(repository, descriptor.Digest, cancellationToken).ConfigureAwait(false);
 
         string tempTarballPath = ContentStore.GetTempFile();
         using (FileStream fs = File.Create(tempTarballPath))
         {
-            using Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-
             await responseStream.CopyToAsync(fs, cancellationToken).ConfigureAwait(false);
         }
 
@@ -349,23 +259,21 @@ internal sealed class Registry
         return localPath;
     }
 
-    public async Task PushAsync(Layer layer, string repository, Action<string> logProgressMessage, CancellationToken cancellationToken)
+    internal async Task PushLayerAsync(Layer layer, string repository, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         string digest = layer.Descriptor.Digest;
 
-        using (FileStream contents = File.OpenRead(layer.BackingFile))
+        using (Stream contents = layer.OpenBackingFile())
         {
             await UploadBlobAsync(repository, digest, contents, cancellationToken).ConfigureAwait(false);
         }
     }
 
-    private async Task<UriBuilder> UploadBlobChunkedAsync(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri, CancellationToken cancellationToken)
+    internal async Task<FinalizeUploadInformation> UploadBlobChunkedAsync(Stream contents, StartUploadInformation startUploadInformation, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        Uri patchUri = uploadUri.Uri;
-        var localUploadUri = new UriBuilder(uploadUri.Uri);
-        localUploadUri.Query += $"&digest={Uri.EscapeDataString(digest)}";
+        Uri patchUri = startUploadInformation.UploadUri;
 
         // TODO: this chunking is super tiny and probably not necessary; what does the docker client do
         //       and can we be smarter?
@@ -392,204 +300,69 @@ internal sealed class Registry
             //    content.Headers.Add("Content-Range", $"0-{contents.Length - 1}");
             Debug.Assert(content.Headers.TryAddWithoutValidation("Content-Range", $"{chunkStart}-{chunkStart + bytesRead - 1}"));
             
-            _logger.LogTrace("Uploading {0} bytes of content at {1}", bytesRead, patchUri);
-
-            HttpRequestMessage patchMessage = new(HttpMethod.Patch, patchUri)
-            {
-                Content = content
-            };
-            patchMessage.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
-            HttpResponseMessage patchResponse = await client.SendAsync(patchMessage, cancellationToken).ConfigureAwait(false);
-
-            _logger.LogTrace("Received status code '{0}' from upload.", patchResponse.StatusCode);
-
-            // Fail the upload if the response code is not Accepted (202) or if uploading to Amazon ECR which returns back Created (201).
-            if (!(patchResponse.StatusCode == HttpStatusCode.Accepted || (IsAmazonECRRegistry && patchResponse.StatusCode == HttpStatusCode.Created)))
-            {
-                await patchResponse.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
-                string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"PATCH {patchUri}", patchResponse.StatusCode);
-                throw new ApplicationException(errorMessage);
-            }
-
-           localUploadUri = GetNextLocation(patchResponse);
-
-            patchUri = localUploadUri.Uri;
+            NextChunkUploadInformation nextChunk = await _registryAPI.Blob.Upload.UploadChunkAsync(patchUri, content, cancellationToken).ConfigureAwait(false);
+            patchUri = nextChunk.UploadUri;
 
             chunkCount += 1;
             chunkStart += bytesRead;
         }
-        return new UriBuilder(patchUri);
+        return new(patchUri);
     }
 
-    private UriBuilder GetNextLocation(HttpResponseMessage response) {
-        if (response.Headers.Location is {IsAbsoluteUri: true })
-        {
-            return new UriBuilder(response.Headers.Location);
-        }
-        else
-        {
-            // if we don't trim the BaseUri and relative Uri of slashes, you can get invalid urls.
-            // Uri constructor does this on our behalf.
-            return new UriBuilder(new Uri(BaseUri, response.Headers.Location?.OriginalString ?? ""));
-        }
-    }
-
-    private async Task<UriBuilder> UploadBlobWholeAsync(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        StreamContent content = new StreamContent(contents);
-        content.Headers.ContentLength = contents.Length;
-        HttpRequestMessage patchMessage = new(HttpMethod.Patch, uploadUri.Uri)
-        {
-            Content = content
-        };
-        patchMessage.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
-        HttpResponseMessage patchResponse = await client.SendAsync(patchMessage, cancellationToken).ConfigureAwait(false);
-
-        cancellationToken.ThrowIfCancellationRequested();
-        // Fail the upload if the response code is not Accepted (202) or if uploading to Amazon ECR which returns back Created (201).
-        if (!(patchResponse.StatusCode == HttpStatusCode.Accepted || (IsAmazonECRRegistry && patchResponse.StatusCode == HttpStatusCode.Created)))
-        {
-            await patchResponse.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
-            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"PATCH {uploadUri}", patchResponse.StatusCode);
-            throw new ApplicationException(errorMessage);
-        }
-        return GetNextLocation(patchResponse);
-    }
-
-    private async Task<UriBuilder> StartUploadSessionAsync(string repository, string digest, HttpClient client, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        Uri startUploadUri = new Uri(BaseUri, $"/v2/{repository}/blobs/uploads/");
-
-        HttpResponseMessage pushResponse = await client.PostAsync(startUploadUri, content: null, cancellationToken).ConfigureAwait(false);
-
-        if (pushResponse.StatusCode != HttpStatusCode.Accepted)
-        {
-            await pushResponse.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
-            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"POST {startUploadUri}", pushResponse.StatusCode);
-            throw new ApplicationException(errorMessage);
-        }
-        cancellationToken.ThrowIfCancellationRequested();
-        return GetNextLocation(pushResponse);
-    }
-
-    private Task<UriBuilder> UploadBlobContentsAsync(string repository, string digest, Stream contents, HttpClient client, UriBuilder uploadUri, CancellationToken cancellationToken)
+    private Task<FinalizeUploadInformation> UploadBlobContentsAsync(Stream contents, StartUploadInformation startUploadInformation, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (s_ForceChunkedUploadEnabled)
+        if (_settings.ForceChunkedUpload)
         {
             //the chunked upload was forced in configuration
             _logger.LogTrace("Chunked upload is forced in configuration, attempting to upload blob in chunks. Content length: {0}.", contents.Length);
-            return UploadBlobChunkedAsync(repository, digest, contents, client, uploadUri, cancellationToken);
+            return UploadBlobChunkedAsync(contents, startUploadInformation, cancellationToken);
         }
 
         try
         {
             _logger.LogTrace("Attempting to upload whole blob, content length: {0}.", contents.Length);
-            return UploadBlobWholeAsync(repository, digest, contents, client, uploadUri, cancellationToken);
+            return _registryAPI.Blob.Upload.UploadAtomicallyAsync(startUploadInformation.UploadUri, contents, cancellationToken);
         }
         catch (Exception ex)
         {
             _logger.LogTrace("Errored while uploading whole blob: {0}.\nRetrying with chunked upload. Content length: {1}.", ex, contents.Length);
             contents.Seek(0, SeekOrigin.Begin);
-            return UploadBlobChunkedAsync(repository, digest, contents, client, uploadUri, cancellationToken);
-        }
-    }
-
-    private async Task FinishUploadSessionAsync(string digest, HttpClient client, UriBuilder uploadUri, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        // PUT with digest to finalize
-        uploadUri.Query += $"&digest={Uri.EscapeDataString(digest)}";
-
-        var putUri = uploadUri.Uri;
-
-        HttpResponseMessage finalizeResponse = await client.PutAsync(putUri, content: null, cancellationToken).ConfigureAwait(false);
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        if (finalizeResponse.StatusCode != HttpStatusCode.Created)
-        {
-            await finalizeResponse.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
-            string errorMessage = Resource.FormatString(nameof(Strings.BlobUploadFailed), $"PUT {putUri}", finalizeResponse.StatusCode);
-            throw new ApplicationException(errorMessage);
+            return UploadBlobChunkedAsync(contents, startUploadInformation, cancellationToken);
         }
     }
 
     private async Task UploadBlobAsync(string repository, string digest, Stream contents, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        HttpClient client = GetClient();
 
-        if (await BlobAlreadyUploadedAsync(repository, digest, client, cancellationToken).ConfigureAwait(false))
+        if (await _registryAPI.Blob.ExistsAsync(repository, digest, cancellationToken).ConfigureAwait(false))
         {
             // Already there!
+            _logger.LogInformation(Strings.Registry_LayerExists, digest);
             return;
         }
 
         // Three steps to this process:
         // * start an upload session
-        cancellationToken.ThrowIfCancellationRequested();
-        var uploadUri = await StartUploadSessionAsync(repository, digest, client, cancellationToken).ConfigureAwait(false);
+        StartUploadInformation uploadUri = await _registryAPI.Blob.Upload.StartAsync(repository, cancellationToken).ConfigureAwait(false);
         _logger.LogTrace("Started upload session for {0}", digest);
 
         // * upload the blob
         cancellationToken.ThrowIfCancellationRequested();
-        var finalChunkUri = await UploadBlobContentsAsync(repository, digest, contents, client, uploadUri, cancellationToken).ConfigureAwait(false);
+        FinalizeUploadInformation finalChunkUri = await UploadBlobContentsAsync(contents, uploadUri, cancellationToken).ConfigureAwait(false);
         _logger.LogTrace("Uploaded content for {0}", digest);
         // * finish the upload session
         cancellationToken.ThrowIfCancellationRequested();
-        await FinishUploadSessionAsync(digest, client, finalChunkUri, cancellationToken).ConfigureAwait(false);
+        await _registryAPI.Blob.Upload.CompleteAsync(finalChunkUri.UploadUri, digest, cancellationToken).ConfigureAwait(false);
         _logger.LogTrace("Finalized upload session for {0}", digest);
 
     }
 
-    private async Task<bool> BlobAlreadyUploadedAsync(string repository, string digest, HttpClient client, CancellationToken cancellationToken)
+    public async Task PushAsync(BuiltImage builtImage, ImageReference source, ImageReference destination, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        HttpResponseMessage response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, new Uri(BaseUri, $"/v2/{repository}/blobs/{digest}")), cancellationToken).ConfigureAwait(false);
-
-        return response.StatusCode == HttpStatusCode.OK;
-    }
-
-    private HttpClient GetClient()
-    {
-        return _client;
-    }
-
-    private HttpClient CreateClient()
-    {
-        HttpMessageHandler clientHandler = new AuthHandshakeMessageHandler(new SocketsHttpHandler() { PooledConnectionLifetime = TimeSpan.FromMilliseconds(10 /* total guess */) });
-
-        if(IsAmazonECRRegistry)
-        {
-            clientHandler = new AmazonECRMessageHandler(clientHandler);
-        }
-
-        HttpClient client = new(clientHandler);
-
-        client.DefaultRequestHeaders.Add("User-Agent", $".NET Container Library v{Constants.Version}");
-
-        return client;
-    }
-
-    private static void AddDockerFormatsAcceptHeader(HttpRequestMessage request)
-    {
-        request.Headers.Accept.Clear();
-        request.Headers.Accept.Add(new("application/json"));
-        request.Headers.Accept.Add(new(DockerManifestListV2));
-        request.Headers.Accept.Add(new(DockerManifestV2));
-        request.Headers.Accept.Add(new(OciManifestV1));
-        request.Headers.Accept.Add(new(DockerContainerV1));
-    }
-
-    public async Task PushAsync(BuiltImage builtImage, ImageReference source, ImageReference destination, Action<string> logProgressMessage, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        HttpClient client = GetClient();
         Registry destinationRegistry = destination.Registry!;
 
         Func<Descriptor, Task> uploadLayerFunc = async (descriptor) =>
@@ -598,16 +371,14 @@ internal sealed class Registry
             string digest = descriptor.Digest;
 
             _logger.LogInformation(Strings.Registry_LayerUploadStarted, digest, destinationRegistry.RegistryName);
-            if (await destinationRegistry.BlobAlreadyUploadedAsync(destination.Repository, digest, client, cancellationToken).ConfigureAwait(false))
+            if (await _registryAPI.Blob.ExistsAsync(destination.Repository, digest, cancellationToken).ConfigureAwait(false))
             {
                 _logger.LogInformation(Strings.Registry_LayerExists, digest);
                 return;
             }
 
             // Blob wasn't there; can we tell the server to get it from the base image?
-            HttpResponseMessage pushResponse = await client.PostAsync(new Uri(destinationRegistry.BaseUri, $"/v2/{destination.Repository}/blobs/uploads/?mount={digest}&from={source.Repository}"), content: null).ConfigureAwait(false);
-
-            if (pushResponse.StatusCode != HttpStatusCode.Created)
+            if (! await _registryAPI.Blob.Upload.TryMountAsync(destination.Repository, source.Repository, digest, cancellationToken).ConfigureAwait(false))
             {
                 // The blob wasn't already available in another namespace, so fall back to explicitly uploading it
 
@@ -616,7 +387,7 @@ internal sealed class Registry
                     // Ensure the blob is available locally
                     await sourceRegistry.DownloadBlobAsync(source.Repository, descriptor, cancellationToken).ConfigureAwait(false);
                     // Then push it to the destination registry
-                    await destinationRegistry.PushAsync(Layer.FromDescriptor(descriptor), destination.Repository, logProgressMessage, cancellationToken).ConfigureAwait(false);
+                    await destinationRegistry.PushLayerAsync(Layer.FromDescriptor(descriptor), destination.Repository, cancellationToken).ConfigureAwait(false);
                     _logger.LogInformation(Strings.Registry_LayerUploaded, digest, destinationRegistry.RegistryName);
                 }
                 else {
@@ -646,29 +417,15 @@ internal sealed class Registry
             _logger.LogInformation(Strings.Registry_ConfigUploaded);
         }
 
-        cancellationToken.ThrowIfCancellationRequested();
-        var manifestDigest = builtImage.Manifest.GetDigest();
+        //manifest upload
+        string manifestDigest = builtImage.Manifest.GetDigest();
         _logger.LogInformation(Strings.Registry_ManifestUploadStarted, RegistryName, manifestDigest);
-        string jsonString = JsonSerializer.SerializeToNode(builtImage.Manifest)?.ToJsonString() ?? "";
-        HttpContent manifestUploadContent = new StringContent(jsonString);
-        manifestUploadContent.Headers.ContentType = new MediaTypeHeaderValue(DockerManifestV2);
-        var putResponse = await client.PutAsync(new Uri(BaseUri, $"/v2/{destination.Repository}/manifests/{manifestDigest}"), manifestUploadContent, cancellationToken).ConfigureAwait(false);
-
-        if (!putResponse.IsSuccessStatusCode)
-        {
-            throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryPushFailed)), putResponse.RequestMessage?.RequestUri?.ToString(), jsonString);
-        }
+        await _registryAPI.Manifest.PutAsync(destination.Repository, manifestDigest, builtImage.Manifest, cancellationToken).ConfigureAwait(false);
         _logger.LogInformation(Strings.Registry_ManifestUploaded, RegistryName);
 
-        cancellationToken.ThrowIfCancellationRequested();
+        //tag upload
         _logger.LogInformation(Strings.Registry_TagUploadStarted, destination.Tag, RegistryName);
-        var putResponse2 = await client.PutAsync(new Uri(BaseUri, $"/v2/{destination.Repository}/manifests/{destination.Tag}"), manifestUploadContent, cancellationToken).ConfigureAwait(false);
-
-        if (!putResponse2.IsSuccessStatusCode)
-        {
-            throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryPushFailed)), putResponse2.RequestMessage?.RequestUri?.ToString(), jsonString);
-        }
-
+        await _registryAPI.Manifest.PutAsync(destination.Repository, destination.Tag, builtImage.Manifest, cancellationToken).ConfigureAwait(false);
         _logger.LogInformation(Strings.Registry_TagUploaded, destination.Tag, RegistryName);
     }
 }
