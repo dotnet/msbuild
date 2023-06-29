@@ -57,7 +57,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
             else if (installType == InstallType.Msi)
             {
-                return Path.Combine(Environment.GetEnvironmentVariable("ProgramData")!, "dotnet", "workloads", sdkFeatureBand.ToString(), "InstallState");
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "dotnet", "workloads", sdkFeatureBand.ToString(), "InstallState");
             }
             else
             {
