@@ -520,7 +520,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
             }
         }
 
-        // controling whether a task should be execute.
+        // controlling whether a task should be execute.
         protected override bool SkipTaskExecution()
         {
             if (this.PreviewCommandLineOnly)
