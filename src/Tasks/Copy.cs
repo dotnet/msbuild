@@ -424,9 +424,18 @@ namespace Microsoft.Build.Tasks
 
             // Use single-threaded code path when requested or when there is only copy to make
             // (no need to create all the parallel infrastructure for that case).
-            bool success = parallelism == 1 || DestinationFiles.Length == 1
-                ? CopySingleThreaded(copyFile, out destinationFilesSuccessfullyCopied)
-                : CopyParallel(copyFile, parallelism, out destinationFilesSuccessfullyCopied);
+            bool success = false;
+
+            try
+            {
+                success = parallelism == 1 || DestinationFiles.Length == 1
+                    ? CopySingleThreaded(copyFile, out destinationFilesSuccessfullyCopied)
+                    : CopyParallel(copyFile, parallelism, out destinationFilesSuccessfullyCopied);
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
 
             // copiedFiles contains only the copies that were successful.
             CopiedFiles = destinationFilesSuccessfullyCopied.ToArray();
