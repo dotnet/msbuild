@@ -11,9 +11,13 @@ namespace Microsoft.Build.Evaluation
 {
     /// <summary>
     /// Class representing a reference to a project import path with property fall-back
+    /// This class is immutable.
+    /// If mutability would be needed in the future, it should be implemented via copy-on-write or
+    ///  a DeepClone would need to be added (and called from DeepClone methods of owning types)
     /// </summary>
     internal class ProjectImportPathMatch : ITranslatable
     {
+        // Those are effectively readonly and should stay so. Cannot be marked readonly due to ITranslatable
         private string _propertyName;
         private string _msBuildPropertyFormat;
         private List<string> _searchPaths;

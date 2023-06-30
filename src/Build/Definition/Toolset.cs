@@ -953,7 +953,7 @@ namespace Microsoft.Build.Evaluation
 
                 // GenerateSubToolsetVersion checks the environment and global properties, so it's safe to go ahead and gather the
                 // subtoolset properties here without fearing that we'll have somehow come up with the wrong subtoolset version.
-                string subToolsetVersion = this.GenerateSubToolsetVersion();
+                string subToolsetVersion = GenerateSubToolsetVersion();
                 SubToolset subToolset;
                 ICollection<ProjectPropertyInstance> subToolsetProperties = null;
 
