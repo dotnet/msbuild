@@ -274,18 +274,18 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>d07f4d43aa93d91dd2db65daaffbf37ce0012841</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.Razor.Tooling.Internal" Version="7.0.0-preview.23328.6">
+    <Dependency Name="Microsoft.CodeAnalysis.Razor.Tooling.Internal" Version="7.0.0-preview.23330.1">
       <Uri>https://github.com/dotnet/razor</Uri>
-      <Sha>b382633a860ff2c3cb538187f88c2bfa83776e12</Sha>
+      <Sha>0ab18affdf2a37647768d0e25f5f021bee6257a1</Sha>
       <SourceBuild RepoName="razor" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions.Tooling.Internal" Version="7.0.0-preview.23328.6">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions.Tooling.Internal" Version="7.0.0-preview.23330.1">
       <Uri>https://github.com/dotnet/razor</Uri>
-      <Sha>b382633a860ff2c3cb538187f88c2bfa83776e12</Sha>
+      <Sha>0ab18affdf2a37647768d0e25f5f021bee6257a1</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.Razor.SourceGenerators.Transport" Version="7.0.0-preview.23328.6">
+    <Dependency Name="Microsoft.NET.Sdk.Razor.SourceGenerators.Transport" Version="7.0.0-preview.23330.1">
       <Uri>https://github.com/dotnet/razor</Uri>
-      <Sha>b382633a860ff2c3cb538187f88c2bfa83776e12</Sha>
+      <Sha>0ab18affdf2a37647768d0e25f5f021bee6257a1</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="8.0.0-preview.7.23329.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
