@@ -238,7 +238,7 @@ public class CreateNewImageTests
         var sourceReference = new ImageReference(registry, DockerRegistryManager.RuntimeBaseImage, DockerRegistryManager.Net8PreviewImageTag);
         var destinationReference = new ImageReference(registry, RootlessBase, "latest");
 
-        await registry.PushAsync(builtImage, sourceReference, destinationReference, Console.WriteLine, cancellationToken: default).ConfigureAwait(false);
+        await registry.PushAsync(builtImage, sourceReference, destinationReference, cancellationToken: default).ConfigureAwait(false);
 
         // Build an application image on top of the rootless base runtime image.
         DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, nameof(CreateNewImage_RootlessBaseImage)));
