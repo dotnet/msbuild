@@ -3,29 +3,54 @@
 
 using System.CommandLine;
 using System.CommandLine.Help;
-using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Cli.Commands;
 
 namespace Dotnet_new3
 {
     internal static class ParserFactory
     {
-        internal static Parser CreateParser(Command command, bool disableHelp = false)
+        internal static CliConfiguration CreateParser(CliCommand command, bool disableHelp = false)
         {
-            var builder = new CommandLineBuilder(command)
+            CliConfiguration config = new(command)
             //.UseExceptionHandler(ExceptionHandler)
             //.UseLocalizationResources(new CommandLineValidationMessages())
             //TODO: decide if it's needed to implement it; and implement if needed
             //.UseParseDirective()
             //.UseSuggestDirective()
-            .UseParseErrorReporting()//TODO: discuss with SDK if it is possible to use it.
-            .EnablePosixBundling(false);
+            {
+                EnableParseErrorReporting = true, //TODO: discuss with SDK if it is possible to use it.
+                EnablePosixBundling = false
+            };
+
+            for (int i = 0; i < command.Options.Count; i++)
+            {
+                if (command.Options[i] is HelpOption)
+                {
+                    if (disableHelp)
+                    {
+                        command.Options.RemoveAt(i);
+                        return config;
+                    }
+
+                    command.Options[i] = CreateCustomHelp();
+                    return config;
+                }
+            }
 
             if (!disableHelp)
             {
-                builder = builder.UseHelp(ctx => ctx.HelpBuilder.CustomizeLayout(CustomHelpLayout));
+                command.Options.Add(CreateCustomHelp());
             }
-            return builder.Build();
+
+            return config;
+
+            static HelpOption CreateCustomHelp()
+            {
+                HelpOption helpOption = new HelpOption();
+                HelpAction helpAction = (HelpAction)helpOption.Action!;
+                helpAction.Builder.CustomizeLayout(CustomHelpLayout);
+                return helpOption;
+            }
         }
 
         private static IEnumerable<Action<HelpContext>> CustomHelpLayout(HelpContext context)

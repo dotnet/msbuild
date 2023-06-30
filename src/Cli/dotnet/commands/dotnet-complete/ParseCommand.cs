@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli
 
             var tokens = result.Tokens.Skip(1).Select(t => t.Value).ToArray();
             var reparsed = Microsoft.DotNet.Cli.Parser.Instance.Parse(tokens);
-            Console.WriteLine(reparsed.Diagram());
+            Console.WriteLine(reparsed.ToString());
 
 
             if (reparsed.UnmatchedTokens.Any())

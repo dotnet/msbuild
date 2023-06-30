@@ -7,32 +7,35 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     public static class SharedOptions
     {
-        public static Option<FileInfo> OutputOption { get; } = new Option<FileInfo>(new string[] { "-o", "--output" })
+        public static CliOption<FileInfo> OutputOption { get; } = new("--output", "-o")
         {
             Description = SymbolStrings.Option_Output,
-            IsRequired = false,
+            Required = false,
             Arity = new ArgumentArity(1, 1)
         };
 
-        public static Option<FileInfo> ProjectPathOption { get; } = new Option<FileInfo>("--project", SymbolStrings.Option_ProjectPath).AcceptExistingOnly();
+        public static CliOption<FileInfo> ProjectPathOption { get; } = new CliOption<FileInfo>("--project")
+        {
+            Description = SymbolStrings.Option_ProjectPath
+        }.AcceptExistingOnly();
 
-        public static Option<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption();
+        public static CliOption<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption();
 
-        internal static Option<bool> ForceOption { get; } = SharedOptionsFactory.CreateForceOption();
+        internal static CliOption<bool> ForceOption { get; } = SharedOptionsFactory.CreateForceOption();
 
-        internal static Option<string> NameOption { get; } = new Option<string>(new string[] { "-n", "--name" })
+        internal static CliOption<string> NameOption { get; } = new("--name", "-n")
         {
             Description = SymbolStrings.TemplateCommand_Option_Name,
             Arity = new ArgumentArity(1, 1)
         };
 
-        internal static Option<bool> DryRunOption { get; } = new Option<bool>("--dry-run")
+        internal static CliOption<bool> DryRunOption { get; } = new("--dry-run")
         {
             Description = SymbolStrings.TemplateCommand_Option_DryRun,
             Arity = new ArgumentArity(0, 1)
         };
 
-        internal static Option<bool> NoUpdateCheckOption { get; } = new Option<bool>("--no-update-check")
+        internal static CliOption<bool> NoUpdateCheckOption { get; } = new("--no-update-check")
         {
             Description = SymbolStrings.TemplateCommand_Option_NoUpdateCheck,
             Arity = new ArgumentArity(0, 1)

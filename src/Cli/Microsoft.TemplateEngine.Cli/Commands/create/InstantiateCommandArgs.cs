@@ -24,7 +24,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 if (command.PassByOptions.Contains(optionResult.Option))
                 {
-                    if (optionResult.Token is { } token)
+                    if (optionResult.IdentifierToken is { } token)
                     {
                         tokens.Add(token.Value);
                     }

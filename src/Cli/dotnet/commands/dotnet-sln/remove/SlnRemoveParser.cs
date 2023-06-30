@@ -3,8 +3,6 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.Sln.Remove;
 using LocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 
@@ -12,26 +10,27 @@ namespace Microsoft.DotNet.Cli
 {
     public static class SlnRemoveParser
     {
-        public static readonly Argument<IEnumerable<string>> ProjectPathArgument = new Argument<IEnumerable<string>>(LocalizableStrings.RemoveProjectPathArgumentName)
+        public static readonly CliArgument<IEnumerable<string>> ProjectPathArgument = new(LocalizableStrings.RemoveProjectPathArgumentName)
         {
+            HelpName = LocalizableStrings.RemoveProjectPathArgumentName,
             Description = LocalizableStrings.RemoveProjectPathArgumentDescription,
             Arity = ArgumentArity.ZeroOrMore
         };
 
-        private static readonly Command Command = ConstructCommand();
+        private static readonly CliCommand Command = ConstructCommand();
 
-        public static Command GetCommand()
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            var command = new Command("remove", LocalizableStrings.RemoveAppFullName);
+            CliCommand command = new("remove", LocalizableStrings.RemoveAppFullName);
 
-            command.AddArgument(ProjectPathArgument);
+            command.Arguments.Add(ProjectPathArgument);
 
-            command.SetHandler((parseResult) => new RemoveProjectFromSolutionCommand(parseResult).Execute());
+            command.SetAction((parseResult) => new RemoveProjectFromSolutionCommand(parseResult).Execute());
 
             return command;
         }

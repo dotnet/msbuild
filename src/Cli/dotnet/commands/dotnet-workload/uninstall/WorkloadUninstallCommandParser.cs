@@ -4,8 +4,6 @@
 using System.CommandLine;
 using System.Collections.Generic;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Uninstall.LocalizableStrings;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Workloads.Workload.Uninstall;
 using Microsoft.DotNet.Workloads.Workload;
 
@@ -13,25 +11,25 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadUninstallCommandParser
     {
-        public static readonly Argument<IEnumerable<string>> WorkloadIdArgument = WorkloadInstallCommandParser.WorkloadIdArgument;
+        public static readonly CliArgument<IEnumerable<string>> WorkloadIdArgument = WorkloadInstallCommandParser.WorkloadIdArgument;
 
-        public static readonly Option<string> VersionOption = InstallingWorkloadCommandParser.VersionOption;
+        public static readonly CliOption<string> VersionOption = InstallingWorkloadCommandParser.VersionOption;
 
-        private static readonly Command Command = ConstructCommand();
+        private static readonly CliCommand Command = ConstructCommand();
 
-        public static Command GetCommand()
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            Command command = new Command("uninstall", LocalizableStrings.CommandDescription);
-            command.AddArgument(WorkloadIdArgument);
-            command.AddOption(WorkloadInstallCommandParser.SkipSignCheckOption);
-            command.AddOption(CommonOptions.VerbosityOption);
+            CliCommand command = new("uninstall", LocalizableStrings.CommandDescription);
+            command.Arguments.Add(WorkloadIdArgument);
+            command.Options.Add(WorkloadInstallCommandParser.SkipSignCheckOption);
+            command.Options.Add(CommonOptions.VerbosityOption);
 
-            command.SetHandler((parseResult) => new WorkloadUninstallCommand(parseResult).Execute());
+            command.SetAction((parseResult) => new WorkloadUninstallCommand(parseResult).Execute());
 
             return command;
         }

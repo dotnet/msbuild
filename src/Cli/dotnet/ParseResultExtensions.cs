@@ -30,11 +30,10 @@ namespace Microsoft.DotNet.Cli
         {
             // take from the start of the list until we hit an option/--/unparsed token
             // since commands can have arguments, we must take those as well in order to get accurate help
-            var tokenList = parseResult.Tokens.TakeWhile(token => token.Type == TokenType.Argument || token.Type == TokenType.Command || token.Type == TokenType.Directive).Select(t => t.Value).ToList();
+            var tokenList = parseResult.Tokens.TakeWhile(token => token.Type == CliTokenType.Argument || token.Type == CliTokenType.Command || token.Type == CliTokenType.Directive).Select(t => t.Value).ToList();
             tokenList.Add("-h");
             Parser.Instance.Parse(tokenList).Invoke();
         }
-
 
         public static void ShowHelpOrErrorIfAppropriate(this ParseResult parseResult)
         {
@@ -103,7 +102,7 @@ namespace Microsoft.DotNet.Cli
         public static bool CanBeInvoked(this ParseResult parseResult)
         {
             return Parser.GetBuiltInCommand(parseResult.RootSubCommandResult()) != null ||
-                parseResult.Directives.Count() > 0 ||
+                parseResult.Tokens.Any(token => token.Type == CliTokenType.Directive) ||
                 (parseResult.IsTopLevelDotnetCommand() && string.IsNullOrEmpty(parseResult.GetValue(Parser.DotnetSubCommand)));
         }
 
@@ -129,7 +128,7 @@ namespace Microsoft.DotNet.Cli
             var runArgs = subargs.Contains("--") ? subargs.GetRange(subargs.IndexOf("--"), subargs.Count() - subargs.IndexOf("--")) : new List<string>();
             subargs = subargs.Contains("--") ? subargs.GetRange(0, subargs.IndexOf("--")) : subargs;
 
-            subargs.RemoveAll(arg => DiagOption.Aliases.Contains(arg));
+            subargs.RemoveAll(arg => DiagOption.Name.Equals(arg) || DiagOption.Aliases.Contains(arg));
             if (subargs[0].Equals("dotnet"))
             {
                 subargs.RemoveAt(0);
@@ -142,13 +141,13 @@ namespace Microsoft.DotNet.Cli
         {
             if (symbolResult.Token() == default)
             {
-                return parseResult.FindResultFor(Parser.DotnetSubCommand)?.GetValueOrDefault<string>();
+                return parseResult.GetResult(Parser.DotnetSubCommand)?.GetValueOrDefault<string>();
             }
-            else if (symbolResult.Token().Type.Equals(TokenType.Command))
+            else if (symbolResult.Token().Type.Equals(CliTokenType.Command))
             {
-                return symbolResult.Symbol.Name;
+                return ((System.CommandLine.Parsing.CommandResult)symbolResult).Command.Name;
             }
-            else if (symbolResult.Token().Type.Equals(TokenType.Argument))
+            else if (symbolResult.Token().Type.Equals(CliTokenType.Argument))
             {
                 return symbolResult.Token().Value;
             }
@@ -210,9 +209,9 @@ namespace Microsoft.DotNet.Cli
         private static IEnumerable<string> GetRunPropertyOptions(ParseResult parseResult, bool shorthand)
         {
             var optionString = shorthand ? "-p" : "--property";
-            var options = parseResult.CommandResult.Children.Where(c => c.Token().Type.Equals(TokenType.Option));
+            var options = parseResult.CommandResult.Children.Where(c => c.Token().Type.Equals(CliTokenType.Option));
             var propertyOptions = options.Where(o => o.Token().Value.Equals(optionString));
-            var propertyValues = propertyOptions.SelectMany(o => o.Children.SelectMany(c => c.Tokens.Select(t=> t.Value))).ToArray();
+            var propertyValues = propertyOptions.SelectMany(o => o.Tokens.Select(t=> t.Value)).ToArray();
             return propertyValues;
         }
 
@@ -231,9 +230,9 @@ namespace Microsoft.DotNet.Cli
         /// If you are inside a command handler or 'normal' System.CommandLine code then you don't need this - the parse error handling
         /// will have covered these cases.
         /// </summary>
-        public static object SafelyGetValueForOption(this ParseResult parseResult, Option optionToGet)
+        public static T SafelyGetValueForOption<T>(this ParseResult parseResult, CliOption<T> optionToGet)
         {
-            if (parseResult.FindResultFor(optionToGet) is OptionResult optionResult &&
+            if (parseResult.GetResult(optionToGet) is OptionResult optionResult &&
                 !parseResult.Errors.Any(e => e.SymbolResult == optionResult))
             {
                 return optionResult.GetValue(optionToGet);
@@ -243,22 +242,6 @@ namespace Microsoft.DotNet.Cli
             }
         }
 
-        /// <summary>
-        /// Only returns the value for this option if the option is present and there are no parse errors for that option.
-        /// This allows cross-cutting code like the telemetry filters to safely get the value without throwing on null-ref errors.
-        /// If you are inside a command handler or 'normal' System.CommandLine code then you don't need this - the parse error handling
-        /// will have covered these cases.
-        /// </summary>
-        public static T SafelyGetValueForOption<T>(this ParseResult parseResult, Option<T> optionToGet)
-        {
-            if (parseResult.FindResultFor(optionToGet) is OptionResult optionResult &&
-                !parseResult.Errors.Any(e => e.SymbolResult == optionResult))
-            {
-                return optionResult.GetValue(optionToGet);
-            } 
-            else {
-                return default;
-            }
-        }
+        public static bool HasOption(this ParseResult parseResult, CliOption option) => parseResult.GetResult(option) is not null;
     }
 }

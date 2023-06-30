@@ -204,7 +204,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [InlineData("new --interactive install source", "'--interactive'")]
         [InlineData("new --language F# --install source", "'--language','F#'")]
         [InlineData("new --language F# install source", "'--language','F#'")]
-        [InlineData("new source1 source2 source3 --install source", "'source1'")] //only first error is added
+        [InlineData("new source1 source2 source3 --install source", "'source1'|'source2','source3'")]
         [InlineData("new source1 --install source", "'source1'")]
         public void Install_CanReturnParseError(string command, string expectedInvalidTokens)
         {
@@ -229,7 +229,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         {
             ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
-            Command rootCommand = new("dotnet")
+            CliCommand rootCommand = new("dotnet")
             {
                 myCommand
             };

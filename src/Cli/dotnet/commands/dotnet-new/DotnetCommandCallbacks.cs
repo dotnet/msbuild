@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Tools.New
             IEnumerable<string> commandArgs = new[] { "add", projectPath, "package", packageName };
             if (!string.IsNullOrWhiteSpace(version))
             {
-                commandArgs = commandArgs.Append(AddPackageParser.VersionOption.Aliases.First()).Append(version);
+                commandArgs = commandArgs.Append(AddPackageParser.VersionOption.Name).Append(version);
             }
             var addPackageReferenceCommand = new AddPackageReferenceCommand(AddCommandParser.GetCommand().Parse(commandArgs.ToArray()));
             return addPackageReferenceCommand.Execute() == 0;
@@ -52,12 +52,12 @@ namespace Microsoft.DotNet.Tools.New
             IEnumerable<string> commandArgs = new[] { "sln", solutionPath, "add" }.Concat(projectsToAdd);
             if (!string.IsNullOrWhiteSpace(solutionFolder))
             {
-                commandArgs = commandArgs.Append(SlnAddParser.SolutionFolderOption.Aliases.First()).Append(solutionFolder);
+                commandArgs = commandArgs.Append(SlnAddParser.SolutionFolderOption.Name).Append(solutionFolder);
             }
 
             if (inRoot is true)
             {
-                commandArgs = commandArgs.Append(SlnAddParser.InRootOption.Aliases.First());
+                commandArgs = commandArgs.Append(SlnAddParser.InRootOption.Name);
             }
             var addProjectToSolutionCommand = new AddProjectToSolutionCommand(SlnCommandParser.GetCommand().Parse(commandArgs.ToArray()));
             return addProjectToSolutionCommand.Execute() == 0;

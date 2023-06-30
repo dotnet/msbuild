@@ -155,7 +155,7 @@ namespace Microsoft.TemplateEngine.Cli
                               string.Format(
                                   LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled,
                                   packageToInstall).Bold().Red());
-                        _reporterError.WriteLine(LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled_Hint, InstallCommand.ForceOption.Aliases.First());
+                        _reporterError.WriteLine(LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled_Hint, InstallCommand.ForceOption.Name);
                         _reporterError.WriteCommand(Example.For<InstallCommand>(parseResult).WithArgument(BaseInstallCommand.NameArgument, packageToInstall).WithOption(BaseInstallCommand.ForceOption));
 
                         break;
@@ -184,7 +184,7 @@ namespace Microsoft.TemplateEngine.Cli
                                     _reporterError.WriteLine(string.Format(
                                        LocalizableStrings.TemplatePackageCoordinator_Install_Error_VulnerablePackageTip,
                                        packageToInstall,
-                                       SharedOptions.ForceOption.Aliases.First()).Bold());
+                                       SharedOptions.ForceOption.Name).Bold());
                                     _reporterError.WriteCommand(Example.For<InstallCommand>(parseResult).WithArgument(BaseInstallCommand.NameArgument, packageToInstall).WithOption(BaseInstallCommand.ForceOption));
                                     break;
 
@@ -196,7 +196,7 @@ namespace Microsoft.TemplateEngine.Cli
                                     _reporterError.WriteLine(string.Format(
                                         LocalizableStrings.TemplatePackageCoordinator_Update_Error_VulnerablePackageTip,
                                         packageToInstall,
-                                        SharedOptions.ForceOption.Aliases.First()).Bold());
+                                        SharedOptions.ForceOption.Name).Bold());
                                     _reporterError.WriteCommand(Example.For<UninstallCommand>(parseResult).WithArgument(BaseUninstallCommand.NameArgument, packageToInstall));
                                     _reporterError.WriteCommand(Example.For<InstallCommand>(parseResult).WithArgument(BaseInstallCommand.NameArgument, packageToInstall).WithOption(BaseInstallCommand.ForceOption));
                                     break;

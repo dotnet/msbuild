@@ -17,9 +17,9 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void ItCanInvokeParseDirective()
+        public void ItCanInvokeDiagramDirective()
         {
-            string [] args = new[] { "[parse]", "build", "-o", "output" };
+            string [] args = new[] { "[diagram]", "build", "-o", "output" };
             new DotnetCommand(Log, args)
                 .Execute()
                 .Should()

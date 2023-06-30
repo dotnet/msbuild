@@ -284,7 +284,7 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                     Reporter.Error.WriteLine(
                         string.Format(
-                            LocalizableStrings.RerunCommandAndPassForceToCreateAnyway, SharedOptions.ForceOption.Aliases.First()).Bold().Red()
+                            LocalizableStrings.RerunCommandAndPassForceToCreateAnyway, SharedOptions.ForceOption.Name).Bold().Red()
                         );
                     Reporter.Error.WriteCommand(Example.FromExistingTokens(templateArgs.ParseResult).WithOption(SharedOptions.ForceOption));
                     return NewCommandStatus.CannotCreateOutputFile;

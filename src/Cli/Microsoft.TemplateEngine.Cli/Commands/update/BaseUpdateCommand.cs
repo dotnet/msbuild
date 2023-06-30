@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
@@ -18,13 +17,13 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             : base(hostBuilder, commandName, description)
         {
             ParentCommand = parentCommand;
-            this.AddOption(InteractiveOption);
-            this.AddOption(AddSourceOption);
+            this.Options.Add(InteractiveOption);
+            this.Options.Add(AddSourceOption);
         }
 
-        internal virtual Option<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption();
+        internal virtual CliOption<bool> InteractiveOption { get; } = SharedOptionsFactory.CreateInteractiveOption();
 
-        internal virtual Option<string[]> AddSourceOption { get; } = SharedOptionsFactory.CreateAddSourceOption();
+        internal virtual CliOption<string[]> AddSourceOption { get; } = SharedOptionsFactory.CreateAddSourceOption();
 
         protected NewCommand ParentCommand { get; }
 
@@ -32,11 +31,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             UpdateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
-            InvocationContext context)
+            ParseResult context,
+            CancellationToken cancellationToken)
         {
             TemplatePackageCoordinator templatePackageCoordinator = new TemplatePackageCoordinator(environmentSettings, templatePackageManager);
 
-            return templatePackageCoordinator.EnterUpdateFlowAsync(args, context.GetCancellationToken());
+            return templatePackageCoordinator.EnterUpdateFlowAsync(args, cancellationToken);
         }
 
         protected override UpdateCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);
