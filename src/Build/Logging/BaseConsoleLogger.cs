@@ -8,7 +8,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+#if NET7_0_OR_GREATER
 using System.Runtime.CompilerServices;
+#endif
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Evaluation;
