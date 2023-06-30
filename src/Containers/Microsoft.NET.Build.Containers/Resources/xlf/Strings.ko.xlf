@@ -29,22 +29,22 @@
       </trans-unit>
       <trans-unit id="BlobUploadFailed">
         <source>CONTAINER1001: Failed to upload blob using {0}; received status code '{1}'.</source>
-        <target state="new">CONTAINER1001: Failed to upload blob using {0}; received status code '{1}'.</target>
+        <target state="translated">CONTAINER1001: {0}을(를) 사용하여 Blob을 업로드하지 못했습니다. '{1}' 상태 코드를 수신했습니다.</target>
         <note>{StrBegin="CONTAINER1001: "}</note>
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToLocalDaemon">
         <source>Pushed container '{0}' to Docker daemon.</source>
-        <target state="new">Pushed container '{0}' to Docker daemon.</target>
+        <target state="translated">Docker 디먼에 '{0}' 컨테이너를 푸시했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToRegistry">
         <source>Pushed container '{0}' to registry '{1}'.</source>
-        <target state="new">Pushed container '{0}' to registry '{1}'.</target>
+        <target state="translated">'{1}' 레지스트리에 '{0}' 컨테이너를 푸시했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_StartBuildingImage">
         <source>Building image '{0}' with tags '{1}' on top of base image '{2}'.</source>
-        <target state="new">Building image '{0}' with tags '{1}' on top of base image '{2}'.</target>
+        <target state="translated">기본 이미지 '{2}' 위에 '{1}' 태그가 있는 '{0}' 이미지를 빌드하는 중입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldntDeserializeJsonToken">
@@ -169,12 +169,12 @@
       </trans-unit>
       <trans-unit id="LocalDocker_FailedToGetConfig">
         <source>Error while reading daemon config: {0}</source>
-        <target state="new">Error while reading daemon config: {0}</target>
+        <target state="translated">디먼 구성을 읽는 동안 오류가 발생했습니다. {0}</target>
         <note>{0} is the exception message that ends with period</note>
       </trans-unit>
       <trans-unit id="LocalDocker_LocalDaemonErrors">
         <source>The daemon server reported errors: {0}</source>
-        <target state="new">The daemon server reported errors: {0}</target>
+        <target state="translated">디먼 서버에서 오류를 보고했습니다. {0}</target>
         <note>{0} are the list of messages, each message starts with new line</note>
       </trans-unit>
       <trans-unit id="MissingLinkToRegistry">
@@ -214,47 +214,47 @@
       </trans-unit>
       <trans-unit id="Registry_ConfigUploadStarted">
         <source>Uploading config to registry at blob '{0}',</source>
-        <target state="new">Uploading config to registry at blob '{0}',</target>
+        <target state="translated">Blob '{0}'에서 레지스트리에 구성을 업로드하는 중입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Registry_ConfigUploaded">
         <source>Uploaded config to registry.</source>
-        <target state="new">Uploaded config to registry.</target>
+        <target state="translated">레지스트리에 구성을 업로드했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Registry_LayerExists">
         <source>Layer '{0}' already exists.</source>
-        <target state="new">Layer '{0}' already exists.</target>
+        <target state="translated">'{0}' 계층이 이미 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Registry_LayerUploadStarted">
         <source>Uploading layer '{0}' to '{1}'.</source>
-        <target state="new">Uploading layer '{0}' to '{1}'.</target>
+        <target state="translated">'{1}'에 '{0}' 계층을 업로드하는 중입니다.</target>
         <note>{0} is the layer digest, {1} is the registry name</note>
       </trans-unit>
       <trans-unit id="Registry_LayerUploaded">
         <source>Finished uploading layer '{0}' to '{1}'.</source>
-        <target state="new">Finished uploading layer '{0}' to '{1}'.</target>
+        <target state="translated">'{1}'에 '{0}' 계층을 업로드했습니다.</target>
         <note>{0} is the layer digest, {1} is the registry name</note>
       </trans-unit>
       <trans-unit id="Registry_ManifestUploadStarted">
         <source>Uploading manifest to registry '{0}' as blob '{1}'.</source>
-        <target state="new">Uploading manifest to registry '{0}' as blob '{1}'.</target>
+        <target state="translated">'{0}' 레지스트리에 매니페스트를 '{1}' Blob으로 업로드하는 중입니다.</target>
         <note>{0} is the registry name</note>
       </trans-unit>
       <trans-unit id="Registry_ManifestUploaded">
         <source>Uploaded manifest to '{0}'.</source>
-        <target state="new">Uploaded manifest to '{0}'.</target>
+        <target state="translated">'{0}'에 매니페스트를 업로드했습니다.</target>
         <note>{0} is the registry name</note>
       </trans-unit>
       <trans-unit id="Registry_TagUploadStarted">
         <source>Uploading tag '{0}' to '{1}'.</source>
-        <target state="new">Uploading tag '{0}' to '{1}'.</target>
+        <target state="translated">'{1}'에 '{0}' 태그를 업로드하는 중입니다.</target>
         <note>{1} is the registry name</note>
       </trans-unit>
       <trans-unit id="Registry_TagUploaded">
         <source>Uploaded tag '{0}' to '{1}'.</source>
-        <target state="new">Uploaded tag '{0}' to '{1}'.</target>
+        <target state="translated">'{1}'에 '{0}' 태그를 업로드했습니다.</target>
         <note>{1} is the registry name</note>
       </trans-unit>
       <trans-unit id="RequiredItemsContainsEmptyItems">

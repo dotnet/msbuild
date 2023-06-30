@@ -682,12 +682,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageContainsIncorrectlyCasedLocale">
         <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
-        <target state="needs-review-translation">NETSDK1187: パッケージ {0} {1} にロケール '{2}' のリソースがあります。大文字と小文字の区別に関する問題を防ぐために、このロケールはビルド内では標準形式 '{3}' に正規化されています。大文字と小文字の区別に関する問題があることをパッケージの作成者に通知するようお勧めします。</target>
+        <target state="translated">NETSDK1187: パッケージ {0} {1} にロケール '{2}' のリソースがあります。大文字と小文字の区別に関する問題を防ぐために、このロケールはビルド内では標準形式 '{3}' に正規化されています。大文字と小文字の区別に関する問題があることをパッケージの作成者に通知するようお勧めします。</target>
         <note>{StrBegin="NETSDK1187: "} 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
       </trans-unit>
       <trans-unit id="PackageContainsUnknownLocale">
         <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
-        <target state="needs-review-translation">NETSDK1188: パッケージ {0} {1} にロケール '{2}' のリソースがあります。このロケールは .NET では認識されません。無効なロケールを使用していると思われることをパッケージ作成者に通知するようお勧めします。</target>
+        <target state="translated">NETSDK1188: パッケージ {0} {1} にロケール '{2}' のリソースがあります。このロケールは .NET では認識されません。無効なロケールを使用していると思われることをパッケージ作成者に通知するようお勧めします。</target>
         <note>{StrBegin="NETSDK1188: "} 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
@@ -932,7 +932,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">
         <source>NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</source>
-        <target state="new">NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</target>
+        <target state="translated">NETSDK1208: ターゲット プラットフォーム識別子 {0} が認識されませんでした。これは、MSBuildEnableWorkloadResolver が false に設定されており、この識別子に必要な .NET SDK ワークロードが無効なためです。ワークロードを有効にするには、この環境変数または MSBuild プロパティを設定解除します。</target>
         <note>{StrBegin="NETSDK1208: "}</note>
       </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
@@ -942,7 +942,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UsingPreviewSdk">
         <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
-        <target state="new">NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</target>
+        <target state="translated">NETSDK1057: プレビュー版の .NET を使用しています。https://aka.ms/dotnet-support-policy をご覧ください</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">
