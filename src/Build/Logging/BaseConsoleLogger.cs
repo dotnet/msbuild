@@ -19,6 +19,7 @@ using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
 
+// if this is removed, also remove the "#nullable disable" in OptimizedStringIndenter
 #nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging
@@ -1092,7 +1093,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 public StringBuilder Builder { get; }
             }
 #endif
-#nullable restore
+#nullable disable
         }
 
         #region eventHandlers
