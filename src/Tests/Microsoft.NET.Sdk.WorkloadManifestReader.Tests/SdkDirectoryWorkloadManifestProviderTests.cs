@@ -866,6 +866,51 @@ namespace ManifestReaderTests
         }
 
         [Fact]
+        public void GlobalJsonWithoutWorkloadVersionDoesNotOverrideInstallState()
+        {
+            Initialize("8.0.200");
+
+            string? globalJsonPath = Path.Combine(_testDirectory, "global.json");
+            File.WriteAllText(globalJsonPath, "{}");
+
+            CreateMockInstallState("8.0.200",
+                """
+                {
+                    "workloadVersion": "8.0.200",
+                }
+                """);
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.200", """
+{
+  "ios": "11.0.1/8.0.100"
+}
+""");
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.201", """
+{
+  "ios": "11.0.2/8.0.100"
+}
+""");
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: globalJsonPath);
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("ios: 11.0.1/8.0.100");
+        }
+
+        [Fact]
         public void ItShouldReturnManifestsFromTestHook()
         {
             Initialize();
