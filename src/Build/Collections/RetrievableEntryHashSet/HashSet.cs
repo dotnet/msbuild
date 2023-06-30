@@ -14,12 +14,10 @@ using Microsoft.Build.Shared;
 
 /*
     ==================================================================================================================
-    MSBUILD COMMENT:
 
-    Ripped off from Hashset.cs with the following changes:
+    This is the standard Hashset with the following changes:
 
     * class renamed
-    * unnecessary methods and attributes if-deffed out (code retained to help windiff, but indented)
     * require T implements IKeyed, and accept IKeyed directly where necessary
     * all constructors require a comparer -- an IEqualityComparer<IKeyed> -- to avoid mistakes
     * change Contains to give you back the found entry, rather than a boolean
@@ -28,11 +26,7 @@ using Microsoft.Build.Shared;
     * constructor that allows the collection to be read-only
     * implement IDictionary<string, T>
     * some convenience methods taking 'string' as overloads of methods taking IKeyed
-    
-    Other than this it is modified absolutely minimally to make it easy to diff with the originals (in the Originals folder) 
-    to verify that no errors were introduced, and make it easier to possibly pick up any future bug fixes to the original. 
-    The care taken to minimally modify this means that it is not necessary to carefully code review this complex class, 
-    nor unit test it directly.
+
     ==================================================================================================================
 */
 
