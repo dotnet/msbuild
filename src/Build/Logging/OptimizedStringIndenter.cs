@@ -3,8 +3,12 @@
 
 using System;
 using System.Buffers;
+
 #if NET7_0_OR_GREATER
 using System.Runtime.CompilerServices;
+#else
+using System.Text;
+using Microsoft.Build.Framework;
 #endif
 
 namespace Microsoft.Build.BackEnd.Logging;
