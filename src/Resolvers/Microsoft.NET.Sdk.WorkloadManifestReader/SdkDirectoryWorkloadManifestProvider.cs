@@ -93,15 +93,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             var availableWorkloadSets = GetAvailableWorkloadSets();
 
-            if (globalJsonPath != null)
+            string? globalJsonWorkloadSetVersion = GlobalJsonReader.GetWorkloadVersionFromGlobalJson(globalJsonPath);
+            if (globalJsonWorkloadSetVersion != null)
             {
-                string? globalJsonWorkloadSetVersion = GlobalJsonReader.GetWorkloadVersionFromGlobalJson(globalJsonPath);
-                if (globalJsonWorkloadSetVersion != null)
+                if (!availableWorkloadSets.TryGetValue(globalJsonWorkloadSetVersion, out _workloadSet))
                 {
-                    if (!availableWorkloadSets.TryGetValue(globalJsonWorkloadSetVersion, out _workloadSet))
-                    {
-                        throw new FileNotFoundException(string.Format(Strings.WorkloadVersionFromGlobalJsonNotFound, globalJsonWorkloadSetVersion, globalJsonPath));
-                    }
+                    throw new FileNotFoundException(string.Format(Strings.WorkloadVersionFromGlobalJsonNotFound, globalJsonWorkloadSetVersion, globalJsonPath));
                 }
             }
             else
