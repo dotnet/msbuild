@@ -23,7 +23,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     {
         static class GlobalJsonReader
         {
-            public static string? GetWorkloadVersionFromGlobalJson(string globalJsonPath)
+            public static string? GetWorkloadVersionFromGlobalJson(string? globalJsonPath)
             {
                 if (string.IsNullOrEmpty(globalJsonPath))
                 {
@@ -31,20 +31,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 }
 
                 using var fileStream = File.OpenRead(globalJsonPath);
-
-#if USE_SYSTEM_TEXT_JSON
-                var readerOptions = new JsonReaderOptions
-                {
-                    AllowTrailingCommas = true,
-                    CommentHandling = JsonCommentHandling.Skip
-                };
-                var reader = new Utf8JsonStreamReader(fileStream, readerOptions);
-#else
-                using var textReader = new StreamReader(fileStream, System.Text.Encoding.UTF8, true);
-                using var jsonReader = new JsonTextReader(textReader);
-
-                var reader = new Utf8JsonStreamReader(jsonReader);
-#endif
+                var reader = JsonReader.CreateReader(fileStream);
 
                 string? workloadVersion = null;
 
