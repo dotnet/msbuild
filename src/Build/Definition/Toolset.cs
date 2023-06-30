@@ -620,8 +620,9 @@ namespace Microsoft.Build.Evaluation
                 _subToolsets = _subToolsets.DeepClone(v => v.DeepClone(), StringComparer.OrdinalIgnoreCase),
                 _overrideTasksPath = _overrideTasksPath,
                 _defaultOverrideToolsVersion = _defaultOverrideToolsVersion,
+                // ProjectImportPathMatch is immutable
                 _propertySearchPathsTable =
-                    _propertySearchPathsTable.DeepClone(v => v.DeepClone(), StringComparer.OrdinalIgnoreCase),
+                    _propertySearchPathsTable.DeepClone(StringComparer.OrdinalIgnoreCase),
                 _defaultTasksRegistrationAttempted = _defaultTasksRegistrationAttempted,
                 _overrideTasksRegistrationAttempted = _overrideTasksRegistrationAttempted,
                 _defaultTaskRegistry = _defaultTaskRegistry?.DeepClone(),

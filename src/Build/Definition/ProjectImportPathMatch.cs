@@ -42,9 +42,6 @@ namespace Microsoft.Build.Evaluation
             ((ITranslatable)this).Translate(translator);
         }
 
-        internal ProjectImportPathMatch DeepClone()
-            => new ProjectImportPathMatch(_propertyName, new List<string>(_searchPaths));
-
         /// <summary>
         /// String representation of the property reference - eg. "MSBuildExtensionsPath32"
         /// </summary>
@@ -58,7 +55,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Enumeration of the search paths for the property.
         /// </summary>
-        public List<string> SearchPaths => _searchPaths;
+        public IReadOnlyList<string> SearchPaths => _searchPaths;
 
         public void Translate(ITranslator translator)
         {

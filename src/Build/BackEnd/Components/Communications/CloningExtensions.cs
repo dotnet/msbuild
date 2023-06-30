@@ -17,6 +17,11 @@ internal static class CloningExtensions
 
     public static Dictionary<TKey, TValue>? DeepClone<TKey, TValue>(
         this IDictionary<TKey, TValue>? dictionary,
+        IEqualityComparer<TKey> comparer) where TKey : notnull
+        => dictionary.DeepClone(null, null, comparer);
+
+    public static Dictionary<TKey, TValue>? DeepClone<TKey, TValue>(
+        this IDictionary<TKey, TValue>? dictionary,
         Func<TValue, TValue> valueClone,
         IEqualityComparer<TKey> comparer) where TKey : notnull
         => dictionary.DeepClone(null, valueClone, comparer);
