@@ -1793,7 +1793,6 @@ namespace Microsoft.Build.Execution
         {
             translator.Translate(ref _toolset, Toolset.FactoryForDeserialization);
             translator.Translate(ref _nextRegistrationOrderId);
-
             IDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> copy = _taskRegistrations;
             translator.TranslateDictionary(ref copy, TranslateTaskRegistrationKey, TranslateTaskRegistrationValue, count => CreateRegisteredTaskDictionary(count));
 
