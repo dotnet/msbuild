@@ -80,12 +80,12 @@
       <trans-unit id="ManifestFromInstallStateNotFound">
         <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
         <target state="new">Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</target>
-        <note />
+        <note>{Locked="dotnet workload repair"}</note>
       </trans-unit>
       <trans-unit id="ManifestFromWorkloadSetNotFound">
         <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
         <target state="new">Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</target>
-        <note />
+        <note>{Locked="dotnet workload repair"}</note>
       </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
@@ -139,8 +139,8 @@
       </trans-unit>
       <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
         <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
-        <target state="translated">A versão da carga de trabalho {0}, especificada em {1}, não foi localizada. Execute "dotnet workload restore" para instalar esta versão da carga de trabalho.</target>
-        <note />
+        <target state="new">Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</target>
+        <note>{Locked="dotnet workload restore"}</note>
       </trans-unit>
       <trans-unit id="WorkloadVersionFromInstallStateNotFound">
         <source>Workload version {0}, which was specified in {1}, was not found.</source>
