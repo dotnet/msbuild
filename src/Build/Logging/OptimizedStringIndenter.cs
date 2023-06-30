@@ -5,9 +5,6 @@ using System;
 using System.Buffers;
 #if NET7_0_OR_GREATER
 using System.Runtime.CompilerServices;
-#else
-using System.Text;
-using System.Threading;
 #endif
 
 namespace Microsoft.Build.BackEnd.Logging;
@@ -89,17 +86,17 @@ internal static class OptimizedStringIndenter
         });
 #pragma warning restore CS8500
 #else
-        using RentedBuilder rental = RentBuilder(indentedStringLength);
+        StringBuilder builder = StringBuilderCache.Acquire(indentedStringLength);
 
         foreach (StringSegment segment in segments)
         {
-            rental.Builder
+            builder
                 .Append(' ', indent)
                 .Append(s, segment.Start, segment.Length)
                 .AppendLine();
         }
 
-        string result = rental.Builder.ToString();
+        string result = StringBuilderCache.GetStringAndRelease(builder);
 #endif
 
         if (pooledArray is not null)
@@ -180,35 +177,4 @@ internal static class OptimizedStringIndenter
         public int Length { get; }
         public int TotalLength { get; }
     }
-
-#if !NET7_0_OR_GREATER
-    private static RentedBuilder RentBuilder(int capacity) => new RentedBuilder(capacity);
-
-    private ref struct RentedBuilder
-    {
-        // The maximum capacity for a StringBuilder that we'll cache.  StringBuilders with
-        // larger capacities will be allowed to be GC'd.
-        private const int MaxStringBuilderCapacity = 512;
-
-        private static StringBuilder? _cachedBuilder;
-
-        public RentedBuilder(int capacity)
-        {
-            Builder = Interlocked.Exchange(ref _cachedBuilder, null) ?? new StringBuilder(capacity);
-            Builder.EnsureCapacity(capacity);
-        }
-
-        public void Dispose()
-        {
-            // if builder's capacity is within our limits, return it to the cache
-            if (Builder.Capacity <= MaxStringBuilderCapacity)
-            {
-                Builder.Clear();
-                Interlocked.Exchange(ref _cachedBuilder, Builder);
-            }
-        }
-
-        public StringBuilder Builder { get; }
-    }
-#endif
 }
