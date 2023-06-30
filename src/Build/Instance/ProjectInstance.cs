@@ -609,7 +609,7 @@ namespace Microsoft.Build.Execution
                     _properties.Set(property.DeepClone(_isImmutable));
                 }
 
-                _items = new ItemDictionary<ProjectItemInstance>(that._items.ItemTypes.Count);
+                _items = new ItemDictionary<ProjectItemInstance>(that._items.Count);
 
                 foreach (ProjectItemInstance item in that.Items)
                 {

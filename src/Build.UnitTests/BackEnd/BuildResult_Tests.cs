@@ -326,16 +326,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(result.ConfigurationId, deserializedResult.ConfigurationId);
             Assert.True(TranslationHelpers.CompareCollections(result.DefaultTargets, deserializedResult.DefaultTargets, StringComparer.Ordinal));
-            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception));
+            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception, out string diffReason), diffReason);
             Assert.Equal(result.Exception.Message, deserializedResult.Exception.Message);
             Assert.Equal(result.GlobalRequestId, deserializedResult.GlobalRequestId);
             Assert.True(TranslationHelpers.CompareCollections(result.InitialTargets, deserializedResult.InitialTargets, StringComparer.Ordinal));
             Assert.Equal(result.NodeRequestId, deserializedResult.NodeRequestId);
             Assert.Equal(result["alpha"].ResultCode, deserializedResult["alpha"].ResultCode);
-            Assert.True(TranslationHelpers.CompareExceptions(result["alpha"].Exception, deserializedResult["alpha"].Exception));
+            Assert.True(TranslationHelpers.CompareExceptions(result["alpha"].Exception, deserializedResult["alpha"].Exception, out diffReason), diffReason);
             Assert.True(TranslationHelpers.CompareCollections(result["alpha"].Items, deserializedResult["alpha"].Items, TaskItemComparer.Instance));
             Assert.Equal(result["omega"].ResultCode, deserializedResult["omega"].ResultCode);
-            Assert.True(TranslationHelpers.CompareExceptions(result["omega"].Exception, deserializedResult["omega"].Exception));
+            Assert.True(TranslationHelpers.CompareExceptions(result["omega"].Exception, deserializedResult["omega"].Exception, out diffReason), diffReason);
             Assert.True(TranslationHelpers.CompareCollections(result["omega"].Items, deserializedResult["omega"].Items, TaskItemComparer.Instance));
         }
 

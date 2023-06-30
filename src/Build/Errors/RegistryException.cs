@@ -3,6 +3,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using Microsoft.Build.Framework.BuildException;
 
 #nullable disable
 
@@ -12,7 +13,7 @@ namespace Microsoft.Build.Exceptions
     /// Generic exception used to wrap exceptions thrown during Registry access.
     /// </summary>
     [Serializable]
-    internal class RegistryException : Exception
+    internal class RegistryException : BuildExceptionBase
     {
         /// <summary>
         /// Basic constructor.
