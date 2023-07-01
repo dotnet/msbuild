@@ -1495,12 +1495,11 @@ namespace Microsoft.Build.Execution
                 // This is ignore case to ensure that task items whose item specs differ only by
                 // casing still have the same hash code, since this is used to determine if we have duplicates when
                 // we do duplicate removal.
-                // Hash in direct metadata count as it's cheap.
-#if NET7_0_OR_GREATER
-                return HashCode.Combine(StringComparer.OrdinalIgnoreCase.GetHashCode(_includeEscaped), DirectMetadataCount);
-#else
-                return StringComparer.OrdinalIgnoreCase.GetHashCode(_includeEscaped) ^ DirectMetadataCount;
-#endif
+                //
+                // Ideally this would also hash in something like the metadata count. However this requires calculation,
+                // because local and inherited metadata are equally considered during equality comparison, and the
+                // former may mask some of the latter.
+                return StringComparer.OrdinalIgnoreCase.GetHashCode(_includeEscaped);
             }
 
             /// <summary>
