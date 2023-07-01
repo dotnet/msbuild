@@ -2369,7 +2369,6 @@ $@"<Project>
             success.ShouldBe(expectedSuccess);
         }
 
-        // Test failed due to timeout. Windows-on-Core Full Framework.
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         [Fact]
