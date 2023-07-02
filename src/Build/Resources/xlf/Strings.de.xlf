@@ -186,6 +186,11 @@
         <target state="translated">Die Parameter wurden über diesen Punkt hinaus abgeschnitten. Um alle Parameter anzuzeigen, löschen Sie die Umgebungsvariable MSBUILDTRUNCATETASKINPUTLOGGING.</target>
         <note />
       </trans-unit>
+      <trans-unit id="LoggingBeforeTaskInitialization">
+        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
+        <target state="new">MSB6005: Task attempted to log before it was initialized. Message was: {0}</target>
+        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Das Metaprojekt "{0}" wurde generiert.</target>
