@@ -331,7 +331,7 @@ namespace Microsoft.Build.Construction
         public virtual void DeepCopyFrom(ProjectElementContainer element)
         {
             ErrorUtilities.VerifyThrowArgumentNull(element, nameof(element));
-            ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), nameof(element));
+            ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), "UnrecognizedElement");
 
             if (this == element)
             {

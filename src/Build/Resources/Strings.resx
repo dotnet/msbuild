@@ -466,6 +466,10 @@
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</comment>
   </data>
+  <data name="LoggingBeforeTaskInitialization" UESanitized="false" Visibility="Public">
+    <value>MSB6005: Task attempted to log before it was initialized. Message was: {0}</value>
+    <comment>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</comment>
+  </data>
   <data name="FatalTaskError" xml:space="preserve">
     <value>MSB4018: The "{0}" task failed unexpectedly.</value>
     <comment>{StrBegin="MSB4018: "}UE: This message is shown when a task terminates because of an unhandled exception. The cause is most likely a

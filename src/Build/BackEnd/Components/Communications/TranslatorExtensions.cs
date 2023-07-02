@@ -71,11 +71,11 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref typeName);
 
             var type = Type.GetType(typeName);
-            ErrorUtilities.VerifyThrowInvalidOperation(type != null, "type cannot be null");
-            ErrorUtilities.VerifyThrowInvalidOperation(
+            ErrorUtilities.VerifyThrow(type != null, "type cannot be null");
+            ErrorUtilities.VerifyThrow(
                 typeof(T).IsAssignableFrom(type),
                 $"{typeName} must be a {typeof(T).FullName}");
-            ErrorUtilities.VerifyThrowInvalidOperation(
+            ErrorUtilities.VerifyThrow(
                 typeof(ITranslatable).IsAssignableFrom(type),
                 $"{typeName} must be a {nameof(ITranslatable)}");
 

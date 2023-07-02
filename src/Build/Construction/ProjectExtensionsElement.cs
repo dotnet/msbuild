@@ -162,7 +162,7 @@ namespace Microsoft.Build.Construction
         public override void CopyFrom(ProjectElement element)
         {
             ErrorUtilities.VerifyThrowArgumentNull(element, nameof(element));
-            ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), nameof(element));
+            ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), "UnrecognizedElement");
 
             if (this == element)
             {
