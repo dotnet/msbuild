@@ -251,12 +251,15 @@
     <Compile Include="Collections\RetrievableEntryHashSet\BitHelper.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Collections\RetrievableEntryHashSet\HashSetDebugView.cs">
+    <Compile Include="Collections\RetrievableEntryHashSet\ICollectionDebugView.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.SerializationInfoTable.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>    
     <Compile Include="Construction\ImplicitImportLocation.cs" />
     <Compile Include="Construction\ProjectSdkElement.cs" />
     <Compile Include="Definition\ProjectOptions.cs" />

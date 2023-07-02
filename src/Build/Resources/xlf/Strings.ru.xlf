@@ -8,6 +8,11 @@
         <note>{StrBegin="MSB4001: "}UE: This message is shown when a task has more than one .NET property with the same name -- it's unclear which of
     those properties the task wants to use as a parameter in project files.</note>
       </trans-unit>
+      <trans-unit id="ArrayPlusOffTooSmall">
+        <source>Destination array is not long enough to copy all the items in the collection. Check array index and length.</source>
+        <target state="new">Destination array is not long enough to copy all the items in the collection. Check array index and length.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AspNetCompiler.UnsupportedMSBuildVersion">
         <source>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
         <target state="translated">MSB4249: невозможно выполнить сборку проекта веб-сайта "{0}". Компилятор ASP.NET доступен только в версии MSBuild для .NET Framework.</target>

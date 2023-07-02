@@ -122,6 +122,9 @@
     <comment>{StrBegin="MSB4001: "}UE: This message is shown when a task has more than one .NET property with the same name -- it's unclear which of
     those properties the task wants to use as a parameter in project files.</comment>
   </data>
+  <data name="ArrayPlusOffTooSmall" xml:space="preserve">
+    <value>Destination array is not long enough to copy all the items in the collection. Check array index and length.</value>
+  </data>
   <data name="AttributeTypeLoadError" xml:space="preserve">
     <value>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</value>
     <comment>{StrBegin="MSB4002: "}UE: This message is shown when the .NET attributes that a task's .NET properties are decorated with, cannot be
