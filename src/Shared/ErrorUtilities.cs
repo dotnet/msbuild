@@ -765,7 +765,7 @@ namespace Microsoft.Build.Shared
                 ThrowArgumentLength(parameterName);
             }
         }
-
+#endif
         private static void ThrowArgumentLength(string parameterName)
         {
             if (s_throwExceptions)
@@ -773,7 +773,6 @@ namespace Microsoft.Build.Shared
                 throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
             }
         }
-#endif
 
         /// <summary>
         /// Throws an ArgumentNullException if the given string parameter is null
