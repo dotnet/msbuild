@@ -53,7 +53,6 @@ namespace Microsoft.Build.Collections
         private int _count;
         private int _freeList;
         private int _freeCount;
-        private int _version;
         private IEqualityComparer<string> _comparer;
         private bool _readOnly;
 
@@ -416,7 +415,7 @@ namespace Microsoft.Build.Collections
                 throw new ArgumentNullException(nameof(info));
             }
 
-            info.AddValue(VersionName, _version); // need to serialize version to avoid problems with serializing while enumerating
+            info.AddValue(VersionName, 0); // serialize dummy version
             info.AddValue(ComparerName, _comparer, typeof(IEqualityComparer<string>));
             info.AddValue(CapacityName, _buckets == null ? 0 : _buckets.Length);
 
@@ -464,7 +463,7 @@ namespace Microsoft.Build.Collections
                 _buckets = null;
             }
 
-            _version = siInfo.GetInt32(VersionName);
+            _ = siInfo.GetInt32(VersionName);
             _ = HashHelpers.SerializationInfoTable.Remove(this);
         }
 
@@ -541,7 +540,6 @@ namespace Microsoft.Build.Collections
             }
 
             int oldCount = _count;
-            _version++;
             Initialize(newSize);
             Entry[] entries = _entries;
             int count = 0;
@@ -636,7 +634,6 @@ namespace Microsoft.Build.Collections
                 entry.Next = bucket - 1; // Value in _buckets is 1-based
                 entry.Value = value;
                 bucket = index + 1;
-                _version++;
             }
 
             return;
@@ -737,7 +734,7 @@ namespace Microsoft.Build.Collections
             internal Enumerator(RetrievableEntryHashSet<T> hashSet)
             {
                 _hashSet = hashSet;
-                _version = hashSet._version;
+                _version = GetVersion();
                 _index = 0;
                 Current = default;
             }
@@ -759,7 +756,7 @@ namespace Microsoft.Build.Collections
 
             public bool MoveNext()
             {
-                if (_version != _hashSet._version)
+                if (_version != GetVersion())
                 {
                     throw new InvalidOperationException();
                 }
@@ -785,13 +782,23 @@ namespace Microsoft.Build.Collections
 
             void IEnumerator.Reset()
             {
-                if (_version != _hashSet._version)
+                if (_version != GetVersion())
                 {
                     throw new InvalidOperationException();
                 }
 
                 _index = 0;
                 Current = default;
+            }
+
+            private int GetVersion()
+            {
+                // As a check on concurrent modifications, check that neither count
+                // nor freeCount change during enumeration. TrimExcess would change only
+                // the latter.
+                // This avoids storing a version field on every collection object, while
+                // catching almost as many cases.
+                return _hashSet._count + _hashSet._freeCount << 16;
             }
         }
     }
