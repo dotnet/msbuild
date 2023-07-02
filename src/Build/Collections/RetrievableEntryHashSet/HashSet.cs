@@ -413,7 +413,7 @@ namespace Microsoft.Build.Collections
         {
             if (info == null)
             {
-                throw new InvalidOperationException();
+                throw new ArgumentNullException(nameof(info));
             }
 
             info.AddValue(VersionName, _version); // need to serialize version to avoid problems with serializing while enumerating
