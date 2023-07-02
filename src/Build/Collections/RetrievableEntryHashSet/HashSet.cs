@@ -21,7 +21,7 @@ namespace Microsoft.Build.Collections
     ///    This is the standard Hashset with the following changes:
     ///
     ///    * require T implements IKeyed, and accept IKeyed directly where necessary
-    ///    * all constructors require a constrainedComparer -- an IEqualityComparer&lt;IKeyed&gt; -- to avoid mistakes
+    ///    * all constructors require a comparer -- an IEqualityComparer&lt;IKeyed&gt; -- to avoid mistakes
     ///    * Get() to give you back the found entry, rather than just Contains() for a boolean
     ///    * Add() always adds, even if there's an entry already present with the same name (replacement semantics)
     ///    * Can set to read-only.
@@ -63,7 +63,6 @@ namespace Microsoft.Build.Collections
         private int _freeCount;
         private int _version;
         private IEqualityComparer<string> _comparer;
-        private IConstrainedEqualityComparer<string> _constrainedComparer;
         private bool _readOnly;
 
         /// <summary>
@@ -74,7 +73,6 @@ namespace Microsoft.Build.Collections
             ErrorUtilities.VerifyThrowInternalError(comparer != null, "use explicit comparer");
 
             _comparer = comparer;
-            _constrainedComparer = comparer as IConstrainedEqualityComparer<string>;
         }
 
         /// <summary>
@@ -222,12 +220,11 @@ namespace Microsoft.Build.Collections
         {
             ErrorUtilities.VerifyThrowArgumentOutOfRange(length < 0, nameof(length));
             ErrorUtilities.VerifyThrowArgumentOutOfRange(index >= 0 && index <= key.Length - length, nameof(index));
-            ErrorUtilities.VerifyThrow(_constrainedComparer != null, "Cannot do a constrained lookup.");
 
             return GetCore(key, index, length);
         }
 
-        /// <summary>Initializes the HashSet from another HashSet with the same element type and equality constrainedComparer.</summary>
+        /// <summary>Initializes the HashSet from another HashSet with the same element type and equality comparer.</summary>
         private void ConstructFrom(RetrievableEntryHashSet<T> source)
         {
             if (source.Count == 0)
@@ -276,8 +273,6 @@ namespace Microsoft.Build.Collections
         /// <returns>item if found, otherwise null</returns>
         private T GetCore(string item, int index, int length)
         {
-            Debug.Assert(_constrainedComparer != null || (index == 0 && length == item.Length));
-
             Entry[] entries = _entries;
             if (_entries == null)
             {
@@ -286,17 +281,25 @@ namespace Microsoft.Build.Collections
 
             uint collisionCount = 0;
             IEqualityComparer<string> comparer = _comparer;
-            IConstrainedEqualityComparer<string> constrainedComparer = _constrainedComparer;
-            int hashCode = (_constrainedComparer != null) ?
-                constrainedComparer.GetHashCode(item, index, length) :
-                comparer.GetHashCode(item);
+            IConstrainedEqualityComparer<string> constrainedComparer = null;
+            int hashCode = 0;
+            if (index != 0 || length != item.Length)
+            {
+                constrainedComparer = comparer as IConstrainedEqualityComparer<string>;
+                Debug.Assert(constrainedComparer != null, "need constrained comparer to compare with index/length");
+                hashCode = constrainedComparer.GetHashCode(item, index, length);
+            }
+            else
+            {
+                hashCode = comparer.GetHashCode(item);
+            }
 
             int i = GetBucketRef(hashCode) - 1; // Value in _buckets is 1-based
             while (i >= 0)
             {
                 ref Entry entry = ref entries[i];
                 if (entry.HashCode == hashCode &&
-                    constrainedComparer != null ? constrainedComparer.Equals(entry.Value.Key, item, index, length) : comparer.Equals(entry.Value.Key, item))
+                    constrainedComparer == null ? comparer.Equals(entry.Value.Key, item) : constrainedComparer.Equals(entry.Value.Key, item, index, length))
                 {
                     return entry.Value;
                 }
@@ -440,7 +443,6 @@ namespace Microsoft.Build.Collections
 
             int capacity = siInfo.GetInt32(CapacityName);
             _comparer = (IEqualityComparer<string>)siInfo.GetValue(ComparerName, typeof(IEqualityComparer<string>))!;
-            _constrainedComparer = _comparer as IConstrainedEqualityComparer<string>;
             _freeList = -1;
             _freeCount = 0;
 
@@ -642,8 +644,8 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Equality constrainedComparer against another of this type.
-        /// Compares entries by reference - not merely by using the constrainedComparer on the key.
+        /// Equality comparison against another of this type.
+        /// Compares entries by reference - not merely by using the comparison on the key.
         /// </summary>
         internal bool EntriesAreReferenceEquals(RetrievableEntryHashSet<T> other)
         {
