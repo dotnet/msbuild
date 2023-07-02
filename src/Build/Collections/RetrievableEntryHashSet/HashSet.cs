@@ -216,7 +216,7 @@ namespace Microsoft.Build.Collections
         /// <returns>item if found, otherwise null</returns>
         public T Get(string key, int index, int length)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(length < 0, nameof(length));
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(length >= 0, nameof(length));
             ErrorUtilities.VerifyThrowArgumentOutOfRange(index >= 0 && index <= key.Length - length, nameof(index));
 
             return GetCore(key, index, length);
