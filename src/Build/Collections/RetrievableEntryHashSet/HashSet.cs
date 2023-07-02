@@ -279,6 +279,7 @@ namespace Microsoft.Build.Collections
 
             uint collisionCount = 0;
             IEqualityComparer<string> comparer = _comparer;
+            Debug.Assert(comparer != null, "no comparer");
             IConstrainedEqualityComparer<string> constrainedComparer = null;
             int hashCode = 0;
             if (index != 0 || length != item.Length)
@@ -297,7 +298,7 @@ namespace Microsoft.Build.Collections
             {
                 ref Entry entry = ref entries[i];
                 if (entry.HashCode == hashCode &&
-                    constrainedComparer == null ? comparer.Equals(entry.Value.Key, item) : constrainedComparer.Equals(entry.Value.Key, item, index, length))
+                    (constrainedComparer == null ? comparer.Equals(entry.Value.Key, item) : constrainedComparer.Equals(entry.Value.Key, item, index, length)))
                 {
                     return entry.Value;
                 }
