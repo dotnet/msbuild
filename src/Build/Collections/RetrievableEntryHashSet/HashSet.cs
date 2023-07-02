@@ -366,7 +366,7 @@ namespace Microsoft.Build.Collections
 
                     Debug.Assert((StartOfFreeList - _freeList) < 0, "shouldn't underflow because max hashtable length is MaxPrimeArrayLength = 0x7FEFFFFD(2146435069) _freelist underflow threshold 2147483646");
                     entry.Next = StartOfFreeList - _freeList;
-                    entry.Value = default!;
+                    entry.Value = default;
 
                     _freeList = i;
                     _freeCount++;
@@ -441,7 +441,7 @@ namespace Microsoft.Build.Collections
             }
 
             int capacity = siInfo.GetInt32(CapacityName);
-            _comparer = (IEqualityComparer<string>)siInfo.GetValue(ComparerName, typeof(IEqualityComparer<string>))!;
+            _comparer = (IEqualityComparer<string>)siInfo.GetValue(ComparerName, typeof(IEqualityComparer<string>));
             _freeList = -1;
             _freeCount = 0;
 
@@ -791,7 +791,7 @@ namespace Microsoft.Build.Collections
                 }
 
                 _index = 0;
-                Current = default!;
+                Current = default;
             }
         }
     }
