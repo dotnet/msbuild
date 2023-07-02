@@ -4421,7 +4421,7 @@ namespace Microsoft.Build.Evaluation
             {
                 ProjectItemDefinition newItemDefinition = new ProjectItemDefinition(Project, itemType);
 
-                ItemDefinitions.Add(newItemDefinition);
+                ItemDefinitions.AddOrReplace(newItemDefinition);
 
                 return newItemDefinition;
             }

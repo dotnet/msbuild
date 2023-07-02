@@ -1446,7 +1446,7 @@ namespace Microsoft.Build.Execution
         {
             ProjectItemDefinitionInstance itemDefinitionInstance = new ProjectItemDefinitionInstance(itemType);
 
-            _itemDefinitions.Add(itemDefinitionInstance);
+            _itemDefinitions.AddOrReplace(itemDefinitionInstance);
 
             return itemDefinitionInstance;
         }
@@ -2983,7 +2983,7 @@ namespace Microsoft.Build.Execution
 
             foreach (ProjectItemDefinition definition in itemDefinitions.Values)
             {
-                _itemDefinitions.Add(new ProjectItemDefinitionInstance(definition));
+                _itemDefinitions.AddOrReplace(new ProjectItemDefinitionInstance(definition));
             }
         }
 

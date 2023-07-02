@@ -1,12 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-// Used by Hashtable and Dictionary's SeralizationInfo .ctor's to store the SeralizationInfo
-// object until OnDeserialization is called.
-
-using System.Threading;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+// Used by Hashtable and Dictionary's SerializationInfo .ctor's to store the SerializationInfo
+// object until OnDeserialization is called.
+using System.Threading;
 
 namespace System.Collections
 {
@@ -20,7 +19,7 @@ namespace System.Collections
             {
                 if (s_serializationInfoTable == null)
                 {
-                    Interlocked.CompareExchange(ref s_serializationInfoTable, new ConditionalWeakTable<object, SerializationInfo>(), null);
+                    _ = Interlocked.CompareExchange(ref s_serializationInfoTable, new ConditionalWeakTable<object, SerializationInfo>(), null);
                 }
 
                 return s_serializationInfoTable;

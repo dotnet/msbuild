@@ -116,7 +116,7 @@ namespace Microsoft.Build.Construction
                 if (!seenString)
                 {
                     entry = new StringCacheEntry(key);
-                    _strings.Add(entry);
+                    _strings.AddOrReplace(entry);
                 }
 
                 if (!seenDocument)

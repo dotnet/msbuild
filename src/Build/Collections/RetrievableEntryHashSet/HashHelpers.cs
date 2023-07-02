@@ -8,8 +8,6 @@ namespace System.Collections
 {
     internal static partial class HashHelpers
     {
-        public const uint HashCollisionThreshold = 100;
-
         // This is the maximum prime smaller than Array.MaxLength.
         public const int MaxPrimeArrayLength = 0x7FFFFFC3;
 
@@ -49,8 +47,10 @@ namespace System.Collections
                         return false;
                     }
                 }
+
                 return true;
             }
+
             return candidate == 2;
         }
 
@@ -70,13 +70,14 @@ namespace System.Collections
             }
 
             // Outside of our predefined table. Compute the hard way.
-            for (int i = (min | 1); i < int.MaxValue; i += 2)
+            for (int i = min | 1; i < int.MaxValue; i += 2)
             {
                 if (IsPrime(i) && ((i - 1) % HashPrime != 0))
                 {
                     return i;
                 }
             }
+
             return min;
         }
 
@@ -87,9 +88,9 @@ namespace System.Collections
 
             // Allow the hashtables to grow to maximum possible size (~2G elements) before encountering capacity overflow.
             // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
-            if ((uint)newSize > MaxPrimeArrayLength && MaxPrimeArrayLength > oldSize)
+            if ((uint)newSize > MaxPrimeArrayLength && oldSize < MaxPrimeArrayLength)
             {
-                Debug.Assert(MaxPrimeArrayLength == GetPrime(MaxPrimeArrayLength), "Invalid MaxPrimeArrayLength");
+                Debug.Assert(GetPrime(MaxPrimeArrayLength) == MaxPrimeArrayLength, "Invalid MaxPrimeArrayLength");
                 return MaxPrimeArrayLength;
             }
 
@@ -99,14 +100,14 @@ namespace System.Collections
         /// <summary>Returns approximate reciprocal of the divisor: ceil(2**64 / divisor).</summary>
         /// <remarks>This should only be used on 64-bit.</remarks>
         public static ulong GetFastModMultiplier(uint divisor) =>
-            ulong.MaxValue / divisor + 1;
+            (ulong.MaxValue / divisor) + 1;
 
         /// <summary>Performs a mod operation using the multiplier pre-computed with <see cref="GetFastModMultiplier"/>.</summary>
         /// <remarks>This should only be used on 64-bit.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint FastMod(uint value, uint divisor, ulong multiplier)
         {
-            // We use modified Daniel Lemire's fastmod algorithm (https://github.com/dotnet/runtime/pull/406),
+            // We use modified Daniel Lemire's fastmod algorithm,
             // which allows to avoid the long multiplication if the divisor is less than 2**31.
             Debug.Assert(divisor <= int.MaxValue);
 

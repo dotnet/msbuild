@@ -52,9 +52,9 @@ namespace Microsoft.Build.Shared
 
         internal static void VerifyThrowInternalError(bool condition, string message, params object[] args)
         {
-            if (s_throwExceptions && !condition)
+            if (!condition)
             {
-                throw new InternalErrorException(ResourceUtilities.FormatString(message, args));
+                ThrowInternalError(message, args);
             }
         }
 
@@ -320,9 +320,6 @@ namespace Microsoft.Build.Shared
         /// <param name="args">Formatting args.</param>
         internal static void ThrowInvalidOperation(string resourceName, params object[] args)
         {
-#if DEBUG
-            ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             if (s_throwExceptions)
             {
                 throw new InvalidOperationException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args));
@@ -338,6 +335,9 @@ namespace Microsoft.Build.Shared
             bool condition,
             string resourceName)
         {
+#if DEBUG
+            ResourceUtilities.VerifyResourceStringExists(resourceName);
+#endif
             if (!condition)
             {
                 // PERF NOTE: explicitly passing null for the arguments array
@@ -357,6 +357,9 @@ namespace Microsoft.Build.Shared
             string resourceName,
             object arg0)
         {
+#if DEBUG
+            ResourceUtilities.VerifyResourceStringExists(resourceName);
+#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInvalidOperation() method, because that method always
             // allocates memory for its variable array of arguments
@@ -379,6 +382,9 @@ namespace Microsoft.Build.Shared
             object arg0,
             object arg1)
         {
+#if DEBUG
+            ResourceUtilities.VerifyResourceStringExists(resourceName);
+#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInvalidOperation() method, because that method always
             // allocates memory for its variable array of arguments
@@ -403,6 +409,9 @@ namespace Microsoft.Build.Shared
             object arg1,
             object arg2)
         {
+#if DEBUG
+            ResourceUtilities.VerifyResourceStringExists(resourceName);
+#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInvalidOperation() method, because that method always
             // allocates memory for its variable array of arguments
@@ -429,6 +438,9 @@ namespace Microsoft.Build.Shared
             object arg2,
             object arg3)
         {
+#if DEBUG
+            ResourceUtilities.VerifyResourceStringExists(resourceName);
+#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInvalidOperation() method, because that method always
             // allocates memory for its variable array of arguments
@@ -474,9 +486,6 @@ namespace Microsoft.Build.Shared
             string resourceName,
             params object[] args)
         {
-#if DEBUG
-            ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             if (s_throwExceptions)
             {
                 throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args), innerException);
@@ -570,6 +579,9 @@ namespace Microsoft.Build.Shared
             Exception innerException,
             string resourceName)
         {
+#if DEBUG
+            ResourceUtilities.VerifyResourceStringExists(resourceName);
+#endif
             if (!condition)
             {
                 // PERF NOTE: explicitly passing null for the arguments array
@@ -592,6 +604,9 @@ namespace Microsoft.Build.Shared
             string resourceName,
             object arg0)
         {
+#if DEBUG
+            ResourceUtilities.VerifyResourceStringExists(resourceName);
+#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowArgument() method, because that method always allocates
             // memory for its variable array of arguments
@@ -617,6 +632,9 @@ namespace Microsoft.Build.Shared
             object arg0,
             object arg1)
         {
+#if DEBUG
+            ResourceUtilities.VerifyResourceStringExists(resourceName);
+#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowArgument() method, because that method always allocates
             // memory for its variable array of arguments
@@ -638,6 +656,9 @@ namespace Microsoft.Build.Shared
             object arg1,
             object arg2)
         {
+#if DEBUG
+            ResourceUtilities.VerifyResourceStringExists(resourceName);
+#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowArgument() method, because that method always allocates
             // memory for its variable array of arguments
@@ -660,6 +681,9 @@ namespace Microsoft.Build.Shared
             object arg2,
             object arg3)
         {
+#if DEBUG
+            ResourceUtilities.VerifyResourceStringExists(resourceName);
+#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowArgument() method, because that method always allocates
             // memory for its variable array of arguments
@@ -706,9 +730,9 @@ namespace Microsoft.Build.Shared
         {
             VerifyThrowArgumentNull(parameter, parameterName);
 
-            if (parameter.Length == 0 && s_throwExceptions)
+            if (parameter.Length == 0)
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
+                ThrowArgumentLength(parameterName);
             }
         }
 
@@ -723,9 +747,9 @@ namespace Microsoft.Build.Shared
         {
             VerifyThrowArgumentNull(parameter, parameterName);
 
-            if (parameter.Count == 0 && s_throwExceptions)
+            if (parameter.Count == 0)
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
+                ThrowArgumentLength(parameterName);
             }
         }
 
@@ -736,7 +760,15 @@ namespace Microsoft.Build.Shared
         /// <param name="parameterName"></param>
         internal static void VerifyThrowArgumentLengthIfNotNull<T>(IReadOnlyCollection<T> parameter, string parameterName)
         {
-            if (parameter?.Count == 0 && s_throwExceptions)
+            if (parameter?.Count == 0)
+            {
+                ThrowArgumentLength(parameterName);
+            }
+        }
+
+        private static void ThrowArgumentLength(string parameterName)
+        {
+            if (s_throwExceptions)
             {
                 throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
             }
@@ -765,9 +797,9 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void VerifyThrowArgumentLengthIfNotNull(string parameter, string parameterName)
         {
-            if (parameter?.Length == 0 && s_throwExceptions)
+            if (parameter?.Length == 0)
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
+                ThrowArgumentLength(parameterName);
             }
         }
 
@@ -788,7 +820,18 @@ namespace Microsoft.Build.Shared
         /// <remarks>This method is thread-safe.</remarks>
         internal static void VerifyThrowArgumentNull(object parameter, string parameterName, string resourceName)
         {
-            if (parameter == null && s_throwExceptions)
+#if DEBUG
+            ResourceUtilities.VerifyResourceStringExists(resourceName);
+#endif
+            if (parameter == null)
+            {
+                ThrowArgumentNull(parameterName, resourceName);
+            }
+        }
+
+        internal static void ThrowArgumentNull(string parameterName, string resourceName)
+        {
+            if (s_throwExceptions)
             {
                 // Most ArgumentNullException overloads append its own rather clunky multi-line message.
                 // So use the one overload that doesn't.
@@ -822,11 +865,9 @@ namespace Microsoft.Build.Shared
 
         internal static void VerifyThrowObjectDisposed(bool condition, string objectName)
         {
+            if (s_throwExceptions && !condition)
             {
-                if (s_throwExceptions && !condition)
-                {
-                    throw new ObjectDisposedException(objectName);
-                }
+                throw new ObjectDisposedException(objectName);
             }
         }
 
