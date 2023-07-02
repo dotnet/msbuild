@@ -85,9 +85,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     ConstructorInfo constructor = null;
                     constructor = type.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-                    ErrorUtilities.VerifyThrowInvalidOperation(
+                    ErrorUtilities.VerifyThrow(
                         constructor != null,
-                        $"{typeName} must have a private parameterless constructor");
+                        "{0} must have a private parameterless constructor", typeName);
                     return constructor;
                 });
 
