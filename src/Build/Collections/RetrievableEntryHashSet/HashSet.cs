@@ -45,14 +45,6 @@ namespace Microsoft.Build.Collections
         private const string ComparerName = "Comparer"; // Do not rename (binary serialization)
         private const string VersionName = "Version"; // Do not rename (binary serialization)
 
-        /// <summary>
-        /// When constructing a hashset from an existing collection, it may contain duplicates,
-        /// so this is used as the max acceptable excess ratio of capacity to count. Note that
-        /// this is only used on the ctor and not to automatically shrink if the hashset has, e.g,
-        /// a lot of adds followed by removes. Users must explicitly shrink by calling TrimExcess.
-        /// This is set to 3 because capacity is acceptable as 2x rounded up to nearest prime.
-        /// </summary>
-        private const int ShrinkThreshold = 3;
         private const int StartOfFreeList = -3;
 
         private int[] _buckets;
@@ -108,6 +100,13 @@ namespace Microsoft.Build.Collections
                 {
                     AddOrReplace(item);
                 }
+
+                // When constructing a hashset from an existing collection, it may contain duplicates,
+                // so this is used as the max acceptable excess ratio of capacity to count. Note that
+                // this is only used on the ctor and not to automatically shrink if the hashset has, e.g,
+                // a lot of adds followed by removes. Users must explicitly shrink by calling TrimExcess.
+                // This is set to 3 because capacity is acceptable as 2x rounded up to nearest prime.
+                const int ShrinkThreshold = 3;
 
                 if (_count > 0 && _entries.Length / _count > ShrinkThreshold)
                 {
