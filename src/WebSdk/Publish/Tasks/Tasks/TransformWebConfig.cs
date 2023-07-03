@@ -42,7 +42,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         public string ProjectGuid { get; set; }
         
         /// <summary>
-        /// Flag that determines whether the publish telemtry needs to be disabled. 
+        /// Flag that determines whether the publish telemetry needs to be disabled. 
         /// </summary>
         public bool IgnoreProjectGuid { get; set; }
         /// <summary>
