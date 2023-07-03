@@ -55,6 +55,11 @@
       LOCALIZATION: Do not localize the following words: ProjectReference, ProjectReferenceTargets
     </note>
       </trans-unit>
+      <trans-unit id="CannotCopyFromElementOfThatType">
+        <source>MSB4276: Cannot copy from object of that type.</source>
+        <target state="new">MSB4276: Cannot copy from object of that type.</target>
+        <note>{StrBegin="MSB4276: "}</note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: невозможно развернуть метаданные в выражении "{0}". {1}</target>

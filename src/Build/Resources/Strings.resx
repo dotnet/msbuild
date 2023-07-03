@@ -1995,4 +1995,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</value>
     <comment>{StrBegin="MSB4120: "}</comment>
   </data>
+  <data name="CannotCopyFromElementOfThatType" xml:space="preserve">
+    <value>MSB4276: Cannot copy from object of that type.</value>
+    <comment>{StrBegin="MSB4276: "}</comment>
+  </data>
 </root>
