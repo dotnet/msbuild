@@ -192,7 +192,7 @@ namespace Microsoft.Build.Construction
         public IReadOnlyDictionary<string, ProjectInSolution> ProjectsByGuid => new ReadOnlyDictionary<string, ProjectInSolution>(_projects);
 
         /// <summary>
-        /// Gets a <see cref="T:System.String" /> value that contains the fully-qualified pathname of the Solution file that has been parsed.
+        /// Gets a <see cref="System.String" /> value that contains the fully-qualified pathname of the Solution file that has been parsed.
         /// </summary>
         // NOTE: This is the read/write accessor that is used internally for the Solution file which we will parse.  This must be set before calling any other methods on this class.
         public string FullPath
