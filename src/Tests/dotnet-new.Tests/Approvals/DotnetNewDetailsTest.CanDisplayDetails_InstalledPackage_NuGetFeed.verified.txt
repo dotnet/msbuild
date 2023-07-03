@@ -1,6 +1,6 @@
 ﻿Uno.ProjectTemplates.Dotnet
    Package version: 4.8.0-dev.792
-   Prefix Reserved: False
+   Reserved: True
    Details: Package Description
    Source Feed: https://api.nuget.org/v3/index.json
    Authors:

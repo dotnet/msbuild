@@ -68,15 +68,17 @@ namespace Microsoft.TemplateEngine.Cli.NuGet
                     );
             }
 
+            var extraMetadata = await GetAdditionalPackageMetadata(repository, packageIdentifier, cancellationToken).ConfigureAwait(false);
             return matchedPackage == default
                 ? null
                 : new NugetPackageMetadata(
+                    sourceFeed,
                     matchedPackage,
-                    await GetPackageOwners(repository, packageIdentifier, cancellationToken).ConfigureAwait(false),
-                    sourceFeed);
+                    extraMetadata);
         }
 
-        private async Task<string> GetPackageOwners(
+        // NuGet keeps some of the package metadata in a separate call, so we need two search objects to get the full metadata
+        private async Task<IPackageSearchMetadata?> GetAdditionalPackageMetadata(
             SourceRepository repository,
             string packageIdentifier,
             CancellationToken cancellationToken)
@@ -92,7 +94,7 @@ namespace Microsoft.TemplateEngine.Cli.NuGet
                 cancellationToken).ConfigureAwait(false))
                 .FirstOrDefault();
 
-            return searchResult != null ? searchResult.Owners : string.Empty;
+            return searchResult;
         }
 
         private SourceRepository GetSourceRepository(PackageSource source)
@@ -107,20 +109,25 @@ namespace Microsoft.TemplateEngine.Cli.NuGet
 
         internal class NugetPackageMetadata
         {
-            public NugetPackageMetadata(IPackageSearchMetadata metadata, string owners, PackageSource packageSource)
+            public NugetPackageMetadata(PackageSource packageSource, IPackageSearchMetadata metadata, IPackageSearchMetadata? extraMetadata = null)
             {
                 Authors = metadata.Authors;
                 Identity = metadata.Identity;
-                Owners = owners;
                 Description = metadata.Description;
                 ProjectUrl = metadata.ProjectUrl;
                 LicenseUrl = metadata.LicenseUrl;
                 License = metadata.LicenseMetadata?.License;
                 Identity = metadata.Identity;
                 LicenseExpression = metadata.LicenseMetadata?.LicenseExpression.ToString();
-                Source = packageSource;
                 PackageVersion = metadata.Identity.Version;
-                PrefixReserved = metadata.PrefixReserved;
+
+                Source = packageSource;
+
+                if (extraMetadata != null)
+                {
+                    Owners = extraMetadata.Owners;
+                    PrefixReserved = extraMetadata.PrefixReserved;
+                }
             }
 
             public string? Description { get; }
@@ -137,7 +144,7 @@ namespace Microsoft.TemplateEngine.Cli.NuGet
 
             public PackageIdentity Identity { get; }
 
-            public string Owners { get; }
+            public string? Owners { get; }
 
             public PackageSource Source { get; }
 

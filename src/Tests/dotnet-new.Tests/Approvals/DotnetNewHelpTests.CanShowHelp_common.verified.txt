@@ -28,4 +28,4 @@ Commands:
   search <template-name>                        Searches for the templates on NuGet.org.
   list <template-name>                          Lists templates containing the specified template name. If no name is specified, lists all templates.
   details <package-identifier>                  Provides the details for specified template package.
-                                                      The command checks if the package is installed locally, if it was not found, then it searches on the https://www.nuget.org/.
+                                                      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.

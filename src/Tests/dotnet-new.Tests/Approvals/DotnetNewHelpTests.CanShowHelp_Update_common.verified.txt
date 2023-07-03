@@ -6,7 +6,7 @@ Usage:
 
 Options:
   --interactive                                Allows the command to stop and wait for user input or action (for example to complete authentication).
-  --add-source, --nuget-source <nuget-source>  Specifies a NuGet source to use during install.
+  --add-source, --nuget-source <nuget-source>  Specifies a NuGet source to use.
   --check-only, --dry-run                      Only checks for updates and display the template packages to be updated without applying update.
   -v, --verbosity <LEVEL>                      Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic]. [default: normal]
   -d, --diagnostics                            Enables diagnostic output.

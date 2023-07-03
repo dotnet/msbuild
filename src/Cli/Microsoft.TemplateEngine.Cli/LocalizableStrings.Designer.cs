@@ -829,7 +829,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Prefix Reserved.
+        ///   Looks up a localized string similar to Reserved.
         /// </summary>
         internal static string DetailsCommand_Property_PrefixReserved {
             get {

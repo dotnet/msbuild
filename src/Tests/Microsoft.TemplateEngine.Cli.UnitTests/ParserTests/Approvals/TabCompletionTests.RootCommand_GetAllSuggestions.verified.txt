@@ -181,7 +181,7 @@
     InsertText: details,
     Detail:
       Provides the details for specified template package.
-      The command checks if the package is installed locally, if it was not found, then it searches on the https://www.nuget.org/.
+      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.
   },
   {
     Label: install,

@@ -439,7 +439,7 @@ namespace Microsoft.TemplateEngine.Cli
                 IEnumerable<PackageSource> packageSources = LoadNuGetSources(additionalSources, true);
 
                 nuGetPackageMetadata = await GetPackageMetadataFromMultipleFeedsAsync(packageSources, nugetApiManager, packageIdentity, packageVersion, cancellationToken).ConfigureAwait(false);
-                if (nuGetPackageMetadata != null && nuGetPackageMetadata.Source.Source.Contains("api.nuget.org"))
+                if (nuGetPackageMetadata != null && nuGetPackageMetadata.Source.Source.Equals(NugetOrgFeed))
                 {
                     packageTemplates = await CliTemplateSearchCoordinator.SearchForPackageTemplatesAsync(
                         _engineEnvironmentSettings,
@@ -472,7 +472,10 @@ namespace Microsoft.TemplateEngine.Cli
         {
             reporter.WriteLine($"{packageMetadata.Identity.Id}");
             WriteIfNotNull(LocalizableStrings.DetailsCommand_Property_Version, packageMetadata.PackageVersion.ToString(), reporter, 1);
-            WriteIfNotNull(LocalizableStrings.DetailsCommand_Property_PrefixReserved, packageMetadata.PrefixReserved.ToString(), reporter, 1);
+            if (packageMetadata.PrefixReserved != null && packageMetadata.Source.Source.Equals(NugetOrgFeed))
+            {
+                WriteIfNotNull(LocalizableStrings.DetailsCommand_Property_PrefixReserved, packageMetadata.PrefixReserved.ToString(), reporter, 1);
+            }
             WriteIfNotNull(LocalizableStrings.DetailsCommand_Property_Description, packageMetadata.Description, reporter, 1);
 
             string sourceFeed = packageMetadata.Source.Source == packageMetadata.Source.Name ? packageMetadata.Source.Source : $"{packageMetadata.Source.Name} [{packageMetadata.Source.Source}]";

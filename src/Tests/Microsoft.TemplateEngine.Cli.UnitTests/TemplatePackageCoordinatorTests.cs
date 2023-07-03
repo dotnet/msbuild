@@ -88,11 +88,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             A.CallTo(() => searchMetadata.LicenseMetadata).Returns(licenseMetadata);
             A.CallTo(() => searchMetadata.LicenseMetadata.LicenseExpression.ToString()).Returns("MIT");
 
+            var extraMetadata = A.Fake<IPackageSearchMetadata>();
+            A.CallTo(() => extraMetadata.Owners).Returns("packageOwner");
+
             var source = new PackageSource("packageSource");
             var nugetPackage = new NugetPackageMetadata(
+                source,
                 searchMetadata,
-                "packageOwner",
-                source);
+                extraMetadata);
 
             packageCoordinator.DisplayNuGetPackageMetadata(nugetPackage, bufferedReporter);
             bufferedReporter.Lines.Should()
@@ -105,7 +108,55 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 .And.Contain("      https://nuget.org/profiles/packageOwner")
                 .And.Contain($"   {LocalizableStrings.DetailsCommand_Property_LicenseExpression}: https://licenses.nuget.org/MIT")
                 .And.Contain($"      {LocalizableStrings.DetailsCommand_Property_LicenseUrl}: https://github.com/dotnet/sdk")
-                .And.Contain($"      {LocalizableStrings.DetailsCommand_Property_RepoUrl}: http://github.com/");
+                .And.Contain($"      {LocalizableStrings.DetailsCommand_Property_RepoUrl}: http://github.com/")
+                .And.NotContain($"   {LocalizableStrings.DetailsCommand_Property_PrefixReserved}: true");
+        }
+
+        [Fact]
+        public void DisplayNuGetPackageMetadata_PrefixReserved()
+        {
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+
+            TemplatePackageManager templatePackageManager = A.Fake<TemplatePackageManager>();
+            var packageCoordinator = new TemplatePackageCoordinator(settings, templatePackageManager);
+            BufferedReporter bufferedReporter = new BufferedReporter();
+
+            var version = new NuGetVersion("1.5.24");
+            var identity = new PackageIdentity("PackageId", version);
+            var licenseMetadata = A.Fake<LicenseMetadata>();
+            var searchMetadata = A.Fake<IPackageSearchMetadata>();
+            A.CallTo(() => searchMetadata.Authors).Returns("PackageAuthor");
+            A.CallTo(() => searchMetadata.Identity).Returns(identity);
+            A.CallTo(() => searchMetadata.Description).Returns("This is the package description");
+            A.CallTo(() => searchMetadata.ProjectUrl).Returns(new Uri("http://github.com"));
+            A.CallTo(() => searchMetadata.LicenseUrl).Returns(new Uri("https://github.com/dotnet/sdk"));
+            A.CallTo(() => searchMetadata.LicenseMetadata).Returns(licenseMetadata);
+            A.CallTo(() => searchMetadata.LicenseMetadata.LicenseExpression.ToString()).Returns("MIT");
+
+            var extraMetadata = A.Fake<IPackageSearchMetadata>();
+            A.CallTo(() => extraMetadata.Owners).Returns("packageOwner");
+            A.CallTo(() => extraMetadata.PrefixReserved).Returns(true);
+
+            var source = new PackageSource("https://api.nuget.org/v3/index.json");
+            var nugetPackage = new NugetPackageMetadata(
+                source,
+                searchMetadata,
+                extraMetadata);
+
+            packageCoordinator.DisplayNuGetPackageMetadata(nugetPackage, bufferedReporter);
+            bufferedReporter.Lines.Should()
+                .Contain("PackageId")
+                .And.Contain("   Package version: 1.5.24")
+                .And.Contain($"   {LocalizableStrings.DetailsCommand_Property_Description}: This is the package description")
+                .And.Contain($"   {LocalizableStrings.DetailsCommand_Property_Authors}:")
+                .And.Contain("      PackageAuthor")
+                .And.Contain($"   {LocalizableStrings.DetailsCommand_Property_Owners}:")
+                .And.Contain("      https://nuget.org/profiles/packageOwner")
+                .And.Contain($"   {LocalizableStrings.DetailsCommand_Property_LicenseExpression}: https://licenses.nuget.org/MIT")
+                .And.Contain($"      {LocalizableStrings.DetailsCommand_Property_LicenseUrl}: https://github.com/dotnet/sdk")
+                .And.Contain($"      {LocalizableStrings.DetailsCommand_Property_RepoUrl}: http://github.com/")
+                .And.Contain($"   {LocalizableStrings.DetailsCommand_Property_PrefixReserved}: True");
         }
 
         [Fact]
@@ -130,11 +181,15 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             A.CallTo(() => searchMetadata.LicenseMetadata).Returns(licenseMetadata);
             A.CallTo(() => searchMetadata.LicenseMetadata.LicenseExpression.ToString()).Returns("MIT");
 
+            var extraMetadata = A.Fake<IPackageSearchMetadata>();
+            A.CallTo(() => extraMetadata.Owners).Returns("packageOwner");
+            A.CallTo(() => extraMetadata.PrefixReserved).Returns(true);
+
             var source = new PackageSource("packageSource");
             var nugetPackage = new NugetPackageMetadata(
+                source,
                 searchMetadata,
-                "packageOwner",
-                source);
+                extraMetadata);
 
             packageCoordinator.DisplayNuGetPackageMetadata(nugetPackage, bufferedReporter);
             bufferedReporter.Lines.Should()
@@ -169,11 +224,15 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             A.CallTo(() => searchMetadata.LicenseMetadata).Returns(licenseMetadata);
             A.CallTo(() => searchMetadata.LicenseMetadata.LicenseExpression.ToString()).Returns("MIT");
 
+            var extraMetadata = A.Fake<IPackageSearchMetadata>();
+            A.CallTo(() => extraMetadata.Owners).Returns("owner1, owner2");
+            A.CallTo(() => extraMetadata.PrefixReserved).Returns(true);
+
             var source = new PackageSource("packageSource");
             var nugetPackage = new NugetPackageMetadata(
+                source,
                 searchMetadata,
-                "owner1, owner2",
-                source);
+                extraMetadata);
 
             packageCoordinator.DisplayNuGetPackageMetadata(nugetPackage, bufferedReporter);
             bufferedReporter.Lines.Should()

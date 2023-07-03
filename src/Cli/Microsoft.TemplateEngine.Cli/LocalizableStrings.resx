@@ -878,7 +878,7 @@ The header is followed by the list of parameters and their errors (might be seve
     <value>Package version</value>
   </data>
   <data name="DetailsCommand_Property_PrefixReserved">
-    <value>Prefix Reserved</value>
+    <value>Reserved</value>
   </data>
   <data name="DetailsCommand_Property_Languages">
     <value>Languages</value>

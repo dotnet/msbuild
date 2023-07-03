@@ -129,7 +129,7 @@
   <data name="Command_Details_Description" xml:space="preserve">
     <value>
       Provides the details for specified template package.
-      The command checks if the package is installed locally, if it was not found, then it searches on the https://www.nuget.org/.</value>
+      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</value>
   </data>
   <data name="Command_Install_Argument_Package" xml:space="preserve">
     <value>NuGet package ID or path to folder or NuGet package to install. 
@@ -184,7 +184,7 @@ If command is specified without the argument, it lists all the template packages
     <value>Disables checking if the template meets the constraints to be run.</value>
   </data>
   <data name="Option_AddSource" xml:space="preserve">
-    <value>Specifies a NuGet source to use during install.</value>
+    <value>Specifies a NuGet source to use.</value>
   </data>
   <data name="Option_AuthorFilter" xml:space="preserve">
     <value>Filters the templates based on the template author.</value>

@@ -20,10 +20,10 @@
       <trans-unit id="Command_Details_Description">
         <source>
       Provides the details for specified template package.
-      The command checks if the package is installed locally, if it was not found, then it searches on the https://www.nuget.org/.</source>
+      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</source>
         <target state="new">
       Provides the details for specified template package.
-      The command checks if the package is installed locally, if it was not found, then it searches on the https://www.nuget.org/.</target>
+      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</target>
         <note />
       </trans-unit>
       <trans-unit id="Command_Install_Argument_Package">
@@ -113,8 +113,8 @@ Jeśli polecenie zostanie określone bez argumentu, zostanie wyświetlona lista 
         <note />
       </trans-unit>
       <trans-unit id="Option_AddSource">
-        <source>Specifies a NuGet source to use during install.</source>
-        <target state="translated">Określa źródło NuGet do użycia podczas instalacji.</target>
+        <source>Specifies a NuGet source to use.</source>
+        <target state="needs-review-translation">Określa źródło NuGet do użycia podczas instalacji.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AuthorFilter">

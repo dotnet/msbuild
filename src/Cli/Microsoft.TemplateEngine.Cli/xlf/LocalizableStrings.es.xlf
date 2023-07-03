@@ -436,8 +436,8 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_PrefixReserved">
-        <source>Prefix Reserved</source>
-        <target state="new">Prefix Reserved</target>
+        <source>Reserved</source>
+        <target state="new">Reserved</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailsCommand_Property_RepoUrl">
