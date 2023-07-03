@@ -49,22 +49,22 @@
       </trans-unit>
       <trans-unit id="BlobUploadFailed">
         <source>CONTAINER1001: Failed to upload blob using {0}; received status code '{1}'.</source>
-        <target state="new">CONTAINER1001: Failed to upload blob using {0}; received status code '{1}'.</target>
+        <target state="translated">CONTAINER1001: Fehler beim Hochladen des Blobs mit {0}; der Statuscode „{1}“ wurde empfangen.</target>
         <note>{StrBegin="CONTAINER1001: "}</note>
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToLocalDaemon">
         <source>Pushed container '{0}' to Docker daemon.</source>
-        <target state="new">Pushed container '{0}' to Docker daemon.</target>
+        <target state="translated">Der Container „{0}“ wurde per Push an den Docker-Daemon übertragen.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_ImageUploadedToRegistry">
         <source>Pushed container '{0}' to registry '{1}'.</source>
-        <target state="new">Pushed container '{0}' to registry '{1}'.</target>
+        <target state="translated">Der Container „{0}“ wurde in die Registrierung „{1}“ gepusht.</target>
         <note />
       </trans-unit>
       <trans-unit id="ContainerBuilder_StartBuildingImage">
         <source>Building image '{0}' with tags '{1}' on top of base image '{2}'.</source>
-        <target state="new">Building image '{0}' with tags '{1}' on top of base image '{2}'.</target>
+        <target state="translated">Das Image „{0}“ mit den Tags „{1}“ wird auf dem Basisimage „{2}“ erstellt.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldntDeserializeJsonToken">
@@ -214,12 +214,12 @@
       </trans-unit>
       <trans-unit id="LocalDocker_FailedToGetConfig">
         <source>Error while reading daemon config: {0}</source>
-        <target state="new">Error while reading daemon config: {0}</target>
+        <target state="translated">Fehler beim Lesen der Daemonkonfiguration: {0}</target>
         <note>{0} is the exception message that ends with period</note>
       </trans-unit>
       <trans-unit id="LocalDocker_LocalDaemonErrors">
         <source>The daemon server reported errors: {0}</source>
-        <target state="new">The daemon server reported errors: {0}</target>
+        <target state="translated">Vom Daemonserver wurden Fehler gemeldet: {0}</target>
         <note>{0} are the list of messages, each message starts with new line</note>
       </trans-unit>
       <trans-unit id="MissingLinkToRegistry">
@@ -259,47 +259,47 @@
       </trans-unit>
       <trans-unit id="Registry_ConfigUploadStarted">
         <source>Uploading config to registry at blob '{0}',</source>
-        <target state="new">Uploading config to registry at blob '{0}',</target>
+        <target state="translated">Die Konfiguration wird in die Registrierung unter Blob „{0}“ hochgeladen,</target>
         <note />
       </trans-unit>
       <trans-unit id="Registry_ConfigUploaded">
         <source>Uploaded config to registry.</source>
-        <target state="new">Uploaded config to registry.</target>
+        <target state="translated">Die Konfiguration wurde in die Registrierung hochgeladen.</target>
         <note />
       </trans-unit>
       <trans-unit id="Registry_LayerExists">
         <source>Layer '{0}' already exists.</source>
-        <target state="new">Layer '{0}' already exists.</target>
+        <target state="translated">Die Ebene „{0}“ ist bereits vorhanden.</target>
         <note />
       </trans-unit>
       <trans-unit id="Registry_LayerUploadStarted">
         <source>Uploading layer '{0}' to '{1}'.</source>
-        <target state="new">Uploading layer '{0}' to '{1}'.</target>
+        <target state="translated">Ebene „{0}“ wird in „{1}“ hochgeladen.</target>
         <note>{0} is the layer digest, {1} is the registry name</note>
       </trans-unit>
       <trans-unit id="Registry_LayerUploaded">
         <source>Finished uploading layer '{0}' to '{1}'.</source>
-        <target state="new">Finished uploading layer '{0}' to '{1}'.</target>
+        <target state="translated">Das Hochladen der Ebene „{0}“ nach „{1}“ wurde abgeschlossen.</target>
         <note>{0} is the layer digest, {1} is the registry name</note>
       </trans-unit>
       <trans-unit id="Registry_ManifestUploadStarted">
         <source>Uploading manifest to registry '{0}' as blob '{1}'.</source>
-        <target state="new">Uploading manifest to registry '{0}' as blob '{1}'.</target>
+        <target state="translated">Das Manifest wird in die Registrierung „{0}“ als Blob „{1}“ hochgeladen.</target>
         <note>{0} is the registry name</note>
       </trans-unit>
       <trans-unit id="Registry_ManifestUploaded">
         <source>Uploaded manifest to '{0}'.</source>
-        <target state="new">Uploaded manifest to '{0}'.</target>
+        <target state="translated">Manifest in „{0}“ hochgeladen.</target>
         <note>{0} is the registry name</note>
       </trans-unit>
       <trans-unit id="Registry_TagUploadStarted">
         <source>Uploading tag '{0}' to '{1}'.</source>
-        <target state="new">Uploading tag '{0}' to '{1}'.</target>
+        <target state="translated">Das Tag „{0}“ wird in „{1}“ hochgeladen.</target>
         <note>{1} is the registry name</note>
       </trans-unit>
       <trans-unit id="Registry_TagUploaded">
         <source>Uploaded tag '{0}' to '{1}'.</source>
-        <target state="new">Uploaded tag '{0}' to '{1}'.</target>
+        <target state="translated">Das Tag „{0}“ wurde in „{1}“ hochgeladen.</target>
         <note>{1} is the registry name</note>
       </trans-unit>
       <trans-unit id="RequiredItemsContainsEmptyItems">

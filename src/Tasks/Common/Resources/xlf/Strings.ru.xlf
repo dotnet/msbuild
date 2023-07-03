@@ -69,12 +69,12 @@
       </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
-        <target state="translated">NETSDK1079: пакет Microsoft.AspNetCore.All не поддерживается при ориентации на .NET Core 3.0 или более поздней версии. Вместо этого нужно использовать ссылку FrameworkReference на Microsoft.AspNetCore.App, которая будет неявно включена пакетом Microsoft.NET.Sdk.Web.</target>
+        <target state="translated">NETSDK1079: пакет Microsoft.AspNetCore.All не поддерживается при ориентации на .NET Core 3.0 или более поздней версии. Вместо этого нужно использовать ссылку FrameworkReference на Microsoft.AspNetCore.App, которая будет неявно включена пакетом Microsoft.NET.Sdk.Web.</target>
         <note>{StrBegin="NETSDK1079: "}</note>
       </trans-unit>
       <trans-unit id="AspNetCoreUsesFrameworkReference">
         <source>NETSDK1080: A PackageReference to Microsoft.AspNetCore.App is not necessary when targeting .NET Core 3.0 or higher. If Microsoft.NET.Sdk.Web is used, the shared framework will be referenced automatically. Otherwise, the PackageReference should be replaced with a FrameworkReference.</source>
-        <target state="translated">NETSDK1080: ссылка PackageReference на Microsoft.AspNetCore.App не требуется при ориентации на .NET Core 3.0 или более поздней версии. Если используется Microsoft.NET.Sdk.Web, ссылка на общую платформу будет применяться автоматически. В противном случае PackageReference следует заменить ссылкой FrameworkReference.</target>
+        <target state="translated">NETSDK1080: ссылка PackageReference на Microsoft.AspNetCore.App не требуется при ориентации на .NET Core 3.0 или более поздней версии. Если используется Microsoft.NET.Sdk.Web, ссылка на общую платформу будет применяться автоматически. В противном случае PackageReference следует заменить ссылкой FrameworkReference.</target>
         <note>{StrBegin="NETSDK1080: "}</note>
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
@@ -129,12 +129,12 @@
       </trans-unit>
       <trans-unit id="CannotFindComhost">
         <source>NETSDK1091: Unable to find a .NET Core COM host. The .NET Core COM host is only available on .NET Core 3.0 or higher when targeting Windows.</source>
-        <target state="translated">NETSDK1091: не удалось найти узел COM .NET Core. Он доступен только в .NET Core 3.0 или более поздней версии при ориентации на Windows.</target>
+        <target state="translated">NETSDK1091: не удалось найти узел COM .NET Core. Он доступен только в .NET Core 3.0 или более поздней версии при ориентации на Windows.</target>
         <note>{StrBegin="NETSDK1091: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindIjwhost">
         <source>NETSDK1114: Unable to find a .NET Core IJW host. The .NET Core IJW host is only available on .NET Core 3.1 or higher when targeting Windows.</source>
-        <target state="translated">NETSDK1114: IJW-узел .NET Core не найден. При разработке для Windows он доступен только начиная с версии .NET Core 3.1.</target>
+        <target state="translated">NETSDK1114: IJW-узел .NET Core не найден. При разработке для Windows он доступен только начиная с версии .NET Core 3.1.</target>
         <note>{StrBegin="NETSDK1114: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
@@ -194,7 +194,7 @@
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
         <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
-        <target state="translated">NETSDK1013: значение "{0}" в TargetFramework не распознано. Возможно, оно содержит опечатку. Если это не так, задайте свойства TargetFrameworkIdentifier и (или) TargetFrameworkVersion явным образом.</target>
+        <target state="translated">NETSDK1013: значение "{0}" в TargetFramework не распознано. Возможно, оно содержит опечатку. Если это не так, задайте свойства TargetFrameworkIdentifier и (или) TargetFrameworkVersion явным образом.</target>
         <note>{StrBegin="NETSDK1013: "}</note>
       </trans-unit>
       <trans-unit id="CannotUseSelfContainedWithoutAppHost">
@@ -371,12 +371,12 @@
       </trans-unit>
       <trans-unit id="DotnetToolOnlySupportNetcoreapp">
         <source>NETSDK1054: only supports .NET Core.</source>
-        <target state="translated">NETSDK1054: поддерживает только .NET Core.</target>
+        <target state="translated">NETSDK1054: поддерживает только .NET Core.</target>
         <note>{StrBegin="NETSDK1054: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>NETSDK1022: Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
-        <target state="translated">NETSDK1022: были включены повторяющиеся элементы "{0}". Пакет SDK для .NET по умолчанию включает элементы "{0}" из каталога проекта. Вы можете удалить из файла проекта эти элементы или присвоить свойству "{1}" значение "{2}", если нужно включить их в файл проекта в явном виде. Дополнительные сведения: {4}. Повторяющиеся элементы: {3}</target>
+        <target state="translated">NETSDK1022: были включены повторяющиеся элементы "{0}". Пакет SDK для .NET по умолчанию включает элементы "{0}" из каталога проекта. Вы можете удалить из файла проекта эти элементы или присвоить свойству "{1}" значение "{2}", если нужно включить их в файл проекта в явном виде. Дополнительные сведения: {4}. Повторяющиеся элементы: {3}</target>
         <note>{StrBegin="NETSDK1022: "}</note>
       </trans-unit>
       <trans-unit id="DuplicatePreprocessorToken">
@@ -436,7 +436,7 @@
       </trans-unit>
       <trans-unit id="FileNameIsTooLong">
         <source>NETSDK1030: Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="translated">NETSDK1030: длина указанного имени файла "{0}" превышает 1024 байта</target>
+        <target state="translated">NETSDK1030: длина указанного имени файла "{0}" превышает 1024 байта</target>
         <note>{StrBegin="NETSDK1030: "}</note>
       </trans-unit>
       <trans-unit id="FolderAlreadyExists">
@@ -461,7 +461,7 @@
       </trans-unit>
       <trans-unit id="FrameworkReferenceOverrideWarning">
         <source>NETSDK1086: A FrameworkReference for '{0}' was included in the project. This is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
-        <target state="translated">NETSDK1086: объект FrameworkReference для "{0}" был включен в проект. На него неявно ссылается пакет SDK для .NET, и ссылаться на него из проекта обычно не нужно. Дополнительные сведения: {1}</target>
+        <target state="translated">NETSDK1086: объект FrameworkReference для "{0}" был включен в проект. На него неявно ссылается пакет SDK для .NET, и ссылаться на него из проекта обычно не нужно. Дополнительные сведения: {1}</target>
         <note>{StrBegin="NETSDK1086: "}</note>
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
@@ -542,7 +542,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="InvalidRollForwardValue">
         <source>NETSDK1104: RollForward value '{0}' is invalid. Allowed values are {1}.</source>
-        <target state="translated">NETSDK1104: недопустимое значение RollForward "{0}". Разрешенные значения — {1}.</target>
+        <target state="translated">NETSDK1104: недопустимое значение RollForward "{0}". Разрешенные значения — {1}.</target>
         <note>{StrBegin="NETSDK1104: "}</note>
       </trans-unit>
       <trans-unit id="InvalidTargetPlatformVersion">
@@ -607,17 +607,17 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NETFrameworkWithoutUsingNETSdkDefaults">
         <source>NETSDK1115: The current .NET SDK does not support .NET Framework without using .NET SDK Defaults. It is likely due to a mismatch between C++/CLI project CLRSupport property and TargetFramework.</source>
-        <target state="translated">NETSDK1115: текущий пакет SDK для .NET не поддерживает .NET Framework без использования значений SDK для .NET по умолчанию. Причиной, скорее всего, является несоответствие TargetFramework и свойства CLRSupport в проекте C++/CLI.</target>
+        <target state="translated">NETSDK1115: текущий пакет SDK для .NET не поддерживает .NET Framework без использования значений SDK для .NET по умолчанию. Причиной, скорее всего, является несоответствие TargetFramework и свойства CLRSupport в проекте C++/CLI.</target>
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
         <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: выбор .NET 6.0 или более поздней версии в качестве цели в Visual Studio 2019 не поддерживается.</target>
+        <target state="translated">NETSDK1182: выбор .NET 6.0 или более поздней версии в качестве цели в Visual Studio 2019 не поддерживается.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="Net7NotCompatibleWithDev173">
         <source>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</source>
-        <target state="translated">NETSDK1192: выбор .NET 7.0 или более поздней версии в качестве цели в Visual Studio 2022 17.3 не поддерживается.</target>
+        <target state="translated">NETSDK1192: выбор .NET 7.0 или более поздней версии в качестве цели в Visual Studio 2022 17.3 не поддерживается.</target>
         <note>{StrBegin="NETSDK1192: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
@@ -652,27 +652,27 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NoSupportCppEnableComHosting">
         <source>NETSDK1119: C++/CLI projects targeting .NET Core cannot use EnableComHosting=true.</source>
-        <target state="translated">NETSDK1119: проекты C++/CLI для .NET Core не могут использовать EnableComHosting=true.</target>
+        <target state="translated">NETSDK1119: проекты C++/CLI для .NET Core не могут использовать EnableComHosting=true.</target>
         <note>{StrBegin="NETSDK1119: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppNonDynamicLibraryDotnetCore">
         <source>NETSDK1116: C++/CLI projects targeting .NET Core must be dynamic libraries.</source>
-        <target state="translated">NETSDK1116: проекты C++/CLI для .NET Core должны представлять собой динамические библиотеки.</target>
+        <target state="translated">NETSDK1116: проекты C++/CLI для .NET Core должны представлять собой динамические библиотеки.</target>
         <note>{StrBegin="NETSDK1116: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppPackDotnetCore">
         <source>NETSDK1118: C++/CLI projects targeting .NET Core cannot be packed.</source>
-        <target state="translated">NETSDK1118: проекты C++/CLI для .NET Core не могут быть упакованы.</target>
+        <target state="translated">NETSDK1118: проекты C++/CLI для .NET Core не могут быть упакованы.</target>
         <note>{StrBegin="NETSDK1118: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppPublishDotnetCore">
         <source>NETSDK1117: Does not support publish of C++/CLI project targeting dotnet core.</source>
-        <target state="translated">NETSDK1117: публикация проекта C++/CLI для .NET Core не поддерживается.</target>
+        <target state="translated">NETSDK1117: публикация проекта C++/CLI для .NET Core не поддерживается.</target>
         <note>{StrBegin="NETSDK1117: "}</note>
       </trans-unit>
       <trans-unit id="NoSupportCppSelfContained">
         <source>NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</source>
-        <target state="translated">NETSDK1121: проекты C++/CLI для .NET Core не могут использовать значение параметра SelfContained=true.</target>
+        <target state="translated">NETSDK1121: проекты C++/CLI для .NET Core не могут использовать значение параметра SelfContained=true.</target>
         <note>{StrBegin="NETSDK1121: "}</note>
       </trans-unit>
       <trans-unit id="NonPortableRuntimeIdentifierDetected">
@@ -697,17 +697,17 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportTargetPlatformIdentifier">
         <source>NETSDK1146: PackAsTool does not support TargetPlatformIdentifier being set. For example, TargetFramework cannot be net5.0-windows, only net5.0. PackAsTool also does not support UseWPF or UseWindowsForms when targeting .NET 5 and higher.</source>
-        <target state="translated">NETSDK1146: PackAsTool не поддерживает задание TargetPlatformIdentifier. Например, TargetFramework не может иметь значение "net5.0-windows", только "net5.0". Кроме того, PackAsTool не поддерживает UseWPF или UseWindowsForms при использовании целевой платформы .NET 5 и более поздних версий.</target>
+        <target state="translated">NETSDK1146: PackAsTool не поддерживает задание TargetPlatformIdentifier. Например, TargetFramework не может иметь значение "net5.0-windows", только "net5.0". Кроме того, PackAsTool не поддерживает UseWPF или UseWindowsForms при использовании целевой платформы .NET 5 и более поздних версий.</target>
         <note>{StrBegin="NETSDK1146: "}</note>
       </trans-unit>
       <trans-unit id="PackageContainsIncorrectlyCasedLocale">
         <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
-        <target state="needs-review-translation">NETSDK1187: в пакете {0} {1} есть ресурс с языковым стандартом "{2}". Эта локаль была нормализована до стандартного формата "{3}", чтобы предотвратить проблемы с регистром в сборке. Попробуйте уведомить автора пакета об этой проблеме с корпусом.</target>
+        <target state="translated">NETSDK1187: в пакете {0} {1} есть ресурс с языковым стандартом "{2}". Эта локаль была нормализована до стандартного формата "{3}", чтобы предотвратить проблемы с регистром в сборке. Попробуйте уведомить автора пакета об этой проблеме с корпусом.</target>
         <note>{StrBegin="NETSDK1187: "} 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
       </trans-unit>
       <trans-unit id="PackageContainsUnknownLocale">
         <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
-        <target state="needs-review-translation">NETSDK1188: в пакете {0} {1} есть ресурс с языковым стандартом "{2}". Эта локаль не распознается .NET. Попробуйте уведомить автора пакета о том, что он использует недопустимую локаль.</target>
+        <target state="translated">NETSDK1188: в пакете {0} {1} есть ресурс с языковым стандартом "{2}". Эта локаль не распознается .NET. Попробуйте уведомить автора пакета о том, что он использует недопустимую локаль.</target>
         <note>{StrBegin="NETSDK1188: "} 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
@@ -717,7 +717,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
         <source>NETSDK1023: A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
-        <target state="translated">NETSDK1023: ссылка на пакет (PackageReference) для "{0}" была включена в проект. На этот пакет неявно ссылается пакет SDK для .NET, и ссылаться на него из проекта обычно не нужно. Дополнительные сведения: {1}</target>
+        <target state="translated">NETSDK1023: ссылка на пакет (PackageReference) для "{0}" была включена в проект. На этот пакет неявно ссылается пакет SDK для .NET, и ссылаться на него из проекта обычно не нужно. Дополнительные сведения: {1}</target>
         <note>{StrBegin="NETSDK1023: "}</note>
       </trans-unit>
       <trans-unit id="PackageReferenceVersionNotRecommended">
@@ -742,12 +742,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
         <source>NETSDK1059: The tool '{0}' is now included in the .NET SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
-        <target state="translated">NETSDK1059: инструмент "{0}" теперь включен в пакет SDK для .NET. Сведения о том, как устранить это предупреждение: https://aka.ms/dotnetclitools-in-box.</target>
+        <target state="translated">NETSDK1059: инструмент "{0}" теперь включен в пакет SDK для .NET. Сведения о том, как устранить это предупреждение: https://aka.ms/dotnetclitools-in-box.</target>
         <note>{StrBegin="NETSDK1059: "}</note>
       </trans-unit>
       <trans-unit id="ProjectToolOnlySupportTFMLowerThanNetcoreapp22">
         <source>NETSDK1093: Project tools (DotnetCliTool) only support targeting .NET Core 2.2 and lower.</source>
-        <target state="translated">NETSDK1093: средства проекта (DotnetCliTool) поддерживают только целевую платформу .NET Core 2.2 и более ранних версий.</target>
+        <target state="translated">NETSDK1093: средства проекта (DotnetCliTool) поддерживают только целевую платформу .NET Core 2.2 и более ранних версий.</target>
         <note>{StrBegin="NETSDK1093: "}</note>
       </trans-unit>
       <trans-unit id="PublishProfileNotPresent">
@@ -757,7 +757,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PublishReadyToRunRequiresVersion30">
         <source>NETSDK1122: ReadyToRun compilation will be skipped because it is only supported for .NET Core 3.0 or higher.</source>
-        <target state="translated">NETSDK1122: компиляция ReadyToRun будет пропущена, так как она поддерживается только для .NET Core 3.0 или более поздних версий.</target>
+        <target state="translated">NETSDK1122: компиляция ReadyToRun будет пропущена, так как она поддерживается только для .NET Core 3.0 или более поздних версий.</target>
         <note>{StrBegin="NETSDK1122: "}</note>
       </trans-unit>
       <trans-unit id="PublishSelfContainedMustBeBool">
@@ -767,12 +767,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PublishSingleFileRequiresVersion30">
         <source>NETSDK1123: Publishing an application to a single-file requires .NET Core 3.0 or higher.</source>
-        <target state="translated">NETSDK1123: для публикации приложения в один файл требуется .NET Core 3.0 или более поздняя версия.</target>
+        <target state="translated">NETSDK1123: для публикации приложения в один файл требуется .NET Core 3.0 или более поздняя версия.</target>
         <note>{StrBegin="NETSDK1123: "}</note>
       </trans-unit>
       <trans-unit id="PublishTrimmedRequiresVersion30">
         <source>NETSDK1124: Trimming assemblies requires .NET Core 3.0 or higher.</source>
-        <target state="translated">NETSDK1124: для усечения сборок требуется .NET Core 3.0 или более поздняя версия.</target>
+        <target state="translated">NETSDK1124: для усечения сборок требуется .NET Core 3.0 или более поздняя версия.</target>
         <note>{StrBegin="NETSDK1124: "}</note>
       </trans-unit>
       <trans-unit id="PublishUnsupportedWithoutTargetFramework">
@@ -802,7 +802,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="RollForwardRequiresVersion30">
         <source>NETSDK1103: RollForward setting is only supported on .NET Core 3.0 or higher.</source>
-        <target state="translated">NETSDK1103: параметр RollForward поддерживается только в .NET Core 3.0 или более поздних версий.</target>
+        <target state="translated">NETSDK1103: параметр RollForward поддерживается только в .NET Core 3.0 или более поздних версий.</target>
         <note>{StrBegin="NETSDK1103: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeIdentifierNotRecognized">
@@ -869,7 +869,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="TargetingApphostPackMissingCannotRestore">
         <source>NETSDK1145: The {0} pack is not installed and NuGet package restore is not supported. Upgrade Visual Studio, remove global.json if it specifies a certain SDK version, and uninstall the newer SDK. For more options visit   https://aka.ms/targeting-apphost-pack-missing  Pack Type:{0}, Pack directory: {1}, targetframework: {2}, Pack PackageId: {3}, Pack Package Version: {4}</source>
-        <target state="translated">NETSDK1145: пакет {0} не установлен, и восстановление пакетов NuGet не поддерживается. Обновите Visual Studio, удалите файл global.js, если он указывает определенную версию пакета SDK, и удалите более новый пакет SDK. Для ознакомления с дополнительными вариантами перейдите по адресу: https://aka.ms/targeting-apphost-pack-missing. Тип пакета: {0}, каталог пакета: {1}, целевая платформа: {2}, ИД упаковки пакета: {3}, версия упаковки пакета: {4}.</target>
+        <target state="translated">NETSDK1145: пакет {0} не установлен, и восстановление пакетов NuGet не поддерживается. Обновите Visual Studio, удалите файл global.js, если он указывает определенную версию пакета SDK, и удалите более новый пакет SDK. Для ознакомления с дополнительными вариантами перейдите по адресу: https://aka.ms/targeting-apphost-pack-missing. Тип пакета: {0}, каталог пакета: {1}, целевая платформа: {2}, ИД упаковки пакета: {3}, версия упаковки пакета: {4}.</target>
         <note>{StrBegin="NETSDK1145: "}</note>
       </trans-unit>
       <trans-unit id="TargetingPackNeedsRestore">
@@ -949,12 +949,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
         <source>NETSDK1050: The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="translated">NETSDK1050: используемая этим проектом версия Microsoft.NET.Sdk не поддерживает ссылки на библиотеки для .NET Standard 1.5 и более поздних версий. Установите пакет SDK для .NET Core версии 2.0 или выше.</target>
+        <target state="translated">NETSDK1050: используемая этим проектом версия Microsoft.NET.Sdk не поддерживает ссылки на библиотеки для .NET Standard 1.5 и более поздних версий. Установите пакет SDK для .NET Core версии 2.0 или выше.</target>
         <note>{StrBegin="NETSDK1050: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="translated">NETSDK1045: текущий пакет SDK для .NET не поддерживает целевой объект {0} {1}. Выберите {0} {2} или более раннюю версию либо используйте версию пакета SDK для .NET, которая поддерживает {0} {1}.</target>
+        <target state="translated">NETSDK1045: текущий пакет SDK для .NET не поддерживает целевой объект {0} {1}. Выберите {0} {2} или более раннюю версию либо используйте версию пакета SDK для .NET, которая поддерживает {0} {1}.</target>
         <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifier">
@@ -979,7 +979,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UsingPreviewSdk">
         <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
-        <target state="new">NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</target>
+        <target state="translated">NETSDK1057: Вы используете предварительную версию .NET. Дополнительные сведения см. на странице https://aka.ms/dotnet-support-policy</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">
@@ -1004,7 +1004,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresVersion30">
         <source>NETSDK1105: Windows desktop applications are only supported on .NET Core 3.0 or higher.</source>
-        <target state="translated">NETSDK1105: классические приложения для Windows поддерживаются только в .NET Core 3.0 или более поздних версиях.</target>
+        <target state="translated">NETSDK1105: классические приложения для Windows поддерживаются только в .NET Core 3.0 или более поздних версиях.</target>
         <note>{StrBegin="NETSDK1105: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresWindows">
