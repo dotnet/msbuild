@@ -1996,7 +1996,14 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>{StrBegin="MSB4120: "}</comment>
   </data>
   <data name="CannotCopyFromElementOfThatType" xml:space="preserve">
-    <value>MSB4276: Cannot copy from object of that type.</value>
-    <comment>{StrBegin="MSB4276: "}</comment>
+    <value>MSB4277: Cannot copy from object of that type.</value>
+    <comment>{StrBegin="MSB4277: "}</comment>
   </data>
+  <!--
+        The Build message bucket is: MSB4000 - MSB4999
+
+        Next message code should be MSB4278
+
+        Don't forget to update this comment after using a new code.
+  -->
 </root>
