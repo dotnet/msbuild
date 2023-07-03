@@ -56,9 +56,9 @@
     </note>
       </trans-unit>
       <trans-unit id="CannotCopyFromElementOfThatType">
-        <source>MSB4276: Cannot copy from object of that type.</source>
-        <target state="new">MSB4276: Cannot copy from object of that type.</target>
-        <note>{StrBegin="MSB4276: "}</note>
+        <source>MSB4277: Cannot copy from object of that type.</source>
+        <target state="new">MSB4277: Cannot copy from object of that type.</target>
+        <note>{StrBegin="MSB4277: "}</note>
       </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
