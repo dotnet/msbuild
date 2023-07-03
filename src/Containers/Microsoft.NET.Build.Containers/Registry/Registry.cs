@@ -27,37 +27,24 @@ internal sealed class Registry
     /// This is used in user-facing error messages, and it should match what the user would manually enter as
     /// part of Docker commands like `docker login`.
     /// </summary>
-    public string RegistryName { get; init; }
+    public string RegistryName { get; }
 
-    internal Registry(Uri baseUri, ILogger logger) : this(baseUri, logger, new DefaultRegistryAPI(baseUri, logger), new RegistrySettings()) { }
-
-    internal Registry(Uri baseUri, ILogger logger, IRegistryAPI registryAPI, RegistrySettings settings)
+    internal Registry(string registryName, ILogger logger, IRegistryAPI? registryAPI = null, RegistrySettings? settings = null, Uri? baseUri = null)
     {
+        RegistryName = registryName;
         _logger = logger;
-        _registryAPI = registryAPI;
-        _settings = settings;
-        RegistryName = DeriveRegistryName(baseUri);
-        BaseUri = baseUri;
-        // "docker.io" is not a real registry. Replace the uri to refer to an actual registry.
-        if (BaseUri.Host == ContainerHelpers.DockerRegistryAlias)
-        {
-            BaseUri = new UriBuilder(BaseUri.ToString()) { Host = DockerHubRegistry1 }.Uri;
-        }
-    }
 
-    private static string DeriveRegistryName(Uri baseUri)
-    {
-        var port = baseUri.Port == -1 ? string.Empty : $":{baseUri.Port}";
-        if (baseUri.OriginalString.EndsWith(port, ignoreCase: true, culture: null))
+        _settings = settings ?? new RegistrySettings();
+
+        Uri uri = baseUri ?? ContainerHelpers.TryExpandRegistryToUri(registryName);
+        // "docker.io" is not a real registry. Replace the uri to refer to an actual registry.
+        if (uri.Host == ContainerHelpers.DockerRegistryAlias)
         {
-            // the port was part of the original assignment, so it's ok to consider it part of the 'name
-            return baseUri.GetComponents(UriComponents.HostAndPort, UriFormat.Unescaped);
+            uri = new UriBuilder(uri.ToString()) { Host = DockerHubRegistry1 }.Uri;
         }
-        else
-        {
-            // the port was not part of the original assignment, so it's not part of the 'name'
-            return baseUri.GetComponents(UriComponents.Host, UriFormat.Unescaped);
-        }
+
+        BaseUri = uri;
+        _registryAPI = registryAPI ?? new DefaultRegistryAPI(registryName, uri, logger);
     }
 
     public Uri BaseUri { get; }
