@@ -799,8 +799,4 @@
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Collections\RetrievableEntryHashSet\Originals\*" />
-  </ItemGroup>
 </Project>
