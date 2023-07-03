@@ -85,7 +85,7 @@ internal class ContainerizeCommand : CliRootCommand
         AllowMultipleArgumentsPerToken = true
     };
 
-    internal CliOption<string[]> CmdOption { get; } = new CliOption<string[]>("--cmd",new[] {"--entrypointargs", "--cmd"})
+    internal CliOption<string[]> CmdOption { get; } = new CliOption<string[]>("--cmd")
     {
         Description = "The Cmd of the container image.",
         AllowMultipleArgumentsPerToken = true
