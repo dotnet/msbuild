@@ -457,7 +457,7 @@
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="new">This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
+        <target state="translated">这是 MSBuild 中未经处理的异常 -- 请对现有问题投赞成票或在 https://aka.ms/msbuild/unhandled 上提交新问题
     {0}</target>
         <note />
       </trans-unit>
