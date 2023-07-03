@@ -1046,6 +1046,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         </Target>
                     </Project>
                 """);
+            ml.AssertLogContains("a=b");
         }
         #endregion
 
