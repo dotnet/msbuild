@@ -697,17 +697,17 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportTargetPlatformIdentifier">
         <source>NETSDK1146: PackAsTool does not support TargetPlatformIdentifier being set. For example, TargetFramework cannot be net5.0-windows, only net5.0. PackAsTool also does not support UseWPF or UseWindowsForms when targeting .NET 5 and higher.</source>
-        <target state="translated">NETSDK1146: PackAsTool, ayarlanan TargetPlatformIdentifier'ı desteklemez. Örneğin, TargetFramework net5.0-windows olamaz, yalnızca net5.0 olabilir. PackAsTool ayrıca .NET 5 ve üzeri hedeflenirken UseWPF veya UseWindowsForms'u da desteklemez.</target>
+        <target state="translated">NETSDK1146: PackAsTool, ayarlanan TargetPlatformIdentifier'ı desteklemez. Örneğin, TargetFramework net5.0-windows olamaz, yalnızca net5.0 olabilir. PackAsTool ayrıca .NET 5 ve üzeri hedeflenirken UseWPF veya UseWindowsForms'u da desteklemez.</target>
         <note>{StrBegin="NETSDK1146: "}</note>
       </trans-unit>
       <trans-unit id="PackageContainsIncorrectlyCasedLocale">
         <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
-        <target state="needs-review-translation">NETSDK1187: {0} {1} paketi, '{2}' yerel ayarına sahip bir kaynağa sahip. Bu yerel ayar, yapıdaki büyük/küçük harf sorunlarını önlemek için standart '{3}' biçimine normalleştirildi. Bu büyük/küçük harf sorunu hakkında paket yazarını bilgilendirmeyi düşünün.</target>
+        <target state="translated">NETSDK1187: {0} {1} paketi, '{2}' yerel ayarına sahip bir kaynağa sahip. Bu yerel ayar, yapıdaki büyük/küçük harf sorunlarını önlemek için standart '{3}' biçimine normalleştirildi. Bu büyük/küçük harf sorunu hakkında paket yazarını bilgilendirmeyi düşünün.</target>
         <note>{StrBegin="NETSDK1187: "} 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
       </trans-unit>
       <trans-unit id="PackageContainsUnknownLocale">
         <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
-        <target state="needs-review-translation">NETSDK1188: {0} {1} paketi, '{2}' yerel ayarına sahip bir kaynağa sahip. Bu yerel ayar .NET tarafından tanınmıyor. Paket yazarına geçersiz bir yerel ayar kullanıyor gibi göründüğünü bildirmeyi düşünün.</target>
+        <target state="translated">NETSDK1188: {0} {1} paketi, '{2}' yerel ayarına sahip bir kaynağa sahip. Bu yerel ayar .NET tarafından tanınmıyor. Paket yazarına geçersiz bir yerel ayar kullanıyor gibi göründüğünü bildirmeyi düşünün.</target>
         <note>{StrBegin="NETSDK1188: "} 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
@@ -979,7 +979,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UsingPreviewSdk">
         <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
-        <target state="new">NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</target>
+        <target state="translated">NETSDK1057: Bir .NET önizleme sürümü kullanıyorsunuz. Bkz. https://aka.ms/dotnet-support-policy</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">

@@ -134,7 +134,7 @@
       </trans-unit>
       <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
         <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
-        <target state="new">Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</target>
+        <target state="translated">Nie znaleziono wersji obciążenia {0} określonej w kontenerze {1}. Uruchom polecenie „dotnet workload restore”, aby zainstalować tę wersję obciążenia.</target>
         <note />
       </trans-unit>
     </body>

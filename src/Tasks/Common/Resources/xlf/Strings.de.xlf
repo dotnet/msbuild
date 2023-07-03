@@ -612,7 +612,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="Net6NotCompatibleWithDev16">
         <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: .NET 6.0 oder höher wird als Ziel in Visual Studio 2019 nicht unterstützt.</target>
+        <target state="translated">NETSDK1182: .NET 6.0 oder höher wird als Ziel in Visual Studio 2019 nicht unterstützt.</target>
         <note>{StrBegin="NETSDK1182: "}</note>
       </trans-unit>
       <trans-unit id="Net7NotCompatibleWithDev173">
@@ -702,12 +702,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageContainsIncorrectlyCasedLocale">
         <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
-        <target state="needs-review-translation">NETSDK1187: Das Paket {0} {1} verfügt über eine Ressource mit dem gebietsschema-'{2}'. Dieses Gebietsschema wurde auf das Standardformat '{3}' normalisiert, um Groß-/Kleinschreibungsprobleme im Build zu vermeiden. Erwägen Sie, den Paketautor über dieses Groß-/Kleinschreibungsproblem zu benachrichtigen.</target>
+        <target state="translated">NETSDK1187: Das Paket {0} {1} verfügt über eine Ressource mit dem gebietsschema-'{2}'. Dieses Gebietsschema wurde auf das Standardformat '{3}' normalisiert, um Groß-/Kleinschreibungsprobleme im Build zu vermeiden. Erwägen Sie, den Paketautor über dieses Groß-/Kleinschreibungsproblem zu benachrichtigen.</target>
         <note>{StrBegin="NETSDK1187: "} 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
       </trans-unit>
       <trans-unit id="PackageContainsUnknownLocale">
         <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
-        <target state="needs-review-translation">NETSDK1188: Das Paket {0} {1} verfügt über eine Ressource mit dem gebietsschema-'{2}'. Dieses Gebietsschema wird von .NET nicht erkannt. Erwägen Sie, den Paketautor darüber zu benachrichtigen, dass offenbar ein ungültiges Gebietsschema verwendet wird.</target>
+        <target state="translated">NETSDK1188: Das Paket {0} {1} verfügt über eine Ressource mit dem gebietsschema-'{2}'. Dieses Gebietsschema wird von .NET nicht erkannt. Erwägen Sie, den Paketautor darüber zu benachrichtigen, dass offenbar ein ungültiges Gebietsschema verwendet wird.</target>
         <note>{StrBegin="NETSDK1188: "} 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
@@ -889,7 +889,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="TrimmingWpfIsNotSupported">
         <source>NETSDK1168: WPF is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</source>
-        <target state="translated">NETSDK1168: Windows Presentation Foundation (WPF) wird nicht unterstützt oder empfohlen, wenn das Kürzen aktiviert ist. Weitere Informationen finden Sie unter „https://aka.ms/dotnet-illink/wpf“.</target>
+        <target state="translated">NETSDK1168: Windows Presentation Foundation (WPF) wird nicht unterstützt oder empfohlen, wenn das Kürzen aktiviert ist. Weitere Informationen finden Sie unter „https://aka.ms/dotnet-illink/wpf“.</target>
         <note>{StrBegin="NETSDK1168: "}</note>
       </trans-unit>
       <trans-unit id="TypeLibraryDoesNotExist">
@@ -969,7 +969,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">
         <source>NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</source>
-        <target state="new">NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</target>
+        <target state="translated">NETSDK1208: Der Zielplattformbezeichner {0} wurde nicht erkannt. Dies liegt daran, dass MSBuildEnableWorkloadResolver auf FALSE festgelegt ist, wodurch .NET SDK-Workloads deaktiviert werden, die für diesen Bezeichner erforderlich sind. Löschen Sie diese Umgebungsvariablen oder die MSBuild-Eigenschaft, um Workloads zu aktivieren.</target>
         <note>{StrBegin="NETSDK1208: "}</note>
       </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
@@ -979,7 +979,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UsingPreviewSdk">
         <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
-        <target state="new">NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</target>
+        <target state="translated">NETSDK1057: Sie verwenden eine Vorschauversion von .NET. Weitere Informationen: https://aka.ms/dotnet-support-policy</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">
