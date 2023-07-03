@@ -335,9 +335,7 @@ namespace Microsoft.Build.Shared
             bool condition,
             string resourceName)
         {
-#if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             if (!condition)
             {
                 // PERF NOTE: explicitly passing null for the arguments array
@@ -357,9 +355,7 @@ namespace Microsoft.Build.Shared
             string resourceName,
             object arg0)
         {
-#if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInvalidOperation() method, because that method always
             // allocates memory for its variable array of arguments
@@ -382,9 +378,7 @@ namespace Microsoft.Build.Shared
             object arg0,
             object arg1)
         {
-#if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInvalidOperation() method, because that method always
             // allocates memory for its variable array of arguments
@@ -409,9 +403,7 @@ namespace Microsoft.Build.Shared
             object arg1,
             object arg2)
         {
-#if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInvalidOperation() method, because that method always
             // allocates memory for its variable array of arguments
@@ -438,9 +430,7 @@ namespace Microsoft.Build.Shared
             object arg2,
             object arg3)
         {
-#if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInvalidOperation() method, because that method always
             // allocates memory for its variable array of arguments
@@ -579,9 +569,7 @@ namespace Microsoft.Build.Shared
             Exception innerException,
             string resourceName)
         {
-#if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             if (!condition)
             {
                 // PERF NOTE: explicitly passing null for the arguments array
@@ -604,9 +592,7 @@ namespace Microsoft.Build.Shared
             string resourceName,
             object arg0)
         {
-#if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowArgument() method, because that method always allocates
             // memory for its variable array of arguments
@@ -632,9 +618,7 @@ namespace Microsoft.Build.Shared
             object arg0,
             object arg1)
         {
-#if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowArgument() method, because that method always allocates
             // memory for its variable array of arguments
@@ -656,9 +640,7 @@ namespace Microsoft.Build.Shared
             object arg1,
             object arg2)
         {
-#if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowArgument() method, because that method always allocates
             // memory for its variable array of arguments
@@ -681,9 +663,7 @@ namespace Microsoft.Build.Shared
             object arg2,
             object arg3)
         {
-#if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowArgument() method, because that method always allocates
             // memory for its variable array of arguments
@@ -819,9 +799,7 @@ namespace Microsoft.Build.Shared
         /// <remarks>This method is thread-safe.</remarks>
         internal static void VerifyThrowArgumentNull(object parameter, string parameterName, string resourceName)
         {
-#if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             if (parameter == null)
             {
                 ThrowArgumentNull(parameterName, resourceName);
