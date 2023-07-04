@@ -33,7 +33,20 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             public static InstallState ReadInstallState(string installStatePath)
             {
                 using var fileStream = File.OpenRead(installStatePath);
-                var reader = JsonReader.CreateReader(fileStream);
+
+#if USE_SYSTEM_TEXT_JSON
+                var readerOptions = new JsonReaderOptions
+                {
+                    AllowTrailingCommas = true,
+                    CommentHandling = JsonCommentHandling.Skip
+                };
+                var reader = new Utf8JsonStreamReader(fileStream, readerOptions);
+#else
+                using var textReader = new StreamReader(fileStream, System.Text.Encoding.UTF8, true);
+                using var jsonReader = new JsonTextReader(textReader);
+
+                var reader = new Utf8JsonStreamReader(jsonReader);
+#endif
 
                 InstallState installState = new();
                 
