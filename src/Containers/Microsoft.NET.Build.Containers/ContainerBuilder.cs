@@ -15,7 +15,11 @@ public static class ContainerBuilder
         string baseImageName,
         string baseImageTag,
         string[] entrypoint,
-        string[]? cmd,
+        string[] entrypointArgs,
+        string[] defaultArgs,
+        string[] appCommand,
+        string[] appCommandArgs,
+        string appCommandInstruction,
         string imageName,
         string[] imageTags,
         string? outputRegistry,
@@ -70,7 +74,31 @@ public static class ContainerBuilder
         Layer newLayer = Layer.FromDirectory(publishDirectory.FullName, workingDir, imageBuilder.IsWindows);
         imageBuilder.AddLayer(newLayer);
         imageBuilder.SetWorkingDirectory(workingDir);
-        imageBuilder.SetEntrypointAndCmd(entrypoint, cmd ?? Array.Empty<string>());
+
+        bool hasErrors = false;
+        (string[] imageEntrypoint, string[] imageCmd) = ImageBuilder.DetermineEntrypointAndCmd(entrypoint, entrypointArgs, defaultArgs, appCommand, appCommandArgs, appCommandInstruction,
+            baseImageEntrypoint: imageBuilder.BaseImageConfig.GetEntrypoint(),
+            logWarning: s =>
+            {
+                Console.WriteLine(Resource.GetString(nameof(s)));
+            },
+            logError: (s, a) => {
+                hasErrors = true;
+                if (a is null)
+                {
+                    Console.WriteLine(Resource.GetString(nameof(s)));
+                }
+                else
+                {
+                    Console.WriteLine(Resource.GetString(nameof(s)), a);
+                }
+            });
+        if (hasErrors)
+        {
+            return 1;
+        }
+        imageBuilder.SetEntrypointAndCmd(imageEntrypoint, imageCmd);
+
         foreach (KeyValuePair<string, string> label in labels)
         {
             // labels are validated by System.CommandLine API

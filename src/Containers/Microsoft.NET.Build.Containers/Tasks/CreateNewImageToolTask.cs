@@ -112,10 +112,18 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
         builder.AppendSwitchIfNotNull("--baseimagename ", BaseImageName);
         builder.AppendSwitchIfNotNull("--repository ", Repository);
         builder.AppendSwitchIfNotNull("--workingdirectory ", WorkingDirectory);
-        ITaskItem[] sanitizedEntryPoints = Entrypoint.Where(e => !string.IsNullOrWhiteSpace(e.ItemSpec)).ToArray();
-        builder.AppendSwitchIfNotNull("--entrypoint ", sanitizedEntryPoints, delimiter: " ");
 
         //optional options
+        AppendSwitchIfNotNullSantized(builder, "--entrypoint ", nameof(Entrypoint), Entrypoint);
+        AppendSwitchIfNotNullSantized(builder, "--entrypointargs ", nameof(EntrypointArgs), EntrypointArgs);
+        AppendSwitchIfNotNullSantized(builder, "--defaultargs ", nameof(DefaultArgs), DefaultArgs);
+        AppendSwitchIfNotNullSantized(builder, "--appcommand ", nameof(AppCommand), AppCommand);
+        AppendSwitchIfNotNullSantized(builder, "--appcommandargs ", nameof(AppCommand), AppCommandArgs);
+
+        if (!string.IsNullOrWhiteSpace(AppCommandInstruction))
+        {
+            builder.AppendSwitchIfNotNull("--appcommandinstruction ", AppCommandInstruction);
+        }
         if (!string.IsNullOrWhiteSpace(BaseImageTag))
         {
             builder.AppendSwitchIfNotNull("--baseimagetag ", BaseImageTag);
@@ -128,13 +136,6 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
         {
             builder.AppendSwitchIfNotNull("--localregistry ", LocalRegistry);
         }
-
-        if (EntrypointArgs.Any(e => string.IsNullOrWhiteSpace(e.ItemSpec)))
-        {
-            Log.LogWarningWithCodeFromResources(nameof(Strings.EmptyValuesIgnored), nameof(EntrypointArgs));
-        }
-        ITaskItem[] sanitizedEntryPointArgs = EntrypointArgs.Where(e => !string.IsNullOrWhiteSpace(e.ItemSpec)).ToArray();
-        builder.AppendSwitchIfNotNull("--entrypointargs ", sanitizedEntryPointArgs, delimiter: " ");
 
         if (Labels.Any(e => string.IsNullOrWhiteSpace(e.ItemSpec)))
         {
@@ -198,6 +199,16 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
         }
 
         return builder.ToString();
+
+        void AppendSwitchIfNotNullSantized(CommandLineBuilder builder, string commandArgName, string propertyName, ITaskItem[] value)
+        {
+            ITaskItem[] santized = value.Where(e => !string.IsNullOrWhiteSpace(e.ItemSpec)).ToArray();
+            if (santized.Length != value.Length)
+            {
+                Log.LogWarningWithCodeFromResources(nameof(Strings.EmptyValuesIgnored), propertyName);
+            }
+            builder.AppendSwitchIfNotNull(commandArgName, santized, delimiter: " ");
+        }
     }
 }
 
