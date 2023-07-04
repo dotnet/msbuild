@@ -149,12 +149,12 @@ internal sealed class Registry
     {
         cancellationToken.ThrowIfCancellationRequested();
         var runtimeGraph = GetRuntimeGraphForDotNet(runtimeIdentifierGraphPath);
-        var (ridDict, graphForManifestList) = ConstructRuntimeGraphForManifestList(manifestList, runtimeGraph);
-        var bestManifestRid = CheckIfRidExistsInGraph(graphForManifestList, ridDict.Keys, runtimeIdentifier);
+        var ridManifestDict = GetManifestsByRid(manifestList);
+        var bestManifestRid = GetBestMatchingRid(runtimeGraph, runtimeIdentifier, ridManifestDict.Keys);
         if (bestManifestRid is null) {
-            throw new BaseImageNotFoundException(runtimeIdentifier, repositoryName, reference, graphForManifestList.Runtimes.Keys);
+            throw new BaseImageNotFoundException(runtimeIdentifier, repositoryName, reference, ridManifestDict.Keys);
         }
-        PlatformSpecificManifest matchingManifest = ridDict[bestManifestRid];
+        PlatformSpecificManifest matchingManifest = ridManifestDict[bestManifestRid];
         HttpResponseMessage manifestResponse = await _registryAPI.Manifest.GetAsync(repositoryName, matchingManifest.digest, cancellationToken).ConfigureAwait(false);
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -165,23 +165,31 @@ internal sealed class Registry
             cancellationToken).ConfigureAwait(false);
     }
 
-    private static string? CheckIfRidExistsInGraph(RuntimeGraph graphForManifestList, IEnumerable<string> leafRids, string userRid) => leafRids.FirstOrDefault(leaf => graphForManifestList.AreCompatible(leaf, userRid));
-
-    private (IReadOnlyDictionary<string, PlatformSpecificManifest>, RuntimeGraph) ConstructRuntimeGraphForManifestList(ManifestListV2 manifestList, RuntimeGraph dotnetRuntimeGraph)
+    IReadOnlyDictionary<string, PlatformSpecificManifest> GetManifestsByRid(ManifestListV2 manifestList)
     {
         var ridDict = new Dictionary<string, PlatformSpecificManifest>();
-        var runtimeDescriptionSet = new HashSet<RuntimeDescription>();
         foreach (var manifest in manifestList.manifests) {
             if (CreateRidForPlatform(manifest.platform) is { } rid)
             {
-                if (ridDict.TryAdd(rid, manifest)) {
-                    AddRidAndDescendantsToSet(runtimeDescriptionSet, rid, dotnetRuntimeGraph);
-                }
+                ridDict.TryAdd(rid, manifest);
             }
         }
 
-        var graph = new RuntimeGraph(runtimeDescriptionSet);
-        return (ridDict, graph);
+        return ridDict;
+    }
+
+    private static string? GetBestMatchingRid(RuntimeGraph runtimeGraph, string runtimeIdentifier, IEnumerable<string> availableRuntimeIdentifiers)
+    {
+        HashSet<string> availableRids = new HashSet<string>(availableRuntimeIdentifiers, StringComparer.Ordinal);
+        foreach (var candidateRuntimeIdentifier in runtimeGraph.ExpandRuntime(runtimeIdentifier))
+        {
+            if (availableRids.Contains(candidateRuntimeIdentifier))
+            {
+                return candidateRuntimeIdentifier;
+            }
+        }
+
+        return null;
     }
 
     private static string? CreateRidForPlatform(PlatformInformation platform)
@@ -216,13 +224,6 @@ internal sealed class Registry
     }
 
     private static RuntimeGraph GetRuntimeGraphForDotNet(string ridGraphPath) => JsonRuntimeFormat.ReadRuntimeGraph(ridGraphPath);
-
-    private void AddRidAndDescendantsToSet(HashSet<RuntimeDescription> runtimeDescriptionSet, string rid, RuntimeGraph dotnetRuntimeGraph)
-    {
-        var R = dotnetRuntimeGraph.Runtimes[rid];
-        runtimeDescriptionSet.Add(R);
-        foreach (var r in R.InheritedRuntimes) AddRidAndDescendantsToSet(runtimeDescriptionSet, r, dotnetRuntimeGraph);
-    }
 
     /// <summary>
     /// Ensure a blob associated with <paramref name="repository"/> from the registry is available locally.
