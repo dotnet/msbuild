@@ -13,7 +13,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 ?? throw new ArgumentException($"{nameof(parseResult)} should contain one argument for {nameof(DetailsCommand.NameArgument)}", nameof(parseResult));
 
             NameCriteria = nameCriteria;
-            VersionCriteria = parseResult.GetValueForOptionOrNull(DetailsCommand.VersionOption);
+            VersionCriteria = null;
             Interactive = parseResult.GetValue(detailsCommand.InteractiveOption);
             AdditionalSources = parseResult.GetValue(detailsCommand.AddSourceOption);
         }

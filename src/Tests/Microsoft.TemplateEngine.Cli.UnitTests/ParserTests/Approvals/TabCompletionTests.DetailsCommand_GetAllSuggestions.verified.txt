@@ -19,19 +19,5 @@
     SortText: --nuget-source,
     InsertText: --nuget-source,
     Detail: Specifies a NuGet source to use.
-  },
-  {
-    Label: --version,
-    Kind: Keyword,
-    SortText: --version,
-    InsertText: --version,
-    Detail: Specifies a concrete version for displaying details. If not specified the last is taken.
-  },
-  {
-    Label: -version,
-    Kind: Keyword,
-    SortText: -version,
-    InsertText: -version,
-    Detail: Specifies a concrete version for displaying details. If not specified the last is taken.
   }
 ]
