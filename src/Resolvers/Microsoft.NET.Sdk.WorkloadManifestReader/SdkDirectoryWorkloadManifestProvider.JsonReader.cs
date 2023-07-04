@@ -24,24 +24,6 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         static class JsonReader
         {
 
-            internal static Utf8JsonStreamReader CreateReader(FileStream fileStream)
-            {
-#if USE_SYSTEM_TEXT_JSON
-                var readerOptions = new JsonReaderOptions
-                {
-                    AllowTrailingCommas = true,
-                    CommentHandling = JsonCommentHandling.Skip
-                };
-                var reader = new Utf8JsonStreamReader(fileStream, readerOptions);
-#else
-                using var textReader = new StreamReader(fileStream, System.Text.Encoding.UTF8, true);
-                using var jsonReader = new JsonTextReader(textReader);
-
-                var reader = new Utf8JsonStreamReader(jsonReader);
-#endif
-                return reader;
-            }
-
             /// <summary>
             /// this expects the reader to be before the value token, and leaves it on the last token of the value
             /// </summary>
