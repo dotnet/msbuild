@@ -80,17 +80,17 @@ public static class ContainerBuilder
             baseImageEntrypoint: imageBuilder.BaseImageConfig.GetEntrypoint(),
             logWarning: s =>
             {
-                Console.WriteLine(Resource.GetString(nameof(s)));
+                logger.LogWarning(Resource.GetString(nameof(s)));
             },
             logError: (s, a) => {
                 hasErrors = true;
                 if (a is null)
                 {
-                    Console.WriteLine(Resource.GetString(nameof(s)));
+                    logger.LogError(Resource.GetString(nameof(s)));
                 }
                 else
                 {
-                    Console.WriteLine(Resource.GetString(nameof(s)), a);
+                    logger.LogError(Resource.FormatString(nameof(s), a));
                 }
             });
         if (hasErrors)

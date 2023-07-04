@@ -114,16 +114,6 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
         builder.AppendSwitchIfNotNull("--workingdirectory ", WorkingDirectory);
 
         //optional options
-        AppendSwitchIfNotNullSantized(builder, "--entrypoint ", nameof(Entrypoint), Entrypoint);
-        AppendSwitchIfNotNullSantized(builder, "--entrypointargs ", nameof(EntrypointArgs), EntrypointArgs);
-        AppendSwitchIfNotNullSantized(builder, "--defaultargs ", nameof(DefaultArgs), DefaultArgs);
-        AppendSwitchIfNotNullSantized(builder, "--appcommand ", nameof(AppCommand), AppCommand);
-        AppendSwitchIfNotNullSantized(builder, "--appcommandargs ", nameof(AppCommand), AppCommandArgs);
-
-        if (!string.IsNullOrWhiteSpace(AppCommandInstruction))
-        {
-            builder.AppendSwitchIfNotNull("--appcommandinstruction ", AppCommandInstruction);
-        }
         if (!string.IsNullOrWhiteSpace(BaseImageTag))
         {
             builder.AppendSwitchIfNotNull("--baseimagetag ", BaseImageTag);
@@ -136,6 +126,16 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
         {
             builder.AppendSwitchIfNotNull("--localregistry ", LocalRegistry);
         }
+        if (!string.IsNullOrWhiteSpace(AppCommandInstruction))
+        {
+            builder.AppendSwitchIfNotNull("--appcommandinstruction ", AppCommandInstruction);
+        }
+
+        AppendSwitchIfNotNullSantized(builder, "--entrypoint ", nameof(Entrypoint), Entrypoint);
+        AppendSwitchIfNotNullSantized(builder, "--entrypointargs ", nameof(EntrypointArgs), EntrypointArgs);
+        AppendSwitchIfNotNullSantized(builder, "--defaultargs ", nameof(DefaultArgs), DefaultArgs);
+        AppendSwitchIfNotNullSantized(builder, "--appcommand ", nameof(AppCommand), AppCommand);
+        AppendSwitchIfNotNullSantized(builder, "--appcommandargs ", nameof(AppCommandArgs), AppCommandArgs);
 
         if (Labels.Any(e => string.IsNullOrWhiteSpace(e.ItemSpec)))
         {
