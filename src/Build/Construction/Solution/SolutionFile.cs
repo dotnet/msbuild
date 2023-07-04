@@ -218,13 +218,15 @@ namespace Microsoft.Build.Construction
                     _solutionFilter = null;
 
                     // Only set the value of the SolutionFileDirectory property
-                    // if, and only if, the _solutionFile field is non blank and the 
+                    // if, and only if, the _solutionFile field is non-blank and the 
                     // _solutionFile field contains the fully-qualified pathname of
                     // a file that actually exists on the disk.
                     if (!string.IsNullOrWhiteSpace(_solutionFile)
                         && File.Exists(_solutionFile)
                         && IsExtensionValid(_solutionFile))
+                    {
                       SolutionFileDirectory = Path.GetDirectoryName(_solutionFile);
+                    }
                 }
             }
         }
@@ -251,8 +253,8 @@ namespace Microsoft.Build.Construction
         }
   
         /// <summary>
-        /// Gets a <see cref="T:System.String" /> containing the fully-qualified
-        /// pathname of the folder in which this Solution's file resides.
+        /// Gets a <see cref="System.String" /> containing the fully-qualified
+        /// pathname of the folder in which this Solution file resides.
         /// </summary
         public string SolutionFileDirectory
         {
