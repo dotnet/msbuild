@@ -32,12 +32,12 @@
     <SystemReflectionMetadataVersion>7.0.0</SystemReflectionMetadataVersion>
     <MicrosoftDotNetSignToolVersion>8.0.0-beta.23353.2</MicrosoftDotNetSignToolVersion>
     <MicrosoftWebXdtPackageVersion>7.0.0-preview.22423.2</MicrosoftWebXdtPackageVersion>
-    <SystemSecurityCryptographyProtectedDataPackageVersion>8.0.0-preview.7.23355.2</SystemSecurityCryptographyProtectedDataPackageVersion>
+    <SystemSecurityCryptographyProtectedDataPackageVersion>8.0.0-preview.7.23355.4</SystemSecurityCryptographyProtectedDataPackageVersion>
     <SystemCollectionsSpecializedPackageVersion>4.3.0</SystemCollectionsSpecializedPackageVersion>
     <SystemXmlXmlDocumentPackageVersion>4.3.0</SystemXmlXmlDocumentPackageVersion>
     <WebDeploymentPackageVersion>4.0.5</WebDeploymentPackageVersion>
     <SystemTextJsonVersion>7.0.2</SystemTextJsonVersion>
-    <SystemReflectionMetadataLoadContextVersion>8.0.0-preview.7.23355.2</SystemReflectionMetadataLoadContextVersion>
+    <SystemReflectionMetadataLoadContextVersion>8.0.0-preview.7.23355.4</SystemReflectionMetadataLoadContextVersion>
     <SystemManagementPackageVersion>4.6.0</SystemManagementPackageVersion>
     <SystemCommandLineVersion>2.0.0-beta4.23307.1</SystemCommandLineVersion>
     <MicrosoftDeploymentDotNetReleasesVersion>1.0.0-preview.6.23206.1</MicrosoftDeploymentDotNetReleasesVersion>
@@ -45,18 +45,18 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/runtime -->
-    <MicrosoftNETCoreAppRefPackageVersion>8.0.0-preview.7.23355.2</MicrosoftNETCoreAppRefPackageVersion>
-    <VSRedistCommonNetCoreSharedFrameworkx6480PackageVersion>8.0.0-preview.7.23355.2</VSRedistCommonNetCoreSharedFrameworkx6480PackageVersion>
-    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>8.0.0-preview.7.23355.2</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
+    <MicrosoftNETCoreAppRefPackageVersion>8.0.0-preview.7.23355.4</MicrosoftNETCoreAppRefPackageVersion>
+    <VSRedistCommonNetCoreSharedFrameworkx6480PackageVersion>8.0.0-preview.7.23355.4</VSRedistCommonNetCoreSharedFrameworkx6480PackageVersion>
+    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>8.0.0-preview.7.23355.4</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
     <MicrosoftNETCoreAppRuntimePackageVersion>$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)</MicrosoftNETCoreAppRuntimePackageVersion>
-    <MicrosoftExtensionsDependencyModelPackageVersion>8.0.0-preview.7.23355.2</MicrosoftExtensionsDependencyModelPackageVersion>
-    <MicrosoftNETCoreDotNetHostResolverPackageVersion>8.0.0-preview.7.23355.2</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftNETHostModelVersion>8.0.0-preview.7.23355.2</MicrosoftNETHostModelVersion>
-    <MicrosoftExtensionsFileSystemGlobbingPackageVersion>8.0.0-preview.7.23355.2</MicrosoftExtensionsFileSystemGlobbingPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>8.0.0-preview.7.23355.4</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftNETCoreDotNetHostResolverPackageVersion>8.0.0-preview.7.23355.4</MicrosoftNETCoreDotNetHostResolverPackageVersion>
+    <MicrosoftNETHostModelVersion>8.0.0-preview.7.23355.4</MicrosoftNETHostModelVersion>
+    <MicrosoftExtensionsFileSystemGlobbingPackageVersion>8.0.0-preview.7.23355.4</MicrosoftExtensionsFileSystemGlobbingPackageVersion>
     <MicrosoftExtensionsDependencyModelVersion>$(MicrosoftExtensionsDependencyModelPackageVersion)</MicrosoftExtensionsDependencyModelVersion>
-    <MicrosoftExtensionsLoggingConsoleVersion>8.0.0-preview.7.23355.2</MicrosoftExtensionsLoggingConsoleVersion>
-    <MicrosoftNETILLinkTasksPackageVersion>8.0.0-preview.7.23355.2</MicrosoftNETILLinkTasksPackageVersion>
-    <SystemServiceProcessServiceControllerVersion>8.0.0-preview.7.23355.2</SystemServiceProcessServiceControllerVersion>
+    <MicrosoftExtensionsLoggingConsoleVersion>8.0.0-preview.7.23355.4</MicrosoftExtensionsLoggingConsoleVersion>
+    <MicrosoftNETILLinkTasksPackageVersion>8.0.0-preview.7.23355.4</MicrosoftNETILLinkTasksPackageVersion>
+    <SystemServiceProcessServiceControllerVersion>8.0.0-preview.7.23355.4</SystemServiceProcessServiceControllerVersion>
     <MicrosoftExtensionsLoggingPackageVersion>$(MicrosoftExtensionsLoggingConsoleVersion)</MicrosoftExtensionsLoggingPackageVersion>
     <MicrosoftExtensionsLoggingAbstractionsPackageVersion>$(MicrosoftExtensionsLoggingConsoleVersion)</MicrosoftExtensionsLoggingAbstractionsPackageVersion>
   </PropertyGroup>
@@ -85,9 +85,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/runtime -->
-    <SystemCodeDomPackageVersion>8.0.0-preview.7.23355.2</SystemCodeDomPackageVersion>
-    <SystemTextEncodingCodePagesPackageVersion>8.0.0-preview.7.23355.2</SystemTextEncodingCodePagesPackageVersion>
-    <SystemResourcesExtensionsPackageVersion>8.0.0-preview.7.23355.2</SystemResourcesExtensionsPackageVersion>
+    <SystemCodeDomPackageVersion>8.0.0-preview.7.23355.4</SystemCodeDomPackageVersion>
+    <SystemTextEncodingCodePagesPackageVersion>8.0.0-preview.7.23355.4</SystemTextEncodingCodePagesPackageVersion>
+    <SystemResourcesExtensionsPackageVersion>8.0.0-preview.7.23355.4</SystemResourcesExtensionsPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/format -->
