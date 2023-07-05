@@ -81,7 +81,7 @@ public class DockerRegistryTests
             // login to that registry
             ContainerCli.LoginCommand(_testOutput, "--username", "testuser", "--password", "testpassword", registryName).Execute().Should().Pass();
             // push an image to that registry using username/password
-            Registry localAuthed = new Registry(registryName, logger, settings: new() { ParallelUploadEnabled = false, ForceChunkedUpload = true }, baseUri: new Uri($"https://{registryName}"));
+            Registry localAuthed = new Registry(new Uri($"https://{registryName}"), logger, settings: new() { ParallelUploadEnabled = false, ForceChunkedUpload = true });
             var ridgraphfile = ToolsetUtils.GetRuntimeGraphFilePath();
             Registry mcr = new Registry(DockerRegistryManager.BaseImageSource, logger);
 

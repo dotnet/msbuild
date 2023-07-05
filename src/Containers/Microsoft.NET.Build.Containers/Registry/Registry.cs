@@ -29,22 +29,39 @@ internal sealed class Registry
     /// </summary>
     public string RegistryName { get; }
 
-    internal Registry(string registryName, ILogger logger, IRegistryAPI? registryAPI = null, RegistrySettings? settings = null, Uri? baseUri = null)
+    internal Registry(string registryName, ILogger logger, IRegistryAPI? registryAPI = null, RegistrySettings? settings = null) :
+        this(ContainerHelpers.TryExpandRegistryToUri(registryName), logger, registryAPI, settings)
+    { }
+
+    internal Registry(Uri baseUri, ILogger logger, IRegistryAPI? registryAPI = null, RegistrySettings? settings = null)
     {
-        RegistryName = registryName;
-        _logger = logger;
+        RegistryName = DeriveRegistryName(baseUri);
 
-        _settings = settings ?? new RegistrySettings();
-
-        Uri uri = baseUri ?? ContainerHelpers.TryExpandRegistryToUri(registryName);
         // "docker.io" is not a real registry. Replace the uri to refer to an actual registry.
-        if (uri.Host == ContainerHelpers.DockerRegistryAlias)
+        if (baseUri.Host == ContainerHelpers.DockerRegistryAlias)
         {
-            uri = new UriBuilder(uri.ToString()) { Host = DockerHubRegistry1 }.Uri;
+            baseUri = new UriBuilder(baseUri.ToString()) { Host = DockerHubRegistry1 }.Uri;
         }
+        BaseUri = baseUri;
 
-        BaseUri = uri;
-        _registryAPI = registryAPI ?? new DefaultRegistryAPI(registryName, uri, logger);
+        _logger = logger;
+        _settings = settings ?? new RegistrySettings();
+        _registryAPI = registryAPI ?? new DefaultRegistryAPI(RegistryName, BaseUri, logger);
+    }
+
+    private static string DeriveRegistryName(Uri baseUri)
+    {
+        var port = baseUri.Port == -1 ? string.Empty : $":{baseUri.Port}";
+        if (baseUri.OriginalString.EndsWith(port, ignoreCase: true, culture: null))
+        {
+            // the port was part of the original assignment, so it's ok to consider it part of the 'name
+            return baseUri.GetComponents(UriComponents.HostAndPort, UriFormat.Unescaped);
+        }
+        else
+        {
+            // the port was not part of the original assignment, so it's not part of the 'name'
+            return baseUri.GetComponents(UriComponents.Host, UriFormat.Unescaped);
+        }
     }
 
     public Uri BaseUri { get; }

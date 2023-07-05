@@ -80,8 +80,7 @@ public class RegistryTests : IDisposable
         var layerDigest = "sha256:fafafafafafafafafafafafafafafafa";
         var mockLayer = new Mock<Layer>(MockBehavior.Strict);
         var chunkSizeLessThanContentLength = 10000;
-        var registryName = "public.ecr.aws";
-        var registryUri = ContainerHelpers.TryExpandRegistryToUri(registryName);
+        var registryUri = ContainerHelpers.TryExpandRegistryToUri("public.ecr.aws");
         mockLayer
             .Setup(l => l.OpenBackingFile()).Returns(new MemoryStream(new byte[100000]));
         mockLayer
@@ -99,7 +98,7 @@ public class RegistryTests : IDisposable
             return Task.FromResult(ChunkUploadSuccessful(absoluteUploadUri, uploadPath, uploadedCount));
         });
 
-        Registry registry = new(registryName, logger, api.Object);
+        Registry registry = new(registryUri, logger, api.Object);
         await registry.PushLayerAsync(mockLayer.Object, repoName, CancellationToken.None);
 
         api.Verify(api => api.Blob.Upload.UploadAtomicallyAsync(It.IsIn(absoluteUploadUri, uploadPath), It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
@@ -115,8 +114,7 @@ public class RegistryTests : IDisposable
         var mockLayer = new Mock<Layer>(MockBehavior.Strict);
         var contentLength = 100000;
         var chunkSizeLessThanContentLength = 100000;
-        var registryName = "public.ecr.aws";
-        var registryUri = ContainerHelpers.TryExpandRegistryToUri(registryName);
+        var registryUri = ContainerHelpers.TryExpandRegistryToUri("public.ecr.aws");
         mockLayer
             .Setup(l => l.OpenBackingFile()).Returns(new MemoryStream(new byte[contentLength]));
         mockLayer
@@ -134,7 +132,7 @@ public class RegistryTests : IDisposable
             return Task.FromResult(ChunkUploadSuccessful(absoluteUploadUri, uploadPath, uploadedCount));
         });
 
-        Registry registry = new(registryName, logger, api.Object);
+        Registry registry = new(registryUri, logger, api.Object);
         await registry.PushLayerAsync(mockLayer.Object, repoName, CancellationToken.None);
 
         api.Verify(api => api.Blob.Upload.UploadAtomicallyAsync(It.IsIn(absoluteUploadUri, uploadPath), It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Once());
@@ -150,8 +148,7 @@ public class RegistryTests : IDisposable
         var mockLayer = new Mock<Layer>(MockBehavior.Strict);
         var contentLength = 1000000;
         var chunkSize = 100000;
-        var registryName = "public.ecr.aws";
-        var registryUri = ContainerHelpers.TryExpandRegistryToUri(registryName);
+        var registryUri = ContainerHelpers.TryExpandRegistryToUri("public.ecr.aws");
         mockLayer
             .Setup(l => l.OpenBackingFile()).Returns(new MemoryStream(new byte[contentLength]));
         mockLayer
@@ -176,7 +173,7 @@ public class RegistryTests : IDisposable
             ChunkedUploadSizeBytes = chunkSize,
         };
 
-        Registry registry = new(registryName, logger, api.Object, settings);
+        Registry registry = new(registryUri, logger, api.Object, settings);
         await registry.PushLayerAsync(mockLayer.Object, repoName, CancellationToken.None);
 
         api.Verify(api => api.Blob.Upload.UploadAtomicallyAsync(It.IsIn(absoluteUploadUri, uploadPath), It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Once());
@@ -225,8 +222,7 @@ public class RegistryTests : IDisposable
         Mock<Layer> mockLayer = new(MockBehavior.Strict);
         int contentLength = 1000000;
         int chunkSize = 100000;
-        var registryName = "public.ecr.aws";
-        var registryUri = ContainerHelpers.TryExpandRegistryToUri(registryName);
+        var registryUri = ContainerHelpers.TryExpandRegistryToUri("public.ecr.aws");
         mockLayer
             .Setup(l => l.OpenBackingFile()).Returns(new MemoryStream(new byte[contentLength]));
         mockLayer
@@ -250,7 +246,7 @@ public class RegistryTests : IDisposable
             ChunkedUploadSizeBytes = chunkSize,
         };
 
-        Registry registry = new(registryName, logger, api.Object, settings);
+        Registry registry = new(registryUri, logger, api.Object, settings);
         await registry.PushLayerAsync(mockLayer.Object, repoName, CancellationToken.None);
 
         api.Verify(api => api.Blob.Upload.UploadAtomicallyAsync(It.IsIn(absoluteUploadUri, uploadPath), It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Never());
@@ -326,8 +322,7 @@ public class RegistryTests : IDisposable
     public async Task UploadBlobChunkedAsync_NormalFlow()
     {
         ILogger logger = _loggerFactory.CreateLogger(nameof(UploadBlobChunkedAsync_NormalFlow));
-        var registryName = "public.ecr.aws";
-        var registryUri = ContainerHelpers.TryExpandRegistryToUri(registryName);
+        var registryUri = ContainerHelpers.TryExpandRegistryToUri("public.ecr.aws");
 
         int contentLength = 50000000;
         int chunkSize = 10000000;
@@ -350,7 +345,7 @@ public class RegistryTests : IDisposable
             ChunkedUploadSizeBytes = chunkSize,
         };
 
-        Registry registry = new(registryName, logger, api.Object, settings);
+        Registry registry = new(registryUri, logger, api.Object, settings);
         await registry.UploadBlobChunkedAsync(testStream, new StartUploadInformation(absoluteUploadUri), CancellationToken.None);
 
         api.Verify(api => api.Blob.Upload.UploadChunkAsync(It.IsIn(absoluteUploadUri, uploadPath), It.IsAny<HttpContent>(), It.IsAny<CancellationToken>()), Times.Exactly(5));
@@ -360,8 +355,7 @@ public class RegistryTests : IDisposable
     public async Task UploadBlobChunkedAsync_Failure()
     {
         ILogger logger = _loggerFactory.CreateLogger(nameof(UploadBlobChunkedAsync_NormalFlow));
-        var registryName = "public.ecr.aws";
-        var registryUri = ContainerHelpers.TryExpandRegistryToUri(registryName);
+        var registryUri = ContainerHelpers.TryExpandRegistryToUri("public.ecr.aws");
 
         int contentLength = 50000000;
         int chunkSize = 10000000;
@@ -385,7 +379,7 @@ public class RegistryTests : IDisposable
             ChunkedUploadSizeBytes = chunkSize,
         };
 
-        Registry registry = new(registryName, logger, api.Object, settings);
+        Registry registry = new(registryUri, logger, api.Object, settings);
         ApplicationException receivedException = await Assert.ThrowsAsync<ApplicationException>(() => registry.UploadBlobChunkedAsync(testStream, new StartUploadInformation(absoluteUploadUri), CancellationToken.None));
 
         Assert.Equal(preparedException, receivedException);
