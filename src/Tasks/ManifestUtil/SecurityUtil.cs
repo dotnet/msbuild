@@ -838,7 +838,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 commandLine.AppendFormat(CultureInfo.InvariantCulture,
                                             "{0} {1} ",
-                                            useRFC3161Timestamp ? "/tr" : "/t",
+                                            useRFC3161Timestamp ? "/td sha256 /tr" : "/t",
                                             timestampUrl.ToString());
             }
             commandLine.AppendFormat(CultureInfo.InvariantCulture, "\"{0}\"", path);

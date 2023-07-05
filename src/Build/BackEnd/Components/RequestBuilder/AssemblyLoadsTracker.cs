@@ -157,11 +157,14 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
                 : $"{_appDomain.Id}|{_appDomain.FriendlyName}";
 
 
-            AssemblyLoadBuildEventArgs buildArgs = new(_context, _initiator, assemblyName, assemblyPath, mvid, appDomainDescriptor)
+            AssemblyLoadBuildEventArgs buildArgs = new(_context, _initiator, assemblyName, assemblyPath, mvid, appDomainDescriptor);
+
+            // Fix #8816 - when LoggingContext does not have BuildEventContext it is unable to log anything
+            if (_loggingContext?.BuildEventContext != null)
             {
-                BuildEventContext = _loggingContext?.BuildEventContext ?? BuildEventContext.Invalid
-            };
-            _loggingContext?.LogBuildEvent(buildArgs);
+                buildArgs.BuildEventContext = _loggingContext.BuildEventContext;
+                _loggingContext.LogBuildEvent(buildArgs);
+            }
             _loggingService?.LogBuildEvent(buildArgs);
         }
 

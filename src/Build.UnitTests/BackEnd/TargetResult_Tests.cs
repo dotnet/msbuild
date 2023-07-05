@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(result.ResultCode, deserializedResult.ResultCode);
             Assert.True(TranslationHelpers.CompareCollections(result.Items, deserializedResult.Items, TaskItemComparer.Instance));
-            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception));
+            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception, out string diffReason), diffReason);
             Assert.Equal(result.OriginalBuildEventContext, deserializedResult.OriginalBuildEventContext);
         }
 
@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(result.ResultCode, deserializedResult.ResultCode);
             Assert.True(TranslationHelpers.CompareCollections(result.Items, deserializedResult.Items, TaskItemComparer.Instance));
-            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception));
+            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception, out string diffReason), diffReason);
         }
 
         /// <summary>

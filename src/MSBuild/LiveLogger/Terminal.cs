@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using System.Text;
 #if NETFRAMEWORK
 using Microsoft.Build.Shared;
@@ -29,16 +30,49 @@ internal sealed class Terminal : ITerminal
     /// </summary>
     private bool _isBuffering = false;
 
-    /// <inheritdoc/>
-    public int Height => Console.BufferHeight;
+    internal TextWriter Output { private get; set; } = Console.Out;
+
+    private const int BigUnknownDimension = 2 << 23;
 
     /// <inheritdoc/>
-    public int Width => Console.BufferWidth;
+    public int Height
+    {
+        get
+        {
+            if (Console.IsOutputRedirected)
+            {
+                return BigUnknownDimension;
+            }
+
+            return Console.BufferHeight;
+        }
+    }
+
+    /// <inheritdoc/>
+    public int Width
+    {
+        get
+        {
+            if (Console.IsOutputRedirected)
+            {
+                return BigUnknownDimension;
+            }
+
+            return Console.BufferWidth;
+        }
+    }
 
     public Terminal()
     {
         _originalOutputEncoding = Console.OutputEncoding;
         Console.OutputEncoding = Encoding.UTF8;
+    }
+
+    internal Terminal(TextWriter output)
+    {
+        Output = output;
+
+        _originalOutputEncoding = Encoding.UTF8;
     }
 
     /// <inheritdoc/>
@@ -60,7 +94,7 @@ internal sealed class Terminal : ITerminal
         }
         _isBuffering = false;
 
-        Console.Write(_outputBuilder.ToString());
+        Output.Write(_outputBuilder.ToString());
         _outputBuilder.Clear();
     }
 
@@ -73,7 +107,7 @@ internal sealed class Terminal : ITerminal
         }
         else
         {
-            Console.Write(text);
+            Output.Write(text);
         }
     }
 
@@ -86,7 +120,7 @@ internal sealed class Terminal : ITerminal
         }
         else
         {
-            Console.Out.Write(text);
+            Output.Write(text);
         }
     }
 
@@ -99,7 +133,7 @@ internal sealed class Terminal : ITerminal
         }
         else
         {
-            Console.WriteLine(text);
+            Output.WriteLine(text);
         }
     }
 
@@ -114,7 +148,7 @@ internal sealed class Terminal : ITerminal
         }
         else
         {
-            Console.Out.WriteLine(truncatedText);
+            Output.WriteLine(truncatedText);
         }
     }
 

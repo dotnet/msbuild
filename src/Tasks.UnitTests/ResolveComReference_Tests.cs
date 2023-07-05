@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
             {
                 TransientTestFile file = env.CreateFile();
                 cache.SerializeCache(file.Path, null);
-                cache2 = StateFileBase.DeserializeCache(file.Path, null, typeof(ResolveComReferenceCache)) as ResolveComReferenceCache;
+                cache2 = StateFileBase.DeserializeCache<ResolveComReferenceCache>(file.Path, null);
             }
 
             cache2.tlbImpLocation.ShouldBe(cache.tlbImpLocation);
@@ -435,7 +435,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(newTlbInfo.strippedTypeLibPath, axRefInfo.strippedTypeLibPath); // "The added reference should have the same type lib path as the Ax reference"
 
             Assert.Equal(newTlbInfo.taskItem.ItemSpec, axRefInfo.taskItem.ItemSpec); // "The added reference should have the same task item spec as the Ax reference"
-            Assert.Equal(newTlbInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.wrapperTool), ComReferenceTypes.primaryortlbimp); // "The added reference should have the tlbimp/primary wrapper tool"
+            Assert.Equal(ComReferenceTypes.primaryortlbimp, newTlbInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.wrapperTool)); // "The added reference should have the tlbimp/primary wrapper tool"
 
             rcr.AddMissingTlbReferences();
             Assert.Equal(4, rcr.allProjectRefs.Count); // "There should still be four references"

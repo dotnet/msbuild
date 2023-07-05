@@ -474,7 +474,7 @@
     <comment>{StrBegin="MSB4187: "}</comment>
   </data>
   <data name="UnhandledMSBuildError" xml:space="preserve">
-    <value>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled.
+    <value>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</value>
   </data>
   <data name="IllFormedCondition" xml:space="preserve">
