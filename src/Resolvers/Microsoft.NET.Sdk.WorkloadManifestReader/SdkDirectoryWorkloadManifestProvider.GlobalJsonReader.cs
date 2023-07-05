@@ -23,7 +23,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     {
         static class GlobalJsonReader
         {
-            public static string? GetWorkloadVersionFromGlobalJson(string globalJsonPath)
+            public static string? GetWorkloadVersionFromGlobalJson(string? globalJsonPath)
             {
                 if (string.IsNullOrEmpty(globalJsonPath))
                 {
