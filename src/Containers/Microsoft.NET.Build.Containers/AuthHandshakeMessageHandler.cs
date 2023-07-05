@@ -136,14 +136,7 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
         }
         else
         {
-            try
-            {
-                privateRepoCreds = await CredsProvider.GetCredentialsAsync(registry).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                throw new CredentialRetrievalException(registry, e);
-            }
+            privateRepoCreds = await GetLoginCredentials(registry).ConfigureAwait(false);
         }
 
         if (scheme is "Basic")
@@ -186,6 +179,31 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
         else
         {
             return null;
+        }
+    }
+
+    private static async Task<DockerCredentials> GetLoginCredentials(string registry)
+    {
+        // For authentication with Docker Hub, 'docker login' uses 'https://index.docker.io/v1/' as the registry key.
+        // And 'podman login docker.io' uses 'docker.io'.
+        // Try the key used by 'docker' first, and then fall back to the regular case for 'podman'.
+        if (registry == ContainerHelpers.DockerRegistryAlias)
+        {
+            try
+            {
+                return await CredsProvider.GetCredentialsAsync("https://index.docker.io/v1/").ConfigureAwait(false);
+            }
+            catch
+            { }
+        }
+
+        try
+        {
+            return await CredsProvider.GetCredentialsAsync(registry).ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            throw new CredentialRetrievalException(registry, e);
         }
     }
 
