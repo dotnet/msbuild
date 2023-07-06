@@ -57,6 +57,16 @@
         <target state="translated">Dokument ist unvollständig.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">Ungültige Version: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">Fehler beim Analysieren der Version \"{1}\" für die Workloadmanifest-ID \"{0}\"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">Die Workloadmanifestabhängigkeit „{0}“, die vom Manifest „{1}“ [{2}] benötigt wird, wurde nicht gefunden.</target>
@@ -92,6 +102,11 @@
         <target state="translated">Die Umleitungsworkload „{0}“ hat andere Schlüssel als „redirect-to“.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SpecifiedManifestNotFound">
+        <source>Specified workload manifest was not found: {0}</source>
+        <target state="translated">Das angegebene Workloadmanifest wurde nicht gefunden: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">Unerwartetes Token "{0}" bei Offset {1}.</target>
@@ -115,6 +130,11 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Nicht aufgelöstes Ziel „{0}“ für die Workloadumleitung „{1}“ im Manifest „{2}“ [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="translated">Die Arbeitsauslastungsversion {0}, die in {1} angegeben wurde, wurde nicht gefunden. Führen Sie „dotnet workload restore“ aus, um diese Workloadversion zu installieren.</target>
         <note />
       </trans-unit>
     </body>

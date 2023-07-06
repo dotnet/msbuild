@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Linq;
@@ -85,35 +85,21 @@ namespace Microsoft.DotNet.Tests.Commands
             reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
         }
 
-        [Fact]
+        // this test in helix errors accessing the template hive  but this test doesn't work with the ephemeral hive
+        [WindowsOnlyFact]
         public void GivenNewCommandItDisplaysCompletions()
         {
             var expected = new[] {
-                "--columns",
-                "--dry-run",
-                "--force",
                 "--help",
-                "--install",
-                "--language",
-                "--list",
-                "--interactive",
-                "--name",
-                "--nuget-source",
-                "--output",
-                "--type",
-                "--uninstall",
                 "-?",
                 "-h",
-                "-i",
-                "-l",
-                "-lang",
-                "-n",
-                "-o",
-                "-u",
                 "/?",
                 "/h",
-                "--update-check",
-                "--update-apply"
+                "install",
+                "list",
+                "search",
+                "uninstall",
+                "update"
             };
 
             var reporter = new BufferedReporter();
@@ -327,7 +313,6 @@ namespace Microsoft.DotNet.Tests.Commands
             var expected = new[] {
                 "install",
                 "uninstall",
-                "--info"
             };
 
             var reporter = new BufferedReporter();

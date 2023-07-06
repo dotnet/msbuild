@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Linq;
 using System.Xml.Linq;
@@ -31,7 +31,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
 
-            CommandResult result = packCommand.Execute();
+            CommandResult result = packCommand.Execute("--property:SelfContained=true");
             result.ExitCode.Should().NotBe(0);
             result.StdOut.Should().Contain(Strings.PackAsToolCannotSupportSelfContained);
         }
@@ -44,7 +44,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             var packCommand = new BuildCommand(helloWorldAsset);
 
-            CommandResult result = packCommand.Execute();
+            CommandResult result = packCommand.Execute("--property:SelfContained=true");
             result.ExitCode.Should().Be(0);
         }
 

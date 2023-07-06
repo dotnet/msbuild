@@ -15,172 +15,196 @@ parameters:
   timeoutInMinutes: 180
 
 jobs:
-- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/release/6.0.1xx')) }}:
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/release/7.0.4xx'), not(contains(parameters.agentOs, 'TemplateEngine'))) }}:
   - template: /eng/common/templates/job/onelocbuild.yml
     parameters:
       CreatePr: true
       LclSource: lclFilesfromPackage
       LclPackageId: 'LCL-JUNO-PROD-DOTNETSDK'
-      MirrorBranch: release/6.0.1xx
+      MirrorBranch: release/7.0.4xx
       MirrorRepo: sdk
-- template: /eng/common/templates/job/job.yml
-  parameters:
-    name: ${{ parameters.agentOs }}
-    enableMicrobuild: true
-    enablePublishBuildAssets: true
-    enableTelemetry: true
-    enablePublishUsingPipelines: true
-    helixRepo: dotnet/sdk
-    pool: ${{ parameters.pool }}
-    timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
-    ${{ if ne(parameters.strategy, '') }}:
-      strategy: ${{ parameters.strategy }}
-    workspace:
-      clean: all
-    variables:
-      - ${{ insert }}: ${{ parameters.variables }}
-      - _AgentOSName: ${{ parameters.agentOs }}
-      - _TeamName: DotNetCore
-      - _OfficialBuildIdArgs: ''
-      - _PublishArgs: ''
-      - _SignArgs: ''
-      - _HelixApiToken: ''
-      # Helix Testing requires a token when internally run
+
+- ${{ if not(contains(parameters.agentOs, 'TemplateEngine')) }}:
+  - template: /eng/common/templates/job/job.yml
+    parameters:
+      name: ${{ parameters.agentOs }}
+      enableMicrobuild: true
+      enablePublishBuildAssets: true
+      enableTelemetry: true
+      enablePublishUsingPipelines: true
+      helixRepo: dotnet/sdk
+      pool: ${{ parameters.pool }}
+      timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
+      ${{ if ne(parameters.strategy, '') }}:
+        strategy: ${{ parameters.strategy }}
+      workspace:
+        clean: all
+      variables:
+        - ${{ insert }}: ${{ parameters.variables }}
+        - _AgentOSName: ${{ parameters.agentOs }}
+        - _TeamName: DotNetCore
+        - _OfficialBuildIdArgs: ''
+        - _PublishArgs: ''
+        - _SignArgs: ''
+        - _HelixApiToken: ''
+        # Helix Testing requires a token when internally run
+        - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          - group: DotNet-HelixApi-Access
+          - _HelixApiToken: $(HelixApiAccessToken)
+        - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+          - group: dotnet-benchview
+          - _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+          - _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
+          - _PerfIterations: 25
+  
+      steps:
       - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-        - group: DotNet-HelixApi-Access
-        - _HelixApiToken: $(HelixApiAccessToken)
-      - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-        - group: dotnet-benchview
-        - _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
-        - _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
-        - _PerfIterations: 25
-
-    steps:
-    - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      - task: PowerShell@2
-        displayName: Setup Private Feeds Credentials
-        inputs:
-          filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
-          arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
-        env:
-          Token: $(dn-bot-dnceng-artifact-feeds-rw)
-    - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-      - script: eng\CIBuild.cmd
-                  -configuration $(_BuildConfig)
-                  $(_PublishArgs)
-                  $(_SignArgs)
-                  $(_OfficialBuildIdArgs)
-                  /p:Test=false
-                  $(_InternalRuntimeDownloadArgs)
-        displayName: Build
-        env:
-          BuildConfig: $(_BuildConfig)
-          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-          HelixAccessToken: ${{ parameters.HelixAccessToken }}
-      - powershell: eng\runHelixAndNonHelixInParallel.ps1
-              -configuration $(_BuildConfig)
-              -buildSourcesDirectory $(Build.SourcesDirectory)
-              -customHelixTargetQueue ${{ parameters.helixTargetQueue }}
-              $(_Test)
-        displayName: Run Tests in Helix and non Helix in parallel
-        condition: succeededOrFailed()
-        env:
+        - task: PowerShell@2
+          displayName: Setup Private Feeds Credentials
+          inputs:
+            filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+            arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+          env:
+            Token: $(dn-bot-dnceng-artifact-feeds-rw)
+      - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
+        - powershell: eng\common\build.ps1
+                    $(_CIBuild)
+                    -configuration $(_BuildConfig)
+                    $(_PublishArgs)
+                    $(_SignArgs)
+                    $(_OfficialBuildIdArgs)
+                    /p:Test=false
+                    $(_InternalRuntimeDownloadArgs)
+                    $(_OfficialBuildArgs)
+          continueOnError: false
+          displayName: Build
+          env:
+            BuildConfig: $(_BuildConfig)
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: ''
-            RunAoTTests: 'false'
-
-    - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
-      - script: eng\CIBuild.cmd
-                  -configuration $(_BuildConfig)
-                  $(_SignArgs)
-                  $(_OfficialBuildIdArgs)
-                  $(_InternalRuntimeDownloadArgs)
-                  /p:Test=false
-        displayName: Build
-        env:
-          BuildConfig: $(_BuildConfig)
-          TestFullMSBuild: 'true'
-          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-          HelixAccessToken: ${{ parameters.HelixAccessToken }}
-      - powershell: eng\runHelixAndNonHelixInParallel.ps1
-              -configuration $(_BuildConfig)
-              -buildSourcesDirectory $(Build.SourcesDirectory)
-              -customHelixTargetQueue ${{ parameters.helixTargetQueue }}
-              $(_Test)
-        displayName: Run Tests in Helix and non Helix in parallel
-        condition: succeededOrFailed()
-        env:
+            HelixAccessToken: ${{ parameters.HelixAccessToken }}
+        - powershell: eng\common\build.ps1
+                -configuration $(_BuildConfig)
+                -prepareMachine
+                -ci
+                -restore
+                $(_Test)
+                -projects $(Build.SourcesDirectory)\src\Tests\UnitTests.proj
+                /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TestInHelix.binlog
+                /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
+                $(_InternalRuntimeDownloadArgs)
+          displayName: Run Tests in Helix
+          condition: succeededOrFailed()
+          env:
+              SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+              HelixAccessToken: $(_HelixApiToken)
+              RunAoTTests: 'false'
+  
+      - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
+        - powershell: eng\common\build.ps1
+                    $(_CIBuild)
+                    -configuration $(_BuildConfig)
+                    $(_SignArgs)
+                    $(_OfficialBuildIdArgs)
+                    $(_InternalRuntimeDownloadArgs)
+                    /p:Test=false
+          continueOnError: false
+          displayName: Build
+          env:
+            BuildConfig: $(_BuildConfig)
             TestFullMSBuild: 'true'
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: ''
-
-    - ${{ if eq(parameters.agentOs, 'Windows_NT_TestAsTools') }}:
-      - script: eng\CIBuild.cmd
-                  -configuration $(_BuildConfig)
-                  $(_SignArgs)
-                  $(_OfficialBuildIdArgs)
-                  $(_Test)
-                  $(_InternalRuntimeDownloadArgs)
-                  /p:RunTestsAsTool=true
-        displayName: Build
-        env:
-          BuildConfig: $(_BuildConfig)
-
-    - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework', 'Windows_NT_TestAsTools') }}:
-      - script: eng/common/cibuild.sh
-                  --configuration $(_BuildConfig)
-                  $(_SignArgs)
-                  $(_OfficialBuildIdArgs)
-                  $(_InternalRuntimeDownloadArgs)
-                  -p:Test=false
-        displayName: Build
-        env:
-          BuildConfig: $(_BuildConfig)
-      - powershell: eng/runHelixAndNonHelixInParallelNonWindows.ps1
+            HelixAccessToken: ${{ parameters.HelixAccessToken }}
+        - powershell: eng\common\build.ps1
                 -configuration $(_BuildConfig)
-                -buildSourcesDirectory $(Build.SourcesDirectory)
-                -customHelixTargetQueue ${{ parameters.helixTargetQueue }}
-                -officialBuildIdArgs "$(_OfficialBuildIdArgs)"
-                $(_Test)
-        displayName: Run Tests in Helix and non Helix in parallel
-        condition: succeededOrFailed()
-        env:
-            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: $(_HelixApiToken)
-            RunAoTTests: 'false'
+                -prepareMachine
+                -ci
+                -restore
+                -test
+                -projects $(Build.SourcesDirectory)\src\Tests\UnitTests.proj
+                /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TestInHelix.binlog
+                /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
+                $(_InternalRuntimeDownloadArgs)
+          displayName: Run Tests in Helix
+          condition: succeededOrFailed()
+          env:
+              TestFullMSBuild: 'true'
+              SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+              HelixAccessToken: $(_HelixApiToken)
+  
+      - ${{ if eq(parameters.agentOs, 'Windows_NT_TestAsTools') }}:
+        - powershell: eng\common\build.ps1
+                    $(_CIBuild)
+                    -configuration $(_BuildConfig)
+                    $(_SignArgs)
+                    $(_OfficialBuildIdArgs)
+                    $(_InternalRuntimeDownloadArgs)
+                    /p:RunTestsAsTool=true
+          displayName: Build
+          env:
+            BuildConfig: $(_BuildConfig)
+  
+      - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework', 'Windows_NT_TestAsTools') }}:
+        - script: eng/common/build.sh
+                    $(_CIBuild)
+                    --configuration $(_BuildConfig)
+                    $(_SignArgs)
+                    $(_OfficialBuildIdArgs)
+                    $(_InternalRuntimeDownloadArgs)
+                    -p:Test=false
+          continueOnError: false
+          displayName: Build
+          env:
+            BuildConfig: $(_BuildConfig)
+        - powershell: eng/common/build.sh
+                -configuration $(_BuildConfig)
+                -prepareMachine
+                -ci
+                -restore
+                -test
+                -projects $(Build.SourcesDirectory)/src/Tests/UnitTests.proj
+                /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/TestInHelix.binlog
+                /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
+                $(_InternalRuntimeDownloadArgs)
+          displayName: Run Tests in Helix
+          condition: succeededOrFailed()
+          env:
+              SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+              HelixAccessToken: $(_HelixApiToken)
+              RunAoTTests: 'false'
 
-    - task: PublishTestResults@2
-      displayName: Publish Test Results	
-      inputs:	
-        testResultsFormat: xUnit	
-        testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'	
-        testRunTitle: '$(_AgentOSName)_$(Agent.JobName)'	
-        buildPlatform: '$(BuildPlatform)'	
-        buildConfiguration: '$(_BuildConfig)'	
-      condition: always()
+      - task: PublishTestResults@2
+        displayName: Publish Test Results	
+        inputs:	
+          testResultsFormat: xUnit	
+          testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'	
+          testRunTitle: '$(_AgentOSName)_$(Agent.JobName)'	
+          buildPlatform: '$(BuildPlatform)'	
+          buildConfiguration: '$(_BuildConfig)'	
+        condition: always()
 
-    - task: CopyFiles@2	
-      displayName: Gather Logs	
-      inputs:	
-        SourceFolder: '$(Build.SourcesDirectory)/artifacts'	
-        Contents: |	
-         log/$(_BuildConfig)/**/*	
-         TestResults/$(_BuildConfig)/**/*	
-         SymStore/$(_BuildConfig)/**/*
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'	
-      continueOnError: true	
-      condition: always()
+      - task: CopyFiles@2	
+        displayName: Gather Logs	
+        inputs:	
+          SourceFolder: '$(Build.SourcesDirectory)/artifacts'	
+          Contents: |	
+           log/$(_BuildConfig)/**/*	
+           TestResults/$(_BuildConfig)/**/*	
+           SymStore/$(_BuildConfig)/**/*
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'	
+        continueOnError: true	
+        condition: always()
+  
+      - task: PublishBuildArtifacts@1	
+        displayName: Publish Logs to VSTS	
+        inputs:	
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'	
+          ArtifactName: '$(_AgentOSName)_$(Agent.JobName)_$(Build.BuildNumber)'	
+          publishLocation: Container	
+        continueOnError: true	
+        condition: always()
 
-    - task: PublishBuildArtifacts@1	
-      displayName: Publish Logs to VSTS	
-      inputs:	
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'	
-        ArtifactName: '$(_AgentOSName)_$(Agent.JobName)_$(Build.BuildNumber)'	
-        publishLocation: Container	
-      continueOnError: true	
-      condition: always()
-
-- ${{ if in(parameters.agentOs, 'Windows_NT', 'Darwin') }}:
+# AoT Jobs
+- ${{ if and(in(parameters.agentOs, 'Windows_NT', 'Darwin'), or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest'))) }}:
   - template: /eng/common/templates/job/job.yml
     parameters:
       name: ${{ parameters.agentOs }}_AoT_Tests
@@ -223,19 +247,20 @@ jobs:
           env:
             Token: $(dn-bot-dnceng-artifact-feeds-rw)
       - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-        - script: eng\CIBuild.cmd
+        - powershell: eng\common\build.ps1
+                    $(_CIBuild)
                     -configuration $(_BuildConfig)
-                    $(_PublishArgs)
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
                     /p:Test=false
                     $(_InternalRuntimeDownloadArgs)
+          continueOnError: false
           displayName: Build
           env:
             BuildConfig: $(_BuildConfig)
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
             HelixAccessToken: ${{ parameters.HelixAccessToken }}
-        - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload install wasm-tools
+        - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload install wasm-tools --skip-manifest-update
           displayName: Install wasm-tools Workload
           continueOnError: false
         - powershell: $(Build.SourcesDirectory)/eng/common/build.ps1
@@ -248,15 +273,18 @@ jobs:
                 /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TestInHelix.binlog
                 /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
           displayName: Run AoT Tests in Helix
-          condition: succeededOrFailed()
           env:
               SYSTEM_ACCESSTOKEN: $(System.AccessToken)
               HelixAccessToken: ''
               RunAoTTests: 'true'
 
       - ${{ if eq(parameters.agentOs, 'Darwin') }}:
-        - script: eng/common/cibuild.sh
+        - script: eng/common/build.sh
                     --configuration $(_BuildConfig)
+                    --restore
+                    --build
+                    --pack
+                    --ci
                     $(_SignArgs)
                     $(_OfficialBuildIdArgs)
                     $(_InternalRuntimeDownloadArgs)
@@ -264,7 +292,7 @@ jobs:
           displayName: Build
           env:
             BuildConfig: $(_BuildConfig)
-        - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload install wasm-tools
+        - script: $(Build.SourcesDirectory)/artifacts/bin/redist/$(_BuildConfig)/dotnet/dotnet workload install wasm-tools --skip-manifest-update
           displayName: Install wasm-tools Workload
           continueOnError: false
         - script: eng/common/build.sh
@@ -277,23 +305,12 @@ jobs:
                 /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/TestInHelix.binlog
                 /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
           displayName: Run AoT Tests in Helix
-          condition: succeededOrFailed()
           env:
               SYSTEM_ACCESSTOKEN: $(System.AccessToken)
               HelixAccessToken: $(_HelixApiToken)
               RunAoTTests: 'true'
 
       - ${{ if in(parameters.agentOs, 'Windows_NT', 'Darwin') }}:
-        - task: PublishTestResults@2
-          displayName: Publish Test Results	
-          inputs:	
-            testResultsFormat: xUnit	
-            testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'	
-            testRunTitle: '$(_AgentOSName)_$(Agent.JobName)'	
-            buildPlatform: '$(BuildPlatform)'	
-            buildConfiguration: '$(_BuildConfig)'	
-          condition: always()
-
         - task: CopyFiles@2	
           displayName: Gather Logs	
           inputs:	
@@ -314,3 +331,145 @@ jobs:
             publishLocation: Container	
           continueOnError: true	
           condition: always()
+
+# TemplateEngine Jobs
+- ${{ if contains(parameters.agentOs, 'TemplateEngine') }}:
+  - template: /eng/common/templates/job/job.yml
+    parameters:
+      name: ${{ parameters.agentOs }}
+      enableMicrobuild: true
+      enablePublishBuildAssets: true
+      enableTelemetry: true
+      enablePublishUsingPipelines: true
+      helixRepo: dotnet/sdk
+      pool: ${{ parameters.pool }}
+      timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
+      ${{ if ne(parameters.strategy, '') }}:
+        strategy: ${{ parameters.strategy }}
+      workspace:
+        clean: all
+      variables:
+        - ${{ insert }}: ${{ parameters.variables }}
+        - _AgentOSName: ${{ parameters.agentOs }}
+        - _TeamName: DotNetCore
+        - _OfficialBuildIdArgs: ''
+        - _PublishArgs: ''
+        - _SignArgs: ''
+        - _HelixApiToken: ''
+        # Helix Testing requires a token when internally run
+        - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+          - group: DotNet-HelixApi-Access
+          - _HelixApiToken: $(HelixApiAccessToken)
+        - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+          - group: dotnet-benchview
+          - _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+          - _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
+          - _PerfIterations: 25
+
+      steps:
+      - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+        - task: PowerShell@2
+          displayName: Setup Private Feeds Credentials
+          inputs:
+            filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+            arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+          env:
+            Token: $(dn-bot-dnceng-artifact-feeds-rw)
+      - ${{ if contains(parameters.agentOs, 'Windows_NT') }}:
+        - powershell: eng\common\build.ps1
+                    $(_CIBuild)
+                    -configuration $(_BuildConfig)
+                    $(_SignArgs)
+                    $(_OfficialBuildIdArgs)
+                    /p:Test=false
+                    $(_InternalRuntimeDownloadArgs)
+          displayName: Build
+          env:
+            BuildConfig: $(_BuildConfig)
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            HelixAccessToken: ${{ parameters.HelixAccessToken }}
+        - powershell: eng\common\build.ps1
+                -configuration $(_BuildConfig)
+                -prepareMachine
+                -ci
+                -restore
+                $(_Test)
+                -projects $(Build.SourcesDirectory)\src\Tests\Microsoft.TemplateEngine.Cli.UnitTests\Microsoft.TemplateEngine.Cli.UnitTests.csproj
+                /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TemplateEngine.Cli.UnitTests.binlog
+                $(_InternalRuntimeDownloadArgs)
+          displayName: Run TemplateEngine Cli Unit Tests
+        - powershell: eng\common\build.ps1
+                -configuration $(_BuildConfig)
+                -prepareMachine
+                -ci
+                -restore
+                $(_Test)
+                -projects $(Build.SourcesDirectory)\src\Tests\dotnet-new.Tests\dotnet-new.IntegrationTests.csproj
+                /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\dotnet-new.IntegrationTests.binlog
+                $(_InternalRuntimeDownloadArgs)
+          displayName: Run dotnet new Integration Tests
+
+      - ${{ if not(contains(parameters.agentOs, 'Windows_NT')) }}:
+        - script: eng/common/build.sh
+                    --configuration $(_BuildConfig)
+                    --restore
+                    --build
+                    --ci
+                    $(_SignArgs)
+                    $(_OfficialBuildIdArgs)
+                    $(_InternalRuntimeDownloadArgs)
+                    -p:Test=false
+          displayName: Build
+          env:
+            BuildConfig: $(_BuildConfig)
+        - powershell: eng/common/build.sh
+                -configuration $(_BuildConfig)
+                -prepareMachine
+                -ci
+                -restore
+                -test
+                -projects $(Build.SourcesDirectory)/src/Tests/Microsoft.TemplateEngine.Cli.UnitTests/Microsoft.TemplateEngine.Cli.UnitTests.csproj
+                /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/TemplateEngine.Cli.UnitTests.binlog
+                $(_InternalRuntimeDownloadArgs)
+          displayName: Run TemplateEngine Cli Unit Tests
+        - powershell: eng/common/build.sh
+                -configuration $(_BuildConfig)
+                -prepareMachine
+                -ci
+                -restore
+                -test
+                -projects $(Build.SourcesDirectory)/src/Tests/dotnet-new.Tests/dotnet-new.IntegrationTests.csproj
+                /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/dotnet-new.IntegrationTests.binlog
+                $(_InternalRuntimeDownloadArgs)
+          displayName: Run dotnet new Integration Tests
+  
+      - task: PublishTestResults@2
+        displayName: Publish Test Results	
+        inputs:	
+          testResultsFormat: xUnit	
+          testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'	
+          testRunTitle: '$(_AgentOSName)_$(Agent.JobName)'	
+          buildPlatform: '$(BuildPlatform)'	
+          buildConfiguration: '$(_BuildConfig)'	
+        condition: always()
+  
+      - task: CopyFiles@2	
+        displayName: Gather Logs	
+        inputs:	
+          SourceFolder: '$(Build.SourcesDirectory)/artifacts'	
+          Contents: |	
+           log/$(_BuildConfig)/**/*	
+           TestResults/$(_BuildConfig)/**/*	
+           SymStore/$(_BuildConfig)/**/*
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'	
+        continueOnError: true	
+        condition: always()
+  
+      - task: PublishBuildArtifacts@1	
+        displayName: Publish Logs to VSTS	
+        inputs:	
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'	
+          ArtifactName: '$(_AgentOSName)_$(Agent.JobName)_$(Build.BuildNumber)'	
+          publishLocation: Container	
+        continueOnError: true	
+        condition: always()

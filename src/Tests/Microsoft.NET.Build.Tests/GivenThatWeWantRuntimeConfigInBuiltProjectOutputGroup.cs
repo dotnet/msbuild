@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.IO;
@@ -23,7 +23,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp1.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_has_target_path_and_final_outputput_path_metadata(string targetFramework)
         {
             var testAsset = _testAssetsManager
@@ -32,9 +32,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithTargetFramework(targetFramework);
 
             var command = new GetValuesCommand(
-                Log,
-                testAsset.TestRoot,
-                targetFramework,
+                testAsset,
                 "BuiltProjectOutputGroupOutput",
                 GetValuesCommand.ValueType.Item)
             {
@@ -59,18 +57,20 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "RuntimeConfigPartialBuild",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                RuntimeIdentifier = "win-x86"
+                RuntimeIdentifier = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            new BuildCommand(testAsset)
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
                 .Execute("/property:Configuration=Release")
                 .Should()
                 .Pass();
 
-            var configFile = Path.Combine(testAsset.TestRoot, testProject.Name, "bin", "Release", testProject.TargetFrameworks, testProject.RuntimeIdentifier, testProject.Name + ".runtimeconfig.json");
+            var configFile = Path.Combine(buildCommand.GetOutputDirectory(configuration: "Release", runtimeIdentifier: testProject.RuntimeIdentifier).FullName, testProject.Name + ".runtimeconfig.json");
 
             File.Exists(configFile).Should().BeTrue();
             File.ReadAllText(configFile).Should().NotContain("\"System.Runtime.TieredCompilation\"");
@@ -104,9 +104,9 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "UpdateRuntimeConfigPartialBuild",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                RuntimeIdentifier = "win-x86"
+                RuntimeIdentifier = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
@@ -120,12 +120,14 @@ namespace Microsoft.NET.Build.Tests
                 propertyGroup.Add(new XElement(ns + "ThreadPoolMinThreads", "3"));
             });
 
-            new BuildCommand(testAsset)
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
                 .Execute("/property:Configuration=Release")
                 .Should()
                 .Pass();
 
-            var configFile = Path.Combine(testAsset.TestRoot, testProject.Name, "bin", "Release", testProject.TargetFrameworks, testProject.RuntimeIdentifier, testProject.Name + ".runtimeconfig.json");
+            var configFile = Path.Combine(buildCommand.GetOutputDirectory(configuration: "Release", runtimeIdentifier: testProject.RuntimeIdentifier).FullName, testProject.Name + ".runtimeconfig.json");
 
             File.Exists(configFile).Should().BeTrue();
             File.ReadAllText(configFile).Should().Contain("\"System.Runtime.TieredCompilation\": true");

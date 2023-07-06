@@ -1,0 +1,31 @@
+﻿Description:
+  Template Instantiation Commands for .NET CLI.
+
+Usage:
+  dotnet new [<template-short-name> [<template-args>...]] [options]
+  dotnet new [command] [options]
+
+Arguments:
+  <template-short-name>  A short name of the template to create.
+  <template-args>        Template specific options to use.
+
+Options:
+  -o, --output <output>    Location to place the generated output.
+  -n, --name <name>        The name for the output being created. If no name is specified, the name of the output directory is used.
+  --dry-run                Displays a summary of what would happen if the given command line were run if it would result in a template creation.
+  --force                  Forces content to be generated even if it would change existing files.
+  --no-update-check        Disables checking for the template package updates when instantiating a template.
+  --project <project>      The project that should be used for context evaluation.
+  -v, --verbosity <LEVEL>  Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic]. [default: normal]
+  -d, --diagnostics        Enables diagnostic output.
+  -?, -h, --help           Show command line help.
+
+Commands:
+  create <template-short-name> <template-args>  Instantiates a template with given short name. An alias of 'dotnet new <template name>'.
+  install <package>                             Installs a template package.
+  uninstall <package>                           Uninstalls a template package.
+  update                                        Checks the currently installed template packages for update, and install the updates.
+  search <template-name>                        Searches for the templates on NuGet.org.
+  list <template-name>                          Lists templates containing the specified template name. If no name is specified, lists all templates.
+  details <package-identifier>                  Provides the details for specified template package.
+                                                      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.

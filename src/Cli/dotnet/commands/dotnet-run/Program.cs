@@ -1,10 +1,11 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
 using Parser = Microsoft.DotNet.Cli.Parser;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System;
 
@@ -20,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Run
 
         public static RunCommand FromParseResult(ParseResult parseResult)
         {
-            var project = parseResult.GetValueForOption(RunCommandParser.ProjectOption);
+            var project = parseResult.GetValue(RunCommandParser.ProjectOption);
             if (parseResult.UsingRunCommandShorthandProjectOption())
             {
                 Reporter.Output.WriteLine(LocalizableStrings.RunCommandProjectAbbreviationDeprecated.Yellow());
@@ -28,17 +29,17 @@ namespace Microsoft.DotNet.Tools.Run
             }
 
             var command = new RunCommand(
-                configuration: parseResult.GetValueForOption(RunCommandParser.ConfigurationOption),
-                framework: parseResult.GetValueForOption(RunCommandParser.FrameworkOption),
+                configuration: parseResult.GetValue(RunCommandParser.ConfigurationOption),
+                framework: parseResult.GetValue(RunCommandParser.FrameworkOption),
                 runtime: parseResult.GetCommandLineRuntimeIdentifier(),
                 noBuild: parseResult.HasOption(RunCommandParser.NoBuildOption),
                 project: project,
-                launchProfile: parseResult.GetValueForOption(RunCommandParser.LaunchProfileOption),
+                launchProfile: parseResult.GetValue(RunCommandParser.LaunchProfileOption),
                 noLaunchProfile: parseResult.HasOption(RunCommandParser.NoLaunchProfileOption),
                 noRestore: parseResult.HasOption(RunCommandParser.NoRestoreOption) || parseResult.HasOption(RunCommandParser.NoBuildOption),
                 interactive: parseResult.HasOption(RunCommandParser.InteractiveOption),
                 restoreArgs: parseResult.OptionValuesToBeForwarded(RunCommandParser.GetCommand()),
-                args: (parseResult.UnparsedTokens ?? Array.Empty<string>()).Concat(parseResult.UnmatchedTokens ?? Array.Empty<string>())
+                args: parseResult.GetValue(RunCommandParser.ApplicationArguments)
             );
 
             return command;

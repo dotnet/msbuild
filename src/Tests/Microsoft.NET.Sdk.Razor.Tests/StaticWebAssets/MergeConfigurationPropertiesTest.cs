@@ -1,14 +1,14 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
-using Microsoft.AspNetCore.Razor.Tasks;
+using Microsoft.AspNetCore.StaticWebAssets.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.NET.TestFramework;
 using Moq;
 using Xunit;
 
@@ -124,7 +124,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                     CreateProjectReference(
                         project: Path.Combine("..", "myRcl", "myRcl.csproj"),
                         msBuildSourceProjectFile: Path.GetFullPath(referenceProjectFile),
-                        setTargetFramework: "TargetFramework=net6.0")
+                        setTargetFramework: $"TargetFramework={ToolsetInfo.CurrentTargetFramework}")
                 }
             };
 
@@ -140,9 +140,9 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             config.GetMetadata("GetPublishAssetsTargets").Should()
                 .Be("ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems");
             config.GetMetadata("Version").Should().Be("2");
-            config.GetMetadata("AdditionalBuildProperties").Should().Be("TargetFramework=net6.0");
+            config.GetMetadata("AdditionalBuildProperties").Should().Be($"TargetFramework={ToolsetInfo.CurrentTargetFramework}");
             config.GetMetadata("AdditionalBuildPropertiesToRemove").Should().Be("");
-            config.GetMetadata("AdditionalPublishProperties").Should().Be("TargetFramework=net6.0");
+            config.GetMetadata("AdditionalPublishProperties").Should().Be($"TargetFramework={ToolsetInfo.CurrentTargetFramework}");
             config.GetMetadata("AdditionalPublishPropertiesToRemove").Should().Be("");
         }
 

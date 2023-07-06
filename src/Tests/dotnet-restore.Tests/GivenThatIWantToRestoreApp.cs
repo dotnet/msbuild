@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -62,10 +62,14 @@ namespace Microsoft.DotNet.Restore.Test
             var testProject = new TestProject()
             {
                 Name = "RestoreToDir",
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            if (extension == ".fsproj")
+            {
+                testProject.PackageReferences.Add(new TestPackageReference("FSharp.Core", "6.0.1", updatePackageReference: true));
+            }
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: useStaticGraphEvaluation.ToString() + extension, targetExtension: extension);
 
@@ -137,7 +141,8 @@ namespace Microsoft.DotNet.Restore.Test
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
             string[] newArgs = new[] { "console", "-o", rootPath, "--no-restore" };
-            new DotnetCommand(Log, "new")
+            new DotnetNewCommand(Log)
+                .WithVirtualHive()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
                 .Should()
@@ -160,7 +165,8 @@ namespace Microsoft.DotNet.Restore.Test
             var rootPath = _testAssetsManager.CreateTestDirectory().Path;
 
             string[] newArgs = new[] { "console", "-o", rootPath, "--no-restore" };
-            new DotnetCommand(Log, "new")
+            new DotnetNewCommand(Log)
+                .WithVirtualHive()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
                 .Should()

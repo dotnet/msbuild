@@ -1,20 +1,23 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
-using Xunit.Abstractions;
 
+#pragma warning disable SA1205 // Partial elements should declare access
 partial class Program
+#pragma warning restore SA1205 // Partial elements should declare access
 {
     public static int Main(string[] args)
     {
         var testCommandLine = TestCommandLine.HandleCommandLine(args);
         var newArgs = testCommandLine.RemainingArgs.ToList();
 
-        //  Help argument needs to be the first one to xunit, so don't insert assembly location in that case
+        // Help argument needs to be the first one to xunit, so don't insert assembly location in that case
         if (testCommandLine.ShouldShowHelp)
         {
             newArgs.Insert(0, "-?");
@@ -75,6 +78,7 @@ partial class Program
     }
 
     static partial void BeforeTestRun(List<string> args);
+
     static partial void AfterTestRun();
 
     static partial void ShowAdditionalHelp();

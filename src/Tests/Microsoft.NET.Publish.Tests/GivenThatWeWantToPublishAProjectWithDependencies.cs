@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
@@ -80,7 +80,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory("net452", "Debug", "win7-x86");
+            DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory("net452", "Debug", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86");
 
             publishDirectory.Should().HaveFiles(new[]
             {
@@ -149,9 +149,8 @@ namespace Microsoft.NET.Publish.Tests
 
             var runtimeConfig = ReadJson(Path.Combine(publishDirectory.FullName, $"{project}.runtimeconfig.json"));
             runtimeConfig["runtimeOptions"]["tfm"].ToString().Should().Be(targetFramework);
-
             var depsJson = ReadJson(Path.Combine(publishDirectory.FullName, $"{project}.deps.json"));
-            depsJson["libraries"]["Newtonsoft.Json/9.0.1"]["runtimeStoreManifestName"].ToString().Should().Be($"{manifestFileName1};{manifestFileName2}");
+            depsJson["libraries"]["Newtonsoft.Json/13.0.1"]["runtimeStoreManifestName"].ToString().Should().Be($"{manifestFileName1};{manifestFileName2}");
 
             // The end-to-end test of running the published app happens in the dotnet/cli repo.
             // See https://github.com/dotnet/cli/blob/358568b07f16749108dd33e7fea2f2c84ccf4563/test/dotnet-store.Tests/GivenDotnetStoresAndPublishesProjects.cs
@@ -214,7 +213,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("KitchenSink", identifier: $"{expectAppDocPublished}_{expectLibProjectDocPublished}")
                 .WithSource();
             
-            var publishCommand = new PublishCommand(Log, Path.Combine(kitchenSinkAsset.TestRoot, "TestApp"));
+            var publishCommand = new PublishCommand(kitchenSinkAsset, "TestApp");
             var publishArgs = properties.Split(';').Select(p => $"/p:{p}").ToArray();
             var publishResult = publishCommand.Execute(publishArgs);
 
@@ -265,19 +264,18 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "TestApp",
                 IsExe = true,
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 References = { publishedLibPath }
             };
 
             var appAsset = _testAssetsManager.CreateTestProject(appProject, identifier: identifier);
-            var appSourcePath  = Path.Combine(appAsset.TestRoot, "TestApp");
 
             new RestoreCommand(appAsset, "TestApp").Execute().Should().Pass();
-            var appPublishCommand = new PublishCommand(Log, appSourcePath);
+            var appPublishCommand = new PublishCommand(appAsset);
             var appPublishResult = appPublishCommand.Execute("/p:" + property);
             appPublishResult.Should().Pass();
 
-            var appPublishDirectory = appPublishCommand.GetOutputDirectory("netcoreapp2.0");
+            var appPublishDirectory = appPublishCommand.GetOutputDirectory(appProject.TargetFrameworks);
 
             if (expectAssemblyDocumentationFilePublished)
             {

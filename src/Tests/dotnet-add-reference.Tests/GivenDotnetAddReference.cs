@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.CommandLineValidation;
@@ -54,11 +54,9 @@ Commands:
 
         const string FrameworkNet451 = "net451";
         const string ConditionFrameworkNet451 = "== 'net451'";
-        const string FrameworkNetCoreApp10 = "netcoreapp1.0";
-        const string ConditionFrameworkNetCoreApp10 = "== 'netcoreapp1.0'";
         static readonly string ProjectNotCompatibleErrorMessageRegEx = string.Format(CommonLocalizableStrings.ProjectNotCompatibleWithFrameworks, "[^`]*");
         static readonly string ProjectDoesNotTargetFrameworkErrorMessageRegEx = string.Format(CommonLocalizableStrings.ProjectDoesNotTargetFramework, "[^`]*", "[^`]*");
-        static readonly string[] DefaultFrameworks = new string[] { "netcoreapp1.0", "net451" };
+        static readonly string[] DefaultFrameworks = new string[] { ToolsetInfo.CurrentTargetFramework, "net451" };
 
         public GivenDotnetAddReference(ITestOutputHelper log) : base(log)
         {
@@ -83,7 +81,8 @@ Commands:
 
             try
             {
-                new DotnetCommand(Log, "new", "classlib", "-o", projDir.Path, "--debug:ephemeral-hive",  "--no-restore")
+                new DotnetNewCommand(Log, "classlib", "-o", projDir.Path, "--no-restore")
+                    .WithVirtualHive()
                     .WithWorkingDirectory(projDir.Path)
                     .Execute()
                 .Should().Pass();
@@ -145,7 +144,7 @@ Commands:
         [Theory]
         [InlineData("idontexist.csproj")]
         [InlineData("ihave?inv@lid/char\\acters")]
-        public void WhenNonExistingProjectIsPassedItPrintsErrorAndUsage(string projName)
+        public void WhenNonExistingProjectIsPassedItPrintsError(string projName)
         {
             var setup = Setup(identifier: projName);
 
@@ -154,11 +153,11 @@ Commands:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, projName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot, "FRAMEWORK"));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
-        public void WhenBrokenProjectIsPassedItPrintsErrorAndUsage()
+        public void WhenBrokenProjectIsPassedItPrintsError()
         {
             string projName = "Broken/Broken.csproj";
             var setup = Setup();
@@ -166,10 +165,10 @@ Commands:
             string brokenFolder = Path.Combine(setup.TestRoot, "Broken");
             Directory.CreateDirectory(brokenFolder);
             string brokenProjectPath = Path.Combine(brokenFolder, "Broken.csproj");
-            File.WriteAllText(brokenProjectPath, @"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+            File.WriteAllText(brokenProjectPath, $@"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
     <PropertyGroup>
         <OutputType>Library</OutputType>
-        <TargetFrameworks>net451;netcoreapp2.1</TargetFrameworks>
+        <TargetFrameworks>net451;{ToolsetInfo.CurrentTargetFramework}</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -182,7 +181,7 @@ Commands:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, projName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot, "FRAMEWORK"));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -196,11 +195,11 @@ Commands:
                     .Execute(setup.ValidRefCsprojRelToOtherProjPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, workingDir + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(workingDir, "FRAMEWORK"));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
-        public void WhenNoProjectsExistsInTheDirectoryItPrintsErrorAndUsage()
+        public void WhenNoProjectsExistsInTheDirectoryItPrintsError()
         {
             var setup = Setup();
 
@@ -209,7 +208,7 @@ Commands:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, setup.TestRoot + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot, "FRAMEWORK"));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -218,9 +217,9 @@ Commands:
             var invalidProjDirectory = Path.Combine(_testAssetsManager.CreateTestDirectory().Path, "InvalidProj");
             var invalidProjPath = Path.Combine(invalidProjDirectory, "InvalidProj.csproj");
             Directory.CreateDirectory(invalidProjDirectory);
-            File.WriteAllText(invalidProjPath, @"<Project Sdk=""Microsoft.NET.Sdk"">
+            File.WriteAllText(invalidProjPath, $@"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>{ToolsetInfo.CurrentTargetFramework}</TargetFramework>
   </PropertyGroup>
   <Import Project=""fake.props"" />
 </Project>");
@@ -323,7 +322,7 @@ Commands:
 
             new DotnetCommand(Log, "add", lib.CsProjPath, "reference")
                 .WithWorkingDirectory(setup.TestRoot)
-                .Execute("-f", FrameworkNetCoreApp10, setup.ValidRefCsprojPath)
+                .Execute("-f", ToolsetInfo.CurrentTargetFramework, setup.ValidRefCsprojPath)
                 .Should().Pass();
 
             int condBefore = lib.CsProj().NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
@@ -676,7 +675,7 @@ Commands:
         [Theory]
         [InlineData("net45")]
         [InlineData("net40")]
-        [InlineData("netcoreapp1.1")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         [InlineData("nonexistingframeworkname")]
         public void WhenFrameworkSwitchIsNotMatchingAnyOfTargetedFrameworksItPrintsError(string framework)
         {
@@ -746,7 +745,7 @@ Commands:
                     .Execute(reference);
 
             result.Should().Fail();
-            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot, "net451|net6.0|netcoreapp1.0"));
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
             result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, reference));
         }
 
@@ -762,7 +761,7 @@ Commands:
                     .Execute(reference);
 
             result.Should().Fail();
-            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot, "net451|net6.0|netcoreapp1.0"));
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
             result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, reference));
         }
     }

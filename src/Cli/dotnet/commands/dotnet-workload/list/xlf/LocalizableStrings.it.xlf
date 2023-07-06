@@ -7,25 +7,15 @@
         <target state="translated">Elenca i carichi di lavoro disponibili.</target>
         <note />
       </trans-unit>
-      <trans-unit id="WorkloadIdColumn">
-        <source>Installed Workload Ids</source>
-        <target state="translated">ID carico di lavoro installati</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WorkloadListFooter">
         <source>Use `dotnet workload search` to find additional workloads to install.</source>
-        <target state="translated">Utilizzare la 'ricerca del carico di lavoro DotNet' per trovare i carichi di lavoro aggiuntivi da installare.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadListHeader">
-        <source>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</source>
-        <target state="translated">Questo comando elenca solo i carichi di lavoro installati tramite ‘l'installazione del carico di lavoro DotNet’ in questa versione dell'SDK e non quelli installati tramite Visual Studio.</target>
-        <note />
+        <target state="translated">Utilizzare la `dotnet workload search` per trovare i carichi di lavoro aggiuntivi da installare.</target>
+        <note>{Locked="dotnet workload search"}</note>
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
-        <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
-        <target state="translated">Gli aggiornamenti sono disponibili per i carichi di lavoro seguenti: {0}. Per ottenere la versione più recente, eseguire l’'aggiornamento del carico di lavoro DotNet '.</target>
-        <note />
+        <source>Updates are available for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
+        <target state="translated">Gli aggiornamenti sono disponibili per i carichi di lavoro seguenti: {0}. Per ottenere la versione più recente, eseguire 'dotnet workload update'.</target>
+        <note>{Locked="dotnet workload update"}</note>
       </trans-unit>
     </body>
   </file>

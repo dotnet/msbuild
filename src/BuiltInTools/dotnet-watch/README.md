@@ -9,9 +9,15 @@ The command must be executed in the directory that contains the project to be wa
     Usage: dotnet watch [options] [[--] <args>...]
 
     Options:
-      -?|-h|--help  Show help information
-      -q|--quiet    Suppresses all output except warnings and errors
-      -v|--verbose  Show verbose output
+      -q, --quiet                             Suppresses all output except warnings and errors
+      -v, --verbose                           Show verbose output
+      --no-hot-reload                         Suppress hot reload for supported apps.
+      --non-interactive                       Runs dotnet-watch in non-interactive mode. This option is only supported when running with
+                                              Hot Reload enabled. Use this option to prevent console input from being captured.
+      --project <project>                     The project to watch
+      -lp, --launch-profile <launch-profile>  The launch profile to start the project with. This option is only supported when running
+                                              'dotnet watch' or 'dotnet watch run'.
+      --list                                  Lists all discovered files without starting the watcher.
 
 Add `watch` after `dotnet` and before the command arguments that you want to run:
 

@@ -186,4 +186,16 @@
   <data name="CyclicWorkloadRedirect" xml:space="preserve">
     <value>Cyclic workload redirect '{0}' in manifest '{1}' [{2}]</value>
   </data>
+  <data name="InvalidManifestVersion" xml:space="preserve">
+    <value>Invalid version: {0}</value>
+  </data>
+  <data name="SpecifiedManifestNotFound" xml:space="preserve">
+    <value>Specified workload manifest was not found: {0}</value>
+  </data>
+  <data name="WorkloadVersionFromGlobalJsonNotFound" xml:space="preserve">
+    <value>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</value>
+  </data>
+  <data name="InvalidVersionForWorkload" xml:space="preserve">
+    <value>Error parsing version '{1}' for workload manifest ID '{0}'</value>
+  </data>
 </root>

@@ -61,8 +61,58 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x86' or '$(PlatformTarget)' == ''">win7-x86</RuntimeIdentifier>
   </PropertyGroup>
 
+  <!-- Breaking change in .NET 8: Some publish properties used to imply SelfContained or require it at the time of this PR to work. We decided to infer SelfContained still in these situations. -->
+  <PropertyGroup Condition="'$(SelfContained)' == '' and
+                             '$(PublishSelfContained)' == '' and
+                             '$(_TargetFrameworkVersionWithoutV)' != '' and
+                             '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
+                             $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '8.0')) and
+                              (
+                                  '$(PublishTrimmed)' == 'true' or
+                                  '$(PublishSingleFile)' == 'true' or
+                                  '$(PublishAot)' == 'true'
+                              )">
+    <PublishSelfContained>true</PublishSelfContained>
+  </PropertyGroup>
+
+
+  <!-- Edit SelfContained to match the value of PublishSelfContained if we are publishing.
+       This Won't affect t:/Publish (because of _IsPublishing), and also won't override a global SelfContained property.-->
+  <PropertyGroup Condition="'$(_IsPublishing)' == 'true' and ('$(PublishSelfContained)' == 'true' or '$(PublishSelfContained)' == 'false')">
+    <SelfContained>$(PublishSelfContained)</SelfContained>
+  </PropertyGroup>
+
+  <!-- Automatically infer the RuntimeIdentifier for properties that require it.
+  SelfContained without a RID is a no-op and semantically hints towards the fact that it can change the behavior of build, publish, and friends.
+  ... So, we infer the RID for SelfContained regardless of the context.
+
+  The other publish properties are specifically labelled Publish* and don't 'NEED' their RID unless we are doing a publish, so the RID inference
+  ... for these properties is limited to publishing only scenarios.
+
+  Finally, library projects and non-executable projects have awkward interactions here so they are excluded.-->
+  <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == ''">
+    <UseCurrentRuntimeIdentifier Condition="
+                 '$(RuntimeIdentifier)' == '' and
+                 '$(_IsExecutable)' == 'true' and '$(IsTestProject)' != 'true' and
+                 '$(IsRidAgnostic)' != 'true' and
+                 (
+                   '$(SelfContained)' == 'true' or
+                   ('$(_IsPublishing)' == 'true' and
+                      (
+                        '$(PublishReadyToRun)' == 'true' or
+                        '$(PublishSingleFile)' == 'true' or
+                        '$(PublishAot)' == 'true'
+                      )
+                   )
+                 )">true</UseCurrentRuntimeIdentifier>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == 'true'">
     <RuntimeIdentifier>$(NETCoreSdkPortableRuntimeIdentifier)</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(_IsPublishing)' == 'true' and '$(PublishRuntimeIdentifier)' != ''">
+    <RuntimeIdentifier>$(PublishRuntimeIdentifier)</RuntimeIdentifier>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(PlatformTarget)' == ''">
@@ -109,8 +159,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     Default SelfContained based on the RuntimeIdentifier, so projects don't have to explicitly set SelfContained.
     This avoids a breaking change from 1.0 behavior.
     -->
+  <PropertyGroup>
+    <!-- Detecting property presence is not harmful and can be done in an unconditioned way -->
+    <_SelfContainedWasSpecified Condition="'$(SelfContained)' != ''">true</_SelfContainedWasSpecified>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
-    <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != ''">true</SelfContained>
+    
+    <!-- Breaking change in .NET 8: Projects with 8.0+ TFMS will no longer have RuntimeIdentifier imply SelfContained. Note that PublishReadyToRun will imply SelfContained in these versions. -->
+    <SelfContained Condition="'$(SelfContained)' == '' and
+                              '$(RuntimeIdentifier)' != '' and
+                              '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
+                              '$(_TargetFrameworkVersionWithoutV)' != '' and
+                              $([MSBuild]::VersionLessThan($(_TargetFrameworkVersionWithoutV), '8.0'))">true</SelfContained>
+    
     <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
     <_RuntimeIdentifierUsesAppHost Condition="$(RuntimeIdentifier.StartsWith('ios')) or $(RuntimeIdentifier.StartsWith('tvos')) or $(RuntimeIdentifier.StartsWith('maccatalyst')) or $(RuntimeIdentifier.StartsWith('android')) or $(RuntimeIdentifier.StartsWith('browser'))">false</_RuntimeIdentifierUsesAppHost>
     <_RuntimeIdentifierUsesAppHost Condition="'$(_RuntimeIdentifierUsesAppHost)' == ''">true</_RuntimeIdentifierUsesAppHost>
@@ -147,8 +208,28 @@ Copyright (c) .NET Foundation. All rights reserved.
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(HasRuntimeOutput)' == 'true'">
 
+    <!-- The following RID errors are asserts, and we don't expect them to ever occur. The error message is added as a safeguard.-->
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' == ''"
-                 ResourceName="CannotHaveSelfContainedWithoutRuntimeIdentifier" />
+                 ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
+                 FormatArguments="SelfContained"/>
+
+    <NETSdkError Condition="'$(PublishReadyToRun)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(_IsPublishing)' == 'true'"
+                 ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
+                 FormatArguments="PublishReadyToRun"/>
+
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(_IsPublishing)' == 'true'"
+                ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
+                FormatArguments="PublishSingleFile"/>
+
+    <NETSdkError Condition="'$(PublishAot)' == 'true' and '$(RuntimeIdentifier)' == '' and '$(_IsPublishing)' == 'true'"
+                ResourceName="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed"
+                FormatArguments="PublishAot"/>
+
+    <!-- End of implicit RID resolver checks.-->
+
+    <NETSdkError Condition="'$(PublishSelfContained)' != 'true' and '$(PublishSelfContained)' != 'false' and '$(PublishSelfContained)' != ''"
+                ResourceName="PublishSelfContainedMustBeBool"
+                FormatArguments="$(PublishSelfContained)"/>
 
     <NETSdkError Condition="'$(SelfContained)' == 'true' and '$(UseAppHost)' != 'true' and '$(_RuntimeIdentifierUsesAppHost)' == 'true'"
                  ResourceName="CannotUseSelfContainedWithoutAppHost" />
@@ -159,18 +240,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
                  ResourceName="PublishSingleFileRequiresVersion30" />
 
-    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and $(RuntimeIdentifier.StartsWith('win7-'))"
-                 ResourceName="SingleFileWin7Incompatible"
-                 FormatArguments="$(RuntimeIdentifier)" />
-
     <!-- The TFM version checks for PublishReadyToRun PublishTrimmed only generate warnings in .Net core 3.1
          because we do not want the behavior to be a breaking change compared to version 3.0 -->
 
     <NETSdkWarning Condition="'$(PublishReadyToRun)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
-                   ResourceName="PublishReadyToRunRequiresVersion30" />
+                 ResourceName="PublishReadyToRunRequiresVersion30" />
 
     <NETSdkWarning Condition="'$(PublishTrimmed)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
-                   ResourceName="PublishTrimmedRequiresVersion30" />
+                 ResourceName="PublishTrimmedRequiresVersion30" />
+
+    <!-- Previously, RuntimeIdentifier (RID) implied SelfContained (SC). A breaking change in 8.0 made it so RID did not activate SC by default.
+         So we warn older TFM users before they upgrade to TFM 8.0 or above that they need to add <SelfContained>true</SelfContained> now to keep the same behavior.-->
+    <NETSdkWarning Condition="'$(RuntimeIdentifier)' != '' and '$(_TargetFrameworkVersionWithoutV)' != '' and $([MSBuild]::VersionLessThan($(_TargetFrameworkVersionWithoutV), '8.0')) and '$(_SelfContainedWasSpecified)' != 'true'"
+                 ResourceName="RuntimeIdentifierWillNoLongerImplySelfContained" />
 
     <!-- Generate Trimming warnings for WinForms and Wpf applications-->
     <NetSdkError Condition="('$(UseWindowsForms)' == 'true') and ('$(PublishTrimmed)' == 'true') and ('$(_SuppressWinFormsTrimError)' != 'true')"
@@ -186,6 +268,19 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkWarning Condition="'$(SelfContained)' == 'true' and '$(EnableComHosting)' == 'true'"
                    ResourceName="NoSupportComSelfContained" />
+
+  </Target>
+
+  <Target Name="_CheckAndUnsetUnsupportedPrefer32Bit"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' >= '7.0'">
+
+    <NETSdkWarning Condition="'$(Prefer32Bit)' == 'true'"
+                    ResourceName="Prefer32BitIgnoredForNetCoreApp" />
+
+    <PropertyGroup>
+      <Prefer32Bit>false</Prefer32Bit>
+    </PropertyGroup>
 
   </Target>
 
@@ -234,8 +329,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     append a RID the user never mentioned in the path and do so even in the AnyCPU case.
    -->
   <PropertyGroup Condition="'$(AppendRuntimeIdentifierToOutputPath)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(_UsingDefaultRuntimeIdentifier)' != 'true'">
-    <IntermediateOutputPath>$(IntermediateOutputPath)$(RuntimeIdentifier)\</IntermediateOutputPath>
-    <OutputPath>$(OutputPath)$(RuntimeIdentifier)\</OutputPath>
+    <IntermediateOutputPath Condition="'$(UseArtifactsIntermediateOutput)' != 'true'">$(IntermediateOutputPath)$(RuntimeIdentifier)\</IntermediateOutputPath>
+    <OutputPath Condition="'$(UseArtifactsOutput)' != 'true'">$(OutputPath)$(RuntimeIdentifier)\</OutputPath>
   </PropertyGroup>
 
   <UsingTask TaskName="Microsoft.NET.Build.Tasks.GetDefaultPlatformTargetForNetFramework"

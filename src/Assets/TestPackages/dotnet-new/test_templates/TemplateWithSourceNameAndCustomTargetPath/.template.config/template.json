@@ -1,0 +1,24 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithSourceNameAndCustomTargetPath",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithSourceNameAndCustomTargetPath",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithSourceNameAndCustomTargetPath",
+  "shortName": "TestAssets.TemplateWithSourceNameAndCustomTargetPath",
+  "sourceName": "foo",
+  "sources": [
+    {
+      "target": "./Custom/Path/"
+    }
+  ],
+  "primaryOutputs": [
+    {
+      "path": "Custom/Path/foo/foo.cs"
+    },
+    {
+      "path": "Custom/Path/foo.name.txt"
+    }
+  ]
+}

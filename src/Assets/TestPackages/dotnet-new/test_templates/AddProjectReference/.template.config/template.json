@@ -1,0 +1,37 @@
+{
+    "author": "Test Asset",
+    "classifications": [ "Test Asset" ],
+    "name": "TestAssets.AddReference",
+    "groupIdentity": "TestAssets.AddReference",
+    "precedence": "100",
+    "identity": "TestAssets.AddReference",
+    "shortName": "TestAssets.AddReference",
+    "primaryOutputs": [
+        {
+            "path": "Project1/Project1.csproj"
+        },
+        {
+            "path": "Project2/Project2.csproj"
+        }
+    ],
+    "postActions": [
+        {
+            "Description": "Adding Reference to Newtonsoft.Json NuGet package",
+            "ActionId": "B17581D1-C5C9-4489-8F0A-004BE667B814",
+            "ContinueOnError": "false",
+            "ManualInstructions": [
+                {
+                    "Text": "Manually add the reference to Project2 in Project1"
+                }
+            ],
+            "args": {
+                "targetFiles": [
+                    "./Project1/Project1.csproj"
+                ],
+                "referenceType": "project",
+                "reference": "./Project2/Project2.csproj",
+                "projectFileExtensions": ".csproj"
+            }
+        }
+    ]
+}

@@ -1,9 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
 using LocalizableStrings = Microsoft.DotNet.Tools.Build.LocalizableStrings;
 
@@ -13,18 +11,25 @@ namespace Microsoft.DotNet.Tools.MSBuild
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-msbuild";
 
-        private static readonly Command Command = ConstructCommand();
+        public static readonly CliArgument<string[]> Arguments = new("arguments");
 
-        public static Command GetCommand()
+        private static readonly CliCommand Command = ConstructCommand();
+
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            var command = new DocumentedCommand("msbuild", DocsLink, LocalizableStrings.AppFullName);
+            var command = new DocumentedCommand("msbuild", DocsLink, LocalizableStrings.AppFullName)
+            {
+                Arguments
+            };
 
-            command.Handler = CommandHandler.Create<ParseResult>(MSBuildCommand.Run);
+            command.Options.Add(CommonOptions.DisableBuildServersOption);
+
+            command.SetAction(MSBuildCommand.Run);
 
             return command;
         }

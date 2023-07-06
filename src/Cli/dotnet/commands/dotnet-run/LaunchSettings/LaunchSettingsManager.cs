@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -50,9 +50,28 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                             .EnumerateObject()
                             .FirstOrDefault(IsDefaultProfileType).Value;
                     }
-                    else
+                    else // Find a profile match for the given profileName
                     {
-                        if (!profilesObject.TryGetProperty(profileName, out profileObject) || profileObject.ValueKind != JsonValueKind.Object)
+                        IEnumerable<JsonProperty> caseInsensitiveProfileMatches = profilesObject
+                            .EnumerateObject() // p.Name shouldn't fail, as profileObject enumerables here are only created from an existing JsonObject
+                            .Where(p => string.Equals(p.Name, profileName, StringComparison.OrdinalIgnoreCase))
+                            .ToList();
+
+                        if (caseInsensitiveProfileMatches.Count() > 1)
+                        {
+                            throw new GracefulException(LocalizableStrings.DuplicateCaseInsensitiveLaunchProfileNames,
+                                String.Join(",\n", caseInsensitiveProfileMatches.Select(p => $"\t{p.Name}").ToArray()));
+                        }
+                        else if (!caseInsensitiveProfileMatches.Any())
+                        {
+                            return new LaunchSettingsApplyResult(false, string.Format(LocalizableStrings.LaunchProfileDoesNotExist, profileName));
+                        }
+                        else
+                        {
+                            profileObject = profilesObject.GetProperty(caseInsensitiveProfileMatches.First().Name);
+                        }
+
+                        if (profileObject.ValueKind != JsonValueKind.Object)
                         {
                             return new LaunchSettingsApplyResult(false, LocalizableStrings.LaunchProfileIsNotAJsonObject);
                         }

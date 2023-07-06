@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -15,6 +15,7 @@ using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Newtonsoft.Json;
 using NuGet.Frameworks;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -44,6 +45,12 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool ReadyToRunUseCrossgen2 { get; set; }
 
+        public bool RequiresILLinkPack { get; set; }
+
+        public bool AotEnabled { get; set; }
+
+        public bool AotUseKnownRuntimePackForTarget { get; set; }
+
         public string RuntimeIdentifier { get; set; }
 
         public string[] RuntimeIdentifiers { get; set; }
@@ -58,6 +65,10 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool EnableRuntimePackDownload { get; set; }
 
+        public bool EnableWindowsTargeting { get; set; }
+
+        public bool DisableTransitiveFrameworkReferenceDownloads { get; set; }
+
         public ITaskItem[] FrameworkReferences { get; set; } = Array.Empty<ITaskItem>();
 
         public ITaskItem[] KnownFrameworkReferences { get; set; } = Array.Empty<ITaskItem>();
@@ -65,6 +76,14 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] KnownRuntimePacks { get; set; } = Array.Empty<ITaskItem>();
 
         public ITaskItem[] KnownCrossgen2Packs { get; set; } = Array.Empty<ITaskItem>();
+
+        public ITaskItem[] KnownILCompilerPacks { get; set; } = Array.Empty<ITaskItem>();
+
+        public ITaskItem[] KnownILLinkPacks { get; set; } = Array.Empty<ITaskItem>();
+
+        public ITaskItem[] KnownWebAssemblySdkPacks { get; set; } = Array.Empty<ITaskItem>();
+
+        public bool UsingMicrosoftNETSdkWebAssembly { get; set; }
 
         [Required]
         public string NETCoreSdkRuntimeIdentifier { get; set; }
@@ -90,9 +109,21 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] Crossgen2Packs { get; set; }
 
+        [Output]
+        public ITaskItem[] HostILCompilerPacks { get; set; }
+
+        [Output]
+        public ITaskItem[] TargetILCompilerPacks { get; set; }
+
+        [Output]
+        public ITaskItem[] ImplicitPackageReferences { get; set; }
+
         //  Runtime packs which aren't available for the specified RuntimeIdentifier
         [Output]
         public ITaskItem[] UnavailableRuntimePacks { get; set; }
+
+        [Output]
+        public string[] KnownRuntimeIdentifierPlatforms { get; set; }
 
         private Version _normalizedTargetFrameworkVersion;
 
@@ -144,7 +175,8 @@ namespace Microsoft.NET.Build.Tasks
 
                 // Handle Windows-only frameworks on non-Windows platforms
                 if (knownFrameworkReference.IsWindowsOnly &&
-                    !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    !RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
+                    !EnableWindowsTargeting)
                 {
                     // It is an error to reference the framework from non-Windows
                     if (!windowsOnlyErrorLogged && frameworkReference != null)
@@ -219,7 +251,10 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    if (EnableTargetingPackDownload)
+                    //  If transitive framework reference downloads are disabled, then don't download targeting packs where there isn't
+                    //  a direct framework reference
+                    if (EnableTargetingPackDownload &&
+                        !(DisableTransitiveFrameworkReferenceDownloads && frameworkReference == null))
                     {
                         //  Download targeting pack
                         TaskItem packageToDownload = new TaskItem(knownFrameworkReference.TargetingPackName);
@@ -297,8 +332,9 @@ namespace Microsoft.NET.Build.Tasks
                         }
                     }
 
-                    ProcessRuntimeIdentifier(hasRuntimePackAlwaysCopyLocal ? "any" : RuntimeIdentifier, runtimePackForRuntimeIDProcessing, runtimePackVersion, additionalFrameworkReferencesForRuntimePack,
-                        unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks, packagesToDownload, isTrimmable, EnableRuntimePackDownload && useRuntimePackAndDownloadIfNecessary);
+                    ProcessRuntimeIdentifier(string.IsNullOrEmpty(RuntimeIdentifier) ? "any" : RuntimeIdentifier, runtimePackForRuntimeIDProcessing, runtimePackVersion, additionalFrameworkReferencesForRuntimePack,
+                        unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks, packagesToDownload, isTrimmable, useRuntimePackAndDownloadIfNecessary,
+                        wasReferencedDirectly: frameworkReference != null);
 
                     processedPrimaryRuntimeIdentifier = true;
                 }
@@ -316,7 +352,8 @@ namespace Microsoft.NET.Build.Tasks
                         //  Pass in null for the runtimePacks list, as for these runtime identifiers we only want to
                         //  download the runtime packs, but not use the assets from them
                         ProcessRuntimeIdentifier(runtimeIdentifier, runtimePackForRuntimeIDProcessing, runtimePackVersion, additionalFrameworkReferencesForRuntimePack: null,
-                            unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks: null, packagesToDownload, isTrimmable, useRuntimePackAndDownloadIfNecessary);
+                            unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks: null, packagesToDownload, isTrimmable, useRuntimePackAndDownloadIfNecessary,
+                            wasReferencedDirectly: frameworkReference != null);
                     }
                 }
 
@@ -331,13 +368,48 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
+            List<ITaskItem> implicitPackageReferences = new List<ITaskItem>();
+
             if (ReadyToRunEnabled && ReadyToRunUseCrossgen2)
             {
-                if (!AddCrossgen2Package(_normalizedTargetFrameworkVersion, packagesToDownload))
+                if (AddToolPack(ToolPackType.Crossgen2, _normalizedTargetFrameworkVersion, packagesToDownload, implicitPackageReferences) is not ToolPackSupport.Supported)
                 {
                     Log.LogError(Strings.ReadyToRunNoValidRuntimePackageError);
                     return;
                 }
+            }
+
+            if (AotEnabled)
+            {
+                switch (AddToolPack(ToolPackType.ILCompiler, _normalizedTargetFrameworkVersion, packagesToDownload, implicitPackageReferences))
+                {
+                    case ToolPackSupport.UnsupportedForTargetFramework:
+                        Log.LogError(Strings.AotUnsupportedTargetFramework);
+                        return;
+                    case ToolPackSupport.UnsupportedForHostRuntimeIdentifier:
+                        Log.LogError(Strings.AotUnsupportedHostRuntimeIdentifier, NETCoreSdkRuntimeIdentifier);
+                        return;
+                    case ToolPackSupport.UnsupportedForTargetRuntimeIdentifier:
+                        Log.LogError(Strings.AotUnsupportedTargetRuntimeIdentifier, RuntimeIdentifier);
+                        return;
+                    case ToolPackSupport.Supported:
+                        break;
+                }
+            }
+
+            if (RequiresILLinkPack)
+            {
+                if (AddToolPack(ToolPackType.ILLink, _normalizedTargetFrameworkVersion, packagesToDownload, implicitPackageReferences) is not ToolPackSupport.Supported)
+                {
+                    Log.LogError(Strings.ILLinkNoValidRuntimePackageError);
+                    return;
+                }
+            }
+
+            if (UsingMicrosoftNETSdkWebAssembly)
+            {
+                // WebAssemblySdk is used for .NET >= 6, it's ok if no pack is added.
+                AddToolPack(ToolPackType.WebAssemblySdk, _normalizedTargetFrameworkVersion, packagesToDownload, implicitPackageReferences);
             }
 
             if (packagesToDownload.Any())
@@ -363,6 +435,29 @@ namespace Microsoft.NET.Build.Tasks
             if (unavailableRuntimePacks.Any())
             {
                 UnavailableRuntimePacks = unavailableRuntimePacks.ToArray();
+            }
+
+            if (implicitPackageReferences.Any())
+            {
+                ImplicitPackageReferences = implicitPackageReferences.ToArray();
+            }
+
+            // Determine the known runtime identifier platforms based on all available Microsoft.NETCore.App packs
+            HashSet<string> knownRuntimeIdentifierPlatforms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var netCoreAppPacks = knownRuntimePacksForTargetFramework.Where(krp => krp.Name.Equals("Microsoft.NETCore.App", StringComparison.OrdinalIgnoreCase));
+            foreach (KnownRuntimePack netCoreAppPack in netCoreAppPacks)
+            {
+                foreach (var runtimeIdentifier in netCoreAppPack.RuntimePackRuntimeIdentifiers.Split(';'))
+                {
+                    int separator = runtimeIdentifier.LastIndexOf('-');
+                    string platform = separator < 0 ? runtimeIdentifier : runtimeIdentifier.Substring(0, separator);
+                    knownRuntimeIdentifierPlatforms.Add(platform);
+                }
+            }
+
+            if (knownRuntimeIdentifierPlatforms.Count > 0)
+            {
+                KnownRuntimeIdentifierPlatforms = knownRuntimeIdentifierPlatforms.ToArray();
             }
         }
 
@@ -452,14 +547,17 @@ namespace Microsoft.NET.Build.Tasks
             List<ITaskItem> runtimePacks,
             List<ITaskItem> packagesToDownload,
             string isTrimmable,
-            bool addRuntimePackAndDownloadIfNecessary)
+            bool addRuntimePackAndDownloadIfNecessary,
+            bool wasReferencedDirectly)
         {
             var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
             var knownFrameworkReferenceRuntimePackRuntimeIdentifiers = selectedRuntimePack.RuntimePackRuntimeIdentifiers.Split(';');
+            var knownFrameworkReferenceRuntimePackExcludedRuntimeIdentifiers = selectedRuntimePack.RuntimePackExcludedRuntimeIdentifiers.Split(';');
 
-            string runtimePackRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(
+            string runtimePackRuntimeIdentifier = NuGetUtils.GetBestMatchingRidWithExclusion(
                     runtimeGraph,
                     runtimeIdentifier,
+                    knownFrameworkReferenceRuntimePackExcludedRuntimeIdentifiers,
                     knownFrameworkReferenceRuntimePackRuntimeIdentifiers,
                     out bool wasInGraph);
 
@@ -521,7 +619,9 @@ namespace Microsoft.NET.Build.Tasks
                         runtimePacks.Add(runtimePackItem);
                     }
 
-                    if (runtimePackPath == null)
+                    if (EnableRuntimePackDownload &&
+                        runtimePackPath == null &&
+                        (wasReferencedDirectly || !DisableTransitiveFrameworkReferenceDownloads))
                     {
                         TaskItem packageToDownload = new TaskItem(runtimePackName);
                         packageToDownload.SetMetadata(MetadataKeys.Version, resolvedRuntimePackVersion);
@@ -532,48 +632,137 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private bool AddCrossgen2Package(Version normalizedTargetFrameworkVersion, List<ITaskItem> packagesToDownload)
+        // Enum values should match the name of the pack: Known<Foo>Pack
+        private enum ToolPackType
         {
-            var knownCrossgen2Pack = KnownCrossgen2Packs.Where(crossgen2Pack =>
+            Crossgen2,
+            ILCompiler,
+            ILLink,
+            WebAssemblySdk
+        }
+
+        enum ToolPackSupport {
+            UnsupportedForTargetFramework,
+            UnsupportedForHostRuntimeIdentifier,
+            UnsupportedForTargetRuntimeIdentifier,
+            Supported
+        }
+
+        private ToolPackSupport AddToolPack(
+            ToolPackType toolPackType,
+            Version normalizedTargetFrameworkVersion,
+            List<ITaskItem> packagesToDownload,
+            List<ITaskItem> implicitPackageReferences)
+        {
+            var knownPacks = toolPackType switch
             {
-                var packTargetFramework = NuGetFramework.Parse(crossgen2Pack.GetMetadata("TargetFramework"));
+                ToolPackType.Crossgen2 => KnownCrossgen2Packs,
+                ToolPackType.ILCompiler => KnownILCompilerPacks,
+                ToolPackType.ILLink => KnownILLinkPacks,
+                ToolPackType.WebAssemblySdk => KnownWebAssemblySdkPacks,
+                _ => throw new ArgumentException($"Unknown package type {toolPackType}", nameof(toolPackType))
+            };
+
+            var knownPack = knownPacks.Where(pack =>
+            {
+                var packTargetFramework = NuGetFramework.Parse(pack.GetMetadata("TargetFramework"));
                 return packTargetFramework.Framework.Equals(TargetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase) &&
                     NormalizeVersion(packTargetFramework.Version) == normalizedTargetFrameworkVersion;
             }).SingleOrDefault();
 
-            if (knownCrossgen2Pack == null)
+            if (knownPack == null)
             {
-                return false;
+                return ToolPackSupport.UnsupportedForTargetFramework;
             }
 
-            var crossgen2PackPattern = knownCrossgen2Pack.GetMetadata("Crossgen2PackNamePattern");
-            var crossgen2PackVersion = knownCrossgen2Pack.GetMetadata("Crossgen2PackVersion");
-            var crossgen2PackSupportedRuntimeIdentifiers = knownCrossgen2Pack.GetMetadata("Crossgen2RuntimeIdentifiers").Split(';');
-
-            // Get the best RID for the host machine, which will be used to validate that we can run crossgen for the target platform and architecture
-            var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
-            var hostRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(runtimeGraph, NETCoreSdkRuntimeIdentifier, crossgen2PackSupportedRuntimeIdentifiers, out bool wasInGraph);
-            if (hostRuntimeIdentifier == null)
-            {
-                return false;
-            }
-
-            var crossgen2PackName = crossgen2PackPattern.Replace("**RID**", hostRuntimeIdentifier);
+            var packName = toolPackType.ToString();
+            var packVersion = knownPack.GetMetadata(packName + "PackVersion");
             if (!string.IsNullOrEmpty(RuntimeFrameworkVersion))
             {
-                crossgen2PackVersion = RuntimeFrameworkVersion;
+                packVersion = RuntimeFrameworkVersion;
             }
 
-            TaskItem packageToDownload = new TaskItem(crossgen2PackName);
-            packageToDownload.SetMetadata(MetadataKeys.Version, crossgen2PackVersion);
-            packagesToDownload.Add(packageToDownload);
+            // Crossgen and ILCompiler have RID-specific bits.
+            if (toolPackType is ToolPackType.Crossgen2 or ToolPackType.ILCompiler)
+            {
+                var packNamePattern = knownPack.GetMetadata(packName + "PackNamePattern");
+                var packSupportedRuntimeIdentifiers = knownPack.GetMetadata(packName + "RuntimeIdentifiers").Split(';');
 
-            Crossgen2Packs = new ITaskItem[1];
-            Crossgen2Packs[0] = new TaskItem(crossgen2PackName);
-            Crossgen2Packs[0].SetMetadata(MetadataKeys.NuGetPackageId, crossgen2PackName);
-            Crossgen2Packs[0].SetMetadata(MetadataKeys.NuGetPackageVersion, crossgen2PackVersion);
+                // Get the best RID for the host machine, which will be used to validate that we can run crossgen for the target platform and architecture
+                var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
+                var hostRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(runtimeGraph, NETCoreSdkRuntimeIdentifier, packSupportedRuntimeIdentifiers, out bool wasInGraph);
+                if (hostRuntimeIdentifier == null)
+                {
+                    return ToolPackSupport.UnsupportedForHostRuntimeIdentifier;
+                }
 
-            return true;
+                var runtimePackName = packNamePattern.Replace("**RID**", hostRuntimeIdentifier);
+
+                if (EnableRuntimePackDownload)
+                {
+                    // We need to download the runtime pack
+                    TaskItem runtimePackToDownload = new TaskItem(runtimePackName);
+                    runtimePackToDownload.SetMetadata(MetadataKeys.Version, packVersion);
+                    packagesToDownload.Add(runtimePackToDownload);
+                }
+
+                var runtimePackItem = new TaskItem(runtimePackName);
+                runtimePackItem.SetMetadata(MetadataKeys.NuGetPackageId, runtimePackName);
+                runtimePackItem.SetMetadata(MetadataKeys.NuGetPackageVersion, packVersion);
+
+                switch (toolPackType)
+                {
+                    case ToolPackType.Crossgen2:
+                        Crossgen2Packs = new[] { runtimePackItem };
+                        break;
+                    case ToolPackType.ILCompiler:
+                        HostILCompilerPacks = new[] { runtimePackItem };
+
+                        // ILCompiler supports cross target compilation. If there is a cross-target request,
+                        // we need to download that package as well unless we use KnownRuntimePack entries for the target.
+                        // We expect RuntimeIdentifier to be defined during publish but can allow during build
+                        if (RuntimeIdentifier != null && !AotUseKnownRuntimePackForTarget)
+                        {
+                            var targetRuntimeIdentifier = NuGetUtils.GetBestMatchingRid(runtimeGraph, RuntimeIdentifier, packSupportedRuntimeIdentifiers, out bool wasInGraph2);
+                            if (targetRuntimeIdentifier == null)
+                            {
+                                return ToolPackSupport.UnsupportedForTargetRuntimeIdentifier;
+                            }
+                            if (!hostRuntimeIdentifier.Equals(targetRuntimeIdentifier))
+                            {
+                                var targetIlcPackName = packNamePattern.Replace("**RID**", targetRuntimeIdentifier);
+                                var targetIlcPack = new TaskItem(targetIlcPackName);
+                                targetIlcPack.SetMetadata(MetadataKeys.NuGetPackageId, targetIlcPackName);
+                                targetIlcPack.SetMetadata(MetadataKeys.NuGetPackageVersion, packVersion);
+                                TargetILCompilerPacks = new[] { targetIlcPack };
+                            }
+                        }
+                        break;
+                }
+            }
+
+            // Packs with RID-agnostic build packages that contain MSBuild targets.
+            if (toolPackType is not ToolPackType.Crossgen2)
+            {
+                var buildPackageName = knownPack.ItemSpec;
+                var buildPackage = new TaskItem(buildPackageName);
+                buildPackage.SetMetadata(MetadataKeys.Version, packVersion);
+                implicitPackageReferences.Add(buildPackage);
+            }
+
+            // Before net8.0, ILLink analyzers shipped in a separate package.
+            // Add the analyzer package with version taken from KnownILLinkPack if the version is less than 8.0.0.
+            // The version comparison doesn't consider prerelease labels, so 8.0.0-foo will be considered equal to 8.0.0 and
+            // will not get the extra analyzer package reference.
+            if (toolPackType is ToolPackType.ILLink &&
+                new VersionComparer(VersionComparison.Version).Compare(NuGetVersion.Parse(packVersion), new NuGetVersion(8, 0, 0)) < 0)
+            {
+                var analyzerPackage = new TaskItem("Microsoft.NET.ILLink.Analyzers");
+                analyzerPackage.SetMetadata(MetadataKeys.Version, packVersion);
+                implicitPackageReferences.Add(analyzerPackage);
+            }
+
+            return ToolPackSupport.Supported;
         }
 
         private string GetRuntimeFrameworkVersion(
@@ -685,14 +874,19 @@ namespace Microsoft.NET.Build.Tasks
             if (_workloadManifestProvider == null)
             {
                 string userProfileDir = CliFolderPathCalculatorCore.GetDotnetUserProfileFolderPath();
-                _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(NetCoreRoot, NETCoreSdkVersion, userProfileDir);
+
+                //  When running MSBuild tasks, the current directory is always the project directory, so we can use that as the
+                //  starting point to search for global.json
+                string globalJsonPath = SdkDirectoryWorkloadManifestProvider.GetGlobalJsonPath(Environment.CurrentDirectory);
+
+                _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(NetCoreRoot, NETCoreSdkVersion, userProfileDir, globalJsonPath);
                 _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, NetCoreRoot, NETCoreSdkVersion, userProfileDir);
             }
 
             var packInfo = _workloadResolver.TryGetPackInfo(new WorkloadPackId(packID));
             if (packInfo == null)
             {
-                Log.LogError("NETSDKZZZZ: Error getting pack version: Pack '{0}' was not present in workload manifests.", packID);
+                Log.LogError(Strings.CouldNotGetPackVersionFromWorkloadManifests, packID);
                 return packVersion;
             }
             return packInfo.Version;
@@ -806,7 +1000,7 @@ namespace Microsoft.NET.Build.Tasks
             public string RuntimePackRuntimeIdentifiers => _item.GetMetadata(MetadataKeys.RuntimePackRuntimeIdentifiers);
 
             public bool IsWindowsOnly => _item.HasMetadataValue("IsWindowsOnly", "true");
-            
+
             public bool RuntimePackAlwaysCopyLocal =>
                 _item.HasMetadataValue(MetadataKeys.RuntimePackAlwaysCopyLocal, "true");
 
@@ -848,6 +1042,8 @@ namespace Microsoft.NET.Build.Tasks
             public string RuntimePackNamePatterns => _item.GetMetadata("RuntimePackNamePatterns");
 
             public string RuntimePackRuntimeIdentifiers => _item.GetMetadata(MetadataKeys.RuntimePackRuntimeIdentifiers);
+
+            public string RuntimePackExcludedRuntimeIdentifiers => _item.GetMetadata(MetadataKeys.RuntimePackExcludedRuntimeIdentifiers);
 
             public string IsTrimmable => _item.GetMetadata(MetadataKeys.IsTrimmable);
 

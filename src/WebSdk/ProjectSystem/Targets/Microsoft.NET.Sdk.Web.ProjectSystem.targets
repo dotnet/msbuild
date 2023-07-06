@@ -37,13 +37,33 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <!--
-      ASP.NET 5.0 explicitly disables this functionality by default, requiring the app author
+      ASP.NET 5.0+ explicitly disables this functionality by default, requiring the app author
       to opt-in to re-enabling the feature. The way to opt back in is to specify the below
-      element with the value "true". It is anticipated that future releases of .NET will
-      disable this functionality by default across all project types, at which point this logic
-      can be removed from the ASP.NET-specific SDK.
+      element with the value "true". This functionality is disabled across most project types
+      by default in .NET 8; however, we need to keep the line below since it's not conditioned
+      on a version check like the normal SDK targets logic is.
     -->
     <EnableUnsafeBinaryFormatterSerialization Condition="'$(EnableUnsafeBinaryFormatterSerialization)' == ''">false</EnableUnsafeBinaryFormatterSerialization>
+  </PropertyGroup>
+
+  <!-- Default settings for trimmed and aot'd apps. -->
+  <PropertyGroup Condition="'$(PublishTrimmed)' == 'true' Or '$(PublishAot)' == 'true'">
+    <JsonSerializerIsReflectionEnabledByDefault Condition="'$(JsonSerializerIsReflectionEnabledByDefault)' == ''">false</JsonSerializerIsReflectionEnabledByDefault>
+  </PropertyGroup>
+
+  <!-- Default settings for aot'd apps. -->
+  <PropertyGroup Condition="'$(PublishAot)' == 'true'">
+    <!-- Enable the built-in source generators. -->
+    <EnableRequestDelegateGenerator Condition="'$(EnableRequestDelegateGenerator)' == ''">true</EnableRequestDelegateGenerator>
+    <EnableConfigurationBindingGenerator Condition="'$(EnableConfigurationBindingGenerator)' == ''">true</EnableConfigurationBindingGenerator>
+
+    <!-- Enable System.GC.DynamicAdaptationMode by default for aot'd apps to get a GC that dynamically adapts to the application's memory use. -->
+    <GarbageCollectionAdaptationMode Condition="'$(GarbageCollectionAdaptationMode)' == '' And '$(ServerGarbageCollection)' == 'true'">1</GarbageCollectionAdaptationMode>
+  </PropertyGroup>
+
+  <!-- Enable the interceptors compiler feature by default for projects that use the RequestDelegateGenerator. -->
+  <PropertyGroup Condition="'$(EnableRequestDelegateGenerator)' == 'true'">
+    <Features>$(Features);InterceptorsPreview</Features>
   </PropertyGroup>
 
   <!--

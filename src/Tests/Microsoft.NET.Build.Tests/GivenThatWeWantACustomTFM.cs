@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using FluentAssertions;
@@ -21,8 +21,8 @@ namespace Microsoft.NET.Build.Tests
         [Fact]
         public void It_imports_custom_parsing_targets()
         {
-            var targetFramework = "netcoreapp3.0";
-            var runtimeIdentifier = "osx-x64";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
+            var runtimeIdentifier = $"{ToolsetInfo.LatestMacRuntimeIdentifier}-x64";
             TestProject testProject = new TestProject()
             {
                 Name = "CustomTFMProject",
@@ -47,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 { "TargetFramework", targetFramework },
                 { "TargetFrameworkIdentifier", ".NETCoreApp" },
-                { "TargetFrameworkVersion", "v3.0" },
+                { "TargetFrameworkVersion", $"v{ToolsetInfo.CurrentTargetFrameworkVersion}" },
                 { "RuntimeIdentifier", runtimeIdentifier }
             };
 

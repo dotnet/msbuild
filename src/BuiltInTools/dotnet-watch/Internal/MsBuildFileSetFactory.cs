@@ -1,5 +1,6 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 
 using System;
 using System.Collections.Generic;
@@ -9,19 +10,19 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Watcher.Tools;
-using Microsoft.Extensions.Tools.Internal;
+using Microsoft.DotNet.Cli;
 using IReporter = Microsoft.Extensions.Tools.Internal.IReporter;
 
 namespace Microsoft.DotNet.Watcher.Internal
 {
-    public class MsBuildFileSetFactory : IFileSetFactory
+    internal sealed class MsBuildFileSetFactory : IFileSetFactory
     {
         private const string TargetName = "GenerateWatchList";
         private const string WatchTargetsFileName = "DotNetWatch.targets";
 
         private readonly IReporter _reporter;
         private readonly DotNetWatchOptions _dotNetWatchOptions;
+        private readonly string _muxerPath;
         private readonly string _projectFile;
         private readonly OutputSink _outputSink;
         private readonly ProcessRunner _processRunner;
@@ -29,41 +30,30 @@ namespace Microsoft.DotNet.Watcher.Internal
         private readonly IReadOnlyList<string> _buildFlags;
 
         public MsBuildFileSetFactory(
-            IReporter reporter,
-            DotNetWatchOptions dotNetWatchOptions,
-            string projectFile,
-            bool waitOnError,
-            bool trace)
-            : this(dotNetWatchOptions, reporter, projectFile, new OutputSink(), waitOnError, trace)
-        {
-        }
-
-        // output sink is for testing
-        internal MsBuildFileSetFactory(
             DotNetWatchOptions dotNetWatchOptions,
             IReporter reporter,
+            string muxerPath,
             string projectFile,
-            OutputSink outputSink,
+            string? targetFramework,
+            IReadOnlyList<(string, string)>? buildProperties,
+            OutputSink? outputSink,
             bool waitOnError,
             bool trace)
         {
-            Ensure.NotNull(reporter, nameof(reporter));
-            Ensure.NotNullOrEmpty(projectFile, nameof(projectFile));
-            Ensure.NotNull(outputSink, nameof(outputSink));
-
             _reporter = reporter;
             _dotNetWatchOptions = dotNetWatchOptions;
+            _muxerPath = muxerPath;
             _projectFile = projectFile;
-            _outputSink = outputSink;
+            _outputSink = outputSink ?? new OutputSink();
             _processRunner = new ProcessRunner(reporter);
-            _buildFlags = InitializeArgs(FindTargetsFile(), trace);
+            _buildFlags = InitializeArgs(FindTargetsFile(), targetFramework, buildProperties, trace);
 
             _waitOnError = waitOnError;
         }
 
-        public async Task<FileSet> CreateAsync(CancellationToken cancellationToken)
+        public async Task<FileSet?> CreateAsync(CancellationToken cancellationToken)
         {
-            var watchList = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var watchList = Path.GetTempFileName();
             try
             {
                 var projectDir = Path.GetDirectoryName(_projectFile);
@@ -90,7 +80,7 @@ namespace Microsoft.DotNet.Watcher.Internal
 
                     var processSpec = new ProcessSpec
                     {
-                        Executable = DotnetMuxer.MuxerPath,
+                        Executable = _muxerPath,
                         WorkingDirectory = projectDir,
                         Arguments = arguments,
                         OutputCapture = capture
@@ -104,6 +94,7 @@ namespace Microsoft.DotNet.Watcher.Internal
                     {
                         using var watchFile = File.OpenRead(watchList);
                         var result = await JsonSerializer.DeserializeAsync<MSBuildFileSetResult>(watchFile, cancellationToken: cancellationToken);
+                        Debug.Assert(result != null);
 
                         var fileItems = new List<FileItem>();
                         foreach (var project in result.Projects)
@@ -146,14 +137,12 @@ namespace Microsoft.DotNet.Watcher.Internal
                         Debug.Assert(fileItems.All(f => Path.IsPathRooted(f.FilePath)), "All files should be rooted paths");
 #endif
 
-                        // TargetFrameworkVersion appears as v6.0 in msbuild. Ignore the leading v
-                        var targetFrameworkVersion = !string.IsNullOrEmpty(result.TargetFrameworkVersion) ?
-                            Version.Parse(result.TargetFrameworkVersion.AsSpan(1)) : // Ignore leading v
-                            null;
                         var projectInfo = new ProjectInfo(
                             _projectFile,
                             result.IsNetCoreApp,
-                            targetFrameworkVersion,
+                            EnvironmentVariableNames.TryParseTargetFrameworkVersion(result.TargetFrameworkVersion),
+                            result.RuntimeIdentifier,
+                            result.DefaultAppHostRuntimeIdentifier,
                             result.RunCommand,
                             result.RunArguments,
                             result.RunWorkingDirectory);
@@ -180,7 +169,7 @@ namespace Microsoft.DotNet.Watcher.Internal
                     {
                         _reporter.Warn("Fix the error to continue or press Ctrl+C to exit.");
 
-                        var fileSet = new FileSet(null, new[] { new FileItem { FilePath = _projectFile } });
+                        var fileSet = new FileSet(projectInfo: null, new[] { new FileItem { FilePath = _projectFile } });
 
                         using (var watcher = new FileSetWatcher(fileSet, _reporter))
                         {
@@ -200,7 +189,7 @@ namespace Microsoft.DotNet.Watcher.Internal
             }
         }
 
-        private IReadOnlyList<string> InitializeArgs(string watchTargetsFile, bool trace)
+        private IReadOnlyList<string> InitializeArgs(string watchTargetsFile, string? targetFramework, IReadOnlyList<(string name, string value)>? buildProperties, bool trace)
         {
             var args = new List<string>
             {
@@ -212,6 +201,16 @@ namespace Microsoft.DotNet.Watcher.Internal
                 "/p:CustomAfterMicrosoftCommonTargets=" + watchTargetsFile,
                 "/p:CustomAfterMicrosoftCommonCrossTargetingTargets=" + watchTargetsFile,
             };
+
+            if (targetFramework != null)
+            {
+                args.Add("/p:TargetFramework=" + targetFramework);
+            }
+
+            if (buildProperties != null)
+            {
+                args.AddRange(buildProperties.Select(p => $"/p:{p.name}={p.value}"));
+            }
 
             if (trace)
             {
@@ -225,6 +224,8 @@ namespace Microsoft.DotNet.Watcher.Internal
         private string FindTargetsFile()
         {
             var assemblyDir = Path.GetDirectoryName(typeof(MsBuildFileSetFactory).Assembly.Location);
+            Debug.Assert(assemblyDir != null);
+
             var searchPaths = new[]
             {
                 Path.Combine(AppContext.BaseDirectory, "assets"),
@@ -234,12 +235,7 @@ namespace Microsoft.DotNet.Watcher.Internal
             };
 
             var targetPath = searchPaths.Select(p => Path.Combine(p, WatchTargetsFileName)).FirstOrDefault(File.Exists);
-            if (targetPath == null)
-            {
-                _reporter.Error("Fatal error: could not find DotNetWatch.targets");
-                return null;
-            }
-            return targetPath;
+            return targetPath ?? throw new FileNotFoundException("Fatal error: could not find DotNetWatch.targets");
         }
     }
 }

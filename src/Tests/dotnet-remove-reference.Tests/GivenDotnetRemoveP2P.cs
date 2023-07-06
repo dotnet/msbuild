@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.CommandLineValidation;
@@ -52,9 +52,9 @@ Options:
 
         readonly string[] FrameworkNet451Args = new[] { "-f", "net451" };
         const string ConditionFrameworkNet451 = "== 'net451'";
-        readonly string[] FrameworkNetCoreApp10Args = new[] { "-f", "netcoreapp1.0" };
-        const string ConditionFrameworkNetCoreApp10 = "== 'netcoreapp1.0'";
-        static readonly string[] DefaultFrameworks = new string[] { "netcoreapp1.0", "net451" };
+        readonly string[] CurrentFramework = new[] { "-f", ToolsetInfo.CurrentTargetFramework };
+        const string ConditionCurrentFramework = $"== '{ToolsetInfo.CurrentTargetFramework}'";
+        static readonly string[] DefaultFrameworks = new string[] { ToolsetInfo.CurrentTargetFramework, "net451" };
 
         public GivenDotnetRemoveReference(ITestOutputHelper log) : base(log)
         {
@@ -80,7 +80,8 @@ Options:
             try
             {
                 string [] newArgs = new[] { "classlib", "-o", projDir.Path, "--no-restore" };
-                new DotnetCommand(Log, "new")
+                new DotnetNewCommand(Log)
+                    .WithVirtualHive()
                     .WithWorkingDirectory(projDir.Path)
                     .Execute(newArgs)
                 .Should().Pass();
@@ -177,7 +178,7 @@ Options:
         [Theory]
         [InlineData("idontexist.csproj")]
         [InlineData("ihave?inv@lid/char\\acters")]
-        public void WhenNonExistingProjectIsPassedItPrintsErrorAndUsage(string projName)
+        public void WhenNonExistingProjectIsPassedItPrintsError(string projName)
         {
             var setup = Setup(identifier: projName.GetHashCode().ToString());
 
@@ -187,11 +188,11 @@ Options:
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, projName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
-        public void WhenBrokenProjectIsPassedItPrintsErrorAndUsage()
+        public void WhenBrokenProjectIsPassedItPrintsError()
         {
             string projName = "Broken/Broken.csproj";
             var setup = Setup();
@@ -199,10 +200,10 @@ Options:
             string brokenFolder = Path.Combine(setup.TestRoot, "Broken");
             Directory.CreateDirectory(brokenFolder);
             string brokenProjectPath = Path.Combine(brokenFolder, "Broken.csproj");
-            File.WriteAllText(brokenProjectPath, @"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+            File.WriteAllText(brokenProjectPath, $@"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
     <PropertyGroup>
         <OutputType>Library</OutputType>
-        <TargetFrameworks>net451;netcoreapp2.1</TargetFrameworks>
+        <TargetFrameworks>net451;{ToolsetInfo.CurrentTargetFramework}</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -216,11 +217,11 @@ Options:
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, projName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
-        public void WhenMoreThanOneProjectExistsInTheDirectoryItPrintsErrorAndUsage()
+        public void WhenMoreThanOneProjectExistsInTheDirectoryItPrintsError()
         {
             var setup = Setup();
 
@@ -230,11 +231,11 @@ Options:
                     .Execute(setup.ValidRefCsprojRelToOtherProjPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, workingDir + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(workingDir));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
-        public void WhenNoProjectsExistsInTheDirectoryItPrintsErrorAndUsage()
+        public void WhenNoProjectsExistsInTheDirectoryItPrintsError()
         {
             var setup = Setup();
 
@@ -243,7 +244,7 @@ Options:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, setup.TestRoot + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
 
         [Fact]
@@ -394,11 +395,11 @@ Options:
             var setup = Setup();
             var lib = NewLibWithFrameworks(setup.TestRoot);
             var librefCondNet451 = AddLibRef(setup, lib, FrameworkNet451Args);
-            var librefCondNetCoreApp10 = AddLibRef(setup, lib, FrameworkNetCoreApp10Args);
+            var librefCondNetCoreApp10 = AddLibRef(setup, lib, CurrentFramework);
 
             var csprojBefore = lib.CsProj();
             int condNet451Before = csprojBefore.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451);
-            int condNetCoreApp10Before = csprojBefore.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNetCoreApp10);
+            int condNetCoreApp10Before = csprojBefore.NumberOfItemGroupsWithConditionContaining(ConditionCurrentFramework);
             var cmd = new RemoveReferenceCommand(Log)
                 .WithProject(lib.CsProjPath)
                 .WithWorkingDirectory(setup.TestRoot)
@@ -409,8 +410,8 @@ Options:
             csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNet451).Should().Be(condNet451Before - 1);
             csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(librefCondNet451.Name, ConditionFrameworkNet451).Should().Be(0);
 
-            csproj.NumberOfItemGroupsWithConditionContaining(ConditionFrameworkNetCoreApp10).Should().Be(condNetCoreApp10Before);
-            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(librefCondNetCoreApp10.Name, ConditionFrameworkNetCoreApp10).Should().Be(1);
+            csproj.NumberOfItemGroupsWithConditionContaining(ConditionCurrentFramework).Should().Be(condNetCoreApp10Before);
+            csproj.NumberOfProjectReferencesWithIncludeAndConditionContaining(librefCondNetCoreApp10.Name, ConditionCurrentFramework).Should().Be(1);
         }
 
         [Fact]
@@ -570,7 +571,7 @@ Options:
                     .Execute(reference);
 
             result.Should().Fail();
-            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
             result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, Path.Combine(setup.TestRoot, reference)));
         }
 
@@ -587,7 +588,7 @@ Options:
                     .Execute(reference);
 
             result.Should().Fail();
-            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
             result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, Path.Combine(setup.TestRoot, reference)));
         }
     }

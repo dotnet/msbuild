@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "EditorConfig-Datei",
+  "description": "Erstellt eine editorconfig-Datei zum Konfigurieren von Codestileinstellungen.",
+  "symbols/Empty/displayName": "Leer",
+  "symbols/Empty/description": "Erstellt leere .editorconfig anstelle der Standardwerte für .NET."
+}

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.IO;
@@ -420,29 +423,38 @@ namespace Microsoft.DotNet.Cli
 
         private void Initialize()
         {
-            using (StreamReader reader = new StreamReader(File.OpenRead("/proc/meminfo")))
+            try
             {
-                string line;
-                while (!Valid && ((line = reader.ReadLine()) != null))
+                using (StreamReader reader = new StreamReader(File.OpenRead("/proc/meminfo")))
                 {
-                    if (line.StartsWith(MemTotal) || line.StartsWith(MemAvailable))
+                    string line;
+                    while (!Valid && ((line = reader.ReadLine()) != null))
                     {
-                        string[] tokens = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                        if (tokens.Length == 3)
+                        if (line.StartsWith(MemTotal) || line.StartsWith(MemAvailable))
                         {
-                            if (MemTotal.Equals(tokens[0]))
+                            string[] tokens = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            if (tokens.Length == 3)
                             {
-                                TotalMemoryMB = (int)Convert.ToUInt64(tokens[1]) / 1024;
-                                _matchingLineCount++;
-                            }
-                            else if (MemAvailable.Equals(tokens[0]))
-                            {
-                                AvailableMemoryMB = (int)Convert.ToUInt64(tokens[1]) / 1024;
-                                _matchingLineCount++;
+                                if (MemTotal.Equals(tokens[0]))
+                                {
+                                    TotalMemoryMB = (int)Convert.ToUInt64(tokens[1]) / 1024;
+                                    _matchingLineCount++;
+                                }
+                                else if (MemAvailable.Equals(tokens[0]))
+                                {
+                                    AvailableMemoryMB = (int)Convert.ToUInt64(tokens[1]) / 1024;
+                                    _matchingLineCount++;
+                                }
                             }
                         }
                     }
                 }
+            }
+            catch (Exception ex) when (ex is IOException || ex.InnerException is IOException)
+            {
+                // in some environments (restricted docker container, shared hosting etc.),
+                // procfs is not accessible and we get UnauthorizedAccessException while the
+                // inner exception is set to IOException. Ignore and continue when that happens.
             }
         }
     }

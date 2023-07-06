@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -43,8 +42,9 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
         protected override int ExecuteTool(string pathToTool, string responseFileCommands, string commandLineCommands)
         {
             int returnCode = base.ExecuteTool(pathToTool, responseFileCommands, commandLineCommands);
-
-            if (IgnoreExitCode)
+            
+            // returnCode 1 indicates that files changed during tar. In our case, it is likely being overwritten by another copy of the same file, so we can safely ignore this warning.
+            if (IgnoreExitCode || returnCode == 1)
             {
                 returnCode = 0;
             }

@@ -1,0 +1,221 @@
+﻿[
+  {
+    Label: buildprops,
+    Kind: Value,
+    SortText: buildprops,
+    InsertText: buildprops,
+    Documentation: An empty Directory.Build.props file which can be used to specify MSBuild properties for an entire folder
+  },
+  {
+    Label: buildtargets,
+    Kind: Value,
+    SortText: buildtargets,
+    InsertText: buildtargets,
+    Documentation: An empty Directory.Build.targets file which can be used to specify MSBuild tasks and targets for an entire folder
+  },
+  {
+    Label: classlib,
+    Kind: Value,
+    SortText: classlib,
+    InsertText: classlib,
+    Documentation: A project for creating a class library that targets .NET or .NET Standard
+  },
+  {
+    Label: console,
+    Kind: Value,
+    SortText: console,
+    InsertText: console,
+    Documentation: A project for creating a command-line application that can run on .NET on Windows, Linux and macOS
+  },
+  {
+    Label: editorconfig,
+    Kind: Value,
+    SortText: editorconfig,
+    InsertText: editorconfig,
+    Documentation: Creates an .editorconfig file for configuring code style preferences.
+  },
+  {
+    Label: gitignore,
+    Kind: Value,
+    SortText: gitignore,
+    InsertText: gitignore,
+    Documentation: Creates a gitignore file for a dotnet project.
+  },
+  {
+    Label: globaljson,
+    Kind: Value,
+    SortText: globaljson,
+    InsertText: globaljson,
+    Documentation: A file for selecting the .NET SDK version.
+  },
+  {
+    Label: nugetconfig,
+    Kind: Value,
+    SortText: nugetconfig,
+    InsertText: nugetconfig,
+    Documentation: A file for configuring the locations NuGet will search for packages
+  },
+  {
+    Label: sln,
+    Kind: Value,
+    SortText: sln,
+    InsertText: sln,
+    Documentation: Create an empty solution containing no projects
+  },
+  {
+    Label: tool-manifest,
+    Kind: Value,
+    SortText: tool-manifest,
+    InsertText: tool-manifest,
+    Documentation: The file that defines available dotnet tools.
+  },
+  {
+    Label: webconfig,
+    Kind: Value,
+    SortText: webconfig,
+    InsertText: webconfig,
+    Documentation: A file used to configure Web Application settings
+  },
+  {
+    Label: --dry-run,
+    Kind: Keyword,
+    SortText: --dry-run,
+    InsertText: --dry-run,
+    Detail: Displays a summary of what would happen if the given command line were run if it would result in a template creation.
+  },
+  {
+    Label: --force,
+    Kind: Keyword,
+    SortText: --force,
+    InsertText: --force,
+    Detail: Forces content to be generated even if it would change existing files.
+  },
+  {
+    Label: --help,
+    Kind: Keyword,
+    SortText: --help,
+    InsertText: --help,
+    Detail: Show help and usage information
+  },
+  {
+    Label: --name,
+    Kind: Keyword,
+    SortText: --name,
+    InsertText: --name,
+    Detail: The name for the output being created. If no name is specified, the name of the output directory is used.
+  },
+  {
+    Label: --no-update-check,
+    Kind: Keyword,
+    SortText: --no-update-check,
+    InsertText: --no-update-check,
+    Detail: Disables checking for the template package updates when instantiating a template.
+  },
+  {
+    Label: --output,
+    Kind: Keyword,
+    SortText: --output,
+    InsertText: --output,
+    Detail: Location to place the generated output.
+  },
+  {
+    Label: --project,
+    Kind: Keyword,
+    SortText: --project,
+    InsertText: --project,
+    Detail: The project that should be used for context evaluation.
+  },
+  {
+    Label: -?,
+    Kind: Keyword,
+    SortText: -?,
+    InsertText: -?,
+    Detail: Show help and usage information
+  },
+  {
+    Label: -h,
+    Kind: Keyword,
+    SortText: -h,
+    InsertText: -h,
+    Detail: Show help and usage information
+  },
+  {
+    Label: -n,
+    Kind: Keyword,
+    SortText: -n,
+    InsertText: -n,
+    Detail: The name for the output being created. If no name is specified, the name of the output directory is used.
+  },
+  {
+    Label: -o,
+    Kind: Keyword,
+    SortText: -o,
+    InsertText: -o,
+    Detail: Location to place the generated output.
+  },
+  {
+    Label: /?,
+    Kind: Keyword,
+    SortText: /?,
+    InsertText: /?,
+    Detail: Show help and usage information
+  },
+  {
+    Label: /h,
+    Kind: Keyword,
+    SortText: /h,
+    InsertText: /h,
+    Detail: Show help and usage information
+  },
+  {
+    Label: create,
+    Kind: Keyword,
+    SortText: create,
+    InsertText: create,
+    Detail: Instantiates a template with given short name. An alias of 'dotnet new <template name>'.
+  },
+  {
+    Label: details,
+    Kind: Keyword,
+    SortText: details,
+    InsertText: details,
+    Detail:
+      Provides the details for specified template package.
+      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.
+  },
+  {
+    Label: install,
+    Kind: Keyword,
+    SortText: install,
+    InsertText: install,
+    Detail: Installs a template package.
+  },
+  {
+    Label: list,
+    Kind: Keyword,
+    SortText: list,
+    InsertText: list,
+    Detail: Lists templates containing the specified template name. If no name is specified, lists all templates.
+  },
+  {
+    Label: search,
+    Kind: Keyword,
+    SortText: search,
+    InsertText: search,
+    Detail: Searches for the templates on NuGet.org.
+  },
+  {
+    Label: uninstall,
+    Kind: Keyword,
+    SortText: uninstall,
+    InsertText: uninstall,
+    Detail: Uninstalls a template package.
+  },
+  {
+    Label: update,
+    Kind: Keyword,
+    SortText: update,
+    InsertText: update,
+    Detail: Checks the currently installed template packages for update, and install the updates.
+  }
+]

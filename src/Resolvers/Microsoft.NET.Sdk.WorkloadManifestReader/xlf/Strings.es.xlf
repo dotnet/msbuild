@@ -57,6 +57,16 @@
         <target state="translated">El documento finalizó antes de tiempo</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">Versión no válida: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">Error al analizar la versión \"{1}\" para el id. de manifiesto de carga de trabajo \"{0}\"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">No se ha encontrado la dependencia del manifiesto de carga de trabajo '{0}' requerida por el manifiesto '{1}' [{2}]</target>
@@ -92,6 +102,11 @@
         <target state="translated">La carga de trabajo de redireccionamiento '{0}' tiene claves distintas que las de 'redirect-to'</target>
         <note />
       </trans-unit>
+      <trans-unit id="SpecifiedManifestNotFound">
+        <source>Specified workload manifest was not found: {0}</source>
+        <target state="translated">No se encontró el manifiesto de carga de trabajo especificado: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">Token "{0}" inesperado en el desplazamiento {1}</target>
@@ -115,6 +130,11 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Destino sin resolver '{0}' para redirección de carga de trabajo '{1}' en el manifiesto '{2}' [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="translated">No se encontró la versión de carga de trabajo {0}, que se especificó en {1}. Ejecuta "restauración de carga de trabajo de dotnet" para instalar esta versión de carga de trabajo.</target>
         <note />
       </trans-unit>
     </body>

@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../Resources.resx">
+    <body>
+      <trans-unit id="ApiCompatRunnerExecutingWorkItems">
+        <source>Executing {0} work item(s)...</source>
+        <target state="translated">{0} 件の作業項目を移動しています...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ApiCompatibilityHeader">
+        <source>API compatibility errors between '{0}' ({2}) and '{1}' ({3}):</source>
+        <target state="translated">'{0}' ({2}) と '{1}' ({3}) の API 互換性エラーは、以下のとおりです。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyCultureDoesNotMatch">
+        <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
+        <target state="translated">{2} アセンブリ カルチャ '{0}' が {3} アセンブリ カルチャ '{1}' と一致しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyLoadError">
+        <source>Could not load assembly symbols for '{0}'. Skipping the assembly.</source>
+        <target state="translated">'{0}' のアセンブリ シンボルを読み込めませんでした。アセンブリをスキップしています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyNameDoesNotExist">
+        <source>Assembly with name '{0}' does not exist at {1}.</source>
+        <target state="translated">'{0}' という名前のアセンブリは {1} に存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyNameDoesNotMatch">
+        <source>{2} assembly name '{0}' does not match with {3} assembly name '{1}'.</source>
+        <target state="translated">{2} アセンブリ名 '{0}' が {3} アセンブリ名 '{1}' と一致しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyPublicKeyTokenDoesNotMatch">
+        <source>{2} assembly public key token '{0}' does not match with {3} '{1}'.</source>
+        <target state="translated">{2} アセンブリ公開キートークン '{0}' が {3} '{1}' と一致しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblySearchDirectoryDoesNotExist">
+        <source>Provided assembly search directory '{0}' does not exist.</source>
+        <target state="translated">指定済みのアセンブリ検索ディレクトリ '{0}' は存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyVersionDoesNotMatch">
+        <source>{3} assembly version '{1}' should be equal to {2} version '{0}'.</source>
+        <target state="translated">{3} アセンブリバージョン '{1}' は {2} バージョン '{0}' と等しい必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyVersionIsNotCompatible">
+        <source>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</source>
+        <target state="new">{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotAddAbstractMember">
+        <source>Cannot add abstract member '{0}' to {1} because it does not exist on {2}</source>
+        <target state="translated">抽象メンバーが {2} に存在しないため、抽象メンバー '{0}' を {1} に追加できません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotAddAttribute">
+        <source>Cannot add attribute '{0}' to '{1}'.</source>
+        <target state="translated">属性 '{0}' を '{1}' に追加できません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotAddMemberToInterface">
+        <source>Cannot add interface member '{0}' to {1} because it does not exist on {2}</source>
+        <target state="translated">インターフェイス メンバーが {2} に存在しないため、インターフェイス メンバー '{0}' を {1} に追加できません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotAddSealedToInterfaceMember">
+        <source>Cannot add sealed keyword to default interface member '{0}'.</source>
+        <target state="translated">既定のインターフェイス メンバー '{0}' にシールド キーワードを追加できません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotAddVirtualToMember">
+        <source>Cannot add virtual keyword to member '{0}'.</source>
+        <target state="translated">メンバー '{0}' に仮想キーワードを追加できません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotChangeAttribute">
+        <source>Cannot change arguments of attribute '{0}' on '{1}'.</source>
+        <target state="translated">'{1}' で属性の引数 '{0}' を変更できません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotChangeParameterName">
+        <source>Parameter name on member '{0}' changed from '{1}' to '{2}'.</source>
+        <target state="translated">メンバー '{0}' のパラメーター名が '{1}' から '{2}' に変更されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotExpandVisibility">
+        <source>Visibility of '{0}' expanded from '{1}' to '{2}'.</source>
+        <target state="translated">'{0}' の可視性が '{1}' から '{2}' に拡張されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotReduceVisibility">
+        <source>Visibility of '{0}' reduced from '{1}' to '{2}'.</source>
+        <target state="translated">'{0}' の可視性が '{1}' から '{2}' に縮小されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveAttribute">
+        <source>Cannot remove attribute '{0}' from '{1}'.</source>
+        <target state="translated">属性 '{0}' を '{1}' から削除できません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveBaseInterface">
+        <source>Type '{0}' does not implement interface '{1}' on {2} but it does on {3}</source>
+        <target state="translated">型 '{0}' は、{2} でインターフェイス '{1}' を実装していませんが、{3} で実装します</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveBaseType">
+        <source>Type '{0}' does not inherit from base type '{1}' on {2} but it does on {3}</source>
+        <target state="translated">型 '{0}' は {2} では基本データ型 '{1}' から継承していませんが、{3} では継承しています</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveVirtualFromMember">
+        <source>Cannot remove virtual keyword from member '{0}'.</source>
+        <target state="translated">メンバー '{0}' から仮想キーワードを削除できません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ElementShouldNotBeNullAtIndex">
+        <source>Element should not be null. Found null at index: {0}.</source>
+        <target state="translated">要素を null にすることはできません。インデックスに null が見つかりました: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnumTypesMustMatch">
+        <source>Underlying type of enum '{0}' changed from '{1}' to '{2}'.</source>
+        <target state="translated">基になる列挙型 '{0}' が '{1}' から '{2}' に変更されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnumValuesMustMatch">
+        <source>Value of field '{1}' in enum '{0}' changed from '{2}' to '{3}'.</source>
+        <target state="translated">列挙型 '{0}' のフィールド '{1}' の値が '{2}' から '{3}' に変更されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IndexShouldBeWithinSetSizeRange">
+        <source>The index should be within the right set size range.</source>
+        <target state="translated">このインデックスは、設定されたサイズ範囲内に存在する必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MatchingAssemblyNotFound">
+        <source>Could not find matching assembly: '{0}' in any of the search directories.</source>
+        <target state="translated">任意の検索ディレクトリ '{0}' に一致するアセンブリが見つかりませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MemberExistsOnLeft">
+        <source>Member '{0}' exists on {1} but not on {2}</source>
+        <target state="translated">メンバー '{0}' は {1} に存在していますが、{2} には存在しません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MemberExistsOnRight">
+        <source>Member '{0}' exists on {2} but not on {1}</source>
+        <target state="translated">メンバー '{0}' は {2} に存在していますが、{1} には存在しません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RightNamesAtLeastOne">
+        <source>Should at least contain one right name.</source>
+        <target state="translated">少なくとも 1 つの権利名を含む必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShouldBeGreaterThanZero">
+        <source>Value should be greater than 0.</source>
+        <target state="translated">値は 0 以上にする必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TypeIsActuallySealed">
+        <source>Type '{0}' has the sealed modifier on {1} but not on {2}</source>
+        <target state="translated">型 '{0}' は {1} に sealed 修飾子がありますが、{2} にはありません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TypeIsEffectivelySealed">
+        <source>Type '{0}' is sealed because it has no visible constructor on {1} but it does on {2}</source>
+        <target state="translated">型 '{0}' iは、{1} に参照可能なコンストラクターがないため sealed ですが、{2} にはあります</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TypeMissingOnSide">
+        <source>Type '{0}' exists on {1} but not on {2}</source>
+        <target state="translated">タイプ '{0}' は {1} に存在していますが、{2} には存在しません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">
+        <source>The provided right count when creating the visitor should match the right set size specified for the mappers.</source>
+        <target state="translated">ビジターの作成時に指定された適切なカウントは、マッパーに指定された適切なセット サイズと一致する必要があります。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

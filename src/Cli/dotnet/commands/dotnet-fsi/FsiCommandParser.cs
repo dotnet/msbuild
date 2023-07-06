@@ -1,9 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.Fsi;
 
 namespace Microsoft.DotNet.Cli
@@ -12,18 +10,20 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-fsi";
 
-        private static readonly Command Command = ConstructCommand();
+        public static readonly CliArgument<string[]> Arguments = new("arguments");
 
-        public static Command GetCommand()
+        private static readonly CliCommand Command = ConstructCommand();
+
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            var command = new DocumentedCommand("fsi", DocsLink);
+            DocumentedCommand command = new("fsi", DocsLink) { Arguments };
 
-            command.Handler = CommandHandler.Create<ParseResult>(FsiCommand.Run);
+            command.SetAction((ParseResult parseResult) => FsiCommand.Run(parseResult.GetValue(Arguments)));
 
             return command;
         }

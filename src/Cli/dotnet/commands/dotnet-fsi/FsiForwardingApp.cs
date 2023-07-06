@@ -1,9 +1,10 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Cli.Utils;
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.IO;
@@ -16,8 +17,7 @@ namespace Microsoft.DotNet.Cli
         private const string FsiDllName = @"FSharp/fsi.dll";
         private const string FsiExeName = @"FSharp/fsi.exe";
 
-        public FsiForwardingApp(ParseResult parseResult)
-            : base(GetFsiAppPath(), parseResult.GetArguments())
+        public FsiForwardingApp(string[] arguments) : base(GetFsiAppPath(), arguments)
         {
         }
 

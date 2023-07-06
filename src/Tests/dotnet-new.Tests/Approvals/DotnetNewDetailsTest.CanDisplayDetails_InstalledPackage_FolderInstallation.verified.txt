@@ -1,0 +1,6 @@
+﻿%TEMPLATE FOLDER%
+   Templates:
+      Template Name  Short Name  Type  Tags        Language
+      -------------  ----------  ----  ----------  --------
+      Basic FSharp   basic       item  Test Asset  F#      
+      

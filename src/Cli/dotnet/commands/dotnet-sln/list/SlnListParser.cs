@@ -1,7 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using Microsoft.DotNet.Tools.Sln;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.Sln.List;
@@ -11,18 +12,21 @@ namespace Microsoft.DotNet.Cli
 {
     public static class SlnListParser
     {
-        private static readonly Command Command = ConstructCommand();
+        public static readonly CliOption<bool> SolutionFolderOption = new ("--solution-folders") { Description = LocalizableStrings.ListSolutionFoldersArgumentDescription };
 
-        public static Command GetCommand()
+        private static readonly CliCommand Command = ConstructCommand();
+
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            var command = new Command("list", LocalizableStrings.ListAppFullName);
+            CliCommand command = new("list", LocalizableStrings.ListAppFullName);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ListProjectsInSolutionCommand(parseResult).Execute());
+            command.Options.Add(SolutionFolderOption);
+            command.SetAction((parseResult) => new ListProjectsInSolutionCommand(parseResult).Execute());
 
             return command;
         }

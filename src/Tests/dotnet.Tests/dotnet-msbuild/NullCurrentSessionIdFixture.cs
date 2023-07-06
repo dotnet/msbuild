@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
 	public class NullCurrentSessionIdFixture
@@ -10,7 +13,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             // This is now needed because before we set SKIP FIRST RUN in the CLI
             // build scripts, but now we don't and we don't want to rely on scripts
             // to make our build/tests work.
-            Telemetry.Telemetry.CurrentSessionId = null;
+            Telemetry.Telemetry.DisableForTests();
         }
     }
 }

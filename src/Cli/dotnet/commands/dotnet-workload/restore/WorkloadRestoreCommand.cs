@@ -1,9 +1,10 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -19,29 +20,27 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Workloads.Workload.Restore
 {
-    internal class WorkloadRestoreCommand : CommandBase
+    internal class WorkloadRestoreCommand : WorkloadCommandBase
     {
         private readonly ParseResult _result;
-        private readonly IReporter _reporter;
         private readonly IEnumerable<string> _slnOrProjectArgument;
 
         public WorkloadRestoreCommand(
             ParseResult result,
             IFileSystem fileSystem = null,
             IReporter reporter = null)
-            : base(result)
+            : base(result, reporter: reporter)
         {
             _result = result;
-            _reporter = reporter ?? Reporter.Output;
             _slnOrProjectArgument =
-                result.GetValueForArgument(RestoreCommandParser.SlnOrProjectArgument);
+                result.GetValue(RestoreCommandParser.SlnOrProjectArgument);
         }
 
         public override int Execute()
         {
             var allProjects = DiscoverAllProjects(Directory.GetCurrentDirectory(), _slnOrProjectArgument).Distinct();
             List<WorkloadId> allWorkloadId = RunTargetToGetWorkloadIds(allProjects);
-            _reporter.WriteLine(string.Format(LocalizableStrings.InstallingWorkloads, string.Join(" ", allWorkloadId)));
+            Reporter.WriteLine(string.Format(LocalizableStrings.InstallingWorkloads, string.Join(" ", allWorkloadId)));
 
             var workloadInstallCommand = new WorkloadInstallCommand(_result,
                 workloadIds: allWorkloadId.Select(a => a.ToString()).ToList().AsReadOnly());
@@ -65,9 +64,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Restore
                 bool buildResult = project.Build(new[] {"_GetRequiredWorkloads"},
                     loggers: new ILogger[]
                     {
-                        new ConsoleLogger(_result
-                            .GetValueForOption(WorkloadInstallCommandParser.VerbosityOption)
-                            .ToLoggerVerbosity())
+                        new ConsoleLogger(Verbosity.ToLoggerVerbosity())
                     },
                     remoteLoggers: Enumerable.Empty<ForwardingLoggerRecord>(),
                     targetOutputs: out var targetOutputs);
@@ -113,7 +110,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Restore
             foreach (string file in slnFiles)
             {
                 var solutionFile = SolutionFile.Parse(file);
-                var projects = solutionFile.ProjectsInOrder;
+                var projects = solutionFile.ProjectsInOrder.Where(p => p.ProjectType != SolutionProjectType.SolutionFolder);
                 foreach (var p in projects)
                 {
                     projectFiles.Add(p.AbsolutePath);

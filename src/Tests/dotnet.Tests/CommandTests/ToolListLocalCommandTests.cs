@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.IO;
@@ -12,6 +12,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Versioning;
 using Xunit;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
@@ -40,6 +41,11 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         NuGetVersion.Parse("2.1.4"),
                         new[] {new ToolCommandName("package-name")},
                         new DirectoryPath(_temporaryDirectory)), new FilePath(_testManifestPath)),
+                    (new ToolManifestPackage(
+                        new PackageId("foo.bar"),
+                        NuGetVersion.Parse("1.0.8"),
+                        new[] {new ToolCommandName("foo-bar")},
+                        new DirectoryPath(_temporaryDirectory)), new FilePath(_testManifestPath))
                 }
             );
             _parseResult = Parser.Instance.Parse("dotnet tool list");
@@ -53,10 +59,15 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         public void GivenManifestInspectorItPrintsTheTable()
         {
             _defaultToolListLocalCommand.Execute();
+            _reporter.Lines.Count.Should().Be(4);
             _reporter.Lines.Should().Contain(l => l.Contains("package.id"));
             _reporter.Lines.Should().Contain(l => l.Contains("2.1.4"));
             _reporter.Lines.Should().Contain(l => l.Contains(_testManifestPath));
             _reporter.Lines.Should().Contain(l => l.Contains("package-name"));
+            _reporter.Lines.Should().Contain(l => l.Contains("foo.bar"));
+            _reporter.Lines.Should().Contain(l => l.Contains("1.0.8"));
+            _reporter.Lines.Should().Contain(l => l.Contains(_testManifestPath));
+            _reporter.Lines.Should().Contain(l => l.Contains("foo-bar"));
         }
 
         [Fact]
@@ -65,10 +76,43 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var command = new ToolListCommand(result: _parseResult,
                 toolListLocalCommand: _defaultToolListLocalCommand);
             _defaultToolListLocalCommand.Execute();
+            _reporter.Lines.Count.Should().Be(4);
             _reporter.Lines.Should().Contain(l => l.Contains("package.id"));
             _reporter.Lines.Should().Contain(l => l.Contains("2.1.4"));
             _reporter.Lines.Should().Contain(l => l.Contains(_testManifestPath));
             _reporter.Lines.Should().Contain(l => l.Contains("package-name"));
+            _reporter.Lines.Should().Contain(l => l.Contains("foo.bar"));
+            _reporter.Lines.Should().Contain(l => l.Contains("1.0.8"));
+            _reporter.Lines.Should().Contain(l => l.Contains(_testManifestPath));
+            _reporter.Lines.Should().Contain(l => l.Contains("foo-bar"));
+        }
+
+        [Fact]
+        public void GivenPackageIdArgumentItPrintsTheCorrectPackageInfo()
+        {
+            CreateCommandWithArg("package.id").Execute().Should().Be(0);
+            _reporter.Lines.Count.Should().Be(3);
+            _reporter.Lines.Should().Contain(l => l.Contains("package.id"));
+            _reporter.Lines.Should().Contain(l => l.Contains("2.1.4"));
+            _reporter.Lines.Should().Contain(l => l.Contains(_testManifestPath));
+            _reporter.Lines.Should().Contain(l => l.Contains("package-name"));
+        }
+
+        [Fact]
+        public void GivenNotInstalledPackageItPrintsEmpty()
+        {
+            CreateCommandWithArg("not-installed-package").Execute().Should().Be(1);
+            _reporter.Lines.Count.Should().Be(2);
+        }
+
+        private ToolListLocalCommand CreateCommandWithArg(string arg)
+        {
+            var parseResult = Parser.Instance.Parse("dotnet tool list " + arg);
+            var command = new ToolListLocalCommand(
+                parseResult,
+                _toolManifestInspector,
+                _reporter);
+            return command;
         }
 
         private class FakeManifestInspector : IToolManifestInspector

@@ -1,0 +1,16 @@
+{
+    "author": "Test Asset",
+    "classifications": [ "Test Asset" ],
+    "name": "name in base configuration",
+    "generatorVersions": "[1.0.0.0-*)",
+    "groupIdentity": "TestAssets.Invalid.Localization.InvalidFormat",
+    "precedence": "100",
+    "identity": "TestAssets.Invalid.Localization.InvalidFormat",
+    "shortName": "TestAssets.Invalid.Localization.InvalidFormat",
+    "tags": {
+        "language": "C#",
+        "type": "project"
+    },
+    "sourceName": "bar",
+    "description": "desc"
+}

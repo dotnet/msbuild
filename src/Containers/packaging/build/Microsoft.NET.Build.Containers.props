@@ -1,0 +1,20 @@
+<Project>
+    <PropertyGroup>
+         <!-- A flag representing this package existing in a project.  -->
+        <SDKContainerSupportEnabled>true</SDKContainerSupportEnabled>
+        <ContainerTaskFolderName>tasks</ContainerTaskFolderName>
+        <ContainerTaskFramework Condition="'$(MSBuildRuntimeType)' == 'Core'">net8.0</ContainerTaskFramework>
+        <ContainerTaskFramework Condition="'$(MSBuildRuntimeType)' == 'Full'">net472</ContainerTaskFramework>
+        <ContainerizeFolderName>containerize</ContainerizeFolderName>
+        <!--The folder where the custom task will be present. It points to inside the nuget package. -->
+        <ContainerCustomTasksFolder>$(MSBuildThisFileDirectory)..\$(ContainerTaskFolderName)\$(ContainerTaskFramework)\</ContainerCustomTasksFolder>
+        <ContainerizeFolder>$(MSBuildThisFileDirectory)..\$(ContainerizeFolderName)\</ContainerizeFolder>
+        <!--Reference to the assembly which contains the MSBuild Task-->
+        <ContainerCustomTasksAssembly Condition="'$(ContainerCustomTasksAssembly)' == ''">$(ContainerCustomTasksFolder)$(MSBuildThisFileName).dll</ContainerCustomTasksAssembly>
+    </PropertyGroup>
+
+    <!--Register our custom task-->
+    <UsingTask TaskName="$(MSBuildThisFileName).Tasks.CreateNewImage" AssemblyFile="$(ContainerCustomTasksAssembly)"/>
+    <UsingTask TaskName="$(MSBuildThisFileName).Tasks.ParseContainerProperties" AssemblyFile="$(ContainerCustomTasksAssembly)"/>
+    <UsingTask TaskName="$(MSBuildThisFileName).Tasks.ComputeDotnetBaseImageTag" AssemblyFile="$(ContainerCustomTasksAssembly)"/>
+</Project>

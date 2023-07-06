@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.Build.Framework;
@@ -39,11 +39,11 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         [Fact]
         public void It_generates_supported_net_framework_target_framework_alias_items()
         {
-            var targetFrameworkMoniker = ".NETFramework,Version=v4.8";
+            var targetFrameworkMoniker = ".NETFramework,Version=v4.8.1";
             RunTask(targetFrameworkMoniker, targetPlatformMoniker: string.Empty, UseWpf: false, UseWindowsForms: false, expectedResult: new List<(string, string)>
                 {
                     ("net471", ".NET Framework 4.7.1"),
-                    ("net48", ".NET Framework 4.8")
+                    ("net48", ".NET Framework 4.8.1")
                 });
         }
 
@@ -109,7 +109,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             };
             task.Execute();
 
-            task.SupportedTargetFrameworkAlias.ShouldBeEquivalentTo(convertToItems(expectedResult));
+            task.SupportedTargetFrameworkAlias.Should().BeEquivalentTo(convertToItems(expectedResult));
         }
     }
 }

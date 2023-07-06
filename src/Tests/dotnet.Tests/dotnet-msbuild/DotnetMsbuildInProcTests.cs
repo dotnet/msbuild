@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,6 +15,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
+    [Collection(TestConstants.UsesStaticTelemetryState)]
     public class DotnetMsbuildInProcTests : SdkTest
     {
         public DotnetMsbuildInProcTests(ITestOutputHelper log) : base(log)
@@ -55,7 +59,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         private string[] GetArgsForMSBuild(Func<bool> sentinelExists, out Telemetry.Telemetry telemetry)
         {
 
-            Telemetry.Telemetry.CurrentSessionId = null; // reset static session id modified by telemetry constructor
+            Telemetry.Telemetry.DisableForTests(); // reset static session id modified by telemetry constructor
             telemetry = new Telemetry.Telemetry(new MockFirstTimeUseNoticeSentinel(sentinelExists));
 
             MSBuildForwardingApp msBuildForwardingApp = new MSBuildForwardingApp(Enumerable.Empty<string>());

@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="translated">Nepovedlo se aktualizovat manifest reklamy. Balíček manifestu pro {0} neexistuje.</target>
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">Manifest reklamy není aktualizován. Balíček manifestu pro {0} neexistuje.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -17,9 +17,19 @@
         <target state="translated">Balíček {0} verze {1} v offline mezipaměti {2} neexistuje.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">Možnosti {0} a {1} nelze použít společně. Při instalaci ze souboru vráceného zpět odeberte {0}. V opačném případě odeberte {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">Kontrolují se aktualizované manifesty úloh.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
-        <source>Uninstalling workload pack {0} version {1}…</source>
-        <target state="translated">Probíhá odinstalace sady úloh {0} verze {1}...</target>
+        <source>Uninstalling workload pack {0} version {1}...</source>
+        <target state="needs-review-translation">Probíhá odinstalace sady úloh {0} verze {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -33,8 +43,13 @@
         <note />
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
-        <source>Downloading pack {0} version {1} to offline cache {2}…</source>
-        <target state="translated">Probíhá stahování balíčku {0} verze {1} do offline mezipaměti {2}…</target>
+        <source>Downloading pack {0} version {1} to offline cache {2}...</source>
+        <target state="needs-review-translation">Probíhá stahování balíčku {0} verze {1} do offline mezipaměti {2}…</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="translated">Z balíčku {0} se očekávalo jedno pásmo funkce manifestu a složka manifestu ve službě MSI.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
@@ -47,9 +62,9 @@
         <target state="translated">Nepovedlo se stáhnout balíček manifestu {0}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToGetPackageManifestUrl">
-        <source>Failed to resolve manifest package URL {0}.</source>
-        <target state="translated">Nepovedlo se přeložit adresu URL balíčku manifestu {0}.</target>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="translated">Nepovedlo se extrahovat informace z MSI: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
@@ -103,13 +118,18 @@
         <note />
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
-        <source>Installing workload manifest {0} version {1}…</source>
-        <target state="translated">Instaluje se manifest úlohy {0} verze {1}...</target>
+        <source>Installing workload manifest {0} version {1}...</source>
+        <target state="needs-review-translation">Instaluje se manifest úlohy {0} verze {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
         <source>Insufficient privilege to start the server.</source>
         <target state="translated">Nedostatečná oprávnění pro spuštění serveru</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">Chyba při analýze verze {1} pro ID manifestu úlohy {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
@@ -135,6 +155,16 @@
       <trans-unit id="ManifestDoesNotExist">
         <source>No manifest with ID {0} exists.</source>
         <target state="translated">Neexistuje žádný manifest s ID {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="translated">Instalační služba MSI manifestu se nenašla v balíčku NuGet {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageUrlNotResolved">
+        <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
+        <target state="translated">Balíček manifestu nebyl přeložen. Balíček manifestu nebo adresa URL pro {0} neexistuje.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
@@ -168,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">Počítač čeká na restartování. Instalace bude pokračovat, ale bude pravděpodobně nutné restartovat počítač.</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">Počítač čeká na restartování. Instalace bude pokračovat, ale bude pravděpodobně nutné restartovat počítač.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">
@@ -184,7 +214,7 @@
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
         <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
-        <target state="new">Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</target>
+        <target state="translated">Neplatná definice vrácení zpět. ID manifestu v definici vrácení zpět {0} neodpovídají nainstalovaným ID manifestu {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">
@@ -205,6 +235,11 @@
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="translated">Přeskočit aktualizaci manifestů úlohy</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="translated">Přeskočit ověření podpisu balíčků úloh a instalačních programů</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
@@ -279,7 +314,7 @@
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
         <source>Workload(s) '{0}' are already installed.</source>
-        <target state="needs-review-translation">Úloha {0} je už nainstalovaná.</target>
+        <target state="translated">{0} úlohy jsou už nainstalované.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadCacheDownloadFailed">
@@ -329,7 +364,7 @@
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
         <source>Workload updates are available. Run `dotnet workload list` for more information.</source>
-        <target state="translated">Jsou k dispozici aktualizace úloh. Pokud chcete získat další informace, spusťte seznam úloh dotnet.</target>
+        <target state="translated">Jsou k dispozici aktualizace úloh. Pokud chcete získat další informace, spusťte `dotnet workload list`.</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingPackInstallRecordMessage">

@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
 
   <PropertyGroup>
     <BaseIntermediateOutputPath>.net/obj</BaseIntermediateOutputPath>

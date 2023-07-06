@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -95,14 +95,24 @@ namespace Microsoft.DotNet.Installer.Windows
         protected string SdkDirectory => Path.GetFileName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
 
         /// <summary>
+        /// Gets whether signatures for workload packages and installers should be verified.
+        /// </summary>
+        protected bool VerifySignatures
+        {
+            get;
+        }
+
+        /// <summary>
         /// Creates a new <see cref="InstallerBase"/> instance using the specified elevation context and logger.
         /// </summary>
         /// <param name="elevationContext"></param>
         /// <param name="logger"></param>
-        protected InstallerBase(InstallElevationContextBase elevationContext, ISetupLogger logger)
+        /// <param name="verifySignatures"></param>
+        protected InstallerBase(InstallElevationContextBase elevationContext, ISetupLogger logger, bool verifySignatures)
         {
             ElevationContext = elevationContext;
             Log = logger;
+            VerifySignatures = verifySignatures;
         }
 
         /// <summary>

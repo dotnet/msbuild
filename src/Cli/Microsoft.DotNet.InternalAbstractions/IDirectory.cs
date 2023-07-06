@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 
@@ -24,5 +24,9 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
         void Delete(string path, bool recursive);
 
         void Move(string source, string destination);
+
+
+        /// <Summary>Returns a new directory created under the temp folder. Can be on the mock under test or the real temp file folder.</Summary>
+        string CreateTemporarySubdirectory();
     }
 }

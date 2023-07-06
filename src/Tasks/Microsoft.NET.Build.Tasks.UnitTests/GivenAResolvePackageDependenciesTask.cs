@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.Build.Framework;
@@ -21,9 +21,9 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
         [Theory]
         [MemberData(nameof(ItemCounts))]
-        public void ItRaisesLockFileToMSBuildItems(string projectName, int[] counts, bool emitLegacyAssetsFileItems)
+        public void ItRaisesLockFileToMSBuildItems(string projectName, int[] counts)
         {
-            var task = GetExecutedTaskFromPrefix(projectName, out _, emitLegacyAssetsFileItems);
+            var task = GetExecutedTaskFromPrefix(projectName, out _);
 
             task.PackageDefinitions .Count().Should().Be(counts[0]);
             task.FileDefinitions    .Count().Should().Be(counts[1]);
@@ -41,33 +41,13 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     new object[] {
                         "dotnet.new",
                         new int[] { 110, 2536, 1, 846, 73 },
-                        true
-                    },
-                    new object[] {
-                        "dotnet.new",
-                        new int[] { 110, 0, 0, 846, 0 },
-                        false
                     },
                     new object[] {
                         "simple.dependencies",
                         new int[] { 113, 2613, 1, 878, 94 },
-                        true
-                    },
-                    new object[] {
-                        "simple.dependencies",
-                        new int[] { 113, 0, 0, 878, 0 },
-                        false
                     },
                 };
             }
-        }
-
-        [Fact]
-        public void ItOmitsLegacyItemsByDefault()
-        {
-            var task = new ResolvePackageDependencies();
-
-            task.EmitLegacyAssetsFileItems.Should().Be(false);
         }
 
         [Theory]
@@ -584,8 +564,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 ProjectAssetsFile = lockFile.Path,
                 ProjectPath = null,
-                ProjectLanguage = projectLanguage, // set language
-                EmitLegacyAssetsFileItems = true
+                ProjectLanguage = projectLanguage // set language
             };
             task.Execute().Should().BeTrue();
 
@@ -669,8 +648,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 ProjectAssetsFile = lockFile.Path,
                 ProjectPath = null,
-                ProjectLanguage = projectLanguage, // set language
-                EmitLegacyAssetsFileItems = true
+                ProjectLanguage = projectLanguage // set language
             };
             task.Execute().Should().BeTrue();
 
@@ -832,26 +810,26 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         public void ItDoesNotThrowOnCrossTargetingWithTargetPlatforms()
         {
             string lockFileContent = CreateCrossTargetingLockFileSnippet(
-                targets: new string[] { CreateTarget(".NETFramework,Version=v4.6.1"), CreateTarget("net5.0"), CreateTarget("net5.0-windows7.0") },
-                originalTargetFrameworks: new string[] { "\"net461\"", "\"net5.0\"", "\"net5.0-windows\"" },
-                targetFrameworks: new string[] { CreateTargetFramework("net5.0"), CreateTargetFramework("net5.0-windows7.0", "net5.0-windows"), CreateTargetFramework("net461") });
+                targets: new string[] { CreateTarget(".NETFramework,Version=v4.6.2"), CreateTarget("net5.0"), CreateTarget("net5.0-windows7.0") },
+                originalTargetFrameworks: new string[] { "\"net462\"", "\"net5.0\"", "\"net5.0-windows\"" },
+                targetFrameworks: new string[] { CreateTargetFramework("net5.0"), CreateTargetFramework("net5.0-windows7.0", "net5.0-windows"), CreateTargetFramework("net462") });
 
             GetExecutedTaskFromContents(lockFileContent, out _); // Task should not fail on matching framework names
         }
 
-        private static ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix, out LockFile lockFile, bool emitLegacyAssetsFileItems = true, string target = null)
+        private static ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix, out LockFile lockFile, string target = null)
         {
             lockFile = TestLockFiles.GetLockFile(lockFilePrefix);
-            return GetExecutedTask(lockFile, emitLegacyAssetsFileItems, target);
+            return GetExecutedTask(lockFile, target);
         }
 
-        private static ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents, out LockFile lockFile, bool emitLegacyAssetsFileItems = true, string target = null)
+        private static ResolvePackageDependencies GetExecutedTaskFromContents(string lockFileContents, out LockFile lockFile, string target = null)
         {
             lockFile = TestLockFiles.CreateLockFile(lockFileContents);
-            return GetExecutedTask(lockFile, emitLegacyAssetsFileItems, target);
+            return GetExecutedTask(lockFile, target);
         }
 
-        private static ResolvePackageDependencies GetExecutedTask(LockFile lockFile, bool emitLegacyAssetsFileItems, string target)
+        private static ResolvePackageDependencies GetExecutedTask(LockFile lockFile, string target)
         {
             var resolver = new MockPackageResolver(_packageRoot);
 
@@ -860,7 +838,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 ProjectAssetsFile = lockFile.Path,
                 ProjectPath = _projectPath,
                 ProjectLanguage = null,
-                EmitLegacyAssetsFileItems = emitLegacyAssetsFileItems,
                 TargetFramework = target
             };
 

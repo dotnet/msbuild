@@ -1,0 +1,11 @@
+﻿Uno.ProjectTemplates.Dotnet
+   Package version: 4.8.0-dev.604
+   Reserved: True
+   Details: Package Description
+   Source Feed: NuGet.org [https://api.nuget.org/v3/index.json]
+   Authors:
+      nventive
+   Owners:
+      https://nuget.org/profiles/unoplatform
+   License Metadata:
+      Repository Url: https://github.com/unoplatform/uno

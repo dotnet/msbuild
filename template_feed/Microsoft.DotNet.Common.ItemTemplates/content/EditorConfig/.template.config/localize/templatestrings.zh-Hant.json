@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "EditorConfig 檔案",
+  "description": "建立 .editorconfig 檔案，以設定程式碼樣式喜好設定。",
+  "symbols/Empty/displayName": "空白",
+  "symbols/Empty/description": "建立空白的 editorconfig，而非 .NET 的預設值。"
+}

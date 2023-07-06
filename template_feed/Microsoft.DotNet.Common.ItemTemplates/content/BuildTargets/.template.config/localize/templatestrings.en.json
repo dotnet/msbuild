@@ -1,0 +1,7 @@
+{
+  "author": "Microsoft",
+  "name": "MSBuild Directory.Build.targets file",
+  "description": "An empty Directory.Build.targets file which can be used to specify MSBuild tasks and targets for an entire folder",
+  "symbols/inherit/displayName": "Inherit",
+  "symbols/inherit/description": "If true, adds an Import for the closest Directory.Build.targets in the file system directory hierarchy. Directory.Build.targets don't inherit by default, so doing this allows you to build up a set of customizations folder-by-folder."
+}

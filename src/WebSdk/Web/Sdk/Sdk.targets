@@ -11,23 +11,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!-- We can't add it here because the OutputPath and other msbuild properties are not evaluated.-->
-  <!--<Import Sdk="Microsoft.NET.Sdk.Publish" Project="ImportPublishProfile.targets" />-->
+  <!-- Imports the .NET, Razor, and other web related SDKs on projects that target server scenarios. -->
+  <Import Project="..\Targets\Sdk.Server.targets" Condition="'$([MSBuild]::GetTargetPlatformIdentifier($(TargetFramework)))' != 'browser'" />
 
-  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
-
-  <PropertyGroup>
-    <!--
-      Configure the Razor SDK to add support for the MVC configuration unless the project configured it or the user opted out of the implicit reference to
-      Microsoft.AspNetCore.App. This needs to happen after the .NET SDK has evaluated TFMs.
-     -->
-    <AddRazorSupportForMvc Condition="'$(DisableImplicitFrameworkReferences)' != 'true' And '$(AddRazorSupportForMvc)' == '' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">true</AddRazorSupportForMvc>
-  </PropertyGroup>
-
-  <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.targets" />
-
-  <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="Sdk.targets" />
-
-  <Import Sdk="Microsoft.NET.Sdk.Publish" Project="Sdk.targets" />
+  <!-- Delegates to the Blazor Webassembly SDK on projects that target browser scenarios -->
+  <Import Project="..\Targets\Sdk.Browser.targets" Condition="'$([MSBuild]::GetTargetPlatformIdentifier($(TargetFramework)))' == 'browser'" />
 
 </Project>

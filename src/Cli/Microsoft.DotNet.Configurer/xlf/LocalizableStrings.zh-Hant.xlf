@@ -7,19 +7,35 @@
         <target state="translated">無法判定該使用者的主目錄。請設定 '{0}' 環境變數，指定要使用的目錄。</target>
         <note />
       </trans-unit>
-      <trans-unit id="FirstTimeMessageMoreInformation">
+      <trans-unit id="FirstTimeMessageAspNetCertificate">
         <source>----------------
 Installed an ASP.NET Core HTTPS development certificate.
-To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only).
-Learn about HTTPS: https://aka.ms/dotnet-https
-----------------
+To trust the certificate, run 'dotnet dev-certs https --trust'
+Learn about HTTPS: https://aka.ms/dotnet-https</source>
+        <target state="new">----------------
+Installed an ASP.NET Core HTTPS development certificate.
+To trust the certificate, run 'dotnet dev-certs https --trust'
+Learn about HTTPS: https://aka.ms/dotnet-https</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FirstTimeMessageAspNetCertificateLinux">
+        <source>----------------
+Installed an ASP.NET Core HTTPS development certificate.
+To trust the certificate, view the instructions: https://aka.ms/dotnet-https-linux</source>
+        <target state="new">----------------
+Installed an ASP.NET Core HTTPS development certificate.
+To trust the certificate, view the instructions: https://aka.ms/dotnet-https-linux</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FirstTimeMessageMoreInformation">
+        <source>----------------
 Write your first app: https://aka.ms/dotnet-hello-world
 Find out what's new: https://aka.ms/dotnet-whats-new
 Explore documentation: https://aka.ms/dotnet-docs
 Report issues and find source on GitHub: https://github.com/dotnet/core
 Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
 --------------------------------------------------------------------------------------</source>
-        <target state="translated">----------------
+        <target state="needs-review-translation">----------------
 已安裝 ASP.NET Core HTTPS 開發憑證。
 若要信任憑證，請執行 'dotnet dev-certs https --trust' (僅限 Windows 與 macOS )。
 深入了解 HTTPS: https://aka.ms/dotnet-https

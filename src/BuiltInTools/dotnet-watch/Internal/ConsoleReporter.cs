@@ -1,8 +1,13 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.Tools.Internal
 {
@@ -10,31 +15,37 @@ namespace Microsoft.Extensions.Tools.Internal
     /// This API supports infrastructure and is not intended to be used
     /// directly from your code. This API may change or be removed in future releases.
     /// </summary>
-    public class ConsoleReporter : IReporter
+    internal sealed class ConsoleReporter : IReporter
     {
         private readonly object _writeLock = new object();
 
         public ConsoleReporter(IConsole console)
-            : this(console, verbose: false, quiet: false)
+            : this(console, verbose: false, quiet: false, suppressEmojis: false)
         { }
 
-        public ConsoleReporter(IConsole console, bool verbose, bool quiet)
+        public ConsoleReporter(IConsole console, bool verbose, bool quiet, bool suppressEmojis)
         {
             Ensure.NotNull(console, nameof(console));
 
             Console = console;
             IsVerbose = verbose;
             IsQuiet = quiet;
+            SuppressEmojis = suppressEmojis;
         }
 
-        protected IConsole Console { get; }
+        private IConsole Console { get; }
         public bool IsVerbose { get; set; }
         public bool IsQuiet { get; set; }
+        public bool SuppressEmojis { get; set; }
 
-        protected virtual void WriteLine(TextWriter writer, string message, ConsoleColor? color)
+        private void WriteLine(TextWriter writer, string message, ConsoleColor? color, string emoji)
         {
             lock (_writeLock)
             {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                writer.Write($"dotnet watch {(SuppressEmojis ? ":" : emoji)} ");
+                Console.ResetColor();
+
                 if (color.HasValue)
                 {
                     Console.ForegroundColor = color.Value;
@@ -49,28 +60,34 @@ namespace Microsoft.Extensions.Tools.Internal
             }
         }
 
-        public virtual void Error(string message)
-            => WriteLine(Console.Error, message, ConsoleColor.Red);
-        public virtual void Warn(string message)
-            => WriteLine(Console.Out, message, ConsoleColor.Yellow);
+        public void Error(string message, string emoji = "❌")
+        {
+            WriteLine(Console.Error, message, ConsoleColor.Red, emoji);
+        }
 
-        public virtual void Output(string message)
+        public void Warn(string message, string emoji = "⌚")
+        {
+            WriteLine(Console.Out, message, ConsoleColor.Yellow, emoji);
+        }
+
+        public void Output(string message, string emoji = "⌚")
         {
             if (IsQuiet)
             {
                 return;
             }
-            WriteLine(Console.Out, message, color: null);
+
+            WriteLine(Console.Out, message, color: null, emoji);
         }
 
-        public virtual void Verbose(string message)
+        public void Verbose(string message, string emoji = "⌚")
         {
             if (!IsVerbose)
             {
                 return;
             }
 
-            WriteLine(Console.Out, message, ConsoleColor.DarkGray);
+            WriteLine(Console.Out, message, ConsoleColor.DarkGray, emoji);
         }
     }
 }

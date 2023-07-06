@@ -1,7 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Cli;
@@ -14,27 +15,50 @@ namespace Microsoft.DotNet.Tools.Sln.List
     internal class ListProjectsInSolutionCommand : CommandBase
     {
         private readonly string _fileOrDirectory;
+        private readonly bool _displaySolutionFolders;
 
         public ListProjectsInSolutionCommand(
             ParseResult parseResult) : base(parseResult)
         {
-            _fileOrDirectory = parseResult.GetValueForArgument(SlnCommandParser.SlnArgument);
+            _fileOrDirectory = parseResult.GetValue(SlnCommandParser.SlnArgument);
+            _displaySolutionFolders = parseResult.GetValue(SlnListParser.SolutionFolderOption);
         }
 
         public override int Execute()
         {
-            SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
-            if (slnFile.Projects.Count == 0)
+            var slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
+
+            string[] paths;
+
+            if (_displaySolutionFolders)
+            {
+                paths = slnFile.Projects
+                    .GetProjectsByType(ProjectTypeGuids.SolutionFolderGuid)
+                    .Select(folder => folder.GetFullSolutionFolderPath())
+                    .ToArray();
+            }
+            else
+            {
+                paths = slnFile.Projects
+                    .GetProjectsNotOfType(ProjectTypeGuids.SolutionFolderGuid)
+                    .Select(project => project.FilePath)
+                    .ToArray();
+            }
+
+            if (paths.Length == 0)
             {
                 Reporter.Output.WriteLine(CommonLocalizableStrings.NoProjectsFound);
             }
             else
             {
-                Reporter.Output.WriteLine($"{LocalizableStrings.ProjectsHeader}");
-                Reporter.Output.WriteLine(new string('-', LocalizableStrings.ProjectsHeader.Length));
-                foreach (var slnProject in slnFile.Projects.Where(p => p.TypeGuid != ProjectTypeGuids.SolutionFolderGuid))
+                Array.Sort(paths);
+
+                string header = _displaySolutionFolders ? LocalizableStrings.SolutionFolderHeader : LocalizableStrings.ProjectsHeader;
+                Reporter.Output.WriteLine($"{header}");
+                Reporter.Output.WriteLine(new string('-', header.Length));
+                foreach (string slnProject in paths)
                 {
-                    Reporter.Output.WriteLine(slnProject.FilePath);
+                    Reporter.Output.WriteLine(slnProject);
                 }
             }
             return 0;

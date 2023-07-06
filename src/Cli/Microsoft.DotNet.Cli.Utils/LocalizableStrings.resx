@@ -149,7 +149,7 @@ Possible reasons for this include:
     <value>.NET SDK</value>
   </data>
   <data name="DotNetSdkInfoLabel" xml:space="preserve">
-    <value>.NET SDK (reflecting any global.json):</value>
+    <value>.NET SDK:</value>
   </data>
   <data name="DotNetRuntimeInfoLabel" xml:space="preserve">
     <value>Runtime Environment:</value>
@@ -182,5 +182,8 @@ dotnet tool install --global {1}</value>
   </data>
   <data name="DotnetCliHomeUsed" xml:space="preserve">
     <value>Using home directory '{0}' set by the '{1}' environment variable.</value>
+  </data>
+  <data name="DotnetWorkloadInfoLabel" xml:space="preserve">
+    <value>.NET workloads installed:</value>
   </data>
 </root>

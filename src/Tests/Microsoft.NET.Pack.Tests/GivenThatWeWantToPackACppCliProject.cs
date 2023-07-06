@@ -1,8 +1,9 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
@@ -18,19 +19,41 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/11008")]
+        [FullMSBuildOnlyFact]
         public void It_cannot_pack_the_cppcliproject()
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("NetCoreCsharpAppReferenceCppCliLib")
-                .WithSource();
+                .WithSource()
+                .WithProjectChanges((projectPath, project) => AddPackageReference(projectPath, project, "NewtonSoft.Json", "13.0.1"))
+                .WithProjectChanges((projectPath, project) => AddBuildProperty(projectPath, project, "EnableManagedpackageReferenceSupport", "true"));
 
             new PackCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest", "NETCoreCppCliTest.vcxproj"))
-                .Execute("-p:Platform=x64")
+                .Execute("-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true")
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining(Strings.NoSupportCppPackDotnetCore);
+                .HaveStdOutContaining("MSB4057"); // We don't get NETSDK1118 when enabling PackageReference support but can't resolve the apphost without it
+        }
+        private void AddPackageReference(string projectPath, XDocument project, string package, string version)
+        {
+            if (Path.GetExtension(projectPath) == ".vcxproj")
+            {
+                XNamespace ns = project.Root.Name.Namespace;
+                XElement itemGroup = project.Root.Descendants(ns + "ItemGroup").First();
+                itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", package),
+                                                    new XAttribute("Version", version)));
+
+            }
+        }
+        private void AddBuildProperty(string projectPath, XDocument project, string property, string value)
+        {
+            if (Path.GetExtension(projectPath) == ".vcxproj")
+            {
+                XNamespace ns = project.Root.Name.Namespace;
+                XElement propertyGroup = project.Root.Descendants(ns + "PropertyGroup").First();
+                propertyGroup.Add(new XElement(ns + $"{property}", value));
+            }
         }
     }
 }

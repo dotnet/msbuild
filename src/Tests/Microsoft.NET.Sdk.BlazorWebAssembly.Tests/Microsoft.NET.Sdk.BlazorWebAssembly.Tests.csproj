@@ -37,6 +37,8 @@
 
   <ItemGroup>
     <Compile Include="..\Microsoft.NET.Sdk.Razor.Tests\AspNetSdkBaselineTest.cs" Link="AspNetSdkBaselineTest.cs" />
+    <Compile Include="..\Microsoft.NET.Sdk.Razor.Tests\StaticWebAssetsBaselineFactory.cs" Link="StaticWebAssetsBaselineFactory.cs" />
+    <Compile Include="..\Microsoft.NET.Sdk.Razor.Tests\StaticWebAssetsBaselineComparer.cs" Link="StaticWebAssetsBaselineComparer.cs" />
   </ItemGroup>
   
   <ItemGroup>
@@ -49,6 +51,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\BlazorWasmSdk\Tasks\Microsoft.NET.Sdk.BlazorWebAssembly.Tasks.csproj" SkipGetTargetFrameworkProperties="true" />
     <ProjectReference Include="..\..\RazorSdk\Tasks\Microsoft.NET.Sdk.Razor.Tasks.csproj" />
+    <ProjectReference Include="..\..\StaticWebAssetsSdk\Tasks\Microsoft.NET.Sdk.StaticWebAssets.Tasks.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
 

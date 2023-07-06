@@ -1,0 +1,23 @@
+﻿/*Things*/
+a {
+  /*#if (defaultTrue) */
+  DefaultTrueIncluded: 0;
+  /*#else*/
+  DefaultTrueExcluded: 0;
+  /*#endif*/
+  /*#if (defaultFalse) */
+  DefaultFalseExcluded: 0;
+  /*#else*/
+  DefaultFalseIncluded: 0;
+  /*#endif*/
+/*-:cnd:noEmit*/
+  /*#if (DEBUG1) */
+  InsideUnknownDirectiveNoEmit: 0;
+  /*#endif*/
+/*+:cnd:noEmit*/
+/*-:cnd*/
+  /*#if (DEBUG2) */
+  InsideUnknownDirectiveEmit: 0;
+  /*#endif*/
+/*+:cnd*/
+}

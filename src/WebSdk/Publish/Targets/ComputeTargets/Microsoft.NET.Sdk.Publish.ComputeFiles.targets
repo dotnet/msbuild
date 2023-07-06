@@ -30,7 +30,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
       <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(_IsAspNetCoreProject)' == 'true' ">AspNetCore</_PublishProjectType>
       <_PublishProjectType Condition="'$(_PublishProjectType)' == '' and '$(WebJobName)' != '' and '$(WebJobType)' != ''">WebJob</_PublishProjectType>
-      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' ">UnKnown</_PublishProjectType>
+      <_PublishProjectType Condition="'$(_PublishProjectType)' == '' ">Console</_PublishProjectType>
     </PropertyGroup>
   </Target>
 

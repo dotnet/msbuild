@@ -1,0 +1,57 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "DefaultIfOptionWithoutValue",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.DefaultIfOptionWithoutValue",
+  "precedence": "100",
+  "identity": "TestAssets.DefaultIfOptionWithoutValue",
+  "shortName": "TestAssets.DefaultIfOptionWithoutValue",
+  "sourceName": "Company.Web.Application1",
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "exclude": "StringOtherFile.cs",
+          "condition": "(MyString != 'NoValueDefaultString')"
+        },
+        {
+          "exclude": "ChoiceOtherFile.cs",
+          "condition": "(MyChoice != 'NoValueDefaultChoice')"
+        }
+      ]
+    }
+  ],
+  "symbols": {
+    "MyString": {
+      "type": "parameter",
+      "datatype": "string",
+      "description": "Test string",
+      "defaultValue": "RegularDefaultString",
+      "replaces": "OriginalString",
+      "DefaultIfOptionWithoutValue": "NoValueDefaultString"
+    },
+    "MyChoice": {
+      "type": "parameter",
+      "datatype": "choice",
+      "description": "Test choice",
+      "defaultValue": "RegularDefaultChoice",
+      "DefaultIfOptionWithoutValue": "NoValueDefaultChoice",
+      "choices": [
+        {
+          "choice": "RegularDefaultChoice",
+          "description": "Choice 1"
+        },
+        {
+          "choice": "NoValueDefaultChoice",
+          "description": "Choice 2"
+        },
+        {
+          "choice": "OtherChoice",
+          "description": "Choice 3"
+        }
+      ],
+      "replaces": "OriginalChoice"
+    }
+  }
+}

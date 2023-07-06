@@ -52,6 +52,11 @@
         <target state="translated">.NET {0} 结束支持。</target>
         <note />
       </trans-unit>
+      <trans-unit id="VersionCheckFailure">
+        <source>No version found to check if this is up to date. Please check for updates manually.</source>
+        <target state="translated">找不到任何版本来检查此是否为最新。请手动检查更新。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReleasesLibraryFailed">
         <source>Unable to get releases information: {0}</source>
         <target state="translated">无法获取发布信息: {0}</target>

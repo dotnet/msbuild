@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.IO;
@@ -145,7 +145,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ReferencePackageDllDirectly",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -199,7 +199,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "AspNetCoreProject",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -227,13 +227,13 @@ namespace Microsoft.NET.Build.Tests
             outputDirectory.Should().NotHaveFile("Microsoft.Extensions.DependencyInjection.Abstractions.dll");
         }
 
-        [Fact]
+        [CoreMSBuildOnlyFact]
         public void AnalyzersAreConflictResolved()
         {
             var testProject = new TestProject()
             {
                 Name = nameof(AnalyzersAreConflictResolved),
-                TargetFrameworks = "net5.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
             // add the package referenced analyzers
@@ -248,6 +248,14 @@ namespace Microsoft.NET.Build.Tests
                     project.Root.Add(itemGroup);
                     itemGroup.Add(new XElement(ns + "EnableNETAnalyzers", "true"));
                     itemGroup.Add(new XElement(ns + "TreatWarningsAsErrors", "true"));
+                    
+                    // Don't error when generators/analyzers can't be loaded.
+                    // This can occur when running tests against FullFramework MSBuild
+                    // if the build machine has an MSBuild install with an older version of Roslyn
+                    // than the generators in the SDK reference. We aren't testing the generators here
+                    // and this failure will occur more clearly in other places when it's
+                    // actually an important failure, so don't error out here.
+                    itemGroup.Add(new XElement(ns + "WarningsNotAsErrors", "CS9057"));
                 });
 
             var buildCommand = new BuildCommand(testAsset);

@@ -1,8 +1,9 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -35,7 +36,14 @@ namespace Microsoft.DotNet.Tools.Tool.List
 
         public override int Execute()
         {
-            var toolPathOption = _parseResult.GetValueForOption(ToolListCommandParser.ToolPathOption);
+            var toolPathOption = _parseResult.GetValue(ToolListCommandParser.ToolPathOption);
+            var packageIdArgument = _parseResult.GetValue(ToolListCommandParser.PackageIdArgument);
+
+            PackageId? packageId = null;
+            if (!string.IsNullOrWhiteSpace(packageIdArgument))
+            {
+                packageId = new PackageId(packageIdArgument);
+            }
 
             DirectoryPath? toolPath = null;
             if (!string.IsNullOrWhiteSpace(toolPathOption))
@@ -63,16 +71,27 @@ namespace Microsoft.DotNet.Tools.Tool.List
                 LocalizableStrings.CommandsColumn,
                 p => string.Join(CommandDelimiter, p.Commands.Select(c => c.Name)));
 
-            table.PrintRows(GetPackages(toolPath), l => _reporter.WriteLine(l));
+            var packageEnumerable = GetPackages(toolPath, packageId);
+            table.PrintRows(packageEnumerable, l => _reporter.WriteLine(l));
+            if (packageId.HasValue && !packageEnumerable.Any())
+            {
+                // return 1 if target package was not found
+                return 1;
+            }
             return 0;
         }
 
-        private IEnumerable<IToolPackage> GetPackages(DirectoryPath? toolPath)
+        private IEnumerable<IToolPackage> GetPackages(DirectoryPath? toolPath, PackageId? packageId)
         {
             return _createToolPackageStore(toolPath).EnumeratePackages()
-                .Where(PackageHasCommands)
+                .Where((p) => PackageHasCommands(p) && PackageIdMatches(p, packageId))
                 .OrderBy(p => p.Id)
                 .ToArray();
+        }
+
+        internal static bool PackageIdMatches(IToolPackage package, PackageId? packageId)
+        {
+            return !packageId.HasValue || package.Id.Equals(packageId);
         }
 
         private bool PackageHasCommands(IToolPackage package)

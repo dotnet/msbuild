@@ -1,0 +1,57 @@
+{
+    "author": "Test Asset",
+    "classifications": [ "Test Asset" ],
+    "name": "TestAssets.PostActions.RunScript.Basic",
+    "generatorVersions": "[1.0.0.0-*)",
+    "groupIdentity": "TestAssets.PostActions.RunScript.Basic",
+    "precedence": "100",
+    "identity": "TestAssets.PostActions.RunScript.Basic",
+    "shortName": "TestAssets.PostActions.RunScript.Basic",
+    "sourceName": "Basic",
+    "postActions": [
+        {
+            "condition": "(OS != \"Windows_NT\")",
+            "description": "Make scripts executable",
+            "manualInstructions": [
+                {
+                    "text": "Run 'chmod +x *.sh'"
+                }
+            ],
+            "actionId": "cb9a6cf3-4f5c-4860-b9d2-03a574959774",
+            "args": {
+                "+x": "*.sh"
+            },
+            "continueOnError": false
+        },
+        {
+            "condition": "(OS != \"Windows_NT\")",
+            "actionId": "3A7C4B45-1F5D-4A30-959A-51B88E82B5D2",
+            "args": {
+                "executable": "setup.sh",
+                "redirectStandardOutput": false
+            },
+            "manualInstructions": [
+                {
+                    "text": "Run 'setup.sh'"
+                }
+            ],
+            "continueOnError": false,
+            "description ": "setups the project by calling setup.sh"
+        },
+        {
+            "condition": "(OS == \"Windows_NT\")",
+            "actionId": "3A7C4B45-1F5D-4A30-959A-51B88E82B5D2",
+            "args": {
+                "executable": "setup.cmd",
+                "redirectStandardOutput": false
+            },
+            "manualInstructions": [
+                {
+                    "text": "Run 'setup.cmd'"
+                }
+            ],
+            "continueOnError": false,
+            "description ": "setups the project by calling setup.cmd"
+        }
+    ]
+}

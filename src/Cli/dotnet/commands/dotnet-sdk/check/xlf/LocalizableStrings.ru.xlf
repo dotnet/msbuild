@@ -52,6 +52,11 @@
         <target state="translated">.NET {0} не поддерживается.</target>
         <note />
       </trans-unit>
+      <trans-unit id="VersionCheckFailure">
+        <source>No version found to check if this is up to date. Please check for updates manually.</source>
+        <target state="translated">Не найдена версия для проверки ее актуальности. Проверьте наличие обновлений вручную.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReleasesLibraryFailed">
         <source>Unable to get releases information: {0}</source>
         <target state="translated">Не удалось получить сведения о выпусках: {0}</target>

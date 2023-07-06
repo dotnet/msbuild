@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using Microsoft.NET.TestFramework;
@@ -16,7 +16,7 @@ namespace Microsoft.NET.Pack.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.1.0.60101")]
         public void It_packs_nondesktop_library_successfully_on_all_platforms()
         {
             var testAsset = _testAssetsManager
@@ -39,7 +39,6 @@ namespace Microsoft.NET.Pack.Tests
                 $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp.deps.json",
                 $"{ToolsetInfo.CurrentTargetFramework}/Newtonsoft.Json.dll",
                 $"{ToolsetInfo.CurrentTargetFramework}/NetStandardAndNetCoreApp{EnvironmentInfo.ExecutableExtension}",
-                $"{ToolsetInfo.CurrentTargetFramework}/ref/NetStandardAndNetCoreApp.dll",
                 "netstandard1.5/NetStandardAndNetCoreApp.dll",
                 "netstandard1.5/NetStandardAndNetCoreApp.pdb",
                 "netstandard1.5/NetStandardAndNetCoreApp.deps.json"

@@ -1,24 +1,37 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
+using System.Xml.Linq;
+using FluentAssertions;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools;
+using Microsoft.Extensions.DependencyModel;
+using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
-using System.Xml.Linq;
-using System.Runtime.CompilerServices;
-using System;
-using Microsoft.Extensions.DependencyModel;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
+
+
+
     public class GivenThatWeWantToPublishAHelloWorldProject : SdkTest
     {
+        private const string PublishRelease = nameof(PublishRelease);
+        private const string PackRelease = nameof(PackRelease);
+
         public GivenThatWeWantToPublishAHelloWorldProject(ITestOutputHelper log) : base(log)
         {
         }
@@ -26,7 +39,7 @@ namespace Microsoft.NET.Publish.Tests
         [Theory]
         [InlineData("netcoreapp1.1")]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_publishes_portable_apps_to_the_publish_folder_and_the_app_should_run(string targetFramework)
         {
             if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
@@ -45,7 +58,7 @@ namespace Microsoft.NET.Publish.Tests
             publishResult.Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(targetFramework);
-            var outputDirectory = publishDirectory.Parent;
+            var outputDirectory = new BuildCommand(helloWorldAsset).GetOutputDirectory(targetFramework);
 
             var filesPublished = new[] {
                 "HelloWorld.dll",
@@ -68,7 +81,7 @@ namespace Microsoft.NET.Publish.Tests
         [Theory]
         [InlineData("netcoreapp1.1")]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_publishes_self_contained_apps_to_the_publish_folder_and_the_app_should_run(string targetFramework)
         {
             if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
@@ -84,14 +97,14 @@ namespace Microsoft.NET.Publish.Tests
                 .WithTargetFramework(targetFramework);
 
             var publishCommand = new PublishCommand(helloWorldAsset);
-            var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:CopyLocalLockFileAssemblies=true");
+            var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true", "/p:CopyLocalLockFileAssemblies=true");
 
             publishResult.Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(
                 targetFramework: targetFramework,
                 runtimeIdentifier: rid);
-            var outputDirectory = publishDirectory.Parent;
+            var outputDirectory = new BuildCommand(helloWorldAsset).GetOutputDirectory(targetFramework, runtimeIdentifier: rid);
             var selfContainedExecutable = $"HelloWorld{Constants.ExeSuffix}";
 
             var filesPublished = new[] {
@@ -129,7 +142,7 @@ namespace Microsoft.NET.Publish.Tests
         [Fact]
         public void Publish_self_contained_app_with_dot_in_the_name()
         {
-            var targetFramework = "netcoreapp2.1";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             TestProject testProject = new TestProject()
@@ -139,17 +152,17 @@ namespace Microsoft.NET.Publish.Tests
                 RuntimeIdentifier = rid,
                 IsExe = true,
             };
-            
+
             testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "true";
-            testProject.SourceFiles["Program.cs"] = @"
+            testProject.SourceFiles["Program.cs"] = $@"
 using System;
 public static class Program
-{
+{{
     public static void Main()
-    {
-        Console.WriteLine(""Hello from a netcoreapp2.1!"");
-    }
-}
+    {{
+        Console.WriteLine(""Hello from a {ToolsetInfo.CurrentTargetFramework}!"");
+    }}
+}}
 ";
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
@@ -162,13 +175,13 @@ public static class Program
 
             publishDirectory.Should().HaveFile($"Hello.World{Constants.ExeSuffix}");
         }
-		
+
         [Theory]
         [InlineData("win-arm")]
         [InlineData("win8-arm")]
         [InlineData("win81-arm")]
-        [InlineData("win10-arm")]
-        [InlineData("win10-arm64")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm")]
+        [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm64")]
         public void Publish_standalone_post_netcoreapp2_arm_app(string runtimeIdentifier)
         {
             // Tests for existence of expected files when publishing an ARM project
@@ -206,14 +219,14 @@ public static class Program
                 targetFramework: targetFramework,
                 runtimeIdentifier: runtimeIdentifier);
             var outputDirectory = publishDirectory.Parent;
-            
+
             // The name of the self contained executable depends on the runtime identifier.
             // For Windows family ARM publishing, it'll always be Hello.exe.
             // We shouldn't use "Constants.ExeSuffix" for the suffix here because that changes
             // depending on the RuntimeInformation
             var selfContainedExecutable = "Hello.exe";
 
-            var filesPublished = new [] {
+            var filesPublished = new[] {
                 selfContainedExecutable,
                 "Hello.dll",
                 "Hello.pdb",
@@ -423,6 +436,280 @@ public static class Program
             publishResult.Should().Fail();
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_publishes_on_release_if_PublishRelease_property_set(bool optedOut)
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", $"{optedOut}")
+               .WithSource();
+
+            File.WriteAllText(Path.Combine(helloWorldAsset.Path, "Directory.Build.props"), "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
+
+            new DotnetPublishCommand(Log, helloWorldAsset.TestRoot)
+                .WithEnvironmentVariable(EnvironmentVariableNames.DISABLE_PUBLISH_AND_PACK_RELEASE, optedOut.ToString())
+                .Execute()
+                .Should()
+                .Pass();
+
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", optedOut ? "Debug" : "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            Assert.True(File.Exists(expectedAssetPath));
+        }
+
+        [Fact]
+        public void It_respects_CLI_PublishRelease_over_project_PublishRelease_value()
+        {
+            var helloWorldAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + PublishRelease, "true"));
+                });
+
+            new DotnetPublishCommand(Log, helloWorldAsset.TestRoot)
+                .Execute("-p:PublishRelease=false")
+                .Should()
+                .Pass();
+
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            Assert.True(File.Exists(expectedAssetPath));
+            var releaseAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.
+        }
+
+        [Fact]
+        public void It_publishes_on_release_if_PublishRelease_property_set_in_sln()
+        {
+
+            var slnDir = _testAssetsManager
+               .CopyTestAsset("TestAppWithSlnUsingPublishRelease")
+               .WithSource()
+               .Path;
+
+            new DotnetCommand(Log)
+                .WithWorkingDirectory(slnDir)
+                .Execute("dotnet", "publish")
+                .Should()
+                .Pass();
+
+            var expectedAssetPath = Path.Combine(slnDir, "App", "bin", "Release", ToolsetInfo.CurrentTargetFramework, "publish", "App.dll");
+            Assert.True(File.Exists(expectedAssetPath));
+
+        }
+
+        [Fact]
+        public void It_passes_using_PublishRelease_with_conflicting_capitalization_but_same_values_across_solution_projects()
+        {
+            var slnDir = _testAssetsManager
+               .CopyTestAsset("TestAppWithSlnUsingPublishReleaseConflictingCasing")
+               .WithSource()
+               .Path;
+
+            new DotnetCommand(Log)
+                .WithWorkingDirectory(slnDir)
+                .Execute("dotnet", "publish")
+                .Should()
+                .Pass();
+
+            var expectedAssetPath = Path.Combine(slnDir, "App", "bin", "Release", ToolsetInfo.CurrentTargetFramework, "publish", "App.dll");
+            Assert.True(File.Exists(expectedAssetPath));
+        }
+
+        [Fact]
+        public void It_no_longer_warns_if_PublishRelease_set_on_sln_but_env_var_not_used()
+        {
+            var slnDir = _testAssetsManager
+               .CopyTestAsset("TestAppWithSlnUsingPublishRelease")
+               .WithSource()
+               .Path;
+
+            new DotnetPublishCommand(Log)
+                .WithWorkingDirectory(slnDir)
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("NETSDK1190");
+        }
+
+        [Fact]
+        public void It_publishes_correctly_in_PublishRelease_evaluation_despite_option_forwarded_format()
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", $"PublishesWithProperyFormats")
+               .WithSource()
+               .WithTargetFramework(ToolsetInfo.CurrentTargetFramework);
+
+            new BuildCommand(helloWorldAsset)
+           .Execute()
+           .Should()
+           .Pass();
+
+            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.TestRoot);
+
+            publishCommand
+            .Execute("-f", ToolsetInfo.CurrentTargetFramework)
+            .Should()
+            .Pass().And.NotHaveStdErr();
+        }
+
+        [Fact]
+        public void It_publishes_on_release_if_PublishRelease_property_set_in_csproj()
+        {
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld")
+               .WithSource()
+               .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
+               .WithProjectChanges(project =>
+               {
+                   var ns = project.Root.Name.Namespace;
+                   var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                   propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
+               });
+
+            new DotnetPublishCommand(Log, helloWorldAsset.TestRoot)
+            .Execute()
+            .Should()
+            .Pass();
+
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "HelloWorld.dll");
+            Assert.True(File.Exists(expectedAssetPath));
+        }
+
+        [Theory]
+        [InlineData("-p:Configuration=Debug")]
+        [InlineData("-property:Configuration=Debug")]
+        [InlineData("--property:Configuration=Debug")]
+        [InlineData("/p:Configuration=Debug")]
+        [InlineData("-p:_IsPublishing=true;Configuration=Debug")]
+        [InlineData("-p:_IsPublishing=true;Configuration=Debug;")]
+        [InlineData("/property:Configuration=Debug")]
+        public void PublishRelease_does_not_override_Configuration_property_across_formats(string configOpt)
+        {
+            string tfm = "net7.0";
+            var helloWorldAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorld", identifier: configOpt)
+               .WithSource()
+               .WithTargetFramework(tfm)
+               .WithProjectChanges(project =>
+               {
+                   var ns = project.Root.Name.Namespace;
+                   var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                   propertyGroup.Add(new XElement(ns + "PublishRelease", "true"));
+               });
+
+            new DotnetPublishCommand(Log, helloWorldAsset.TestRoot)
+                .Execute(configOpt)
+                .Should()
+                .Pass().And.NotHaveStdErr();
+
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Debug", tfm, "HelloWorld.dll");
+            Assert.True(File.Exists(expectedAssetPath));
+            var releaseAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", tfm, "HelloWorld.dll");
+            Assert.False(File.Exists(releaseAssetPath)); // build will produce a debug asset, need to make sure this doesn't exist either.
+        }
+
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("=")]
+        public void PublishRelease_does_recognize_undefined_property(string propertySuffix)
+        {
+            string tfm = ToolsetInfo.CurrentTargetFramework;
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = tfm
+            };
+
+            testProject.RecordProperties("SelfContained");
+            testProject.RecordProperties("PublishAot");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            new DotnetPublishCommand(Log)
+                .WithWorkingDirectory(Path.Combine(testAsset.TestRoot, MethodBase.GetCurrentMethod().Name))
+                .Execute(("-p:SelfContained" + propertySuffix))
+                .Should()
+                .Pass();
+
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, configuration: "Release", targetFramework: tfm);
+
+            Assert.Equal("", properties["SelfContained"]);
+            Assert.Equal("", properties["PublishAot"]);
+        }
+
+        [Theory]
+        [InlineData("net7.0")]
+        [InlineData("net8.0")]
+        public void It_publishes_with_Release_by_default_in_net_8_but_not_net_7(string tfm)
+        {
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = tfm
+            };
+            testProject.RecordProperties("Configuration");
+            testProject.RecordProperties("DebugSymbols"); // If Configuration is set too late, it doesn't actually do anything. Check this too.
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            new DotnetPublishCommand(Log)
+                .WithWorkingDirectory(Path.Combine(testAsset.TestRoot, testProject.Name))
+                .Execute()
+                .Should()
+                .Pass();
+
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm, configuration: tfm == "net7.0" ? "Debug" : "Release");
+            var finalConfiguration = properties["Configuration"];
+            var finalDebugSymbols = properties["DebugSymbols"];
+            Assert.Equal((tfm == "net7.0" ? "Debug" : "Release"), finalConfiguration);
+            Assert.Equal((tfm == "net7.0" ? "true" : "false"), finalDebugSymbols);
+        }
+
+        [Fact]
+        public void PublishRelease_interacts_similarly_with_PublishProfile_Configuration()
+        {
+            var config = "Debug";
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+            var rid = EnvironmentInfo.GetCompatibleRid(tfm);
+
+            var helloWorldAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFramework(ToolsetInfo.CurrentTargetFramework)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + PublishRelease, "true"));
+                });
+
+            var publishProfilesDirectory = Path.Combine(helloWorldAsset.Path, "Properties", "PublishProfiles");
+            Directory.CreateDirectory(publishProfilesDirectory);
+
+            File.WriteAllText(Path.Combine(publishProfilesDirectory, "test.pubxml"), $@"
+            <Project>
+              <PropertyGroup>
+                <RuntimeIdentifier>{rid}</RuntimeIdentifier>
+                <Configuration>{config}</Configuration>
+              </PropertyGroup>
+            </Project>
+            ");
+
+            var publishCommand = new DotnetPublishCommand(Log, helloWorldAsset.Path);
+
+            CommandResult publishOutput = publishCommand
+            .Execute("/p:PublishProfile=test");
+
+            publishOutput.Should().Pass();
+            var releaseAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release", ToolsetInfo.CurrentTargetFramework, rid, "HelloWorld.dll");
+            Assert.True(File.Exists(releaseAssetPath)); // We ignore Debug configuration and override it
+        }
+
         [Fact]
         public void It_allows_unsupported_rid_with_override()
         {
@@ -439,7 +726,7 @@ public static class Program
 
         [Theory]
         [InlineData("netcoreapp2.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_preserves_newest_files_on_publish(string tfm)
         {
             var testProject = new TestProject()
@@ -474,7 +761,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "InvokeBuildOnPublish",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -522,7 +809,7 @@ public static class Program
                     testProject.AdditionalProperties.Add("UseWpf", "true");
                     testProject.AdditionalProperties.Add("UseWindowsForms", "true");
                     break;
-               case "console":
+                case "console":
                     break;
                 case "web":
                     testProject.ProjectSdk = "Microsoft.NET.Sdk.Web";
@@ -531,7 +818,7 @@ public static class Program
                     throw new ArgumentOutOfRangeException(nameof(type));
             }
 
-            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", "9.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", "13.0.1"));
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: type)
                 .WithProjectChanges(project =>
@@ -574,7 +861,7 @@ public static class Program
         [InlineData(true, true)]
         public void It_publishes_with_a_publish_profile(bool? selfContained, bool? useAppHost)
         {
-            var tfm = "netcoreapp2.2";
+            var tfm = ToolsetInfo.CurrentTargetFramework;
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
 
             var testProject = new TestProject()
@@ -597,7 +884,7 @@ public static class Program
   <PropertyGroup>
     <RuntimeIdentifier>{rid}</RuntimeIdentifier>
     {(selfContained.HasValue ? $"<SelfContained>{selfContained}</SelfContained>" : "")}
-    {((!(selfContained ?? true) && useAppHost.HasValue) ? $"<UseAppHost>{useAppHost}</UseAppHost>" : "")}
+    {((!(selfContained ?? false) && useAppHost.HasValue) ? $"<UseAppHost>{useAppHost}</UseAppHost>" : "")}
   </PropertyGroup>
 </Project>
 ");
@@ -617,7 +904,7 @@ public static class Program
                 $"{testProject.Name}.runtimeconfig.json",
             });
 
-            if (selfContained ?? true)
+            if (selfContained ?? false)
             {
                 output.Should().HaveFiles(new[] {
                     $"{FileConstants.DynamicLibPrefix}hostfxr{FileConstants.DynamicLibSuffix}",
@@ -632,7 +919,7 @@ public static class Program
                 });
             }
 
-            if ((selfContained ?? true) || (useAppHost ?? true))
+            if ((selfContained ?? false) || (useAppHost ?? true))
             {
                 output.Should().HaveFile($"{testProject.Name}{Constants.ExeSuffix}");
             }
@@ -654,7 +941,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "ExeWithPublishProfile",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
@@ -677,10 +964,10 @@ public static class Program
             var publishProfilePath = Path.Combine(publishProfilesDirectory, "test.pubxml");
 
             Directory.CreateDirectory(publishProfilesDirectory);
-            File.WriteAllText(publishProfilePath, @"
+            File.WriteAllText(publishProfilePath, $@"
 <Project>
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>{ToolsetInfo.CurrentTargetFramework}</TargetFramework>
   </PropertyGroup>
 </Project>
 ");
@@ -695,13 +982,149 @@ public static class Program
                 .Pass();
         }
 
+        [Theory]
+        [InlineData("invalidProfile", true)]
+        [InlineData("invalidProfile.pubxml", true)]
+        [InlineData("..\\Properties\\PublishProfiles\\invalidProfile.pubxml", true)]
+        [InlineData("invalidProfile.txt", true)]
+        [InlineData("testProfile", false)]
+        [InlineData("testProfile.pubxml", false)]
+        [InlineData("..\\Properties\\PublishProfiles\\testProfile.pubxml", false)]
+        [InlineData("", false)]
+        public void It_warns_with_an_invalid_publish_profile_NetSdk(string publishProfile, bool shouldWarn)
+        {
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+
+            var testProject = new TestProject()
+            {
+                Name = "ConsoleWithPublishProfile",
+                TargetFrameworks = tfm,
+                ProjectSdk = "Microsoft.NET.Sdk",
+                IsExe = true,
+            };
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: $"PublishProfile{publishProfile.Length}");
+
+            var projectDirectory = Path.Combine(testProjectInstance.Path, testProject.Name);
+            var publishProfilesDirectory = Path.Combine(projectDirectory, "Properties", "PublishProfiles");
+            Directory.CreateDirectory(publishProfilesDirectory);
+
+            File.WriteAllText(Path.Combine(publishProfilesDirectory, "testProfile.pubxml"), $@"
+<Project>
+  <PropertyGroup>
+    <msbuildProperty>value</msbuildProperty>
+  </PropertyGroup>
+</Project>
+");
+
+            var command = new PublishCommand(testProjectInstance);
+            if (shouldWarn)
+            {
+                command
+                    .Execute($"/p:PublishProfile={publishProfile}")
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOutContaining("NETSDK1198");
+            }
+            else
+            {
+                command
+                    .Execute($"/p:PublishProfile={publishProfile}")
+                    .Should()
+                    .Pass()
+                    .And
+                    .NotHaveStdOutContaining("NETSDK1198");
+            }
+        }
+
+        [Theory]
+        [InlineData("invalidProfile", true)]
+        [InlineData("invalidProfile.pubxml", true)]
+        [InlineData("..\\Properties\\PublishProfiles\\invalidProfile.pubxml", true)]
+        [InlineData("invalidProfile.txt", true)]
+        [InlineData("testProfile", false)]
+        [InlineData("testProfile.pubxml", false)]
+        [InlineData("..\\Properties\\PublishProfiles\\testProfile.pubxml", false)]
+        [InlineData("Default", false)]
+        [InlineData("", false)]
+        public void It_warns_with_an_invalid_publish_profile_WebSdk(string publishProfile, bool shouldWarn)
+        {
+            var tfm = ToolsetInfo.CurrentTargetFramework;
+
+            var testProject = new TestProject()
+            {
+                Name = "WebWithPublishProfile",
+                TargetFrameworks = tfm,
+                ProjectSdk = "Microsoft.NET.Sdk.Web",
+                IsExe = true,
+            };
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: $"PublishProfile{publishProfile.Length}");
+
+            var projectDirectory = Path.Combine(testProjectInstance.Path, testProject.Name);
+            var publishProfilesDirectory = Path.Combine(projectDirectory, "Properties", "PublishProfiles");
+            Directory.CreateDirectory(publishProfilesDirectory);
+
+            File.WriteAllText(Path.Combine(publishProfilesDirectory, "testProfile.pubxml"), $@"
+<Project>
+  <PropertyGroup>
+    <msbuildProperty>value</msbuildProperty>
+  </PropertyGroup>
+</Project>
+");
+
+            var command = new PublishCommand(testProjectInstance);
+            if (shouldWarn)
+            {
+                command
+                    .Execute($"/p:PublishProfile={publishProfile}")
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOutContaining("NETSDK1198");
+            }
+            else
+            {
+                command
+                    .Execute($"/p:PublishProfile={publishProfile}")
+                    .Should()
+                    .Pass()
+                    .And
+                    .NotHaveStdOutContaining("NETSDK1198");
+            }
+        }
+
+        [Theory]
+        [InlineData("--p:PublishReadyToRun=true")]
+        [InlineData("-p:PublishSingleFile=true")]
+        [InlineData("-p:PublishSelfContained=true")]
+        public void It_publishes_with_implicit_rid_with_rid_specific_properties(string executeOptionsAndProperties)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "PublishImplicitRid",
+                TargetFrameworks = $"net472;{ToolsetInfo.CurrentTargetFramework}",
+            };
+            testProject.AdditionalProperties.Add("IsPublishable", "false");
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: executeOptionsAndProperties);
+
+            var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand
+               .Execute(executeOptionsAndProperties)
+               .Should()
+               .Pass()
+               .And
+               .NotHaveStdErrContaining("NETSDK1191"); // Publish Properties Requiring RID Checks 
+        }
+
         [Fact]
         public void IsPublishableIsRespectedWhenMultitargeting()
         {
             var testProject = new TestProject()
             {
                 Name = "PublishMultitarget",
-                TargetFrameworks = "net472;net5.0"
+                TargetFrameworks = $"net472;{ToolsetInfo.CurrentTargetFramework}"
             };
             testProject.AdditionalProperties.Add("IsPublishable", "false");
             var testAsset = _testAssetsManager.CreateTestProject(testProject);

@@ -19,7 +19,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <!-- We want to force this property to be true, hence not adding a condition check -->
     <SupportsDeployOnBuild>true</SupportsDeployOnBuild>
-    <_PublishTaskFramework Condition=" '$(MSBuildRuntimeType)' == 'Core'">net7.0</_PublishTaskFramework>
+    <_PublishTaskFramework Condition=" '$(MSBuildRuntimeType)' == 'Core'">net8.0</_PublishTaskFramework>
     <_PublishTaskFramework Condition=" '$(_PublishTaskFramework)' == ''">net472</_PublishTaskFramework>
     <_PublishTasksDir Condition=" '$(_PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\tools\$(_PublishTaskFramework)\</_PublishTasksDir>
     <_PublishTaskAssemblyFullPath Condition=" '$(_PublishTaskAssemblyFullPath)'=='' ">$(_PublishTasksDir)Microsoft.NET.Sdk.Publish.Tasks.dll</_PublishTaskAssemblyFullPath>
@@ -29,6 +29,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_PublishTargetsDir Condition=" '$(_PublishTargetsDir)'=='' ">$(MSBuildThisFileDirectory)PublishTargets\</_PublishTargetsDir>
     <_DotNetCLIToolTargetsDir Condition=" '$(_DotNetCLIToolTargetsDir)'=='' ">$(MSBuildThisFileDirectory)DotNetCLIToolTargets\</_DotNetCLIToolTargetsDir>
     <_PublishProfilesDir Condition=" '$(_PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</_PublishProfilesDir>
+    <_ContainersTargetsDir Condition=" '$(_ContainersTargetsDir)'=='' ">$(MSBuildThisFileDirectory)..\..\..\Containers\build\</_ContainersTargetsDir>
 
     <PublishIISAssets Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
              And '$(_TargetFrameworkVersionWithoutV)' != ''
@@ -36,6 +37,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
              And '$(RuntimeIdentifier)' != ''
              And !$(RuntimeIdentifier.StartsWith('win'))
              And '$(PublishIISAssets)' == ''">false</PublishIISAssets>
+    <PublishIISAssets Condition="'$(PublishIISAssets)' == '' and '$(PublishAot)' == 'true'">false</PublishIISAssets>
   </PropertyGroup>
 
   <!-- Extension points for BeforePublish and AfterPublish-->
@@ -53,6 +55,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <Import Project="$(_PublishProfilesDir)$(PublishProfileName).pubxml" Condition="Exists('$(_PublishProfilesDir)$(PublishProfileName).pubxml') And '$(PublishProfileImported)' != 'true'" />
+
+  <!-- Mark the PublishProfile as imported if the default profile shipped with WebSDK is imported -->
+  <PropertyGroup Condition="'$(PublishProfileImported)' != 'true'">
+    <PublishProfileImported Condition="Exists('$(_PublishProfilesDir)$(PublishProfileName).pubxml')">true</PublishProfileImported>
+  </PropertyGroup>
+
 
   <!--
   ***********************************************************************************************
@@ -85,6 +93,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishIntermediateOutputPath Condition="'$(DockerPublish)' == 'true'">obj/Docker/publish/</PublishIntermediateOutputPath>
 
     <EFSQLScriptsFolderName Condition="$(EFSQLScriptsFolderName) == ''">EFSQLScripts</EFSQLScriptsFolderName>
+
+    <!-- If TrimMode has not already been set, default to partial trimming, as AspNet is not currently fully trim-compatible -->
+    <!-- We allow the full trimming default with PublishAot enabled, because the parts that are not trim-compatible are not aot-compatible either -->
+    <TrimMode Condition="'$(TrimMode)' == '' and '$(PublishTrimmed)' == 'true' and '$(PublishAot)' != 'true'">partial</TrimMode>
   </PropertyGroup>
 
   <!--
@@ -137,6 +149,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(_DotNetCLIToolTargetsDir)Microsoft.NET.Sdk.DotNetCLITool.targets" Condition="Exists('$(_DotNetCLIToolTargetsDir)Microsoft.NET.Sdk.DotNetCLITool.targets')"/>
 
+<!--
+  ***********************************************************************************************
+  Import the Containers target
+  ***********************************************************************************************
+ -->
+  <!-- Container publishing is only supported for a single TFM at a time at this point, so only import those targets in
+       'inner' builds  -->
+  <Import Project="$(_ContainersTargetsDir)Microsoft.NET.Build.Containers.targets"
+    Condition="'$(EnableSdkContainerSupport)' == 'true'
+               AND Exists('$(_ContainersTargetsDir)Microsoft.NET.Build.Containers.targets')
+               AND '$(TargetFramework)' != ''" />
+
   <!--
   ***********************************************************************************************
   TARGET : DotNetPublish
@@ -157,6 +181,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Condition=" '$(DeployOnBuild)' == 'true' " >
   </Target>
 
+  <Target Name="CheckContainersPackage" AfterTargets="Build" Condition="'$(EnableSdkContainerSupport)' == 'true'">
+    <PropertyGroup>
+      <ContainersPackageIdentity>Microsoft.NET.Build.Containers</ContainersPackageIdentity>
+    </PropertyGroup>
+    <ItemGroup>
+      <ContainersPackage Include="@(PackageReference)" Condition="'%(Identity)' == '$(ContainersPackageIdentity)'"/>
+    </ItemGroup>
+    <Warning Text="Microsoft.NET.Build.Containers NuGet package is explicitly referenced. Consider removing the package reference to Microsoft.NET.Build.Containers as it is now part of .NET SDK." Condition="'@(ContainersPackage)' != ''" />
+  </Target>
 
   <PropertyGroup>
     <CorePublishDependsOn>

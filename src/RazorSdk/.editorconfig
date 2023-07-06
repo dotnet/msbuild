@@ -7,3 +7,6 @@
 csharp_style_var_elsewhere = true
 csharp_style_var_for_built_in_types = true
 csharp_style_var_when_type_is_apparent = true
+
+# IDE0073: The file header does not match the required text
+dotnet_diagnostic.IDE0073.severity = error

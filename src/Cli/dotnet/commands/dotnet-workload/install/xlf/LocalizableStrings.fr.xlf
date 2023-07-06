@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
-        <target state="translated">Échec de la mise à jour du manifeste de publicité, le package de Manifeste pour {0} n’existe pas.</target>
+        <source>Advertising manifest not updated. Manifest package for {0} doesn't exist.</source>
+        <target state="translated">Manifeste de publicité non mis à jour. Le package de manifeste pour {0} n’existe pas.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -17,9 +17,19 @@
         <target state="translated">La version du {0} de package {1} n’existe pas dans le cache hors connexion {2}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotCombineSkipManifestAndRollback">
+        <source>Cannot use the {0} and {1} options together. If installing from a rollback file, remove {0}. Otherwise, remove {1}</source>
+        <target state="translated">Impossible d’utiliser les options {0} et {1} ensemble. Si vous installez à partir d’un fichier de restauration, supprimez {0}. Sinon, supprimez {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CheckForUpdatedWorkloadManifests">
+        <source>Checking for updated workload manifests.</source>
+        <target state="translated">Recherche de manifestes de charge de travail mis à jour</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
-        <source>Uninstalling workload pack {0} version {1}…</source>
-        <target state="translated">Désinstallation du pack de charge de travail {0} version {1}...</target>
+        <source>Uninstalling workload pack {0} version {1}...</source>
+        <target state="needs-review-translation">Désinstallation du pack de charge de travail {0} version {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -33,8 +43,13 @@
         <note />
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
-        <source>Downloading pack {0} version {1} to offline cache {2}…</source>
-        <target state="translated">Téléchargement de la version du pack d' {0} de la {1} sur le cache hors connexion {2}...</target>
+        <source>Downloading pack {0} version {1} to offline cache {2}...</source>
+        <target state="needs-review-translation">Téléchargement de la version du pack d' {0} de la {1} sur le cache hors connexion {2}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedSingleManifest">
+        <source>Expected single manifest feature band and manifest folder in MSI from package {0}</source>
+        <target state="translated">Bande de fonctionnalités de manifeste unique et dossier manifeste attendus dans MSI à partir du package {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
@@ -47,9 +62,9 @@
         <target state="translated">Impossible de télécharger le package de manifeste '{0}'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToGetPackageManifestUrl">
-        <source>Failed to resolve manifest package URL {0}.</source>
-        <target state="translated">Échec de la résolution de l’URL du package de manifeste {0}.</target>
+      <trans-unit id="FailedToExtractMsi">
+        <source>Failed to extract information from MSI: {0}</source>
+        <target state="translated">Échec de l’extraction des informations de MSI : {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
@@ -103,13 +118,18 @@
         <note />
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
-        <source>Installing workload manifest {0} version {1}…</source>
-        <target state="translated">Installation du {0} de la charge de travail du manifeste {1}...</target>
+        <source>Installing workload manifest {0} version {1}...</source>
+        <target state="needs-review-translation">Installation du {0} de la charge de travail du manifeste {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
         <source>Insufficient privilege to start the server.</source>
         <target state="translated">Privilèges insuffisants pour démarrer le serveur</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">Erreur lors de l’analyse de la version «{1}» pour l’ID de manifeste de charge de travail «{0}»</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
@@ -135,6 +155,16 @@
       <trans-unit id="ManifestDoesNotExist">
         <source>No manifest with ID {0} exists.</source>
         <target state="translated">Aucun manifeste ayant l’ID {0} existe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMsiNotFoundInNuGetPackage">
+        <source>Manifest MSI not found in NuGet package {0}</source>
+        <target state="translated">MSI de manifeste introuvable dans le package NuGet {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPackageUrlNotResolved">
+        <source>Manifest package not resolved. Manifest package or URL for {0} doesn't exist.</source>
+        <target state="translated">Package de manifeste non résolu. Le package ou l’URL du manifeste pour {0} n’existe pas.</target>
         <note />
       </trans-unit>
       <trans-unit id="MsiProgressInstall">
@@ -168,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">Le redémarrage de l’ordinateur est en attente. L’installation va se poursuivre, mais vous devrez peut-être redémarrer.</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">Le redémarrage de l’ordinateur est en attente. L’installation va se poursuivre, mais vous devrez peut-être redémarrer.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">
@@ -184,7 +214,7 @@
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
         <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</source>
-        <target state="new">Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs {1}.</target>
+        <target state="translated">Définition de restauration non valide. Les ID de manifeste dans la définition de restauration {0} ne correspondent pas aux ID de manifeste installés {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">
@@ -205,6 +235,11 @@
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="translated">Ignorer la mise à jour des manifestes de charge de travail.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipSignCheckOptionDescription">
+        <source>Skip signature verification of workload packages and installers.</source>
+        <target state="translated">Ignorez la vérification de signature des packages de charge de travail et des programmes d’installation.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
@@ -279,7 +314,7 @@
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">
         <source>Workload(s) '{0}' are already installed.</source>
-        <target state="needs-review-translation">La charge de travail '{0}' est déjà installée.</target>
+        <target state="translated">La ou les charges de travail '{0}' sont déjà installées.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadCacheDownloadFailed">
@@ -329,7 +364,7 @@
       </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
         <source>Workload updates are available. Run `dotnet workload list` for more information.</source>
-        <target state="translated">Des mises à jour de la charge de travail sont disponibles. Exécutez « liste des charges de travail dotnet » pour plus d’informations.</target>
+        <target state="translated">Des mises à jour de la charge de travail sont disponibles. Exécutez `dotnet workload list` pour plus d’informations.</target>
         <note />
       </trans-unit>
       <trans-unit id="WritingPackInstallRecordMessage">

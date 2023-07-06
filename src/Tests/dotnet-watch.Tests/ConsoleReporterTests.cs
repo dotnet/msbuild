@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -12,28 +12,59 @@ namespace Microsoft.Extensions.Tools.Internal
     {
         private static readonly string EOL = Environment.NewLine;
 
-        [Fact]
-        public void WritesToStandardStreams()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void WritesToStandardStreams(bool suppressEmojis)
         {
             var testConsole = new TestConsole();
-            var reporter = new ConsoleReporter(testConsole, verbose: true, quiet: false);
+            var reporter = new ConsoleReporter(testConsole, verbose: true, quiet: false, suppressEmojis: suppressEmojis);
+            var dotnetWatchDefaultPrefix = $"dotnet watch {(suppressEmojis ? ":" : "⌚")} ";
 
             // stdout
             reporter.Verbose("verbose");
-            Assert.Equal("verbose" + EOL, testConsole.GetOutput());
+            Assert.Equal($"{dotnetWatchDefaultPrefix}verbose" + EOL, testConsole.GetOutput());
             testConsole.Clear();
 
             reporter.Output("out");
-            Assert.Equal("out" + EOL, testConsole.GetOutput());
+            Assert.Equal($"{dotnetWatchDefaultPrefix}out" + EOL, testConsole.GetOutput());
             testConsole.Clear();
 
             reporter.Warn("warn");
-            Assert.Equal("warn" + EOL, testConsole.GetOutput());
+            Assert.Equal($"{dotnetWatchDefaultPrefix}warn" + EOL, testConsole.GetOutput());
             testConsole.Clear();
 
             // stderr
             reporter.Error("error");
-            Assert.Equal("error" + EOL, testConsole.GetError());
+            Assert.Equal($"dotnet watch {(suppressEmojis ? ":" : "❌")} error" + EOL, testConsole.GetError());
+            testConsole.Clear();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void WritesToStandardStreamsWithCustomEmojis(bool suppressEmojis)
+        {
+            var testConsole = new TestConsole();
+            var reporter = new ConsoleReporter(testConsole, verbose: true, quiet: false, suppressEmojis: suppressEmojis);
+            var dotnetWatchDefaultPrefix = $"dotnet watch {(suppressEmojis ? ":" : "😄")}";
+
+            // stdout
+            reporter.Verbose("verbose", emoji: "😄");
+            Assert.Equal($"{dotnetWatchDefaultPrefix} verbose" + EOL, testConsole.GetOutput());
+            testConsole.Clear();
+
+            reporter.Output("out", emoji: "😄");
+            Assert.Equal($"{dotnetWatchDefaultPrefix} out" + EOL, testConsole.GetOutput());
+            testConsole.Clear();
+
+            reporter.Warn("warn", emoji: "😄");
+            Assert.Equal($"{dotnetWatchDefaultPrefix} warn" + EOL, testConsole.GetOutput());
+            testConsole.Clear();
+
+            // stderr
+            reporter.Error("error", emoji: "😄");
+            Assert.Equal($"{dotnetWatchDefaultPrefix} error" + EOL, testConsole.GetError());
             testConsole.Clear();
         }
 

@@ -1,0 +1,9 @@
+﻿Unable to resolve the template, the following installed templates are conflicting:
+Identity           Template Name  Short Name  Language  Author      Package
+%TABLE HEADER DELIMITER%
+TestAssets.Group1  Basic FSharp   basic       F#        Test Asset  %TEMPLATE ONE LOCATION%
+TestAssets.Group2  Basic VB       basic       VB        Test Asset  %TEMPLATE TWO LOCATION%    
+
+Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.
+
+For details on the exit code, refer to https://aka.ms/templating-exit-codes#103

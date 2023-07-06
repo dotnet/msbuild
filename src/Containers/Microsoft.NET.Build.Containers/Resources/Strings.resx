@@ -1,0 +1,388 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AmazonRegistryFailed" xml:space="preserve">
+    <value>CONTAINER1002: Request to Amazon Elastic Container Registry failed prematurely. This is often caused when the target repository does not exist in the registry.</value>
+    <comment>{StrBegin="CONTAINER1002: "}</comment>
+  </data>
+  <data name="AmbiguousTags" xml:space="preserve">
+    <value>CONTAINER2008: Both {0} and {1} were provided, but only one or the other is allowed.</value>
+    <comment>{StrBegin="CONTAINER2008: "}</comment>
+  </data>
+  <data name="BaseImageNameParsingFailed" xml:space="preserve">
+    <value>CONTAINER2009: Could not parse {0}: {1}</value>
+    <comment>{StrBegin="CONTAINER2009: "}</comment>
+  </data>
+  <data name="BaseImageNameWithSpaces" xml:space="preserve">
+    <value>CONTAINER2013: {0} had spaces in it, replacing with dashes.</value>
+    <comment>{StrBegin="CONTAINER2013: "}</comment>
+  </data>
+  <data name="BaseImageNameRegistryFallback" xml:space="preserve">
+    <value>CONTAINER2020: {0} does not specify a registry and will be pulled from Docker Hub. Please prefix the name with the image registry, for example: '{1}/&lt;image&gt;'.</value>
+    <comment>{StrBegin="CONTAINER2020: "}</comment>
+  </data>
+  <data name="BaseImageNotFound" xml:space="preserve">
+    <value>CONTAINER1011: Couldn't find matching base image for {0} that matches RuntimeIdentifier {1}.</value>
+    <comment>{StrBegin="CONTAINER1011: "}</comment>
+  </data>
+  <data name="BlobUploadFailed" xml:space="preserve">
+    <value>CONTAINER1001: Failed to upload blob using {0}; received status code '{1}'.</value>
+    <comment>{StrBegin="CONTAINER1001: "}</comment>
+  </data>
+  <data name="CouldntDeserializeJsonToken" xml:space="preserve">
+    <value>CONTAINER1007: Could not deserialize token from JSON.</value>
+    <comment>{StrBegin="CONTAINER1007: "}</comment>
+  </data>
+  <data name="CouldntRecognizeRegistry" xml:space="preserve">
+    <value>CONTAINER2012: Could not recognize registry '{0}'.</value>
+    <comment>{StrBegin="CONTAINER2012: "}</comment>
+  </data>
+  <data name="DockerInfoFailed" xml:space="preserve">
+    <value>CONTAINER3002: Failed to get docker info({0})\n{1}\n{2}</value>
+    <comment>{StrBegin="CONTAINER3002: "}</comment>
+  </data>
+  <data name="DockerInfoFailed_Ex" xml:space="preserve">
+    <value>CONTAINER3002: Failed to get docker info: {0}</value>
+    <comment>{StrBegin="CONTAINER3002: "}</comment>
+  </data>
+  <data name="DockerProcessCreationFailed" xml:space="preserve">
+    <value>CONTAINER3001: Failed creating {0} process.</value>
+    <comment>CONTAINER3001: {0} is the name of the command we failed to run, usually 'docker' or 'podman'.</comment>
+  </data>
+  <data name="ImagePullNotSupported" xml:space="preserve">
+    <value>CONTAINER1010: Pulling images from local registry is not supported.</value>
+    <comment>{StrBegin="CONTAINER1010: "}</comment>
+  </data>
+  <data name="EmptyOrWhitespacePropertyIgnored" xml:space="preserve">
+    <value>CONTAINER4006: Property '{0}' is empty or contains whitespace and will be ignored.</value>
+    <comment>{StrBegin="CONTAINER4006: "}</comment>
+  </data>
+  <data name="EmptyValuesIgnored" xml:space="preserve">
+    <value>CONTAINER4004: Items '{0}' contain empty item(s) which will be ignored.</value>
+    <comment>{StrBegin="CONTAINER4004: "}</comment>
+  </data>
+  <data name="FailedRetrievingCredentials" xml:space="preserve">
+    <value>CONTAINER1008: Failed retrieving credentials for "{0}": {1}</value>
+    <comment>{StrBegin="CONTAINER1008: "}</comment>
+  </data>
+  <data name="HostObjectNotDetected" xml:space="preserve">
+    <value>No host object detected.</value>
+  </data>
+  <data name="ImageLoadFailed" xml:space="preserve">
+    <value>CONTAINER1009: Failed to load image from local registry. stdout: {0}</value>
+    <comment>{StrBegin="CONTAINER1009: "}</comment>
+  </data>
+  <data name="InvalidContainerRepository" xml:space="preserve">
+    <value>CONTAINER2014: Invalid {0}: {1}.</value>
+    <comment>{StrBegin="CONTAINER2014: "}</comment>
+  </data>
+  <data name="InvalidEnvVar" xml:space="preserve">
+    <value>CONTAINER2015: {0}: '{1}' was not a valid Environment Variable. Ignoring.</value>
+    <comment>{StrBegin="CONTAINER2015: "}</comment>
+  </data>
+  <data name="InvalidImageName" xml:space="preserve">
+    <value>CONTAINER2005: The first character of the image name must be a lowercase letter or a digit.</value>
+    <comment>{StrBegin="CONTAINER2005: "}</comment>
+  </data>
+  <data name="InvalidSdkVersion" xml:space="preserve">
+    <value>CONTAINER2019: Invalid SDK semantic version '{0}'.</value>
+    <comment>{StrBegin="CONTAINER2019: "}</comment>
+  </data>
+  <data name="InvalidSdkPrereleaseVersion" xml:space="preserve">
+    <value>CONTAINER2018: Invalid SDK prerelease version '{0}' - only 'rc' and 'preview' are supported.</value>
+    <comment>{StrBegin="CONTAINER2018: "}</comment>
+  </data>
+  <data name="InvalidPort_Number" xml:space="preserve">
+    <value>CONTAINER2017: A ContainerPort item was provided with an invalid port number '{0}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</value>
+    <comment>{StrBegin="CONTAINER2017: "}</comment>
+  </data>
+  <data name="InvalidPort_NumberAndType" xml:space="preserve">
+    <value>CONTAINER2017: A ContainerPort item was provided with an invalid port number '{0}' and an invalid port type '{1}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</value>
+    <comment>{StrBegin="CONTAINER2017: "}</comment>
+  </data>
+  <data name="InvalidPort_Type" xml:space="preserve">
+    <value>CONTAINER2017: A ContainerPort item was provided with an invalid port type '{0}'. ContainerPort items must have an Include value that is an integer, and a Type value that is either 'tcp' or 'udp'.</value>
+    <comment>{StrBegin="CONTAINER2017: "}</comment>
+  </data>
+  <data name="InvalidTag" xml:space="preserve">
+    <value>CONTAINER2007: Invalid {0} provided: {1}. Image tags must be alphanumeric, underscore, hyphen, or period.</value>
+    <comment>{StrBegin="CONTAINER2007: "}</comment>
+  </data>
+  <data name="InvalidTags" xml:space="preserve">
+    <value>CONTAINER2010: Invalid {0} provided: {1}. {0} must be a semicolon-delimited list of valid image tags. Image tags must be alphanumeric, underscore, hyphen, or period.</value>
+    <comment>{StrBegin="CONTAINER2010: "}</comment>
+  </data>
+  <data name="InvalidTokenResponse" xml:space="preserve">
+    <value>CONTAINER1003: Token response had neither token nor access_token.</value>
+    <comment>{StrBegin="CONTAINER1003: "}</comment>
+  </data>
+  <data name="ItemsWithoutMetadata" xml:space="preserve">
+    <value>CONTAINER4005: Item '{0}' contains items without metadata 'Value', and they will be ignored.</value>
+    <comment>{StrBegin="CONTAINER4005: "}</comment>
+  </data>
+  <data name="LocalRegistryNotAvailable" xml:space="preserve">
+    <value>CONTAINER1012: The local registry is not available, but pushing to a local registry was requested.</value>
+    <comment>{StrBegin="CONTAINER1012: "}</comment>
+  </data>
+  <data name="MissingLinkToRegistry" xml:space="preserve">
+    <value>CONTAINER2004: Unable to download layer with descriptor '{0}' from registry '{1}' because it does not exist.</value>
+    <comment>{StrBegin="CONTAINER2004: "}</comment>
+  </data>
+  <data name="MissingPortNumber" xml:space="preserve">
+    <value>CONTAINER2016: ContainerPort item '{0}' does not specify the port number. Please ensure the item's Include is a port number, for example '&lt;ContainerPort Include="80" /&gt;'</value>
+    <comment>{StrBegin="CONTAINER2016: "}</comment>
+  </data>
+  <data name="NoRequestUriSpecified" xml:space="preserve">
+    <value>CONTAINER1004: No RequestUri specified.</value>
+    <comment>{StrBegin="CONTAINER1004: "}</comment>
+  </data>
+  <data name="NormalizedContainerName" xml:space="preserve">
+    <value>'{0}' was not a valid container image name, it was normalized to '{1}'</value>
+  </data>
+  <data name="PublishDirectoryDoesntExist" xml:space="preserve">
+    <value>CONTAINER2011: {0} '{1}' does not exist</value>
+    <comment>{StrBegin="CONTAINER2011: "}</comment>
+  </data>
+  <data name="RegistryOutputPushFailed" xml:space="preserve">
+    <value>CONTAINER1013: Failed to push to the output registry: {0}</value>
+    <comment>{StrBegin="CONTAINER1013: "}</comment>
+  </data>
+  <data name="RegistryPushFailed" xml:space="preserve">
+    <value>CONTAINER1005: Registry push failed.</value>
+    <comment>{StrBegin="CONTAINER1005: "}</comment>
+  </data>
+  <data name="RequiredItemsContainsEmptyItems" xml:space="preserve">
+    <value>CONTAINER4003: Required '{0}' items contain empty items.</value>
+    <comment>{StrBegin="CONTAINER4003: "}</comment>
+  </data>
+  <data name="RequiredItemsNotSet" xml:space="preserve">
+    <value>CONTAINER4002: Required '{0}' items were not set.</value>
+    <comment>{StrBegin="CONTAINER4002: "}</comment>
+  </data>
+  <data name="RequiredPropertyNotSetOrEmpty" xml:space="preserve">
+    <value>CONTAINER4001: Required property '{0}' was not set or empty.</value>
+    <comment>{StrBegin="CONTAINER4001: "}</comment>
+  </data>
+  <data name="TooManyRetries" xml:space="preserve">
+    <value>CONTAINER1006: Too many retries, stopping.</value>
+    <comment>{StrBegin="CONTAINER1006: "}</comment>
+  </data>
+  <data name="UnknownLocalRegistryType" xml:space="preserve">
+    <value>CONTAINER2002: Unknown local registry type '{0}'. Valid local container registry types are {1}.</value>
+    <comment>{StrBegin="CONTAINER2002: "}</comment>
+  </data>
+  <data name="UnknownMediaType" xml:space="preserve">
+    <value>CONTAINER2003: The manifest for {0}:{1} from registry {2} was an unknown type: {3}. Please raise an issue at https://github.com/dotnet/sdk-container-builds/issues with this message.</value>
+    <comment>{StrBegin="CONTAINER2003: "}</comment>
+  </data>
+  <data name="UnrecognizedMediaType" xml:space="preserve">
+    <value>CONTAINER2001: Unrecognized mediaType '{0}'.</value>
+    <comment>{StrBegin="CONTAINER2001: "}</comment>
+  </data>
+  <data name="UnknownAppCommandInstruction" xml:space="preserve">
+    <value>CONTAINER2021: Unknown AppCommandInstruction '{0}'. Valid instructions are {1}.</value>
+    <comment>{StrBegin="CONTAINER2021: "}</comment>
+  </data>
+  <data name="BaseEntrypointOverwritten" xml:space="preserve">
+    <value>CONTAINER2022: The base image has an entrypoint that will be overwritten to start the application. Set ContainerAppCommandInstruction to 'Entrypoint' if this is desired. To preserve the base image entrypoint, set ContainerAppCommandInstruction to 'DefaultArgs'.</value>
+    <comment>{StrBegin="CONTAINER2022: "}</comment>
+  </data>
+  <data name="EntrypointAndAppCommandArgsSetNoAppCommandInstruction" xml:space="preserve">
+    <value>CONTAINER2023: A ContainerEntrypoint and ContainerAppCommandArgs are provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</value>
+    <comment>{StrBegin="CONTAINER2023: "}</comment>
+  </data>
+  <data name="EntrypointArgsSetNoEntrypoint" xml:space="preserve">
+    <value>CONTAINER2024: ContainerEntrypointArgs are provided without specifying a ContainerEntrypoint.</value>
+    <comment>{StrBegin="CONTAINER2024: "}</comment>
+  </data>
+  <data name="AppCommandArgsSetNoAppCommand" xml:space="preserve">
+    <value>CONTAINER2025: ContainerAppCommandArgs are provided without specifying a ContainerAppCommand.</value>
+    <comment>{StrBegin="CONTAINER2025: "}</comment>
+  </data>
+  <data name="AppCommandSetNotUsed" xml:space="preserve">
+    <value>CONTAINER2026: ContainerAppCommand and ContainerAppCommandArgs must be empty when ContainerAppCommandInstruction is '{0}'.</value>
+    <comment>{StrBegin="CONTAINER2026: "}</comment>
+  </data>
+  <data name="EntrypointSetNoAppCommandInstruction" xml:space="preserve">
+    <value>CONTAINER2027: A ContainerEntrypoint is provided. ContainerAppInstruction must be set to configure how the application is started. Valid instructions are {0}.</value>
+    <comment>{StrBegin="CONTAINER2027: "}</comment>
+  </data>
+  <data name="EntrypointConflictAppCommand" xml:space="preserve">
+    <value>CONTAINER2028: ContainerEntrypoint can not be combined with ContainerAppCommandInstruction '{0}'.</value>
+    <comment>{StrBegin="CONTAINER2028: "}</comment>
+  </data>
+  <data name="EntrypointArgsSetPreferAppCommandArgs" xml:space="preserve">
+    <value>CONTAINER2029: ContainerEntrypointArgsSet are provided. Change to use ContainerAppCommandArgs for arguments that must always be set, or ContainerDefaultArgs for arguments that can be overridden when the container is created.</value>
+    <comment>{StrBegin="CONTAINER2029: "}</comment>
+  </data>
+  <data name="_Test" xml:space="preserve">
+    <value>CONTAINER0000: Value for unit test {0}</value>
+    <comment>Used only for unit tests</comment>
+  </data>
+  <data name="ContainerBuilder_ImageUploadedToLocalDaemon" xml:space="preserve">
+    <value>Pushed container '{0}' to Docker daemon.</value>
+  </data>
+  <data name="ContainerBuilder_ImageUploadedToRegistry" xml:space="preserve">
+    <value>Pushed container '{0}' to registry '{1}'.</value>
+  </data>
+  <data name="ContainerBuilder_StartBuildingImage" xml:space="preserve">
+    <value>Building image '{0}' with tags '{1}' on top of base image '{2}'.</value>
+  </data>
+  <data name="LocalDocker_FailedToGetConfig" xml:space="preserve">
+    <value>Error while reading daemon config: {0}</value>
+    <comment>{0} is the exception message that ends with period</comment>
+  </data>
+  <data name="LocalDocker_LocalDaemonErrors" xml:space="preserve">
+    <value>The daemon server reported errors: {0}</value>
+    <comment>{0} are the list of messages, each message starts with new line</comment>
+  </data>
+  <data name="Registry_ConfigUploaded" xml:space="preserve">
+    <value>Uploaded config to registry.</value>
+  </data>
+  <data name="Registry_ConfigUploadStarted" xml:space="preserve">
+    <value>Uploading config to registry at blob '{0}',</value>
+  </data>
+  <data name="Registry_LayerExists" xml:space="preserve">
+    <value>Layer '{0}' already exists.</value>
+  </data>
+  <data name="Registry_LayerUploaded" xml:space="preserve">
+    <value>Finished uploading layer '{0}' to '{1}'.</value>
+    <comment>{0} is the layer digest, {1} is the registry name</comment>
+  </data>
+  <data name="Registry_LayerUploadStarted" xml:space="preserve">
+    <value>Uploading layer '{0}' to '{1}'.</value>
+    <comment>{0} is the layer digest, {1} is the registry name</comment>
+  </data>
+  <data name="Registry_ManifestUploaded" xml:space="preserve">
+    <value>Uploaded manifest to '{0}'.</value>
+    <comment>{0} is the registry name</comment>
+  </data>
+  <data name="Registry_ManifestUploadStarted" xml:space="preserve">
+    <value>Uploading manifest to registry '{0}' as blob '{1}'.</value>
+    <comment>{0} is the registry name</comment>
+  </data>
+  <data name="Registry_TagUploaded" xml:space="preserve">
+    <value>Uploaded tag '{0}' to '{1}'.</value>
+    <comment>{1} is the registry name</comment>
+  </data>
+  <data name="Registry_TagUploadStarted" xml:space="preserve">
+    <value>Uploading tag '{0}' to '{1}'.</value>
+    <comment>{1} is the registry name</comment>
+  </data>
+</root>

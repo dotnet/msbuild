@@ -1,13 +1,13 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Cli.Telemetry;
-using System.CommandLine.Parsing;
+using System.CommandLine;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli
         {
             var telemetry = new ThreadBlockingTelemetry();
             ProcessInputAndSendTelemetry(parseResult, telemetry);
-
+            telemetry.Dispose();
             return 0;
         }
 
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Cli
 
         public static void ProcessInputAndSendTelemetry(ParseResult result, ITelemetry telemetry)
         {
-            var exeName = Path.GetFileName(result.GetValueForArgument(InternalReportinstallsuccessCommandParser.Argument));
+            var exeName = Path.GetFileName(result.GetValue(InternalReportinstallsuccessCommandParser.Argument));
 
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
             foreach (var e in filter.Filter(new InstallerSuccessReport(exeName)))
@@ -55,6 +55,11 @@ namespace Microsoft.DotNet.Cli
 
             public void Flush()
             {
+            }
+
+            public void Dispose()
+            {
+                telemetry.Dispose();
             }
 
             public void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)

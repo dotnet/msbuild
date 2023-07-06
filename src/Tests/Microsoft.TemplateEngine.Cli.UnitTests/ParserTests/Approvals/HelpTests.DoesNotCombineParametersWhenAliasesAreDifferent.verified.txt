@@ -1,0 +1,16 @@
+﻿Template options:
+  -C, --Choice <choice>  my description
+                         Type: choice
+                           val1  
+                         Default: def-val
+                         Default if option is 
+                         provided without a 
+                         value: def-val-no-arg
+  -C, --choice <choice>  my description
+                         Type: choice
+                           val2  
+                         Default: def-val
+                         Default if option is 
+                         provided without a 
+                         value: def-val-no-arg
+

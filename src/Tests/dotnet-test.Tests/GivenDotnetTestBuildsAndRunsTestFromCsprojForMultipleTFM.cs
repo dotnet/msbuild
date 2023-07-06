@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Tools.Test.Utilities;
 using FluentAssertions;
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         }
 
         [WindowsOnlyFact]
-        public void ItCreatesTwoCoverageFilesForMultiTargetedProject()
+        public void ItCreatesMergedCoverageFileForMultiTargetedProject()
         {
             // Copy XunitMulti project in output directory of project dotnet-test.Tests
             string testAppName = "XunitMulti";
@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify
             DirectoryInfo d = new DirectoryInfo(resultsDirectory);
             FileInfo[] coverageFileInfos = d.GetFiles("*.coverage", SearchOption.AllDirectories);
-            Assert.Equal(2, coverageFileInfos.Length);
+            Assert.Single(coverageFileInfos);
         }
 
         [Fact]
@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             new DotnetTestCommand(Log, ConsoleLoggerOutputNormal)
                .WithWorkingDirectory(projectDirectory)
-               .Execute("--framework", "netcoreapp3.0")
+               .Execute("--framework", ToolsetInfo.CurrentTargetFramework)
                .Should().Pass();
         }
 
@@ -152,13 +152,13 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             var libraryProject = new TestProject()
             {
                 Name = "LibraryProject",
-                TargetFrameworks = "netcoreapp3.1;net5.0",
+                TargetFrameworks = $"netcoreapp3.1;{ToolsetInfo.CurrentTargetFramework}",
             };
 
             var testProject = new TestProject()
             {
                 Name = "TestProject",
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.NET.Test.Sdk", "16.7.1"));
@@ -169,7 +169,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            new DotnetCommand(Log, "new", "sln")
+            new DotnetNewCommand(Log, "sln")
+                .WithVirtualHive()
                 .WithWorkingDirectory(testAsset.TestRoot)
                 .Execute()
                 .Should()

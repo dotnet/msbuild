@@ -1,0 +1,9 @@
+﻿Microsoft.Azure.WebJobs.ItemTemplates
+   Package version: 4.0.2288
+   Details: Collection of templates for Azure Functions
+   Source Feed: dotnet-public [https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json]
+   Authors:
+      Microsoft
+   License Metadata:
+      License Url: https://go.microsoft.com/fwlink/?linkid=2028464
+      Repository Url: https://go.microsoft.com/fwlink/?linkid=848145

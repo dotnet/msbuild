@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Xunit;
 using FluentAssertions;
@@ -68,6 +68,7 @@ SDK commands:
 Additional commands from bundled tools:
   dev-certs         Create and manage development certificates.
   fsi               Start F# Interactive / execute F# scripts.
+  user-jwts         Manage JSON Web Tokens in development.
   user-secrets      Manage development user secrets.
   watch             Start a file watcher that runs a command when files change.
 

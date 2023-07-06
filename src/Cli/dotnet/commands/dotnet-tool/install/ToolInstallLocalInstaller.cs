@@ -1,7 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using Microsoft.DotNet.Cli;
@@ -29,11 +30,11 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             IToolPackageInstaller toolPackageInstaller = null)
         {
             _parseResult = parseResult;
-            _packageId = new PackageId(parseResult.GetValueForArgument(ToolInstallCommandParser.PackageIdArgument));
-            _packageVersion = parseResult.GetValueForOption(ToolInstallCommandParser.VersionOption);
-            _configFilePath = parseResult.GetValueForOption(ToolInstallCommandParser.ConfigOption);
-            _sources = parseResult.GetValueForOption(ToolInstallCommandParser.AddSourceOption);
-            _verbosity = Enum.GetName(parseResult.GetValueForOption(ToolInstallCommandParser.VerbosityOption));
+            _packageId = new PackageId(parseResult.GetValue(ToolInstallCommandParser.PackageIdArgument));
+            _packageVersion = parseResult.GetValue(ToolInstallCommandParser.VersionOption);
+            _configFilePath = parseResult.GetValue(ToolInstallCommandParser.ConfigOption);
+            _sources = parseResult.GetValue(ToolInstallCommandParser.AddSourceOption);
+            _verbosity = Enum.GetName(parseResult.GetValue(ToolInstallCommandParser.VerbosityOption));
 
             if (toolPackageInstaller == null)
             {
@@ -77,7 +78,8 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                         new PackageLocation(
                             nugetConfig: configFile,
                             additionalFeeds: _sources,
-                            rootConfigDirectory: manifestFile.GetDirectoryPath()),
+                            // Fix https://github.com/dotnet/sdk/issues/23135
+                            rootConfigDirectory: manifestFile.GetDirectoryPath().GetParentPath()),
                         _packageId,
                         versionRange,
                         TargetFrameworkToInstall,

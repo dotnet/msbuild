@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
@@ -13,6 +13,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Xunit;
 using Xunit.Abstractions;
+using static System.Net.WebRequestMethods;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -25,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
         [RequiresMSBuildVersionFact("16.8.0")]
         public void CanBuildProjectWithPackageReferencesWithConflictingTypes()
         {
-            var targetFramework = "net5.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var packageReferences = GetPackageReferencesWithConflictingTypes(targetFramework, packageNames: new string[] { "A", "B" });
 
             TestProject testProject = new TestProject()
@@ -63,7 +64,7 @@ namespace Microsoft.NET.Build.Tests
         [RequiresMSBuildVersionFact("16.8.0")]
         public void CanBuildProjectWithMultiplePackageReferencesWithAliases()
         {
-            var targetFramework = "net5.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
 
             var packageReferenceA = GetPackageReference(targetFramework, "A", ClassLibClassA);
             var packageReferenceB = GetPackageReference(targetFramework, "B", ClassLibClassB);
@@ -107,7 +108,7 @@ namespace Microsoft.NET.Build.Tests
         [RequiresMSBuildVersionFact("16.8.0")]
         public void CanBuildProjectWithAPackageReferenceWithMultipleAliases()
         {
-            var targetFramework = "net5.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
 
             var packageReferenceA = GetPackageReference(targetFramework, "A", ClassLibMultipleClasses);
 
@@ -153,7 +154,7 @@ namespace Microsoft.NET.Build.Tests
         private TestPackageReference GetPackageReference(string targetFramework, string packageName, string projectFileContent, [CallerMemberName] string callingMethod = "", string identifier = null)
         {
             var project = GetProject(targetFramework, packageName, projectFileContent);
-            var packCommand = new PackCommand(Log, _testAssetsManager.CreateTestProject(project, callingMethod: callingMethod, identifier: identifier).TestRoot, packageName);
+            var packCommand = new PackCommand(_testAssetsManager.CreateTestProject(project, callingMethod: callingMethod, identifier: identifier));
 
             packCommand
                 .Execute()

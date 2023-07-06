@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "EditorConfig 文件",
+  "description": "创建用于配置代码样式首选项的 .editorconfig 文件。",
+  "symbols/Empty/displayName": "空",
+  "symbols/Empty/description": "创建空的 .editorconfig 而非 .NET 的默认值。"
+}

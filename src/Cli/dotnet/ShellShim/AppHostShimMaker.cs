@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -51,17 +51,17 @@ namespace Microsoft.DotNet.ShellShim
                                          appHostDestinationFilePath: appHostDestinationFilePath,
                                          appBinaryFilePath: appBinaryFilePath,
                                          windowsGraphicalUserInterface: (windowsGraphicalUserInterfaceBit == WindowsGUISubsystem),
-                                         assemblyToCopyResorcesFrom: entryPointFullPath);
+                                         assemblyToCopyResourcesFrom: entryPointFullPath);
             }
             else
             {
-                // by passing null to assemblyToCopyResorcesFrom, it will skip copying resources,
+                // by passing null to assemblyToCopyResourcesFrom, it will skip copying resources,
                 // which is only supported on Windows
                 HostWriter.CreateAppHost(appHostSourceFilePath: appHostSourcePath,
                                          appHostDestinationFilePath: appHostDestinationFilePath,
                                          appBinaryFilePath: appBinaryFilePath,
                                          windowsGraphicalUserInterface: false,
-                                         assemblyToCopyResorcesFrom: null,
+                                         assemblyToCopyResourcesFrom: null,
                                          enableMacOSCodeSign: OperatingSystem.IsMacOS());
             }
 

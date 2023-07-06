@@ -1,6 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.NativeWrapper;
@@ -36,27 +37,35 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
             if (NewFeatureBandAvailable())
             {
                 _reporter.WriteLine();
+                // advertise newest feature band
                 _reporter.WriteLine(string.Format(LocalizableStrings.NewFeatureBandMessage, NewestFeatureBandAvailable()));
             }
         }
 
         private string GetSdkStatusMessage(NetSdkInfo sdk)
         {
-            if (BundleIsEndOfLife(sdk))
+            bool? isEndOfLife = BundleIsEndOfLife(sdk);
+            bool? isMaintenance = BundleIsMaintenance(sdk);
+            bool sdkPatchExists = NewerSdkPatchExists(sdk);
+            if (isEndOfLife == true)
             {
                 return string.Format(LocalizableStrings.OutOfSupportMessage, $"{sdk.Version.Major}.{sdk.Version.Minor}");
             }
-            else if (BundleIsMaintenance(sdk))
+            else if (isMaintenance == true)
             {
                 return string.Format(LocalizableStrings.MaintenanceMessage, $"{sdk.Version.Major}.{sdk.Version.Minor}");
             }
-            else if (NewerSdkPatchExists(sdk))
+            else if (sdkPatchExists)
             {
                 return string.Format(LocalizableStrings.NewPatchAvailableMessage, NewestSdkPatchVersion(sdk));
             }
-            else
+            else if (isEndOfLife == false && isMaintenance == false && !sdkPatchExists)
             {
                 return LocalizableStrings.BundleUpToDateMessage;
+            }
+            else
+            {
+                return LocalizableStrings.VersionCheckFailure;
             }
         }
 
@@ -66,7 +75,7 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
             return newestPatchVesion == null ? false : newestPatchVesion> bundle.Version;
         }
 
-        private ReleaseVersion NewestSdkPatchVersion(NetSdkInfo bundle)
+        private ReleaseVersion? NewestSdkPatchVersion(NetSdkInfo bundle)
         {
             var product = _productCollection.First(product => product.ProductVersion.Equals($"{bundle.Version.Major}.{bundle.Version.Minor}"));
             if (product.LatestSdkVersion.SdkFeatureBand == bundle.Version.SdkFeatureBand)

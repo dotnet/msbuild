@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -26,26 +26,26 @@ namespace Microsoft.DotNet.Cli.Utils
         public void GetRelativePathForFilePath()
         {
             Assert.Equal(
-                @"mytool\1.0.1\mytool\1.0.1\tools\netcoreapp2.1\any\mytool.dll",
+                $@"mytool\1.0.1\mytool\1.0.1\tools\{ToolsetInfo.CurrentTargetFramework}\any\mytool.dll",
                 PathUtility.GetRelativePath(
                     @"C:\Users\myuser\.dotnet\tools\mytool.exe",
-                    @"C:\Users\myuser\.dotnet\tools\mytool\1.0.1\mytool\1.0.1\tools\netcoreapp2.1\any\mytool.dll"));
+                    $@"C:\Users\myuser\.dotnet\tools\mytool\1.0.1\mytool\1.0.1\tools\{ToolsetInfo.CurrentTargetFramework}\any\mytool.dll"));
         }
 
         [WindowsOnlyFact]
         public void GetRelativePathRequireTrailingSlashForDirectoryPath()
         {
             Assert.NotEqual(
-                @"mytool\1.0.1\mytool\1.0.1\tools\netcoreapp2.1\any\mytool.dll",
+                $@"mytool\1.0.1\mytool\1.0.1\tools\{ToolsetInfo.CurrentTargetFramework}\any\mytool.dll",
                 PathUtility.GetRelativePath(
                     @"C:\Users\myuser\.dotnet\tools",
-                    @"C:\Users\myuser\.dotnet\tools\mytool\1.0.1\mytool\1.0.1\tools\netcoreapp2.1\any\mytool.dll"));
+                    $@"C:\Users\myuser\.dotnet\tools\mytool\1.0.1\mytool\1.0.1\tools\{ToolsetInfo.CurrentTargetFramework}\any\mytool.dll"));
 
             Assert.Equal(
-                @"mytool\1.0.1\mytool\1.0.1\tools\netcoreapp2.1\any\mytool.dll",
+                $@"mytool\1.0.1\mytool\1.0.1\tools\{ToolsetInfo.CurrentTargetFramework}\any\mytool.dll",
                 PathUtility.GetRelativePath(
                     @"C:\Users\myuser\.dotnet\tools\",
-                    @"C:\Users\myuser\.dotnet\tools\mytool\1.0.1\mytool\1.0.1\tools\netcoreapp2.1\any\mytool.dll"));
+                    $@"C:\Users\myuser\.dotnet\tools\mytool\1.0.1\mytool\1.0.1\tools\{ToolsetInfo.CurrentTargetFramework}\any\mytool.dll"));
         }
 
         /// <summary>

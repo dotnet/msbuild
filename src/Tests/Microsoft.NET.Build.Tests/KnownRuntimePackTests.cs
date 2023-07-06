@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using FluentAssertions;
@@ -104,6 +107,40 @@ namespace Microsoft.NET.Build.Tests
             //  StartsWith instead of exact match because current RID is likely to be more specific than the runtime pack RID
             getValuesCommand.GetValues().Should().Contain(rp => rp.StartsWith("Microsoft.NETCore.App.Runtime.Mono."));
 
+        }
+
+        [Fact]
+        public void AspNetRuntimePackIsNotRestoredForAndroid()
+        {
+            var testProject = new TestProject()
+            {
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true
+            };
+            testProject.AdditionalProperties["RuntimeIdentifiers"] = "android-arm;android-arm64;android-x86;android-x64";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var knownFrameworkReferenceUpdate = new XElement("KnownFrameworkReference",
+                new XAttribute("Update", "Microsoft.AspNetCore.App"),
+                new XAttribute("RuntimePackExcludedRuntimeIdentifiers", "android"));
+
+            AddItem(testAsset, knownFrameworkReferenceUpdate);
+
+            var getValuesCommand = new GetValuesCommand(testAsset, "PackageDownload", GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "ProcessFrameworkReferences",
+                ShouldRestore = false
+            };
+
+            getValuesCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var packageDownloads = getValuesCommand.GetValues();
+
+            packageDownloads.Should().NotContain(packageDownload => packageDownload.StartsWith("Microsoft.AspNetCore.App.Runtime."));
         }
 
         private XElement CreateTestKnownRuntimePack()

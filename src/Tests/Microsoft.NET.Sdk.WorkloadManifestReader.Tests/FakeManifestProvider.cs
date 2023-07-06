@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 
@@ -28,11 +28,11 @@ namespace ManifestReaderTests
 
         public IEnumerable<string> GetManifestDirectories() => throw new NotImplementedException();
 
-        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream, Func<Stream?> openLocalizationStream)> GetManifests()
+        public IEnumerable<ReadableWorkloadManifest> GetManifests()
         {
             foreach (var filePath in _filePaths)
             {
-                yield return (
+                yield return new(
                     Path.GetFileNameWithoutExtension(filePath.manifest),
                     filePath.manifest,
                     () => new FileStream(filePath.manifest, FileMode.Open, FileAccess.Read),
@@ -51,10 +51,10 @@ namespace ManifestReaderTests
         public void Add(string id, string content) => _manifests.Add((id, Encoding.UTF8.GetBytes(content)));
         public IEnumerable<string> GetManifestDirectories() => throw new NotImplementedException();
 
-        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream, Func<Stream?> openLocalizationStream)> GetManifests()
-            => _manifests.Select(m => (
+        public IEnumerable<ReadableWorkloadManifest> GetManifests()
+            => _manifests.Select(m => new ReadableWorkloadManifest(
                 m.id,
-                (string?)null,
+                $@"C:\fake\{m.id}\WorkloadManifest.json",
                 (Func<Stream>)(() => new MemoryStream(m.content)),
                 (Func<Stream?>)(() => null)
             ));

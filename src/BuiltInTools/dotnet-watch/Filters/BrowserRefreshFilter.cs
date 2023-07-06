@@ -1,9 +1,9 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -13,21 +13,25 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public sealed class BrowserRefreshFilter : IWatchFilter, IAsyncDisposable
+    internal sealed class BrowserRefreshFilter : IWatchFilter, IAsyncDisposable
     {
-        private readonly bool _suppressBrowserRefresh;
+        private readonly DotNetWatchOptions _options;
         private readonly IReporter _reporter;
+        private readonly string _muxerPath;
         private BrowserRefreshServer? _refreshServer;
 
-        public BrowserRefreshFilter(DotNetWatchOptions dotNetWatchOptions, IReporter reporter)
+        public BrowserRefreshFilter(DotNetWatchOptions options, IReporter reporter, string muxerPath)
         {
-            _suppressBrowserRefresh = dotNetWatchOptions.SuppressBrowserRefresh;
+            _options = options;
             _reporter = reporter;
+            _muxerPath = muxerPath;
         }
 
         public async ValueTask ProcessAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
-            if (_suppressBrowserRefresh)
+            Debug.Assert(context.ProcessSpec != null);
+
+            if (_options.SuppressBrowserRefresh)
             {
                 return;
             }
@@ -49,7 +53,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                     return;
                 }
 
-                _refreshServer = new BrowserRefreshServer(context.Reporter);
+                _refreshServer = new BrowserRefreshServer(_options, context.Reporter, _muxerPath);
                 context.BrowserRefreshServer = _refreshServer;
                 var serverUrls = string.Join(',', await _refreshServer.StartAsync(cancellationToken));
                 context.Reporter.Verbose($"Refresh server running at {serverUrls}.");
@@ -60,7 +64,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 context.ProcessSpec.EnvironmentVariables.DotNetStartupHooks.Add(pathToMiddleware);
                 context.ProcessSpec.EnvironmentVariables.AspNetCoreHostingStartupAssemblies.Add("Microsoft.AspNetCore.Watch.BrowserRefresh");
             }
-            else if (!_suppressBrowserRefresh)
+            else if (!_options.SuppressBrowserRefresh)
             {
                 // We've detected a change. Notify the browser.
                 await (_refreshServer?.SendWaitMessageAsync(cancellationToken) ?? default);

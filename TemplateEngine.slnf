@@ -1,0 +1,25 @@
+{
+  "solution": {
+    "path": "sdk.sln",
+    "projects": [
+      "src\\Assets\\TestPackages\\dotnet-new\\Microsoft.TemplateEngine.TestTemplates.csproj",
+      "src\\Cli\\Microsoft.DotNet.Cli.Sln.Internal\\Microsoft.DotNet.Cli.Sln.Internal.csproj",
+      "src\\Cli\\Microsoft.DotNet.Cli.Utils\\Microsoft.DotNet.Cli.Utils.csproj",
+      "src\\Cli\\Microsoft.DotNet.Configurer\\Microsoft.DotNet.Configurer.csproj",
+      "src\\Cli\\Microsoft.DotNet.InternalAbstractions\\Microsoft.DotNet.InternalAbstractions.csproj",
+      "src\\Cli\\Microsoft.TemplateEngine.Cli\\Microsoft.TemplateEngine.Cli.csproj",
+      "src\\Cli\\dotnet-new3\\dotnet-new3.csproj",
+      "src\\Cli\\dotnet\\dotnet.csproj",
+      "src\\Microsoft.DotNet.TemplateLocator\\Microsoft.DotNet.TemplateLocator.csproj",
+      "src\\Microsoft.Win32.Msi\\Microsoft.Win32.Msi.csproj",
+      "src\\Resolvers\\Microsoft.DotNet.NativeWrapper\\Microsoft.DotNet.NativeWrapper.csproj",
+      "src\\Resolvers\\Microsoft.DotNet.SdkResolver\\Microsoft.DotNet.SdkResolver.csproj",
+      "src\\Tests\\Microsoft.NET.TestFramework\\Microsoft.NET.TestFramework.csproj",
+      "src\\Tests\\Microsoft.TemplateEngine.Cli.UnitTests\\Microsoft.TemplateEngine.Cli.UnitTests.csproj",
+      "src\\Tests\\dotnet-new.Tests\\dotnet-new.IntegrationTests.csproj",
+      "src\\Tests\\dotnet.Tests\\dotnet.Tests.csproj",
+      "template_feed\\Microsoft.DotNet.Common.ItemTemplates\\Microsoft.DotNet.Common.ItemTemplates.csproj",
+      "template_feed\\Microsoft.DotNet.Common.ProjectTemplates.8.0\\Microsoft.DotNet.Common.ProjectTemplates.8.0.csproj"
+    ]
+  }
+}

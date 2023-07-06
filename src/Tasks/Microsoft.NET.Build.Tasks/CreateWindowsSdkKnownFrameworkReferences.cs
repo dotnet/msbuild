@@ -1,6 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -55,6 +54,9 @@ namespace Microsoft.NET.Build.Tasks
             else
             {
                 var normalizedTargetFrameworkVersion = ProcessFrameworkReferences.NormalizeVersion(new Version(TargetFrameworkVersion));
+                
+                var knownFrameworkReferencesByWindowsSdkVersion = new Dictionary<Version, List<(Version minimumNetVersion, TaskItem knownFrameworkReference)>>();
+
                 foreach (var supportedWindowsVersion in WindowsSdkSupportedTargetPlatformVersions)
                 {
                     var windowsSdkPackageVersion = supportedWindowsVersion.GetMetadata("WindowsSdkPackageVersion");
@@ -62,17 +64,36 @@ namespace Microsoft.NET.Build.Tasks
                     if (!string.IsNullOrEmpty(windowsSdkPackageVersion))
                     {
                         var minimumNETVersion = supportedWindowsVersion.GetMetadata("MinimumNETVersion");
+                        Version normalizedMinimumVersion = new Version(0, 0, 0);
                         if (!string.IsNullOrEmpty(minimumNETVersion))
                         {
-                            var normalizedMinimumVersion = ProcessFrameworkReferences.NormalizeVersion(new Version(minimumNETVersion));
+                            normalizedMinimumVersion = ProcessFrameworkReferences.NormalizeVersion(new Version(minimumNETVersion));
                             if (normalizedMinimumVersion > normalizedTargetFrameworkVersion)
                             {
                                 continue;
                             }
                         }
 
-                        knownFrameworkReferences.Add(CreateKnownFrameworkReference(windowsSdkPackageVersion, TargetFrameworkVersion, supportedWindowsVersion.ItemSpec));
+                        if (!Version.TryParse(supportedWindowsVersion.ItemSpec, out var windowsSdkVersionParsed))
+                        {
+                            continue;
+                        }
+
+                        if (!knownFrameworkReferencesByWindowsSdkVersion.ContainsKey(windowsSdkVersionParsed))
+                        {
+                            knownFrameworkReferencesByWindowsSdkVersion[windowsSdkVersionParsed] = new();
+                        }
+
+                        knownFrameworkReferencesByWindowsSdkVersion[windowsSdkVersionParsed].Add((normalizedMinimumVersion, CreateKnownFrameworkReference(windowsSdkPackageVersion, TargetFrameworkVersion, supportedWindowsVersion.ItemSpec)));
                     }
+                }
+                
+                foreach (var knownFrameworkReferencesForSdkVersion in knownFrameworkReferencesByWindowsSdkVersion.Values)
+                {
+                    //  If there are multiple WindowsSdkSupportedTargetPlatformVersion items for the same Windows SDK version, choose the one with the highest minimum version.
+                    //  That way it is possible to use older packages when targeting older versions of .NET, and newer packages for newer versions of .NET
+                    var highestMinimumVersion = knownFrameworkReferencesForSdkVersion.Max(t => t.minimumNetVersion);
+                    knownFrameworkReferences.AddRange(knownFrameworkReferencesForSdkVersion.Where(t => t.minimumNetVersion == highestMinimumVersion).Select(t => t.knownFrameworkReference));
                 }
             }
 

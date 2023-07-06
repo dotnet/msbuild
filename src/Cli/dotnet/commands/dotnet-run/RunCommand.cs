@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Exceptions;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Run.LaunchSettings;
 using Microsoft.DotNet.CommandFactory;
@@ -26,7 +27,6 @@ namespace Microsoft.DotNet.Tools.Run
         public bool Interactive { get; private set; }
         public IEnumerable<string> RestoreArgs { get; private set; }
 
-        private Version Version6_0 = new Version(6, 0);
         private bool ShouldBuild => !NoBuild;
         private bool HasQuietVerbosity =>
             RestoreArgs.All(arg => !arg.StartsWith("-verbosity:", StringComparison.Ordinal) ||
@@ -71,6 +71,10 @@ namespace Microsoft.DotNet.Tools.Run
                         string value = Environment.ExpandEnvironmentVariables(entry.Value);
                         //NOTE: MSBuild variables are not expanded like they are in VS
                         targetCommand.EnvironmentVariable(entry.Key, value);
+                    }
+                    if (String.IsNullOrEmpty(targetCommand.CommandArgs) && launchSettings.CommandLineArgs != null)
+                    {
+                        targetCommand.SetCommandArgs(launchSettings.CommandLineArgs);
                     }
                 }
 
@@ -167,7 +171,7 @@ namespace Microsoft.DotNet.Tools.Run
             }
             else if (!string.IsNullOrEmpty(LaunchProfile))
             {
-                Reporter.Error.WriteLine(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile.Bold().Red());
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile, launchSettingsPath).Bold().Red());
             }
 
             return true;
@@ -257,21 +261,14 @@ namespace Microsoft.DotNet.Tools.Run
             var command = CommandFactoryUsingResolver.Create(commandSpec)
                 .WorkingDirectory(runWorkingDirectory);
 
-            if (((TryGetTargetArchitecture(project.GetPropertyValue("RuntimeIdentifier"), out var targetArchitecture) ||
-                TryGetTargetArchitecture(project.GetPropertyValue("DefaultAppHostRuntimeIdentifier"), out targetArchitecture)) &&
-                targetArchitecture == RuntimeInformation.ProcessArchitecture) || targetArchitecture == null)
-            {
-                var rootVariableName = Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)";
-                string targetFrameworkVersion = project.GetPropertyValue("TargetFrameworkVersion");
-                if (!string.IsNullOrEmpty(targetFrameworkVersion) && Version.Parse(targetFrameworkVersion.AsSpan(1)) >= Version6_0)
-                {
-                    rootVariableName = $"DOTNET_ROOT_{RuntimeInformation.ProcessArchitecture.ToString().ToUpperInvariant()}";
-                }
+            var rootVariableName = EnvironmentVariableNames.TryGetDotNetRootVariableName(
+                project.GetPropertyValue("RuntimeIdentifier"),
+                project.GetPropertyValue("DefaultAppHostRuntimeIdentifier"),
+                project.GetPropertyValue("TargetFrameworkVersion"));
 
-                if (Environment.GetEnvironmentVariable(rootVariableName) == null)
-                {
-                    command.EnvironmentVariable(rootVariableName, Path.GetDirectoryName(new Muxer().MuxerPath));
-                }
+            if (rootVariableName != null && Environment.GetEnvironmentVariable(rootVariableName) == null)
+            {
+                command.EnvironmentVariable(rootVariableName, Path.GetDirectoryName(new Muxer().MuxerPath));
             }
 
             return command;
@@ -324,27 +321,6 @@ namespace Microsoft.DotNet.Tools.Run
             }
 
             return projectFiles[0];
-        }
-
-        private static bool TryGetTargetArchitecture(string runtimeIdentifier, out Architecture? targetArchitecture)
-        {
-            targetArchitecture = null;
-            int separator = runtimeIdentifier.LastIndexOf("-");
-            if (separator < 0)
-            {
-                return false;
-            }
-
-            targetArchitecture = runtimeIdentifier.Substring(separator + 1).ToLowerInvariant() switch
-            {
-                "arm" => Architecture.Arm,
-                "arm64" => Architecture.Arm64,
-                "x64" => Architecture.X64,
-                "x86" => Architecture.X86,
-                _ => null
-            };
-
-            return targetArchitecture != null;
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 
@@ -16,7 +16,7 @@ namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToUsePlatformAnalyzers : SdkTest
     {
-        private const string targetFrameworkNet5 = "net5.0";
+        private const string currentTargetFramework = ToolsetInfo.CurrentTargetFramework;
         private const string targetFrameworkNetCore31 = "netcoreapp3.1";
 
         public GivenThatWeWantToUsePlatformAnalyzers(ITestOutputHelper log) : base(log)
@@ -29,7 +29,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                TargetFrameworks = targetFrameworkNet5,
+                TargetFrameworks = currentTargetFramework,
                 IsExe = true,
                 SourceFiles =
                 {
@@ -59,7 +59,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new GetValuesCommand(
                 Log,
                 Path.Combine(testAsset.TestRoot, testProject.Name),
-                targetFrameworkNet5, "Analyzer")
+                currentTargetFramework, "Analyzer")
             {
                 DependsOnTargets = "Build"
             };
@@ -74,7 +74,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                TargetFrameworks = targetFrameworkNet5,
+                TargetFrameworks = currentTargetFramework,
                 IsExe = true,
                 SourceFiles =
                 {
@@ -105,7 +105,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new GetValuesCommand(
                 Log,
                 Path.Combine(testAsset.TestRoot, testProject.Name),
-                targetFrameworkNet5, "Analyzer")
+                currentTargetFramework, "Analyzer")
             {
                 DependsOnTargets = "Build"
             };
@@ -166,7 +166,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                TargetFrameworks = targetFrameworkNet5,
+                TargetFrameworks = currentTargetFramework,
                 IsExe = true,
                 SourceFiles =
                 {
@@ -197,7 +197,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new GetValuesCommand(
                 Log,
                 Path.Combine(testAsset.TestRoot, testProject.Name),
-                targetFrameworkNet5, "Analyzer")
+                currentTargetFramework, "Analyzer")
             {
                 DependsOnTargets = "Build"
             };
@@ -297,7 +297,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                TargetFrameworks = targetFrameworkNet5,
+                TargetFrameworks = currentTargetFramework,
                 IsExe = true,
                 SourceFiles =
                 {
@@ -328,7 +328,7 @@ namespace Microsoft.NET.Build.Tests
             var buildCommand = new GetValuesCommand(
                 Log,
                 Path.Combine(testAsset.TestRoot, testProject.Name),
-                targetFrameworkNet5, "Analyzer")
+                currentTargetFramework, "Analyzer")
             {
                 DependsOnTargets = "Build"
             };

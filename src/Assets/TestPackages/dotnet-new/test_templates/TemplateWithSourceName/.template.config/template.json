@@ -1,0 +1,19 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithSourceName",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithSourceName",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithSourceName",
+  "shortName": "TestAssets.TemplateWithSourceName",
+  "sourceName": "bar",
+  "primaryOutputs": [
+    {
+      "path": "bar.cs"
+    },
+    {
+      "path": "bar/bar.cs"
+    },
+  ]
+}

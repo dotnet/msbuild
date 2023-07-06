@@ -1,0 +1,8 @@
+{
+  "author": "Microsoft",
+  "name": "NuGet Yapılandırması",
+  "description": "NuGet'in paketleri arama yapacağı konumları yapılandırmaya yönelik dosya",
+  "postActions/chmod/description": "İzinleri uygula",
+  "postActions/chmod/manualInstructions/default/text": "'chmod 600 nuget.config' dosyasını çalıştır",
+  "postActions/open-file/description": "Düzenleyicide nuget.config’i açar"
+}

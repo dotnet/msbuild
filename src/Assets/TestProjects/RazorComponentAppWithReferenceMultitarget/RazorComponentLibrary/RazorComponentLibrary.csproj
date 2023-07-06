@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(AspNetTestTfm);$(AspNetTestTfm)-browser1.0</TargetFrameworks>
+    <EnableSdkContainerSupport>false</EnableSdkContainerSupport>
+    <OutputType>Library</OutputType>
+
+    <!-- Until we have support for it, pretend it supports it -->
+    <TargetPlatformSupported>true</TargetPlatformSupported>
+  </PropertyGroup>
+
+  <!-- Until we have support for it, pretend it supports it -->
+  <ItemGroup>
+    <SdkSupportedTargetPlatformVersion Include="1.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- We don't want to run build server when not running as tests. -->
+    <UseRazorBuildServer>false</UseRazorBuildServer>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$([MSBuild]::GetTargetPlatformIdentifier($(TargetFramework)))' == 'browser'">
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.0-preview.4.23260.4" />
+  </ItemGroup>
+
+</Project>

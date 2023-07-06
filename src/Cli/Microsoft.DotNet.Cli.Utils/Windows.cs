@@ -1,6 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -37,19 +36,6 @@ namespace Microsoft.DotNet.Cli.Utils
         public static bool InstallRunning()
         {
             return !Mutex.TryOpenExisting(@"Global\_MSIExecute", out _);
-        }
-
-        /// <summary>
-        /// Queries the Windows Update Agent API to determine if there is a pending reboot.
-        /// </summary>
-        /// <returns><see langword="true"/> if there is a pending reboot; <see langword="false"> otherwise.</see></returns>
-        /// <remarks>
-        /// See <see href="https://docs.microsoft.com/en-us/windows/win32/api/wuapi/nf-wuapi-isysteminformation-get_rebootrequired">this</see>
-        /// for more information.
-        /// </remarks>
-        public static bool RebootRequired()
-        {
-            return new SystemInformationClass().RebootRequired;
         }
 
         /// <summary>

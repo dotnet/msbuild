@@ -1,0 +1,9 @@
+﻿{
+  "author": "Microsoft",
+  "name": "File MSBuild Directory.Build.props",
+  "description": "File Directory.Build.props vuoto che può essere usato per specificare le proprietà di MSBuild per un'intera cartella",
+  "symbols/inherit/displayName": "Ereditare",
+  "symbols/inherit/description": "Se True, aggiunge un'importazione di Directory.Build.props più vicino nella gerarchia delle directory del file system. Directory.Build.props non eredita per impostazione predefinita. In questo modo è possibile creare un set di personalizzazioni cartella per cartella.",
+  "symbols/useArtifacts/displayName": "Use Artifacts Output Layout",
+  "symbols/useArtifacts/description": "If true, adds a property to enable the artifacts output layout. This is a common pattern for projects that produce build artifacts, such as NuGet packages, that are placed in a common folder."
+}

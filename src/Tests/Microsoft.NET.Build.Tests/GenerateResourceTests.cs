@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -19,7 +22,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory(Skip="https://github.com/microsoft/msbuild/issues/4488")]
-        [InlineData("netcoreapp3.0", true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
         public void DependentUponTest(string targetFramework, bool isExe)
         {
             var testProject = new TestProject

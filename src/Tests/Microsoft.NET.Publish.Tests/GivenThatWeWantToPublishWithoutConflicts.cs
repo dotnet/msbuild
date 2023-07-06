@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
@@ -26,7 +26,7 @@ namespace Microsoft.NET.Publish.Tests
             // This dll is included in both the explicit package reference and Microsoft.NET.Build.Extensions. We prevent a double write in 
             // _ComputeResolvedCopyLocalPublishAssets by removing dlls duplicated between package references and implicitly expanded .NET references.
             var reference = "System.Runtime.InteropServices.RuntimeInformation";
-            var targetFramework = "net461";
+            var targetFramework = "net462";
             var testProject = new TestProject()
             {
                 Name = "ConflictingFilePublish",
@@ -38,7 +38,7 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
             var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, "ResolvedFileToPublish", GetValuesCommand.ValueType.Item)
-           {
+            {
                 DependsOnTargets = "Publish"
             };
 
@@ -52,7 +52,7 @@ namespace Microsoft.NET.Publish.Tests
             files.Count().Should().Be(1);
 
             // We should choose the system.runtime.interopservices.runtimeinformation file from Microsoft.NET.Build.Extensions as it has a higher AssemblyVersion (4.0.2.0 compared to 4.0.1.0)
-            files.FirstOrDefault().Contains(@"Microsoft.NET.Build.Extensions\net461\lib\System.Runtime.InteropServices.RuntimeInformation.dll").Should().BeTrue();
+            files.FirstOrDefault().Contains(@"Microsoft.NET.Build.Extensions\net462\lib\System.Runtime.InteropServices.RuntimeInformation.dll").Should().BeTrue();
         }
 
         [Theory]
@@ -60,15 +60,17 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(false)]
         public void It_has_consistent_behavior_when_publishing_single_file(bool shouldPublishSingleFile)
         {
-            var targetFramework = "netcoreapp3.1";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var testProject = new TestProject()
             {
                 Name = "DuplicateFiles",
                 TargetFrameworks = targetFramework,
                 IsSdkProject = true,
                 IsExe = true,
-                RuntimeIdentifier = "win-x64"
+                RuntimeIdentifier = "win-x64",
+                SelfContained = "true"
             };
+
             // The Microsoft.TestPlatform.CLI package contains System.Runtime.CompilerServices.Unsafe.dll as content, which could cause a double write with the same dll originating from the 
             // runtime package. Without _HandleFileConflictsForPublish this would be caught when by the bundler when publishing single file, but a normal publish would succeed with double writes.
             testProject.PackageReferences.Add(new TestPackageReference("Microsoft.TestPlatform.CLI", "16.5.0"));
@@ -79,7 +81,8 @@ namespace Microsoft.NET.Publish.Tests
                 DependsOnTargets = "Publish"
             };
 
-            if (shouldPublishSingleFile) {
+            if (shouldPublishSingleFile)
+            {
                 getValuesCommand.Execute("/p:PublishSingleFile=true")
                     .Should()
                     .Pass();

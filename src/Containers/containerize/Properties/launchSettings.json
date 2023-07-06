@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "containerize": {
+      "commandName": "Project",
+      "commandLineArgs": "\"S:\\play\\container-package-test\\obj\\Release\\net7.0\\PubTmp\\Out\" --baseregistry mcr.microsoft.com --baseimagename dotnet/aspnet --baseimagetag 7.0 --outputregistry ghcr.io --imagename baronfel/container-package-test --workingdirectory /app --entrypoint /app/container-package-test.exe --labels org.opencontainers.image.created=2022-10-27T14:17:19.9046559Z --imagetags latest --ports 80/tcp --environmentvariables ASPNETCORE_URLS=http://+:80 \r\n"
+    }
+  }
+}

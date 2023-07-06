@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 
@@ -12,12 +12,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// </summary>
     public class WorkloadManifest
     {
-        internal WorkloadManifest(string id, FXVersion version, string? description, string? informationalPath,  Dictionary<WorkloadId, BaseWorkloadDefinition> workloads, Dictionary<WorkloadPackId, WorkloadPack> packs, Dictionary<string, FXVersion>? dependsOnManifests)
+        internal WorkloadManifest(string id, FXVersion version, string? description, string manifestPath,  Dictionary<WorkloadId, BaseWorkloadDefinition> workloads, Dictionary<WorkloadPackId, WorkloadPack> packs, Dictionary<string, FXVersion>? dependsOnManifests)
         {
             Id = id;
             ParsedVersion = version;
             Description = description;
-            InformationalPath = informationalPath;
+            ManifestPath = manifestPath;
             Workloads = workloads;
             Packs = packs;
             DependsOnManifests = dependsOnManifests;
@@ -45,11 +45,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public string? Description { get; }
 
-        /// <summary>
-        /// A path that indicates where the manifest was loaded from, for diagnostic purposes only.
-        /// Not guaranteed to be set or to be a valid filesystem path.
-        /// </summary>
-        public string? InformationalPath { get; }
+        public string ManifestPath { get; }
 
         public Dictionary<WorkloadId, BaseWorkloadDefinition> Workloads { get; }
         public Dictionary<WorkloadPackId, WorkloadPack> Packs { get; }

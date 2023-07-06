@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>classlib</RootNamespace>
+    <TargetFramework>%FRAMEWORK%</TargetFramework>
+  </PropertyGroup>
+
+</Project>

@@ -54,6 +54,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <TargetFrameworkIdentifier>$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)'))</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)', 2))</TargetFrameworkVersion>
   </PropertyGroup>
+  
+  <PropertyGroup>
+    <_TargetFrameworkVersionWithoutV>$(TargetFrameworkVersion.TrimStart('vV'))</_TargetFrameworkVersionWithoutV>
+  </PropertyGroup>
 
   <!--
     Parse TargetPlatform properties.
@@ -107,17 +111,31 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup>
       <TargetPlatformSupported Condition="'$(TargetPlatformIdentifier)' == 'Windows'">true</TargetPlatformSupported>
+      <UseWorkloadsSpecificError Condition="($(TargetPlatformIdentifier) == 'ios' or $(TargetPlatformIdentifier) == 'tvos' or $(TargetPlatformIdentifier) == 'maccatalyst' or $(TargetPlatformIdentifier) == 'android' or $(TargetPlatformIdentifier.StartsWith('browser'))) and '$(MSBuildEnableWorkloadResolver)' != 'true'">true</UseWorkloadsSpecificError>
     </PropertyGroup>
 
-    <NETSdkError Condition="'$(TargetPlatformSupported)' != 'true'"
+    <NETSdkError Condition="'$(TargetPlatformSupported)' != 'true' and '$(UseWorkloadsSpecificError)' != 'true'"
                  ResourceName="UnsupportedTargetPlatformIdentifier"
+                 FormatArguments="$(TargetPlatformIdentifier)" />
+
+    <NETSdkError Condition="'$(TargetPlatformSupported)' != 'true' and '$(UseWorkloadsSpecificError)' == 'true'"
+                 ResourceName="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled"
                  FormatArguments="$(TargetPlatformIdentifier)" />
   </Target>
 
   <UsingTask TaskName="AllowEmptyTelemetry" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="_CollectTargetFrameworkForTelemetry" AfterTargets="_CheckForUnsupportedTargetFramework">
-    <AllowEmptyTelemetry EventName="targetframeworkeval" EventData="TargetFrameworkVersion=$([MSBuild]::Escape('$(TargetFrameworkMoniker)'));RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained);UseApphost=$(UseApphost);OutputType=$(OutputType)" />
+    <ItemGroup>
+      <TFTelemetry Include="TargetFrameworkVersion" Value="$([MSBuild]::Escape('$(TargetFrameworkMoniker)'))" />
+      <TFTelemetry Include="RuntimeIdentifier" Value="$(RuntimeIdentifier)" />
+      <TFTelemetry Include="SelfContained" Value="$(SelfContained)" />
+      <TFTelemetry Include="UseApphost" Value="$(UseApphost)" />
+      <TFTelemetry Include="OutputType" Value="$(OutputType)" />
+      <TFTelemetry Include="UseArtifactsOutput" Value="$(UseArtifactsOutput)" />
+      <TFTelemetry Include="ArtifactsPathLocationType" Value="$(_ArtifactsPathLocationType)" />
+    </ItemGroup>
+    <AllowEmptyTelemetry EventName="targetframeworkeval" EventData="@(TFTelemetry)" />
   </Target>
 
   <!--
@@ -199,7 +217,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <PropertyGroup>
-      <TargetPlatformVersion Condition="'@(_ValidTargetPlatformVersion)' != '' and '@(_ValidTargetPlatformVersion->Count())' == '1' and '@(_ValidTargetPlatformVersion)' != '$(TargetPlatformVersion)'">@(_ValidTargetPlatformVersion)</TargetPlatformVersion>
+      <TargetPlatformVersion Condition="'@(_ValidTargetPlatformVersion)' != '' and '@(_ValidTargetPlatformVersion->Distinct()->Count())' == '1' and '@(_ValidTargetPlatformVersion)' != '$(TargetPlatformVersion)'">@(_ValidTargetPlatformVersion->Distinct())</TargetPlatformVersion>
     </PropertyGroup>
   </Target>
 
@@ -218,31 +236,12 @@ Copyright (c) .NET Foundation. All rights reserved.
                  FormatArguments="$(TargetPlatformVersion);$(TargetPlatformIdentifier);$(_ValidTargetPlatformVersions)" />
   </Target>
 
-  <!-- Exclude files from OutputPath and IntermediateOutputPath from default item globs.  Use the value
-       of these properties before the TargetFramework is appended, so that if these values are specified
-       in the project file, the specified value will be used for the exclude. -->
-  <PropertyGroup>
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(OutputPath)/**</DefaultItemExcludes>
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(IntermediateOutputPath)/**</DefaultItemExcludes>
-  </PropertyGroup>
-
-  <!-- Projects which don't use Microsoft.NET.Sdk will typically define the OutputPath directly (usually in a
-       Configuration-specific PropertyGroup), so in that case we won't append to it by default. -->
-  <PropertyGroup Condition="'$(UsingNETSdkDefaults)' == 'true'">
-    <AppendTargetFrameworkToOutputPath Condition="'$(AppendTargetFrameworkToOutputPath)' == ''">true</AppendTargetFrameworkToOutputPath>
-  </PropertyGroup>
+  <!-- Hook for processing after target framework parsing (for example to customize output paths) -->
+  <Import Project="$(AfterTargetFrameworkInferenceTargets)" Condition="$(AfterTargetFrameworkInferenceTargets) != ''" />
 
   <PropertyGroup>
-    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and ('$(ProduceOnlyReferenceAssembly)' != 'true')" >true</ProduceReferenceAssembly>
-  </PropertyGroup>
-
-  <!--
-    Append $(TargetFramework) directory to output and intermediate paths to prevent bin clashes between
-    targets.
-   -->
-  <PropertyGroup Condition="'$(AppendTargetFrameworkToOutputPath)' == 'true' and '$(TargetFramework)' != '' and '$(_UnsupportedTargetFrameworkError)' != 'true'">
-    <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework.ToLowerInvariant())\</IntermediateOutputPath>
-    <OutputPath>$(OutputPath)$(TargetFramework.ToLowerInvariant())\</OutputPath>
+    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and ('$(ProduceOnlyReferenceAssembly)' != 'true') and '$(MSBuildProjectExtension)' != '.fsproj'" >true</ProduceReferenceAssembly>
+    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 7.0)) and ('$(ProduceOnlyReferenceAssembly)' != 'true') and '$(MSBuildProjectExtension)' == '.fsproj'" >true</ProduceReferenceAssembly>
   </PropertyGroup>
 
 </Project>

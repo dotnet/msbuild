@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -15,14 +15,14 @@ namespace Microsoft.DotNet.Cli.Telemetry
     public class Telemetry : ITelemetry
     {
         internal static string CurrentSessionId = null;
+        internal static bool DisabledForTests = false;
         private readonly int _senderCount;
         private TelemetryClient _client = null;
         private Dictionary<string, string> _commonProperties = null;
         private Dictionary<string, double> _commonMeasurements = null;
         private Task _trackEventTask = null;
 
-        private const string InstrumentationKey = "74cc1c9e-3e6e-4d05-b3fc-dde9101d0254";
-        private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
+        private const string ConnectionString = "InstrumentationKey=74cc1c9e-3e6e-4d05-b3fc-dde9101d0254";
 
         public bool Enabled { get; }
 
@@ -37,12 +37,19 @@ namespace Microsoft.DotNet.Cli.Telemetry
             IEnvironmentProvider environmentProvider = null,
             int senderCount = 3)
         {
+
+            if (DisabledForTests)
+            {
+                return;
+            }
+
             if (environmentProvider == null)
             {
                 environmentProvider = new EnvironmentProvider();
             }
 
-            Enabled = !environmentProvider.GetEnvironmentVariableAsBool(TelemetryOptout, false) && PermissionExists(sentinel);
+            Enabled = !environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.TELEMETRY_OPTOUT, defaultValue: CompileOptions.TelemetryOptOutDefault)
+                        && PermissionExists(sentinel);
 
             if (!Enabled)
             {
@@ -61,6 +68,17 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 //initialize in task to offload to parallel thread
                 _trackEventTask = Task.Run(() => InitializeTelemetry());
             }
+        }
+
+        internal static void DisableForTests()
+        {
+            DisabledForTests = true;
+            CurrentSessionId = null;
+        }
+
+        internal static void EnableForTests()
+        {
+            DisabledForTests = false;
         }
 
         private bool PermissionExists(IFirstTimeUseNoticeSentinel sentinel)
@@ -97,6 +115,16 @@ namespace Microsoft.DotNet.Cli.Telemetry
             _trackEventTask.Wait();
         }
 
+        // Adding dispose on graceful shutdown per https://github.com/microsoft/ApplicationInsights-dotnet/issues/1152#issuecomment-518742922
+        public void Dispose()
+        {
+            if (_client != null)
+            {
+                _client.TelemetryConfiguration.Dispose();
+                _client = null;
+            }
+        }
+
         public void ThreadBlockingTrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
         {
             if (!Enabled)
@@ -112,10 +140,11 @@ namespace Microsoft.DotNet.Cli.Telemetry
             {
                 var persistenceChannel = new PersistenceChannel.PersistenceChannel(sendersCount: _senderCount);
                 persistenceChannel.SendingInterval = TimeSpan.FromMilliseconds(1);
-                TelemetryConfiguration.Active.TelemetryChannel = persistenceChannel;
 
-                _client = new TelemetryClient();
-                _client.InstrumentationKey = InstrumentationKey;
+                var config = TelemetryConfiguration.CreateDefault();
+                config.TelemetryChannel = persistenceChannel;
+                config.ConnectionString = ConnectionString;
+                _client = new TelemetryClient(config);
                 _client.Context.Session.Id = CurrentSessionId;
                 _client.Context.Device.OperatingSystem = RuntimeEnvironment.OperatingSystem;
 

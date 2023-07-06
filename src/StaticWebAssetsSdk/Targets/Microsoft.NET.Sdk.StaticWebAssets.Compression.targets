@@ -1,0 +1,171 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.StaticWebAssets.Compression.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project ToolsVersion="14.0">
+
+  <UsingTask TaskName="Microsoft.AspNetCore.StaticWebAssets.Tasks.BrotliCompress" AssemblyFile="$(StaticWebAssetsSdkBuildTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.AspNetCore.StaticWebAssets.Tasks.GZipCompress" AssemblyFile="$(StaticWebAssetsSdkBuildTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.AspNetCore.StaticWebAssets.Tasks.ResolveCompressedAssets" AssemblyFile="$(StaticWebAssetsSdkBuildTasksAssembly)" />
+
+  <PropertyGroup>
+    <BuildCompressionFormats>$(BuildCompressionFormats);gzip</BuildCompressionFormats>
+    <PublishCompressionFormats>$(PublishCompressionFormats);gzip;brotli</PublishCompressionFormats>
+    <DisableBuildCompression Condition="'$(DisableBuildCompression)' == ''">false</DisableBuildCompression>
+    <CompressionIncludePatterns>$(CompressionIncludePatterns)</CompressionIncludePatterns>
+    <CompressionExcludePatterns>$(CompressionExcludePatterns)</CompressionExcludePatterns>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ResolveCompressedFilesDependsOn>$(ResolveCompressedFilesDependsOn)</ResolveCompressedFilesDependsOn>
+    <ResolveCompressedFilesForPublishDependsOn>$(ResolveCompressedFilesForPublishDependsOn)</ResolveCompressedFilesForPublishDependsOn>
+    <CompressFilesDependsOn>$(CompressFilesDependsOn)</CompressFilesDependsOn>
+    <CompressFilesForPublishDependsOn>$(CompressFilesForPublishDependsOn)</CompressFilesForPublishDependsOn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateComputedBuildStaticWebAssetsDependsOn>
+      $(GenerateComputedBuildStaticWebAssetsDependsOn);
+      _CompressFiles;
+    </GenerateComputedBuildStaticWebAssetsDependsOn>
+    <GenerateComputedPublishStaticWebAssetsDependsOn>
+      $(GenerateComputedPublishStaticWebAssetsDependsOn);
+      _CompressFilesForPublish;
+    </GenerateComputedPublishStaticWebAssetsDependsOn>
+    <StaticWebAssetsPrepareForPublishDependsOn>
+      $(StaticWebAssetsPrepareForPublishDependsOn);
+      _CompressFilesForPublish;
+    </StaticWebAssetsPrepareForPublishDependsOn>
+    <ResolveStaticWebAssetsInputsDependsOn>
+      $(ResolveStaticWebAssetsInputsDependsOn);
+      _ResolveCompressedFiles;
+    </ResolveStaticWebAssetsInputsDependsOn>
+    <ResolvePublishStaticWebAssetsDependsOn>
+      $(ResolvePublishStaticWebAssetsDependsOn);
+      _ResolveCompressedFilesForPublish;
+    </ResolvePublishStaticWebAssetsDependsOn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(DOTNET_HOST_PATH)' == ''">
+    <_DotNetHostDirectory>$(NetCoreRoot)</_DotNetHostDirectory>
+    <_DotNetHostFileName>dotnet</_DotNetHostFileName>
+    <_DotNetHostFileName Condition="'$(OS)' == 'Windows_NT'">dotnet.exe</_DotNetHostFileName>
+  </PropertyGroup>
+
+  <Target
+    Name="_ResolveCompressedFiles"
+    DependsOnTargets="$(ResolveCompressedFilesDependsOn)"
+    Condition="'$(DisableBuildCompression)' != 'true'">
+
+    <ResolveCompressedAssets
+      CandidateAssets="@(StaticWebAsset)"
+      Formats="$(BuildCompressionFormats)"
+      IncludePatterns="$(CompressionIncludePatterns)"
+      ExcludePatterns="$(CompressionExcludePatterns)"
+      ExplicitAssets="@(AssetToCompress)"
+      OutputPath="$(IntermediateOutputPath)\compressed">
+
+      <Output
+        TaskParameter="AssetsToCompress"
+        ItemName="_CompressedStaticWebAssets" />
+
+    </ResolveCompressedAssets>
+
+    <ItemGroup>
+      <StaticWebAsset Include="@(_CompressedStaticWebAssets)" RemoveMetadata="RelatedAssetOriginalItemSpec" />
+    </ItemGroup>
+
+  </Target>
+
+  <Target
+    Name="_ResolveCompressedFilesForPublish"
+    DependsOnTargets="$(ResolveCompressedFilesForPublishDependsOn)"
+    Condition="'$(DisableBuildCompression)' != 'true'">
+
+    <ItemGroup>
+      <_CandidateAssetsForPublish
+        Include="@(StaticWebAsset)"
+        Condition="'%(AssetKind)' != 'Build'" />
+    </ItemGroup>
+
+    <ResolveCompressedAssets
+      CandidateAssets="@(_CandidateAssetsForPublish)"
+      Formats="$(PublishCompressionFormats)"
+      IncludePatterns="$(CompressionIncludePatterns)"
+      ExcludePatterns="$(CompressionExcludePatterns)"
+      ExplicitAssets="@(AssetToCompress)"
+      OutputPath="$(IntermediateOutputPath)\compressed\publish">
+
+      <Output
+        TaskParameter="AssetsToCompress"
+        ItemName="_CompressedStaticWebAssetsForPublish" />
+
+    </ResolveCompressedAssets>
+
+    <ItemGroup>
+      <StaticWebAsset Include="@(_CompressedStaticWebAssetsForPublish)" RemoveMetadata="RelatedAssetOriginalItemSpec" />
+    </ItemGroup>
+
+  </Target>
+
+  <Target
+    Name="_CompressFiles"
+    DependsOnTargets="$(CompressFilesDependsOn)"
+    Condition="'$(DisableBuildCompression)' != 'true'">
+
+    <ItemGroup>
+      <_GZipCompressedStaticWebAssets Include="@(_CompressedStaticWebAssets)" Condition="'%(AssetTraitName)' == 'Content-Encoding' and '%(AssetTraitValue)' == 'gzip'" />
+      <_BrotliCompressedStaticWebAssets Include="@(_CompressedStaticWebAssets)" Condition="'%(AssetTraitName)' == 'Content-Encoding' and '%(AssetTraitValue)' == 'br'" />
+    </ItemGroup>
+
+    <GZipCompress Condition="'@(_GZipCompressedStaticWebAssets)' != ''"
+      FilesToCompress="@(_GZipCompressedStaticWebAssets)" />
+
+    <BrotliCompress Condition="'@(_BrotliCompressedStaticWebAssets)' != ''"
+      FilesToCompress="@(_BrotliCompressedStaticWebAssets)"
+      CompressionLevel="$(_BlazorBrotliCompressionLevel)"
+      ToolAssembly="$(_StaticWebAssetsSdkToolAssembly)"
+      ToolExe="$(_DotNetHostFileName)"
+      ToolPath="$(_DotNetHostDirectory)" />
+
+    <ItemGroup>
+      <FileWrites Include="@(_GZipCompressedStaticWebAssets)" />
+      <FileWrites Include="@(_BrotliCompressedStaticWebAssets)" />
+    </ItemGroup>
+  </Target>
+
+  <Target
+    Name="_CompressFilesForPublish"
+    DependsOnTargets="$(CompressFilesForPublishDependsOn)"
+    Condition="'$(DisableBuildCompression)' != 'true'">
+
+    <ItemGroup>
+      <_GZipCompressedStaticWebAssetsForPublish Include="@(_CompressedStaticWebAssetsForPublish)" Condition="'%(AssetTraitName)' == 'Content-Encoding' and '%(AssetTraitValue)' == 'gzip'" />
+      <_BrotliCompressedStaticWebAssetsForPublish Include="@(_CompressedStaticWebAssetsForPublish)" Condition="'%(AssetTraitName)' == 'Content-Encoding' and '%(AssetTraitValue)' == 'br'" />
+    </ItemGroup>
+
+    <GZipCompress Condition="'@(_GZipCompressedStaticWebAssetsForPublish)' != ''"
+      FilesToCompress="@(_GZipCompressedStaticWebAssetsForPublish)" />
+
+    <BrotliCompress Condition="'@(_BrotliCompressedStaticWebAssetsForPublish)' != ''"
+      FilesToCompress="@(_BrotliCompressedStaticWebAssetsForPublish)"
+      CompressionLevel="$(_BlazorBrotliCompressionLevel)"
+      ToolAssembly="$(_StaticWebAssetsSdkToolAssembly)"
+      ToolExe="$(_DotNetHostFileName)"
+      ToolPath="$(_DotNetHostDirectory)" />
+
+    <ItemGroup>
+      <FileWrites Include="@(_GZipCompressedStaticWebAssetsForPublish)" />
+      <FileWrites Include="@(_BrotliCompressedStaticWebAssetsForPublish)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

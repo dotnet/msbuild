@@ -1,0 +1,17 @@
+﻿Description:
+  Installs a template package.
+
+Usage:
+  dotnet new install <package>... [options]
+
+Arguments:
+  <package>  NuGet package ID or path to folder or NuGet package to install. 
+             To install the NuGet package of certain version, use <package ID>::<version>.
+
+Options:
+  --interactive                                Allows the command to stop and wait for user input or action (for example to complete authentication).
+  --add-source, --nuget-source <nuget-source>  Specifies a NuGet source to use.
+  --force                                      Allows installing template packages from the specified sources even if they would override a template package from another source.
+  -v, --verbosity <LEVEL>                      Sets the verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], and diag[nostic]. [default: normal]
+  -d, --diagnostics                            Enables diagnostic output.
+  -?, -h, --help                               Show command line help.

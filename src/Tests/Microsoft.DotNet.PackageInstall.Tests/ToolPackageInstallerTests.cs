@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -33,7 +33,22 @@ using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.PackageInstall.Tests
 {
-    public class ToolPackageInstallerTests : SdkTest
+    internal class DotnetEnvironmentTestFixture : IDisposable
+    {
+        private readonly string _originalPath;
+        private const string _PATH_VAR_NAME = "PATH";
+
+        public DotnetEnvironmentTestFixture()
+        {
+            string dotnetRootUnderTest = TestContext.Current.ToolsetUnderTest.DotNetRoot;
+            _originalPath = Environment.GetEnvironmentVariable(_PATH_VAR_NAME);
+            Environment.SetEnvironmentVariable(_PATH_VAR_NAME, dotnetRootUnderTest + Path.PathSeparator + _originalPath);
+        }
+
+        public void Dispose() => Environment.SetEnvironmentVariable(_PATH_VAR_NAME, _originalPath);
+    }
+
+    public class ToolPackageInstallerTests : SdkTest, IClassFixture<DotnetEnvironmentTestFixture>
     {
         [Theory]
         [InlineData(false)]
@@ -47,7 +62,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             Action a = () => installer.InstallPackage(new PackageLocation(), packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion), targetFramework: _testTargetframework);
 
-            a.ShouldThrow<ToolPackageException>().WithMessage(Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
+            a.Should().Throw<ToolPackageException>().WithMessage(Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
 
             reporter.Lines.Count.Should().Be(1);
             reporter.Lines[0].Should().Contain(TestPackageId.ToString());
@@ -460,7 +475,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 }
             };
 
-            a.ShouldThrow<ToolPackageException>().WithMessage(Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
+            a.Should().Throw<ToolPackageException>().WithMessage(Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
 
             AssertInstallRollBack(fileSystem, store);
         }
@@ -476,7 +491,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
-            void FailedStepAfterSuccessRestore() => throw new GracefulException("simulated error");
+            static void FailedStepAfterSuccessRestore() => throw new GracefulException("simulated error");
 
             Action a = () =>
             {
@@ -494,7 +509,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 }
             };
 
-            a.ShouldThrow<GracefulException>().WithMessage("simulated error");
+            a.Should().Throw<GracefulException>().WithMessage("simulated error");
 
             AssertInstallRollBack(fileSystem, store);
         }
@@ -521,7 +536,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                         versionRange: VersionRange.Parse(TestPackageVersion),
                         targetFramework: _testTargetframework);
 
-                    first.ShouldNotThrow();
+                    first.Should().NotThrow();
 
                     installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { source }),
                         packageId: TestPackageId,
@@ -532,7 +547,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 }
             };
 
-            a.ShouldThrow<ToolPackageException>().Where(
+            a.Should().Throw<ToolPackageException>().Where(
                 ex => ex.Message ==
                       string.Format(
                           CommonLocalizableStrings.ToolPackageConflictPackageId,
@@ -567,7 +582,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
 
             reporter.Lines.Should().BeEmpty();
 
-            secondCall.ShouldThrow<ToolPackageException>().Where(
+            secondCall.Should().Throw<ToolPackageException>().Where(
                 ex => ex.Message ==
                       string.Format(
                           CommonLocalizableStrings.ToolPackageConflictPackageId,
@@ -821,7 +836,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                     versionRange: VersionRange.Parse(packageVersion),
                     targetFramework: _testTargetframework);
 
-                action.ShouldNotThrow<ToolConfigurationException>();
+                action.Should().NotThrow<ToolConfigurationException>();
 
                 fileSystem.File.Exists(package.Commands[0].Executable.Value).Should().BeTrue($"{package.Commands[0].Executable.Value} should exist");
 
@@ -1059,7 +1074,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         private readonly string _testTargetframework = BundledTargetFramework.GetTargetFrameworkMoniker();
         private const string TestPackageVersion = "1.0.4";
         private static readonly PackageId TestPackageId = new PackageId("global.tool.console.demo");
-        private static readonly IEnumerable<NuGetFramework> TestFrameworks = new NuGetFramework[] { NuGetFramework.Parse("netcoreapp2.1")};
+        private static readonly IEnumerable<NuGetFramework> TestFrameworks = new NuGetFramework[] { NuGetFramework.Parse("netcoreapp2.1") };
 
         public ToolPackageInstallerTests(ITestOutputHelper log) : base(log)
         {

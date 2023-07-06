@@ -154,4 +154,10 @@
   <data name="ListToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
     <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</value>
   </data>
+  <data name="PackageIdArgumentDescription" xml:space="preserve">
+    <value>The NuGet Package Id of the tool to list</value>
+  </data>
+  <data name="PackageIdArgumentName" xml:space="preserve">
+    <value>PACKAGE_ID</value>
+  </data>
 </root>

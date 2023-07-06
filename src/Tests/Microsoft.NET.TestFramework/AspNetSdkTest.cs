@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -39,11 +39,37 @@ namespace Microsoft.NET.TestFramework
                 {
                     var ns = project.Root.Name.Namespace;
                     var targetFramework = project.Descendants()
-                       .Single(e => e.Name.LocalName == "TargetFramework");
-                    if (targetFramework.Value == "$(AspNetTestTfm)")
+                       .SingleOrDefault(e => e.Name.LocalName == "TargetFramework");
+                    if (targetFramework?.Value == "$(AspNetTestTfm)")
                     {
                         targetFramework.Value = overrideTfm ?? DefaultTfm;
                     }
+                    var targetFrameworks = project.Descendants()
+                        .SingleOrDefault(e => e.Name.LocalName == "TargetFrameworks");
+                    if (targetFrameworks != null)
+                    {
+                        targetFrameworks.Value = targetFrameworks.Value.Replace("$(AspNetTestTfm)", overrideTfm ?? DefaultTfm);
+                    }
+                });
+            return projectDirectory;
+        }
+
+        public TestAsset CreateMultitargetAspNetSdkTestAsset(
+            string testAsset,
+            [CallerMemberName] string callerName = "",
+            string subdirectory = "",
+            string overrideTfm = null,
+            string identifier = null)
+        {
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset(testAsset, callingMethod: callerName, testAssetSubdirectory: subdirectory, identifier: identifier)
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var targetFramework = project.Descendants()
+                       .Single(e => e.Name.LocalName == "TargetFrameworks");
+                    targetFramework.Value = targetFramework.Value.Replace("$(AspNetTestTfm)", overrideTfm ?? DefaultTfm);
                 });
             return projectDirectory;
         }

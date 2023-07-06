@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
+  <Import Project="$(RepositoryEngineeringDir)Packages.props" />
   <ItemGroup>
     <SupportedPlatform Remove="Android" />
     <SupportedPlatform Remove="iOS" />
@@ -51,6 +52,15 @@
         Update="Microsoft.NETCore.App"
         TargetingPackVersion="$(MicrosoftNETCoreAppRefPackageVersion)"
         RuntimeFrameworkVersion="$(MicrosoftNETCoreAppRuntimePackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(MicrosoftAspNetCoreAppRefPackageVersion.StartsWith('$(_TargetFrameworkVersionWithoutV)'))">
+    <KnownFrameworkReference Update="Microsoft.AspNetCore.App">
+      <LatestRuntimeFrameworkVersion>$(MicrosoftAspNetCoreAppRefPackageVersion)</LatestRuntimeFrameworkVersion>
+      <RuntimePackRuntimeIdentifiers>${SupportedRuntimeIdentifiers}</RuntimePackRuntimeIdentifiers>
+      <TargetingPackVersion>$(MicrosoftAspNetCoreAppRefPackageVersion)</TargetingPackVersion>
+      <DefaultRuntimeFrameworkVersion>$(MicrosoftAspNetCoreAppRefPackageVersion)</DefaultRuntimeFrameworkVersion>
+    </KnownFrameworkReference>
   </ItemGroup>
 
 </Project>

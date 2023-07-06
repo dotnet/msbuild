@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.TemplateEngine.Abstractions;
@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.New
     {
         public static readonly Guid FactoryId = new Guid("{4B11226E-4594-43A4-B843-EB97447B6455}");
 
-        public string DisplayName => "BuiltIn SDK packages";
+        public string DisplayName => ".NET SDK";
 
         public Guid Id { get => FactoryId; }
 

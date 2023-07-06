@@ -1,0 +1,6 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Web Yapılandırması",
+  "description": "Web Uygulaması ayarlarını yapılandırmak için kullanılan bir dosya",
+  "postActions/open-file/description": "Düzenleyicide web.config’i açar"
+}

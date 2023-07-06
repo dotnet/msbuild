@@ -1,0 +1,195 @@
+﻿const Microsoft.NET.Build.Containers.KnownLocalRegistryTypes.Docker = "Docker" -> string!
+const Microsoft.NET.Build.Containers.KnownLocalRegistryTypes.Podman = "Podman" -> string!
+Microsoft.NET.Build.Containers.BaseImageNotFoundException
+Microsoft.NET.Build.Containers.Constants
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.ComputeDotnetBaseImageTag() -> void
+static Microsoft.NET.Build.Containers.ContainerBuilder.ContainerizeAsync(System.IO.DirectoryInfo! publishDirectory, string! workingDir, string! baseRegistry, string! baseImageName, string! baseImageTag, string![]! entrypoint, string![]? cmd, string! imageName, string![]! imageTags, string? outputRegistry, System.Collections.Generic.Dictionary<string!, string!>! labels, Microsoft.NET.Build.Containers.Port[]? exposedPorts, System.Collections.Generic.Dictionary<string!, string!>! envVars, string! containerRuntimeIdentifier, string! ridGraphPath, string! localRegistry, string? containerUser, Microsoft.Extensions.Logging.ILoggerFactory! loggerFactory, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<int>!
+static readonly Microsoft.NET.Build.Containers.Constants.Version -> string!
+Microsoft.NET.Build.Containers.ContainerBuilder
+Microsoft.NET.Build.Containers.ContainerHelpers
+Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError
+Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError.InvalidPortNumber = 1 -> Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError
+Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError.InvalidPortType = 2 -> Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError
+Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError.MissingPortNumber = 0 -> Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError
+Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError.UnknownPortFormat = Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError.InvalidPortNumber | Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError.InvalidPortType -> Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError
+Microsoft.NET.Build.Containers.Descriptor
+Microsoft.NET.Build.Containers.Descriptor.Annotations.get -> System.Collections.Generic.Dictionary<string!, string?>?
+Microsoft.NET.Build.Containers.Descriptor.Annotations.init -> void
+Microsoft.NET.Build.Containers.Descriptor.Data.get -> string?
+Microsoft.NET.Build.Containers.Descriptor.Data.init -> void
+Microsoft.NET.Build.Containers.Descriptor.Descriptor() -> void
+Microsoft.NET.Build.Containers.Descriptor.Descriptor(string! mediaType, string! digest, long size) -> void
+Microsoft.NET.Build.Containers.Descriptor.Digest.get -> string!
+Microsoft.NET.Build.Containers.Descriptor.Digest.init -> void
+Microsoft.NET.Build.Containers.Descriptor.MediaType.get -> string!
+Microsoft.NET.Build.Containers.Descriptor.MediaType.init -> void
+Microsoft.NET.Build.Containers.Descriptor.Size.get -> long
+Microsoft.NET.Build.Containers.Descriptor.Size.init -> void
+Microsoft.NET.Build.Containers.Descriptor.UncompressedDigest.get -> string?
+Microsoft.NET.Build.Containers.Descriptor.UncompressedDigest.init -> void
+Microsoft.NET.Build.Containers.Descriptor.Urls.get -> string![]?
+Microsoft.NET.Build.Containers.Descriptor.Urls.init -> void
+Microsoft.NET.Build.Containers.KnownLocalRegistryTypes
+Microsoft.NET.Build.Containers.ManifestConfig
+Microsoft.NET.Build.Containers.ManifestConfig.digest.get -> string!
+Microsoft.NET.Build.Containers.ManifestConfig.digest.set -> void
+Microsoft.NET.Build.Containers.ManifestConfig.ManifestConfig() -> void
+Microsoft.NET.Build.Containers.ManifestConfig.ManifestConfig(string! mediaType, long size, string! digest) -> void
+Microsoft.NET.Build.Containers.ManifestConfig.mediaType.get -> string!
+Microsoft.NET.Build.Containers.ManifestConfig.mediaType.set -> void
+Microsoft.NET.Build.Containers.ManifestConfig.size.get -> long
+Microsoft.NET.Build.Containers.ManifestConfig.size.set -> void
+Microsoft.NET.Build.Containers.ManifestLayer
+Microsoft.NET.Build.Containers.ManifestLayer.digest.get -> string!
+Microsoft.NET.Build.Containers.ManifestLayer.digest.set -> void
+Microsoft.NET.Build.Containers.ManifestLayer.ManifestLayer() -> void
+Microsoft.NET.Build.Containers.ManifestLayer.ManifestLayer(string! mediaType, long size, string! digest, string![]? urls) -> void
+Microsoft.NET.Build.Containers.ManifestLayer.mediaType.get -> string!
+Microsoft.NET.Build.Containers.ManifestLayer.mediaType.set -> void
+Microsoft.NET.Build.Containers.ManifestLayer.size.get -> long
+Microsoft.NET.Build.Containers.ManifestLayer.size.set -> void
+Microsoft.NET.Build.Containers.ManifestLayer.urls.get -> string![]?
+Microsoft.NET.Build.Containers.ManifestLayer.urls.set -> void
+Microsoft.NET.Build.Containers.ManifestListV2
+Microsoft.NET.Build.Containers.ManifestListV2.ManifestListV2() -> void
+Microsoft.NET.Build.Containers.ManifestListV2.ManifestListV2(int schemaVersion, string! mediaType, Microsoft.NET.Build.Containers.PlatformSpecificManifest[]! manifests) -> void
+Microsoft.NET.Build.Containers.ManifestListV2.manifests.get -> Microsoft.NET.Build.Containers.PlatformSpecificManifest[]!
+Microsoft.NET.Build.Containers.ManifestListV2.manifests.set -> void
+Microsoft.NET.Build.Containers.ManifestListV2.mediaType.get -> string!
+Microsoft.NET.Build.Containers.ManifestListV2.mediaType.set -> void
+Microsoft.NET.Build.Containers.ManifestListV2.schemaVersion.get -> int
+Microsoft.NET.Build.Containers.ManifestListV2.schemaVersion.set -> void
+Microsoft.NET.Build.Containers.ManifestV2
+Microsoft.NET.Build.Containers.ManifestV2.Config.get -> Microsoft.NET.Build.Containers.ManifestConfig
+Microsoft.NET.Build.Containers.ManifestV2.Config.init -> void
+Microsoft.NET.Build.Containers.ManifestV2.GetDigest() -> string!
+Microsoft.NET.Build.Containers.ManifestV2.Layers.get -> System.Collections.Generic.List<Microsoft.NET.Build.Containers.ManifestLayer>!
+Microsoft.NET.Build.Containers.ManifestV2.Layers.init -> void
+Microsoft.NET.Build.Containers.ManifestV2.ManifestV2() -> void
+Microsoft.NET.Build.Containers.ManifestV2.MediaType.get -> string!
+Microsoft.NET.Build.Containers.ManifestV2.MediaType.init -> void
+Microsoft.NET.Build.Containers.ManifestV2.SchemaVersion.get -> int
+Microsoft.NET.Build.Containers.ManifestV2.SchemaVersion.init -> void
+Microsoft.NET.Build.Containers.PlatformInformation
+Microsoft.NET.Build.Containers.PlatformInformation.architecture.get -> string!
+Microsoft.NET.Build.Containers.PlatformInformation.architecture.set -> void
+Microsoft.NET.Build.Containers.PlatformInformation.features.get -> string![]!
+Microsoft.NET.Build.Containers.PlatformInformation.features.set -> void
+Microsoft.NET.Build.Containers.PlatformInformation.os.get -> string!
+Microsoft.NET.Build.Containers.PlatformInformation.os.set -> void
+Microsoft.NET.Build.Containers.PlatformInformation.PlatformInformation() -> void
+Microsoft.NET.Build.Containers.PlatformInformation.PlatformInformation(string! architecture, string! os, string? variant, string![]! features, string? version) -> void
+Microsoft.NET.Build.Containers.PlatformInformation.variant.get -> string?
+Microsoft.NET.Build.Containers.PlatformInformation.variant.set -> void
+Microsoft.NET.Build.Containers.PlatformInformation.version.get -> string?
+Microsoft.NET.Build.Containers.PlatformInformation.version.set -> void
+Microsoft.NET.Build.Containers.PlatformSpecificManifest
+Microsoft.NET.Build.Containers.PlatformSpecificManifest.digest.get -> string!
+Microsoft.NET.Build.Containers.PlatformSpecificManifest.digest.set -> void
+Microsoft.NET.Build.Containers.PlatformSpecificManifest.mediaType.get -> string!
+Microsoft.NET.Build.Containers.PlatformSpecificManifest.mediaType.set -> void
+Microsoft.NET.Build.Containers.PlatformSpecificManifest.platform.get -> Microsoft.NET.Build.Containers.PlatformInformation
+Microsoft.NET.Build.Containers.PlatformSpecificManifest.platform.set -> void
+Microsoft.NET.Build.Containers.PlatformSpecificManifest.PlatformSpecificManifest() -> void
+Microsoft.NET.Build.Containers.PlatformSpecificManifest.PlatformSpecificManifest(string! mediaType, long size, string! digest, Microsoft.NET.Build.Containers.PlatformInformation platform) -> void
+Microsoft.NET.Build.Containers.PlatformSpecificManifest.size.get -> long
+Microsoft.NET.Build.Containers.PlatformSpecificManifest.size.set -> void
+Microsoft.NET.Build.Containers.Port
+Microsoft.NET.Build.Containers.Port.Number.get -> int
+Microsoft.NET.Build.Containers.Port.Number.set -> void
+Microsoft.NET.Build.Containers.Port.Port() -> void
+Microsoft.NET.Build.Containers.Port.Port(int Number, Microsoft.NET.Build.Containers.PortType Type) -> void
+Microsoft.NET.Build.Containers.Port.Type.get -> Microsoft.NET.Build.Containers.PortType
+Microsoft.NET.Build.Containers.Port.Type.set -> void
+Microsoft.NET.Build.Containers.PortType
+Microsoft.NET.Build.Containers.PortType.tcp = 0 -> Microsoft.NET.Build.Containers.PortType
+Microsoft.NET.Build.Containers.PortType.udp = 1 -> Microsoft.NET.Build.Containers.PortType
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.SdkVersion.get -> string!
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.SdkVersion.set -> void
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.TargetFrameworkVersion.get -> string!
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.TargetFrameworkVersion.set -> void
+Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.ComputedBaseImageTag.get -> string?
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.BaseImageName.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.BaseImageName.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.BaseImageTag.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.BaseImageTag.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.BaseRegistry.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.BaseRegistry.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Cancel() -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerEnvironmentVariables.get -> Microsoft.Build.Framework.ITaskItem![]!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerEnvironmentVariables.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerizeDirectory.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerizeDirectory.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerRuntimeIdentifier.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerRuntimeIdentifier.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerUser.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ContainerUser.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.CreateNewImage() -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Dispose() -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Entrypoint.get -> Microsoft.Build.Framework.ITaskItem![]!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Entrypoint.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.EntrypointArgs.get -> Microsoft.Build.Framework.ITaskItem![]!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.EntrypointArgs.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.DefaultArgs.get -> Microsoft.Build.Framework.ITaskItem![]!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.DefaultArgs.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.AppCommand.get -> Microsoft.Build.Framework.ITaskItem![]!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.AppCommand.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.AppCommandArgs.get -> Microsoft.Build.Framework.ITaskItem![]!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.AppCommandArgs.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.AppCommandInstruction.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.AppCommandInstruction.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ExposedPorts.get -> Microsoft.Build.Framework.ITaskItem![]!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ExposedPorts.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedContainerConfiguration.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedContainerConfiguration.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedContainerManifest.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.GeneratedContainerManifest.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Repository.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Repository.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ImageTags.get -> string![]!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ImageTags.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Labels.get -> Microsoft.Build.Framework.ITaskItem![]!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Labels.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.LocalRegistry.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.LocalRegistry.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.OutputRegistry.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.OutputRegistry.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.PublishDirectory.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.PublishDirectory.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.RuntimeIdentifierGraphPath.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.RuntimeIdentifierGraphPath.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ToolExe.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ToolExe.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ToolPath.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.ToolPath.set -> void
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.WorkingDirectory.get -> string!
+Microsoft.NET.Build.Containers.Tasks.CreateNewImage.WorkingDirectory.set -> void
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ContainerEnvironmentVariables.get -> Microsoft.Build.Framework.ITaskItem![]!
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ContainerEnvironmentVariables.set -> void
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ContainerRepository.get -> string!
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ContainerRepository.set -> void
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ContainerImageTag.get -> string!
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ContainerImageTag.set -> void
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ContainerImageTags.get -> string![]!
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ContainerImageTags.set -> void
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ContainerRegistry.get -> string!
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ContainerRegistry.set -> void
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.FullyQualifiedBaseImageName.get -> string!
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.FullyQualifiedBaseImageName.set -> void
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.NewContainerEnvironmentVariables.get -> Microsoft.Build.Framework.ITaskItem![]!
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.NewContainerRepository.get -> string!
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.NewContainerRegistry.get -> string!
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.NewContainerTags.get -> string![]!
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ParseContainerProperties() -> void
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ParsedContainerImage.get -> string!
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ParsedContainerRegistry.get -> string!
+Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.ParsedContainerTag.get -> string!
+override Microsoft.NET.Build.Containers.Tasks.ComputeDotnetBaseImageTag.Execute() -> bool
+override Microsoft.NET.Build.Containers.Tasks.CreateNewImage.Execute() -> bool
+override Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.Execute() -> bool
+static Microsoft.NET.Build.Containers.ContainerHelpers.TryParsePort(string! input, out Microsoft.NET.Build.Containers.Port? port, out Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError? error) -> bool
+static Microsoft.NET.Build.Containers.ContainerHelpers.TryParsePort(string? portNumber, string? portType, out Microsoft.NET.Build.Containers.Port? port, out Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError? error) -> bool
+static readonly Microsoft.NET.Build.Containers.KnownLocalRegistryTypes.SupportedLocalRegistryTypes -> string![]!

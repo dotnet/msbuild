@@ -24,6 +24,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
   </PropertyGroup>
 
+  <!-- Default the value of PackRelease for every project. Note that this is pre-evaluated by the CLI in an evaluation before evaluation (see ReleasePropertyProjectLocator.cs).
+  Multitargeting pack splits a single 2 TFM project into 9 separate evaluations, with different target imports. Microsoft.NET.SDK.DefaultItems.Targets ...
+  is where PublishRelease is defaulted because it depends on _TargetFrameworkVersionWithoutV. Some targets do not run in some instances of dotnet pack.
+  So, we must set PackRelease here. Even though this occurs before project import, the project import can override PackRelease later, before the pre-evaluation, so this is fine.-->
+  <PropertyGroup Condition="'$(PackRelease)' == ''">
+    <!-- Do not depend on this value being correct until after project evaluation.-->
+    <PackRelease>true</PackRelease>
+  </PropertyGroup>
+
   <!-- User-facing configuration-agnostic defaults -->
   <PropertyGroup>
     <OutputType Condition=" '$(OutputType)' == '' ">Library</OutputType>
@@ -70,8 +79,20 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition=" '$(_PlatformWithoutConfigurationInference)' == 'ARM' ">
     <PlatformTarget Condition=" '$(PlatformTarget)' == '' ">ARM</PlatformTarget>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(_PlatformWithoutConfigurationInference)' == 'arm64' ">
+    <PlatformTarget Condition=" '$(PlatformTarget)' == '' ">arm64</PlatformTarget>
+  </PropertyGroup>
 
   <!-- Default settings for all projects built with this Sdk package -->
+
+  <PropertyGroup Condition=" '$(AssemblySearchPaths)' == '' ">
+    <!-- By default exclude GAC, registry, output directory from search paths. -->
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseCandidateAssemblyFiles)' != 'false'">{CandidateAssemblyFiles}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseHintPathFromItem)' != 'false'">$(AssemblySearchPaths);{HintPathFromItem}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseTargetFrameworkDirectory)' != 'false'">$(AssemblySearchPaths);{TargetFrameworkDirectory}</AssemblySearchPaths>
+    <AssemblySearchPaths Condition="'$(AssemblySearchPath_UseRawFileName)' != 'false'">$(AssemblySearchPaths);{RawFileName}</AssemblySearchPaths>
+  </PropertyGroup>
+
   <PropertyGroup>
     <DebugType Condition=" '$(DebugType)' == '' ">portable</DebugType>
 
@@ -87,8 +108,6 @@ Copyright (c) .NET Foundation. All rights reserved.
          a project targets .NET Framework and doesn't have any direct package dependencies. -->
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
 
-    <!-- Exclude GAC, registry, output directory from search paths. -->
-    <AssemblySearchPaths Condition=" '$(AssemblySearchPaths)' == '' ">{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
     <DesignTimeAssemblySearchPaths Condition=" '$(DesignTimeAssemblySearchPaths)' == '' ">$(AssemblySearchPaths)</DesignTimeAssemblySearchPaths>
 
     <AllowUnsafeBlocks Condition="'$(AllowUnsafeBlocks)'==''">false</AllowUnsafeBlocks>
@@ -101,7 +120,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DebugSymbols Condition="'$(DebugSymbols)'==''">false</DebugSymbols>
     <CheckForOverflowUnderflow Condition="'$(CheckForOverflowUnderflow)'==''">false</CheckForOverflowUnderflow>
     <AutomaticallyUseReferenceAssemblyPackages Condition="'$(AutomaticallyUseReferenceAssemblyPackages)'==''">true</AutomaticallyUseReferenceAssemblyPackages>
-    <MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>1.0.2</MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>
+    <MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>1.0.3</MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion>
     <CopyConflictingTransitiveContent>false</CopyConflictingTransitiveContent>
     <MSBuildCopyContentTransitively Condition="'$(MSBuildCopyContentTransitively)' == ''">true</MSBuildCopyContentTransitively>
     <ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts Condition="'$(ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts)' == ''">true</ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts>
@@ -138,11 +157,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- List of supported .NET windows target platform versions -->
   <Import Project="Microsoft.NET.WindowsSdkSupportedTargetPlatforms.props" />
 
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.SourceLink.props" />
+
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.CSharp.props" Condition="'$(MSBuildProjectExtension)' == '.csproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.VisualBasic.props" Condition="'$(MSBuildProjectExtension)' == '.vbproj'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.FSharp.props" Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ILLink.props" />
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Compatibility.props" />
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackTool.props" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.PackProjectTool.props" />

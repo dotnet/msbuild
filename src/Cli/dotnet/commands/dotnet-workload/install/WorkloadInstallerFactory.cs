@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IWorkloadResolver workloadResolver, 
             VerbosityOptions verbosity,
             string userProfileDir,
+            bool verifySignatures,
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir = null, 
             string tempDirPath = null,
@@ -37,7 +38,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     throw new InvalidOperationException(LocalizableStrings.OSDoesNotSupportMsi);
                 }
 
-                return NetSdkMsiInstallerClient.Create(sdkFeatureBand, workloadResolver,
+                return NetSdkMsiInstallerClient.Create(verifySignatures, sdkFeatureBand, workloadResolver,
                     nugetPackageDownloader, verbosity, packageSourceLocation, reporter, tempDirPath);
             }
 
@@ -48,7 +49,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
 
-            return new NetSdkManagedInstaller(reporter,
+            return new FileBasedInstaller(
+                reporter,
                 sdkFeatureBand,
                 workloadResolver,
                 userProfileDir,
@@ -68,7 +70,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public static InstallType GetWorkloadInstallType(SdkFeatureBand sdkFeatureBand, string dotnetDir)
         {
             string installerTypePath = Path.Combine(dotnetDir, "metadata",
-                "workloads", $"{sdkFeatureBand}", "installertype");
+                "workloads", $"{sdkFeatureBand.ToStringWithoutPrerelease()}", "installertype");
 
             if (File.Exists(Path.Combine(installerTypePath, "msi")))
             {

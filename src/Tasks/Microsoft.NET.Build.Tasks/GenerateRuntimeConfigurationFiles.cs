@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -91,7 +91,7 @@ namespace Microsoft.NET.Build.Tasks
 
             if (!string.IsNullOrEmpty(RollForward))
             {
-                if (!RollForwardValues.Any(v => string.Equals(RollForward, v, StringComparison.OrdinalIgnoreCase)))
+                if (!RollForwardValues.Contains(RollForward, StringComparer.OrdinalIgnoreCase))
                 {
                     Log.LogError(Strings.InvalidRollForwardValue, RollForward, string.Join(", ", RollForwardValues));
                     return;
@@ -267,9 +267,12 @@ namespace Microsoft.NET.Build.Tasks
                 return;
             }
 
-            var rawRuntimeOptions = File.ReadAllText(UserRuntimeConfig);
+            JObject runtimeOptionsFromProject;
+            using (JsonTextReader reader = new JsonTextReader(File.OpenText(UserRuntimeConfig)))
+            {
+                runtimeOptionsFromProject = JObject.Load(reader);
+            }
 
-            var runtimeOptionsFromProject = JObject.Parse(rawRuntimeOptions);
             foreach (var runtimeOption in runtimeOptionsFromProject)
             {
                 runtimeOptions.RawOptions.Add(runtimeOption.Key, runtimeOption.Value);

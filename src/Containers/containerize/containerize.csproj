@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(SdkTargetFramework)</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <StrongNameKeyId>MicrosoftShared</StrongNameKeyId>
+    <SignAssembly>true</SignAssembly>
+    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)"  />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsLoggingConsoleVersion)"  />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.NET.Build.Containers\Microsoft.NET.Build.Containers.csproj" />
+    <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
+  </ItemGroup>
+
+  <!-- Copy to TestExecutionDirectory for using in integration tests. -->
+  <Target Name="CopyDllToTestExecutionDirectory" AfterTargets="Build">
+    <ItemGroup>
+      <ContainerizeFiles Include="$(ArtifactsBinDir)containerize\$(Configuration)\$(SdkTargetFramework)\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ContainerizeFiles)" DestinationFiles="@(ContainerizeFiles->'$(ArtifactsTmpDir)Container\containerize\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <!-- Copy to *.csproj for using in sanity checks integration tests. -->
+  <Target Name="CopyCsprojToTestExecutionDirectory" AfterTargets="Build">
+    <Copy SourceFiles="$(MSBuildThisFileFullPath)" DestinationFiles="$(ArtifactsTmpDir)Container\ProjectFiles\$(MSBuildThisFileName).csproj" />
+  </Target>
+</Project>

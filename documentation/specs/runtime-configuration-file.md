@@ -127,15 +127,16 @@ The files are both JSON files stored in UTF-8 encoding. Below are sample files. 
 
 This section is created when building a project. Settings include:
 * `configProperties` - Indicates configuration properties to configure the runtime and the framework
-  * Examples:    
-    * Full list of [configuration properties](https://github.com/dotnet/docs/blob/main/docs/core/run-time-config/index.md) for CoreCLR. 
+  * Examples:
+    * Full list of [configuration properties](https://github.com/dotnet/docs/blob/main/docs/core/runtime-config/index.md) for CoreCLR.
     * `System.GC.Server` (old: `gcServer`) - Boolean indicating if the server GC should be used (Default: `true`).
     * `System.GC.Concurrent` (old: `gcConcurrent`) - Boolean indicating if background garbage collection should be used.
-* `framework` - Indicates the `name`, `version`, and other properties of the shared framework to use when activating the application including `applyPathes` and `rollForwardOnNoCandidateFx`. The presence of this section (or another framework in the new `frameworks` section) indicates that the application is a framework-dependent app.
-* `applyPatches` - When `false`, the most compatible framework version previously found is used. When `applyPatches` is unspecified or `true`, the framework from either the same or a higher version that differs only by the patch field will be used. See [roll-forward-on-no-candidate documentation](https://github.com/dotnet/core-setup/blob/main/Documentation/design-docs/roll-forward-on-no-candidate-fx.md) for more information.
-* `rollForwardOnNoCandidateFx` - Determines roll-forward behavior. Only applies to `production` releases. Values: 0(Off), 1 (roll forward on [minor] or [patch]), 2 (Roll forward on [major], [minor] or [patch])
- See [roll-forward-on-no-candidate documentation](https://github.com/dotnet/core-setup/blob/main/Documentation/design-docs/roll-forward-on-no-candidate-fx.md) for more information.
-* `frameworks` - This is an optional array added in 3.0 that allows multiple frameworks to be specified. The `name`, `version`, `applyPatches` and `rollForwardOnNoCandidateFx` properties are available. The `framework` section is no longer necessary in 3.0, but if present is treated as if it was the first framework in the `frameworks` section. The presence of frameworks in this section (or the `framework` section) indicates that the application is a framework-dependent app. See the notes at the end of this document for more information.
+* `framework` - Indicates the `name`, `version`, and other properties of the shared framework to use when activating the application including `applyPatches` and `rollForwardOnNoCandidateFx`. The presence of this section (or another framework in the new `frameworks` section) indicates that the application is a framework-dependent app.
+* `rollForward` - Introduced in .NET Core 3.0. Determines roll-forward behavior. Values: `LatestPatch`, `Minor`, `Major`, `LatestMinor`, `LatestMajor`, `Disable`. See [high-level design](https://github.com/dotnet/designs/blob/main/accepted/2019/runtime-binding.md#rollforward) and [detailed design](https://github.com/dotnet/runtime/blob/main/docs/design/features/framework-version-resolution.md) for more information.
+* `applyPatches` - **Deprecated in favor of `rollForward`**, please use `rollForward` property instead. When `false`, the most compatible framework version previously found is used. When `applyPatches` is unspecified or `true`, the framework from either the same or a higher version that differs only by the patch field will be used. See [roll-forward-on-no-candidate documentation](https://github.com/dotnet/runtime/blob/main/docs/design/features/roll-forward-on-no-candidate-fx.md) for more information.
+* `rollForwardOnNoCandidateFx` - **Deprecated in favor of `rollForward`**, please use `rollForward` property instead - Determines roll-forward behavior. Only applies to `production` releases. Values: 0(Off), 1 (roll forward on [minor] or [patch]), 2 (Roll forward on [major], [minor] or [patch])
+ See [roll-forward-on-no-candidate documentation](https://github.com/dotnet/runtime/blob/main/docs/design/features/roll-forward-on-no-candidate-fx.md) for more information.
+* `frameworks` - This is an optional array added in 3.0 that allows multiple frameworks to be specified. The `name`, `version`, `rollForward` (.NET Core 3.0 +), `applyPatches` (deprecated) and `rollForwardOnNoCandidateFx` (deprecated) properties are available. The `framework` section is no longer necessary in 3.0, but if present is treated as if it was the first framework in the `frameworks` section. The presence of frameworks in this section (or the `framework` section) indicates that the application is a framework-dependent app. See the notes at the end of this document for more information.
 * `additionalProbingPaths` - Optional property which specifies additional paths to consider when looking for dependencies. The value is either a single string, or an array of strings.
 * `tfm` - Optional string value which specifies the Target Framework Moniker.
 
@@ -143,7 +144,7 @@ These settings are read by host (apphost or dotnet executable) to determine how 
 
 ### `compilationOptions` Section (`.deps.json`)
 
-This section is created during build from the project's settings. The exact settings found here are specific to the compiler that produced the original application binary. Some example settings include: `defines`, `languageVersion` (e.g. the version of C# or VB), `allowUnsafe` (a C# option), etc.  
+This section is created during build from the project's settings. The exact settings found here are specific to the compiler that produced the original application binary. Some example settings include: `defines`, `languageVersion` (e.g. the version of C# or VB), `allowUnsafe` (a C# option), etc.
 This section is ignored by the runtime host. It is only potentially used by the application itself.
 
 ### `runtimeTarget` Section (`.deps.json`)
@@ -152,8 +153,8 @@ This property contains the name of the target from `targets` that should be used
 
 ### `targets` Section (`.deps.json`)
 
-Each property under `targets` describes a "target", which is a collection of libraries required by the application when run or compiled in a certain framework and platform context. A target **must** specify a Framework name, and **may** specify a Runtime Identifier. Targets without Runtime Identifiers represent the dependencies and assets which are platform agnostic. These targets can also represent dependencies and assets which are used for compiling the application for a particular framework. Targets with Runtime Identifiers represent the dependencies and assets used for running the application under a particular framework and on the platform defined by the Runtime Identifier.  
-In the example above, the `.NETCoreApp,Version=v2.1` target lists the dependencies and assets used to run and compile the application for `netcoreapp2.1`.  
+Each property under `targets` describes a "target", which is a collection of libraries required by the application when run or compiled in a certain framework and platform context. A target **must** specify a Framework name, and **may** specify a Runtime Identifier. Targets without Runtime Identifiers represent the dependencies and assets which are platform agnostic. These targets can also represent dependencies and assets which are used for compiling the application for a particular framework. Targets with Runtime Identifiers represent the dependencies and assets used for running the application under a particular framework and on the platform defined by the Runtime Identifier.
+In the example above, the `.NETCoreApp,Version=v2.1` target lists the dependencies and assets used to run and compile the application for `netcoreapp2.1`.
 If the app was published specifically for 64-bit Mac OS X 10.10 machine, it would also contain a target `.NETCoreApp,Version=v2.1/osx.10.10-x64` which would list the dependencies and assets used to run the application on that specific platform.
 
 There will always at least one target in the `[appname].deps.json` file: the platform neutral list of runtime and compilation dependencies. In cases of a platform specific application there would be two targets: a compilation target, and a runtime target. The compilation target will be named with the framework name used for the compilation (`.NETCoreApp,Version=v2.1` in the example above). The runtime target will be named with the framework name and runtime identifier used to execute the application (`.NETCoreApp,Version=v2.5/osx.10.10-x64` in the example above). However, the runtime target will also be identified by name in the `runtimeOptions` section, so that the host does not need to parse and understand target names.
@@ -183,7 +184,7 @@ This section contains a union of all the dependencies found in the various targe
 * `path` - in the `package` library this is a relative path where to find the assets.
 * `serviceable` - a boolean indicating if the library can be serviced (only for `package`-typed libraries)
 * `sha512` - SHA-512 hash of the package file (`package`-typed libraries).
-* `hashPath` - in the `package` library this is a relative path to the `.nupkg.sha512` has file.
+* `hashPath` - in the `package` library this is a relative path to the `.nupkg.sha512` hash file.
 
 ### `runtimes` Section (`.deps.json`)
 
@@ -205,7 +206,7 @@ This section is only present in the root framework's (so `Microsoft.NETCore.App`
 
 The file is read by two different components:
 
-* The host uses it to determine what to place on the TPA and Native Library Search Path lists, as well as what runtime settings to apply (GC type, etc.). 
+* The host uses it to determine what to place on the TPA and Native Library Search Path lists, as well as what runtime settings to apply (GC type, etc.).
 * `Microsoft.Extensions.DependencyModel` uses it to allow a running managed application to query various data about it's dependencies. For example:
   * To find all dependencies that depend on a particular package (used by ASP.NET MVC and other plugin-based systems to identify assemblies that should be searched for possible plugin implementations)
   * To determine the reference assemblies used by the application when it was compiled in order to allow runtime compilation to use the same reference assemblies (used by ASP.NET Razor to compile views)
@@ -213,12 +214,12 @@ The file is read by two different components:
 
 ## Opt-In Compilation Data
 
-Some of the sections in the `.deps.json` file contain data used for runtime compilation. This data is not provided in the file by default. Instead, an MSBuild property `PreserveCompilationContext` must be set to `true` (typically in the project file) in order to ensure this data is added. Without this setting, the `compilationOptions` will not be present in the file, and the `targets` section will contain only the runtime dependencies.  
+Some of the sections in the `.deps.json` file contain data used for runtime compilation. This data is not provided in the file by default. Instead, an MSBuild property `PreserveCompilationContext` must be set to `true` (typically in the project file) in order to ensure this data is added. Without this setting, the `compilationOptions` will not be present in the file, and the `targets` section will contain only the runtime dependencies.
 Note that ASP.NET projects (those using `Microsoft.NET.Sdk.Web` SDK) has this property set to `true` by default.
 
 ## Framework-dependent Deployment Model
 
-An application can be deployed in a "framework-dependent" deployment model. In this case, the RID-specific assets of packages are published within a folder structure that preserves the RID metadata. However the host does not use this folder structure, rather it reads data from the `.deps.json` file. 
+An application can be deployed in a "framework-dependent" deployment model. In this case, the RID-specific assets of packages are published within a folder structure that preserves the RID metadata. However the host does not use this folder structure, rather it reads data from the `.deps.json` file.
 
 In the framework-dependent deployment model, the `*.runtimeConfig.json` file will contain the `runtimeOptions.framework` section:
 
@@ -349,53 +350,53 @@ The path to a runtime-specific asset is resolved in the same way as a normal ass
 
 Each entry in the `runtime` or `runtimeTargets` sections can also have `assemblyVersion` and `fileVersion` properties. These specify the assembly and file version of the assembly being referenced. These versions are used when resolving assemblies based on roll-forward settings. See the [Multi Level Shared FX Lookup](https://github.com/dotnet/core-setup/blob/main/Documentation/design-docs/multilevel-sharedfx-lookup.md#hostpolicy-changes-for-21) for more details.
 
-## Additional information on runtimeconfig.json frammework settings (3.0+)
+## Additional information on runtimeconfig.json framework settings (3.0+)
 With the addition of the `frameworks` section in 3.0, an application (or another framework) can reference multiple frameworks. This is necessary when more than one framework is being used by the application (or framework). Previously, an application or framework could only reference one framework, causing a "chain" of frameworks. Now, with multiple frameworks at each level, a "graph" or "tree" of frameworks is supported.
 
 In addition to specifying a dependency on more than one framework, the `frameworks` section can also be used to override settings from a framework's `runtimeconfig.json`; this should only be done with the understanding of all consequences including preventing roll-forward compatibility to future versions. The settings include `version`, `rollForwardOnNoCandidateFx` and `applyPatches`, with `version` the most likely value to be changed.
 
 Overriding a value is always "most restrictive". This means if `applyPatches` is already `false` in a lower-level framework, then it cannot be changed to `true`. For `rollForwardOnNoCandidateFx` the value 0=off is the most restrictive, then 1=minor\patch, then 2=major\minor\patch. For `version`, the highest version requested will be used.
 
-As an example of overriding settings, assume the following framework layering: 
-- Application 
-- Microsoft.AspNetCore.All 
-- Microsoft.AspNetCore.App 
-- Microsoft.NetCore.App 
+As an example of overriding settings, assume the following framework layering:
+- Application
+- Microsoft.AspNetCore.All
+- Microsoft.AspNetCore.App
+- Microsoft.NetCore.App
 
-Except for Microsoft.NetCore.App (since it does not have a lower-level framework), each layer has a runtimeconfig.json setting specifying a single lower-layer framework's `name`, `version` and optional `rollForwardOnNoCandidateFx` and `applyPatches`. 
+Except for Microsoft.NetCore.App (since it does not have a lower-level framework), each layer has a runtimeconfig.json setting specifying a single lower-layer framework's `name`, `version` and optional `rollForwardOnNoCandidateFx` and `applyPatches`.
 
-The normal hierarchy processing for most knobs, such as `rollForwardOnNoCandidateFx`: 
- - a) Default value determined by the framework (e.g. roll-forward on [Minor]) 
- - b) Environment variable override (e.g. `DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX`) 
- - c) Each layer's `runtimeOptions` override setting in its runtimeconfig.json, starting with app (e.g. `rollForwardOnNoCandidateFx`). Lower layers can override this. 
+The normal hierarchy processing for most knobs, such as `rollForwardOnNoCandidateFx`:
+ - a) Default value determined by the framework (e.g. roll-forward on [Minor])
+ - b) Environment variable override (e.g. `DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX`)
+ - c) Each layer's `runtimeOptions` override setting in its runtimeconfig.json, starting with app (e.g. `rollForwardOnNoCandidateFx`). Lower layers can override this.
  - d) The app's `frameworks` section in `[appname].runtimeconfig.json` which allows knobs per-framework.
- - e) A `--` command line value such as `--roll-forward-on-no-candidate-fx` 
+ - e) A `--` command line value such as `--roll-forward-on-no-candidate-fx`
 
-In a hypothetical example, `Microsoft.AspNetCore.App` references version `2.2.0` of `Microsoft.NetCore.App` in `Microsoft.AspNetCore.App.runtimeconfig.json`: 
-```json 
-{ 
-    "runtimeOptions": { 
-        "framework": { 
-            "name": "Microsoft.NetCore.App", 
-            "version": "2.2.0" 
-        }, 
-     } 
-} 
+In a hypothetical example, `Microsoft.AspNetCore.App` references version `2.2.0` of `Microsoft.NetCore.App` in `Microsoft.AspNetCore.App.runtimeconfig.json`:
+```json
+{
+    "runtimeOptions": {
+        "framework": {
+            "name": "Microsoft.NetCore.App",
+            "version": "2.2.0"
+        },
+     }
+}
 ```
-However, if the app requires the newer version `2.2.1` of `Microsoft.NetCore.App`, then mechanism `d` is used. An example of the `frameworks` section for mechanism `d` in the app's `runtimeconfig.json`: 
-```json 
-{ 
-    "runtimeOptions": { 
-        "framework": { 
-            "name": "Microsoft.AspNetCore.All", 
-            "version": "1.0.1" 
-        }, 
-        "frameworks": [ 
-            { 
-                "name": "Microsoft.AspNetCore.App", 
+However, if the app requires the newer version `2.2.1` of `Microsoft.NetCore.App`, then mechanism `d` is used. An example of the `frameworks` section for mechanism `d` in the app's `runtimeconfig.json`:
+```json
+{
+    "runtimeOptions": {
+        "framework": {
+            "name": "Microsoft.AspNetCore.All",
+            "version": "1.0.1"
+        },
+        "frameworks": [
+            {
+                "name": "Microsoft.AspNetCore.App",
                 "version": "2.2.1",
-            } 
-        ] 
-    } 
-} 
+            }
+        ]
+    }
+}
 ```

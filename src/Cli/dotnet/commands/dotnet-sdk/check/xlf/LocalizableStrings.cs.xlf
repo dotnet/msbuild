@@ -52,6 +52,11 @@
         <target state="translated">Rozhraní .NET {0} se už nepodporuje.</target>
         <note />
       </trans-unit>
+      <trans-unit id="VersionCheckFailure">
+        <source>No version found to check if this is up to date. Please check for updates manually.</source>
+        <target state="translated">Nenašla se žádná verze, díky níž by se ověřilo, jestli je aktuální. Vyhledejte aktualizace ručně.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReleasesLibraryFailed">
         <source>Unable to get releases information: {0}</source>
         <target state="translated">Nedají se získat informace o vydaných verzích: {0}</target>

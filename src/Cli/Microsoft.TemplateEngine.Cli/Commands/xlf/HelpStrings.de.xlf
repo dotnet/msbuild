@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="de" original="../HelpStrings.resx">
+    <body>
+      <trans-unit id="Hint_AmbiguousLanguage">
+        <source>Re-run the command specifying the language to use with --language option.</source>
+        <target state="translated">Führen Sie den Befehl erneut aus, der die Sprache angibt, die mit der Option \"--language\" verwendet werden soll.</target>
+        <note>--language is an option name and should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Hint_AmbiguousType">
+        <source>Re-run the command specifying the type to use with --type option.</source>
+        <target state="translated">Führen Sie den Befehl erneut aus, der die den Typ angibt, der mit der Option \"--type\" verwendet werden soll.</target>
+        <note>--type is an option name and should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Hint_HelpForOtherLanguages">
+        <source>To see help for other template languages ({0}), use --language option:</source>
+        <target state="translated">Verwenden Sie die Option \"--language\", um Hilfe zu anderen Vorlagensprachen ({0}) anzuzeigen:</target>
+        <note>{0} is comma-separated list of supported programming languages by template. --language should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Hint_HelpForOtherTypes">
+        <source>To see help for other template types ({0}), use --type option:</source>
+        <target state="translated">Verwenden Sie die Option \"--type\", um Hilfe zu anderen Vorlagentypen ({0}) anzuzeigen:</target>
+        <note>{0} is comma-separated list of supported types by template. --type should not be translated.</note>
+      </trans-unit>
+      <trans-unit id="Info_TemplateThirdPartyNotice">
+        <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
+        <target state="translated">Diese Vorlage enthält Technologien von anderen Anbietern als Microsoft, siehe {0} für Details.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RowHeader_AllowMultiValue">
+        <source>Multiple values are allowed: {0}</source>
+        <target state="translated">Es sind mehrere Werte zulässig: {0}</target>
+        <note>{0} is a boolean flag</note>
+      </trans-unit>
+      <trans-unit id="RowHeader_DefaultIfOptionWithoutValue">
+        <source>Default if option is provided without a value: {0}</source>
+        <target state="translated">Standardwert, wenn die Option ohne einen Wert bereitgestellt wird: {0}</target>
+        <note>{0} is default value if option was provided without a value</note>
+      </trans-unit>
+      <trans-unit id="RowHeader_DefaultValue">
+        <source>Default: {0}</source>
+        <target state="translated">Standard: {0}</target>
+        <note>{0} is default value for option</note>
+      </trans-unit>
+      <trans-unit id="RowHeader_Description">
+        <source>Description: {0}</source>
+        <target state="translated">Beschreibung: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RowHeader_TemplateAuthor">
+        <source>Author: {0}</source>
+        <target state="translated">Autor: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RowHeader_Type">
+        <source>Type: {0}</source>
+        <target state="translated">Typ: {0}</target>
+        <note>{0} is option type (string, boolean, etc)</note>
+      </trans-unit>
+      <trans-unit id="SectionHeader_TemplateSpecificOptions">
+        <source>Template options:</source>
+        <target state="translated">Optionen für Vorlagen:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TableHeader_AmbiguousTemplatesList">
+        <source>Unable to resolve the template, these templates matched your input:</source>
+        <target state="translated">Die Vorlage konnte nicht aufgelöst werden, diese Vorlagen stimmen mit der Eingabe überein:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Text_ChoiceArgumentHelpName">
+        <source>choice</source>
+        <target state="translated">Auswahl</target>
+        <note>this text is used as argument help name when list of possible values is too long to fit the screen, " --my-o &lt;choice&gt;"</note>
+      </trans-unit>
+      <trans-unit id="Text_Disabled">
+        <source>Enabled: *false*</source>
+        <target state="translated">Aktiviert: *false*</target>
+        <note>Indication that parameter is not enabled</note>
+      </trans-unit>
+      <trans-unit id="Text_EnabledCondition">
+        <source>Enabled if: {0}</source>
+        <target state="translated">Aktiviert wenn: {0}</target>
+        <note>{0} is the condition expression</note>
+      </trans-unit>
+      <trans-unit id="Text_NoTemplateOptions">
+        <source>(No options)</source>
+        <target state="translated">(Keine Optionen)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Text_Required">
+        <source>Required: *true*</source>
+        <target state="translated">Erforderlich: *true*</target>
+        <note>Indication that parameter is always required, do not translate "true".</note>
+      </trans-unit>
+      <trans-unit id="Text_RequiredCondition">
+        <source>Required if: {0}</source>
+        <target state="translated">Erforderlich wenn: {0}</target>
+        <note>{0} is the condition expression</note>
+      </trans-unit>
+      <trans-unit id="Text_UsageTemplateOptionsPart">
+        <source>[template options]</source>
+        <target state="translated">[template options]</target>
+        <note>this text will be used as part of command usage: dotnet new console [options] [template options]</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

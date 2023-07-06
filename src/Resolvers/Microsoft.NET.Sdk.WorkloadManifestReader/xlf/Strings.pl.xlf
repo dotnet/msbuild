@@ -57,6 +57,16 @@
         <target state="translated">Dokument zakończony przedwcześnie</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">Nieprawidłowa wersja: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">Wystąpił błąd podczas analizowania wersji „{1}” dla identyfikatora manifestu obciążenia „{0}”</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">Nie znaleziono zależności manifestu obciążenia „{0}” wymaganej przez manifest „{1}” [{2}]</target>
@@ -92,6 +102,11 @@
         <target state="translated">Obciążenie przekierowania „{0}” ma klucze inne niż „redirect-to”</target>
         <note />
       </trans-unit>
+      <trans-unit id="SpecifiedManifestNotFound">
+        <source>Specified workload manifest was not found: {0}</source>
+        <target state="translated">Nie znaleziono określonego manifestu obciążenia: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">Nieoczekiwany token „{0}” pod przesunięciem {1}</target>
@@ -115,6 +130,11 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Nierozpoznany element docelowy „{0}” przekierowania obciążenia „{1}” w manifeście „{2}” [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="translated">Nie znaleziono wersji obciążenia {0} określonej w kontenerze {1}. Uruchom polecenie „dotnet workload restore”, aby zainstalować tę wersję obciążenia.</target>
         <note />
       </trans-unit>
     </body>

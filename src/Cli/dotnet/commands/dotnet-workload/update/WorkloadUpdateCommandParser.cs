@@ -1,9 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
+using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.DotNet.Workloads.Workload.Update;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Update.LocalizableStrings;
 
@@ -11,64 +10,45 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadUpdateCommandParser
     {
-        public static readonly Option<string> ConfigOption = WorkloadInstallCommandParser.ConfigOption;
+        public static readonly CliOption<string> TempDirOption = WorkloadInstallCommandParser.TempDirOption;
 
-        public static readonly Option<string[]> SourceOption = WorkloadInstallCommandParser.SourceOption;
-
-        public static readonly Option<string> VersionOption = WorkloadInstallCommandParser.VersionOption;
-
-        public static readonly Option<VerbosityOptions> VerbosityOption = WorkloadInstallCommandParser.VerbosityOption;
-
-        public static readonly Option<bool> IncludePreviewsOption = WorkloadInstallCommandParser.IncludePreviewOption;
-
-        public static readonly Option<string> DownloadToCacheOption = WorkloadInstallCommandParser.DownloadToCacheOption;
-
-        public static readonly Option<string> TempDirOption = WorkloadInstallCommandParser.TempDirOption;
-
-        public static readonly Option<bool> PrintDownloadLinkOnlyOption =
-            WorkloadInstallCommandParser.PrintDownloadLinkOnlyOption;
-
-        public static readonly Option<string> FromCacheOption =
-            WorkloadInstallCommandParser.FromCacheOption;
-
-        public static readonly Option<bool> FromPreviousSdkOption = new Option<bool>("--from-previous-sdk", LocalizableStrings.FromPreviousSdkOptionDescription);
-
-        public static readonly Option<bool> AdManifestOnlyOption = new Option<bool>("--advertising-manifests-only", LocalizableStrings.AdManifestOnlyOptionDescription);
-
-        public static readonly Option<bool> PrintRollbackOption = new Option<bool>("--print-rollback")
+        public static readonly CliOption<bool> FromPreviousSdkOption = new("--from-previous-sdk")
         {
-            IsHidden = true
+            Description = LocalizableStrings.FromPreviousSdkOptionDescription
         };
 
-        public static readonly Option<string> FromRollbackFileOption = WorkloadInstallCommandParser.FromRollbackFileOption;
+        public static readonly CliOption<bool> AdManifestOnlyOption = new("--advertising-manifests-only")
+        {
+            Description = LocalizableStrings.AdManifestOnlyOptionDescription
+        };
 
-        private static readonly Command Command = ConstructCommand();
+        public static readonly CliOption<bool> PrintRollbackOption = new("--print-rollback")
+        {
+            Hidden = true
+        };
 
-        public static Command GetCommand()
+        private static readonly CliCommand Command = ConstructCommand();
+
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            Command command = new("update", LocalizableStrings.CommandDescription);
+            CliCommand command = new("update", LocalizableStrings.CommandDescription);
 
-            command.AddOption(ConfigOption);
-            command.AddOption(SourceOption);
-            command.AddOption(VersionOption);
-            command.AddOption(PrintDownloadLinkOnlyOption);
-            command.AddOption(FromCacheOption);
-            command.AddOption(IncludePreviewsOption);
-            command.AddOption(DownloadToCacheOption);
-            command.AddOption(TempDirOption);
-            command.AddOption(FromPreviousSdkOption);
-            command.AddOption(AdManifestOnlyOption);
+            InstallingWorkloadCommandParser.AddWorkloadInstallCommandOptions(command);
+
+            command.Options.Add(TempDirOption);
+            command.Options.Add(FromPreviousSdkOption);
+            command.Options.Add(AdManifestOnlyOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
-            command.AddOption(VerbosityOption);
-            command.AddOption(PrintRollbackOption);
-            command.AddOption(FromRollbackFileOption);
+            command.Options.Add(CommonOptions.VerbosityOption);
+            command.Options.Add(PrintRollbackOption);
+            command.Options.Add(WorkloadInstallCommandParser.SkipSignCheckOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new WorkloadUpdateCommand(parseResult).Execute());
+            command.SetAction((parseResult) => new WorkloadUpdateCommand(parseResult).Execute());
 
             return command;
         }

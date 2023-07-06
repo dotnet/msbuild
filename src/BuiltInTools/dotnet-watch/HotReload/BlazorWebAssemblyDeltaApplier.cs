@@ -1,170 +1,143 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
 
 using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.ExternalAccess.Watch.Api;
-using Microsoft.Extensions.HotReload;
 using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    internal class BlazorWebAssemblyDeltaApplier : IDeltaApplier
+    internal sealed class BlazorWebAssemblyDeltaApplier : SingleProcessDeltaApplier
     {
-        private static Task<ImmutableArray<string>>? _cachedCapabilties;
+        private static Task<ImmutableArray<string>>? s_cachedCapabilties;
         private readonly IReporter _reporter;
         private int _sequenceId;
-
-        private static readonly TimeSpan VerifyDeltaTimeout = TimeSpan.FromSeconds(5);
 
         public BlazorWebAssemblyDeltaApplier(IReporter reporter)
         {
             _reporter = reporter;
         }
 
-        public ValueTask InitializeAsync(DotNetWatchContext context, CancellationToken cancellationToken)
+        public override void Initialize(DotNetWatchContext context, CancellationToken cancellationToken)
         {
+            Debug.Assert(context.ProcessSpec != null);
+
+            base.Initialize(context, cancellationToken);
+
             // Configure the app for EnC
             context.ProcessSpec.EnvironmentVariables["DOTNET_MODIFIABLE_ASSEMBLIES"] = "debug";
-            return default;
         }
 
-        public Task<ImmutableArray<string>> GetApplyUpdateCapabilitiesAsync(DotNetWatchContext context, CancellationToken cancellationToken)
+        public override Task<ImmutableArray<string>> GetApplyUpdateCapabilitiesAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
-            _cachedCapabilties ??= GetApplyUpdateCapabilitiesCoreAsync();
-            return _cachedCapabilties;
+            return s_cachedCapabilties ??= GetApplyUpdateCapabilitiesCoreAsync();
 
             async Task<ImmutableArray<string>> GetApplyUpdateCapabilitiesCoreAsync()
             {
                 if (context.BrowserRefreshServer is null)
                 {
-                    return ImmutableArray<string>.Empty;
+                    throw new ApplicationException("The browser refresh server is unavailable.");
                 }
 
-                await context.BrowserRefreshServer.WaitForClientConnectionAsync(cancellationToken);
+                _reporter.Verbose("Connecting to the browser.");
 
+                await context.BrowserRefreshServer.WaitForClientConnectionAsync(cancellationToken);
                 await context.BrowserRefreshServer.SendJsonSerlialized(default(BlazorRequestApplyUpdateCapabilities), cancellationToken);
-                // 32k ought to be enough for anyone.
+
                 var buffer = ArrayPool<byte>.Shared.Rent(32 * 1024);
                 try
                 {
-                    // We'll query the browser and ask it send capabilities. If the browser does not respond in 10s, we'll assume something is amiss and return
-                    // no capabilities. This should give you baseline hot reload capabilties.
-                    var response = await context.BrowserRefreshServer.ReceiveAsync(buffer, cancellationToken)
-                        .AsTask()
-                        .WaitAsync(TimeSpan.FromSeconds(10), cancellationToken);
+                    // We'll query the browser and ask it send capabilities.
+                    var response = await context.BrowserRefreshServer.ReceiveAsync(buffer, cancellationToken);
                     if (!response.HasValue || !response.Value.EndOfMessage || response.Value.MessageType != WebSocketMessageType.Text)
                     {
-                        return ImmutableArray<string>.Empty;
+                        throw new ApplicationException("Unable to connect to the browser refresh server.");
                     }
 
-                    var values = Encoding.UTF8.GetString(buffer.AsSpan(0, response.Value.Count));
+                    var capabilities = Encoding.UTF8.GetString(buffer.AsSpan(0, response.Value.Count));
 
-                    // Capabilitiies are expressed a space-separated string.
+                    // Capabilities are expressed a space-separated string.
                     // e.g. https://github.com/dotnet/runtime/blob/14343bdc281102bf6fffa1ecdd920221d46761bc/src/coreclr/System.Private.CoreLib/src/System/Reflection/Metadata/AssemblyExtensions.cs#L87
-                    var result = values.Split(' ').ToImmutableArray();
-                    return result;
-                }
-                catch (TimeoutException)
-                {
+                    return capabilities.Split(' ').ToImmutableArray();
                 }
                 finally
                 {
                     ArrayPool<byte>.Shared.Return(buffer);
                 }
-
-                return ImmutableArray<string>.Empty;
             }
         }
 
-        public async ValueTask<bool> Apply(DotNetWatchContext context, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken)
+        public override async Task<ApplyStatus> Apply(DotNetWatchContext context, ImmutableArray<WatchHotReloadService.Update> updates, CancellationToken cancellationToken)
         {
             if (context.BrowserRefreshServer is null)
             {
-                _reporter.Verbose("Unable to send deltas because the refresh server is unavailable.");
+                _reporter.Verbose("Unable to send deltas because the browser refresh server is unavailable.");
+                return ApplyStatus.Failed;
+            }
+
+            var applicableUpdates = await FilterApplicableUpdatesAsync(context, updates, cancellationToken);
+            if (applicableUpdates.Count == 0)
+            {
+                return ApplyStatus.NoChangesApplied;
+            }
+
+            await context.BrowserRefreshServer.SendJsonWithSecret(sharedSecret => new UpdatePayload
+            {
+                SharedSecret = sharedSecret,
+                Deltas = updates.Select(update => new UpdateDelta
+                {
+                    SequenceId = _sequenceId++,
+                    ModuleId = update.ModuleId,
+                    MetadataDelta = update.MetadataDelta.ToArray(),
+                    ILDelta = update.ILDelta.ToArray(),
+                    UpdatedTypes = update.UpdatedTypes.ToArray(),
+                })
+            }, cancellationToken);
+
+            bool result = await ReceiveApplyUpdateResult(context.BrowserRefreshServer, cancellationToken);
+
+            return !result ? ApplyStatus.Failed : (applicableUpdates.Count < updates.Length) ? ApplyStatus.SomeChangesApplied : ApplyStatus.AllChangesApplied;
+        }
+
+        private async Task<bool> ReceiveApplyUpdateResult(BrowserRefreshServer browserRefresh, CancellationToken cancellationToken)
+        {
+            var _receiveBuffer = new byte[1];
+            var result = await browserRefresh.ReceiveAsync(_receiveBuffer, cancellationToken);
+            if (result is null)
+            {
+                // A null result indicates no clients are connected. No deltas could have been applied in this state.
+                _reporter.Verbose("Apply confirmation: No browser is connected");
                 return false;
             }
 
-            var deltas = solutionUpdate.Select(c => new UpdateDelta
+            if (IsDeltaReceivedMessage(result.Value))
             {
-                SequenceId = _sequenceId++,
-                ModuleId = c.ModuleId,
-                MetadataDelta = c.MetadataDelta.ToArray(),
-                ILDelta = c.ILDelta.ToArray(),
-                UpdatedTypes = c.UpdatedTypes.ToArray(),
-            });
-
-            await context.BrowserRefreshServer.SendJsonWithSecret(sharedSecret => new UpdatePayload { SharedSecret = sharedSecret, Deltas = deltas }, cancellationToken);
-            return await VerifyDeltaApplied(context, cancellationToken).WaitAsync(VerifyDeltaTimeout, cancellationToken);
-        }
-
-        public async ValueTask ReportDiagnosticsAsync(DotNetWatchContext context, IEnumerable<string> diagnostics, CancellationToken cancellationToken)
-        {
-            if (context.BrowserRefreshServer != null)
-            {
-                var message = new HotReloadDiagnostics
-                {
-                    Diagnostics = diagnostics
-                };
-
-                await context.BrowserRefreshServer.SendJsonSerlialized(message, cancellationToken);
-            }
-        }
-
-        private async Task<bool> VerifyDeltaApplied(DotNetWatchContext context, CancellationToken cancellationToken)
-        {
-            var _receiveBuffer = new byte[1];
-            try
-            {
-                // We want to give the client some time to ACK the deltas being applied. VerifyDeltaApplied is limited by a
-                // 5 second wait timeout enforced using a WaitAsync. However, WaitAsync only works reliably if the calling
-                // function is async. If BrowserRefreshServer.ReceiveAsync finishes synchronously, the WaitAsync would
-                // never have an opportunity to execute. Consequently, we'll give it some reasonable number of opportunities
-                // to loop before we decide that applying deltas failed.
-                for (var i = 0; i < 100; i++)
-                {
-                    var result = await context.BrowserRefreshServer!.ReceiveAsync(_receiveBuffer, cancellationToken);
-                    if (result is null)
-                    {
-                        // A null result indicates no clients are connected. No deltas could have been applied in this state.
-                        _reporter.Verbose("No client is connected to ack deltas");
-                        return false;
-                    }
-
-                    if (IsDeltaReceivedMessage(result.Value))
-                    {
-                        // 1 indicates success.
-                        return _receiveBuffer[0] == 1;
-                    }
-                }
-            }
-            catch (TaskCanceledException)
-            {
-                _reporter.Verbose("Timed out while waiting to verify delta was applied.");
+                // 1 indicates success.
+                return _receiveBuffer[0] == 1;
             }
 
             return false;
 
             bool IsDeltaReceivedMessage(ValueWebSocketReceiveResult result)
             {
-                _reporter.Verbose($"Received {_receiveBuffer[0]} from browser in [Count: {result.Count}, MessageType: {result.MessageType}, EndOfMessage: {result.EndOfMessage}].");
+                _reporter.Verbose($"Apply confirmation: Received {_receiveBuffer[0]} from browser in [Count: {result.Count}, MessageType: {result.MessageType}, EndOfMessage: {result.EndOfMessage}].");
                 return result.Count == 1 // Should have received 1 byte on the socket for the acknowledgement
                     && result.MessageType is WebSocketMessageType.Binary
                     && result.EndOfMessage;
             }
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             // Do nothing.
         }
@@ -172,7 +145,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         private readonly struct UpdatePayload
         {
             public string Type => "BlazorHotReloadDeltav1";
-            public string SharedSecret { get; init; }
+            public string? SharedSecret { get; init; }
             public IEnumerable<UpdateDelta> Deltas { get; init; }
         }
 
@@ -184,13 +157,6 @@ namespace Microsoft.DotNet.Watcher.Tools
             public byte[] MetadataDelta { get; init; }
             public byte[] ILDelta { get; init; }
             public int[] UpdatedTypes { get; init; }
-        }
-
-        public readonly struct HotReloadDiagnostics
-        {
-            public string Type => "HotReloadDiagnosticsv1";
-
-            public IEnumerable<string> Diagnostics { get; init; }
         }
 
         private readonly struct BlazorRequestApplyUpdateCapabilities

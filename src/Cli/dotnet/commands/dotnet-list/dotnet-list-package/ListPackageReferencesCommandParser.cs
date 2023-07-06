@@ -1,10 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.List.PackageReferences;
 using LocalizableStrings = Microsoft.DotNet.Tools.List.PackageReferences.LocalizableStrings;
@@ -13,79 +11,109 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ListPackageReferencesCommandParser
     {
-        public static readonly Option OutdatedOption = new ForwardedOption<bool>("--outdated", LocalizableStrings.CmdOutdatedDescription)
-            .ForwardAs("--outdated");
-
-        public static readonly Option DepreciatedOption = new ForwardedOption<bool>("--deprecated", LocalizableStrings.CmdDeprecatedDescription)
-            .ForwardAs("--deprecated");
-
-        public static readonly Option VulnerableOption = new ForwardedOption<bool>("--vulnerable", LocalizableStrings.CmdVulnerableDescription)
-            .ForwardAs("--vulnerable");
-
-        public static readonly Option FrameworkOption = new ForwardedOption<IEnumerable<string>>("--framework", LocalizableStrings.CmdFrameworkDescription)
+        public static readonly CliOption OutdatedOption = new ForwardedOption<bool>("--outdated")
         {
-            ArgumentHelpName = LocalizableStrings.CmdFramework
+            Description = LocalizableStrings.CmdOutdatedDescription
+        }.ForwardAs("--outdated");
+
+        public static readonly CliOption DeprecatedOption = new ForwardedOption<bool>("--deprecated")
+        {
+            Description = LocalizableStrings.CmdDeprecatedDescription
+        }.ForwardAs("--deprecated");
+
+        public static readonly CliOption VulnerableOption = new ForwardedOption<bool>("--vulnerable")
+        {
+            Description = LocalizableStrings.CmdVulnerableDescription
+        }.ForwardAs("--vulnerable");
+
+        public static readonly CliOption FrameworkOption = new ForwardedOption<IEnumerable<string>>("--framework")
+        {
+            Description = LocalizableStrings.CmdFrameworkDescription,
+            HelpName = LocalizableStrings.CmdFramework
         }.ForwardAsManyArgumentsEachPrefixedByOption("--framework")
         .AllowSingleArgPerToken();
 
-        public static readonly Option TransitiveOption = new ForwardedOption<bool>("--include-transitive", LocalizableStrings.CmdTransitiveDescription)
-            .ForwardAs("--include-transitive");
-
-        public static readonly Option PrereleaseOption = new ForwardedOption<bool>("--include-prerelease", LocalizableStrings.CmdPrereleaseDescription)
-            .ForwardAs("--include-prerelease");
-
-        public static readonly Option HighestPatchOption = new ForwardedOption<bool>("--highest-patch", LocalizableStrings.CmdHighestPatchDescription)
-            .ForwardAs("--highest-patch");
-
-        public static readonly Option HighestMinorOption = new ForwardedOption<bool>("--highest-minor", LocalizableStrings.CmdHighestMinorDescription)
-            .ForwardAs("--highest-minor");
-
-        public static readonly Option ConfigOption = new ForwardedOption<string>("--config", LocalizableStrings.CmdConfigDescription)
+        public static readonly CliOption TransitiveOption = new ForwardedOption<bool>("--include-transitive")
         {
-            ArgumentHelpName = LocalizableStrings.CmdConfig
+            Description = LocalizableStrings.CmdTransitiveDescription
+        }.ForwardAs("--include-transitive");
+
+        public static readonly CliOption PrereleaseOption = new ForwardedOption<bool>("--include-prerelease")
+        {
+            Description = LocalizableStrings.CmdPrereleaseDescription
+        }.ForwardAs("--include-prerelease");
+
+        public static readonly CliOption HighestPatchOption = new ForwardedOption<bool>("--highest-patch")
+        {
+            Description = LocalizableStrings.CmdHighestPatchDescription
+        }.ForwardAs("--highest-patch");
+
+        public static readonly CliOption HighestMinorOption = new ForwardedOption<bool>("--highest-minor")
+        {
+            Description = LocalizableStrings.CmdHighestMinorDescription
+        }.ForwardAs("--highest-minor");
+
+        public static readonly CliOption ConfigOption = new ForwardedOption<string>("--config", "--configfile")
+        {
+            Description = LocalizableStrings.CmdConfigDescription,
+            HelpName = LocalizableStrings.CmdConfig
         }.ForwardAsMany(o => new[] { "--config", o });
 
-        public static readonly Option SourceOption = new ForwardedOption<IEnumerable<string>>("--source", LocalizableStrings.CmdSourceDescription)
+        public static readonly CliOption SourceOption = new ForwardedOption<IEnumerable<string>>("--source")
         {
-            ArgumentHelpName = LocalizableStrings.CmdSource
+            Description = LocalizableStrings.CmdSourceDescription,
+            HelpName = LocalizableStrings.CmdSource
         }.ForwardAsManyArgumentsEachPrefixedByOption("--source")
         .AllowSingleArgPerToken();
 
-        public static readonly Option InteractiveOption = new ForwardedOption<bool>("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
-            .ForwardAs("--interactive");
+        public static readonly CliOption InteractiveOption = new ForwardedOption<bool>("--interactive")
+        {
+            Description = CommonLocalizableStrings.CommandInteractiveOptionDescription
+        }.ForwardAs("--interactive");
 
-        public static readonly Option VerbosityOption = new ForwardedOption<VerbosityOptions>(
-                new string[] { "-v", "--verbosity" },
-                description: CommonLocalizableStrings.VerbosityOptionDescription)
-            {
-                ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
-            }.ForwardAsSingle(o => $"--verbosity:{o}");
+        public static readonly CliOption VerbosityOption = new ForwardedOption<VerbosityOptions>("--verbosity", "-v")
+        {
+            Description = CommonLocalizableStrings.VerbosityOptionDescription,
+            HelpName = CommonLocalizableStrings.LevelArgumentName
+        }.ForwardAsSingle(o => $"--verbosity:{o}");
 
-        private static readonly Command Command = ConstructCommand();
+        public static readonly CliOption FormatOption = new ForwardedOption<ReportOutputFormat>("--format")
+        {
+            Description = LocalizableStrings.CmdFormatDescription
+        }.ForwardAsSingle(o => $"--format:{o}");
 
-        public static Command GetCommand()
+        public static readonly CliOption OutputVersionOption = new ForwardedOption<int>("--output-version")
+        {
+            Description = LocalizableStrings.CmdOutputVersionDescription
+        }.ForwardAsSingle(o => $"--output-version:{o}");
+
+        private static readonly CliCommand Command = ConstructCommand();
+
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            var command = new Command("package", LocalizableStrings.AppFullName);
+            CliCommand command = new("package", LocalizableStrings.AppFullName);
 
-            command.AddOption(VerbosityOption);
-            command.AddOption(OutdatedOption);
-            command.AddOption(DepreciatedOption);
-            command.AddOption(VulnerableOption);
-            command.AddOption(FrameworkOption);
-            command.AddOption(TransitiveOption);
-            command.AddOption(PrereleaseOption);
-            command.AddOption(HighestPatchOption);
-            command.AddOption(HighestMinorOption);
-            command.AddOption(ConfigOption);
-            command.AddOption(SourceOption);
-            command.AddOption(InteractiveOption);
+            command.Options.Add(VerbosityOption);
+            command.Options.Add(OutdatedOption);
+            command.Options.Add(DeprecatedOption);
+            command.Options.Add(VulnerableOption);
+            command.Options.Add(FrameworkOption);
+            command.Options.Add(TransitiveOption);
+            command.Options.Add(PrereleaseOption);
+            command.Options.Add(HighestPatchOption);
+            command.Options.Add(HighestMinorOption);
+            command.Options.Add(ConfigOption);
+            command.Options.Add(SourceOption);
+            command.Options.Add(InteractiveOption);
+            command.Options.Add(FormatOption);
+            command.Options.Add(OutputVersionOption);
 
-            command.Handler = CommandHandler.Create<ParseResult>((parseResult) => new ListPackageReferencesCommand(parseResult).Execute());
+            command.SetAction((parseResult) => new ListPackageReferencesCommand(parseResult).Execute());
 
             return command;
         }

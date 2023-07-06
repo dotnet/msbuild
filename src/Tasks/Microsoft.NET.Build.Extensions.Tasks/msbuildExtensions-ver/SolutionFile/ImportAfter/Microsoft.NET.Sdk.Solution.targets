@@ -28,4 +28,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+
+  <Target Name="_CheckForSolutionLevelOutputPath"
+          BeforeTargets="Build;Publish;Clean;Store;VSTest"
+          Condition="'$(_CommandLineDefinedOutputPath)' == 'true'">
+
+    <NetSdkWarning ResourceName="CannotHaveSolutionLevelOutputPath" />
+
+  </Target>
+
 </Project>

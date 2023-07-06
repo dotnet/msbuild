@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
@@ -25,6 +25,7 @@ using Xunit.Abstractions;
 using Microsoft.NET.Build.Tasks;
 using NuGet.Versioning;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -272,7 +273,7 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData("netcoreapp2.0")]
         [InlineData("netcoreapp2.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_runs_the_app_from_the_output_folder(string targetFramework)
         {
             RunAppFromOutputFolder("RunFromOutputFolder_" + targetFramework, false, false, targetFramework);
@@ -280,7 +281,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp2.1")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_runs_a_rid_specific_app_from_the_output_folder(string targetFramework)
         {
             RunAppFromOutputFolder("RunFromOutputFolderWithRID_" + targetFramework, true, false, targetFramework);
@@ -288,7 +289,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_runs_the_app_with_conflicts_from_the_output_folder(string targetFramework)
         {
             if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
@@ -301,7 +302,7 @@ namespace Microsoft.NET.Build.Tests
 
         [Theory]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_runs_a_rid_specific_app_with_conflicts_from_the_output_folder(string targetFramework)
         {
             if (!EnvironmentInfo.SupportsTargetFramework(targetFramework))
@@ -380,7 +381,7 @@ public static class Program
         [InlineData("netcoreapp2.0", true)]
         [InlineData("netcoreapp3.0", true)]
         [InlineData("net5.0", true)]
-        [InlineData("net6.0", false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, false)]
         public void It_stops_generating_runtimeconfig_dev_json_after_net6(string targetFramework, bool shouldGenerateRuntimeConfigDevJson)
         {
             TestProject proj = new TestProject()
@@ -409,7 +410,7 @@ public static class Program
         [InlineData("netcoreapp2.0")]
         [InlineData("netcoreapp3.0")]
         [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_stops_generating_runtimeconfig_dev_json_after_net6_allow_property_override(string targetFramework)
         {
             TestProject proj = new TestProject()
@@ -440,7 +441,7 @@ public static class Program
 
         [Theory]
         [InlineData("netcoreapp2.0")]
-        [InlineData("netcoreapp3.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_trims_conflicts_from_the_deps_file(string targetFramework)
         {
             TestProject project = new TestProject()
@@ -506,7 +507,7 @@ public static class Program
         [InlineData(false)]
         public void It_generates_rid_fallback_graph(bool isSelfContained)
         {
-            var targetFramework = "netcoreapp3.0";
+            var targetFramework = ToolsetInfo.CurrentTargetFramework;
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             TestProject project = new TestProject()
@@ -575,7 +576,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "AppUsingPackageWithSatellites",
-                TargetFrameworks = "netcoreapp2.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -612,40 +613,53 @@ public static class Program
             outputDirectory.Should().HaveFile(Path.Combine("fr", "Humanizer.resources.dll"));
         }
 
-        [Fact]
-        public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_uses_lowercase_form_of_the_target_framework_for_the_output_path(bool useStandardOutputPaths)
         {
             var testProject = new TestProject()
             {
                 Name = "OutputPathCasing",
-                TargetFrameworks = "ignored",
+                //  Force the actual TargetFramework to be included in the artifact pivots
+                TargetFrameworks = "ignored;ignored2",
                 IsExe = true
             };
 
-            string[] extraArgs = new[] { "/p:TargetFramework=NETCOREAPP1.1" };
+            string[] extraArgs = new[] { $"/p:TargetFramework={ToolsetInfo.CurrentTargetFramework.ToUpper()}" };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: useStandardOutputPaths.ToString());
 
             var buildCommand = new BuildCommand(testAsset);
 
             buildCommand
+                .WithEnvironmentVariable("UseStandardOutputPaths", useStandardOutputPaths.ToString())
                 .Execute(extraArgs)
                 .Should()
                 .Pass();
 
-            string outputFolderWithConfiguration = Path.Combine(buildCommand.ProjectRootPath, "bin", "Debug");
+            if (useStandardOutputPaths)
+            {
+                buildCommand.GetOutputDirectory().Should().Exist();
 
-            Directory.GetDirectories(outputFolderWithConfiguration)
-                .Select(Path.GetFileName)
-                .Should()
-                .BeEquivalentTo("netcoreapp1.1");
+                buildCommand.GetIntermediateDirectory().Should().Exist();
+            }
+            else
+            {
+                string outputFolderWithConfiguration = Path.Combine(buildCommand.ProjectRootPath, "bin", "Debug");
 
-            string intermediateFolderWithConfiguration = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "Debug");
+                Directory.GetDirectories(outputFolderWithConfiguration)
+                    .Select(Path.GetFileName)
+                    .Should()
+                    .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
 
-            Directory.GetDirectories(intermediateFolderWithConfiguration)
-                .Select(Path.GetFileName)
-                .Should()
-                .BeEquivalentTo("netcoreapp1.1");
+                string intermediateFolderWithConfiguration = Path.Combine(buildCommand.GetBaseIntermediateDirectory().FullName, "Debug");
+
+                Directory.GetDirectories(intermediateFolderWithConfiguration)
+                    .Select(Path.GetFileName)
+                    .Should()
+                    .BeEquivalentTo(ToolsetInfo.CurrentTargetFramework);
+            }
         }
 
         [Fact]
@@ -654,7 +668,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "NetCoreAppPackageReference",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -735,9 +749,9 @@ class Program
             var testProject = new TestProject()
             {
                 Name = "ReferencesLegacyContracts",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid("netcoreapp3.0")
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(ToolsetInfo.CurrentTargetFramework)
             };
 
             //  Dependencies on contracts from different 1.x "bands" can cause downgrades when building
@@ -762,7 +776,7 @@ class Program
             var testProject = new TestProject()
             {
                 Name = "NoPackageReferences",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true
             };
 
@@ -792,7 +806,7 @@ class Program
             var testProject = new TestProject()
             {
                 Name = "Prj_すおヸょー",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
             };
 
@@ -810,7 +824,7 @@ class Program
         [Fact]
         public void It_regenerates_files_if_self_contained_changes()
         {
-            const string TFM = "netcoreapp3.0";
+            const string TFM = ToolsetInfo.CurrentTargetFramework;
 
             var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(TFM);
 
@@ -819,7 +833,8 @@ class Program
                 Name = "GenerateFilesTest",
                 TargetFrameworks = TFM,
                 RuntimeIdentifier = runtimeIdentifier,
-                IsExe = true
+                IsExe = true,
+                SelfContained = "true"
             };
 
             var testAsset = _testAssetsManager
@@ -876,7 +891,7 @@ class Program
             var testProject = new TestProject()
             {
                 Name = "MainProject",
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsSdkProject = true,
                 IsExe = true
             };
@@ -891,7 +906,7 @@ class Program
                 .Should()
                 .Pass();
 
-            var outputPath = buildCommand.GetOutputDirectory(targetFramework: "net5.0").FullName;
+            var outputPath = buildCommand.GetOutputDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework).FullName;
             if (produceOnlyReferenceAssembly == true)
             {
                 var refPath = Path.Combine(outputPath, "ref");
@@ -901,10 +916,116 @@ class Program
             }
             else
             {
-                var refPath = Path.Combine(outputPath, "ref", "MainProject.dll");
+                // Reference assembly should be produced in obj
+                var refPath = Path.Combine(
+                    buildCommand.GetIntermediateDirectory(targetFramework: ToolsetInfo.CurrentTargetFramework).FullName,
+                    "ref",
+                    "MainProject.dll");
                 File.Exists(refPath)
                     .Should()
                     .BeTrue();
+            }
+        }
+
+        [Theory]
+        // Non-portable RID should warn
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "ubuntu.22.04-x64" }, true, true, null, true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "ubuntu.22.04-x64" }, true, false, null, true)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "ubuntu.22.04-x64" }, false, true, null, true)]
+        // Non-portable and portable RIDs should warn
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "ubuntu.22.04-x64", "win7-x86", "unix" }, true, true, null, true)]
+        // Portable RIDs only should not warn
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "win-x86", "win", "linux", "linux-musl-x64", "osx", "osx-arm64", "unix", "browser", "browser-wasm", "ios-arm64" }, true, true, null, false)]
+        // No RID assets should not warn
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new string[] { }, false, false, null, false)]
+        // Below .NET 8 should not warn
+        [InlineData("net7.0", new string[] { "ubuntu.22.04-x64", "win7-x86" }, true, true, null, false)]
+        // Explicitly set to use RID graph should not warn
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "alpine-x64" }, true, true, true, false)]
+        // Explicitly set to not use RID graph should warn
+        [InlineData(ToolsetInfo.CurrentTargetFramework, new[] { "alpine-x64" }, true, true, false, true)]
+        public void It_warns_on_nonportable_rids(string targetFramework, string[] rids, bool addLibAssets, bool addNativeAssets, bool? useRidGraph, bool shouldWarn)
+        {
+            var packageProject = new TestProject()
+            {
+                Name = "WithRidAssets",
+                TargetFrameworks = targetFramework,
+            };
+
+            // Add assets for each RID. The test just needs the asset to exist, so it can just copy same output assembly.
+            foreach (string rid in rids)
+            {
+                if (addLibAssets)
+                {
+                    packageProject.AddItem("None",
+                        new Dictionary<string, string>()
+                        {
+                        { "Include", $"$(TargetPath)" },
+                        { "Pack", "true" },
+                        { "PackagePath", $@"runtimes\{rid}\lib\$(TargetFramework)" }
+                        });
+                }
+
+                if (addNativeAssets)
+                {
+                    packageProject.AddItem("None",
+                        new Dictionary<string, string>()
+                        {
+                            { "Include", $"$(TargetPath)" },
+                            { "Pack", "true" },
+                            { "PackagePath", $@"runtimes\{rid}\native" }
+                        });
+                }
+            }
+
+            // Identifer based on test inputs to create test assets that are unique for each test case
+            string assetIdentifier = $"{targetFramework}{string.Join(null, rids)}{addLibAssets}{addNativeAssets}{useRidGraph}{shouldWarn}";
+
+            var packCommand = new PackCommand(_testAssetsManager.CreateTestProject(packageProject, assetIdentifier));
+            packCommand.Execute().Should().Pass();
+            var package = new TestPackageReference(packageProject.Name, "1.0.0", packCommand.GetNuGetPackage());
+
+            var testProject = new TestProject()
+            {
+                Name = "NonPortableRid",
+                TargetFrameworks = targetFramework,
+                IsExe = true
+            };
+
+            // Reference the package, add it to restore sources, and use a test-specific packages folder 
+            testProject.PackageReferences.Add(package);
+            testProject.AdditionalProperties["RestoreAdditionalProjectSources"] = Path.GetDirectoryName(package.NupkgPath);
+            testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
+
+            // The actual list comes from BundledVersions.props. For testing, we conditionally add a
+            // subset of the list if it isn't already defined (so running on an older version)
+            testProject.AddItem("_KnownRuntimeIdentiferPlatforms",
+                new Dictionary<string, string>()
+                {
+                    { "Include", "unix" },
+                    { "Condition", "'@(_KnownRuntimeIdentiferPlatforms)'==''" }
+                });
+
+            if (useRidGraph.HasValue)
+            {
+                testProject.AddItem("RuntimeHostConfigurationOption",
+                    new Dictionary<string, string>()
+                    {
+                    { "Include", "System.Runtime.Loader.UseRidGraph" },
+                    { "Value", useRidGraph.Value.ToString() },
+                    });
+            }
+
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject, assetIdentifier);
+            var result = new BuildCommand(testAsset).Execute();
+            result.Should().Pass();
+            if (shouldWarn)
+            {
+                result.Should().HaveStdOutMatching($"NETSDK1206.*{package.ID}");
+            }
+            else
+            {
+                result.Should().NotHaveStdOutContaining("NETSDK1206");
             }
         }
     }

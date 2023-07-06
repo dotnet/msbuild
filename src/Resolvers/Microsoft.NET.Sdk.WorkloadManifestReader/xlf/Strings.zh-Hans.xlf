@@ -57,6 +57,16 @@
         <target state="translated">文档过早结束</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidManifestVersion">
+        <source>Invalid version: {0}</source>
+        <target state="translated">版本 {0} 无效</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">分析工作负载清单 ID“{1}”的版本“{0}”时出错</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">未找到清单“{1}”[{2}] 所需的工作负载清单依赖项“{0}”</target>
@@ -92,6 +102,11 @@
         <target state="translated">重定向工作负荷“{0}”具有“重定向到”以外的键</target>
         <note />
       </trans-unit>
+      <trans-unit id="SpecifiedManifestNotFound">
+        <source>Specified workload manifest was not found: {0}</source>
+        <target state="translated">找不到指定的工作负荷清单: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">偏移为 {1} 时意外出现的标记“{0}”</target>
@@ -115,6 +130,11 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">工作负载未解析的目标“{0}”重定向到清单“{2}”[{3}] 中的“{1}”</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="translated">找不到在 {1} 中指定的工作负载版本 {0}。运行“dotnet 工作负载还原”以安装此工作负载版本。</target>
         <note />
       </trans-unit>
     </body>

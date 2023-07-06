@@ -1,7 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -27,8 +28,8 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
         {
             var result = Parser.Instance.Parse(@"dotnet restore .\some.csproj --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
 
-            result.GetValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument).Should().BeEquivalentTo(@".\some.csproj");
-            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"-property:SkipInvalidConfigurations=true");
+            result.GetValue<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument).Should().BeEquivalentTo(@".\some.csproj");
+            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"--property:SkipInvalidConfigurations=true");
         }
 
         [Fact]
@@ -36,7 +37,7 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
         {
             var result = Parser.Instance.Parse(@"dotnet restore --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
 
-            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"-property:SkipInvalidConfigurations=true");
+            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"--property:SkipInvalidConfigurations=true");
         }
 
         [Fact]
@@ -47,9 +48,9 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
                       .Parse(
                           @"dotnet restore --no-cache --packages ""D:\OSS\corefx\packages"" --source https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json --source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json --source https://api.nuget.org/v3/index.json D:\OSS\corefx\external\runtime\runtime.depproj");
 
-            restore.GetValueForArgument(RestoreCommandParser.SlnOrProjectArgument);
+            restore.GetValue(RestoreCommandParser.SlnOrProjectArgument);
 
-            restore.GetValueForOption(RestoreCommandParser.SourceOption)
+            restore.GetValue(RestoreCommandParser.SourceOption)
                 .Should()
                 .BeEquivalentTo(
                     "https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json",

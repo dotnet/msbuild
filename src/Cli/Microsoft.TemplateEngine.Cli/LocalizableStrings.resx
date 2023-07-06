@@ -1,0 +1,950 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AliasCreated" xml:space="preserve">
+    <value>Successfully created alias named '{0}' with value '{1}'</value>
+  </data>
+  <data name="ArgsFileNotFound" xml:space="preserve">
+    <value>The specified extra args file does not exist: {0}.</value>
+  </data>
+  <data name="ArgsFileWrongFormat" xml:space="preserve">
+    <value>Extra args file {0} is not formatted properly.</value>
+  </data>
+  <data name="Assembly" xml:space="preserve">
+    <value>Assembly</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>Change</value>
+  </data>
+  <data name="ConfiguredValue" xml:space="preserve">
+    <value>Configured Value: {0}</value>
+  </data>
+  <data name="CreateFailed" xml:space="preserve">
+    <value>Template "{0}" could not be created.
+{1}</value>
+  </data>
+  <data name="CreateSuccessful" xml:space="preserve">
+    <value>The template "{0}" was created successfully.</value>
+  </data>
+  <data name="CurrentConfiguration" xml:space="preserve">
+    <value>Current configuration:</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DestructiveChangesNotification" xml:space="preserve">
+    <value>Creating this template will make changes to existing files:</value>
+  </data>
+  <data name="DisplaysHelp" xml:space="preserve">
+    <value>Displays help for this command.</value>
+  </data>
+  <data name="Generators" xml:space="preserve">
+    <value>Generators</value>
+  </data>
+  <data name="InvalidParameterDetail" xml:space="preserve">
+    <value>'{1}' is not a valid value for {0}.</value>
+  </data>
+  <data name="InvalidCommandOptions" xml:space="preserve">
+    <value>Error: Invalid option(s):</value>
+  </data>
+  <data name="ColumnNameLanguage" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="MissingRequiredParameter" xml:space="preserve">
+    <value>Missing mandatory option(s) for the template '{1}': {0}.</value>
+    <comment>{0} - comma-separated list of missing options, each option is quoted.</comment>
+  </data>
+  <data name="MountPointFactories" xml:space="preserve">
+    <value>Mount Point Factories</value>
+  </data>
+  <data name="NoItems" xml:space="preserve">
+    <value>(No Items)</value>
+  </data>
+  <data name="NoParameters" xml:space="preserve">
+    <value>    (No Parameters)</value>
+  </data>
+  <data name="Generic_Info_NoMatchingTemplates" xml:space="preserve">
+    <value>No templates found matching: {0}.</value>
+  </data>
+  <data name="Generic_Info_NoMatchingTemplatePackage" xml:space="preserve">
+    <value>
+      No template packages found matching: {0}.
+      
+      To list installed template packages, run:
+        dotnet new uninstall
+      To search for the template packages on NuGet.org, run:
+        dotnet new search --package {0}
+    </value>
+  </data>
+  <data name="OptionalWorkloadsSyncFailed" xml:space="preserve">
+    <value>Error during synchronization with the Optional SDK Workloads.</value>
+  </data>
+  <data name="Options" xml:space="preserve">
+    <value>Options:</value>
+  </data>
+  <data name="Overwrite" xml:space="preserve">
+    <value>Overwrite</value>
+  </data>
+  <data name="RerunCommandAndPassForceToCreateAnyway" xml:space="preserve">
+    <value>To create the template anyway, run the command with '{0}' option:</value>
+    <comment>{0} - additional option name (--force)</comment>
+  </data>
+  <data name="RunHelpForInformationAboutAcceptedParameters" xml:space="preserve">
+    <value>For usage information, run: </value>
+  </data>
+  <data name="ColumnNameShortName" xml:space="preserve">
+    <value>Short Name</value>
+  </data>
+  <data name="ShowsAllTemplates" xml:space="preserve">
+    <value>Shows all templates.</value>
+  </data>
+  <data name="ColumnNameTags" xml:space="preserve">
+    <value>Tags</value>
+  </data>
+  <data name="Templates" xml:space="preserve">
+    <value>Templates</value>
+  </data>
+  <data name="TemplatesFoundMatchingInputParameters" xml:space="preserve">
+    <value>These templates matched your input: {0}</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="UnknownChangeKind" xml:space="preserve">
+    <value>Unknown Change</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Info_UpdateAvailable" xml:space="preserve">
+    <value>An update for template package '{0}' is available.</value>
+  </data>
+  <data name="CommandFailed" xml:space="preserve">
+    <value>Command failed.</value>
+  </data>
+  <data name="CommandOutput" xml:space="preserve">
+    <value>Output from command:</value>
+  </data>
+  <data name="CommandSucceeded" xml:space="preserve">
+    <value>Command succeeded.</value>
+  </data>
+  <data name="RunningCommand" xml:space="preserve">
+    <value>Running command '{0}'...</value>
+  </data>
+  <data name="PostActionInvalidInputRePrompt" xml:space="preserve">
+    <value>Invalid input "{0}". Please enter one of [{1}(yes)|{2}(no)].</value>
+  </data>
+  <data name="PostActionPromptHeader" xml:space="preserve">
+    <value>Template is configured to run the following action:</value>
+  </data>
+  <data name="PostActionPromptRequest" xml:space="preserve">
+    <value>Do you want to run this action [{0}(yes)|{1}(no)]?</value>
+  </data>
+  <data name="ProcessingPostActions" xml:space="preserve">
+    <value>Processing post-creation actions...</value>
+  </data>
+  <data name="AllowScriptsNoChoice" xml:space="preserve">
+    <value>Do not allow scripts to run</value>
+  </data>
+  <data name="AllowScriptsPromptChoice" xml:space="preserve">
+    <value>Ask before running each script</value>
+  </data>
+  <data name="AllowScriptsYesChoice" xml:space="preserve">
+    <value>Allow scripts to run</value>
+  </data>
+  <data name="PostActionCommand" xml:space="preserve">
+    <value>Actual command: {0}</value>
+  </data>
+  <data name="PostActionDescription" xml:space="preserve">
+    <value>Description: {0}</value>
+  </data>
+  <data name="PostActionInstructions" xml:space="preserve">
+    <value>Manual instructions: {0}</value>
+  </data>
+  <data name="ThirdPartyNotices" xml:space="preserve">
+    <value>This template contains technologies from parties other than Microsoft, see {0} for details.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Uninstall_Error_GenericError" xml:space="preserve">
+    <value>Failed to uninstall {0}, reason: {1}.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Error_VulnerablePackage" xml:space="preserve">
+    <value>The package {0} was not updated due to detected vulnerabilities:</value>
+    <comment>{0} - template package name.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Error_VulnerablePackageTip" xml:space="preserve">
+    <value>In order to update this package, run:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Install_Error_VulnerablePackageTip" xml:space="preserve">
+    <value>In order to install this package, run:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage" xml:space="preserve">
+    <value>The package {0} contains vulnerabilities:</value>
+    <comment>{0} - template package name.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_Download_VulnerablePackage" xml:space="preserve">
+    <value>Installed package has the following vulnerabilities:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Download_Error_VulnerablePackage" xml:space="preserve">
+    <value>Failed to install {0}, due to detected vulnerabilities:</value>
+    <comment>{0} - template package name.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_VulnerabilitySeverity_Low" xml:space="preserve">
+    <value>Low</value>
+    <comment>represents nuget api severity of level 0.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_VulnerabilitySeverity_Moderate" xml:space="preserve">
+    <value>Moderate</value>
+    <comment>represents nuget api severity of level 1.</comment>   
+  </data>
+  <data name="TemplatePackageCoordinator_VulnerabilitySeverity_High" xml:space="preserve">
+    <value>High</value>
+    <comment>represents nuget api severity of level 2.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_VulnerabilitySeverity_Critical" xml:space="preserve">
+    <value>Critical</value>
+    <comment>represents nuget api severity of level 3.</comment>
+  </data>
+  <data name="InvalidParameterDefault" xml:space="preserve">
+    <value>The default value '{1}' is not a valid value for {0}.</value>
+  </data>
+  <data name="PostActionFailedInstructionHeader" xml:space="preserve">
+    <value>Post action failed.</value>
+  </data>
+  <data name="AliasName" xml:space="preserve">
+    <value>Alias Name</value>
+  </data>
+  <data name="AliasValue" xml:space="preserve">
+    <value>Alias Value</value>
+  </data>
+  <data name="AliasNameContainsInvalidCharacters" xml:space="preserve">
+    <value>Alias names can only contain letters, numbers, underscores, and periods.</value>
+  </data>
+  <data name="AliasCannotBeShortName" xml:space="preserve">
+    <value>Alias '{0}' is a template short name, and therefore cannot be aliased.</value>
+  </data>
+  <data name="AliasCommandAfterExpansion" xml:space="preserve">
+    <value>After expanding aliases, the command is:
+    dotnet {0}</value>
+  </data>
+  <data name="AliasExpandedCommandParseError" xml:space="preserve">
+    <value>Command is invalid after expanding aliases.</value>
+  </data>
+  <data name="AliasExpansionError" xml:space="preserve">
+    <value>Error expanding aliases on input params.</value>
+  </data>
+  <data name="ExtraArgsCommandAfterExpansion" xml:space="preserve">
+    <value>After expanding the extra args files, the command is:
+    dotnet {0}</value>
+  </data>
+  <data name="AliasCycleError" xml:space="preserve">
+    <value>Alias not created. It would have created an alias cycle, resulting in infinite expansion.</value>
+  </data>
+  <data name="AliasNotCreatedInvalidInput" xml:space="preserve">
+    <value>Alias not created. The input was invalid.</value>
+  </data>
+  <data name="AliasRemoved" xml:space="preserve">
+    <value>Successfully removed alias named '{0}' whose value was '{1}'.</value>
+  </data>
+  <data name="AliasShowAllAliasesHeader" xml:space="preserve">
+    <value>All Aliases:</value>
+  </data>
+  <data name="AliasShowErrorUnknownAlias" xml:space="preserve">
+    <value>Unknown alias name '{0}'.
+Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
+  </data>
+  <data name="AliasUpdated" xml:space="preserve">
+    <value>Successfully updated alias named '{0}' to value '{1}'.</value>
+  </data>
+  <data name="AliasValueFirstArgError" xml:space="preserve">
+    <value>First argument of an alias value must begin with a letter or digit.</value>
+  </data>
+  <data name="AliasRemoveNonExistentFailed" xml:space="preserve">
+    <value>Unable to remove alias '{0}'. It did not exist.</value>
+  </data>
+  <data name="UnableToSetPermissions" xml:space="preserve">
+    <value>Unable to apply permissions {0} to "{1}".</value>
+  </data>
+  <data name="PartialTemplateMatchSwitchesNotValidForAllMatches" xml:space="preserve">
+    <value>Some partially matched templates may not support these input switches:</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>Version:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Uninstall_Info_InstalledItems" xml:space="preserve">
+    <value>Currently installed items:</value>
+  </data>
+  <data name="SettingsReadError" xml:space="preserve">
+    <value>Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</value>
+  </data>
+  <data name="SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches" xml:space="preserve">
+    <value>The following option(s) or their value(s) are not valid in combination with other supplied options or their values:</value>
+  </data>
+  <data name="Authoring_AmbiguousBestPrecedence" xml:space="preserve">
+    <value>Equal highest precedence values among the best template matches prevented unambiguously choosing a template to invoke.</value>
+  </data>
+  <data name="Authoring_AmbiguousChoiceParameterValue" xml:space="preserve">
+    <value>An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</value>
+  </data>
+  <data name="ActionWouldHaveBeenTakenAutomatically" xml:space="preserve">
+    <value>Action would have been taken automatically:</value>
+  </data>
+  <data name="FileActionsWouldHaveBeenTaken" xml:space="preserve">
+    <value>File actions would have been taken:</value>
+  </data>
+  <data name="TemplateCreator_Error_TemplateNotFound" xml:space="preserve">
+    <value>Unable to locate the specified template content, the template package might be removed or corrupted.</value>
+  </data>
+  <data name="InvalidNameParameter" xml:space="preserve">
+    <value>Name cannot contain any of the following characters {0} or character codes {1}</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Uninstall_Info_DetailsHeader" xml:space="preserve">
+    <value>Details:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Uninstall_Info_UninstallCommandHint" xml:space="preserve">
+    <value>Uninstall Command:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Error_PackageForTemplateNotFound" xml:space="preserve">
+    <value>Could not find the template package containing template '{0}'</value>
+  </data>
+  <data name="CliTemplateSearchCoordinator_Info_SearchInProgress" xml:space="preserve">
+    <value>Searching for the templates...</value>
+  </data>
+  <data name="CliTemplateSearchCoordinator_Info_InstallHelp" xml:space="preserve">
+    <value>To use the template, run the following command to install the package:</value>
+  </data>
+  <data name="CliTemplateSearchCoordinator_Info_MatchesFromSource" xml:space="preserve">
+    <value>Matches from template source: {0}</value>
+  </data>
+  <data name="TemplatesNotValidGivenTheSpecifiedFilter" xml:space="preserve">
+    <value>{0} template(s) partially matched, but failed on {1}.</value>
+  </data>
+  <data name="InvalidParameterTemplateHint" xml:space="preserve">
+    <value>For more information, run:</value>
+  </data>
+  <data name="Generic_CommandHints_List_Template" xml:space="preserve">
+    <value>To list installed templates similar to '{0}', run:</value>
+  </data>
+  <data name="ColumnNameAuthor" xml:space="preserve">
+    <value>Author</value>
+  </data>
+  <data name="ColumnNamePackageNameAndOwners" xml:space="preserve">
+    <value>Package Name / Owners</value>
+    <comment>information about NuGet package: its name and owner</comment>
+  </data>
+  <data name="ColumnNamesAreNotSupported" xml:space="preserve">
+    <value>The column {0} is/are not supported, the supported columns are: {1}.</value>
+  </data>
+  <data name="ColumnNameType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="CliTemplateSearchCoordinator_Error_NoSources" xml:space="preserve">
+    <value>No remoted sources defined to search for the templates.</value>
+  </data>
+  <data name="CliTemplateSearchCoordinator_Error_NotFound" xml:space="preserve">
+    <value>Template '{0}' was not found.</value>
+  </data>
+  <data name="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort" xml:space="preserve">
+    <value>Search failed: template name is too short, minimum 2 characters are required.</value>
+  </data>
+  <data name="ColumnNamePackage" xml:space="preserve">
+    <value>Package</value>
+  </data>
+  <data name="ColumnNameTemplateName" xml:space="preserve">
+    <value>Template Name</value>
+  </data>
+  <data name="ColumnNameTotalDownloads" xml:space="preserve">
+    <value>Downloads</value>
+  </data>
+  <data name="Generic_CommandHints_Search" xml:space="preserve">
+    <value>To search for the templates on NuGet.org, run:</value>
+  </data>
+  <data name="AmbiguousParameterDetail" xml:space="preserve">
+    <value>The value '{1}' is ambiguous for option {0}.</value>
+  </data>
+  <data name="AmbiguousTemplateGroupListHint" xml:space="preserve">
+    <value>Re-run the command using the template's exact short name.</value>
+  </data>
+  <data name="AmbiguousTemplatesHeader" xml:space="preserve">
+    <value>Unable to resolve the template, the following installed templates are conflicting:</value>
+  </data>
+  <data name="AmbiguousTemplatesMultiplePackagesHint" xml:space="preserve">
+    <value>Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.</value>
+  </data>
+  <data name="AmbiguousTemplatesSamePackageHint" xml:space="preserve">
+    <value>The package {0} is not correct, uninstall it and report the issue to the package author.</value>
+  </data>
+  <data name="ColumnNameIdentity" xml:space="preserve">
+    <value>Identity</value>
+  </data>
+  <data name="ColumnNamePrecedence" xml:space="preserve">
+    <value>Precedence</value>
+  </data>
+  <data name="InvalidParameterNameDetail" xml:space="preserve">
+    <value>'{0}' is not a valid option</value>
+  </data>
+  <data name="PossibleValuesHeader" xml:space="preserve">
+    <value>The possible values are:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_lnstall_Error_DownloadFailed" xml:space="preserve">
+    <value>{0} could not be installed, download failed.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_lnstall_Error_GenericError" xml:space="preserve">
+    <value>{0} could not be installed.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_lnstall_Error_InvalidNuGetFeeds" xml:space="preserve">
+    <value>{0} could not be installed, no NuGet feeds are configured or they are invalid.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_lnstall_Error_PackageNotFound" xml:space="preserve">
+    <value>{0} could not be installed, the package does not exist.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_lnstall_Error_UnsupportedRequest" xml:space="preserve">
+    <value>{0} is not supported.</value>
+  </data>
+  <data name="GenericError" xml:space="preserve">
+    <value>Error: {0}</value>
+  </data>
+  <data name="GenericWarning" xml:space="preserve">
+    <value>Warning: {0}</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Error_PackageNameContainsTemplates" xml:space="preserve">
+    <value>{0} (contains {1} templates)</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Error_PackageNotFound" xml:space="preserve">
+    <value>The template package '{0}' is not found.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Error_TemplateIncludedToPackages" xml:space="preserve">
+    <value>The template '{0}' is included to the packages:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Install_Error_FoundNoPackagesToInstall" xml:space="preserve">
+    <value>Found no template packages to install.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled" xml:space="preserve">
+    <value>The following template packages will be installed:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled" xml:space="preserve">
+    <value>{0} is already installed.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_lnstall_Error_InvalidPackage" xml:space="preserve">
+    <value>Failed to install {0}, failed to uninstall previous version of the template package.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_lnstall_Error_UninstallFailed" xml:space="preserve">
+    <value>Failed to install {0}, the template package is invalid.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_lnstall_Info_Success" xml:space="preserve">
+    <value>Success: {0} installed the following templates:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Uninstall_Error_ListPackagesHeader" xml:space="preserve">
+    <value>To list installed template packages use:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Uninstall_Error_UninstallCommandHeader" xml:space="preserve">
+    <value>To uninstall the template package use:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Uninstall_Info_Success" xml:space="preserve">
+    <value>Success: {0} was uninstalled.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Error_GenericError" xml:space="preserve">
+    <value>Failed to check update for {0}: {1}.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Error_InvalidNuGetFeeds" xml:space="preserve">
+    <value>Failed to check update for {0}: no NuGet feeds are configured or they are invalid.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Error_PackageNotFound" xml:space="preserve">
+    <value>Failed to check update for {0}: the package is not available in configured NuGet feeds.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Error_PackageNotSupported" xml:space="preserve">
+    <value>Failed to check update for {0}: the package is not supported.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate" xml:space="preserve">
+    <value>All template packages are up-to-date.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Info_PackagesToBeUpdated" xml:space="preserve">
+    <value>The following template packages will be updated:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError" xml:space="preserve">
+    <value>Failed to initialize NuGet credential service, details: {0}.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Install_Error_SameInstallRequests" xml:space="preserve">
+    <value>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</value>
+  </data>
+  <data name="Generic_Details" xml:space="preserve">
+    <value>Details: {0}</value>
+  </data>
+  <data name="TemplateResolver_Warning_FailedToReparseTemplate" xml:space="preserve">
+    <value>[Warning]: Failed to parse input for template {0}, it will be skipped from further processing.</value>
+  </data>
+  <data name="ColumnNameCurrentVersion" xml:space="preserve">
+    <value>Current</value>
+  </data>
+  <data name="ColumnNameLatestVersion" xml:space="preserve">
+    <value>Latest</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Info_UpdateAllCommandHeader" xml:space="preserve">
+    <value>To update all the packages use:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Info_UpdateAvailablePackages" xml:space="preserve">
+    <value>An update for template packages is available:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader" xml:space="preserve">
+    <value>To update the package use:</value>
+  </data>
+  <data name="PostActionDispatcher_Error_NotSupported" xml:space="preserve">
+    <value>The post action {0} is not supported.</value>
+  </data>
+  <data name="PostActionDispatcher_Error_RunScriptNotAllowed" xml:space="preserve">
+    <value>Execution of 'Run script' post action is not allowed.</value>
+  </data>
+  <data name="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable" xml:space="preserve">
+    <value>Failed to run the command: argument 'executable' is missing in post action configuration.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package" xml:space="preserve">
+    <value>No templates were found in the package {0}.</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="TemplateInformationCoordinator_DotnetNew_Description" xml:space="preserve">
+    <value>The '{0}' command creates a .NET project based on a template.</value>
+  </data>
+  <data name="TemplateInformationCoordinator_DotnetNew_ExampleHeader" xml:space="preserve">
+    <value>An example would be:</value>
+  </data>
+  <data name="TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint" xml:space="preserve">
+    <value>Display template options with:</value>
+  </data>
+  <data name="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint" xml:space="preserve">
+    <value>Display all installed templates with:</value>
+  </data>
+  <data name="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint" xml:space="preserve">
+    <value>Display templates available on NuGet.org with:</value>
+  </data>
+  <data name="TemplateInformationCoordinator_DotnetNew_TemplatesHeader" xml:space="preserve">
+    <value>Common templates are:</value>
+  </data>
+  <data name="CliTemplateSearchCoordinator_Error_NoTemplateName" xml:space="preserve">
+    <value>Search failed: not enough information specified for search.</value>
+  </data>
+  <data name="CliTemplateSearchCoordinator_Info_SearchHelp" xml:space="preserve">
+    <value>To search for templates, specify partial template name or use one of the supported filters: {0}.</value>
+  </data>
+  <data name="Generic_ExampleHeader" xml:space="preserve">
+    <value>Example:</value>
+  </data>
+  <data name="Generic_ExamplesHeader" xml:space="preserve">
+    <value>Examples:</value>
+  </data>
+  <data name="Generic_Empty" xml:space="preserve">
+    <value>(empty)</value>
+    <comment>shown when there is no data to show</comment>
+  </data>
+  <data name="CliTemplateSearchCoordinator_Error_SearchFailure" xml:space="preserve">
+    <value>Search failed: {0}</value>
+    <comment>0 - localized error message</comment>
+  </data>
+  <data name="InvalidSyntax" xml:space="preserve">
+    <value>Invalid command syntax: use '{0}' instead.</value>
+    <comment>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</comment>
+  </data>
+  <data name="HostSpecificDataLoader_Warning_FailedToRead" xml:space="preserve">
+    <value>Failed to load dotnet CLI host data for template {0} from cache.</value>
+    <comment>{0} - template short name</comment>
+  </data>
+  <data name="HostSpecificDataLoader_Warning_FailedToReadFromFile" xml:space="preserve">
+    <value>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</value>
+    <comment>{0} - template short name, {1} - file path to host data.</comment>
+  </data>
+  <data name="Commands_Validator_WrongTokens" xml:space="preserve">
+    <value>Unrecognized command or argument(s): {0}.</value>
+    <comment>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</comment>
+  </data>
+  <data name="TemplateOptions_Error_AllowedValuesForOptionList" xml:space="preserve">
+    <value>Allowed values for '{0}' option are: {1}.</value>
+    <comment>0} - option name (as --language)
+{1} - comma separated, escaped in quotes list of allowed values</comment>
+  </data>
+  <data name="AliasAssignmentCoordinator_Error_LongAlias" xml:space="preserve">
+    <value>Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</value>
+    <comment>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
+{0}, {1}, {2} should have no whitespaces.</comment>
+  </data>
+  <data name="AliasAssignmentCoordinator_Error_NameShouldNotHaveColon" xml:space="preserve">
+    <value>Parameter name '{0}' contains colon, which is forbidden.</value>
+    <comment>{0} is parameter name, has no whitespaces.</comment>
+  </data>
+  <data name="AliasAssignmentCoordinator_Error_ShortAlias" xml:space="preserve">
+    <value>Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</value>
+    <comment>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
+{0}, {1}, {2} should have no whitespaces.</comment>
+  </data>
+  <data name="Exception_InvalidTemplateParameters_MessageHeader" xml:space="preserve">
+    <value>Template {0} ({1}) is malformed. The following template parameters are invalid:</value>
+    <comment>{0} is template identity, {1} is template short name.
+The header is followed by the list of parameters and their errors (might be several for one parameter).</comment>
+  </data>
+  <data name="ParseChoiceTemplateOption_ErrorText_InvalidChoiceValue" xml:space="preserve">
+    <value>value '{0}' is not allowed, allowed values are: {1}</value>
+    <comment>the error message is part of other sentence, no punctuation is needed
+{0} is a value given by user / configuration, {1} is comma separated list of possible values(each value is in quotes).</comment>
+  </data>
+  <data name="ParseChoiceTemplateOption_ErrorText_NoChoicesDefined" xml:space="preserve">
+    <value>no choices are defined for parameter</value>
+    <comment>the error message is part of other sentence, no punctuation is needed</comment>
+  </data>
+  <data name="ParseChoiceTemplateOption_Error_InvalidArgument" xml:space="preserve">
+    <value>Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</value>
+    <comment>{0} - value that is given by used for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</comment>
+  </data>
+  <data name="ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue" xml:space="preserve">
+    <value>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</value>
+    <comment>{0} - default value for option {1} in case no argument is given
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</comment>
+  </data>
+  <data name="ParseChoiceTemplateOption_Error_InvalidDefaultValue" xml:space="preserve">
+    <value>Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</value>
+    <comment>{0} - default value for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</comment>
+  </data>
+  <data name="ParseTemplateOption_Error_InvalidArgument" xml:space="preserve">
+    <value>Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</value>
+    <comment>{0} - value that is given by used for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).</comment>
+  </data>
+  <data name="ParseTemplateOption_Error_InvalidCount" xml:space="preserve">
+    <value>Using more than 1 argument is not allowed for '{0}', used: {1}.</value>
+    <comment>{0} - option name, {1} - count of arguments used</comment>
+  </data>
+  <data name="ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue" xml:space="preserve">
+    <value>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</value>
+    <comment>{0} - default value for option {1} in case no argument is given
+{1} - option name
+{2} - type of the value (string, choice, etc).
+</comment>
+  </data>
+  <data name="ParseTemplateOption_Error_InvalidDefaultValue" xml:space="preserve">
+    <value>Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</value>
+    <comment>{0} - default value for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+</comment>
+  </data>
+  <data name="ParseTemplateOption_Error_MissingDefaultIfNoOptionValue" xml:space="preserve">
+    <value>Required argument missing for option: '{0}'.</value>
+    <comment>{0} - option name</comment>
+  </data>
+  <data name="ParseTemplateOption_Error_MissingDefaultValue" xml:space="preserve">
+    <value>Default value for argument missing for option: '{0}'.</value>
+    <comment>{0} - option name</comment>
+  </data>
+  <data name="NoTemplatesFound" xml:space="preserve">
+    <value>No templates installed.</value>
+  </data>
+  <data name="Commands_Validator_WrongArgumentValue" xml:space="preserve">
+    <value>Argument(s) {0} are not recognized. Must be one of: {1}.</value>
+    <comment>{0} - comma-separated quoted list of argument value(s) given by user, {1} - comma-separated quoted list of allowed values.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_Install_Info_OverrideNotice" xml:space="preserve">
+    <value>Installing the template package(s) will override the available template package(s).</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Install_Info_PackageIsAvailable" xml:space="preserve">
+    <value>The following template package(s) are already available:</value>
+    <comment>Followed by list of packages that are available</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_Install_Info_UseForceToOverride" xml:space="preserve">
+    <value>To install the template package(s) anyway, apply '{0}' option:</value>
+    <comment>{0} is option to use (--force). Followed by command to use to install the packages.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_BuiltInCheck_Info_BuiltInPackageAvailable" xml:space="preserve">
+    <value>An update for template package '{0}' is available in the '{1}' provider.</value>
+    <comment>{0} - id and version of template package, {1} - provider name (.NET SDK, Optional workloads, etc)</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_BuiltInCheck_Info_UninstallPackage" xml:space="preserve">
+    <value>To use built-in template package, uninstall manually installed template package using:</value>
+    <comment>followed by command to uninstall package</comment>
+  </data>
+  <data name="TemplateListCoordinator_Error_FailedConstraints" xml:space="preserve">
+    <value>{0} template(s) are hidden because their constraints are not satisfied. To show them, use the '{1}' option.</value>
+    <comment>{0} - the count of templates that are not shown. {1} - option to be used (--ignore-constraints).</comment>
+  </data>
+  <data name="Commands_Warning_DeprecatedCommand" xml:space="preserve">
+    <value>Warning: use of '{0}' is deprecated. Use '{1}' instead.</value>
+    <comment>{0} - deprecated command ('dotnet new --install'); {1} - new command ('dotnet new install).</comment>
+  </data>
+  <data name="Commands_Warning_DeprecatedCommand_Info" xml:space="preserve">
+    <value>For more information, run: </value>
+    <comment>followed by command example (at new line, without quotes)</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_Install_ConstraintsNotice" xml:space="preserve">
+    <value>The following templates might not work because their constraints are not met:</value>
+    <comment>The sentence is followed by the list of templates with information on their constraints. Each template and each restriction is given from new line.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled_Hint" xml:space="preserve">
+    <value>To reinstall the same version of the template package, use '{0}' option:</value>
+    <comment>{0} - option name (--force). Followed by command example on new line.</comment>
+  </data>
+  <data name="BaseCommand_ExitCodeHelp" xml:space="preserve">
+    <value>For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</value>
+    <comment>{0} is the exit code</comment>
+  </data>
+  <data name="TemplateCommand_DisplayConstraintResults_Error" xml:space="preserve">
+    <value>Failed to instatiate template '{0}', the following constraints are not met:</value>
+    <comment>{0} - template name (user friendly)</comment>
+  </data>
+  <data name="TemplateCommand_DisplayConstraintResults_Hint" xml:space="preserve">
+    <value>To run the template anyway, use '{0}' option:</value>
+    <comment>{0} - additional option name (--force)</comment>
+  </data>
+  <data name="TemplateCommand_DisplayConstraintResults_Hint_TemplateNotUsable" xml:space="preserve">
+    <value>The template might not be usable.</value>
+  </data>
+  <data name="TemplateCommand_DisplayConstraintResults_Warning" xml:space="preserve">
+    <value>Warning: the following constraints for the template '{0}' are not met:</value>
+    <comment>{0} - template name (user friendly)</comment>
+  </data>
+  <data name="Generic_NoCallbackError" xml:space="preserve">
+    <value>No callback is configured. Running post action is not possible.</value>
+  </data>
+  <data name="TemplateCreator_Hint_Install" xml:space="preserve">
+    <value>To install the template package, run:</value>
+    <comment>The sentence is followed by the command to run the action</comment>
+  </data>
+  <data name="TemplateCreator_Hint_RebuildCache" xml:space="preserve">
+    <value>To rescan installed template packages, run:</value>
+    <comment>The sentence is followed by the command to run the action</comment>
+  </data>
+  <data name="TemplateCreator_Hint_Uninstall" xml:space="preserve">
+    <value>To uninstall the template package, run:</value>
+    <comment>The sentence is followed by the command to run the action</comment>
+  </data>
+  <data name="InstantiateCommand_Info_TypoCorrection_Templates" xml:space="preserve">
+    <value>Did you mean one of the following templates?</value>
+    <comment>Followed by the list of suggestions</comment>
+  </data>
+  <data name="InstantiateCommand_Info_NoMatchingTemplatesSubCommands" xml:space="preserve">
+    <value>No templates or subcommands found matching: '{0}'.</value>
+  </data>
+  <data name="InstantiateCommand_Info_TypoCorrection_Subcommands" xml:space="preserve">
+    <value>Did you mean one of the following subcommands?</value>
+    <comment>Followed by the list of suggestions</comment>
+  </data>
+  <data name="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate" xml:space="preserve">
+    <value>Failed to get information about template packages for the template with identity '{0}'.</value>
+  </data>
+  <data name="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup" xml:space="preserve">
+    <value>Failed to get information about template packages for template group '{0}'.</value>
+  </data>
+  <data name="Commands_TemplateShortNameCommandConflict_Info" xml:space="preserve">
+    <value>To instantiate the template with short name '{0}', run:</value>
+    <comment>Followed by command example from new line.</comment>
+  </data>
+  <data name="Generic_CommandHints_List" xml:space="preserve">
+    <value>To list installed templates, run:</value>
+  </data>
+  <data name="DetailsCommand_Argument_PackageIdentifier">
+    <value>Package identifier</value>
+  </data>
+  <data name="DetailsCommand_Option_Version">
+    <value>Specifies a concrete version for displaying details. If not specified the last is taken.</value>
+  </data>
+  <data name="DetailsCommand_Property_Authors">
+    <value>Authors</value>
+  </data>
+  <data name="DetailsCommand_Property_Description">
+    <value>Details</value>
+  </data>
+  <data name="DetailsCommand_Property_SourceFeed">
+    <value>Source Feed</value>
+  </data>
+  <data name="DetailsCommand_Property_Version">
+    <value>Package version</value>
+  </data>
+  <data name="DetailsCommand_Property_PrefixReserved">
+    <value>Reserved</value>
+  </data>
+  <data name="DetailsCommand_Property_Languages">
+    <value>Languages</value>
+    <comment></comment>
+  </data>
+  <data name="DetailsCommand_Property_LicenseMetadata">
+    <value>License Metadata</value>
+  </data>
+  <data name="DetailsCommand_Property_LicenseExpression">
+    <value>License Expression</value>
+  </data>
+  <data name="DetailsCommand_Property_License">
+    <value>License</value>
+  </data>
+  <data name="DetailsCommand_Property_LicenseUrl">
+    <value>License Url</value>
+  </data>
+  <data name="DetailsCommand_Property_Owners">
+    <value>Owners</value>
+  </data>
+  <data name="DetailsCommand_Property_RepoUrl">
+    <value>Repository Url</value>
+  </data>
+  <data name="DetailsCommand_Property_ShortNames">
+    <value>Short Names</value>
+    <comment></comment>
+  </data>
+  <data name="DetailsCommand_Property_Tags">
+    <value>Tags</value>
+    <comment></comment>
+  </data>
+  <data name="DetailsCommand_Property_Templates">
+    <value>Templates</value>
+  </data>
+  <data name="DetailsCommand_NoNuGetSources">
+    <value>No NuGet sources are defined or enabled</value>
+  </data>
+  <data name="DetailsCommand_UnableToLoadResorces">
+    <value>Failed to load NuGet sources configured for the folder {0}</value>
+  </data>
+  <data name="DetailsCommand_UnableToLoadResorce">
+    <value>Could not parse NuGet source '{0}', so it was discarded</value>
+  </data>
+  <data name="OperationCancelled" xml:space="preserve">
+    <value>The operation was cancelled.</value>
+  </data>
+  <data name="UnexpectedResult" xml:space="preserve">
+    <value>Template generation ended with unexpected result: '{0}'. Details: {1}</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_ArgumentNotConfigured" xml:space="preserve">
+    <value>Post action argument '{0}' is mandatory, but not configured.</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_MultipleJsonFiles" xml:space="preserve">
+    <value>More than one file found that matches '{0}'.</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_NoJsonFile" xml:space="preserve">
+    <value>Unable to find the json file in the solution</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_ParentPropertyPathInvalid" xml:space="preserve">
+    <value>Parent property path '{0}' could not be traversed.</value>
+  </data>
+  <data name="PostAction_ModifyJson_Succeeded" xml:space="preserve">
+    <value>Successfully modified {0}.</value>
+  </data>
+  <data name="ColumnNameTrusted" xml:space="preserve">
+    <value>Trusted</value>
+    <comment>information about NuGet package origin; if a package has PrefixReserved indicator </comment>
+  </data>
+</root>

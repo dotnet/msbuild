@@ -1,11 +1,9 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
@@ -16,23 +14,22 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tool
     {
         public static int Main(string[] args)
         {
-            var rootCommand = new RootCommand();
-            var brotli = new Command("brotli");
+            CliRootCommand rootCommand = new();
+            CliCommand brotli = new("brotli");
 
-            var compressionLevelOption = new Option<CompressionLevel>(
-                "-c",
-                getDefaultValue: () => CompressionLevel.Optimal,
-                description: "System.IO.Compression.CompressionLevel for the Brotli compression algorithm.");
-            var sourcesOption = new Option<List<string>>(
-                "-s",
-                description: "A list of files to compress.")
+            CliOption<CompressionLevel> compressionLevelOption = new("-c")
             {
+                DefaultValueFactory = _ => CompressionLevel.SmallestSize,
+                Description = "System.IO.Compression.CompressionLevel for the Brotli compression algorithm.",
+            };
+            CliOption<List<string>> sourcesOption = new("-s")
+            {
+                Description = "A list of files to compress.",
                 AllowMultipleArgumentsPerToken = false
             };
-            var outputsOption = new Option<List<string>>(
-                "-o",
-                "The filenames to output the compressed file to.")
+            CliOption<List<string>> outputsOption = new("-o")
             {
+                Description = "The filenames to output the compressed file to.",
                 AllowMultipleArgumentsPerToken = false
             };
 
@@ -42,29 +39,33 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tool
 
             rootCommand.Add(brotli);
 
-            brotli.Handler = CommandHandler.Create<CompressionLevel, List<string>, List<string>>((c, s, o) =>
+            brotli.SetAction((ParseResult parseResult) =>
             {
-                    Parallel.For(0, s.Count, i =>
-                    {
-                        var source = s[i];
-                        var output = o[i];
-                        try
-                        {
-                            using var sourceStream = File.OpenRead(source);
-                            using var fileStream = new FileStream(output, FileMode.Create);
+                var c = parseResult.GetValue(compressionLevelOption);
+                var s = parseResult.GetValue(sourcesOption);
+                var o = parseResult.GetValue(outputsOption);
 
-                            using var stream = new BrotliStream(fileStream, c);
-                            sourceStream.CopyTo(stream);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.Error.WriteLine($"Error compressing '{source}' into '{output}'");
-                            Console.Error.WriteLine(ex.ToString());
-                        }
-                    });
+                Parallel.For(0, s.Count, i =>
+                {
+                    var source = s[i];
+                    var output = o[i];
+                    try
+                    {
+                        using var sourceStream = File.OpenRead(source);
+                        using var fileStream = new FileStream(output, FileMode.Create);
+
+                        using var stream = new BrotliStream(fileStream, c);
+                        sourceStream.CopyTo(stream);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"Error compressing '{source}' into '{output}'");
+                        Console.Error.WriteLine(ex.ToString());
+                    }
+                });
             });
 
-            return rootCommand.InvokeAsync(args).Result;
+            return rootCommand.Parse(args).Invoke();
         }
     }
 }

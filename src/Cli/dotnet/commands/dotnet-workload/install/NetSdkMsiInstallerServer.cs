@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO.Pipes;
@@ -20,8 +20,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private bool _done;
         private bool _shutdownRequested;
 
-        public NetSdkMsiInstallerServer(InstallElevationContextBase elevationContext, PipeStreamSetupLogger logger)
-            : base(elevationContext, logger)
+        public NetSdkMsiInstallerServer(InstallElevationContextBase elevationContext, PipeStreamSetupLogger logger, bool verifySignatures)
+            : base(elevationContext, logger, verifySignatures)
         {
             // Establish a connection with the install client and logger. We're relying on tasks to handle
             // this, otherwise, the ordering needs to be lined up with how the client configures
@@ -124,8 +124,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         /// <summary>
         /// Creates a new <see cref="NetSdkMsiInstallerServer"/> instance.
         /// </summary>
-        /// <returns></returns>
-        public static NetSdkMsiInstallerServer Create()
+        /// <returns>A new install server.</returns>
+        public static NetSdkMsiInstallerServer Create(bool verifySignatures)
         {
             if (!WindowsUtils.IsAdministrator())
             {
@@ -166,7 +166,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             PipeStreamSetupLogger logger = new(logPipe, logPipeName);
             InstallServerElevationContext elevationContext = new(serverPipe);
 
-            return new NetSdkMsiInstallerServer(elevationContext, logger);
+            return new NetSdkMsiInstallerServer(elevationContext, logger, verifySignatures);
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.ComponentModel;
@@ -43,7 +43,6 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         private ITaskItem _runtimePack;
-        private ITaskItem _crossgen2Pack;
         private string _targetRuntimeIdentifier;
         private string _targetPlatform;
         private string _hostRuntimeIdentifier;
@@ -57,7 +56,6 @@ namespace Microsoft.NET.Build.Tasks
         protected override void ExecuteCore()
         {
             _runtimePack = GetNETCoreAppRuntimePack();
-            _crossgen2Pack = Crossgen2Packs?.FirstOrDefault();
             _targetRuntimeIdentifier = _runtimePack?.GetMetadata(MetadataKeys.RuntimeIdentifier);
 
             // Get the list of runtime identifiers that we support and can target
@@ -133,9 +131,11 @@ namespace Microsoft.NET.Build.Tasks
 
         private bool ValidateCrossgen2Support()
         {
-            _crossgen2Tool.PackagePath = _crossgen2Pack?.GetMetadata(MetadataKeys.PackageDirectory);
-            if (_crossgen2Tool.PackagePath == null ||
-                !NuGetVersion.TryParse(_crossgen2Pack.GetMetadata(MetadataKeys.NuGetPackageVersion), out NuGetVersion crossgen2PackVersion))
+            ITaskItem crossgen2Pack = Crossgen2Packs?.FirstOrDefault();
+            _crossgen2Tool.PackagePath = crossgen2Pack?.GetMetadata(MetadataKeys.PackageDirectory);
+
+            if (string.IsNullOrEmpty(_crossgen2Tool.PackagePath) ||
+                !NuGetVersion.TryParse(crossgen2Pack.GetMetadata(MetadataKeys.NuGetPackageVersion), out NuGetVersion crossgen2PackVersion))
             {
                 Log.LogError(Strings.ReadyToRunNoValidRuntimePackageError);
                 return false;
@@ -143,21 +143,14 @@ namespace Microsoft.NET.Build.Tasks
 
             bool version5 = crossgen2PackVersion.Major < 6;
             bool isSupportedTarget = ExtractTargetPlatformAndArchitecture(_targetRuntimeIdentifier, out _targetPlatform, out _targetArchitecture);
-            string targetOS = _targetPlatform switch
-            {
-                "linux" => "linux",
-                "linux-musl" => "linux",
-                "osx" => "osx",
-                "win" => "windows",
-                _ => null
-            };
 
             // In .NET 5 Crossgen2 supported only the following host->target compilation scenarios:
             //      win-x64 -> win-x64
             //      linux-x64 -> linux-x64
             //      linux-musl-x64 -> linux-musl-x64
+            string targetOS = null;
             isSupportedTarget = isSupportedTarget &&
-                targetOS != null &&
+                GetCrossgen2TargetOS(out targetOS) &&
                 (!version5 || _targetRuntimeIdentifier == _hostRuntimeIdentifier) &&
                 GetCrossgen2ComponentsPaths(version5);
 
@@ -186,6 +179,48 @@ namespace Microsoft.NET.Build.Tasks
 
             _crossgen2IsVersion5 = version5;
             return true;
+        }
+
+        private bool GetCrossgen2TargetOS(out string targetOS)
+        {
+            targetOS = null;
+
+            // Determine targetOS based on target rid.
+            // Use the runtime graph to support non-portable target rids.
+            var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
+            string portablePlatform = NuGetUtils.GetBestMatchingRid(
+                    runtimeGraph,
+                    _targetPlatform,
+                    new[] { "linux", "linux-musl", "osx", "win" },
+                    out _);
+
+            // For source-build, allow the bootstrap SDK rid to be unknown to the runtime repo graph.
+            if (portablePlatform == null && _targetRuntimeIdentifier == _hostRuntimeIdentifier)
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    portablePlatform = "linux";
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    portablePlatform = "win";
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    portablePlatform = "osx";
+                }
+            }
+
+            targetOS = portablePlatform switch
+            {
+                "linux" => "linux",
+                "linux-musl" => "linux",
+                "osx" => "osx",
+                "win" => "windows",
+                _ => null
+            };
+
+            return targetOS != null;
         }
 
         private ITaskItem GetNETCoreAppRuntimePack()

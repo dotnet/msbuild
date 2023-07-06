@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -31,9 +31,9 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(null, "netcoreapp2.2")]
         [InlineData("true", "netcoreapp2.2")]
         [InlineData("false", "netcoreapp2.2")]
-        [InlineData(null, "netcoreapp3.0")]
-        [InlineData("true", "netcoreapp3.0")]
-        [InlineData("false", "netcoreapp3.0")]
+        [InlineData(null, ToolsetInfo.CurrentTargetFramework)]
+        [InlineData("true", ToolsetInfo.CurrentTargetFramework)]
+        [InlineData("false", ToolsetInfo.CurrentTargetFramework)]
         public void It_publishes_with_or_without_apphost(string useAppHost, string targetFramework)
         {
             var runtimeIdentifier = RuntimeInformation.RuntimeIdentifier;
@@ -41,14 +41,14 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager
                 .CopyTestAsset(TestProjectName, $"It_publishes_with_or_without_apphost_{(useAppHost ?? "null")}_{targetFramework}")
-                .WithSource();
+                .WithSource()
+                .WithTargetFramework(targetFramework);
 
             var msbuildArgs = new List<string>()
             {
                 $"/p:RuntimeIdentifier={runtimeIdentifier}",
                 $"/p:TestRuntimeIdentifier={runtimeIdentifier}",
                 "/p:SelfContained=false",
-                $"/p:TargetFramework={targetFramework}"
             };
 
             if (useAppHost != null)

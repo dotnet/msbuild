@@ -1,0 +1,1286 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="ActionWouldHaveBeenTakenAutomatically">
+        <source>Action would have been taken automatically:</source>
+        <target state="translated">조치가 자동으로 수행되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasAssignmentCoordinator_Error_LongAlias">
+        <source>Failed to assign long option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
+        <target state="translated">'{0}' 매개 변수에 긴 옵션 별칭을 할당하지 못했습니다. 시도됨: '{1}'; '{2}'.</target>
+        <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
+{0}, {1}, {2} should have no whitespaces.</note>
+      </trans-unit>
+      <trans-unit id="AliasAssignmentCoordinator_Error_NameShouldNotHaveColon">
+        <source>Parameter name '{0}' contains colon, which is forbidden.</source>
+        <target state="translated">매개 변수 이름 '{0}'에 사용할 수 없는 콜론이 포함되어 있습니다.</target>
+        <note>{0} is parameter name, has no whitespaces.</note>
+      </trans-unit>
+      <trans-unit id="AliasAssignmentCoordinator_Error_ShortAlias">
+        <source>Failed to assign short option alias for parameter '{0}', tried: '{1}'; '{2}'.</source>
+        <target state="translated">'{0}' 매개 변수에 짧은 옵션 별칭을 할당하지 못했습니다. 시도됨: '{1}'; '{2}'.</target>
+        <note>{0} is parameter name, {1} and {2} are attempted option aliases for the parameter.
+{0}, {1}, {2} should have no whitespaces.</note>
+      </trans-unit>
+      <trans-unit id="AliasCannotBeShortName">
+        <source>Alias '{0}' is a template short name, and therefore cannot be aliased.</source>
+        <target state="translated">별칭 '{0}'은(는) 템플릿 축약 이름이므로 별칭을 지정할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasCommandAfterExpansion">
+        <source>After expanding aliases, the command is:
+    dotnet {0}</source>
+        <target state="translated">별칭을 확장한 후 명령은 다음과 같습니다.
+ dotnet{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasCreated">
+        <source>Successfully created alias named '{0}' with value '{1}'</source>
+        <target state="translated">값이 '{1}'인 '{0}'(이)라는 별칭을 만들었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasCycleError">
+        <source>Alias not created. It would have created an alias cycle, resulting in infinite expansion.</source>
+        <target state="translated">별칭이 생성되지 않았습니다. 별칭 순환이 생성되어 무한 확장이 발생했을 것입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasExpandedCommandParseError">
+        <source>Command is invalid after expanding aliases.</source>
+        <target state="translated">별칭을 확장한 후 명령이 유효하지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasExpansionError">
+        <source>Error expanding aliases on input params.</source>
+        <target state="translated">입력 매개 변수에서 별칭을 확장하는 중에 오류가 발생했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasName">
+        <source>Alias Name</source>
+        <target state="translated">별칭 이름</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasNameContainsInvalidCharacters">
+        <source>Alias names can only contain letters, numbers, underscores, and periods.</source>
+        <target state="translated">별칭 이름은 문자, 숫자, 밑줄 및 마침표만 포함할 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasNotCreatedInvalidInput">
+        <source>Alias not created. The input was invalid.</source>
+        <target state="translated">별칭이 생성되지 않았습니다. 입력이 잘못되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasRemoveNonExistentFailed">
+        <source>Unable to remove alias '{0}'. It did not exist.</source>
+        <target state="translated">별칭 '{0}'을(를) 제거할 수 없습니다. 해당 별칭은 존재하지 않았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasRemoved">
+        <source>Successfully removed alias named '{0}' whose value was '{1}'.</source>
+        <target state="translated">값이 '{1}'인 '{0}' 별칭을 성공적으로 제거했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasShowAllAliasesHeader">
+        <source>All Aliases:</source>
+        <target state="translated">모든 별칭:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasShowErrorUnknownAlias">
+        <source>Unknown alias name '{0}'.
+Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
+        <target state="translated">알 수 없는 별칭 이름 '{0}'.
+ 모든 별칭을 표시하려면 인수 없이 'dotnet{1} --show-aliases'를 실행하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasUpdated">
+        <source>Successfully updated alias named '{0}' to value '{1}'.</source>
+        <target state="translated">이름이 '{0}'인 별칭을 '{1}' 값으로 업데이트했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasValue">
+        <source>Alias Value</source>
+        <target state="translated">별칭 값</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AliasValueFirstArgError">
+        <source>First argument of an alias value must begin with a letter or digit.</source>
+        <target state="translated">별칭 값의 첫 번째 인수는 문자 또는 숫자로 시작해야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AllowScriptsNoChoice">
+        <source>Do not allow scripts to run</source>
+        <target state="translated">스크립트 실행 허용 안함</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AllowScriptsPromptChoice">
+        <source>Ask before running each script</source>
+        <target state="translated">각 스크립트를 실행하기 전에 확인</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AllowScriptsYesChoice">
+        <source>Allow scripts to run</source>
+        <target state="translated">스크립트 실행 허용</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AmbiguousParameterDetail">
+        <source>The value '{1}' is ambiguous for option {0}.</source>
+        <target state="translated">{0} 옵션에 대한 '{1}' 값이 모호합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AmbiguousTemplateGroupListHint">
+        <source>Re-run the command using the template's exact short name.</source>
+        <target state="translated">템플릿의 정확한 짧은 이름을 사용하여 명령을 다시 실행하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AmbiguousTemplatesHeader">
+        <source>Unable to resolve the template, the following installed templates are conflicting:</source>
+        <target state="translated">템플릿을 확인할 수 없습니다. 다음의 설치된 템플릿들이 충돌합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
+        <source>Uninstall the template packages containing the templates to keep only one template from the list or add the template options which differentiate the template to run.</source>
+        <target state="translated">템플릿이 포함된 템플릿 패키지를 제거하여 목록에서 템플릿을 하나만 유지하거나 실행할 템플릿을 구분하는 템플릿 옵션을 추가합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AmbiguousTemplatesSamePackageHint">
+        <source>The package {0} is not correct, uninstall it and report the issue to the package author.</source>
+        <target state="translated">{0} 패키지가 올바르지 않습니다. 패키지를 제거하고 패키지 작성자에게 문제를 보고하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgsFileNotFound">
+        <source>The specified extra args file does not exist: {0}.</source>
+        <target state="translated">지정된 추가 인수 파일이 없습니다:{0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgsFileWrongFormat">
+        <source>Extra args file {0} is not formatted properly.</source>
+        <target state="translated">추가 인수 파일{0}이(가) 제대로 형식화되지 않았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Assembly">
+        <source>Assembly</source>
+        <target state="translated">어셈블리</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Authoring_AmbiguousBestPrecedence">
+        <source>Equal highest precedence values among the best template matches prevented unambiguously choosing a template to invoke.</source>
+        <target state="translated">최상의 템플릿 일치 중에서 가장 높은 우선 순위 값이 동일하므로 호출할 템플릿을 명확하게 선택할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Authoring_AmbiguousChoiceParameterValue">
+        <source>An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</source>
+        <target state="translated">애매한 선택 매개 변수 값으로 인해 호출할 템플릿을 명확하게 선택할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BaseCommand_ExitCodeHelp">
+        <source>For details on the exit code, refer to https://aka.ms/templating-exit-codes#{0}</source>
+        <target state="translated">종료 코드에 관한 자세한 내용은 https://aka.ms/templating-exit-codes#를 참조하세요.{0}</target>
+        <note>{0} is the exit code</note>
+      </trans-unit>
+      <trans-unit id="Change">
+        <source>Change</source>
+        <target state="translated">변경</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_NoSources">
+        <source>No remoted sources defined to search for the templates.</source>
+        <target state="translated">템플릿을 검색하도록 정의된 원격 소스가 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
+        <source>Search failed: not enough information specified for search.</source>
+        <target state="translated">검색 실패: 검색을 위해 지정된 정보가 충분하지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
+        <source>Template '{0}' was not found.</source>
+        <target state="translated">'{0}' 템플릿을 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_SearchFailure">
+        <source>Search failed: {0}</source>
+        <target state="translated">검색 실패: {0}</target>
+        <note>0 - localized error message</note>
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
+        <source>Search failed: template name is too short, minimum 2 characters are required.</source>
+        <target state="translated">검색 실패: 템플릿 이름이 너무 짧습니다. 최소 2 자 이상이 필요합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_InstallHelp">
+        <source>To use the template, run the following command to install the package:</source>
+        <target state="translated">템플릿을 사용하려면 다음 명령을 실행하여 패키지를 설치하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_MatchesFromSource">
+        <source>Matches from template source: {0}</source>
+        <target state="translated">템플릿 소스에서 일치:{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
+        <source>To search for templates, specify partial template name or use one of the supported filters: {0}.</source>
+        <target state="translated">템플릿을 검색하려면 부분 템플릿 이름을 지정하거나 지원되는 필터({0}) 중 하나를 사용하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
+        <source>Searching for the templates...</source>
+        <target state="translated">템플릿 검색 중...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameAuthor">
+        <source>Author</source>
+        <target state="translated">만든 사람</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameCurrentVersion">
+        <source>Current</source>
+        <target state="translated">현재</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameIdentity">
+        <source>Identity</source>
+        <target state="translated">ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameLanguage">
+        <source>Language</source>
+        <target state="translated">언어</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameLatestVersion">
+        <source>Latest</source>
+        <target state="translated">최신</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNamePackage">
+        <source>Package</source>
+        <target state="translated">패키지</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNamePackageNameAndOwners">
+        <source>Package Name / Owners</source>
+        <target state="new">Package Name / Owners</target>
+        <note>information about NuGet package: its name and owner</note>
+      </trans-unit>
+      <trans-unit id="ColumnNamePrecedence">
+        <source>Precedence</source>
+        <target state="translated">우선 순위</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameShortName">
+        <source>Short Name</source>
+        <target state="translated">약식 이름</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameTags">
+        <source>Tags</source>
+        <target state="translated">태그</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameTemplateName">
+        <source>Template Name</source>
+        <target state="translated">템플릿 이름</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameTotalDownloads">
+        <source>Downloads</source>
+        <target state="translated">다운로드</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameTrusted">
+        <source>Trusted</source>
+        <target state="new">Trusted</target>
+        <note>information about NuGet package origin; if a package has PrefixReserved indicator </note>
+      </trans-unit>
+      <trans-unit id="ColumnNameType">
+        <source>Type</source>
+        <target state="translated">유형</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnNamesAreNotSupported">
+        <source>The column {0} is/are not supported, the supported columns are: {1}.</source>
+        <target state="translated">{0} 열은 지원되지 않습니다. 지원되는 열은 {1}입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandFailed">
+        <source>Command failed.</source>
+        <target state="translated">명령이 실패했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandOutput">
+        <source>Output from command:</source>
+        <target state="translated">명령의 출력:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandSucceeded">
+        <source>Command succeeded.</source>
+        <target state="translated">명령이 성공했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Commands_TemplateShortNameCommandConflict_Info">
+        <source>To instantiate the template with short name '{0}', run:</source>
+        <target state="translated">짧은 이름이 '{0}'인 템플릿을 인스턴스화하려면 다음을 실행합니다.</target>
+        <note>Followed by command example from new line.</note>
+      </trans-unit>
+      <trans-unit id="Commands_Validator_WrongArgumentValue">
+        <source>Argument(s) {0} are not recognized. Must be one of: {1}.</source>
+        <target state="translated">{0} 인수를 인식할 수 없습니다. {1} 중 하나여야 합니다.</target>
+        <note>{0} - comma-separated quoted list of argument value(s) given by user, {1} - comma-separated quoted list of allowed values.</note>
+      </trans-unit>
+      <trans-unit id="Commands_Validator_WrongTokens">
+        <source>Unrecognized command or argument(s): {0}.</source>
+        <target state="translated">인식할 수 없는 명령 또는 인수: {0}.</target>
+        <note>{0} - wrong token or comma-separated tokens (if multiple). Each token is enclosed with single quotes: 'token'.</note>
+      </trans-unit>
+      <trans-unit id="Commands_Warning_DeprecatedCommand">
+        <source>Warning: use of '{0}' is deprecated. Use '{1}' instead.</source>
+        <target state="translated">경고: '{0}' 사용은 중단되었습니다. 대신 '{1}'을(를) 사용하세요.</target>
+        <note>{0} - deprecated command ('dotnet new --install'); {1} - new command ('dotnet new install).</note>
+      </trans-unit>
+      <trans-unit id="Commands_Warning_DeprecatedCommand_Info">
+        <source>For more information, run: </source>
+        <target state="translated">자세한 내용은 다음을 실행하세요. </target>
+        <note>followed by command example (at new line, without quotes)</note>
+      </trans-unit>
+      <trans-unit id="ConfiguredValue">
+        <source>Configured Value: {0}</source>
+        <target state="translated">구성된 값:{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Create">
+        <source>Create</source>
+        <target state="translated">만들기</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CreateFailed">
+        <source>Template "{0}" could not be created.
+{1}</source>
+        <target state="translated">"{0}" 템플릿을 만들 수 없습니다.
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CreateSuccessful">
+        <source>The template "{0}" was created successfully.</source>
+        <target state="translated">"{0}" 템플릿이 성공적으로 생성되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CurrentConfiguration">
+        <source>Current configuration:</source>
+        <target state="translated">현재 구성:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Delete">
+        <source>Delete</source>
+        <target state="translated">삭제</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DestructiveChangesNotification">
+        <source>Creating this template will make changes to existing files:</source>
+        <target state="translated">이 템플릿을 만들면 기존 파일이 변경됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Argument_PackageIdentifier">
+        <source>Package identifier</source>
+        <target state="new">Package identifier</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_NoNuGetSources">
+        <source>No NuGet sources are defined or enabled</source>
+        <target state="new">No NuGet sources are defined or enabled</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Option_Version">
+        <source>Specifies a concrete version for displaying details. If not specified the last is taken.</source>
+        <target state="new">Specifies a concrete version for displaying details. If not specified the last is taken.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_Authors">
+        <source>Authors</source>
+        <target state="new">Authors</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_Description">
+        <source>Details</source>
+        <target state="new">Details</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_Languages">
+        <source>Languages</source>
+        <target state="new">Languages</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_License">
+        <source>License</source>
+        <target state="new">License</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_LicenseExpression">
+        <source>License Expression</source>
+        <target state="new">License Expression</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_LicenseMetadata">
+        <source>License Metadata</source>
+        <target state="new">License Metadata</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_LicenseUrl">
+        <source>License Url</source>
+        <target state="new">License Url</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_Owners">
+        <source>Owners</source>
+        <target state="new">Owners</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_PrefixReserved">
+        <source>Reserved</source>
+        <target state="new">Reserved</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_RepoUrl">
+        <source>Repository Url</source>
+        <target state="new">Repository Url</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_ShortNames">
+        <source>Short Names</source>
+        <target state="new">Short Names</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_SourceFeed">
+        <source>Source Feed</source>
+        <target state="new">Source Feed</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_Tags">
+        <source>Tags</source>
+        <target state="new">Tags</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_Templates">
+        <source>Templates</source>
+        <target state="new">Templates</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_Version">
+        <source>Package version</source>
+        <target state="new">Package version</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_UnableToLoadResorce">
+        <source>Could not parse NuGet source '{0}', so it was discarded</source>
+        <target state="new">Could not parse NuGet source '{0}', so it was discarded</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_UnableToLoadResorces">
+        <source>Failed to load NuGet sources configured for the folder {0}</source>
+        <target state="new">Failed to load NuGet sources configured for the folder {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DisplaysHelp">
+        <source>Displays help for this command.</source>
+        <target state="translated">이 명령에 대한 도움말을 표시합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Exception_InvalidTemplateParameters_MessageHeader">
+        <source>Template {0} ({1}) is malformed. The following template parameters are invalid:</source>
+        <target state="translated">템플릿 {0}({1})의 형식이 잘못되었습니다. 다음 템플릿 매개 변수는 잘못되었습니다.</target>
+        <note>{0} is template identity, {1} is template short name.
+The header is followed by the list of parameters and their errors (might be several for one parameter).</note>
+      </trans-unit>
+      <trans-unit id="ExtraArgsCommandAfterExpansion">
+        <source>After expanding the extra args files, the command is:
+    dotnet {0}</source>
+        <target state="translated">추가 인수 파일을 확장하면 명령은 다음과 같습니다.
+ dotnet{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileActionsWouldHaveBeenTaken">
+        <source>File actions would have been taken:</source>
+        <target state="translated">파일 조치가 취해졌습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generators">
+        <source>Generators</source>
+        <target state="translated">발전기</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GenericError">
+        <source>Error: {0}</source>
+        <target state="translated">오류 :{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GenericWarning">
+        <source>Warning: {0}</source>
+        <target state="translated">경고 :{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_CommandHints_List">
+        <source>To list installed templates, run:</source>
+        <target state="translated">설치된 템플릿을 나열하려면 다음을 실행하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_CommandHints_List_Template">
+        <source>To list installed templates similar to '{0}', run:</source>
+        <target state="translated">'{0}'와(과) 유사한 설치된 템플릿을 나열하려면 다음을 실행합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_CommandHints_Search">
+        <source>To search for the templates on NuGet.org, run:</source>
+        <target state="translated">NuGet.org에서 템플릿을 검색하려면 다음을 실행하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_Details">
+        <source>Details: {0}</source>
+        <target state="translated">세부 정보 :{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_Empty">
+        <source>(empty)</source>
+        <target state="translated">(비어 있음)</target>
+        <note>shown when there is no data to show</note>
+      </trans-unit>
+      <trans-unit id="Generic_ExampleHeader">
+        <source>Example:</source>
+        <target state="translated">예:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_ExamplesHeader">
+        <source>Examples:</source>
+        <target state="translated">예:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_Info_NoMatchingTemplatePackage">
+        <source>
+      No template packages found matching: {0}.
+      
+      To list installed template packages, run:
+        dotnet new uninstall
+      To search for the template packages on NuGet.org, run:
+        dotnet new search --package {0}
+    </source>
+        <target state="new">
+      No template packages found matching: {0}.
+      
+      To list installed template packages, run:
+        dotnet new uninstall
+      To search for the template packages on NuGet.org, run:
+        dotnet new search --package {0}
+    </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_Info_NoMatchingTemplates">
+        <source>No templates found matching: {0}.</source>
+        <target state="translated">일치하는 템플릿이 없음:{0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_NoCallbackError">
+        <source>No callback is configured. Running post action is not possible.</source>
+        <target state="translated">콜백이 구성되지 않았습니다. 게시 작업을 실행할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HostSpecificDataLoader_Warning_FailedToRead">
+        <source>Failed to load dotnet CLI host data for template {0} from cache.</source>
+        <target state="translated">캐시에서 템플릿 {0}에 대한 dotnet CLI 호스트 데이터를 로드하지 못했습니다.</target>
+        <note>{0} - template short name</note>
+      </trans-unit>
+      <trans-unit id="HostSpecificDataLoader_Warning_FailedToReadFromFile">
+        <source>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</source>
+        <target state="translated">{1}에서 템플릿 {0}에 대한 dotnet CLI 호스트 데이터를 로드하지 못했습니다. 호스트 데이터는 무시됩니다.</target>
+        <note>{0} - template short name, {1} - file path to host data.</note>
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_NoMatchingTemplatesSubCommands">
+        <source>No templates or subcommands found matching: '{0}'.</source>
+        <target state="translated">일치하는 템플릿 또는 하위 명령이 없습니다. '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_TypoCorrection_Subcommands">
+        <source>Did you mean one of the following subcommands?</source>
+        <target state="translated">다음 하위 명령 중 하나를 의미했나요?</target>
+        <note>Followed by the list of suggestions</note>
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Info_TypoCorrection_Templates">
+        <source>Did you mean one of the following templates?</source>
+        <target state="translated">다음 템플릿 중 하나를 의미했나요?</target>
+        <note>Followed by the list of suggestions</note>
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplate">
+        <source>Failed to get information about template packages for the template with identity '{0}'.</source>
+        <target state="translated">ID가 '{0}'인 템플릿의 템플릿 패키지에 대한 정보를 가져오지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstantiateCommand_Warning_FailedToGetTemplatePackageForTemplateGroup">
+        <source>Failed to get information about template packages for template group '{0}'.</source>
+        <target state="translated">템플릿 그룹 '{0}'의 템플릿 패키지에 대한 정보를 가져오지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidCommandOptions">
+        <source>Error: Invalid option(s):</source>
+        <target state="translated">오류: 잘못된 옵션 :</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidNameParameter">
+        <source>Name cannot contain any of the following characters {0} or character codes {1}</source>
+        <target state="translated">이름은 다음 문자 {0} 또는 문자 코드{1}을(를) 포함할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidParameterDefault">
+        <source>The default value '{1}' is not a valid value for {0}.</source>
+        <target state="translated">기본값 '{1}'은(는){0}에 유효한 값이 아닙니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidParameterDetail">
+        <source>'{1}' is not a valid value for {0}.</source>
+        <target state="translated">'{1}'은(는) {0}에 유효한 값이 아닙니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidParameterNameDetail">
+        <source>'{0}' is not a valid option</source>
+        <target state="translated">'{0}'은(는) 유효한 옵션이 아닙니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidParameterTemplateHint">
+        <source>For more information, run:</source>
+        <target state="translated">자세한 내용은 다음을 실행하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidSyntax">
+        <source>Invalid command syntax: use '{0}' instead.</source>
+        <target state="translated">잘못된 명령 구문: 대신 '{0}'을(를) 사용하세요.</target>
+        <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
+      </trans-unit>
+      <trans-unit id="MissingRequiredParameter">
+        <source>Missing mandatory option(s) for the template '{1}': {0}.</source>
+        <target state="translated">템플릿 '{1}'에 누락된 필수 옵션: {0}.</target>
+        <note>{0} - comma-separated list of missing options, each option is quoted.</note>
+      </trans-unit>
+      <trans-unit id="MountPointFactories">
+        <source>Mount Point Factories</source>
+        <target state="translated">마운트 포인트 팩토리</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoItems">
+        <source>(No Items)</source>
+        <target state="translated">(항목 없음)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoParameters">
+        <source>    (No Parameters)</source>
+        <target state="translated">    (매개 변수 없음)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoTemplatesFound">
+        <source>No templates installed.</source>
+        <target state="translated">템플릿이 설치되어 있지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperationCancelled">
+        <source>The operation was cancelled.</source>
+        <target state="translated">작업이 취소되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionalWorkloadsSyncFailed">
+        <source>Error during synchronization with the Optional SDK Workloads.</source>
+        <target state="translated">선택적 SDK 워크로드와 동기화하는 동안 오류가 발생했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Options">
+        <source>Options:</source>
+        <target state="translated">옵션:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Overwrite">
+        <source>Overwrite</source>
+        <target state="translated">덮어쓰기</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_ErrorText_InvalidChoiceValue">
+        <source>value '{0}' is not allowed, allowed values are: {1}</source>
+        <target state="translated">'{0}' 값은 허용되지 않습니다. 허용되는 값: {1}</target>
+        <note>the error message is part of other sentence, no punctuation is needed
+{0} is a value given by user / configuration, {1} is comma separated list of possible values(each value is in quotes).</note>
+      </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_ErrorText_NoChoicesDefined">
+        <source>no choices are defined for parameter</source>
+        <target state="translated">매개 변수에 대해 선택 항목이 정의되지 않았습니다.</target>
+        <note>the error message is part of other sentence, no punctuation is needed</note>
+      </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_Error_InvalidArgument">
+        <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}': {3}.</source>
+        <target state="translated">옵션 '{1}'의 인수 '{0}'을(를) 예상 유형 '{2}'(으)로 구문 분석할 수 없습니다. {3}.</target>
+        <note>{0} - value that is given by used for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</note>
+      </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultIfNoOptionValue">
+        <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
+        <target state="translated">옵션 '{1}'에 대해 값 '{0}'이 없는 옵션은 예상 유형 '{2}'(으)로 기본값을 구분 분석할 수 없습니다. {3}.</target>
+        <note>{0} - default value for option {1} in case no argument is given
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</note>
+      </trans-unit>
+      <trans-unit id="ParseChoiceTemplateOption_Error_InvalidDefaultValue">
+        <source>Cannot parse default value '{0}' for option '{1}' as expected type '{2}': {3}.</source>
+        <target state="translated">옵션 '{1}'의 기본값 '{0}'을 예상 유형 '{2}'으로 구문 분석할 수 없습니다. {3}.</target>
+        <note>{0} - default value for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+{3} - detailed error message</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_InvalidArgument">
+        <source>Cannot parse argument '{0}' for option '{1}' as expected type '{2}'.</source>
+        <target state="translated">옵션 '{1}'의 인수 '{0}'을(를) 예상 유형 '{2}'(으)로 구문 분석할 수 없습니다.</target>
+        <note>{0} - value that is given by used for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_InvalidCount">
+        <source>Using more than 1 argument is not allowed for '{0}', used: {1}.</source>
+        <target state="translated">'{0}'에 대해 둘 이상의 인수를 사용할 수 없습니다. 사용됨: {1}.</target>
+        <note>{0} - option name, {1} - count of arguments used</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_InvalidDefaultIfNoOptionValue">
+        <source>Cannot parse default if option without value '{0}' for option '{1}' as expected type '{2}'.</source>
+        <target state="translated">옵션 '{1}'에 대해 값 '{0}'이 없는 옵션은 예상 유형 '{2}'(으)로 기본값을 구분 분석할 수 없습니다.</target>
+        <note>{0} - default value for option {1} in case no argument is given
+{1} - option name
+{2} - type of the value (string, choice, etc).
+</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_InvalidDefaultValue">
+        <source>Cannot parse default value '{0}' for option '{1}' as expected type {2}'.</source>
+        <target state="translated">옵션 '{1}'의 기본값 '{0}'을 예상 유형 {2}'으로 구문 분석할 수 없습니다.</target>
+        <note>{0} - default value for option {1}
+{1} - option name
+{2} - type of the value (string, choice, etc).
+</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_MissingDefaultIfNoOptionValue">
+        <source>Required argument missing for option: '{0}'.</source>
+        <target state="translated">'{0}' 옵션에 필요한 인수가 없습니다.</target>
+        <note>{0} - option name</note>
+      </trans-unit>
+      <trans-unit id="ParseTemplateOption_Error_MissingDefaultValue">
+        <source>Default value for argument missing for option: '{0}'.</source>
+        <target state="translated">'{0}' 옵션에 대한 인수의 기본값이 없습니다.</target>
+        <note>{0} - option name</note>
+      </trans-unit>
+      <trans-unit id="PartialTemplateMatchSwitchesNotValidForAllMatches">
+        <source>Some partially matched templates may not support these input switches:</source>
+        <target state="translated">부분적으로 일치하는 일부 템플릿은 다음 입력 스위치를 지원하지 않을 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PossibleValuesHeader">
+        <source>The possible values are:</source>
+        <target state="translated">가능한 값은 다음과 같습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionCommand">
+        <source>Actual command: {0}</source>
+        <target state="translated">실제 명령:{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionDescription">
+        <source>Description: {0}</source>
+        <target state="translated">설명: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionDispatcher_Error_NotSupported">
+        <source>The post action {0} is not supported.</source>
+        <target state="translated">게시 작업 {0}은(는) 지원되지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionDispatcher_Error_RunScriptNotAllowed">
+        <source>Execution of 'Run script' post action is not allowed.</source>
+        <target state="translated">'스크립트 실행' 게시 작업은 실행할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionFailedInstructionHeader">
+        <source>Post action failed.</source>
+        <target state="translated">게시 작업이 실패했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionInstructions">
+        <source>Manual instructions: {0}</source>
+        <target state="translated">수동 지침 :{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionInvalidInputRePrompt">
+        <source>Invalid input "{0}". Please enter one of [{1}(yes)|{2}(no)].</source>
+        <target state="translated">잘못된 입력 "{0}". [{1} (예) |{2} (아니오)] 중 하나를 입력하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionPromptHeader">
+        <source>Template is configured to run the following action:</source>
+        <target state="translated">템플릿은 다음 작업을 실행하도록 구성됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionPromptRequest">
+        <source>Do you want to run this action [{0}(yes)|{1}(no)]?</source>
+        <target state="translated">이 작업을 실행하시겠어요 [{0} (예) |{1} (아니요)]?</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_ArgumentNotConfigured">
+        <source>Post action argument '{0}' is mandatory, but not configured.</source>
+        <target state="new">Post action argument '{0}' is mandatory, but not configured.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_MultipleJsonFiles">
+        <source>More than one file found that matches '{0}'.</source>
+        <target state="new">More than one file found that matches '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_NoJsonFile">
+        <source>Unable to find the json file in the solution</source>
+        <target state="new">Unable to find the json file in the solution</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_ParentPropertyPathInvalid">
+        <source>Parent property path '{0}' could not be traversed.</source>
+        <target state="new">Parent property path '{0}' could not be traversed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Succeeded">
+        <source>Successfully modified {0}.</source>
+        <target state="new">Successfully modified {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
+        <source>Failed to run the command: argument 'executable' is missing in post action configuration.</source>
+        <target state="translated">명령을 실행하지 못했습니다. 게시 작업 구성에 'executable' 인수가 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProcessingPostActions">
+        <source>Processing post-creation actions...</source>
+        <target state="translated">생성 후 작업 처리 중...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RerunCommandAndPassForceToCreateAnyway">
+        <source>To create the template anyway, run the command with '{0}' option:</source>
+        <target state="translated">템플릿을 만들려면 '{0}' 옵션으로 다음 명령을 실행합니다.</target>
+        <note>{0} - additional option name (--force)</note>
+      </trans-unit>
+      <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
+        <source>For usage information, run: </source>
+        <target state="translated">사용법 정보를 보려면 다음을 실행하세요. </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RunningCommand">
+        <source>Running command '{0}'...</source>
+        <target state="translated">'{0}' 명령 실행 중 ...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SettingsReadError">
+        <source>Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</source>
+        <target state="translated">설치된 구성을 읽는 동안 오류가 발생했습니다. 파일이 손상되었을 수 있습니다. 이 문제가 지속되면`--debug : reinit '플래그로 재설정해 보세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShowsAllTemplates">
+        <source>Shows all templates.</source>
+        <target state="translated">모든 템플릿을 표시합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches">
+        <source>The following option(s) or their value(s) are not valid in combination with other supplied options or their values:</source>
+        <target state="translated">다음 옵션 또는 해당 값은 제공된 다른 옵션 또는 해당 값과 함께 사용할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_DisplayConstraintResults_Error">
+        <source>Failed to instatiate template '{0}', the following constraints are not met:</source>
+        <target state="translated">'{0}' 템플릿을 예로 들지 못했습니다. 다음 제약 조건이 충족되지 않습니다.</target>
+        <note>{0} - template name (user friendly)</note>
+      </trans-unit>
+      <trans-unit id="TemplateCommand_DisplayConstraintResults_Hint">
+        <source>To run the template anyway, use '{0}' option:</source>
+        <target state="translated">템플릿을 실행하려면 '{0}' 옵션을 사용합니다.</target>
+        <note>{0} - additional option name (--force)</note>
+      </trans-unit>
+      <trans-unit id="TemplateCommand_DisplayConstraintResults_Hint_TemplateNotUsable">
+        <source>The template might not be usable.</source>
+        <target state="translated">템플릿을 사용할 수 없을 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCommand_DisplayConstraintResults_Warning">
+        <source>Warning: the following constraints for the template '{0}' are not met:</source>
+        <target state="translated">경고: '{0}' 템플릿에 대한 다음 제약 조건이 충족되지 않습니다.</target>
+        <note>{0} - template name (user friendly)</note>
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Error_TemplateNotFound">
+        <source>Unable to locate the specified template content, the template package might be removed or corrupted.</source>
+        <target state="translated">지정된 템플릿 콘텐츠를 찾을 수 없습니다. 템플릿 패키지가 제거되었거나 손상되었을 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Hint_Install">
+        <source>To install the template package, run:</source>
+        <target state="translated">템플릿 패키지를 설치하려면 다음을 실행합니다.</target>
+        <note>The sentence is followed by the command to run the action</note>
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Hint_RebuildCache">
+        <source>To rescan installed template packages, run:</source>
+        <target state="translated">설치된 템플릿 패키지를 다시 검사하려면 다음을 실행합니다.</target>
+        <note>The sentence is followed by the command to run the action</note>
+      </trans-unit>
+      <trans-unit id="TemplateCreator_Hint_Uninstall">
+        <source>To uninstall the template package, run:</source>
+        <target state="translated">템플릿 패키지를 제거하려면 다음을 실행합니다.</target>
+        <note>The sentence is followed by the command to run the action</note>
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_Description">
+        <source>The '{0}' command creates a .NET project based on a template.</source>
+        <target state="translated">'{0}' 명령은 템플릿을 기반으로 .NET 프로젝트를 만듭니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint">
+        <source>Display template options with:</source>
+        <target state="translated">다음을 사용하여 템플릿 옵션을 표시합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_ExampleHeader">
+        <source>An example would be:</source>
+        <target state="translated">예를 들면 다음과 같습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
+        <source>Display all installed templates with:</source>
+        <target state="translated">설치된 모든 템플릿을 다음을 사용하여 표시합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">
+        <source>Display templates available on NuGet.org with:</source>
+        <target state="translated">다음을 사용하여 NuGet.org에서 사용할 수 있는 템플릿을 표시합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_TemplatesHeader">
+        <source>Common templates are:</source>
+        <target state="translated">일반적인 템플릿은 다음과 같습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateListCoordinator_Error_FailedConstraints">
+        <source>{0} template(s) are hidden because their constraints are not satisfied. To show them, use the '{1}' option.</source>
+        <target state="translated">제약 조건이 충족되지 않으므로 {0} 템플릿이 숨겨집니다. 표시하려면 '{1}' 옵션을 사용하세요.</target>
+        <note>{0} - the count of templates that are not shown. {1} - option to be used (--ignore-constraints).</note>
+      </trans-unit>
+      <trans-unit id="TemplateOptions_Error_AllowedValuesForOptionList">
+        <source>Allowed values for '{0}' option are: {1}.</source>
+        <target state="translated">'{0}' 옵션에 허용되는 값: {1}.</target>
+        <note>0} - option name (as --language)
+{1} - comma separated, escaped in quotes list of allowed values</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_BuiltInCheck_Info_BuiltInPackageAvailable">
+        <source>An update for template package '{0}' is available in the '{1}' provider.</source>
+        <target state="translated">‘{1}’ 공급자에서 '{0}' 템플릿 패키지에 대한 업데이트를 사용할 수 있습니다.</target>
+        <note>{0} - id and version of template package, {1} - provider name (.NET SDK, Optional workloads, etc)</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_BuiltInCheck_Info_UninstallPackage">
+        <source>To use built-in template package, uninstall manually installed template package using:</source>
+        <target state="translated">기본 제공 템플릿 패키지를 사용하려면 다음을 사용하여 수동으로 설치된 템플릿 패키지를 제거합니다.</target>
+        <note>followed by command to uninstall package</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Download_Error_VulnerablePackage">
+        <source>Failed to install {0}, due to detected vulnerabilities:</source>
+        <target state="new">Failed to install {0}, due to detected vulnerabilities:</target>
+        <note>{0} - template package name.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Download_VulnerablePackage">
+        <source>Installed package has the following vulnerabilities:</source>
+        <target state="new">Installed package has the following vulnerabilities:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
+        <source>Could not find the template package containing template '{0}'</source>
+        <target state="translated">'{0}' 템플릿이 포함된 ‘템플릿 패키지를 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Error_PackageNameContainsTemplates">
+        <source>{0} (contains {1} templates)</source>
+        <target state="translated">{0}({1} 템플릿 포함)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Error_PackageNotFound">
+        <source>The template package '{0}' is not found.</source>
+        <target state="translated">템플릿 패키지 '{0}'을(를) 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Error_TemplateIncludedToPackages">
+        <source>The template '{0}' is included to the packages:</source>
+        <target state="translated">'{0}' 템플릿이 패키지에 포함되어 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_ConstraintsNotice">
+        <source>The following templates might not work because their constraints are not met:</source>
+        <target state="translated">제약 조건이 충족되지 않아 다음 템플릿이 작동하지 않을 수 있습니다.</target>
+        <note>The sentence is followed by the list of templates with information on their constraints. Each template and each restriction is given from new line.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Error_FoundNoPackagesToInstall">
+        <source>Found no template packages to install.</source>
+        <target state="translated">설치할 템플릿 패키지를 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Error_SameInstallRequests">
+        <source>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</source>
+        <target state="translated">명령이 '{0}' 템플릿 패키지를 두 번 설치하려고 시도하고 있습니다. 인수를 확인하고 재시도하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Error_VulnerablePackageTip">
+        <source>In order to install this package, run:</source>
+        <target state="new">In order to install this package, run:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
+        <source>Installing the template package(s) will override the available template package(s).</source>
+        <target state="translated">템플릿 패키지를 설치하면 사용 가능한 템플릿 패키지가 재정의됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Info_PackageIsAvailable">
+        <source>The following template package(s) are already available:</source>
+        <target state="translated">다음 템플릿 패키지를 이미 사용할 수 있습니다.</target>
+        <note>Followed by list of packages that are available</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled">
+        <source>The following template packages will be installed:</source>
+        <target state="translated">다음 템플릿 패키지가 설치됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Info_UseForceToOverride">
+        <source>To install the template package(s) anyway, apply '{0}' option:</source>
+        <target state="translated">템플릿 패키지를 설치하려면 '{0}' 옵션을 적용합니다.</target>
+        <note>{0} is option to use (--force). Followed by command to use to install the packages.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_GenericError">
+        <source>Failed to uninstall {0}, reason: {1}.</source>
+        <target state="translated">{0} 제거에 실패했습니다. 이유:{1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_ListPackagesHeader">
+        <source>To list installed template packages use:</source>
+        <target state="translated">설치된 템플릿 패키지를 나열하려면 다음을 사용합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_UninstallCommandHeader">
+        <source>To uninstall the template package use:</source>
+        <target state="translated">템플릿 패키지를 제거하려면 다음을 사용하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_DetailsHeader">
+        <source>Details:</source>
+        <target state="translated">세부 정보:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_InstalledItems">
+        <source>Currently installed items:</source>
+        <target state="translated">현재 설치된 항목:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_Success">
+        <source>Success: {0} was uninstalled.</source>
+        <target state="translated">성공:{0}이(가) 제거되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_UninstallCommandHint">
+        <source>Uninstall Command:</source>
+        <target state="translated">제거 명령 :</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage">
+        <source>The package {0} contains vulnerabilities:</source>
+        <target state="new">The package {0} contains vulnerabilities:</target>
+        <note>{0} - template package name.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_GenericError">
+        <source>Failed to check update for {0}: {1}.</source>
+        <target state="translated">{0}에 대한 업데이트를 확인하지 못했습니다 :{1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_InvalidNuGetFeeds">
+        <source>Failed to check update for {0}: no NuGet feeds are configured or they are invalid.</source>
+        <target state="translated">{0}에 대한 업데이트를 확인하지 못했습니다. 구성된 NuGet 피드가 없거나 올바르지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_PackageNotFound">
+        <source>Failed to check update for {0}: the package is not available in configured NuGet feeds.</source>
+        <target state="translated">{0}에 대한 업데이트를 확인하지 못했습니다. 구성된 NuGet 피드에서 패키지를 사용할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_PackageNotSupported">
+        <source>Failed to check update for {0}: the package is not supported.</source>
+        <target state="translated">{0}에 대한 업데이트를 확인하지 못했습니다. 패키지가 지원되지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackage">
+        <source>The package {0} was not updated due to detected vulnerabilities:</source>
+        <target state="new">The package {0} was not updated due to detected vulnerabilities:</target>
+        <note>{0} - template package name.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackageTip">
+        <source>In order to update this package, run:</source>
+        <target state="new">In order to update this package, run:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate">
+        <source>All template packages are up-to-date.</source>
+        <target state="translated">모든 템플릿 패키지는 최신입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Info_PackagesToBeUpdated">
+        <source>The following template packages will be updated:</source>
+        <target state="translated">다음 템플릿 패키지가 업데이트됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAllCommandHeader">
+        <source>To update all the packages use:</source>
+        <target state="translated">모든 패키지를 업데이트하려면 다음을 사용하세요/</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAvailable">
+        <source>An update for template package '{0}' is available.</source>
+        <target state="translated">템플릿 패키지 '{0}'에 대한 업데이트를 사용할 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAvailablePackages">
+        <source>An update for template packages is available:</source>
+        <target state="translated">템플릿 패키지 업데이트를 사용할 수 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader">
+        <source>To update the package use:</source>
+        <target state="translated">패키지를 업데이트하려면 다음을 사용하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError">
+        <source>Failed to initialize NuGet credential service, details: {0}.</source>
+        <target state="translated">NuGet 자격 증명 서비스를 초기화하지 못했습니다. 세부 정보 :{0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Critical">
+        <source>Critical</source>
+        <target state="new">Critical</target>
+        <note>represents nuget api severity of level 3.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_High">
+        <source>High</source>
+        <target state="new">High</target>
+        <note>represents nuget api severity of level 2.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Low">
+        <source>Low</source>
+        <target state="new">Low</target>
+        <note>represents nuget api severity of level 0.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Moderate">
+        <source>Moderate</source>
+        <target state="new">Moderate</target>
+        <note>represents nuget api severity of level 1.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled">
+        <source>{0} is already installed.</source>
+        <target state="translated">{0}이(가) 이미 설치되어 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled_Hint">
+        <source>To reinstall the same version of the template package, use '{0}' option:</source>
+        <target state="translated">동일한 버전의 템플릿 패키지를 다시 설치하려면 '{0}' 옵션을 사용합니다.</target>
+        <note>{0} - option name (--force). Followed by command example on new line.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_DownloadFailed">
+        <source>{0} could not be installed, download failed.</source>
+        <target state="translated">{0}을(를) 설치할 수 없습니다. 다운로드하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_GenericError">
+        <source>{0} could not be installed.</source>
+        <target state="translated">{0}을(를) 설치할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_InvalidNuGetFeeds">
+        <source>{0} could not be installed, no NuGet feeds are configured or they are invalid.</source>
+        <target state="translated">{0}을(를) 설치할 수 없거나 NuGet 피드가 구성되지 않았거나 올바르지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_InvalidPackage">
+        <source>Failed to install {0}, failed to uninstall previous version of the template package.</source>
+        <target state="translated">{0}을(를) 설치하지 못했습니다. 템플릿 패키지의 이전 버전을 제거하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_PackageNotFound">
+        <source>{0} could not be installed, the package does not exist.</source>
+        <target state="translated">{0}을(를) 설치할 수 없습니다. 패키지가 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_UninstallFailed">
+        <source>Failed to install {0}, the template package is invalid.</source>
+        <target state="translated">{0}을(를) 설치하지 못했습니다. 템플릿 패키지가 잘못되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Error_UnsupportedRequest">
+        <source>{0} is not supported.</source>
+        <target state="translated">{0}은(는) 지원되지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Info_Success">
+        <source>Success: {0} installed the following templates:</source>
+        <target state="translated">성공:{0}이(가) 다음 템플릿을 설치했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package">
+        <source>No templates were found in the package {0}.</source>
+        <target state="translated">패키지 {0}에서 템플릿을 찾을 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateResolver_Warning_FailedToReparseTemplate">
+        <source>[Warning]: Failed to parse input for template {0}, it will be skipped from further processing.</source>
+        <target state="translated">[경고] :{0} 템플릿에 대한 입력을 구문 분석하지 못했습니다. 추가 처리에서 건너 뜁니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Templates">
+        <source>Templates</source>
+        <target state="translated">템플릿</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesFoundMatchingInputParameters">
+        <source>These templates matched your input: {0}</source>
+        <target state="translated">이 템플릿은 입력 내용과 일치합니다. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">
+        <source>{0} template(s) partially matched, but failed on {1}.</source>
+        <target state="translated">{0} 템플릿이 부분적으로 일치했지만{1}에서 실패했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ThirdPartyNotices">
+        <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
+        <target state="translated">이 템플릿에는 Microsoft 이외의 타사 기술이 포함되어 있습니다. 자세한 내용은{0}을(를) 참조하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Type">
+        <source>Type</source>
+        <target state="translated">형식</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnableToSetPermissions">
+        <source>Unable to apply permissions {0} to "{1}".</source>
+        <target state="translated">{0} 권한을 "{1}"에 적용할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedResult">
+        <source>Template generation ended with unexpected result: '{0}'. Details: {1}</source>
+        <target state="translated">템플릿 생성이 예기치 않은 결과 '{0}'과(와) 함께 종료되었습니다. 세부 정보: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownChangeKind">
+        <source>Unknown Change</source>
+        <target state="translated">알 수 없는 변경</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Version">
+        <source>Version:</source>
+        <target state="translated">버전:</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

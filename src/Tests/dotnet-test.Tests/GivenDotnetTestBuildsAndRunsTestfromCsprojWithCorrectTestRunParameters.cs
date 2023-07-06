@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
@@ -34,12 +34,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                         .WithWorkingDirectory(testProjectDirectory)
                                         .Execute(ConsoleLoggerOutputNormal.Concat(new[] {
                                             "--",
-                                            "TestRunParameters.Parameter(name=\"myParam\",",
-                                            "value=\"value\")",
-                                            "TestRunParameters.Parameter(name=\"myParam2\",",
-                                            "value=\"value", 
-                                            "with", 
-                                            "space\")"
+                                            "TestRunParameters.Parameter(name=\"myParam\",value=\"value\")",
+                                            "TestRunParameters.Parameter(name=\"myParam2\",value=\"value with space\")"
                                         }));
 
             // Verify
@@ -65,19 +61,15 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .Execute()
                 .Should().Pass();
 
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "VSTestTestRunParameters.dll");
+            var outputDll = Path.Combine(OutputPathCalculator.FromProject(testProjectDirectory).GetOutputDirectory(configuration: configuration), "VSTestTestRunParameters.dll");
 
             // Call test
             CommandResult result = new DotnetTestCommand(Log)
                                         .Execute(ConsoleLoggerOutputNormal.Concat(new[] {
                                             outputDll,
                                             "--",
-                                            "TestRunParameters.Parameter(name=\"myParam\",",
-                                            "value=\"value\")",
-                                            "TestRunParameters.Parameter(name=\"myParam2\",",
-                                            "value=\"value",
-                                            "with",
-                                            "space\")"
+                                            "TestRunParameters.Parameter(name=\"myParam\",value=\"value\")",
+                                            "TestRunParameters.Parameter(name=\"myParam2\",value=\"value with space\")"
                                         }));
 
             // Verify

@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Linq;
 
@@ -32,7 +32,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData("net45", true)]
+        [InlineData("net472", true)]
         [InlineData("netstandard2.0", false)]
         [InlineData("netcoreapp2.1", true)]
         [InlineData("netcoreapp3.0", true)]
@@ -105,7 +105,7 @@ namespace Microsoft.NET.Build.Tests
         {
             switch ((targetFramework, isExe))
             {
-                case ("net45", true):
+                case ("net472", true):
                     var files = new[]
                         {
                             "HelloWorld.exe",
@@ -185,9 +185,12 @@ namespace Microsoft.NET.Build.Tests
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
 
-            var newCommand = new DotnetCommand(Log, "new", "wpf", "-lang", "vb");
-            newCommand.WorkingDirectory = testDirectory;
-            newCommand.Execute().Should().Pass();
+            new DotnetNewCommand(Log, "wpf", "-lang", "vb")
+                .WithVirtualHive()
+                .WithWorkingDirectory(testDirectory)
+                .Execute()
+                .Should()
+                .Pass();
 
             var buildCommand = new BuildCommand(Log, testDirectory);
             buildCommand.Execute().Should().Pass();

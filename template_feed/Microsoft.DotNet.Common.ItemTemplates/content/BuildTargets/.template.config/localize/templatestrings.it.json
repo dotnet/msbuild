@@ -1,0 +1,7 @@
+﻿{
+  "author": "Microsoft",
+  "name": "File MSBuild Directory.Build.targets",
+  "description": "File Directory.Build.targets vuoto che può essere usato per specificare le attività e le destinazioni di MSBuild per un'intera cartella",
+  "symbols/inherit/displayName": "Ereditare",
+  "symbols/inherit/description": "Se True, aggiunge un'importazione di Directory.Build.targets più vicino nella gerarchia delle directory del file system. Directory.Build.targets non eredita per impostazione predefinita. In questo modo è possibile creare un set di personalizzazioni cartella per cartella."
+}
