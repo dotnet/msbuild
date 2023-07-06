@@ -28,8 +28,8 @@
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
-        <source>Uninstalling workload pack {0} version {1}…</source>
-        <target state="translated">Desinstalando pacote de carga de trabalho {0} versão {1}...</target>
+        <source>Uninstalling workload pack {0} version {1}...</source>
+        <target state="needs-review-translation">Desinstalando pacote de carga de trabalho {0} versão {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -43,8 +43,8 @@
         <note />
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
-        <source>Downloading pack {0} version {1} to offline cache {2}…</source>
-        <target state="translated">Baixando pacote {0} versão {1} para o cache offline {2}...</target>
+        <source>Downloading pack {0} version {1} to offline cache {2}...</source>
+        <target state="needs-review-translation">Baixando pacote {0} versão {1} para o cache offline {2}...</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedSingleManifest">
@@ -118,8 +118,8 @@
         <note />
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
-        <source>Installing workload manifest {0} version {1}…</source>
-        <target state="translated">Instalando manifesto de carga de trabalho {0} versão {1}...</target>
+        <source>Installing workload manifest {0} version {1}...</source>
+        <target state="needs-review-translation">Instalando manifesto de carga de trabalho {0} versão {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
