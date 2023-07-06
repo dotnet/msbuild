@@ -14,6 +14,7 @@ using Valleysoft.DockerCredsProvider;
 using Microsoft.NET.Build.Containers.Credentials;
 using System.Net.Sockets;
 using Microsoft.NET.Build.Containers.Resources;
+using System.Collections.Concurrent;
 
 namespace Microsoft.NET.Build.Containers;
 
@@ -28,7 +29,7 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
 
     private readonly string _registryName;
 
-    private AuthenticationHeaderValue? _authenticationHeader = null;
+    private static ConcurrentDictionary<string, AuthenticationHeaderValue?> _authenticationHeaders = new();
 
     /// <summary>
     /// the www-authenticate header must have realm, service, and scope information, so this method parses it into that shape if present
@@ -214,9 +215,9 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
             throw new ArgumentException(Resource.GetString(nameof(Strings.NoRequestUriSpecified)), nameof(request));
         }
 
-        if (_authenticationHeader is not null)
+        if (_authenticationHeaders.TryGetValue(_registryName, out AuthenticationHeaderValue? header))
         {
-            request.Headers.Authorization = _authenticationHeader;
+            request.Headers.Authorization = header;
         }
 
         int retryCount = 0;
@@ -232,10 +233,10 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
                 }
                 else if (response is { StatusCode: HttpStatusCode.Unauthorized } && TryParseAuthenticationInfo(response, out string? scheme, out AuthInfo? authInfo))
                 {
-                    if (await GetAuthenticationAsync(_registryName, scheme, authInfo, cancellationToken).ConfigureAwait(false) is AuthenticationHeaderValue authentication)
+                    if (await GetAuthenticationAsync(_registryName, scheme, authInfo, cancellationToken).ConfigureAwait(false) is AuthenticationHeaderValue authHeader)
                     {
-                        Volatile.Write(ref _authenticationHeader, authentication);
-                        request.Headers.Authorization = authentication;
+                        _authenticationHeaders[_registryName] = authHeader;
+                        request.Headers.Authorization = authHeader;
                         return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
                     }
                     return response;
