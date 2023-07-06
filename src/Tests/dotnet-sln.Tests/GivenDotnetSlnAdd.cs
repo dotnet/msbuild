@@ -712,6 +712,27 @@ EndGlobal
             slnFile.Sections.GetSection("NestedProjects").Should().BeNull();
         }
 
+        [Fact]
+        public void WhenSharedProjectAddedShouldStillBuild()
+        {
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles")
+                .WithSource()
+                .Path;
+
+            var projectToAdd = Path.Combine("Shared", "Shared.shproj");
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"sln", "App.sln", "add", projectToAdd);
+            cmd.Should().Pass();
+            cmd.StdErr.Should().BeEmpty();
+
+            cmd = new DotnetBuildCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute();
+            cmd.Should().Pass();
+        }
+
         [Theory]
         [InlineData(".")]
         [InlineData("")]

@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Tools.Common
                 // section comes first we need to add it first. This doesn't affect correctness but does
                 // stop VS from re-ordering things later on. Since we are keeping the SlnFile class low-level
                 // it shouldn't care about the VS implementation details. That's why we handle this here.
-                if (AreBuildConfigurationsApplicable(relativeProjectPath)) {
+                if (AreBuildConfigurationsApplicable(slnProject.TypeGuid)) {
                     slnFile.AddDefaultBuildConfigurations();
 
                     slnFile.MapSolutionConfigurationsToProject(
@@ -90,6 +90,11 @@ namespace Microsoft.DotNet.Tools.Common
                 Reporter.Output.WriteLine(
                     string.Format(CommonLocalizableStrings.ProjectAddedToTheSolution, relativeProjectPath));
             }
+        }
+
+        private static bool AreBuildConfigurationsApplicable(string projectTypeGuid)
+        {
+            return !projectTypeGuid.Equals(ProjectTypeGuids.SharedProjectGuid, StringComparison.OrdinalIgnoreCase);
         }
 
         private static void SetupSolutionFolders(SlnFile slnFile, IList<string> solutionFolders, string relativeProjectPath, SlnProject slnProject)
@@ -121,11 +126,6 @@ namespace Microsoft.DotNet.Tools.Common
                 // Even if we added a solution folder above for a duplicate, we still need to add the expected folder for the current project
                 slnFile.AddSolutionFolders(slnProject, solutionFolders);
             }
-        }
-
-        private static bool AreBuildConfigurationsApplicable(string projectFilePath)
-        {
-            return !Path.GetExtension(projectFilePath).Equals(".shproj", StringComparison.OrdinalIgnoreCase);
         }
 
         private static void AddDefaultBuildConfigurations(this SlnFile slnFile)
