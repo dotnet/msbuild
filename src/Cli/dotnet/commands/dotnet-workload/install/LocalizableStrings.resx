@@ -199,7 +199,7 @@
     <value>Installing pack {0} version {1}...</value>
   </data>
   <data name="DownloadingPackToCacheMessage" xml:space="preserve">
-    <value>Downloading pack {0} version {1} to offline cache {2}…</value>
+    <value>Downloading pack {0} version {1} to offline cache {2}...</value>
   </data>
   <data name="WorkloadPackAlreadyInstalledMessage" xml:space="preserve">
     <value>Pack {0} version {1} is already installed.</value>
@@ -244,7 +244,7 @@
     <value>Failed to install manifest {0} version {1}: {2}.</value>
   </data>
   <data name="InstallingWorkloadManifest" xml:space="preserve">
-    <value>Installing workload manifest {0} version {1}…</value>
+    <value>Installing workload manifest {0} version {1}...</value>
   </data>
   <data name="IncludePreviewOptionDescription" xml:space="preserve">
     <value>Allow prerelease workload manifests.</value>
@@ -262,7 +262,7 @@
     <value>MSI installations are only supported on Windows.</value>
   </data>
   <data name="DeletingWorkloadPack" xml:space="preserve">
-    <value>Uninstalling workload pack {0} version {1}…</value>
+    <value>Uninstalling workload pack {0} version {1}...</value>
   </data>
   <data name="SkippingManifestUpdate" xml:space="preserve">
     <value>Manifest packages were not found. Skipping manifest update...</value>

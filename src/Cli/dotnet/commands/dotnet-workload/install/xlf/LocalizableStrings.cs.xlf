@@ -28,8 +28,8 @@
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
-        <source>Uninstalling workload pack {0} version {1}…</source>
-        <target state="translated">Probíhá odinstalace sady úloh {0} verze {1}...</target>
+        <source>Uninstalling workload pack {0} version {1}...</source>
+        <target state="needs-review-translation">Probíhá odinstalace sady úloh {0} verze {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -43,8 +43,8 @@
         <note />
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
-        <source>Downloading pack {0} version {1} to offline cache {2}…</source>
-        <target state="translated">Probíhá stahování balíčku {0} verze {1} do offline mezipaměti {2}…</target>
+        <source>Downloading pack {0} version {1} to offline cache {2}...</source>
+        <target state="needs-review-translation">Probíhá stahování balíčku {0} verze {1} do offline mezipaměti {2}…</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedSingleManifest">
@@ -118,8 +118,8 @@
         <note />
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
-        <source>Installing workload manifest {0} version {1}…</source>
-        <target state="translated">Instaluje se manifest úlohy {0} verze {1}...</target>
+        <source>Installing workload manifest {0} version {1}...</source>
+        <target state="needs-review-translation">Instaluje se manifest úlohy {0} verze {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">

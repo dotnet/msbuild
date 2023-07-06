@@ -28,8 +28,8 @@
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
-        <source>Uninstalling workload pack {0} version {1}…</source>
-        <target state="translated">워크로드 팩 {0} 버전 {1} 제거 중…</target>
+        <source>Uninstalling workload pack {0} version {1}...</source>
+        <target state="needs-review-translation">워크로드 팩 {0} 버전 {1} 제거 중…</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -43,8 +43,8 @@
         <note />
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
-        <source>Downloading pack {0} version {1} to offline cache {2}…</source>
-        <target state="translated">오프라인 캐시 {2} 팩 {0} 버전 {1} 다운로드 중…</target>
+        <source>Downloading pack {0} version {1} to offline cache {2}...</source>
+        <target state="needs-review-translation">오프라인 캐시 {2} 팩 {0} 버전 {1} 다운로드 중…</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedSingleManifest">
@@ -118,8 +118,8 @@
         <note />
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
-        <source>Installing workload manifest {0} version {1}…</source>
-        <target state="translated">워크로드 매니페스트 {0} 버전 {1} 설치 중…</target>
+        <source>Installing workload manifest {0} version {1}...</source>
+        <target state="needs-review-translation">워크로드 매니페스트 {0} 버전 {1} 설치 중…</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
