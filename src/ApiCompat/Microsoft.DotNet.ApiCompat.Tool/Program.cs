@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 using NuGet.Frameworks;
@@ -133,7 +135,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 Arity = ArgumentArity.ZeroOrMore
             };
 
-            CliRootCommand rootCommand = new("Microsoft.DotNet.ApiCompat v" + Environment.Version.ToString(2))
+            CliRootCommand rootCommand = new("Microsoft.DotNet.ApiCompat v" + FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion)
             {
                 TreatUnmatchedTokensAsErrors = true
             };
