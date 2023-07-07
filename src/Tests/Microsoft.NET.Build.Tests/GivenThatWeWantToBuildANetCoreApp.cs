@@ -1059,7 +1059,7 @@ class Program
         #endif
     }
 }";
-            var testAsset = _testAssetsManager.CreateTestProject(testProj);
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, identifier: disableTracing.ToString());
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.Path, testProj.Name));
             buildCommand
@@ -1067,9 +1067,10 @@ class Program
                 .Should()
                 .Pass();
 
-            var runCommand = new RunExeCommand(Log, Path.Combine(buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework).FullName, $"{testProj.Name}.exe"));
-            var stdOut = runCommand.Execute().StdOut;
-            stdOut.Should().BeEquivalentTo(expectedOutput);
+            var runCommand = new RunExeCommand(Log, Path.Combine(buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework).FullName, $"{testProj.Name}{EnvironmentInfo.ExecutableExtension}"));
+            runCommand
+                .Execute().
+                .Should().HaveStdOut(expectedOutput);
         }
     }
 }
