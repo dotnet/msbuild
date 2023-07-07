@@ -40,7 +40,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <UserRuntimeConfig Condition=" '$(UserRuntimeConfig)' == '' ">$(MSBuildProjectDirectory)/runtimeconfig.template.json</UserRuntimeConfig>
     <GenerateSatelliteAssembliesForCore Condition=" '$(GenerateSatelliteAssembliesForCore)' == '' and '$(MSBuildRuntimeType)' == 'Core' ">true</GenerateSatelliteAssembliesForCore>
     <ComputeNETCoreBuildOutputFiles Condition=" '$(ComputeNETCoreBuildOutputFiles)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</ComputeNETCoreBuildOutputFiles>
-    <JsonSerializerIsReflectionEnabledByDefault Condition=" '$(JsonSerializerIsReflectionEnabledByDefault)' == '' and '$(PublishTrimmed)' == 'true'">false</JsonSerializerIsReflectionEnabledByDefault>
     <_GenerateRuntimeConfigurationPropertyInputsCache Condition="'$(_GenerateRuntimeConfigurationPropertyInputsCache)' == ''">$(IntermediateOutputPath)$(MSBuildProjectName).genruntimeconfig.cache</_GenerateRuntimeConfigurationPropertyInputsCache>
     <_GenerateRuntimeConfigurationPropertyInputsCache>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(_GenerateRuntimeConfigurationPropertyInputsCache)))</_GenerateRuntimeConfigurationPropertyInputsCache>
     <_GeneratePublishDependencyFilePropertyInputsCache Condition="'$(_GeneratePublishDependencyFilePropertyInputsCache)' == ''">$(IntermediateOutputPath)$(MSBuildProjectName).genpublishdeps.cache</_GeneratePublishDependencyFilePropertyInputsCache>
