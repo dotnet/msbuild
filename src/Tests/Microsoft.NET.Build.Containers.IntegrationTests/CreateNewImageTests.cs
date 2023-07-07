@@ -10,6 +10,9 @@ using Microsoft.NET.Build.Containers.UnitTests;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework;
+using FakeItEasy;
+using Microsoft.Build.Framework;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.Build.Containers.Tasks.IntegrationTests;
 
@@ -26,8 +29,7 @@ public class CreateNewImageTests
     [DockerDaemonAvailableFact]
     public void CreateNewImage_Baseline()
     {
-        DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, nameof(CreateNewImage_Baseline)));
-
+        DirectoryInfo newProjectDir = new(GetTestDirectoryName());
         if (newProjectDir.Exists)
         {
             newProjectDir.Delete(recursive: true);
@@ -45,28 +47,33 @@ public class CreateNewImageTests
             .Execute()
             .Should().Pass();
 
-        CreateNewImage task = new CreateNewImage();
+        CreateNewImage task = new();
+
+        (IBuildEngine buildEngine, List<string?> errors) = SetupBuildEngine();
+        task.BuildEngine = buildEngine;
+
         task.BaseRegistry = "mcr.microsoft.com";
         task.BaseImageName = "dotnet/runtime";
         task.BaseImageTag = "7.0";
 
         task.OutputRegistry = "localhost:5010";
+        task.LocalContainerDaemon = "Docker";
         task.PublishDirectory = Path.Combine(newProjectDir.FullName, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "linux-arm64", "publish");
-        task.ImageName = "dotnet/testimage";
+        task.ImageName = "dotnet/create-new-image-baseline";
         task.ImageTags = new[] { "latest" };
         task.WorkingDirectory = "app/";
         task.ContainerRuntimeIdentifier = "linux-arm64";
         task.Entrypoint = new TaskItem[] { new("dotnet"), new("build") };
         task.RuntimeIdentifierGraphPath = ToolsetUtils.GetRuntimeGraphFilePath();
 
-        Assert.True(task.Execute());
+        Assert.True(task.Execute(), FormatBuildMessages(errors));
         newProjectDir.Delete(true);
     }
 
     [DockerDaemonAvailableFact]
     public void ParseContainerProperties_EndToEnd()
     {
-        DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, nameof(ParseContainerProperties_EndToEnd)));
+        DirectoryInfo newProjectDir = new(GetTestDirectoryName());
 
         if (newProjectDir.Exists)
         {
@@ -85,13 +92,16 @@ public class CreateNewImageTests
             .Execute()
             .Should().Pass();
 
-        ParseContainerProperties pcp = new ParseContainerProperties();
+        ParseContainerProperties pcp = new();
+        (IBuildEngine buildEngine, List<string?> errors) = SetupBuildEngine();
+        pcp.BuildEngine = buildEngine;
+
         pcp.FullyQualifiedBaseImageName = "mcr.microsoft.com/dotnet/runtime:7.0";
         pcp.ContainerRegistry = "localhost:5010";
         pcp.ContainerImageName = "dotnet/testimage";
         pcp.ContainerImageTags = new[] { "5.0", "latest" };
 
-        Assert.True(pcp.Execute());
+        Assert.True(pcp.Execute(), FormatBuildMessages(errors));
         Assert.Equal("mcr.microsoft.com", pcp.ParsedContainerRegistry);
         Assert.Equal("dotnet/runtime", pcp.ParsedContainerImage);
         Assert.Equal("7.0", pcp.ParsedContainerTag);
@@ -99,7 +109,10 @@ public class CreateNewImageTests
         Assert.Equal("dotnet/testimage", pcp.NewContainerImageName);
         pcp.NewContainerTags.Should().BeEquivalentTo(new[] { "5.0", "latest" });
 
-        CreateNewImage cni = new CreateNewImage();
+        CreateNewImage cni = new();
+        (buildEngine, errors) = SetupBuildEngine();
+        cni.BuildEngine = buildEngine;
+
         cni.BaseRegistry = pcp.ParsedContainerRegistry;
         cni.BaseImageName = pcp.ParsedContainerImage;
         cni.BaseImageTag = pcp.ParsedContainerTag;
@@ -107,12 +120,12 @@ public class CreateNewImageTests
         cni.OutputRegistry = "localhost:5010";
         cni.PublishDirectory = Path.Combine(newProjectDir.FullName, "bin", "release", ToolsetInfo.CurrentTargetFramework);
         cni.WorkingDirectory = "app/";
-        cni.Entrypoint = new TaskItem[] { new("ParseContainerProperties_EndToEnd") };
+        cni.Entrypoint = new TaskItem[] { new(newProjectDir.Name) };
         cni.ImageTags = pcp.NewContainerTags;
         cni.ContainerRuntimeIdentifier = "linux-x64";
         cni.RuntimeIdentifierGraphPath = ToolsetUtils.GetRuntimeGraphFilePath();
 
-        Assert.True(cni.Execute());
+        Assert.True(cni.Execute(), FormatBuildMessages(errors));
         newProjectDir.Delete(true);
     }
 
@@ -122,7 +135,7 @@ public class CreateNewImageTests
     [DockerDaemonAvailableFact]
     public void Tasks_EndToEnd_With_EnvironmentVariable_Validation()
     {
-        DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, nameof(Tasks_EndToEnd_With_EnvironmentVariable_Validation)));
+        DirectoryInfo newProjectDir = new(GetTestDirectoryName());
 
         if (newProjectDir.Exists)
         {
@@ -143,7 +156,10 @@ public class CreateNewImageTests
             .Execute()
             .Should().Pass();
 
-        ParseContainerProperties pcp = new ParseContainerProperties();
+        ParseContainerProperties pcp = new();
+        (IBuildEngine buildEngine, List<string?> errors) = SetupBuildEngine();
+        pcp.BuildEngine = buildEngine;
+
         pcp.FullyQualifiedBaseImageName = "mcr.microsoft.com/dotnet/runtime:6.0";
         pcp.ContainerRegistry = "";
         pcp.ContainerImageName = "dotnet/envvarvalidation";
@@ -154,7 +170,7 @@ public class CreateNewImageTests
 
         pcp.ContainerEnvironmentVariables = new[] { new TaskItem("B@dEnv.Var", dict), new TaskItem("GoodEnvVar", dict) };
 
-        Assert.True(pcp.Execute());
+        Assert.True(pcp.Execute(), FormatBuildMessages(errors));
         Assert.Equal("mcr.microsoft.com", pcp.ParsedContainerRegistry);
         Assert.Equal("dotnet/runtime", pcp.ParsedContainerImage);
         Assert.Equal("6.0", pcp.ParsedContainerTag);
@@ -164,7 +180,10 @@ public class CreateNewImageTests
         Assert.Equal("dotnet/envvarvalidation", pcp.NewContainerImageName);
         Assert.Equal("latest", pcp.NewContainerTags[0]);
 
-        CreateNewImage cni = new CreateNewImage();
+        CreateNewImage cni = new();
+        (buildEngine, errors) = SetupBuildEngine();
+        cni.BuildEngine = buildEngine;
+
         cni.BaseRegistry = pcp.ParsedContainerRegistry;
         cni.BaseImageName = pcp.ParsedContainerImage;
         cni.BaseImageTag = pcp.ParsedContainerTag;
@@ -172,18 +191,33 @@ public class CreateNewImageTests
         cni.OutputRegistry = pcp.NewContainerRegistry;
         cni.PublishDirectory = Path.Combine(newProjectDir.FullName, "bin", "release", ToolsetInfo.CurrentTargetFramework, "linux-x64");
         cni.WorkingDirectory = "/app";
-        cni.Entrypoint = new TaskItem[] { new("/app/Tasks_EndToEnd_With_EnvironmentVariable_Validation") };
+        cni.Entrypoint = new TaskItem[] { new($"/app/{newProjectDir.Name}") };
         cni.ImageTags = pcp.NewContainerTags;
         cni.ContainerEnvironmentVariables = pcp.NewContainerEnvironmentVariables;
         cni.ContainerRuntimeIdentifier = "linux-x64";
         cni.RuntimeIdentifierGraphPath = ToolsetUtils.GetRuntimeGraphFilePath();
         cni.LocalContainerDaemon = global::Microsoft.NET.Build.Containers.KnownDaemonTypes.Docker;
 
-        Assert.True(cni.Execute());
+        Assert.True(cni.Execute(), FormatBuildMessages(errors));
 
         new RunExeCommand(_testOutput, "docker", "run", "--rm", $"{pcp.NewContainerImageName}:latest")
             .Execute()
             .Should().Pass()
             .And.HaveStdOut("Foo");
     }
+
+    private static (IBuildEngine buildEngine, List<string?> errors) SetupBuildEngine()
+    {
+        List<string?> errors = new();
+        IBuildEngine buildEngine = A.Fake<IBuildEngine>();
+        A.CallTo(() => buildEngine.LogWarningEvent(A<BuildWarningEventArgs>.Ignored)).Invokes((BuildWarningEventArgs e) => errors.Add(e.Message));
+        A.CallTo(() => buildEngine.LogErrorEvent(A<BuildErrorEventArgs>.Ignored)).Invokes((BuildErrorEventArgs e) => errors.Add(e.Message));
+        A.CallTo(() => buildEngine.LogMessageEvent(A<BuildMessageEventArgs>.Ignored)).Invokes((BuildMessageEventArgs e) => errors.Add(e.Message));
+
+        return (buildEngine, errors);
+    }
+
+    private static string GetTestDirectoryName([CallerMemberName]string testName = "DefaultTest") => Path.Combine(TestSettings.TestArtifactsDirectory, testName + "_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
+
+    private static string FormatBuildMessages(List<string?> messages) => string.Join("\r\n", messages);
 }

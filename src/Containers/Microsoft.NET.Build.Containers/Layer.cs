@@ -162,7 +162,8 @@ internal record struct Layer
 
             fs.Position = 0;
 
-            SHA256.HashData(fs, hash);
+            int bW = SHA256.HashData(fs, hash);
+            Debug.Assert(bW == hash.Length);
         }
 
         string contentHash = Convert.ToHexString(hash).ToLowerInvariant();
