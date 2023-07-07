@@ -2308,9 +2308,9 @@ namespace Microsoft.DotNet.GenAPI.Tests
                             public new int Foo;
                             int IExplicit2.ExplicitProperty { get { throw null; } }
                             public new int Baz { get { throw null; } set {} }
-                            [System.Runtime.CompilerServices.NullableContext(1)]
+                            [System.Runtime.CompilerServices.Nullable(1)]
                             public new D this[int i] { get { throw null; } set {} }
-                            [System.Runtime.CompilerServices.NullableContext(1)]
+                            [System.Runtime.CompilerServices.Nullable(1)]
                             public new event System.EventHandler MyEvent { add {} remove {} }
                             void IExplicit2.Explicit2() {}
                             public new void Do() {}
@@ -2330,7 +2330,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                             public new const int Do = 30;
                             int IExplicit2.ExplicitProperty { get { throw null; } }
                             public new int Foo { get { throw null; } set {} }
-                            [System.Runtime.CompilerServices.NullableContext(1)]
+                            [System.Runtime.CompilerServices.Nullable(1)]
                             public new event System.EventHandler MyNestedClass { add {} remove {} }
                             void IExplicit.Explicit() {}
                             void IExplicit2.Explicit2() {}
@@ -2428,8 +2428,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     using System;
                     namespace A
                     {
-                        [System.Runtime.CompilerServices.NullableContext(1)]
-                        [System.Runtime.CompilerServices.Nullable(0)]
                         public class Foo<T> : System.Collections.ICollection, System.Collections.Generic.ICollection<T>
                         {
                             int System.Collections.Generic.ICollection<T>.Count => throw new NotImplementedException();
@@ -2454,6 +2452,8 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                     namespace A
                     {
+                        [System.Runtime.CompilerServices.NullableContext(1)]
+                        [System.Runtime.CompilerServices.Nullable(0)]
                         public partial class Foo<T> : System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.Generic.ICollection<T>, System.Collections.Generic.IEnumerable<T>
                         {
                             int System.Collections.Generic.ICollection<T>.Count { get { throw null; } }
