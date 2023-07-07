@@ -157,7 +157,7 @@ public class EndToEndTests : IDisposable
         return publishDirectory;
     }
 
-    [DockerAvailableTheory]
+    [DockerAvailableTheory(Skip = "https://github.com/dotnet/sdk/issues/33858")]
     [InlineData(false)]
     [InlineData(true)]
     public async Task EndToEnd_NoAPI_Web(bool addPackageReference)
