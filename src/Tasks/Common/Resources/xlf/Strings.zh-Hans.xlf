@@ -934,6 +934,7 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</source>
         <target state="new">NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</target>
         <note>{StrBegin="NETSDK1209: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">
         <source>NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</source>
         <target state="translated">NETSDK1208: 无法识别目标平台标识符 {0}。这是因为 MSBuildEnableWorkloadResolver 设置为 false，这将禁用此标识符所需的 .NET SDK 工作负载。若要启用这些工作负载，请取消设置此环境变量或 MSBuild 属性。</target>
