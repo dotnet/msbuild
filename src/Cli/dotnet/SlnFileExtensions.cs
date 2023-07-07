@@ -75,7 +75,8 @@ namespace Microsoft.DotNet.Tools.Common
                 // section comes first we need to add it first. This doesn't affect correctness but does
                 // stop VS from re-ordering things later on. Since we are keeping the SlnFile class low-level
                 // it shouldn't care about the VS implementation details. That's why we handle this here.
-                if (AreBuildConfigurationsApplicable(slnProject.TypeGuid)) {
+                if (AreBuildConfigurationsApplicable(slnProject.TypeGuid))
+                {
                     slnFile.AddDefaultBuildConfigurations();
 
                     slnFile.MapSolutionConfigurationsToProject(
