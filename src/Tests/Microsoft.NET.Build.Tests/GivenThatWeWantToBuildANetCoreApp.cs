@@ -1069,7 +1069,7 @@ class Program
 
             var runCommand = new RunExeCommand(Log, Path.Combine(buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework).FullName, $"{testProj.Name}{EnvironmentInfo.ExecutableExtension}"));
             runCommand
-                .Execute().
+                .Execute()
                 .Should().HaveStdOut(expectedOutput);
         }
     }
