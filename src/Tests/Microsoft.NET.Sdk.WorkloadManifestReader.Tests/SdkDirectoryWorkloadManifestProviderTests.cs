@@ -925,11 +925,11 @@ namespace ManifestReaderTests
 
             //  Manifest in test hook directory
             Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, sdkVersion, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory, sdkVersion, "Android", "WorkloadManifest.json"), "AndroidContent");
+            File.WriteAllText(Path.Combine(additionalManifestDirectory, sdkVersion, "Android", "WorkloadManifest.json"), "Android: AndroidContent");
 
             //  Manifest in default directory
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "iOS"));
-            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "iOS", "WorkloadManifest.json"), "iOSContent");
+            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "iOS", "WorkloadManifest.json"), "iOS: iOSContent");
 
 
             var sdkDirectoryWorkloadManifestProvider
@@ -937,7 +937,7 @@ namespace ManifestReaderTests
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("AndroidContent", "iOSContent");
+                .BeEquivalentTo("Android: AndroidContent", "iOS: iOSContent");
         }
 
         [Fact]
@@ -955,18 +955,18 @@ namespace ManifestReaderTests
 
             //  Manifest in test hook directory
             Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, sdkVersion, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory, sdkVersion, "Android", "WorkloadManifest.json"), "OverridingAndroidContent");
+            File.WriteAllText(Path.Combine(additionalManifestDirectory, sdkVersion, "Android", "WorkloadManifest.json"), "Android: OverridingAndroidContent");
 
             //  Manifest in default directory
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "Android"));
-            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Android", "WorkloadManifest.json"), "OverriddenAndroidContent");
+            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Android", "WorkloadManifest.json"), "Android: OverriddenAndroidContent");
 
             var sdkDirectoryWorkloadManifestProvider
                 = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable, userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("OverridingAndroidContent");
+                .BeEquivalentTo("Android: OverridingAndroidContent");
 
         }
 
@@ -988,28 +988,28 @@ namespace ManifestReaderTests
 
             //  Manifests in default directory
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "iOS"));
-            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "iOS", "WorkloadManifest.json"), "iOSContent");
+            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "iOS", "WorkloadManifest.json"), "iOS: iOSContent");
 
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "Android"));
-            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Android", "WorkloadManifest.json"), "DefaultAndroidContent");
+            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Android", "WorkloadManifest.json"), "Android: DefaultAndroidContent");
 
             //  Manifests in first additional directory
             Directory.CreateDirectory(Path.Combine(additionalManifestDirectory1, sdkVersion, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory1, sdkVersion, "Android", "WorkloadManifest.json"), "AndroidContent1");
+            File.WriteAllText(Path.Combine(additionalManifestDirectory1, sdkVersion, "Android", "WorkloadManifest.json"), "Android: AndroidContent1");
 
             //  Manifests in second additional directory
             Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, sdkVersion, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory2, sdkVersion, "Android", "WorkloadManifest.json"), "AndroidContent2");
+            File.WriteAllText(Path.Combine(additionalManifestDirectory2, sdkVersion, "Android", "WorkloadManifest.json"), "Android: AndroidContent2");
 
             Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, sdkVersion, "Test"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory2, sdkVersion, "Test", "WorkloadManifest.json"), "TestContent2");
+            File.WriteAllText(Path.Combine(additionalManifestDirectory2, sdkVersion, "Test", "WorkloadManifest.json"), "Test: TestContent2");
 
             var sdkDirectoryWorkloadManifestProvider
                 = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable, userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("AndroidContent1", "iOSContent", "TestContent2");
+                .BeEquivalentTo("Android: AndroidContent1", "iOS: iOSContent", "Test: TestContent2");
          
         }
 
@@ -1025,14 +1025,14 @@ namespace ManifestReaderTests
 
             //  Manifest in default directory
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "Android"));
-            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Android", "WorkloadManifest.json"), "AndroidContent");
+            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Android", "WorkloadManifest.json"), "Android: AndroidContent");
 
             var sdkDirectoryWorkloadManifestProvider
                 = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", environmentMock.GetEnvironmentVariable, userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("AndroidContent");
+                .BeEquivalentTo("Android: AndroidContent");
          
         }
 
@@ -1042,16 +1042,16 @@ namespace ManifestReaderTests
             Initialize();
 
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "iOS"));
-            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "iOS", "WorkloadManifest.json"), "iOSContent");
+            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "iOS", "WorkloadManifest.json"), "iOS: iOSContent");
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "Microsoft.NET.Workload.Android"));
-            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Microsoft.NET.Workload.Android", "WorkloadManifest.json"), "iOSContent");
+            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Microsoft.NET.Workload.Android", "WorkloadManifest.json"), "Microsoft.NET.Workload.Android: AndroidContent");
 
             var sdkDirectoryWorkloadManifestProvider
                 = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("iOSContent");
+                .BeEquivalentTo("iOS: iOSContent");
         }
 
         [Fact]
@@ -1231,7 +1231,7 @@ Microsoft.Net.Workload.Emscripten.net7"
             var manifestDirectory6 = Path.Combine(fakeDotnetRootDirectory, "sdk-manifests", "6.0.100");
             Directory.CreateDirectory(manifestDirectory6);
             Directory.CreateDirectory(Path.Combine(manifestDirectory6, "iOS"));
-            File.WriteAllText(Path.Combine(manifestDirectory6, "iOS", "WorkloadManifest.json"), "iOS-6.0.100");
+            File.WriteAllText(Path.Combine(manifestDirectory6, "iOS", "WorkloadManifest.json"), "iOS: iOS-6.0.100");
 
             var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", "6.0.100", "KnownWorkloadManifests.txt");
             Directory.CreateDirectory(Path.GetDirectoryName(knownWorkloadsFilePath)!);
@@ -1242,13 +1242,21 @@ Microsoft.Net.Workload.Emscripten.net7"
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("iOS-6.0.100");
+                .BeEquivalentTo("iOS: iOS-6.0.100");
 
         }
 
         private IEnumerable<string> GetManifestContents(SdkDirectoryWorkloadManifestProvider manifestProvider)
         {
-            return manifestProvider.GetManifests().Select(manifest => new StreamReader(manifest.OpenManifestStream()).ReadToEnd());
+            return manifestProvider.GetManifests().Select(manifest =>
+                {
+                    var contents = new StreamReader(manifest.OpenManifestStream()).ReadToEnd();
+
+                    string manifestId = contents.Split(':')[0];
+                    manifest.ManifestId.Should().Be(manifestId);
+
+                    return contents;
+                });
         }
 
         private class EnvironmentMock

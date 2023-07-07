@@ -128,22 +128,6 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public IEnumerable<ReadableWorkloadManifest> GetManifests()
         {
-            foreach (var workloadManifestDirectory in GetManifestDirectories())
-            {
-                var workloadManifestPath = Path.Combine(workloadManifestDirectory, "WorkloadManifest.json");
-                var id = Path.GetFileName(workloadManifestDirectory);
-
-                yield return new(
-                    id,
-                    workloadManifestPath,
-                    () => File.OpenRead(workloadManifestPath),
-                    () => WorkloadManifestReader.TryOpenLocalizationCatalogForManifest(workloadManifestPath)
-                );
-            }
-        }
-
-        public IEnumerable<string> GetManifestDirectories()
-        {
             //  Scan manifest directories
             var manifestIdsToDirectories = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -246,7 +230,19 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     return int.MaxValue;
                 })
                 .ThenBy(kvp => kvp.Key, StringComparer.OrdinalIgnoreCase)
-                .Select(kvp => kvp.Value)
+                .Select(kvp =>
+                {
+                    var manifestId = kvp.Key;
+                    var manifestDirectory = kvp.Value;
+                    var workloadManifestPath = Path.Combine(manifestDirectory, "WorkloadManifest.json");
+
+                    return new ReadableWorkloadManifest(
+                        manifestId,
+                        manifestDirectory,
+                        workloadManifestPath,
+                        () => File.OpenRead(workloadManifestPath),
+                        () => WorkloadManifestReader.TryOpenLocalizationCatalogForManifest(workloadManifestPath));
+                })
                 .ToList();
         }
 

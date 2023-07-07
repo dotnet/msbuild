@@ -40,6 +40,7 @@ namespace ManifestReaderTests
                 {
                     yield return new(
                         id,
+                        Path.GetDirectoryName(path),
                         path,
                         () => File.OpenRead(path),
                         () => WorkloadManifestReader.TryOpenLocalizationCatalogForManifest(path)
