@@ -415,6 +415,57 @@ public class CreateNewImageToolTaskTests
             .And.NotHaveStdOutContaining("Description:"); //standard help output for parse error
     }
 
+    [Fact]
+    public void Logging_CanEnableTraceLogging()
+    {
+        CreateNewImage task = new();
+        DirectoryInfo publishDir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), DateTime.Now.ToString("yyyyMMddHHmmssfff")));
+
+        task.PublishDirectory = publishDir.FullName;
+        task.BaseRegistry = "MyBaseRegistry";
+        task.BaseImageName = "MyBaseImageName";
+        task.Repository = "MyImageName";
+        task.WorkingDirectory = "MyWorkingDirectory";
+        task.Entrypoint = new[] { new TaskItem("") };
+        task.Entrypoint = new[] { new TaskItem("MyEntryPoint") };
+
+        string args = task.GenerateCommandLineCommandsInt();
+        string workDir = GetPathToContainerize();
+
+        new DotnetCommand(_testOutput, args)
+            .WithRawArguments()
+            .WithWorkingDirectory(workDir)
+            .WithEnvironmentVariable("CONTAINERIZE_TRACE_LOGGING_ENABLED", "1")
+            .Execute().Should().Fail()
+            .And.NotHaveStdOutContaining("Description:") //standard help output for parse error
+            .And.HaveStdOutContaining("Trace logging: enabled.");
+    }
+
+    [Fact]
+    public void Logging_TraceLoggingIsDisabledByDefault()
+    {
+        CreateNewImage task = new();
+        DirectoryInfo publishDir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), DateTime.Now.ToString("yyyyMMddHHmmssfff")));
+
+        task.PublishDirectory = publishDir.FullName;
+        task.BaseRegistry = "MyBaseRegistry";
+        task.BaseImageName = "MyBaseImageName";
+        task.Repository = "MyImageName";
+        task.WorkingDirectory = "MyWorkingDirectory";
+        task.Entrypoint = new[] { new TaskItem("") };
+        task.Entrypoint = new[] { new TaskItem("MyEntryPoint") };
+
+        string args = task.GenerateCommandLineCommandsInt();
+        string workDir = GetPathToContainerize();
+
+        new DotnetCommand(_testOutput, args)
+            .WithRawArguments()
+            .WithWorkingDirectory(workDir)
+            .Execute().Should().Fail()
+            .And.NotHaveStdOutContaining("Description:") //standard help output for parse error
+            .And.NotHaveStdOutContaining("Trace logging: enabled.");
+    }
+
     private static string GetPathToContainerize()
     {
         return Path.Combine(TestContext.Current.TestExecutionDirectory, "Container", "containerize");

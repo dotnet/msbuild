@@ -35,6 +35,8 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             public string DotnetRootPath { get; init; }
             public string SdkVersion { get; init; }
 
+            public string GlobalJsonPath { get; init; }
+
             public CachingWorkloadResolver WorkloadResolver { get; init; }
         }
 
@@ -56,10 +58,13 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                 //  The SDK version is the name of the SDK directory (ie dotnet\sdk\5.0.100)
                 var sdkVersion = Path.GetFileName(sdkDirectory);
 
+                var globalJsonPath = SdkDirectoryWorkloadManifestProvider.GetGlobalJsonPath(GetGlobalJsonStartDir(resolverContext));
+
                 cachedState = new CachedState()
                 {
                     DotnetRootPath = dotnetRootPath,
                     SdkVersion = sdkVersion,
+                    GlobalJsonPath = globalJsonPath,
                     WorkloadResolver = new CachingWorkloadResolver()
                 };
 
@@ -67,7 +72,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             }
 
             string userProfileDir = CliFolderPathCalculatorCore.GetDotnetUserProfileFolderPath();
-            var result = cachedState.WorkloadResolver.Resolve(sdkReference.Name, cachedState.DotnetRootPath, cachedState.SdkVersion, userProfileDir);
+            var result = cachedState.WorkloadResolver.Resolve(sdkReference.Name, cachedState.DotnetRootPath, cachedState.SdkVersion, userProfileDir, cachedState.GlobalJsonPath);
 
 
             return result.ToSdkResult(sdkReference, factory);
@@ -94,6 +99,23 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             var sdkDirectory = GetSdkDirectory(context);
             var dotnetRoot = Directory.GetParent(sdkDirectory).Parent.FullName;
             return dotnetRoot;
+        }
+
+        //  Duplicated logic from DotNetMSBuildSdkResolver
+        private static string GetGlobalJsonStartDir(SdkResolverContext context)
+        {
+            string startDir = Environment.CurrentDirectory;
+
+            if (!string.IsNullOrWhiteSpace(context.SolutionFilePath))
+            {
+                startDir = Path.GetDirectoryName(context.SolutionFilePath);
+            }
+            else if (!string.IsNullOrWhiteSpace(context.ProjectFilePath))
+            {
+                startDir = Path.GetDirectoryName(context.ProjectFilePath);
+            }
+
+            return startDir;
         }
     }
 }

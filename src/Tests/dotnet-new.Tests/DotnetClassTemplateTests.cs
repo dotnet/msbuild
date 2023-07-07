@@ -8,7 +8,6 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.Authoring.TemplateVerifier;
-using Microsoft.TemplateEngine.TestHelper;
 using NuGet.Packaging;
 using Xunit.Abstractions;
 
@@ -24,8 +23,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             _fixture = fixture;
             _log = log;
-            _logger = new XunitLoggerProvider(log)
-                .CreateLogger("TestRun");
+            _logger = new TestLoggerFactory(log).CreateLogger(nameof(DotnetClassTemplateTests));
         }
 
         [Theory]

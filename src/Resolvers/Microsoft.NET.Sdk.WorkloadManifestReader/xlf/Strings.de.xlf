@@ -107,11 +107,6 @@
         <target state="translated">Das angegebene Workloadmanifest wurde nicht gefunden: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifiedWorkloadSetNotFound">
-        <source>Specified workload set was not found: {0}</source>
-        <target state="translated">Die angegebene Workloadgruppe wurde nicht gefunden: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">Unerwartetes Token "{0}" bei Offset {1}.</target>
@@ -135,6 +130,11 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Nicht aufgelöstes Ziel „{0}“ für die Workloadumleitung „{1}“ im Manifest „{2}“ [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="translated">Die Arbeitsauslastungsversion {0}, die in {1} angegeben wurde, wurde nicht gefunden. Führen Sie „dotnet workload restore“ aus, um diese Workloadversion zu installieren.</target>
         <note />
       </trans-unit>
     </body>

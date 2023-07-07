@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Microsoft.NET.Build.Containers;
 
-internal record struct Layer
+internal class Layer
 {
     // NOTE: The SID string below was created using the following snippet. As the code is Windows only we keep the constant
     // private static string CreateUserOwnerAndGroupSID()
@@ -30,17 +30,24 @@ internal record struct Layer
 
     private const string BuiltinUsersSecurityDescriptor = "AQAAgBQAAAAkAAAAAAAAAAAAAAABAgAAAAAABSAAAAAhAgAAAQIAAAAAAAUgAAAAIQIAAA==";
 
-    public Descriptor Descriptor { get; private set; }
+    public virtual Descriptor Descriptor { get; }
 
-    public string BackingFile { get; private set; }
+    public string BackingFile { get; }
+
+    internal Layer()
+    {
+        Descriptor = new Descriptor();
+        BackingFile = "";
+    }
+    internal Layer(string backingFile, Descriptor descriptor)
+    {
+        BackingFile = backingFile;
+        Descriptor = descriptor;
+    }
 
     public static Layer FromDescriptor(Descriptor descriptor)
     {
-        return new()
-        {
-            BackingFile = ContentStore.PathForDescriptor(descriptor),
-            Descriptor = descriptor
-        };
+        return new(ContentStore.PathForDescriptor(descriptor), descriptor);
     }
 
     public static Layer FromDirectory(string directory, string containerPath, bool isWindowsLayer)
@@ -183,14 +190,10 @@ internal record struct Layer
 
         File.Move(tempTarballPath, storedContent, overwrite: true);
 
-        Layer l = new()
-        {
-            Descriptor = descriptor,
-            BackingFile = storedContent,
-        };
-
-        return l;
+        return new(storedContent, descriptor);
     }
+
+    internal virtual Stream OpenBackingFile() => File.OpenRead(BackingFile);
 
     private readonly static char[] PathSeparators = new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
 

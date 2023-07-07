@@ -70,12 +70,12 @@ export PATH="$PATH:{0}"
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # 添加 .NET Core SDK 工具
-导出 PATH="$PATH:{0}"
+export PATH="$PATH:{0}"
 EOF
 
 可运行以下命令将其添加到当前会话:
 
-导出 PATH ="$PATH:{0}"
+export PATH="$PATH:{0}"
 </target>
         <note />
       </trans-unit>
@@ -99,14 +99,14 @@ export PATH="$PATH:{0}"
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
 # 添加 .NET Core SDK 工具
-导出 PATH="$PATH:{0}"
+export PATH="$PATH:{0}"
 EOF
 
 并运行 `zsh -l` 使其用于当前会话。
 
 只可通过运行以下命令将其添加到当前会话:
 
-导出 PATH="$PATH:{0}"
+export PATH="$PATH:{0}"
 </target>
         <note />
       </trans-unit>
@@ -864,12 +864,12 @@ export PATH="$PATH:{0}"
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # 添加 .NET Core SDK 工具
-导出 PATH="$PATH:{0}"
+export PATH="$PATH:{0}"
 EOF
 
 可运行以下命令将其添加到当前会话:
 
-导出 PATH ="$PATH:{0}"
+export PATH="$PATH:{0}"
 </target>
         <note />
       </trans-unit>

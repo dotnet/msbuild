@@ -107,11 +107,6 @@
         <target state="translated">O manifesto de carga de trabalho especificado não foi encontrado: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifiedWorkloadSetNotFound">
-        <source>Specified workload set was not found: {0}</source>
-        <target state="translated">O conjunto de cargas de trabalho especificado não foi encontrado: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">Token inesperado '{0}' no deslocamento {1}</target>
@@ -135,6 +130,11 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Destino '{0}' não resolvido para o redirecionamento de carga de trabalho '{1}' no manifesto '{2}' [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="translated">A versão da carga de trabalho {0}, especificada em {1}, não foi localizada. Execute "dotnet workload restore" para instalar esta versão da carga de trabalho.</target>
         <note />
       </trans-unit>
     </body>

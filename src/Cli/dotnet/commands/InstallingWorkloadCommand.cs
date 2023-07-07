@@ -33,8 +33,6 @@ namespace Microsoft.DotNet.Workloads.Workload
         protected readonly string _dotnetPath;
         protected readonly string _userProfileDir;
         protected readonly bool _checkIfManifestExist;
-        protected readonly ReleaseVersion _sdkVersion;
-        protected readonly ReleaseVersion _installedSdkVersion;
         protected readonly SdkFeatureBand _sdkFeatureBand;
         protected readonly SdkFeatureBand _installedFeatureBand;
         protected readonly string _fromRollbackDefinition;
@@ -63,13 +61,6 @@ namespace Microsoft.DotNet.Workloads.Workload
             _fromCacheOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.FromCacheOption);
             _includePreviews = parseResult.GetValueForOption(InstallingWorkloadCommandParser.IncludePreviewOption);
             _downloadToCacheOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.DownloadToCacheOption);
-            _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
-            _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _checkIfManifestExist = !(_printDownloadLinkOnly);      // don't check for manifest existence when print download link is passed
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValueForOption(InstallingWorkloadCommandParser.VersionOption), version, _dotnetPath, _userProfileDir, _checkIfManifestExist);
-            _sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            _installedSdkVersion = new ReleaseVersion(version ?? Product.Version);
-            _installedFeatureBand = new SdkFeatureBand(installedFeatureBand ?? Product.Version);
 
             _fromRollbackDefinition = parseResult.GetValueForOption(InstallingWorkloadCommandParser.FromRollbackFileOption);
             var configOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.ConfigOption);
@@ -77,8 +68,25 @@ namespace Microsoft.DotNet.Workloads.Workload
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
 
-            var sdkWorkloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _installedSdkVersion.ToString(), userProfileDir);
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(sdkWorkloadManifestProvider, _dotnetPath, _installedSdkVersion.ToString(), _userProfileDir);
+            var creationParameters = new WorkloadResolverFactory.CreationParameters()
+            {
+                DotnetPath = dotnetDir,
+                UserProfileDir = userProfileDir,
+                GlobalJsonStartDir = null,
+                SdkVersionFromOption = parseResult.GetValueForOption(InstallingWorkloadCommandParser.VersionOption),
+                VersionForTesting = version,
+                CheckIfFeatureBandManifestExists = !(_printDownloadLinkOnly),    // don't check for manifest existence when print download link is passed
+                WorkloadResolverForTesting = workloadResolver,
+                UseInstalledSdkVersionForResolver = true
+            };
+
+            var creationResult = WorkloadResolverFactory.Create(creationParameters);
+
+            _dotnetPath = creationResult.DotnetPath;
+            _userProfileDir = creationResult.UserProfileDir;
+            _sdkFeatureBand = new SdkFeatureBand(creationResult.SdkVersion);
+            _installedFeatureBand = new SdkFeatureBand(creationResult.InstalledSdkVersion);
+            _workloadResolver = creationResult.WorkloadResolver;
 
             _workloadInstallerFromConstructor = workloadInstaller;
             _workloadManifestUpdaterFromConstructor = workloadManifestUpdater;

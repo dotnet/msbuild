@@ -107,11 +107,6 @@
         <target state="translated">Zadaný manifest úlohy se nenašel: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifiedWorkloadSetNotFound">
-        <source>Specified workload set was not found: {0}</source>
-        <target state="translated">Zadaná sada úloh se nenašla: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">Neočekávaný token {0} u posunu {1}</target>
@@ -135,6 +130,11 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Nevyřešený cíl {0} pro přesměrování úlohy {1} v manifestu {2} [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="translated">Verze {0} úlohy, která byla zadána v {1}, nebyla nalezena. Spuštěním příkazu dotnet workload restore nainstalujte tuto verzi úlohy.</target>
         <note />
       </trans-unit>
     </body>

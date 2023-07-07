@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                     string.IsNullOrWhiteSpace(_targetSdkVersion)
                         ? currentSdkReleaseVersion.ToString()
                         : _targetSdkVersion,
-                    userProfileDir);
+                    userProfileDir, SdkDirectoryWorkloadManifestProvider.GetGlobalJsonPath(Environment.CurrentDirectory));
             WorkloadResolver = workloadResolver ?? NET.Sdk.WorkloadManifestReader.WorkloadResolver.Create(
                 workloadManifestProvider, dotnetPath,
                 currentSdkReleaseVersion.ToString(), userProfileDir);
