@@ -27,7 +27,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
         {
             var manifestProvider = CreateManifestProvider();
 
-            var manifestDirectories = manifestProvider.GetManifestDirectories();
+            var manifestDirectories = manifestProvider.GetManifests().Select(m => m.ManifestDirectory);
             foreach (var manifestDirectory in manifestDirectories)
             {
                 Log.WriteLine(manifestDirectory);

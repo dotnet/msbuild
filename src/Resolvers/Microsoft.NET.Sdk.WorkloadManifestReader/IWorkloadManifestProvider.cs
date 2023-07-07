@@ -15,8 +15,6 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     {
         IEnumerable<ReadableWorkloadManifest> GetManifests();
 
-        IEnumerable<string> GetManifestDirectories();
-
         string GetSdkFeatureBand();
     }
 }
