@@ -236,10 +236,25 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
+  <!-- Remove TRACE when DisableDiagnosticTracing is true -->
+  <Target Name="_DisableDiagnosticTracing"
+          Condition="'$(DisableDiagnosticTracing)' == 'true'"
+          DependsOnTargets="GenerateTargetPlatformDefineConstants;GenerateNETCompatibleDefineConstants;GeneratePlatformCompatibleDefineConstants"
+          BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <_DefineConstantsWithoutTrace Include="$(DefineConstants)" />
+      <_DefineConstantsWithoutTrace Remove="TRACE"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+      <DefineConstants>@(_DefineConstantsWithoutTrace)</DefineConstants>
+    </PropertyGroup>
+  </Target>
+
   <!-- Add implicitly defined preprocessor symbols to DefineConstants -->
   <Target Name="AddImplicitDefineConstants"
           Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' "
-          DependsOnTargets="GenerateTargetPlatformDefineConstants;GenerateNETCompatibleDefineConstants;GeneratePlatformCompatibleDefineConstants"
+          DependsOnTargets="GenerateTargetPlatformDefineConstants;GenerateNETCompatibleDefineConstants;GeneratePlatformCompatibleDefineConstants;_DisableDiagnosticTracing"
           BeforeTargets="CoreCompile" >
     <PropertyGroup>
       <DefineConstants Condition=" '@(_ImplicitDefineConstant)' != '' " >$(DefineConstants);@(_ImplicitDefineConstant)</DefineConstants>

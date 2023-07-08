@@ -1028,5 +1028,49 @@ class Program
                 result.Should().NotHaveStdOutContaining("NETSDK1206");
             }
         }
+
+        [Theory]
+        [InlineData(true, "TRACE DISABLED")]
+        [InlineData(false, "TRACE ENABLED")]
+        public void It_can_use_implicitly_defined_compilation_constants(bool disableTracing, string expectedOutput)
+        {
+            var testProj = new TestProject()
+            {
+                Name = "DisableTracing_" + disableTracing.ToString(),
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                IsExe = true,
+            };
+            if (disableTracing == true)
+            {
+                testProj.AdditionalProperties["DisableDiagnosticTracing"] = "true";
+            }
+
+            testProj.SourceFiles[$"{testProj.Name}.cs"] = @"
+using System;
+class Program
+{
+    static void Main(string[] args)
+    {
+        #if TRACE
+            Console.WriteLine(""TRACE ENABLED"");
+        #endif
+        #if !TRACE
+            Console.WriteLine(""TRACE DISABLED"");
+        #endif
+    }
+}";
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, identifier: disableTracing.ToString());
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.Path, testProj.Name));
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var runCommand = new RunExeCommand(Log, Path.Combine(buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework).FullName, $"{testProj.Name}{EnvironmentInfo.ExecutableExtension}"));
+            runCommand
+                .Execute()
+                .Should().HaveStdOut(expectedOutput);
+        }
     }
 }
