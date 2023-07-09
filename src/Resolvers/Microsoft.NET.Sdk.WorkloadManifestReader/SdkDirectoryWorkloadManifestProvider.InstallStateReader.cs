@@ -9,6 +9,7 @@ using System.Linq;
 using Microsoft.NET.Sdk.Localization;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadManifestReader;
 using System.Runtime.Serialization;
+using Microsoft.Deployment.DotNet.Releases;
 
 #if USE_SYSTEM_TEXT_JSON
 using System.Text.Json;
@@ -21,16 +22,17 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public partial class SdkDirectoryWorkloadManifestProvider
     {
-        static class GlobalJsonReader
+        class InstallState
         {
-            public static string? GetWorkloadVersionFromGlobalJson(string? globalJsonPath)
-            {
-                if (string.IsNullOrEmpty(globalJsonPath))
-                {
-                    return null;
-                }
+            public string? WorkloadSetVersion { get; set; }
+            public WorkloadSet? Manifests { get; set; }
+        }
 
-                using var fileStream = File.OpenRead(globalJsonPath);
+        static class InstallStateReader
+        {
+            public static InstallState ReadInstallState(string installStatePath)
+            {
+                using var fileStream = File.OpenRead(installStatePath);
 
 #if USE_SYSTEM_TEXT_JSON
                 var readerOptions = new JsonReaderOptions
@@ -46,8 +48,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 var reader = new Utf8JsonStreamReader(jsonReader);
 #endif
 
-                string? workloadVersion = null;
-
+                InstallState installState = new();
+                
                 JsonReader.ConsumeToken(ref reader, JsonTokenType.StartObject);
                 while (reader.Read())
                 {
@@ -55,33 +57,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     {
                         case JsonTokenType.PropertyName:
                             var propName = reader.GetString();
-                            if (string.Equals("sdk", propName, StringComparison.OrdinalIgnoreCase))
+                            if (string.Equals("workloadVersion", propName, StringComparison.OrdinalIgnoreCase))
                             {
-                                JsonReader.ConsumeToken(ref reader, JsonTokenType.StartObject);
-
-                                bool readingSdk = true;
-                                while (readingSdk && reader.Read())
-                                {
-                                    switch (reader.TokenType)
-                                    {
-                                        case JsonTokenType.PropertyName:
-                                            var sdkPropName = reader.GetString();
-                                            if (string.Equals("workloadVersion", sdkPropName, StringComparison.OrdinalIgnoreCase))
-                                            {
-                                                workloadVersion = JsonReader.ReadString(ref reader);
-                                            }
-                                            else
-                                            {
-                                                JsonReader.ConsumeValue(ref reader);
-                                            }
-                                            break;
-                                        case JsonTokenType.EndObject:
-                                            readingSdk = false;
-                                            break;
-                                        default:
-                                            throw new JsonFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
-                                    }
-                                }
+                                installState.WorkloadSetVersion = JsonReader.ReadString(ref reader);
+                            }
+                            else if (string.Equals("manifests", propName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                installState.Manifests = ReadManifests(ref reader);
                             }
                             else
                             {
@@ -90,12 +72,35 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                             break;
 
                         case JsonTokenType.EndObject:
-                            return workloadVersion;
+                            return installState;
                         default:
                             throw new JsonFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
                     }
                 }
 
+                throw new JsonFormatException(Strings.IncompleteDocument);
+            }
+
+            static WorkloadSet ReadManifests(ref Utf8JsonStreamReader reader)
+            {
+                JsonReader.ConsumeToken(ref reader, JsonTokenType.StartObject);
+                Dictionary<string, string> workloadSetDict = new();
+
+                while (reader.Read())
+                {
+                    switch (reader.TokenType)
+                    {
+                        case JsonTokenType.PropertyName:
+                            var propName = reader.GetString();
+                            var propValue = JsonReader.ReadString(ref reader);
+                            workloadSetDict[propName] = propValue;
+                            break;
+                        case JsonTokenType.EndObject:
+                            return WorkloadSet.FromDictionaryForJson(workloadSetDict, new SdkFeatureBand(new ReleaseVersion(0,0,0)));
+                        default:
+                            throw new JsonFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
+                    }
+                }
                 throw new JsonFormatException(Strings.IncompleteDocument);
             }
         }
