@@ -17,7 +17,28 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The root element name to use for the generated XML string
         /// </summary>
-        public string RootElementName { get; set; }
+        private string _rootElementName;
+
+        /// <summary>
+        /// Gets or sets the root element name to use for the generated XML string
+        /// </summary>
+        public string RootElementName
+        {
+            get
+            {
+                if (!UseAttributeForTargetFrameworkInfoPropertyNames)
+                {
+                    ErrorUtilities.VerifyThrowArgumentLength(_rootElementName, nameof(RootElementName));
+                }
+                else
+                {
+                    ErrorUtilities.VerifyThrowArgumentNull(_rootElementName, nameof(RootElementName));
+                }
+                return _rootElementName;
+            }
+
+            set => _rootElementName = value;
+        }
 
         /// <summary>
         /// Items to include in the XML.  The ItemSpec should be the property name, and it should have Value metadata for its value.
@@ -39,9 +60,17 @@ namespace Microsoft.Build.Tasks
         {
             if (PropertiesAndValues != null)
             {
+                if (!UseAttributeForTargetFrameworkInfoPropertyNames)
+                {
+                    ErrorUtilities.VerifyThrowArgumentLength(_rootElementName, nameof(RootElementName));
+                }
+                else
+                {
+                    ErrorUtilities.VerifyThrowArgumentNull(_rootElementName, nameof(RootElementName));
+                }
                 XElement root = UseAttributeForTargetFrameworkInfoPropertyNames ?
-                    new("TargetFramework", new XAttribute("Name", EscapingUtilities.Escape(RootElementName))) :
-                    new(RootElementName);
+                    new("TargetFramework", new XAttribute("Name", EscapingUtilities.Escape(_rootElementName))) :
+                    new(_rootElementName);
 
                 foreach (ITaskItem item in PropertiesAndValues)
                 {
