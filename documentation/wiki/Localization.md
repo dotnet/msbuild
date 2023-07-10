@@ -21,8 +21,8 @@
 
 ## Process for interacting with the localization team
 
-- 3 weeks cadence for master, initiated by loc team
-- on demand for master / release branches, initiated by msbuild team
+- 3 weeks cadence for main, initiated by loc team
+- on demand for main / release branches, initiated by msbuild team
 
 ## Contributing a better translation
 

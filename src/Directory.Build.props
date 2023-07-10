@@ -15,7 +15,7 @@
     <!-- Ensure that compiler errors emit full paths so that files
          can be correctly annotated in GitHub. -->
     <GenerateFullPaths>true</GenerateFullPaths>
-    
+
     <!-- https://github.com/NuGet/Home/issues/8684 -->
     <NoWarn>$(NoWarn);NU5131</NoWarn>
 
@@ -36,7 +36,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <!-- Target frameworks for Exe and unit test projects (ie projects with runtime output) -->
-    <RuntimeOutputTargetFrameworks>net7.0</RuntimeOutputTargetFrameworks>
+    <RuntimeOutputTargetFrameworks>$(LatestDotNetCoreForMSBuild)</RuntimeOutputTargetFrameworks>
     <RuntimeOutputTargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(FullFrameworkTFM);$(RuntimeOutputTargetFrameworks)</RuntimeOutputTargetFrameworks>
     <RuntimeOutputTargetFrameworks Condition="'$(MonoBuild)' == 'true'">$(FullFrameworkTFM)</RuntimeOutputTargetFrameworks>
 
@@ -56,6 +56,7 @@
     <GenerateResourceMSBuildArchitecture>CurrentArchitecture</GenerateResourceMSBuildArchitecture>
     <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
 
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <PackageLicenseUrl Condition="'$(PackageLicenseExpression)' == ''">http://go.microsoft.com/fwlink/?LinkId=329770</PackageLicenseUrl>

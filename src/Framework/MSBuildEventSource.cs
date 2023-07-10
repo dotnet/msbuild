@@ -1,4 +1,7 @@
-﻿using System.Diagnostics.Tracing;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Diagnostics.Tracing;
 
 #nullable disable
 
@@ -313,7 +316,7 @@ namespace Microsoft.Build.Eventing
         }
 
         /// <summary>
-        /// Call this method to notify listeners of profiling for the method that removes blacklisted references from the reference table. It puts primary and dependency references in invalid file lists.
+        /// Call this method to notify listeners of profiling for the method that removes denylisted references from the reference table. It puts primary and dependency references in invalid file lists.
         /// </summary>
         [Event(35, Keywords = Keywords.All)]
         public void RarRemoveReferencesMarkedForExclusionStart()
@@ -646,7 +649,7 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(88, assemblyPath, numberOfPublicTypesSearched);
         }
-        
+
         [Event(89, Keywords = Keywords.All)]
         public void MSBuildServerBuildStart(string commandLine)
         {

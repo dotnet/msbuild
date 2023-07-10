@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
 using Microsoft.Build.ObjectModelRemoting;
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Construction
             {
                 if (value)
                 {
-                    ValidateValidMetadataAsAttributeName(Name, Parent?.ElementName ?? "null" , Parent?.Location);
+                    ValidateValidMetadataAsAttributeName(Name, Parent?.ElementName ?? "null", Parent?.Location);
                 }
                 base.ExpressedAsAttribute = value;
             }
@@ -100,13 +100,13 @@ namespace Microsoft.Build.Construction
         /// Creates an unparented ProjectMetadataElement, wrapping an unparented XmlElement.
         /// Caller should then ensure the element is added to a parent.
         /// </summary>
-        internal static ProjectMetadataElement CreateDisconnected(string name, ProjectRootElement containingProject)
+        internal static ProjectMetadataElement CreateDisconnected(string name, ProjectRootElement containingProject, ElementLocation location = null)
         {
             XmlUtilities.VerifyThrowArgumentValidElementName(name);
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
             ErrorUtilities.VerifyThrowInvalidOperation(!XMakeElements.ReservedItemNames.Contains(name), "CannotModifyReservedItemMetadata", name);
 
-            XmlElementWithLocation element = containingProject.CreateElement(name);
+            XmlElementWithLocation element = containingProject.CreateElement(name, location);
 
             return new ProjectMetadataElement(element, containingProject);
         }

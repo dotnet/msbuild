@@ -1,16 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Linq;
 using System.Xml;
-
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Microsoft.Build.Evaluation;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -84,6 +82,30 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal(0, Helpers.Count(item.Metadata));
         }
 
+        [Fact]
+        public void ReadMetadataLocationPreserved()
+        {
+            string project = """
+                <Project>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <i Include='i' MetadataA='123' MetadataB='xyz' />
+                        </ItemGroup>
+                    </Target>
+                </Project>
+                """;
+
+            ProjectItemElement item = GetItemFromContent(project);
+            Assert.Equal(2, item.Metadata.Count);
+            ProjectMetadataElement metadatum1 = item.Metadata.First();
+            ProjectMetadataElement metadatum2 = item.Metadata.Skip(1).First();
+
+            Assert.Equal(4, metadatum1.Location.Line);
+            Assert.Equal(4, metadatum2.Location.Line);
+            Assert.Equal(27, metadatum1.Location.Column);
+            Assert.Equal(43, metadatum2.Location.Column);
+        }
+
         /// <summary>
         /// Read item with no include
         /// </summary>
@@ -110,8 +132,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -139,8 +160,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -168,8 +188,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -197,8 +216,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -217,8 +235,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var exception =
                 Assert.Throws<InvalidProjectFileException>(
-                    () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); }
-                    );
+                    () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); });
 
             Assert.Contains("Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.", exception.Message);
         }
@@ -241,8 +258,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var exception =
                 Assert.Throws<InvalidProjectFileException>(
-                    () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); }
-                    );
+                    () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); });
 
             Assert.Contains("The attribute \"Exclude\" in element <i> is unrecognized.", exception.Message);
         }
@@ -285,8 +301,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -428,8 +443,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         [Theory]
@@ -454,8 +468,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         [Theory]
@@ -480,8 +493,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -513,8 +525,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -542,8 +553,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -571,8 +581,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -732,8 +741,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectItemElement item = GetItemFromContent(project);
 
                 item.Remove = "i1";
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -749,8 +757,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectItemElement item = GetItemFromContent(project);
 
                 item.Update = "i1";
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -811,8 +818,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectItemElement item = GetItemFromContent(project);
 
                 item.Include = "i1";
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -828,8 +834,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectItemElement item = GetItemFromContent(project);
 
                 item.Exclude = "i1";
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -845,8 +850,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectItemElement item = GetItemFromContent(project);
 
                 item.Update = "i1";
-            }
-           );
+            });
         }
 
         ///
@@ -908,8 +912,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectItemElement item = GetItemFromContent(project);
 
                 item.Include = "i1";
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -925,8 +928,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectItemElement item = GetItemFromContent(project);
 
                 item.Exclude = "i1";
-            }
-           );
+            });
         }
 
         /// <summary>

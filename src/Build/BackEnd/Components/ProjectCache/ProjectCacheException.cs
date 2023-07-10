@@ -1,7 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using Microsoft.Build.Framework.BuildException;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -12,7 +13,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     /// This exception is used to wrap an unhandled exception from a project cache plugin. This exception aborts the build, and it can only be
     /// thrown by the MSBuild engine.
     /// </summary>
-    public sealed class ProjectCacheException : Exception
+    public sealed class ProjectCacheException : BuildExceptionBase
     {
         private ProjectCacheException()
         {
@@ -23,8 +24,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             string message,
             Exception innerException,
             bool hasBeenLoggedByProjectCache,
-            string errorCode
-        )
+            string errorCode)
             : base(message, innerException)
         {
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(message), "Need error message.");
@@ -33,6 +33,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
             HasBeenLoggedByProjectCache = hasBeenLoggedByProjectCache;
             ErrorCode = errorCode;
         }
+
+        internal ProjectCacheException(string message, Exception inner)
+            : base(message, inner)
+        { }
 
         /// <summary>
         /// The project cache has already logged this as an error.
@@ -46,12 +50,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
         /// <value>The error code string.</value>
         public string ErrorCode { get; }
 
-        internal static void ThrowAsUnhandledException
-        (
+        internal static void ThrowAsUnhandledException(
             Exception innerException,
             string messageResourceName,
-            params string[] messageArgs
-        )
+            params string[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(messageResourceName != null, "Need error message.");
 
@@ -60,11 +62,9 @@ namespace Microsoft.Build.Experimental.ProjectCache
             throw new ProjectCacheException(message, innerException, hasBeenLoggedByProjectCache: false, errorCode);
         }
 
-        internal static void ThrowForErrorLoggedInsideTheProjectCache
-        (
+        internal static void ThrowForErrorLoggedInsideTheProjectCache(
             string messageResourceName,
-            params string[] messageArgs
-        )
+            params string[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(messageResourceName != null, "Need error message.");
 
@@ -73,11 +73,9 @@ namespace Microsoft.Build.Experimental.ProjectCache
             throw new ProjectCacheException(message: message, innerException: null, hasBeenLoggedByProjectCache: true, errorCode: errorCode);
         }
 
-        internal static void ThrowForMSBuildIssueWithTheProjectCache
-        (
+        internal static void ThrowForMSBuildIssueWithTheProjectCache(
             string messageResourceName,
-            params string[] messageArgs
-        )
+            params string[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(messageResourceName != null, "Need error message.");
 

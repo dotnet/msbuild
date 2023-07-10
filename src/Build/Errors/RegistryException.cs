@@ -1,8 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Runtime.Serialization;
+using Microsoft.Build.Framework.BuildException;
 
 #nullable disable
 
@@ -12,7 +13,7 @@ namespace Microsoft.Build.Exceptions
     /// Generic exception used to wrap exceptions thrown during Registry access.
     /// </summary>
     [Serializable]
-    internal class RegistryException : Exception
+    internal class RegistryException : BuildExceptionBase
     {
         /// <summary>
         /// Basic constructor.

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -144,6 +147,90 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 a3.Execute().ShouldBeTrue();
                 File.GetLastWriteTime(file).ShouldBeGreaterThan(writeTime.AddSeconds(1));
+            }
+            finally
+            {
+                File.Delete(file);
+            }
+        }
+
+        [Fact]
+        public void RedundantParametersAreLogged()
+        {
+            using TestEnvironment testEnv = TestEnvironment.Create(_output);
+
+            MockEngine engine = new(_output);
+
+            string file = testEnv.ExpectFile().Path;
+
+            WriteLinesToFile task = new()
+            {
+                BuildEngine = engine,
+                File = new TaskItem(file),
+                Lines = new ITaskItem[] { new TaskItem($"{nameof(RedundantParametersAreLogged)} Test") },
+                WriteOnlyWhenDifferent = true,
+                Overwrite = false,
+            };
+
+            task.Execute().ShouldBeTrue();
+            engine.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", file);
+        }
+
+        /// <summary>
+        /// Question WriteLines to return false when a write will be required.
+        /// </summary>
+        [Fact]
+        public void QuestionWriteLinesWriteOnlyWhenDifferentTest()
+        {
+            var file = FileUtilities.GetTemporaryFile();
+            try
+            {
+                // Write an initial file.
+                var a = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Lines = new ITaskItem[] { new TaskItem("File contents1") }
+                };
+
+                a.Execute().ShouldBeTrue();
+
+                // Verify contents
+                var r = new ReadLinesFromFile { File = new TaskItem(file) };
+                r.Execute().ShouldBeTrue();
+                r.Lines[0].ItemSpec.ShouldBe("File contents1");
+
+                var writeTime = DateTime.Now.AddHours(-1);
+
+                File.SetLastWriteTime(file, writeTime);
+
+                // Write the same contents to the file, timestamps should match.
+                var a2 = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Lines = new ITaskItem[] { new TaskItem("File contents1") },
+                    FailIfNotIncremental = true,
+                };
+                a2.Execute().ShouldBeTrue();
+                File.GetLastWriteTime(file).ShouldBe(writeTime, tolerance: TimeSpan.FromSeconds(1));
+
+                // Write different contents to the file, last write time should differ.
+                var a3 = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Lines = new ITaskItem[] { new TaskItem("File contents2") },
+                    FailIfNotIncremental = true,
+                };
+                a3.Execute().ShouldBeFalse();
+                File.GetLastWriteTime(file).ShouldBe(writeTime, tolerance: TimeSpan.FromSeconds(1));
             }
             finally
             {

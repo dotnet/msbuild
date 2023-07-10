@@ -1,10 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
-using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -17,12 +17,12 @@ namespace Microsoft.Build.Shared
     /// <comment>
     /// Partial class in order to reduce the amount of sharing into different assemblies
     /// </comment>
-    static internal partial class FileUtilities
+    internal static partial class FileUtilities
     {
         /// <summary>
         /// Encapsulates the definitions of the item-spec modifiers a.k.a. reserved item metadata.
         /// </summary>
-        static internal class ItemSpecModifiers
+        internal static class ItemSpecModifiers
         {
 #if DEBUG
             /// <summary>
@@ -563,11 +563,9 @@ namespace Microsoft.Build.Shared
                             if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectDirectory, StringComparison.OrdinalIgnoreCase))
                             {
                                 // ItemSpecModifiers.Directory does not contain the root directory
-                                modifiedItemSpec = Path.Combine
-                                    (
+                                modifiedItemSpec = Path.Combine(
                                         GetItemSpecModifier(currentDirectory, definingProjectEscaped, null, ItemSpecModifiers.RootDir),
-                                        GetItemSpecModifier(currentDirectory, definingProjectEscaped, null, ItemSpecModifiers.Directory)
-                                    );
+                                        GetItemSpecModifier(currentDirectory, definingProjectEscaped, null, ItemSpecModifiers.Directory));
                             }
                             else
                             {

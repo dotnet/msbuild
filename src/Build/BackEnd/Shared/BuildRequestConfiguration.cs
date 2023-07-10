@@ -1,19 +1,19 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Collections;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -108,6 +108,11 @@ namespace Microsoft.Build.BackEnd
         private List<string> _projectDefaultTargets;
 
         /// <summary>
+        /// The defined targets for the project.
+        /// </summary>
+        private HashSet<string> _projectTargets;
+
+        /// <summary>
         /// This is the lookup representing the current project items and properties 'state'.
         /// </summary>
         private Lookup _baseLookup;
@@ -138,7 +143,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The target names that were requested to execute.
         /// </summary>
-        internal IReadOnlyCollection<string> TargetNames { get; }
+        internal IReadOnlyCollection<string> RequestedTargets { get; }
 
         /// <summary>
         /// Initializes a configuration from a BuildRequestData structure.  Used by the BuildManager.
@@ -170,7 +175,7 @@ namespace Microsoft.Build.BackEnd
             _explicitToolsVersionSpecified = data.ExplicitToolsVersionSpecified;
             _toolsVersion = ResolveToolsVersion(data, defaultToolsVersion);
             _globalProperties = data.GlobalPropertiesDictionary;
-            TargetNames = new List<string>(data.TargetNames);
+            RequestedTargets = new List<string>(data.TargetNames);
 
             // The following information only exists when the request is populated with an existing project.
             if (data.ProjectInstance != null)
@@ -178,7 +183,7 @@ namespace Microsoft.Build.BackEnd
                 _project = data.ProjectInstance;
                 _projectInitialTargets = data.ProjectInstance.InitialTargets;
                 _projectDefaultTargets = data.ProjectInstance.DefaultTargets;
-
+                _projectTargets = GetProjectTargets(data.ProjectInstance.Targets);
                 if (data.PropertiesToTransfer != null)
                 {
                     _transferredProperties = new List<ProjectPropertyInstance>();
@@ -215,6 +220,7 @@ namespace Microsoft.Build.BackEnd
             _project = instance;
             _projectInitialTargets = instance.InitialTargets;
             _projectDefaultTargets = instance.DefaultTargets;
+            _projectTargets = GetProjectTargets(instance.Targets);
             IsCacheable = false;
         }
 
@@ -231,13 +237,14 @@ namespace Microsoft.Build.BackEnd
             _transferredProperties = other._transferredProperties;
             _projectDefaultTargets = other._projectDefaultTargets;
             _projectInitialTargets = other._projectInitialTargets;
+            _projectTargets = other._projectTargets;
             _projectFullPath = other._projectFullPath;
             _toolsVersion = other._toolsVersion;
             _explicitToolsVersionSpecified = other._explicitToolsVersionSpecified;
             _globalProperties = other._globalProperties;
             IsCacheable = other.IsCacheable;
             _configId = configId;
-            TargetNames = other.TargetNames;
+            RequestedTargets = other.RequestedTargets;
         }
 
         /// <summary>
@@ -404,9 +411,11 @@ namespace Microsoft.Build.BackEnd
             // Clear these out so the other accessors don't complain.  We don't want to generally enable resetting these fields.
             _projectDefaultTargets = null;
             _projectInitialTargets = null;
+            _projectTargets = null;
 
             ProjectDefaultTargets = _project.DefaultTargets;
             ProjectInitialTargets = _project.InitialTargets;
+            ProjectTargets = GetProjectTargets(_project.Targets);
 
             if (IsCached)
             {
@@ -489,8 +498,7 @@ namespace Microsoft.Build.BackEnd
         private void InitializeProject(BuildParameters buildParameters, Func<ProjectInstance> loadProjectFromFile)
         {
             if (_project == null || // building from file. Load project from file
-                _transferredProperties != null // need to overwrite particular properties, so load project from file and overwrite properties
-            )
+                _transferredProperties != null) // need to overwrite particular properties, so load project from file and overwrite properties
             {
                 Project = loadProjectFromFile.Invoke();
             }
@@ -546,6 +554,23 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrow(_projectDefaultTargets == null, "Default targets cannot be reset once they have been set.");
                 _projectDefaultTargets = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the targets defined for the project.
+        /// </summary>
+        internal HashSet<string> ProjectTargets
+        {
+            [DebuggerStepThrough]
+            get => _projectTargets;
+            [DebuggerStepThrough]
+            set
+            {
+                ErrorUtilities.VerifyThrow(
+                    _projectTargets == null,
+                    "Targets cannot be reset once set.");
+                _projectTargets = value;
             }
         }
 
@@ -880,6 +905,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _explicitToolsVersionSpecified);
             translator.Translate(ref _projectDefaultTargets);
             translator.Translate(ref _projectInitialTargets);
+            translator.Translate(ref _projectTargets);
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
         }
 
@@ -963,6 +989,13 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Gets the set of project targets for this <see cref="BuildRequestConfiguration"/>.
+        /// </summary>
+        /// <param name="projectTargets">The project targets to transform into a set.</param>
+        /// <returns>The set of project targets for this <see cref="BuildRequestConfiguration"/>.</returns>
+        private HashSet<string> GetProjectTargets(IDictionary<string, ProjectTargetInstance> projectTargets) => projectTargets.Keys.ToHashSet();
+
+        /// <summary>
         /// Determines what the real tools version is.
         /// </summary>
         private static string ResolveToolsVersion(BuildRequestData data, string defaultToolsVersion)
@@ -1004,7 +1037,7 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     // Not using sharedReadBuffer because this is not a memory stream and so the buffer won't be used anyway.
-                    return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), null);
+                    return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), InterningBinaryReader.PoolingBuffer);
                 }
             }
             catch (Exception e) when (e is DirectoryNotFoundException || e is UnauthorizedAccessException)

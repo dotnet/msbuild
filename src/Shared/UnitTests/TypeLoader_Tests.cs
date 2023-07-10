@@ -1,16 +1,16 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 
 using System;
 using System.IO;
-using Microsoft.Build.Shared;
+using System.Linq;
 using System.Reflection;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Shouldly;
-using System.Linq;
 
 #nullable disable
 
@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.True(TypeLoader.IsPartialTypeNameMatch("Csc", "Microsoft.Build.Tasks.Csc"));
         }
-        
+
 
         [Fact]
         public void LoadNonExistingAssembly()
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact (Skip = "https://github.com/dotnet/msbuild/issues/325")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/325")]
         public void LoadInsideAssemblyWhenGivenOutsideAssemblyWithSameName()
         {
             using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))

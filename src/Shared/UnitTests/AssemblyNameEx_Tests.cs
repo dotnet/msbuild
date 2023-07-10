@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class AssemblyNameEx_Tests
+    public sealed class AssemblyNameEx_Tests
     {
         /// <summary>
         /// Delegate defines a function that produces an AssemblyNameExtension from a string.
@@ -175,8 +175,7 @@ namespace Microsoft.Build.UnitTests
                             if
                                 (
                                     a1.CompareBaseNameTo(a2) == 0   // Only check version if basenames match
-                                    && a1.Version != a2.Version
-                                )
+                                    && a1.Version != a2.Version)
                             {
                                 if (a1.Version == null)
                                 {
@@ -331,8 +330,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.Throws<FileLoadException>(() =>
                 {
                     AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a", true);
-                }
-               );
+                });
             }
         }
 
@@ -350,8 +348,7 @@ namespace Microsoft.Build.UnitTests
                     AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
                     AssemblyNameExtension extension2 = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
                     extension2.PartialNameCompare(extension);
-                }
-                                                 );
+                });
             }
         }
 
@@ -706,7 +703,7 @@ namespace Microsoft.Build.UnitTests
             using (MemoryStream ms = new MemoryStream(bytes))
             {
                 BinaryFormatter formatter = new BinaryFormatter();
-                assemblyNameDeserialized = (AssemblyNameExtension) formatter.Deserialize(ms);
+                assemblyNameDeserialized = (AssemblyNameExtension)formatter.Deserialize(ms);
             }
 
             assemblyNameDeserialized.ShouldBe(assemblyNameOriginal);
@@ -761,7 +758,7 @@ namespace Microsoft.Build.UnitTests
             writeTranslator.Translate(ref assemblyNameOriginal, (ITranslator t) => new AssemblyNameExtension(t));
 
             serializationStream.Seek(0, SeekOrigin.Begin);
-            ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, null);
+            ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, InterningBinaryReader.PoolingBuffer);
 
             readTranslator.Translate(ref assemblyNameDeserialized, (ITranslator t) => new AssemblyNameExtension(t));
 
@@ -785,7 +782,7 @@ namespace Microsoft.Build.UnitTests
             writeTranslator.Translate(ref assemblyNameOriginal, (ITranslator t) => new AssemblyNameExtension(t));
 
             serializationStream.Seek(0, SeekOrigin.Begin);
-            ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, null);
+            ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, InterningBinaryReader.PoolingBuffer);
 
             readTranslator.Translate(ref assemblyNameDeserialized, (ITranslator t) => new AssemblyNameExtension(t));
 

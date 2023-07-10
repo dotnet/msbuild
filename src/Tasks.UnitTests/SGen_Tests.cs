@@ -1,13 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Shared;
 using System.IO;
 using System.Linq;
-using Xunit;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Shouldly;
+using Xunit;
 
 #nullable disable
 
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 #else
-        internal class SGenExtension : SGen
+        internal sealed class SGenExtension : SGen
         {
             internal string CommandLine()
             {
@@ -153,8 +153,7 @@ namespace Microsoft.Build.UnitTests
                 // This should result in a quoted parameter...
                 sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
                 string commandLine = sgen.CommandLine();
-            }
-           );
+            });
         }
 
         [Fact]
@@ -173,8 +172,7 @@ namespace Microsoft.Build.UnitTests
                 sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
 
                 string commandLine = sgen.CommandLine();
-            }
-           );
+            });
         }
         [Fact]
         public void TestInputPlatform()
@@ -268,12 +266,12 @@ namespace Microsoft.Build.UnitTests
             sgen.ShouldGenerateSerializer = true;
             sgen.UseProxyTypes = false;
             sgen.UseKeep = false;
-            sgen.References = new string[]{ "C:\\SomeFolder\\reference1.dll", "C:\\SomeFolder\\reference2.dll" };
+            sgen.References = new string[] { "C:\\SomeFolder\\reference1.dll", "C:\\SomeFolder\\reference2.dll" };
 
             string commandLine = sgen.CommandLine();
             string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
                                        + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /reference:\"C:\\SomeFolder\\reference1.dll,C:\\SomeFolder\\reference2.dll\"";
-            
+
             Assert.Equal(targetCommandLine, commandLine);
         }
 #endif

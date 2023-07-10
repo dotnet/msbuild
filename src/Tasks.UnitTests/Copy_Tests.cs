@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Threading;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
@@ -20,6 +19,7 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -27,19 +27,47 @@ namespace Microsoft.Build.UnitTests
 {
     public class Copy_Tests : IDisposable
     {
-        public bool UseHardLinks { get; protected set; }
-
-        public bool UseSymbolicLinks { get; protected set; }
-
-        public bool UseSingleThreadedCopy
+        /// <summary>
+        /// Gets data for testing with combinations of isUseHardLinks and isUseSymbolicLinks.
+        /// Index 0 is the value for isUseHardLinks.
+        /// Index 1 is the value for isUseSymbolicLinks.
+        /// </summary>
+        public static IEnumerable<object[]> GetHardLinksSymLinks() => new List<object[]>
         {
-            get => _parallelismThreadCount == NoParallelismThreadCount;
-            protected set => _parallelismThreadCount = value ? NoParallelismThreadCount : DefaultParallelismThreadCount;
-        }
+            new object[] { false, false },
+            new object[] { false, true },
+            new object[] { true, false },
+
+            /* Cases not covered
+            new object[] { true, true },
+            */
+        };
+
+        /// <summary>
+        /// Gets data for testing with combinations of isUseHardLinks, isUseSymbolicLinks, and isUseSingleThreadedCopy.
+        /// Index 0 is the value for isUseHardLinks.
+        /// Index 1 is the value for isUseSymbolicLinks.
+        /// Index 2 is the value for isUseSingleThreadedCopy.
+        /// </summary>
+        public static IEnumerable<object[]> GetHardLinksSymLinksSingleThreaded() => new List<object[]>
+        {
+            new object[] { false, false, false },
+            new object[] { false, false, true },
+            new object[] { false, true, false },
+            new object[] { true, false, false },
+
+            /* Cases not covered
+            new object[] { false, true, true },
+            new object[] { true, false, true },
+            new object[] { true, true, false },
+            new object[] { true, true, true },
+            */
+        };
 
         private const int NoParallelismThreadCount = 1;
         private const int DefaultParallelismThreadCount = int.MaxValue;
-        private int _parallelismThreadCount = DefaultParallelismThreadCount;
+
+        private int GetParallelismThreadCount(bool isUseSingleThreadedCopy) => isUseSingleThreadedCopy ? NoParallelismThreadCount : DefaultParallelismThreadCount;
 
         /// <summary>
         /// Temporarily save off the value of MSBUILDALWAYSOVERWRITEREADONLYFILES, so that we can run
@@ -88,8 +116,9 @@ namespace Microsoft.Build.UnitTests
         /// If OnlyCopyIfDifferent is set to "true" then we shouldn't copy over files that
         /// have the same date and time.
         /// </summary>
-        [Fact]
-        public void DontCopyOverSameFile()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinksSingleThreaded))]
+        public void DontCopyOverSameFile(bool isUseHardLinks, bool isUseSymbolicLinks, bool isUseSingleThreadedCopy)
         {
             string file = FileUtilities.GetTemporaryFile();
             try
@@ -111,11 +140,11 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
-                t.Execute(m.CopyFile, _parallelismThreadCount);
+                t.Execute(m.CopyFile, GetParallelismThreadCount(isUseSingleThreadedCopy));
 
                 // Expect for there to have been no copies.
                 Assert.Equal(0, m.copyCount);
@@ -129,13 +158,175 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Question should not copy any files.
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinksSingleThreaded))]
+        public void QuestionCopyFile(bool isUseHardLinks, bool isUseSymbolicLinks, bool isUseSingleThreadedCopy)
+        {
+            string source = FileUtilities.GetTemporaryFile();
+            string destination = FileUtilities.GetTemporaryFile(null, ".tmp", false);
+            string content = "This is a source file.";
+
+            try
+            {
+                using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
+                {
+                    sw.Write(content);
+                }
+
+                ITaskItem sourceItem = new TaskItem(source);
+                ITaskItem destinationItem = new TaskItem(destination);
+                ITaskItem[] sourceFiles = { sourceItem };
+                ITaskItem[] destinationFiles = { destinationItem };
+
+                CopyMonitor m = new CopyMonitor();
+                Copy t = new Copy
+                {
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(_testOutputHelper),
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
+                    FailIfNotIncremental = true,
+                };
+
+                Assert.False(t.Execute(m.CopyFile, GetParallelismThreadCount(isUseSingleThreadedCopy)));
+
+                // Expect for there to have been no copies.
+                Assert.Equal(0, m.copyCount);
+
+                Assert.False(FileUtilities.FileExistsNoThrow(destination));
+            }
+            finally
+            {
+                File.Delete(source);
+            }
+        }
+
+        /// <summary>
+        /// Question copy should not error if copy did no work.
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinksSingleThreaded))]
+        public void QuestionCopyFileSameContent(bool isUseHardLinks, bool isUseSymbolicLinks, bool isUseSingleThreadedCopy)
+        {
+            string source = FileUtilities.GetTemporaryFile();
+            string destination = FileUtilities.GetTemporaryFile();
+            string content = "This is a source file.";
+            DateTime testTime = DateTime.Now;
+
+            try
+            {
+                using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
+                {
+                    sw.Write(content);
+                }
+
+                using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
+                {
+                    sw.Write(content);
+                }
+
+                FileInfo sourcefi = new FileInfo(source);
+                sourcefi.LastWriteTimeUtc = testTime;
+
+                FileInfo destinationfi = new FileInfo(destination);
+                destinationfi.LastWriteTimeUtc = testTime;
+
+                ITaskItem sourceItem = new TaskItem(source);
+                ITaskItem destinationItem = new TaskItem(destination);
+                ITaskItem[] sourceFiles = { sourceItem };
+                ITaskItem[] destinationFiles = { destinationItem };
+
+                CopyMonitor m = new CopyMonitor();
+                Copy t = new Copy
+                {
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(_testOutputHelper),
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
+                    SkipUnchangedFiles = true,
+                    FailIfNotIncremental = true,
+                };
+                Assert.True(t.Execute(m.CopyFile, GetParallelismThreadCount(isUseSingleThreadedCopy)));
+
+                // Expect for there to have been no copies.
+                Assert.Equal(0, m.copyCount);
+
+                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
+            }
+            finally
+            {
+                File.Delete(source);
+                File.Delete(destination);
+            }
+        }
+
+        /// <summary>
+        /// Question copy should error if a copy will occur.
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinksSingleThreaded))]
+        public void QuestionCopyFileNotSameContent(bool isUseHardLinks, bool isUseSymbolicLinks, bool isUseSingleThreadedCopy)
+        {
+            string source = FileUtilities.GetTemporaryFile();
+            string destination = FileUtilities.GetTemporaryFile();
+            try
+            {
+                using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
+                {
+                    sw.Write("This is a source file.");
+                }
+
+                using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
+                {
+                    sw.Write("This is a destination file.");
+                }
+
+                ITaskItem sourceItem = new TaskItem(source);
+                ITaskItem destinationItem = new TaskItem(destination);
+                ITaskItem[] sourceFiles = { sourceItem };
+                ITaskItem[] destinationFiles = { destinationItem };
+
+                CopyMonitor m = new CopyMonitor();
+                Copy t = new Copy
+                {
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = new MockEngine(_testOutputHelper),
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
+                    SkipUnchangedFiles = true,
+                    FailIfNotIncremental = true,
+                };
+
+                Assert.False(t.Execute(m.CopyFile, GetParallelismThreadCount(isUseSingleThreadedCopy)));
+
+                // Expect for there to have been no copies.
+                Assert.Equal(0, m.copyCount);
+
+                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
+            }
+            finally
+            {
+                File.Delete(source);
+                File.Delete(destination);
+            }
+        }
+
+        /// <summary>
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
+        [Theory]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void DoNotNormallyCopyOverReadOnlyFile()
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoNotNormallyCopyOverReadOnlyFile(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string source = FileUtilities.GetTemporaryFile();
             string destination = FileUtilities.GetTemporaryFile();
@@ -166,8 +357,8 @@ namespace Microsoft.Build.UnitTests
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
                     // OverwriteReadOnlyFiles defaults to false
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 // Should fail: target is readonly
@@ -194,11 +385,11 @@ namespace Microsoft.Build.UnitTests
         /// If MSBUILDALWAYSOVERWRITEREADONLYFILES is set, then overwrite read-only even when
         /// OverwriteReadOnlyFiles is false
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
+        [Theory]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void CopyOverReadOnlyFileEnvironmentOverride()
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void CopyOverReadOnlyFileEnvironmentOverride(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string source = FileUtilities.GetTemporaryFile();
             string destination = FileUtilities.GetTemporaryFile();
@@ -233,8 +424,8 @@ namespace Microsoft.Build.UnitTests
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
                     OverwriteReadOnlyFiles = false,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 // Should not fail although target is readonly
@@ -260,11 +451,11 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// If MSBUILDALWAYSRETRY is set, keep retrying the copy.
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
+        [Theory]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void AlwaysRetryCopyEnvironmentOverride()
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void AlwaysRetryCopyEnvironmentOverride(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string source = FileUtilities.GetTemporaryFile();
             string destination = FileUtilities.GetTemporaryFile();
@@ -301,8 +492,8 @@ namespace Microsoft.Build.UnitTests
                     SkipUnchangedFiles = true,
                     OverwriteReadOnlyFiles = false,
                     Retries = 5,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 // The file is read-only, so the retries will all fail.
@@ -332,11 +523,11 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
+        [Theory]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void CopyOverReadOnlyFileParameterIsSet()
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void CopyOverReadOnlyFileParameterIsSet(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string source = FileUtilities.GetTemporaryFile();
             string destination = FileUtilities.GetTemporaryFile();
@@ -367,8 +558,8 @@ namespace Microsoft.Build.UnitTests
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
                     OverwriteReadOnlyFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 // Should not fail although target is readonly
@@ -392,8 +583,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
-        [Fact]
-        public void CopyOverReadOnlyFileParameterIsSetWithDestinationFolder()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void CopyOverReadOnlyFileParameterIsSetWithDestinationFolder(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string source1 = FileUtilities.GetTemporaryFile();
             string source2 = FileUtilities.GetTemporaryFile();
@@ -438,8 +630,8 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destinationFolder),
                     OverwriteReadOnlyFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 // Should not fail although one target is readonly
@@ -476,8 +668,9 @@ namespace Microsoft.Build.UnitTests
          * If OnlyCopyIfDifferent is set to "true" then we should still copy over files that
          * have different dates or sizes.
          */
-        [Fact]
-        public void DoCopyOverDifferentFile()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoCopyOverDifferentFile(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
             string destinationFile = FileUtilities.GetTemporaryFile();
@@ -503,15 +696,17 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 t.Execute();
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destinationFile)) // HIGHCHAR: Test reads ASCII (not ANSI).
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
                 Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination file to contain the contents of source file."
 
@@ -531,9 +726,13 @@ namespace Microsoft.Build.UnitTests
          * If SkipUnchangedFiles is set to "true" then we should never copy over files that have same dates and sizes.
          */
         [Theory(Skip = "https://github.com/dotnet/msbuild/issues/4126")]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void DoCopyOverCopiedFile(bool skipUnchangedFiles)
+        [InlineData(false, false, false)]
+        [InlineData(false, false, true)]
+        [InlineData(false, true, false)]
+        [InlineData(true, false, false)]
+        [InlineData(true, false, true)]
+        [InlineData(true, true, false)]
+        public void DoCopyOverCopiedFile(bool skipUnchangedFiles, bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             using (var env = TestEnvironment.Create())
             {
@@ -553,8 +752,8 @@ namespace Microsoft.Build.UnitTests
                         SourceFiles = new[] { new TaskItem(sourceFile) },
                         DestinationFiles = new[] { new TaskItem(destinationFile) },
                         SkipUnchangedFiles = skipUnchangedFiles,
-                        UseHardlinksIfPossible = UseHardLinks,
-                        UseSymboliclinksIfPossible = UseSymbolicLinks,
+                        UseHardlinksIfPossible = isUseHardLinks,
+                        UseSymboliclinksIfPossible = isUseSymbolicLinks,
                     };
 
                     var success = t.Execute();
@@ -564,10 +763,10 @@ namespace Microsoft.Build.UnitTests
                                         i == 1 &&
                                         // SkipUnchanged check will always fail for symbolic links,
                                         // because we compare attributes of real file with attributes of symbolic link.
-                                        !UseSymbolicLinks &&
+                                        !isUseSymbolicLinks &&
                                         // On Windows and MacOS File.Copy already preserves LastWriteTime, but on Linux extra step is needed.
                                         // TODO - this need to be fixed on Linux
-                                        (!NativeMethodsShared.IsLinux || UseHardLinks);
+                                        (!NativeMethodsShared.IsLinux || isUseHardLinks);
 
                     if (shouldNotCopy)
                     {
@@ -576,8 +775,7 @@ namespace Microsoft.Build.UnitTests
                             sourceFile,
                             destinationFile,
                             "SkipUnchangedFiles",
-                            "true"
-                            );
+                            "true");
                     }
                     else
                     {
@@ -586,8 +784,7 @@ namespace Microsoft.Build.UnitTests
                             sourceFile,
                             destinationFile,
                             "SkipUnchangedFiles",
-                            "true"
-                            );
+                            "true");
                     }
 
                     // "Expected the destination file to contain the contents of source file."
@@ -603,8 +800,9 @@ namespace Microsoft.Build.UnitTests
          * If OnlyCopyIfDifferent is set to "true" then we should still copy over files that
          * don't exist.
          */
-        [Fact]
-        public void DoCopyOverNonExistentFile()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoCopyOverNonExistentFile(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
             string destinationFile = FileUtilities.GetTemporaryFile();
@@ -633,8 +831,8 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 t.Execute();
@@ -652,16 +850,10 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we do not retry when the source file has a misplaced colon
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
-        public void DoNotRetryCopyNotSupportedException()
+        [WindowsFullFrameworkOnlyTheory(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. Colon is special only on Windows.")]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoNotRetryCopyNotSupportedException(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                // Colon is special only on Windows
-                return;
-            }
-
             string sourceFile = FileUtilities.GetTemporaryFile();
             string destinationFile = "foobar:";
 
@@ -678,8 +870,8 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 bool result = t.Execute();
@@ -698,8 +890,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we do not retry when the source file does not exist
         /// </summary>
-        [Fact]
-        public void DoNotRetryCopyNonExistentSourceFile()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoNotRetryCopyNonExistentSourceFile(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string sourceFile = "Nannanacat";
             string destinationFile = FileUtilities.GetTemporaryFile();
@@ -724,8 +917,8 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 bool result = t.Execute();
@@ -744,8 +937,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we do not retry when the source file is a folder
         /// </summary>
-        [Fact]
-        public void DoNotRetryCopyWhenSourceIsFolder()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoNotRetryCopyWhenSourceIsFolder(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string sourceFile = Path.GetTempPath();
             string destinationFile = FileUtilities.GetTemporaryFile();
@@ -770,8 +964,8 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 bool result = t.Execute();
@@ -790,11 +984,11 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Most important case is when destination is locked
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
+        [Theory]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void DoRetryWhenDestinationLocked()
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoRetryWhenDestinationLocked(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string destinationFile = Path.GetTempFileName();
             string sourceFile = Path.GetTempFileName();
@@ -812,8 +1006,8 @@ namespace Microsoft.Build.UnitTests
                         BuildEngine = engine,
                         SourceFiles = sourceFiles,
                         DestinationFiles = new ITaskItem[] { new TaskItem(destinationFile) },
-                        UseHardlinksIfPossible = UseHardLinks,
-                        UseSymboliclinksIfPossible = UseSymbolicLinks,
+                        UseHardlinksIfPossible = isUseHardLinks,
+                        UseSymboliclinksIfPossible = isUseSymbolicLinks,
                     };
 
                     bool result = t.Execute();
@@ -842,8 +1036,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When destination is inaccessible due to ACL, do NOT retry
         /// </summary>
-        [Fact]
-        public void DoNotRetryWhenDestinationLockedDueToAcl()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoNotRetryWhenDestinationLockedDueToAcl(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "DoNotRetryWhenDestinationLockedDueToAcl");
             string destinationFile = Path.Combine(tempDirectory, "DestinationFile.txt");
@@ -882,8 +1077,8 @@ namespace Microsoft.Build.UnitTests
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(sourceFile) },
                     DestinationFiles = new ITaskItem[] { new TaskItem(destinationFile) },
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 bool result = t.Execute();
@@ -914,8 +1109,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we do not retry when the destination file is a folder
         /// </summary>
-        [Fact]
-        public void DoNotRetryCopyWhenDestinationFolderIsFile()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoNotRetryCopyWhenDestinationFolderIsFile(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string destinationFile = FileUtilities.GetTemporaryFile();
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -937,8 +1133,8 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destinationFile),
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 bool result = t.Execute();
@@ -959,8 +1155,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we do not retry when the destination file is a folder
         /// </summary>
-        [Fact]
-        public void DoNotRetryCopyWhenDestinationFileIsFolder()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoNotRetryCopyWhenDestinationFileIsFolder(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string destinationFile = Path.GetTempPath();
             string sourceFile = FileUtilities.GetTemporaryFile();
@@ -968,7 +1165,9 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))   // HIGHCHAR: Test writes in UTF8 without preamble.
+                {
                     sw.Write("This is a destination temp file.");
+                }
 
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = { new TaskItem(destinationFile) };
@@ -981,8 +1180,8 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 bool result = t.Execute();
@@ -998,30 +1197,13 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class CopyMonitor
-        {
-            internal int copyCount;
-
-            /*
-            * Method:   CopyFile
-            *
-            * Don't really copy the file, just count how many times this was called.
-            */
-            internal bool? CopyFile(FileState source, FileState destination)
-            {
-                Interlocked.Increment(ref copyCount);
-                return true;
-            }
-        }
-
         /// <summary>
         /// CopiedFiles should only include files that were successfully copied
         /// (or skipped), not files for which there was an error.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "Under Unix all filenames are valid and this test is not useful"
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
-        public void OutputsOnlyIncludeSuccessfulCopies()
+        [WindowsFullFrameworkOnlyTheory(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. Under Unix all filenames are valid and this test is not useful.")]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void OutputsOnlyIncludeSuccessfulCopies(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string temp = Path.GetTempPath();
             string inFile1 = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A392");
@@ -1050,8 +1232,8 @@ namespace Microsoft.Build.UnitTests
                 {
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = engine,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 ITaskItem i1 = new TaskItem(inFile1);
@@ -1107,8 +1289,9 @@ namespace Microsoft.Build.UnitTests
         /// Copying a file on top of itself should be a success (no-op) whether
         /// or not skipUnchangedFiles is true or false.
         /// </summary>
-        [Fact]
-        public void CopyFileOnItself()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void CopyFileOnItself(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string temp = Path.GetTempPath();
             string file = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A395");
@@ -1134,8 +1317,8 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = new ITaskItem[] { new TaskItem(file) },
                     DestinationFiles = new ITaskItem[] { new TaskItem(file) },
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 bool success = t.Execute();
@@ -1153,8 +1336,8 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = new ITaskItem[] { new TaskItem(file) },
                     DestinationFiles = new ITaskItem[] { new TaskItem(file) },
                     SkipUnchangedFiles = false,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 success = t.Execute();
@@ -1176,9 +1359,9 @@ namespace Microsoft.Build.UnitTests
         /// Copying a file on top of itself should be a success (no-op) whether
         /// or not skipUnchangedFiles is true or false. Variation with different casing/relativeness.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // "File names under Unix are case-sensitive and this test is not useful"
-        public void CopyFileOnItself2()
+        [WindowsOnlyTheory(additionalMessage: "File names under Unix are case-sensitive and this test is not useful.")]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void CopyFileOnItself2(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string currdir = Directory.GetCurrentDirectory();
             string filename = "2A333ED756AF4dc392E728D0F864A396";
@@ -1205,8 +1388,8 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = new ITaskItem[] { new TaskItem(file) },
                     DestinationFiles = new ITaskItem[] { new TaskItem(filename.ToLowerInvariant()) },
                     SkipUnchangedFiles = false,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 bool success = t.Execute();
@@ -1227,11 +1410,11 @@ namespace Microsoft.Build.UnitTests
         /// Copying a file on top of itself should be a success (no-op) whether
         /// or not skipUnchangedFiles is true or false. Variation with a second copy failure.
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
+        [Theory]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void CopyFileOnItselfAndFailACopy()
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void CopyFileOnItselfAndFailACopy(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string temp = Path.GetTempPath();
             string file = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A395");
@@ -1259,8 +1442,8 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = new ITaskItem[] { new TaskItem(file), new TaskItem(invalidFile) },
                     DestinationFiles = new ITaskItem[] { new TaskItem(file), new TaskItem(dest2) },
                     SkipUnchangedFiles = false,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 bool success = t.Execute();
@@ -1293,8 +1476,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact]
-        public void CopyToDestinationFolder()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void CopyToDestinationFolder(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
             string temp = Path.GetTempPath();
@@ -1319,8 +1503,8 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destFolder),
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 bool success = t.Execute();
@@ -1330,9 +1514,11 @@ namespace Microsoft.Build.UnitTests
 
                 string destinationFileContents;
                 using (StreamReader sr = FileUtilities.OpenRead(destFile))
+                {
                     destinationFileContents = sr.ReadToEnd();
+                }
 
-                if (!UseHardLinks)
+                if (!isUseHardLinks)
                 {
                     MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
                     me.AssertLogDoesntContainMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
@@ -1361,8 +1547,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact]
-        public void CopyDoubleEscapableFileToDestinationFolder()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void CopyDoubleEscapableFileToDestinationFolder(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string sourceFileEscaped = Path.GetTempPath() + "a%253A_" + Guid.NewGuid().ToString("N") + ".txt";
             string sourceFile = EscapingUtilities.UnescapeAll(sourceFileEscaped);
@@ -1388,8 +1575,8 @@ namespace Microsoft.Build.UnitTests
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destFolder),
                     SkipUnchangedFiles = true,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 bool success = t.Execute();
@@ -1422,8 +1609,9 @@ namespace Microsoft.Build.UnitTests
         /// Copying duplicates should only perform the actual copy once for each unique source/destination pair
         /// but should still produce outputs for all specified source/destination pairs.
         /// </summary>
-        [Fact]
-        public void CopyWithDuplicatesUsingFolder()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinksSingleThreaded))]
+        public void CopyWithDuplicatesUsingFolder(bool isUseHardLinks, bool isUseSymbolicLinks, bool isUseSingleThreadedCopy)
         {
             string tempPath = Path.GetTempPath();
 
@@ -1451,8 +1639,8 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = sourceFiles,
                 DestinationFolder = new TaskItem(Path.Combine(tempPath, "foo")),
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = isUseHardLinks,
+                UseSymboliclinksIfPossible = isUseSymbolicLinks,
             };
 
             bool success = t.Execute(delegate (FileState source, FileState dest)
@@ -1462,7 +1650,7 @@ namespace Microsoft.Build.UnitTests
                     filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
                 }
                 return true;
-            }, _parallelismThreadCount);
+            }, GetParallelismThreadCount(isUseSingleThreadedCopy));
 
             Assert.True(success);
             Assert.Equal(2, filesActuallyCopied.Count);
@@ -1478,8 +1666,9 @@ namespace Microsoft.Build.UnitTests
         /// Copying duplicates should only perform the actual copy once for each unique source/destination pair
         /// but should still produce outputs for all specified source/destination pairs.
         /// </summary>
-        [Fact]
-        public void CopyWithDuplicatesUsingFiles()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinksSingleThreaded))]
+        public void CopyWithDuplicatesUsingFiles(bool isUseHardLinks, bool isUseSymbolicLinks, bool isUseSingleThreadedCopy)
         {
             string tempPath = Path.GetTempPath();
 
@@ -1517,8 +1706,8 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = sourceFiles,
                 DestinationFiles = destFiles,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = isUseHardLinks,
+                UseSymboliclinksIfPossible = isUseSymbolicLinks,
             };
 
             bool success = t.Execute(delegate (FileState source, FileState dest)
@@ -1528,7 +1717,7 @@ namespace Microsoft.Build.UnitTests
                     filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
                 }
                 return true;
-            }, _parallelismThreadCount);
+            }, GetParallelismThreadCount(isUseSingleThreadedCopy));
 
             Assert.True(success);
             Assert.Equal(4, filesActuallyCopied.Count);
@@ -1554,8 +1743,9 @@ namespace Microsoft.Build.UnitTests
         /// DestinationFiles should only include files that were successfully copied
         /// (or skipped), not files for which there was an error.
         /// </summary>
-        [Fact]
-        public void DestinationFilesLengthNotEqualSourceFilesLength()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DestinationFilesLengthNotEqualSourceFilesLength(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string temp = Path.GetTempPath();
             string inFile1 = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
@@ -1585,8 +1775,8 @@ namespace Microsoft.Build.UnitTests
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(inFile1), new TaskItem(inFile2) },
                     DestinationFiles = new ITaskItem[] { new TaskItem(outFile1) },
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 bool success = t.Execute();
@@ -1610,9 +1800,9 @@ namespace Microsoft.Build.UnitTests
         /// If the destination path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
-        public void Regress451057_ExitGracefullyIfPathNameIsTooLong()
+        [WindowsFullFrameworkOnlyTheory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void Regress451057_ExitGracefullyIfPathNameIsTooLong(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             string sourceFile = FileUtilities.GetTemporaryFile();
             const string destinationFile = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -1633,8 +1823,8 @@ namespace Microsoft.Build.UnitTests
                     BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
                     DestinationFiles = destinationFiles,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
                 bool result = t.Execute();
@@ -1654,9 +1844,9 @@ namespace Microsoft.Build.UnitTests
         /// If the source path is too long, the task should not bubble up
         /// the System.IO.PathTooLongException
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
-        public void Regress451057_ExitGracefullyIfPathNameIsTooLong2()
+        [WindowsFullFrameworkOnlyTheory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void Regress451057_ExitGracefullyIfPathNameIsTooLong2(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             const string sourceFile = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
             string destinationFile = FileUtilities.GetTemporaryFile();
@@ -1671,8 +1861,8 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = sourceFiles,
                 DestinationFiles = destinationFiles,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = isUseHardLinks,
+                UseSymboliclinksIfPossible = isUseSymbolicLinks,
             };
 
             bool result = t.Execute();
@@ -1687,8 +1877,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// If the SourceFiles parameter is given invalid path characters, make sure the task exits gracefully.
         /// </summary>
-        [Fact]
-        public void ExitGracefullyOnInvalidPathCharacters()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void ExitGracefullyOnInvalidPathCharacters(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             var t = new Copy
             {
@@ -1696,8 +1887,8 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = new ITaskItem[] { new TaskItem("foo | bar") },
                 DestinationFolder = new TaskItem("dest"),
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = isUseHardLinks,
+                UseSymboliclinksIfPossible = isUseSymbolicLinks,
             };
 
             bool result = t.Execute();
@@ -1721,8 +1912,6 @@ namespace Microsoft.Build.UnitTests
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
                 Retries = -1,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
             };
 
             bool result = t.Execute();
@@ -1745,8 +1934,6 @@ namespace Microsoft.Build.UnitTests
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
                 Retries = 1,
                 RetryDelayMilliseconds = -1,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
             };
 
             bool result = t.Execute();
@@ -1759,8 +1946,9 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that we do not log the retrying warning if we didn't request
         /// retries.
         /// </summary>
-        [Fact]
-        public void FailureWithNoRetries()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinksSingleThreaded))]
+        public void FailureWithNoRetries(bool isUseHardLinks, bool isUseSymbolicLinks, bool isUseSingleThreadedCopy)
         {
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
@@ -1770,12 +1958,12 @@ namespace Microsoft.Build.UnitTests
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
                 Retries = 0,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = isUseHardLinks,
+                UseSymboliclinksIfPossible = isUseSymbolicLinks,
             };
 
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
+            bool result = t.Execute(copyFunctor.Copy, GetParallelismThreadCount(isUseSingleThreadedCopy));
 
             Assert.False(result);
             engine.AssertLogDoesntContain("MSB3026");
@@ -1825,8 +2013,9 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that we get the one retry we ask for after the first attempt fails,
         /// and we get appropriate messages.
         /// </summary>
-        [Fact]
-        public void SuccessAfterOneRetry()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinksSingleThreaded))]
+        public void SuccessAfterOneRetry(bool isUseHardLinks, bool isUseSymbolicLinks, bool isUseSingleThreadedCopy)
         {
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
@@ -1836,12 +2025,12 @@ namespace Microsoft.Build.UnitTests
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
                 Retries = 1,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = isUseHardLinks,
+                UseSymboliclinksIfPossible = isUseSymbolicLinks,
             };
 
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
+            bool result = t.Execute(copyFunctor.Copy, GetParallelismThreadCount(isUseSingleThreadedCopy));
 
             Assert.True(result);
             engine.AssertLogContains("MSB3026");
@@ -1851,8 +2040,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that after a successful retry we continue to the next file
         /// </summary>
-        [Fact]
-        public void SuccessAfterOneRetryContinueToNextFile()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinksSingleThreaded))]
+        public void SuccessAfterOneRetryContinueToNextFile(bool isUseHardLinks, bool isUseSymbolicLinks, bool isUseSingleThreadedCopy)
         {
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
@@ -1862,12 +2052,12 @@ namespace Microsoft.Build.UnitTests
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source"), new TaskItem("c:\\source2") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination"), new TaskItem("c:\\destination2") },
                 Retries = 1,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = isUseHardLinks,
+                UseSymboliclinksIfPossible = isUseSymbolicLinks,
             };
 
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
+            bool result = t.Execute(copyFunctor.Copy, GetParallelismThreadCount(isUseSingleThreadedCopy));
 
             Assert.True(result);
             engine.AssertLogContains("MSB3026");
@@ -1882,8 +2072,9 @@ namespace Microsoft.Build.UnitTests
         /// The copy delegate can return false, or throw on failure.
         /// This test tests returning false.
         /// </summary>
-        [Fact]
-        public void TooFewRetriesReturnsFalse()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinksSingleThreaded))]
+        public void TooFewRetriesReturnsFalse(bool isUseHardLinks, bool isUseSymbolicLinks, bool isUseSingleThreadedCopy)
         {
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
@@ -1893,12 +2084,12 @@ namespace Microsoft.Build.UnitTests
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
                 Retries = 2,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = isUseHardLinks,
+                UseSymboliclinksIfPossible = isUseSymbolicLinks,
             };
 
             var copyFunctor = new CopyFunctor(4, false /* do not throw */);
-            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
+            bool result = t.Execute(copyFunctor.Copy, GetParallelismThreadCount(isUseSingleThreadedCopy));
 
             Assert.False(result);
             engine.AssertLogContains("MSB3026");
@@ -1910,8 +2101,9 @@ namespace Microsoft.Build.UnitTests
         /// The copy delegate can return false, or throw on failure.
         /// This test tests the throw case.
         /// </summary>
-        [Fact]
-        public void TooFewRetriesThrows()
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinksSingleThreaded))]
+        public void TooFewRetriesThrows(bool isUseHardLinks, bool isUseSymbolicLinks, bool isUseSingleThreadedCopy)
         {
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
@@ -1921,20 +2113,22 @@ namespace Microsoft.Build.UnitTests
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
                 Retries = 1,
-                UseHardlinksIfPossible = UseHardLinks,
-                UseSymboliclinksIfPossible = UseSymbolicLinks,
+                UseHardlinksIfPossible = isUseHardLinks,
+                UseSymboliclinksIfPossible = isUseSymbolicLinks,
             };
 
             var copyFunctor = new CopyFunctor(3, true /* throw */);
-            bool result = t.Execute(copyFunctor.Copy, _parallelismThreadCount);
+            bool result = t.Execute(copyFunctor.Copy, GetParallelismThreadCount(isUseSingleThreadedCopy));
 
             Assert.False(result);
             engine.AssertLogContains("MSB3026");
             engine.AssertLogContains("MSB3027");
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
-        internal virtual void ErrorIfLinkFailedCheck()
+        [WindowsOnlyTheory]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        public void ErrorIfLinkFailedCheck(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
             using (var env = TestEnvironment.Create())
             {
@@ -1947,8 +2141,8 @@ namespace Microsoft.Build.UnitTests
                 Copy t = new Copy
                 {
                     RetryDelayMilliseconds = 1,
-                    UseHardlinksIfPossible = UseHardLinks,
-                    UseSymboliclinksIfPossible = UseSymbolicLinks,
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
                     ErrorIfLinkFails = true,
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(source) },
@@ -1958,165 +2152,6 @@ namespace Microsoft.Build.UnitTests
                 t.Execute().ShouldBeFalse();
                 engine.AssertLogContains("MSB3893");
             }
-        }
-
-        /// <summary>
-        /// Helper functor for retry tests.
-        /// Simulates the File.Copy method without touching the disk.
-        /// First copy fails as requested, subsequent copies succeed.
-        /// </summary>
-        private class CopyFunctor
-        {
-            /// <summary>
-            /// Protects the counts and lists below.
-            /// </summary>
-            private readonly object _lockObj = new object();
-
-            /// <summary>
-            /// On what attempt count should we stop failing?
-            /// </summary>
-            private readonly int _countOfSuccess;
-
-            /// <summary>
-            /// Should we throw when we fail, instead of just returning false?
-            /// </summary>
-            private readonly bool _throwOnFailure;
-
-            /// <summary>
-            /// How many tries have we done so far
-            /// </summary>
-            private int _tries;
-
-            /// <summary>
-            /// Which files we actually copied
-            /// </summary>
-            internal List<FileState> FilesCopiedSuccessfully { get; } = new List<FileState>();
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            internal CopyFunctor(int countOfSuccess, bool throwOnFailure)
-            {
-                _countOfSuccess = countOfSuccess;
-                _throwOnFailure = throwOnFailure;
-            }
-
-            /// <summary>
-            /// Pretend to be File.Copy.
-            /// </summary>
-            internal bool? Copy(FileState source, FileState destination)
-            {
-                lock (_lockObj)
-                {
-                    _tries++;
-
-                    // 2nd and subsequent copies always succeed
-                    if (FilesCopiedSuccessfully.Count > 0 || _countOfSuccess == _tries)
-                    {
-                        Console.WriteLine("Copied {0} to {1} OK", source, destination);
-                        FilesCopiedSuccessfully.Add(source);
-                        return true;
-                    }
-                }
-
-                if (_throwOnFailure)
-                {
-                    throw new IOException("oops");
-                }
-
-                return null;
-            }
-        }
-    }
-
-    public class CopySingleThreaded_Tests : Copy_Tests
-    {
-        public CopySingleThreaded_Tests(ITestOutputHelper testOutputHelper)
-            : base(testOutputHelper)
-        {
-            UseSingleThreadedCopy = true;
-        }
-    }
-
-    public class CopyNotHardLink_Tests : Copy_Tests
-    {
-        public CopyNotHardLink_Tests(ITestOutputHelper testOutputHelper)
-            : base(testOutputHelper)
-        {
-            UseHardLinks = false;
-        }
-    }
-
-    public class CopyHardAndSymbolicLink_Tests
-    {
-        [Fact]
-        public void CopyWithHardAndSymbolicLinks()
-        {
-            string sourceFile = FileUtilities.GetTemporaryFile();
-            string temp = Path.GetTempPath();
-            string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
-            string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
-
-            try
-            {
-                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
-
-                MockEngine me = new MockEngine(true);
-                Copy t = new Copy
-                {
-                    RetryDelayMilliseconds = 1, // speed up tests!
-                    UseHardlinksIfPossible = true,
-                    UseSymboliclinksIfPossible = true,
-                    BuildEngine = me,
-                    SourceFiles = sourceFiles,
-                    DestinationFolder = new TaskItem(destFolder),
-                    SkipUnchangedFiles = true
-                };
-
-                bool success = t.Execute();
-
-                Assert.False(success);
-
-                MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
-                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.ExactlyOneTypeOfLink", "UseHardlinksIfPossible", "UseSymboliclinksIfPossible");
-            }
-            finally
-            {
-                Helpers.DeleteFiles(sourceFile, destFile);
-            }
-        }
-
-        /// <summary>
-        /// Verifies that we error when ErrorIfLinkFailed is true when UseHardlinksIfPossible
-        /// and UseSymboliclinksIfPossible are false.
-        /// </summary>
-        [Fact]
-        public void InvalidErrorIfLinkFailed()
-        {
-            var engine = new MockEngine(true);
-            var t = new Copy
-            {
-                BuildEngine = engine,
-                SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
-                DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
-                UseHardlinksIfPossible = false,
-                UseSymboliclinksIfPossible = false,
-                ErrorIfLinkFails = true,
-            };
-
-            bool result = t.Execute();
-
-            Assert.False(result);
-            engine.AssertLogContains("MSB3892");
-        }
-    }
-
-    public class CopyHardLink_Tests : Copy_Tests
-    {
-        public CopyHardLink_Tests(ITestOutputHelper testOutputHelper)
-            : base(testOutputHelper)
-        {
-            UseHardLinks = true;
         }
 
         /// <summary>
@@ -2184,8 +2219,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // SMB share paths only work on Windows
+        [WindowsOnlyFact(additionalMessage: "SMB share paths only work on Windows.")]
         public void CopyToDestinationFolderWithHardLinkFallbackNetwork()
         {
             // Workaround: For some reason when this test runs with all other tests we are getting
@@ -2290,8 +2324,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // Only Windows has a (small) link limit, and this tests for an HRESULT
+        [WindowsOnlyFact(additionalMessage: "Only Windows has a (small) link limit, and this tests for an HRESULT.")]
         public void CopyToDestinationFolderWithHardLinkFallbackTooManyLinks()
         {
             // Workaround: For some reason when this test runs with all other tests we are getting
@@ -2312,15 +2345,6 @@ namespace Microsoft.Build.UnitTests
 
                 Directory.CreateDirectory(destFolder);
 
-                // Exhaust the number (1024) of directory entries that can be created for a file
-                // This is 1 + (1 x hard links)
-                // We need to test the fallback code path when we're out of directory entries for a file..
-                for (int n = 0; n < 1025 /* make sure */; n++)
-                {
-                    string destLink = Path.Combine(destFolder, Path.GetFileNameWithoutExtension(sourceFile) + "." + n);
-                    string linkError = String.Empty;
-                    Tasks.NativeMethods.MakeHardLink(destLink, sourceFile, ref linkError);
-                }
 
                 ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
 
@@ -2334,6 +2358,16 @@ namespace Microsoft.Build.UnitTests
                     DestinationFolder = new TaskItem(destFolder),
                     SkipUnchangedFiles = true
                 };
+
+                // Exhaust the number (1024) of directory entries that can be created for a file
+                // This is 1 + (1 x hard links)
+                // We need to test the fallback code path when we're out of directory entries for a file..
+                for (int n = 0; n < 1025 /* make sure */; n++)
+                {
+                    string destLink = Path.Combine(destFolder, Path.GetFileNameWithoutExtension(sourceFile) + "." + n);
+                    string linkError = String.Empty;
+                    Tasks.NativeMethods.MakeHardLink(destLink, sourceFile, ref linkError, t.Log);
+                }
 
                 bool success = t.Execute();
 
@@ -2376,105 +2410,291 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        internal override void ErrorIfLinkFailedCheck()
-        {
-            base.ErrorIfLinkFailedCheck();
-        }
-    }
-
-    public class CopySymbolicLink_Tests : Copy_Tests
-    {
-        public CopySymbolicLink_Tests(ITestOutputHelper testOutputHelper)
-            : base(testOutputHelper)
-        {
-            UseSymbolicLinks = true;
-        }
-
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [Fact]
+        [RequiresSymbolicLinksFact]
         public void CopyToDestinationFolderWithSymbolicLinkCheck()
         {
-            var isPrivileged = true;
-
-            if (NativeMethodsShared.IsWindows)
+            string sourceFile = FileUtilities.GetTemporaryFile();
+            string temp = Path.GetTempPath();
+            string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
+            string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
+            try
             {
-                if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null)))
+                File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
+
+                // Don't create the dest folder, let task do that
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+
+                var me = new MockEngine(true);
+                var t = new Copy
                 {
-                    isPrivileged = false;
-                    Assert.True(true, "It seems that you don't have the permission to create symbolic links. Try to run this test again with higher privileges");
-                }
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = me,
+                    SourceFiles = sourceFiles,
+                    DestinationFolder = new TaskItem(destFolder),
+                    SkipUnchangedFiles = true,
+                    UseSymboliclinksIfPossible = true
+                };
+
+                bool success = t.Execute();
+
+                Assert.True(success); // "success"
+                Assert.True(File.Exists(destFile)); // "destination exists"
+                Assert.True((File.GetAttributes(destFile) & FileAttributes.ReparsePoint) != 0, "File was copied but is not a symlink");
+
+                MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
+
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
+
+                string destinationFileContents = File.ReadAllText(destFile);
+                Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination symbolic linked file to contain the contents of source file."
+
+                Assert.Single(t.DestinationFiles);
+                Assert.Single(t.CopiedFiles);
+                Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
+                Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
+
+                // Now we will write new content to the source file
+                // we'll then check that the destination file automatically
+                // has the same content (i.e. it's been hard linked)
+
+                File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
+
+                // Read the destination file (it should have the same modified content as the source)
+                destinationFileContents = File.ReadAllText(destFile);
+                Assert.Equal("This is another source temp file.", destinationFileContents); // "Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
+
+                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
             }
-
-            if (isPrivileged)
+            finally
             {
-                string sourceFile = FileUtilities.GetTemporaryFile();
-                string temp = Path.GetTempPath();
-                string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
-                string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
-                try
-                {
-                    File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
-
-                    // Don't create the dest folder, let task do that
-
-                    ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
-
-                    var me = new MockEngine(true);
-                    var t = new Copy
-                    {
-                        RetryDelayMilliseconds = 1,  // speed up tests!
-                        BuildEngine = me,
-                        SourceFiles = sourceFiles,
-                        DestinationFolder = new TaskItem(destFolder),
-                        SkipUnchangedFiles = true,
-                        UseSymboliclinksIfPossible = true
-                    };
-
-                    bool success = t.Execute();
-
-                    Assert.True(success); // "success"
-                    Assert.True(File.Exists(destFile)); // "destination exists"
-
-                    MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
-
-                    me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
-
-                    string destinationFileContents = File.ReadAllText(destFile);
-                    Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination symbolic linked file to contain the contents of source file."
-
-                    Assert.Single(t.DestinationFiles);
-                    Assert.Single(t.CopiedFiles);
-                    Assert.Equal(destFile, t.DestinationFiles[0].ItemSpec);
-                    Assert.Equal(destFile, t.CopiedFiles[0].ItemSpec);
-
-                    // Now we will write new content to the source file
-                    // we'll then check that the destination file automatically
-                    // has the same content (i.e. it's been hard linked)
-
-                    File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
-
-                    // Read the destination file (it should have the same modified content as the source)
-                    destinationFileContents = File.ReadAllText(destFile);
-                    Assert.Equal("This is another source temp file.", destinationFileContents); // "Expected the destination hard linked file to contain the contents of source file. Even after modification of the source"
-
-                    ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3891"); // Didn't do retries
-                }
-                finally
-                {
-                    File.Delete(sourceFile);
-                    File.Delete(destFile);
-                    FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
-                }
+                File.Delete(sourceFile);
+                File.Delete(destFile);
+                FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
             }
         }
 
+        /// <summary>
+        /// Verify build successful when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true
+        /// </summary>
         [Fact]
-        internal override void ErrorIfLinkFailedCheck()
+        public void CopyWithHardAndSymbolicLinks()
         {
-            base.ErrorIfLinkFailedCheck();
+            string sourceFile = FileUtilities.GetTemporaryFile();
+            string temp = Path.GetTempPath();
+            string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
+            string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
+
+            try
+            {
+                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+
+                MockEngine me = new MockEngine(true);
+                Copy t = new Copy
+                {
+                    RetryDelayMilliseconds = 1, // speed up tests!
+                    UseHardlinksIfPossible = true,
+                    UseSymboliclinksIfPossible = true,
+                    BuildEngine = me,
+                    SourceFiles = sourceFiles,
+                    DestinationFolder = new TaskItem(destFolder),
+                    SkipUnchangedFiles = true
+                };
+
+                bool success = t.Execute();
+
+                Assert.True(success);
+                MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.HardLinkComment", sourceFile, destFile);
+            }
+            finally
+            {
+                Helpers.DeleteFiles(sourceFile, destFile);
+            }
+        }
+
+        /// <summary>
+        /// Verifies that we error when ErrorIfLinkFailed is true when UseHardlinksIfPossible
+        /// and UseSymboliclinksIfPossible are false.
+        /// </summary>
+        [Fact]
+        public void InvalidErrorIfLinkFailed()
+        {
+            var engine = new MockEngine(true);
+            var t = new Copy
+            {
+                BuildEngine = engine,
+                SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
+                DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
+                UseHardlinksIfPossible = false,
+                UseSymboliclinksIfPossible = false,
+                ErrorIfLinkFails = true,
+            };
+
+            bool result = t.Execute();
+
+            Assert.False(result);
+            engine.AssertLogContains("MSB3892");
+        }
+
+        /// <summary>
+        /// An existing link source should not be modified.
+        /// </summary>
+        /// <remarks>
+        /// Related to issue [#8273](https://github.com/dotnet/msbuild/issues/8273)
+        /// </remarks>
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoNotCorruptSourceOfLink(bool useHardLink, bool useSymbolicLink)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile sourceFile1 = env.CreateFile("source1.tmp", "This is the first source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
+            TransientTestFile sourceFile2 = env.CreateFile("source2.tmp", "This is the second source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
+            TransientTestFolder destFolder = env.CreateFolder(createFolder: false);
+            string destFile = Path.Combine(destFolder.Path, "The Destination");
+
+            // Don't create the dest folder, let task do that
+            ITaskItem[] sourceFiles = { new TaskItem(sourceFile1.Path) };
+            ITaskItem[] destinationFiles = { new TaskItem(destFile) };
+
+            var me = new MockEngine(true);
+            var t = new Copy
+            {
+                RetryDelayMilliseconds = 1, // speed up tests!
+                BuildEngine = me,
+                SourceFiles = sourceFiles,
+                DestinationFiles = destinationFiles,
+                SkipUnchangedFiles = true,
+                UseHardlinksIfPossible = useHardLink,
+                UseSymboliclinksIfPossible = useSymbolicLink,
+            };
+
+            t.Execute().ShouldBeTrue();
+            File.Exists(destFile).ShouldBeTrue();
+            File.ReadAllText(destFile).ShouldBe("This is the first source temp file.");
+
+            sourceFiles = new TaskItem[] { new TaskItem(sourceFile2.Path) };
+
+            t = new Copy
+            {
+                RetryDelayMilliseconds = 1, // speed up tests!
+                BuildEngine = me,
+                SourceFiles = sourceFiles,
+                DestinationFiles = destinationFiles,
+                SkipUnchangedFiles = true,
+                UseHardlinksIfPossible = false,
+                UseSymboliclinksIfPossible = false,
+            };
+
+            t.Execute().ShouldBeTrue();
+            File.Exists(destFile).ShouldBeTrue();
+            File.ReadAllText(destFile).ShouldBe("This is the second source temp file.");
+
+            // Read the source file (it should not have been overwritten)
+            File.ReadAllText(sourceFile1.Path).ShouldBe("This is the first source temp file.");
+            ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
+
+            destinationFiles = new TaskItem[] { new TaskItem(
+                Path.Combine(Path.GetDirectoryName(sourceFile2.Path), ".", Path.GetFileName(sourceFile2.Path))) // sourceFile2.Path with a "." inserted before the file name
+            };
+
+            t = new Copy
+            {
+                RetryDelayMilliseconds = 1, // speed up tests!
+                BuildEngine = me,
+                SourceFiles = sourceFiles,
+                DestinationFiles = destinationFiles,
+                SkipUnchangedFiles = true,
+            };
+
+            t.Execute().ShouldBeTrue();
+            File.Exists(sourceFile2.Path).ShouldBeTrue();
+        }
+
+        internal sealed class CopyMonitor
+        {
+            internal int copyCount;
+
+            /*
+            * Method:   CopyFile
+            *
+            * Don't really copy the file, just count how many times this was called.
+            */
+            internal bool? CopyFile(FileState source, FileState destination)
+            {
+                Interlocked.Increment(ref copyCount);
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Helper functor for retry tests.
+        /// Simulates the File.Copy method without touching the disk.
+        /// First copy fails as requested, subsequent copies succeed.
+        /// </summary>
+        private sealed class CopyFunctor
+        {
+            /// <summary>
+            /// Protects the counts and lists below.
+            /// </summary>
+            private readonly object _lockObj = new object();
+
+            /// <summary>
+            /// On what attempt count should we stop failing?
+            /// </summary>
+            private readonly int _countOfSuccess;
+
+            /// <summary>
+            /// Should we throw when we fail, instead of just returning false?
+            /// </summary>
+            private readonly bool _throwOnFailure;
+
+            /// <summary>
+            /// How many tries have we done so far
+            /// </summary>
+            private int _tries;
+
+            /// <summary>
+            /// Which files we actually copied
+            /// </summary>
+            internal List<FileState> FilesCopiedSuccessfully { get; } = new List<FileState>();
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            internal CopyFunctor(int countOfSuccess, bool throwOnFailure)
+            {
+                _countOfSuccess = countOfSuccess;
+                _throwOnFailure = throwOnFailure;
+            }
+
+            /// <summary>
+            /// Pretend to be File.Copy.
+            /// </summary>
+            internal bool? Copy(FileState source, FileState destination)
+            {
+                lock (_lockObj)
+                {
+                    _tries++;
+
+                    // 2nd and subsequent copies always succeed
+                    if (FilesCopiedSuccessfully.Count > 0 || _countOfSuccess == _tries)
+                    {
+                        Console.WriteLine("Copied {0} to {1} OK", source, destination);
+                        FilesCopiedSuccessfully.Add(source);
+                        return true;
+                    }
+                }
+
+                if (_throwOnFailure)
+                {
+                    throw new IOException("oops");
+                }
+
+                return null;
+            }
         }
     }
 }

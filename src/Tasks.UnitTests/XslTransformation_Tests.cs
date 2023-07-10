@@ -1,18 +1,18 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.IO;
 using System.Text.RegularExpressions;
-using System.Xml.Xsl;
 using System.Xml;
+using System.Xml.Xsl;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests
     /// 20. XslDocument that throws runtime exception.
     /// 21. Passing a dll that has two types to XsltCompiledDll parameter without specifying a type.
     /// </summary>
-    sealed public class XslTransformation_Tests
+    public sealed class XslTransformation_Tests
     {
         /// <summary>
         /// The "surround" regex.
@@ -68,12 +68,10 @@ namespace Microsoft.Build.UnitTests
         private readonly string _xslDocument = "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:msxsl=\"urn:schemas-microsoft-com:xslt\" exclude-result-prefixes=\"msxsl\"><xsl:output method=\"xml\" indent=\"yes\"/><xsl:template match=\"@* | node()\"><surround><xsl:copy><xsl:apply-templates select=\"@* | node()\"/></xsl:copy></surround></xsl:template></xsl:stylesheet>";
 
 
-#if FEATURE_COMPILED_XSL
         /// <summary>
         /// The contents of another xsl document for tests
         /// </summary>
         private readonly string _xslDocument2 = "<?xml version = \"1.0\" ?><xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"><xsl:template match = \"myInclude\"><xsl:apply-templates select = \"document(@path)\"/></xsl:template><xsl:template match = \"@*|node()\"><xsl:copy><xsl:apply-templates select = \"@*|node()\"/></xsl:copy></xsl:template></xsl:stylesheet>";
-#endif
         /// <summary>
         /// The contents of xslparameters for tests.
         /// </summary>
@@ -629,8 +627,7 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 CleanUp(dir);
-            }
-           );
+            });
         }
         /// <summary>
         /// Missing XmlFile file.
@@ -872,7 +869,7 @@ namespace Microsoft.Build.UnitTests
             // load transformed xsl and assert it is well formatted
             {
                 XslTransformation t = new XslTransformation();
-                
+
                 t.BuildEngine = engine;
                 t.XslInputPath = xslPath;
                 t.XmlInputPaths = xmlPaths;
@@ -1041,7 +1038,6 @@ namespace Microsoft.Build.UnitTests
             CleanUp(dir);
         }
 
-#if FEATURE_COMPILED_XSL
         /// <summary>
         /// Validate that the XslTransformation task allows use of the document function
         /// </summary>
@@ -1095,7 +1091,6 @@ namespace Microsoft.Build.UnitTests
 
             CleanUp(dir);
         }
-#endif
 
         /// <summary>
         /// Prepares the test environment, creates necessary files.

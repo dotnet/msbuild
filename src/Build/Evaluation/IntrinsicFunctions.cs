@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -163,6 +163,21 @@ namespace Microsoft.Build.Evaluation
         internal static int BitwiseNot(int first)
         {
             return ~first;
+        }
+
+        internal static int LeftShift(int operand, int count)
+        {
+            return operand << count;
+        }
+
+        internal static int RightShift(int operand, int count)
+        {
+            return operand >> count;
+        }
+
+        internal static int RightShiftUnsigned(int operand, int count)
+        {
+            return operand >>> count;
         }
 
         /// <summary>
@@ -549,6 +564,11 @@ namespace Microsoft.Build.Evaluation
             return NuGetFramework.Value.GetTargetPlatformVersion(tfm, versionPartCount);
         }
 
+        internal static string FilterTargetFrameworks(string incoming, string filter)
+        {
+            return NuGetFramework.Value.FilterTargetFrameworks(incoming, filter);
+        }
+
         internal static bool AreFeaturesEnabled(Version wave)
         {
             return ChangeWaves.AreFeaturesEnabled(wave);
@@ -594,7 +614,7 @@ namespace Microsoft.Build.Evaluation
             return BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
         }
 
-#region Debug only intrinsics
+        #region Debug only intrinsics
 
         /// <summary>
         /// returns if the string contains escaped wildcards
@@ -604,7 +624,7 @@ namespace Microsoft.Build.Evaluation
             return new List<string> { "A", "B", "C", "D" };
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Following function will parse a keyName and returns the basekey for it.

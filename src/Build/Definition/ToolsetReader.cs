@@ -1,22 +1,22 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ErrorUtils = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
-using System.Runtime.CompilerServices;
 
 #nullable disable
 
@@ -99,8 +99,7 @@ namespace Microsoft.Build.Evaluation
         /// Gathers toolset data from the registry and configuration file, if any.
         /// NOTE:  this method is internal for unit testing purposes only.
         /// </summary>
-        internal static string ReadAllToolsets
-            (
+        internal static string ReadAllToolsets(
             Dictionary<string, Toolset> toolsets,
 #if FEATURE_WIN32_REGISTRY
             ToolsetRegistryReader registryReader,
@@ -108,8 +107,7 @@ namespace Microsoft.Build.Evaluation
             ToolsetConfigurationReader configurationReader,
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
             PropertyDictionary<ProjectPropertyInstance> globalProperties,
-            ToolsetDefinitionLocations locations
-            )
+            ToolsetDefinitionLocations locations)
         {
             var initialProperties =
                 new PropertyDictionary<ProjectPropertyInstance>(environmentProperties);
@@ -356,15 +354,13 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <remarks>Internal for unit testing only</remarks>
         /// <returns>the default tools version if available, or null otherwise</returns>
-        internal string ReadToolsets
-            (
+        internal string ReadToolsets(
             Dictionary<string, Toolset> toolsets,
             PropertyDictionary<ProjectPropertyInstance> globalProperties,
             PropertyDictionary<ProjectPropertyInstance> initialProperties,
             bool accumulateProperties,
             out string msBuildOverrideTasksPath,
-            out string defaultOverrideToolsVersion
-            )
+            out string defaultOverrideToolsVersion)
         {
             ErrorUtils.VerifyThrowArgumentNull(toolsets, "Toolsets");
 
@@ -416,13 +412,11 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Reads all the toolsets and populates the given ToolsetCollection with them
         /// </summary>
-        private void ReadEachToolset
-            (
+        private void ReadEachToolset(
             Dictionary<string, Toolset> toolsets,
             PropertyDictionary<ProjectPropertyInstance> globalProperties,
             PropertyDictionary<ProjectPropertyInstance> initialProperties,
-            bool accumulateProperties
-            )
+            bool accumulateProperties)
         {
             foreach (ToolsetPropertyDefinition toolsVersion in ToolsVersions)
             {
@@ -482,13 +476,11 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Reads the settings for a specified tools version
         /// </summary>
-        private Toolset ReadToolset
-            (
+        private Toolset ReadToolset(
             ToolsetPropertyDefinition toolsVersion,
             PropertyDictionary<ProjectPropertyInstance> globalProperties,
             PropertyDictionary<ProjectPropertyInstance> initialProperties,
-            bool accumulateProperties
-            )
+            bool accumulateProperties)
         {
             // Initial properties is the set of properties we're going to use to expand property expressions like $(foo)
             // in the values we read out of the registry or config file. We'll add to it as we pick up properties (including binpath)
@@ -673,12 +665,10 @@ namespace Microsoft.Build.Evaluation
 
                 if (accumulateProperties)
                 {
-                    SetProperty
-                    (
+                    SetProperty(
                         new ToolsetPropertyDefinition(ReservedPropertyNames.toolsPath, toolsPath, property.Source),
                         initialProperties,
-                        globalProperties
-                    );
+                        globalProperties);
                 }
             }
             else if (String.Equals(property.Name, ReservedPropertyNames.binPath, StringComparison.OrdinalIgnoreCase))
@@ -688,12 +678,10 @@ namespace Microsoft.Build.Evaluation
 
                 if (accumulateProperties)
                 {
-                    SetProperty
-                    (
+                    SetProperty(
                         new ToolsetPropertyDefinition(ReservedPropertyNames.binPath, binPath, property.Source),
                         initialProperties,
-                        globalProperties
-                    );
+                        globalProperties);
                 }
             }
             else if (ReservedPropertyNames.IsReservedProperty(property.Name))
@@ -829,7 +817,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Returns the corresponding property name - eg. "$(MSBuildExtensionsPath32)"
         /// </summary>
-        public string MSBuildPropertyName => String.Format($"$({StringRepresentation})");
+        public readonly string MSBuildPropertyName => String.Format($"$({StringRepresentation})");
 
         /// <summary>
         /// Tries to find a reference to MSBuildExtensionsPath* property in the given string
@@ -853,5 +841,5 @@ namespace Microsoft.Build.Evaluation
 
             return MSBuildExtensionsPathReferenceKind.None;
         }
-     }
+    }
 }

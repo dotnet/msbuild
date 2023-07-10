@@ -13,6 +13,9 @@ See the [MSBuild Command-Line Reference](https://learn.microsoft.com/visualstudi
    * Passes parameters to the file logger. If you want to attach multiple file loggers, you do so by specifying additional parameters in the switches /flp1, /flp2, /flp3, and so on.
 
 # Environment Variables
+
+ * `MSBuildDebugEngine=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
+  * Set this to cause any MSBuild invocation launched within this environment to emit binary logs and additional debugging information to `<DIRECTORY>`. Useful when debugging build or evaluation issues when you can't directly influence the MSBuild invocation, such as in Visual Studio.
  * `MSBUILDTARGETOUTPUTLOGGING=1`
    * Set this to enable [printing all target outputs to the log](https://learn.microsoft.com/archive/blogs/msbuild/displaying-target-output-items-using-the-console-logger).
  * `MSBUILDLOGTASKINPUTS=1`
@@ -33,7 +36,7 @@ See the [MSBuild Command-Line Reference](https://learn.microsoft.com/visualstudi
    * Launch debugger on build start.
    * Setting the value of 2 allows for manually attaching a debugger to a process ID.
  * `MSBUILDDEBUGSCHEDULER=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
-   * Dumps scheduler state at specified directory
+   * Dumps scheduler state at specified directory (`MSBUILDDEBUGSCHEDULER` is implied by `MSBuildDebugEngine`).
 
 # TreatAsLocalProperty
 If MSBuild.exe is passed properties on the command line, such as `/p:Platform=AnyCPU` then this value overrides whatever assignments you have to that property inside property groups. For instance, `<Platform>x86</Platform>` will be ignored. To make sure your local assignment to properties overrides whatever they pass on the command line, add the following at the top of your MSBuild project file:

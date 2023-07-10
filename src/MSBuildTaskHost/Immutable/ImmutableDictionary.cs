@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.Linq;
@@ -8,15 +8,15 @@ using System.Linq;
 
 namespace System.Collections.Immutable
 {
-    static class ImmutableExtensions
+    internal static class ImmutableExtensions
     {
-        public static ImmutableDictionary<K,V> ToImmutableDictionary<K,V>(this IDictionary<K,V> dictionary)
+        public static ImmutableDictionary<K, V> ToImmutableDictionary<K, V>(this IDictionary<K, V> dictionary)
         {
             return new ImmutableDictionary<K, V>(dictionary);
         }
     }
 
-    static class ImmutableDictionary
+    internal static class ImmutableDictionary
     {
         internal static ImmutableDictionary<K, V> Create<K, V>(IEqualityComparer<K> comparer)
         {
@@ -29,7 +29,7 @@ namespace System.Collections.Immutable
     /// </summary>
     /// <typeparam name="K"></typeparam>
     /// <typeparam name="V"></typeparam>
-    sealed class ImmutableDictionary<K, V> : IDictionary<K, V>, IDictionary
+    internal sealed class ImmutableDictionary<K, V> : IDictionary<K, V>, IDictionary
     {
         /// <summary>
         /// The underlying dictionary.

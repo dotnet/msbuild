@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Xml;
@@ -496,7 +500,7 @@ namespace Microsoft.Build.BuildEngine
         /// This constructor creates a new virtual (non-persisted) item based
         /// on a ITaskItem object that was emitted by a task.
         /// </summary>
-        public BuildItem(string itemName, ITaskItem taskItem) 
+        public BuildItem(string itemName, ITaskItem taskItem)
         {
             ErrorUtilities.VerifyThrowArgumentNull(taskItem, nameof(taskItem));
 
@@ -519,7 +523,7 @@ namespace Microsoft.Build.BuildEngine
             rawSourceTable.Keys.CopyTo(keys, 0);
             foreach (string singleMetadataName in keys)
             {
-                string singleMetadataValue = (string) rawSourceTable[singleMetadataName];
+                string singleMetadataValue = (string)rawSourceTable[singleMetadataName];
                 rawSourceTable[singleMetadataName] = EscapingUtilities.Escape(singleMetadataValue);
             }
 
@@ -727,7 +731,7 @@ namespace Microsoft.Build.BuildEngine
                 return GetCustomMetadataCount();
             }
         }
-        
+
         /// <summary>
         /// Read-only accessor for accessing the XML attribute for "Include".  Callers should
         /// never try and modify this.  Go through this.Include to change the include spec.
@@ -829,7 +833,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get { return EscapingUtilities.UnescapeAll(FinalItemSpecEscaped); }
         }
-        
+
         /// <summary>
         /// Read-only accessor for the piece of the item's Include that resulted in
         /// this item, with properties expanded.
@@ -851,7 +855,7 @@ namespace Microsoft.Build.BuildEngine
 
             set
             {
-                ErrorUtilities.VerifyThrow( ((value == null) && (this.parentPersistedItemGroup != null)) || ((value != null) && (this.parentPersistedItemGroup == null)),
+                ErrorUtilities.VerifyThrow(((value == null) && (this.parentPersistedItemGroup != null)) || ((value != null) && (this.parentPersistedItemGroup == null)),
                     "Either new parent cannot be assigned because we already have a parent, or old parent cannot be removed because none exists.");
 
                 this.parentPersistedItemGroup = value;
@@ -875,7 +879,7 @@ namespace Microsoft.Build.BuildEngine
 
             set
             {
-                ErrorUtilities.VerifyThrow( ((value == null) && (this.parentPersistedItem != null)) || ((value != null) && (this.parentPersistedItem == null)),
+                ErrorUtilities.VerifyThrow(((value == null) && (this.parentPersistedItem != null)) || ((value != null) && (this.parentPersistedItem == null)),
                     "Either new parent cannot be assigned because we already have a parent, or old parent cannot be removed because none exists.");
 
                 this.parentPersistedItem = value;
@@ -894,7 +898,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 if (this.childItems == null)
                 {
-                    this.childItems = new BuildItemGroup ();
+                    this.childItems = new BuildItemGroup();
                 }
 
                 return this.childItems;
@@ -943,7 +947,7 @@ namespace Microsoft.Build.BuildEngine
         /// 1) this method should return a clone of the metadata
         /// 2) writing to this dictionary should not be reflected in the underlying item.
         /// </remarks>
-        internal IDictionary CloneCustomMetadata() 
+        internal IDictionary CloneCustomMetadata()
         {
             IDictionary result = (IDictionary)this.evaluatedCustomMetadata.Clone();
             return MergeDefaultMetadata(result);
@@ -1061,11 +1065,11 @@ namespace Microsoft.Build.BuildEngine
         /// Evaluates the item and returns a virtual group containing any resulting items.
         /// This allows an item to be evaluated without it belonging to an item group.
         /// </summary>
-        internal BuildItemGroup Evaluate(Expander expander, 
-                                        string baseDirectory, 
+        internal BuildItemGroup Evaluate(Expander expander,
+                                        string baseDirectory,
                                         bool expandMetadata,
                                         ParserOptions parserOptions,
-                                        EngineLoggingServices loggingServices, 
+                                        EngineLoggingServices loggingServices,
                                         BuildEventContext buildEventContext)
         {
             BuildItemGroup result = new BuildItemGroup();
@@ -1255,14 +1259,14 @@ namespace Microsoft.Build.BuildEngine
             {
                 ErrorUtilities.VerifyThrow(this.unevaluatedCustomMetadata != null, "Item not initialized properly.  unevaluatedCustomMetadata is null.");
 
-                metadataValue = (string) this.unevaluatedCustomMetadata[metadataName];
+                metadataValue = (string)this.unevaluatedCustomMetadata[metadataName];
             }
 
             // If we don't have an explicit value for this metadata then try to find a default value
             if (metadataValue == null)
             {
                 metadataValue = GetDefaultMetadataValue(metadataName);
-            } 
+            }
 
             return metadataValue ?? String.Empty;
         }
@@ -1305,14 +1309,14 @@ namespace Microsoft.Build.BuildEngine
             {
                 ErrorUtilities.VerifyThrow(this.evaluatedCustomMetadata != null, "Item not initialized properly.  evaluatedCustomMetadata is null.");
 
-                metadataValue = (string) this.evaluatedCustomMetadata[metadataName];
+                metadataValue = (string)this.evaluatedCustomMetadata[metadataName];
             }
 
             // If we don't have an explicit value for this metadata then try to find a default value
             if (metadataValue == null)
             {
                 metadataValue = GetDefaultMetadataValue(metadataName);
-            }              
+            }
 
             return metadataValue ?? String.Empty;
         }
@@ -1564,7 +1568,7 @@ namespace Microsoft.Build.BuildEngine
                 evaluatedCustomMetadataBackup = null;
             }
         }
-        
+
         /// <summary>
         /// Sets an arbitrary metadata on the item element. These are metadata that the project author has placed on the item
         /// element that have no meaning to MSBuild. They are just arbitrary metadata that travel around with the BuildItem.
@@ -1645,7 +1649,7 @@ namespace Microsoft.Build.BuildEngine
         /// <exception cref="InvalidOperationException">Thrown when the item-spec is not a path.</exception>
         private string GetItemSpecModifier(string modifier)
         {
-            string modifiedItemSpec = 
+            string modifiedItemSpec =
                 FileUtilities.GetItemSpecModifier(Project.PerThreadProjectDirectory, FinalItemSpecEscaped, modifier, ref itemSpecModifiers);
 
             if (modifiedItemSpec.Length == 0)
@@ -1901,7 +1905,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal void UpdateBackingXml(BuildItemGroupChildXml backingXml)
         {
-            xml =  backingXml;
+            xml = backingXml;
             this.name = xml.Name;
         }
 
@@ -1928,15 +1932,15 @@ namespace Microsoft.Build.BuildEngine
                 definitionLibraryToClone = null;
             }
 
-           BuildItem virtualClone = 
-               new BuildItem
-               (
-                   null /* this is a virtual item with no backing XML */,
-                   name, Include,
-                   false, /* PERF NOTE: don't waste time creating a new custom metadata
+            BuildItem virtualClone =
+                new BuildItem
+                (
+                    null /* this is a virtual item with no backing XML */,
+                    name, Include,
+                    false, /* PERF NOTE: don't waste time creating a new custom metadata
                            * cache, because we're going to clone the current item's cache */
-                   definitionLibraryToClone
-               );
+                    definitionLibraryToClone
+                );
 
             virtualClone.SetEvaluatedItemSpecEscaped(evaluatedItemSpecEscaped);
             virtualClone.SetFinalItemSpecEscaped(FinalItemSpecEscaped);
@@ -1947,7 +1951,7 @@ namespace Microsoft.Build.BuildEngine
             virtualClone.recursivePortionOfFinalItemSpecDirectory = recursivePortionOfFinalItemSpecDirectory;
 
             ErrorUtilities.VerifyThrow(unevaluatedCustomMetadata != null && evaluatedCustomMetadata != null, "Item is not initialized properly.");
-             
+
             if (removeReferences)
             {
                 // The ItemDefinition is going to be cleared to remove a link between a project instance and the Item when it is in the cache of targetOutputs.
@@ -1961,8 +1965,8 @@ namespace Microsoft.Build.BuildEngine
                 // Cloning is cheap for CopyOnWriteHashtable so just always do it.
                 virtualClone.unevaluatedCustomMetadata = (CopyOnWriteHashtable)this.unevaluatedCustomMetadata.Clone();
                 virtualClone.evaluatedCustomMetadata = (CopyOnWriteHashtable)this.evaluatedCustomMetadata.Clone();
-           }
-   
+            }
+
             return virtualClone;
         }
 

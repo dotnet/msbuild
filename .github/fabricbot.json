@@ -444,6 +444,128 @@
           }
         ]
       }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "isAction",
+                  "parameters": {
+                    "action": "opened"
+                  }
+                },
+                {
+                  "name": "isAction",
+                  "parameters": {
+                    "action": "reopened"
+                  }
+                },
+                {
+                  "name": "labelAdded",
+                  "parameters": {
+                    "label": "Servicing-consider"
+                  }
+                }
+              ]
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "prTargetsBranch",
+                  "parameters": {
+                    "branchName": "vs17.0"
+                  }
+                },
+                {
+                  "name": "prTargetsBranch",
+                  "parameters": {
+                    "branchName": "vs17.2"
+                  }
+                },
+                {
+                  "name": "prTargetsBranch",
+                  "parameters": {
+                    "branchName": "vs17.4"
+                  }
+                },
+                {
+                  "name": "prTargetsBranch",
+                  "parameters": {
+                    "branchName": "vs17.5"
+                  }
+                },
+                {
+                  "name": "prTargetsBranch",
+                  "parameters": {
+                    "branchName": "vs17.6"
+                  }
+                },
+                {
+                  "name": "prTargetsBranch",
+                  "parameters": {
+                    "branchName": "vs17.7"
+                  }
+                },
+                {
+                  "name": "prTargetsBranch",
+                  "parameters": {
+                    "branchName": "vs17.8"
+                  }
+                },
+                {
+                  "name": "prTargetsBranch",
+                  "parameters": {
+                    "branchName": "vs17.9"
+                  }
+                },
+                {
+                  "name": "prTargetsBranch",
+                  "parameters": {
+                    "branchName": "vs17.10"
+                  }
+                },
+                {
+                  "name": "prTargetsBranch",
+                  "parameters": {
+                    "branchName": "vs16.11"
+                  }
+                },
+                {
+                  "name": "prTargetsBranch",
+                  "parameters": {
+                    "branchName": "vs15.9"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "Comment on vs* branches",
+        "actions": [
+          {
+            "name": "addReply",
+            "parameters": {
+              "comment": "Hello! I noticed that you're targeting one of our servicing branches. Please consider updating the version."
+            }
+          }
+        ]
+      }
     }
   ],
   "userGroups": []

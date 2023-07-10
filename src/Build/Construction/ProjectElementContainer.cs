@@ -1,14 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml;
-using System.Diagnostics;
+using Microsoft.Build.Internal;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
 
 #nullable disable
 
@@ -72,10 +72,8 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return new Collections.ReadOnlyCollection<ProjectElement>
-                    (
-                        new ProjectElementSiblingEnumerable(FirstChild)
-                    );
+                return new Collections.ReadOnlyCollection<ProjectElement>(
+                        new ProjectElementSiblingEnumerable(FirstChild));
             }
         }
 
@@ -87,10 +85,8 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return new Collections.ReadOnlyCollection<ProjectElement>
-                    (
-                        new ProjectElementSiblingEnumerable(LastChild, false /* reverse */)
-                    );
+                return new Collections.ReadOnlyCollection<ProjectElement>(
+                        new ProjectElementSiblingEnumerable(LastChild, false /* reverse */));
             }
         }
 
@@ -746,7 +742,7 @@ namespace Microsoft.Build.Construction
             /// <summary>
             /// Get enumerator
             /// </summary>
-            public IEnumerator<ProjectElement> GetEnumerator()
+            public readonly IEnumerator<ProjectElement> GetEnumerator()
             {
                 return _enumerator;
             }
@@ -812,7 +808,7 @@ namespace Microsoft.Build.Construction
                 /// <summary>
                 /// Dispose. Do nothing.
                 /// </summary>
-                public void Dispose()
+                public readonly void Dispose()
                 {
                 }
 

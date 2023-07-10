@@ -1,13 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Construction;
 using System.IO;
 using System.Xml;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.BuildException;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -16,12 +17,17 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// Exception indicating that we tried to build a type of project MSBuild did not recognize.
     /// </summary>
-    internal sealed class UnbuildableProjectTypeException : Exception
+    internal sealed class UnbuildableProjectTypeException : BuildExceptionBase
     {
         internal UnbuildableProjectTypeException(string file)
             : base(file)
         {
         }
+
+        // Do not remove - used by BuildExceptionSerializationHelper
+        internal UnbuildableProjectTypeException(string message, Exception inner)
+            : base(message, inner)
+        { }
     }
 
     /// <summary>
@@ -128,15 +134,13 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void VerifyThrowProjectAttributeEitherMissingOrNotEmpty(XmlElementWithLocation xmlElement, XmlAttributeWithLocation attribute, string attributeName)
         {
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-            (
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 attribute == null || attribute.Value.Length > 0,
                 attribute?.Location,
                 "InvalidAttributeValue",
                 String.Empty,
                 attributeName,
-                xmlElement.Name
-            );
+                xmlElement.Name);
         }
 
         /// <summary>

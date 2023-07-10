@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -36,7 +36,7 @@ namespace Microsoft.Build.Unittest
             };
         }
 
-        internal class ConfigurableMockSdkResolver : SdkResolver
+        internal sealed class ConfigurableMockSdkResolver : SdkResolver
         {
             private readonly Dictionary<string, SdkResult> _resultMap;
             private readonly Func<SdkReference, SdkResolverContext, SdkResultFactory, Framework.SdkResult> _resolveFunc;
@@ -128,7 +128,7 @@ namespace Microsoft.Build.Unittest
             }
         }
 
-        internal class FileBasedMockSdkResolver : SdkResolver
+        internal sealed class FileBasedMockSdkResolver : SdkResolver
         {
             private readonly Dictionary<string, string> _mapping;
 
@@ -175,7 +175,7 @@ namespace Microsoft.Build.Unittest
 
             internal static void AssertTargetResultsEqual(TargetResult a, TargetResult b)
             {
-                TranslationHelpers.CompareExceptions(a.Exception, b.Exception).ShouldBeTrue();
+                TranslationHelpers.CompareExceptions(a.Exception, b.Exception, out string diffReason).ShouldBeTrue(diffReason);
                 TranslationHelpers.CompareCollections(a.Items, b.Items, TaskItemComparer.Instance).ShouldBeTrue();
 
                 a.ResultCode.ShouldBe(b.ResultCode);

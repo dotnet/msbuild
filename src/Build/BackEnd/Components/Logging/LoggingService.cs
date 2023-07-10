@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -8,6 +8,8 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
@@ -244,15 +246,15 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Event set when message is consumed from queue.
         /// </summary>
-        private ManualResetEventSlim _dequeueEvent;
+        private AutoResetEvent _dequeueEvent;
         /// <summary>
         /// Event set when queue become empty.
         /// </summary>
-        private ManualResetEventSlim _emptyQueueEvent;
+        private ManualResetEvent _emptyQueueEvent;
         /// <summary>
         /// Even set when message is added into queue.
         /// </summary>
-        private ManualResetEventSlim _enqueueEvent;
+        private AutoResetEvent _enqueueEvent;
 
         /// <summary>
         /// CTS for stopping logging event processing.
@@ -932,14 +934,12 @@ namespace Microsoft.Build.BackEnd.Logging
                     Assembly engineAssembly = typeof(LoggingService).GetTypeInfo().Assembly;
                     string loggerClassName = "Microsoft.Build.BackEnd.Logging.CentralForwardingLogger";
                     string loggerAssemblyName = engineAssembly.GetName().FullName;
-                    LoggerDescription centralForwardingLoggerDescription = new LoggerDescription
-                                                                                     (
+                    LoggerDescription centralForwardingLoggerDescription = new LoggerDescription(
                                                                                       loggerClassName,
                                                                                       loggerAssemblyName,
                                                                                       null /*Not needed as we are loading from current assembly*/,
                                                                                       string.Empty /*No parameters needed as we are forwarding all events*/,
-                                                                                      LoggerVerbosity.Diagnostic /*Not used, but the spirit of the logger is to forward everything so this is the most appropriate verbosity */
-                                                                                     );
+                                                                                      LoggerVerbosity.Diagnostic); /*Not used, but the spirit of the logger is to forward everything so this is the most appropriate verbosity */
 
                     // Registering a distributed logger will initialize the logger, and create and initialize the forwarding logger.
                     // In addition it will register the logging description so that it can be instantiated on a node.
@@ -1151,8 +1151,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     (warningEvent != null)
                     || (errorEvent != null)
                     || (buildEvent is CustomBuildEventArgs)
-                    || (buildEvent is CriticalBuildMessageEventArgs)
-                   )
+                    || (buildEvent is CriticalBuildMessageEventArgs))
                 {
                     ProcessLoggingEvent(buildEvent);
                 }
@@ -1184,8 +1183,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 while (_eventQueue.Count >= _queueCapacity)
                 {
                     // Block and wait for dequeue event.
-                    _dequeueEvent.Wait();
-                    _dequeueEvent.Reset();
+                    _dequeueEvent.WaitOne();
                 }
 
                 _eventQueue.Enqueue(buildEvent);
@@ -1210,12 +1208,12 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             while (_eventQueue?.IsEmpty == false)
             {
-                _emptyQueueEvent?.Wait();
+                _emptyQueueEvent?.WaitOne();
             }
             // To avoid race condition when last message has been removed from queue but
             //   not yet fully processed (handled by loggers), we need to make sure _emptyQueueEvent
             //   is set as it is guaranteed to be in set state no sooner than after event has been processed.
-            _emptyQueueEvent?.Wait();
+            _emptyQueueEvent?.WaitOne();
         }
 
         /// <summary>
@@ -1264,9 +1262,9 @@ namespace Microsoft.Build.BackEnd.Logging
         private void StartLoggingEventProcessing()
         {
             _eventQueue = new ConcurrentQueue<object>();
-            _dequeueEvent = new ManualResetEventSlim(false);
-            _emptyQueueEvent = new ManualResetEventSlim(false);
-            _enqueueEvent = new ManualResetEventSlim(false);
+            _dequeueEvent = new AutoResetEvent(false);
+            _emptyQueueEvent = new ManualResetEvent(false);
+            _enqueueEvent = new AutoResetEvent(false);
             _loggingEventProcessingCancellation = new CancellationTokenSource();
 
             _loggingEventProcessingThread = new Thread(LoggingEventProc);
@@ -1277,7 +1275,7 @@ namespace Microsoft.Build.BackEnd.Logging
             void LoggingEventProc()
             {
                 var completeAdding = _loggingEventProcessingCancellation.Token;
-                WaitHandle[] waitHandlesForNextEvent = { completeAdding.WaitHandle, _enqueueEvent.WaitHandle };
+                WaitHandle[] waitHandlesForNextEvent = { completeAdding.WaitHandle, _enqueueEvent };
 
                 do
                 {
@@ -1296,7 +1294,6 @@ namespace Microsoft.Build.BackEnd.Logging
                             WaitHandle.WaitAny(waitHandlesForNextEvent);
                         }
 
-                        _enqueueEvent.Reset();
                         _emptyQueueEvent.Reset();
                     }
                 } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
@@ -1441,7 +1438,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (ShouldTreatWarningAsMessage(warningEvent))
                 {
-                    loggingEvent = new BuildMessageEventArgs(
+                    buildEventArgs = new BuildMessageEventArgs(
                         warningEvent.Subcategory,
                         warningEvent.Code,
                         warningEvent.File,
@@ -1461,7 +1458,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
                 else if (ShouldTreatWarningAsError(warningEvent))
                 {
-                    loggingEvent = new BuildErrorEventArgs(
+                    buildEventArgs = new BuildErrorEventArgs(
                         warningEvent.Subcategory,
                         warningEvent.Code,
                         warningEvent.File,
@@ -1480,13 +1477,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            if (loggingEvent is BuildErrorEventArgs errorEvent)
+            if (buildEventArgs is BuildErrorEventArgs errorEvent)
             {
                 // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
                 _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
             }
 
-            if (loggingEvent is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
+            if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
             {
                 int key = GetWarningsAsErrorOrMessageKey(projectFinishedEvent);
                 _warningsAsErrorsByProject?.Remove(key);
@@ -1494,12 +1491,18 @@ namespace Microsoft.Build.BackEnd.Logging
                 _warningsAsMessagesByProject?.Remove(key);
             }
 
-            if (loggingEvent is BuildEventArgs loggingEventBuildArgs)
+            if (loggingEvent is BuildEventArgs)
             {
-                RouteBuildEvent(loggingEventBuildArgs);
+                RouteBuildEvent(buildEventArgs);
             }
             else if (loggingEvent is KeyValuePair<int, BuildEventArgs> loggingEventKeyValuePair)
             {
+                if (loggingEventKeyValuePair.Value != buildEventArgs)
+                {
+                    // buildEventArgs has been altered, lets use that new one
+                    loggingEventKeyValuePair = new KeyValuePair<int, BuildEventArgs>(loggingEventKeyValuePair.Key, buildEventArgs);
+                }
+
                 RouteBuildEvent(loggingEventKeyValuePair);
             }
         }
@@ -1592,8 +1595,20 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="Exception">Any exception which is a ExceptionHandling.IsCriticalException will not be wrapped</exception>
         private void InitializeLogger(ILogger logger, IEventSource sourceForLogger)
         {
+            ILogger UnwrapLoggerType(ILogger log)
+            {
+                while (log is ProjectCollection.ReusableLogger reusableLogger)
+                {
+                    log = reusableLogger.OriginalLogger;
+                }
+
+                return log;
+            }
+
             try
             {
+                using var assemblyLoadTracker = AssemblyLoadsTracker.StartTracking(this, AssemblyLoadingContext.LoggerInitialization, UnwrapLoggerType(logger).GetType());
+
                 INodeLogger nodeLogger = logger as INodeLogger;
                 if (nodeLogger != null)
                 {
@@ -1628,7 +1643,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </remarks>
         private void UpdateMinimumMessageImportance(ILogger logger)
         {
-            var innerLogger = (logger is Evaluation.ProjectCollection.ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
+            var innerLogger = (logger is ProjectCollection.ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
 
             MessageImportance? minimumImportance = innerLogger switch
             {
@@ -1642,8 +1657,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 // The null logger has no effect on minimum verbosity.
                 Execution.BuildManager.NullLogger => null,
 
-                // If the logger is not on our whitelist, there are no importance guarantees. Fall back to "any importance".
-                _ => MessageImportance.Low
+                // The live logger consumes only high priority messages.
+                _ => innerLogger.GetType().FullName == "Microsoft.Build.Logging.LiveLogger.LiveLogger"
+                    ? MessageImportance.High
+                    // If the logger is not on our allow list, there are no importance guarantees. Fall back to "any importance".
+                    : MessageImportance.Low,
             };
 
             if (minimumImportance != null)

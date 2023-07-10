@@ -1,10 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Exceptions;
@@ -175,7 +176,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 foreach (var graph in Graphs)
                 {
                     foreach (
-                        var currentSolutionConfigurationPlatform in SolutionFileBuilder.SolutionConfigurationPlatformsDefaults.Concat(new SolutionConfigurationInSolution[] {null}))
+                        var currentSolutionConfigurationPlatform in SolutionFileBuilder.SolutionConfigurationPlatformsDefaults.Concat(new SolutionConfigurationInSolution[] { null }))
                     {
                         yield return new[]
                         {
@@ -228,7 +229,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 {
                     {"1", _env.CreateFile("1.csproj", string.Empty).Path}
                 },
-                SolutionConfigurationPlatforms = new[] {new SolutionConfigurationInSolution("Foo", "Bar")},
+                SolutionConfigurationPlatforms = new[] { new SolutionConfigurationInSolution("Foo", "Bar") },
                 ProjectConfigurations = new Dictionary<string, Dictionary<SolutionConfigurationInSolution, ProjectConfigurationInSolution>>
                 {
                     {
@@ -265,7 +266,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {1, null},
                         {2, null}
                     },
-                    new[] {(1, 2)}, // solution only edges
+                    new[] {(1, 2) }, // solution only edges
                     false, // is there a cycle
                     false // solution edges overlap with graph edges
                 };
@@ -277,7 +278,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {1, null},
                         {2, null}
                     },
-                    new[] {(1, 2), (2, 1)},
+                    new[] {(1, 2), (2, 1) },
                     true,
                     false
                 };
@@ -292,7 +293,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {4, null},
                         {5, null}
                     },
-                    new[] {(1, 2), (1, 3), (2, 4), (3,4), (4, 5)},
+                    new[] {(1, 2), (1, 3), (2, 4), (3,4), (4, 5) },
                     false,
                     false
                 };
@@ -307,7 +308,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {4, null},
                         {5, null}
                     },
-                    new[] {(1, 2), (1, 3), (2, 4), (3, 4), (4, 5), (2, 3)},
+                    new[] {(1, 2), (1, 3), (2, 4), (3, 4), (4, 5), (2, 3) },
                     false,
                     false
                 };
@@ -322,7 +323,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {4, null},
                         {5, null}
                     },
-                    new[] {(1, 3), (2, 3), (3, 4), (3, 5), (5, 4), (2, 1)},
+                    new[] {(1, 3), (2, 3), (3, 4), (3, 5), (5, 4), (2, 1) },
                     false,
                     false
                 };
@@ -333,7 +334,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     {
                         {1, new []{2}},
                     },
-                    new[] {(1, 2)},
+                    new[] {(1, 2) },
                     false,
                     true
                 };
@@ -344,7 +345,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     {
                         {1, new []{2}},
                     },
-                    new[] {(1, 2), (1, 2)},
+                    new[] {(1, 2), (1, 2) },
                     false,
                     true
                 };
@@ -355,7 +356,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     {
                         {1, new []{2}},
                     },
-                    new[] {(2, 1)},
+                    new[] {(2, 1) },
                     true,
                     false
                 };
@@ -370,7 +371,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {4, new []{5}},
                         {5, null}
                     },
-                    new[] {(3, 2)},
+                    new[] {(3, 2) },
                     false,
                     false
                 };
@@ -385,7 +386,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {4, new []{5}},
                         {5, null}
                     },
-                    new[] {(1, 2), (1, 3), (3, 2), (1, 5)},
+                    new[] {(1, 2), (1, 3), (3, 2), (1, 5) },
                     false,
                     true
                 };
@@ -400,7 +401,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {4, new []{5}},
                         {5, null}
                     },
-                    new[] {(3, 2), (5, 3)},
+                    new[] {(3, 2), (5, 3) },
                     true,
                     false
                 };
@@ -415,7 +416,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {4, new []{5}},
                         {5, null}
                     },
-                    new[] {(5, 3)},
+                    new[] {(5, 3) },
                     true,
                     false
                 };
@@ -428,7 +429,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {2, new[] {3}},
                         {3, new[] {4}},
                     },
-                    new[] {(1,3), (2, 4)},
+                    new[] {(1,3), (2, 4) },
                     false,
                     false
                 };
@@ -441,7 +442,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {2, new[] {3}},
                         {3, new[] {4}},
                     },
-                    new[] {(1,3), (2, 4), (1, 2), (2, 3), (3, 4)},
+                    new[] {(1,3), (2, 4), (1, 2), (2, 3), (3, 4) },
                     false,
                     true
                 };
@@ -454,7 +455,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {3, null},
                         {4, null}
                     },
-                    new[] {(3, 2), (2, 4)},
+                    new[] {(3, 2), (2, 4) },
                     false,
                     false
                 };
@@ -467,7 +468,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {3, null},
                         {4, null}
                     },
-                    new[] {(3, 2), (2, 4), (4, 1)},
+                    new[] {(3, 2), (2, 4), (4, 1) },
                     true,
                     false
                 };
@@ -522,6 +523,39 @@ namespace Microsoft.Build.Graph.UnitTests
             exception.ShouldBeNull();
 
             var graphFromSolutionEdges = graphFromSolution.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
+
+            // These are global properties added by GraphBuilder when building a solution
+            HashSet<string> propertiesToIgnore = new(StringComparer.OrdinalIgnoreCase)
+            {
+                "CurrentSolutionConfigurationContents",
+                "BuildingSolutionFile",
+                "SolutionDir",
+                "SolutionExt",
+                "SolutionFileName",
+                "SolutionName",
+                SolutionProjectGenerator.SolutionPathPropertyName
+            };
+
+            // Solutions add these global properties
+            foreach (string propertyToIgnore in propertiesToIgnore)
+            {
+                foreach ((ConfigurationMetadata, ConfigurationMetadata) graphFromSolutionEdge in graphFromSolutionEdges.Keys)
+                {
+                    graphFromSolutionEdge.Item1.GlobalProperties.ShouldContainKey(propertyToIgnore);
+                    graphFromSolutionEdge.Item2.GlobalProperties.ShouldContainKey(propertyToIgnore);
+                }
+            }
+
+            // Remove some properties for comparison purposes as we are comparing a graph created from a solution against the graph (without solution properties) used to make the solution.
+            // This is done as a separate pass since some edges may be sharing an instance.
+            foreach (string propertyToIgnore in propertiesToIgnore)
+            {
+                foreach ((ConfigurationMetadata, ConfigurationMetadata) graphFromSolutionEdge in graphFromSolutionEdges.Keys)
+                {
+                    graphFromSolutionEdge.Item1.GlobalProperties.Remove(propertyToIgnore);
+                    graphFromSolutionEdge.Item2.GlobalProperties.Remove(propertyToIgnore);
+                }
+            }
 
             // Original edges get preserved.
             foreach (var graphEdge in graphEdges)
@@ -579,13 +613,13 @@ namespace Microsoft.Build.Graph.UnitTests
                     {"3", GraphTestingUtilities.CreateProjectFile(_env, 3, new[] {4}, extraContent: MultitargetingSpecificationPropertyGroup).Path},
                     {"4", GraphTestingUtilities.CreateProjectFile(_env, 4).Path}
                 },
-                SolutionDependencies = new[] {("1", "2"), ("3", "4")}
+                SolutionDependencies = new[] { ("1", "2"), ("3", "4") }
             }.BuildSolution();
 
             var graph = new ProjectGraph(_env.CreateFile("solution.sln", solutionContents).Path);
 
             var edges = graph.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
-            edges.Count.ShouldBe(8);
+            edges.Count.ShouldBe(10);
 
             var node1 = GetFirstNodeWithProjectNumber(graph, 1);
             node1.ProjectReferences.Count.ShouldBe(3);
@@ -617,8 +651,8 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             var solutionContents = SolutionFileBuilder.FromGraphEdges(
                 _env,
-                new Dictionary<int, int[]> {{1, null}, {2, null}},
-                new[] {("1", new[] {Guid.NewGuid().ToString("B")})}).BuildSolution();
+                new Dictionary<int, int[]> { { 1, null }, { 2, null } },
+                new[] { ("1", new[] { Guid.NewGuid().ToString("B") }) }).BuildSolution();
 
             var solutionFile = _env.CreateFile(
                 "solution.sln",

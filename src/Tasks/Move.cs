@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ namespace Microsoft.Build.Tasks
     /// but this could restriction could be lifted as MoveFileEx,
     /// which is used here, supports it.
     /// </remarks>
-    public class Move : TaskExtension, ICancelableTask
+    public class Move : TaskExtension, ICancelableTask, IIncrementalTask
     {
         /// <summary>
         /// Flags for MoveFileEx.
@@ -62,10 +62,18 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] DestinationFiles { get; set; }
 
         /// <summary>
-        /// Subset that were successfully moved 
+        /// Subset that were successfully moved.
         /// </summary>
         [Output]
         public ITaskItem[] MovedFiles { get; private set; }
+
+        /// <summary>
+        /// Set question parameter for Move task.
+        /// </summary>
+        /// <remarks>Move can be chained A->B->C with location C as the final location.
+        /// Incrementally, it is hard to question A->B if both files are gone.
+        /// In short, question will always return false and author should use target inputs/outputs.</remarks>
+        public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
         /// Stop and return (in an undefined state) as soon as possible.
@@ -149,7 +157,7 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    if (MoveFileWithLogging(sourceFile, destinationFile))
+                    if (!FailIfNotIncremental && MoveFileWithLogging(sourceFile, destinationFile))
                     {
                         SourceFiles[i].CopyMetadataTo(DestinationFiles[i]);
                         destinationFilesSuccessfullyMoved.Add(DestinationFiles[i]);
@@ -175,7 +183,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Makes the provided file writeable if necessary
+        /// Makes the provided file writeable if necessary.
         /// </summary>
         private static void MakeWriteableIfReadOnly(string file)
         {
@@ -189,12 +197,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Move one file from source to destination. Create the target directory if necessary.
         /// </summary>
-        /// <throws>IO related exceptions</throws>
-        private bool MoveFileWithLogging
-        (
+        /// <throws>IO related exceptions.</throws>
+        private bool MoveFileWithLogging(
             string sourceFile,
-            string destinationFile
-        )
+            string destinationFile)
         {
             if (FileSystems.Default.DirectoryExists(destinationFile))
             {

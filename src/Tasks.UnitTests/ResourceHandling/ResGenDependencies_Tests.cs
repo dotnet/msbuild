@@ -1,19 +1,19 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
-using Xunit;
+using Microsoft.Build.Tasks;
 using Shouldly;
-using System;
+using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class ResGenDependencies_Tests
+    public sealed class ResGenDependencies_Tests
     {
         [Theory]
         [MemberData(nameof(GenerateResource_Tests.Utilities.UsePreserializedResourceStates), MemberType = typeof(GenerateResource_Tests.Utilities))]
@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
                 cache.IsDirty.ShouldBeFalse();
 
                 // Getting a file that wasn't in the cache is a write operation.
-                cache.GetResXFileInfo(resx, useMSBuildResXReader);
+                cache.GetResXFileInfo(resx, useMSBuildResXReader, null, false);
                 cache.IsDirty.ShouldBeTrue();
 
                 // Add linkedFiles to further test serialization and deserialization.
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests
                 resX2.linkedFiles[1].ShouldBe(resX.linkedFiles[1]);
 
                 // Asking for a file that's in the cache should not dirty the cache.
-                cache2.GetResXFileInfo(resx, useMSBuildResXReader);
+                cache2.GetResXFileInfo(resx, useMSBuildResXReader, null, false);
                 cache2.IsDirty.ShouldBeFalse();
 
                 // Changing UseSourcePath to false should dirty the cache.
@@ -92,8 +92,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns></returns>
         private string CreateSampleResx()
         {
-            string resx = FileUtilities.GetTemporaryFile();
-            File.Delete(resx);
+            string resx = FileUtilities.GetTemporaryFileName();
             Stream fileToSend = Assembly.GetExecutingAssembly().GetManifestResourceStream("Microsoft.Build.Tasks.UnitTests.SampleResx");
             using (FileStream f = new FileStream(resx, FileMode.CreateNew))
             {

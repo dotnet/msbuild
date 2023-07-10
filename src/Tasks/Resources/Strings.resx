@@ -221,6 +221,9 @@
 
         If this bucket overflows, pls. contact 'vsppbdev'.
   -->
+  <data name="Copy.NonWindowsLinkErrorMessage">
+    <value>The {0} library call failed with the following error code: {1}.</value>
+  </data>
   <data name="Copy.CreatesDirectory">
     <value>Creating directory "{0}".</value>
   </data>
@@ -249,6 +252,10 @@
   </data>
   <data name="Copy.RetryingAsFileCopy">
     <value>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</value>
+    <comment>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</comment>
+  </data>
+  <data name="Copy.RetryingAsSymbolicLink">
+    <value>Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</value>
     <comment>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</comment>
   </data>
   <data name="Copy.NeedsDestination">
@@ -364,6 +371,18 @@
   </data>
   <data name="Delete.SkippingNonexistentFile">
     <value>File "{0}" doesn't exist. Skipping.</value>
+  </data>
+  <data name="Delete.Retrying">
+    <value>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</value>
+    <comment>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message.</comment>
+  </data>
+  <data name="Delete.InvalidRetryCount">
+    <value>MSB3028: {0} is an invalid retry count. Value must not be negative.</value>
+    <comment>{StrBegin="MSB3028: "} LOCALIZATION: {0} is a number.</comment>
+  </data>
+  <data name="Delete.InvalidRetryDelay">
+    <value>MSB3029: {0} is an invalid retry delay. Value must not be negative.</value>
+    <comment>{StrBegin="MSB3029: "} LOCALIZATION: {0} is a number.</comment>
   </data>
   <!--
         The Exec message bucket is: MSB3071 - MSB3080
@@ -605,6 +624,9 @@
   </data>
   <data name="GenerateBindingRedirects.ProcessingSuggestedRedirect">
     <value>Processing suggested binding redirect on "{0}" with MaxVersion "{1}".</value>
+  </data>
+  <data name="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+    <value>Creating binding redirection file "{0}".</value>
   </data>
   <!--
         The GenerateBootstrapper message bucket is: MSB3141 - MSB3170
@@ -1142,7 +1164,16 @@
     <value>MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</value>
     <comment>{StrBegin="MSB3824: "}</comment>
   </data>
+  <data name="GenerateResource.BinaryFormatterUse">
+    <value>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/msbuild/net8-binaryformatter</value>
+    <comment>{StrBegin="MSB3825: "}</comment>
+  </data>
 
+  <data name="GenerateResource.MimeTypeNotSupportedOnCore">
+    <value>MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</value>
+    <comment>{StrBegin="MSB3826: "}</comment>
+  </data>
 
   <!--
         The GetAssemblyIdentity message bucket is: MSB3441 - MSB3450
@@ -1615,6 +1646,12 @@
         LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name. "CopyLocalDependenciesWhenParentReferenceInGac" is a property name.
    </comment>
   </data>
+  <data name="ResolveAssemblyReference.NoBecauseBadImage">
+    <value>This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</value>
+    <comment>
+      LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
+    </comment>
+  </data>
   <data name="ResolveAssemblyReference.NotCopyLocalBecauseEmbedded">
     <value>This reference is not "CopyLocal" because its types will be embedded into the target assembly.</value>
     <comment>
@@ -1711,7 +1748,7 @@
   <data name="ResolveAssemblyReference.TargetFrameworkSubsetLogHeader">
     <value>TargetFramework Profile List Information:</value>
   </data>
-  <data name="ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader">
+  <data name="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
     <value>TargetFramework Profile List Paths:</value>
   </data>
   <data name="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">
@@ -1733,6 +1770,10 @@
   </data>
   <data name="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
     <value>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</value>
+    <comment></comment>
+  </data>
+  <data name="ResolveAssemblyReference.WritingCacheFile">
+    <value>Updating assembly cache file "{0}".</value>
     <comment></comment>
   </data>
   <!--
@@ -2153,6 +2194,9 @@
   <data name="WriteLinesToFile.SkippingUnchangedFile">
     <value>Skipping write to file "{0}" because content would not change.</value>
   </data>
+  <data name="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
+    <value>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</value>
+  </data>
   <!--
         The GetReferenceAssemblyPaths message bucket is: MSB3642 - MSB3646.
         If this bucket overflows, pls. contact 'vsppbdev'.
@@ -2289,6 +2333,9 @@
   </data>
   <data name="XslTransform.UseTrustedSettings" xml:space="preserve">
     <value>The usage of the document() method and embedded scripts is prohibited by default, due to risks of foreign code execution.  If "{0}" is a trusted source that requires those constructs, please set the "UseTrustedSettings" parameter to "true" to allow their execution.</value>
+  </data>
+  <data name="XslTransform.SecuritySettingsViaUseTrustedSettings" xml:space="preserve">
+    <value>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</value>
   </data>
     <data name="XslTransform.PrecompiledXsltError" xml:space="preserve">
     <value>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</value>
@@ -2726,9 +2773,6 @@
         MSB3891 - MSB3900   Targets: Copy Overflow
         If this bucket overflows, pls. contact 'vsppbdev'.
   -->
-  <data name="Copy.ExactlyOneTypeOfLink">
-    <value>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</value>
-  </data>
   <data name="Copy.ErrorIfLinkFailsSetWithoutLinkOption" xml:space="preserve">
     <value>MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</value>
     <comment>{StrBegin="MSB3892: "} LOCALIZATION: Do not localize "ErrorIfLinkFails", "UseHardLinksIfPossible", or "UseSymbolicLinksIfPossible".</comment>
@@ -2832,6 +2876,9 @@
   <data name="Unzip.DidNotUnzipBecauseOfFilter">
     <value>Did not unzip file "{0}" because it didn't match the include filter or because it matched the exclude filter.</value>
   </data>
+  <data name="Unzip.ZipSlipExploit">
+    <value>Entry is outside the target directory: "{0}"</value>
+  </data>
   <data name="Unzip.FileComment">
     <value>Unzipping file "{0}" to "{1}".</value>
   </data>
@@ -2934,6 +2981,9 @@
   </data>
   <data name="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
     <value>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</value>
+  </data>
+  <data name="ResolveKeySource.PfxUnsupported" xml:space="preserve">
+    <value>PFX signing not supported on .NET Core.</value>
   </data>
   <!--
         The tasks message bucket is: MSB3001 - MSB3999

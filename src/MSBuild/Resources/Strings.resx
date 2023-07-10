@@ -277,6 +277,10 @@
                      n[ormal], d[etailed], and diag[nostic]. (Short form: -v)
                      Example:
                        -verbosity:quiet
+
+                     Note: File loggers' verbosity
+                           is set separately by
+                           -fileloggerparameters.
 </value>
     <comment>
       LOCALIZATION: The following should not be localized:
@@ -470,7 +474,7 @@
    <value>  -outputResultsCache:[cacheFile]
                      Output cache file where MSBuild will write the contents of
                      its build result caches at the end of the build.
-                     Setting this also turns on isolated builds (-isolate).
+                     If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </value>
     <comment>
@@ -482,9 +486,8 @@
   <data name="HelpMessage_InputCachesFiles" UESanitized="false" Visibility="Public">
    <value>  -inputResultsCaches:&lt;cacheFile&gt;...
                      Semicolon separated list of input cache files that MSBuild
-                     will read build results from.
-                     Setting this also turns on isolated builds (-isolate).
-                     (short form: -irc)
+                     will read build results from. If -isolateProjects is set
+                     to False, this sets it to True. (short form: -irc)
    </value>
     <comment>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -756,8 +759,17 @@
     </comment>
   </data>
   <data name="HelpMessage_35_IsolateProjectsSwitch" UESanitized="false" Visibility="Public">
-    <value>  -isolateProjects[:True|False]
+    <value>  -isolateProjects[:True|MessageUponIsolationViolation|False]
                      Causes MSBuild to build each project in isolation.
+
+                     When set to "MessageUponIsolationViolation" (or its short
+                     form "Message"), only the results from top-level targets
+                     are serialized if the -outputResultsCache switch is
+                     supplied. This is to mitigate the chances of an
+                     isolation-violating target on a dependency project using
+                     incorrect state due to its dependency on a cached target
+                     whose side effects would not be taken into account.
+                     (For example, the definition of a property.)
 
                      This is a more restrictive mode of MSBuild as it requires
                      that the project graph be statically discoverable at
@@ -825,8 +837,7 @@
     </comment>
   </data>
   <data name="HelpMessage_40_WarnNotAsErrorSwitch" Visibility="Public">
-    <value>
-      -warnNotAsError[:code[;code2]]
+    <value>  -warnNotAsError[:code[;code2]]
                      List of warning codes to treats not treat as errors.
                      Use a semicolon or a comma to separate
                      multiple warning codes. Has no effect if the -warnaserror
@@ -837,6 +848,20 @@
     </value>
     <comment>
       LOCALIZATION: "-warnNotAsError" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </comment>
+  </data>
+  <data name="HelpMessage_41_QuestionSwitch" Visibility="Public">
+    <value>  -question
+                     (Experimental) Question whether there is any build work.
+                     MSBuild will error out when it detects a target or task
+                     that can be incremental (has inputs and outputs),
+                     but isn't up to date.
+                     (Short form: -q)
+    </value>
+    <comment>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "-question" and "-q" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
@@ -1187,7 +1212,8 @@
     <comment>
       {StrBegin="MSBUILD : error MSB1056: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      This error is shown when a user specifies a value for the -isolateProjects parameter that is not equivalent
+      to Boolean.TrueString, nameof(ProjectIsolationMode.MessageUponIsolationViolation), or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
@@ -1206,6 +1232,15 @@
       {StrBegin="MSBUILD : error MSB1061: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the -detailedSummary parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
+  <data name="InvalidLowPriorityValue" UESanitized="true" Visibility="Public">
+    <value>MSBUILD : error MSB1064: Low priority value is not valid. {0}</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1064: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
@@ -1341,10 +1376,117 @@
     <value>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</value>
     <comment>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</comment>
   </data>
+  <data name="UnsupportedSwitchForSolutionFiles" Visibility="Public">
+    <value>The '{0}' switch is not supported for solution files.</value>
+  </data>
+  <!-- **** LiveLogger strings begin **** -->
+  <data name="RestoreComplete" xml:space="preserve">
+    <value>Restore complete ({0}s)</value>
+    <comment>
+      {0}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
+  <data name="RestoreCompleteWithMessage" xml:space="preserve">
+    <value>Restore {0} in {1}s</value>
+    <comment>
+      Restore summary when finished with warning or error
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
+  <data name="BuildFinished" xml:space="preserve">
+    <value>Build {0} in {1}s</value>
+    <comment>
+      Overall build summary
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
+  <data name="BuildResult_FailedWithErrors" xml:space="preserve">
+    <value>failed with errors</value>
+    <comment>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_FailedWithWarnings" xml:space="preserve">
+    <value>failed with warnings</value>
+    <comment>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_Failed" xml:space="preserve">
+    <value>failed</value>
+    <comment>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_Succeeded" xml:space="preserve">
+    <value>succeeded</value>
+    <comment>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_SucceededWithWarnings" xml:space="preserve">
+    <value>succeeded with warnings</value>
+    <comment>
+      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="ProjectFinished_NoTF" xml:space="preserve">
+    <value>{0}{1} {2} ({3}s)</value>
+    <comment>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
+  <data name="ProjectFinished_WithTF" xml:space="preserve">
+    <value>{0}{1} {2} {3} ({4}s)</value>
+    <comment>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
+  <data name="ProjectFinished_OutputPath" xml:space="preserve">
+    <value> → {0}</value>
+    <comment>
+      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
+      {0}: VT100 coded hyperlink to project output directory
+    </comment>
+  </data>
+  <data name="ProjectBuilding_NoTF" xml:space="preserve">
+    <value>{0}{1} {2} ({3}s)</value>
+    <comment>
+      Project building.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target
+      {3}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
+  <data name="ProjectBuilding_WithTF" xml:space="preserve">
+    <value>{0}{1} {2} {3} ({4}s)</value>
+    <comment>
+      Project building including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: target
+      {4}: duration in seconds with 1 decimal point
+    </comment>
+  </data>
+  <!-- **** LiveLogger strings end **** -->
+
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1063.
+        Next error code should be MSB1065.
 
         Don't forget to update this comment after using the new code.
   -->

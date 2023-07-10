@@ -1,14 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 using Task = System.Threading.Tasks.Task;
 
 #nullable disable
@@ -18,7 +18,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Represents a task that can download a file.
     /// </summary>
-    public sealed class DownloadFile : TaskExtension, ICancelableTask
+    public sealed class DownloadFile : TaskExtension, ICancelableTask, IIncrementalTask
     {
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
@@ -65,6 +65,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public int Timeout { get; set; } = 100_000;
 
+        public bool FailIfNotIncremental { get; set; }
+
         /// <summary>
         /// Gets or sets a <see cref="HttpMessageHandler"/> to use.  This is used by unit tests to mock a connection to a remote server.
         /// </summary>
@@ -90,10 +92,10 @@ namespace Microsoft.Build.Tasks
             }
 
             int retryAttemptCount = 0;
-            
+
             CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
-            while(true)
+            while (true)
             {
                 try
                 {
@@ -125,7 +127,9 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, actualException.Message);
+                        string flattenedMessage = TaskLoggingHelper.GetInnerExceptionMessageString(e);
+                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, flattenedMessage);
+                        Log.LogMessage(MessageImportance.Low, actualException.ToString());
                         break;
                     }
                 }
@@ -183,6 +187,11 @@ namespace Microsoft.Build.Tasks
 
                         return;
                     }
+                    else if (FailIfNotIncremental)
+                    {
+                        Log.LogErrorFromResources("DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
+                        return;
+                    }
 
                     try
                     {
@@ -191,12 +200,13 @@ namespace Microsoft.Build.Tasks
                         using (var target = new FileStream(destinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
                             Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
-
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                             using (Stream responseStream = await response.Content.ReadAsStreamAsync(
 #if NET6_0_OR_GREATER
                             cancellationToken
 #endif
                             ).ConfigureAwait(false))
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                             {
                                 await responseStream.CopyToAsync(target, 1024, cancellationToken).ConfigureAwait(false);
                             }

@@ -1,10 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -20,7 +21,7 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_itemType} #Metadata={MetadataCount}")]
-    public class ProjectItemDefinitionInstance : IKeyed, IMetadataTable, IItemDefinition<ProjectMetadataInstance>, ITranslatable
+    public class ProjectItemDefinitionInstance : IKeyed, IMetadataTable, IItemDefinition<ProjectMetadataInstance>, ITranslatable, IItemTypeDefinition
     {
         /// <summary>
         /// Item type, for example "Compile", that this item definition applies to
@@ -58,11 +59,9 @@ namespace Microsoft.Build.Execution
             if (itemDefinition.MetadataCount > 0)
             {
                 _metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
-            }
 
-            foreach (ProjectMetadata originalMetadata in itemDefinition.Metadata)
-            {
-                _metadata.Set(new ProjectMetadataInstance(originalMetadata));
+                IEnumerable<ProjectMetadataInstance> projectMetadataInstances = itemDefinition.Metadata.Select(originalMetadata => new ProjectMetadataInstance(originalMetadata));
+                _metadata.ImportProperties(projectMetadataInstances);
             }
         }
 
@@ -231,9 +230,11 @@ namespace Microsoft.Build.Execution
         internal static ProjectItemDefinitionInstance FactoryForDeserialization(ITranslator translator)
         {
             var instance = new ProjectItemDefinitionInstance();
-            ((ITranslatable) instance).Translate(translator);
+            ((ITranslatable)instance).Translate(translator);
 
             return instance;
         }
+
+        string IItemTypeDefinition.ItemType => _itemType;
     }
 }

@@ -1,10 +1,14 @@
-﻿using Microsoft.Build.Shared;
-using Microsoft.Build.UnitTests;
-using Shouldly;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -33,8 +37,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             result.ShouldBe(true);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void CanResolveLongNonNormalizedHintPath()
         {
             var tempfolder = _env.DefaultTestDirectory.CreateDirectory("tempfolder_for_CanResolveLongHintPath");
@@ -75,6 +78,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 sdkName: "",
                 rawFileNameCandidate: "FakeSystem.Net.Http",
                 isPrimaryProjectReference: true,
+                isImmutableFrameworkReference: false,
                 wantSpecificVersion: false,
                 executableExtensions: new string[] { ".winmd", ".dll", ".exe" },
                 hintPath: hintPath,

@@ -24,7 +24,12 @@
 
     <!-- Include NuGet build tasks -->
     <PackageReference Include="NuGet.Build.Tasks" />
+    <PackageReference Include="NuGet.Build.Tasks.Console" />
     <PackageReference Include="Microsoft.Build.NuGetSdkResolver" />
+
+    <!-- As of 17.5, NuGet.Build.Tasks and Microsoft.Build.NuGetSdkResolver depends on Newtonsoft.Json version 13.0.1,
+         causing it to be downloaded and flagged by component governance -->
+    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(MonoBuild)' == 'true'">
@@ -41,10 +46,10 @@
 
   <!-- Use deps file from this project with additional dependencies listed instead of the one generated in the MSBuild project -->
   <Target Name="UpdateMSBuildDepsFile" AfterTargets="Build" Condition="'$(MonoBuild)' != 'true' and ($([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1')) or '$(TargetFramework)' == 'netstandard2.0')">
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).deps.json" DestinationFiles="$(OutputPath)MSBuild.deps.json" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).deps.json" DestinationFiles="$(OutputPath)MSBuild.deps.json" SkipUnchangedFiles="true" />
   </Target>
   <Target Name="UpdatePublishedMSBuildDepsFile" AfterTargets="Publish" Condition="'$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">
-    <Copy SourceFiles="$(PublishDir)$(AssemblyName).deps.json" DestinationFiles="$(PublishDir)MSBuild.deps.json" />
+    <Copy SourceFiles="$(PublishDir)$(AssemblyName).deps.json" DestinationFiles="$(PublishDir)MSBuild.deps.json" SkipUnchangedFiles="true" />
   </Target>
 
   <Import Project="..\Package\GetBinPaths.targets" Condition="$(TargetFramework.StartsWith('net4'))"/>

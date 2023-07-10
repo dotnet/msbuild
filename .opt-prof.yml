@@ -1,0 +1,94 @@
+# Runs OptProf for MSBuild binaries based on an insertion build
+
+trigger: none # Prevents this pipeline from triggering on check-ins
+pr: none # don't run this on PR as well, this should only trigger off on MSBuild runs
+schedules:
+  - cron: "0 9 * * Wed,Sat"
+    displayName: Weekly OptProf Run
+    branches:
+      include:
+      - main
+    always: true
+
+resources:
+  pipelines:
+  - pipeline: ComponentBuildUnderTest
+    source: MSBuild\MSBuild # The name of the pipeline that produces the artifact
+    trigger:
+      branches:
+        - vs*
+  - pipeline: DartLab
+    project: DevDiv
+    source: DartLab
+    branch: main
+  - pipeline: DartLab.OptProf
+    source: DartLab.OptProf
+    branch: main
+  repositories:
+  - repository: DartLabTemplates
+    type: git
+    name: DartLab.Templates
+    ref: refs/heads/main
+  - repository: DartLabOptProfTemplates
+    type: git
+    name: DartLab.OptProf
+    ref: refs/heads/main
+
+parameters:
+  # Whether or not to delete the test machines after the run completes
+  - name: testMachineCleanUpStrategy
+    type: string
+    default: delete
+    values:
+    - delete
+    - stop
+
+stages:
+- template: \templates\stages\visual-studio\single-runsettings.yml@DartLabOptProfTemplates
+  parameters:
+    ##### Required #####
+    runSettingsURI: $(Pipeline.Workspace)\ComponentBuildUnderTest\VSSetup\Insertion\OptProf\Training.runsettings
+    visualStudioBootstrapperURI: $(VisualStudio.InstallationUnderTest.BootstrapperURL)
+    ##### Optional #####
+    name: OptProfProfilingWorkflow
+    displayName: OptProf Profiling Workflow
+    optOptimizationInputsDropName: $(OptimizationInputsDropName)
+    testLabPoolName: VS-Platform # The test lab pool to run your tests in
+    testMachineCleanUpStrategy: ${{parameters.testMachineCleanUpStrategy}}
+    testMachineImageName: Windows-10-Enterprise-20H2
+    visualStudioSigning: Test
+    variables:
+    - name: branchName # The branch in the VS repo the bootstrapper was based on
+      value: $[replace(variables['resources.pipeline.ComponentBuildUnderTest.sourceBranch'],'refs/heads/','')]
+    - name: OptimizationInputsDropName # The naming convention of the OptimizationInputsDrop
+      value: OptimizationData/DotNet-msbuild-Trusted/$(branchName)/$(resources.pipeline.ComponentBuildUnderTest.runName)/$(Build.BuildId)/$(System.StageAttempt)
+    ##### Step Hooks #####
+    preTestMachineConfigurationStepList:
+    - download: ComponentBuildUnderTest
+      artifact: MicroBuildOutputs
+      patterns: '**\BootstrapperInfo.json'
+      displayName: Download Bootstrapper Information
+    - download: ComponentBuildUnderTest
+      artifact: VSSetup
+      patterns: '**\*.runsettings'
+      displayName: Download OptProf Information
+    - powershell: |
+        try {
+          $bootstrapperInfoJson = Get-Content -Raw -Path '$(Pipeline.Workspace)\ComponentBuildUnderTest\MicroBuildOutputs\BootstrapperInfo.json' | ConvertFrom-Json
+          $vsBranch = $bootstrapperInfoJson[0].VSBranch
+          Write-Host "VSBootstrapperBranch: $vsBranch"
+          Set-AzurePipelinesVariable 'VSBootstrapperBranch' $vsBranch
+        }
+        catch {
+          Write-Host $_
+          Write-Error "Failed to set VSBootstrapperBranch pipeline variable"
+          throw
+        }
+      displayName: Set 'VSBootstrapperBranch' variable
+    - task: PowerShell@2
+      displayName: Set 'VisualStudio.InstallationUnderTest.BootstrapperURL' variable
+      inputs:
+        filePath: $(DartLab.Path)\Scripts\VisualStudio\Bootstrapper\Get-BootstrapperURL.ps1
+        arguments: -BootstrapperInfoJsonURI '$(Pipeline.Workspace)\ComponentBuildUnderTest\MicroBuildOutputs\BootstrapperInfo.json' -VSBranch '$(VSBootstrapperBranch)' -OutVariableName 'VisualStudio.InstallationUnderTest.BootstrapperURL'
+    preDeployAndRunTestsStepList:
+    - download: ComponentBuildUnderTest

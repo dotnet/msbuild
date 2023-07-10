@@ -1,16 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Globalization;
+using System.IO;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Collections;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 
@@ -298,7 +298,7 @@ namespace Microsoft.Build.Execution
                 // rough guess for an average number of bytes needed to store them.  This doesn't have to be accurate, just
                 // big enough to avoid unnecessary buffer reallocations in most cases.
                 var defaultBufferCapacity = _items.Length * 128;
-                
+
                 using var itemsStream = new MemoryStream(defaultBufferCapacity);
                 var itemTranslator = BinaryTranslator.GetWriteTranslator(itemsStream);
 
@@ -327,7 +327,7 @@ namespace Microsoft.Build.Execution
                 ErrorUtilities.VerifyThrow(buffer != null, "Unexpected null items buffer during translation.");
 
                 using MemoryStream itemsStream = new MemoryStream(buffer, 0, buffer.Length, writable: false, publiclyVisible: true);
-                using var itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, null);
+                using var itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, InterningBinaryReader.PoolingBuffer);
                 _items = new TaskItem[itemsCount];
                 for (int i = 0; i < _items.Length; i++)
                 {
@@ -355,7 +355,7 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), null);
+                return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), InterningBinaryReader.PoolingBuffer);
             }
         }
 

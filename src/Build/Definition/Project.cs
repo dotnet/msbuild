@@ -1,37 +1,37 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
-using ObjectModel = System.Collections.ObjectModel;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
+using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Globbing;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Constants = Microsoft.Build.Internal.Constants;
+using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
+using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using ObjectModel = System.Collections.ObjectModel;
 using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
-using System.Globalization;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Definition;
-using Microsoft.Build.Evaluation.Context;
-using Microsoft.Build.Globbing;
-using Microsoft.Build.ObjectModelRemoting;
-using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
-using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
-using Microsoft.Build.FileSystem;
 
 #nullable disable
 
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// * and ? are invalid file name characters, but they occur in globs as wild cards.
         /// </summary>
-        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?' && c!= '/' && c != '\\' && c != ':').ToArray();
+        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?' && c != '/' && c != '\\' && c != ':').ToArray();
 
         /// <summary>
         /// Context to log messages and events in.
@@ -257,12 +257,12 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The <see cref="ProjectCollection"/> the project is added to.</param>
         /// <param name="loadSettings">The <see cref="ProjectLoadSettings"/> to use for evaluation.</param>
         public Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
-            : this(xml, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null, null)
+            : this(xml, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, evaluationContext: null, directoryCacheFactory: null, interactive: false)
         {
         }
 
         private Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
-            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory)
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -273,7 +273,7 @@ namespace Microsoft.Build.Evaluation
             implementation = defaultImplementation;
 
             _directoryCacheFactory = directoryCacheFactory;
-            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive);
         }
 
         /// <summary>
@@ -351,12 +351,12 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
         /// <param name="loadSettings">The load settings for this project.</param>
         public Project(XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
-            : this(xmlReader, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null, null)
+            : this(xmlReader, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, evaluationContext: null, directoryCacheFactory: null, interactive: false)
         {
         }
 
         private Project(XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
-            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory)
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xmlReader, nameof(xmlReader));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -367,7 +367,7 @@ namespace Microsoft.Build.Evaluation
             implementation = defaultImplementation;
 
             _directoryCacheFactory = directoryCacheFactory;
-            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive);
         }
 
         /// <summary>
@@ -447,12 +447,12 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
         /// <param name="loadSettings">The load settings for this project.</param>
         public Project(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
-            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null, null)
+            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, evaluationContext: null, directoryCacheFactory: null, interactive: false)
         {
         }
 
         private Project(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
-            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory)
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -469,7 +469,7 @@ namespace Microsoft.Build.Evaluation
             // seems the XmlReader based one should also clean the same way.
             try
             {
-                defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+                defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive);
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
@@ -500,7 +500,8 @@ namespace Microsoft.Build.Evaluation
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
                 options.EvaluationContext,
-                options.DirectoryCacheFactory);
+                options.DirectoryCacheFactory,
+                options.Interactive);
         }
 
         /// <summary>
@@ -518,7 +519,8 @@ namespace Microsoft.Build.Evaluation
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
                 options.EvaluationContext,
-                options.DirectoryCacheFactory);
+                options.DirectoryCacheFactory,
+                options.Interactive);
         }
 
         /// <summary>
@@ -536,7 +538,8 @@ namespace Microsoft.Build.Evaluation
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
                 options.EvaluationContext,
-                options.DirectoryCacheFactory);
+                options.DirectoryCacheFactory,
+                options.Interactive);
         }
 
         /// <summary>
@@ -1807,18 +1810,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Returns <see cref="IDirectoryCache"/> as provided by the <see cref="IDirectoryCacheFactory"/> passed when creating the
-        /// project, specific for a given evaluation ID.
-        /// </summary>
-        /// <param name="evaluationId">The evaluation ID for which the cache is requested.</param>
-        /// <returns>An <see cref="IDirectoryCache"/> implementation, or null if this project has no <see cref="IDirectoryCacheFactory"/>
-        /// associated with it or it returned null.</returns>
-        internal IDirectoryCache GetDirectoryCacheForEvaluation(int evaluationId)
-        {
-            return _directoryCacheFactory?.GetDirectoryCacheForEvaluation(evaluationId);
-        }
-
-        /// <summary>
         /// Internal project evaluation implementation.
         /// </summary>
         private class ProjectImpl : ProjectLink, IProjectLinkInternal
@@ -1870,6 +1861,11 @@ namespace Microsoft.Build.Evaluation
             /// If it has been set to null, the project has been unloaded from its collection.
             /// </summary>
             private RenameHandlerDelegate _renameHandler;
+
+            /// <summary>
+            /// Indicates if the process of loading the project is allowed to interact with the user.
+            /// </summary>
+            private bool _interactive = false;
 
             /// <summary>
             ///
@@ -2550,7 +2546,7 @@ namespace Microsoft.Build.Evaluation
                     };
                 }
 
-                public void AccumulateInformationFromRemoveItemSpec(EvaluationItemSpec removeSpec)
+                public readonly void AccumulateInformationFromRemoveItemSpec(EvaluationItemSpec removeSpec)
                 {
                     IEnumerable<string> removeSpecFragmentStrings = removeSpec.FlattenFragmentsAsStrings();
                     var removeGlob = removeSpec.ToMSBuildGlob();
@@ -2660,9 +2656,9 @@ namespace Microsoft.Build.Evaluation
             {
                 return (excludeGlob, removeGlob) switch
                 {
-                    (null,     null)     => includeGlob,
-                    (not null, null)     => new MSBuildGlobWithGaps(includeGlob, excludeGlob),
-                    (null,     not null) => new MSBuildGlobWithGaps(includeGlob, removeGlob),
+                    (null, null) => includeGlob,
+                    (not null, null) => new MSBuildGlobWithGaps(includeGlob, excludeGlob),
+                    (null, not null) => new MSBuildGlobWithGaps(includeGlob, removeGlob),
                     (not null, not null) => new MSBuildGlobWithGaps(includeGlob, new CompositeGlob(excludeGlob, removeGlob))
                 };
             }
@@ -2782,12 +2778,13 @@ namespace Microsoft.Build.Evaluation
                     return new List<ProvenanceResult>();
                 }
 
-                return
-                    projectItemElements
+                return projectItemElements
                     .AsParallel()
-                    .AsOrdered()
-                    .Select(i => ComputeProvenanceResult(itemToMatch, i))
-                    .Where(r => r != null)
+                    .Select((item, index) => (Result: ComputeProvenanceResult(itemToMatch, item), Index: index))
+                    .Where(pair => pair.Result != null)
+                    .AsSequential()
+                    .OrderBy(pair => pair.Index)
+                    .Select(pair => pair.Result)
                     .ToList();
             }
 
@@ -3728,11 +3725,13 @@ namespace Microsoft.Build.Evaluation
                     loggingServiceForEvaluation,
                     new ProjectItemFactory(Owner),
                     ProjectCollection,
+                    Owner._directoryCacheFactory,
                     ProjectCollection.ProjectRootElementCache,
                     s_buildEventContext,
                     evaluationContext.SdkResolverService,
                     BuildEventContext.InvalidSubmissionId,
-                    evaluationContext);
+                    evaluationContext,
+                    _interactive);
 
                 ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
@@ -3765,7 +3764,7 @@ namespace Microsoft.Build.Evaluation
             /// Global properties may be null.
             /// Tools version may be null.
             /// </summary>
-            internal void Initialize(IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
+            internal void Initialize(IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext, bool interactive)
             {
                 Xml.MarkAsExplicitlyLoaded();
 
@@ -3800,6 +3799,7 @@ namespace Microsoft.Build.Evaluation
                 _data = new Data(Owner, globalPropertiesCollection, toolsVersion, subToolsetVersion, canEvaluateElementsWithFalseConditions);
 
                 _loadSettings = loadSettings;
+                _interactive = interactive;
 
                 ErrorUtilities.VerifyThrow(LastEvaluationId == BuildEventContext.InvalidEvaluationId, "This is the first evaluation therefore the last evaluation id is invalid");
 
@@ -4295,14 +4295,12 @@ namespace Microsoft.Build.Evaluation
                     toolsVersionLocation = Project.Xml.ToolsVersionLocation;
                 }
 
-                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse
-                (
+                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
                     ExplicitToolsVersion,
                     Project.Xml.ToolsVersion,
                     Project.ProjectCollection.GetToolset,
                     Project.ProjectCollection.DefaultToolsVersion,
-                    out var usingDifferentToolsVersionFromProjectFile
-                );
+                    out var usingDifferentToolsVersionFromProjectFile);
 
                 UsingDifferentToolsVersionFromProjectFile = usingDifferentToolsVersionFromProjectFile;
 

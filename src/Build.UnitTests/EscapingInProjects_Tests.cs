@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
         }
 
-        override public bool Execute()
+        public override bool Execute()
         {
             if (TaskItemParam != null)
             {
@@ -107,7 +107,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// a string parameter of a task, in this case the Message task.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SemicolonInPropertyPassedIntoStringParam_UsingTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
@@ -160,7 +159,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// an ITaskItem[] task parameter.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SemicolonInPropertyPassedIntoITaskItemParam_UsingTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(String.Format(@"
@@ -564,8 +562,15 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
             finally
             {
-                if (inputFile != null) File.Delete(inputFile);
-                if (outputFile != null) File.Delete(outputFile);
+                if (inputFile != null)
+                {
+                    File.Delete(inputFile);
+                }
+
+                if (outputFile != null)
+                {
+                    File.Delete(outputFile);
+                }
             }
         }
 
@@ -599,7 +604,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// as an escaped percent sign.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ItemTransformContainingSemicolon_InTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
@@ -650,8 +654,15 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
             finally
             {
-                if (File.Exists(projectAbsolutePath)) File.Delete(projectAbsolutePath);
-                if (Directory.Exists(path)) FileUtilities.DeleteWithoutTrailingBackslash(path);
+                if (File.Exists(projectAbsolutePath))
+                {
+                    File.Delete(projectAbsolutePath);
+                }
+
+                if (Directory.Exists(path))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(path);
+                }
             }
         }
 
@@ -719,7 +730,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// literally, not as a wildcard
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void EscapedWildcardsShouldNotBeExpanded_InTaskHost()
         {
             MockLogger logger = new();
@@ -858,15 +868,15 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                         <MyUserMacro>foo%3bbar</MyUserMacro>
                     </PropertyGroup>
                     <ItemGroup>
-                        <CrazyList Include=""a"" />
-                        <CrazyList Include=""b%3bc"" />
-                        <CrazyList Include=""$(MyUserMacro)"" />
+                        <DifferentList Include=""a"" />
+                        <DifferentList Include=""b%3bc"" />
+                        <DifferentList Include=""$(MyUserMacro)"" />
                     </ItemGroup>
                 </Project>";
 
             System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
             Project project = new Project(reader);
-            IEnumerable<ProjectItem> items = project.GetItems("CrazyList");
+            IEnumerable<ProjectItem> items = project.GetItems("DifferentList");
 
             Assert.Equal(3, items.Count());
             Assert.Equal("a", items.ElementAt(0).EvaluatedInclude);
@@ -890,15 +900,15 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                         <MyUserMacro>foo;bar</MyUserMacro>
                     </PropertyGroup>
                     <ItemGroup>
-                        <CrazyList Include=""a"" />
-                        <CrazyList Include=""b%3bc"" />
-                        <CrazyList Include=""$(MyUserMacro)"" />
+                        <DifferentList Include=""a"" />
+                        <DifferentList Include=""b%3bc"" />
+                        <DifferentList Include=""$(MyUserMacro)"" />
                     </ItemGroup>
                 </Project>";
 
             System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
             Project project = new Project(reader);
-            IEnumerable<ProjectItem> items = project.GetItems("CrazyList");
+            IEnumerable<ProjectItem> items = project.GetItems("DifferentList");
 
             Assert.Equal(4, items.Count());
             Assert.Equal("a", items.ElementAt(0).EvaluatedInclude);
@@ -1436,11 +1446,11 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
         /// <summary>
         /// Build a .SLN file using MSBuild.  The .SLN and the projects contained within
-        /// have all sorts of crazy characters in their name. There
+        /// have all sorts of different characters in their name. There
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
         [Fact(Skip = "This is a known issue in Roslyn. This test should be enabled if Roslyn is updated for this scenario.")]
-        public void SolutionWithLotsaCrazyCharacters()
+        public void SolutionWithLotsaDifferentCharacters()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
 
@@ -1602,11 +1612,11 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
         /// <summary>
         /// Build a .SLN file using MSBuild.  The .SLN and the projects contained within
-        /// have all sorts of crazy characters in their name. There
+        /// have all sorts of different characters in their name. There
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
         [Fact(Skip = "This is a known issue in Roslyn. This test should be enabled if Roslyn is updated for this scenario.")]
-        public void SolutionWithLotsaCrazyCharacters_UsingTaskHost()
+        public void SolutionWithLotsaDifferentCharacters_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");
 
@@ -1778,7 +1788,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
     }
 #endif
 
-    internal class EscapingInProjectsHelper
+    internal sealed class EscapingInProjectsHelper
     {
         /// <summary>
         /// Deletes all *.weirdo files from the temp path, and dumps 3 files there --

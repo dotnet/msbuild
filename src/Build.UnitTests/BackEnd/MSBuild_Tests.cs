@@ -1,10 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
-
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -700,6 +699,193 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+
+        /// <summary>
+        /// Include and Exclude items outside and inside targets should result in same behavior on
+        ///  platform specific paths.
+        /// </summary>
+        [Fact]
+        public void ItemsIncludeExcludePathsCombinations()
+        {
+            string projectFile = null;
+
+            try
+            {
+                projectFile = ObjectModelHelpers.CreateTempFileOnDisk(@"
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <ItemGroup>
+                        <iout1 Include='a/b.foo' Exclude='a\b.foo' />
+                        <iout2 Include='a\b.foo' Exclude='a/b.foo' />
+                        <iout3 Include='a/b.foo' Exclude='a/b.foo' />
+                        <iout4 Include='a\b.foo' Exclude='a\b.foo' />
+                        <iout5 Include='a/b.foo' Exclude='a\c.foo' />
+                        <iout6 Include='a\b.foo' Exclude='a\c.foo' />
+                      </ItemGroup>
+                      <Target Name='a'>
+                        <ItemGroup>
+                          <iin1 Include='a/b.foo' Exclude='a\b.foo' />
+                          <iin2 Include='a\b.foo' Exclude='a/b.foo' />
+                          <iin3 Include='a/b.foo' Exclude='a/b.foo' />
+                          <iin4 Include='a\b.foo' Exclude='a\b.foo' />
+                          <iin5 Include='a/b.foo' Exclude='a\c.foo' />
+                          <iin6 Include='a\b.foo' Exclude='a\c.foo' />
+                        </ItemGroup>
+                        <Message Text='iout1=[@(iout1)]' Importance='High' />
+                        <Message Text='iout2=[@(iout2)]' Importance='High' />
+                        <Message Text='iout3=[@(iout3)]' Importance='High' />
+                        <Message Text='iout4=[@(iout4)]' Importance='High' />
+                        <Message Text='iout5=[@(iout5)]' Importance='High' />
+                        <Message Text='iout6=[@(iout6)]' Importance='High' />
+
+                        <Message Text='iin1=[@(iin1)]' Importance='High' />
+                        <Message Text='iin2=[@(iin2)]' Importance='High' />
+                        <Message Text='iin3=[@(iin3)]' Importance='High' />
+                        <Message Text='iin4=[@(iin4)]' Importance='High' />
+                        <Message Text='iin5=[@(iin5)]' Importance='High' />
+                        <Message Text='iin6=[@(iin6)]' Importance='High' />
+                      </Target>
+                    </Project>
+                ");
+
+                MockLogger logger = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile, logger);
+
+                Console.WriteLine(logger.FullLog);
+
+                logger.AssertLogContains("iout1=[]");
+                logger.AssertLogContains("iout2=[]");
+                logger.AssertLogContains("iout3=[]");
+                logger.AssertLogContains("iout4=[]");
+                logger.AssertLogContains("iout5=[a/b.foo]");
+                logger.AssertLogContains($"iout6=[a{Path.DirectorySeparatorChar}b.foo]");
+                logger.AssertLogContains("iin1=[]");
+                logger.AssertLogContains("iin2=[]");
+                logger.AssertLogContains("iin3=[]");
+                logger.AssertLogContains("iin4=[]");
+                logger.AssertLogContains("iin5=[a/b.foo]");
+                logger.AssertLogContains($"iin6=[a{Path.DirectorySeparatorChar}b.foo]");
+            }
+            finally
+            {
+                File.Delete(projectFile);
+            }
+        }
+
+        /// <summary>
+        /// Referring to an item outside of target leads to 'naturally expected' reference to the item being processed.
+        ///  No expansion occurs.
+        /// </summary>
+        [Fact]
+        public void ItemsRecursionOutsideTarget()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectContent = """
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                     <ItemGroup>
+                        <iout1 Include='a/b.foo' TargetPath='%(Filename)%(Extension)' />
+                        <iout1 Include='c/d.foo' TargetPath='%(Filename)%(Extension)' />
+                        <iout1 Include='g/h.foo' TargetPath='%(Filename)%(Extension)' />
+                      </ItemGroup>
+                      <Target Name='a'>
+                        <Message Text="iout1=[@(iout1)]" Importance='High' />
+                        <Message Text="iout1-target-paths=[@(iout1->'%(TargetPath)')]" Importance='High' />
+                      </Target>
+                    </Project>
+                """;
+            var projectFile = env.CreateFile("test.proj", ObjectModelHelpers.CleanupFileContents(projectContent));
+
+            MockLogger logger = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile.Path, logger);
+
+            _testOutput.WriteLine(logger.FullLog);
+
+            logger.AssertLogContains("iout1=[a/b.foo;c/d.foo;g/h.foo]");
+            logger.AssertLogContains("iout1-target-paths=[b.foo;d.foo;h.foo]");
+        }
+
+        /// <summary>
+        /// Referring to an item within target leads to item expansion which might be unintended behavior - hence warning.
+        /// </summary>
+        [Fact]
+        public void ItemsRecursionWithinTarget()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectContent = """
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <Target Name='a'>
+                        <ItemGroup>
+                          <iin1 Include='a/b.foo' TargetPath='%(Filename)%(Extension)' />
+                          <iin1 Include='c/d.foo' TargetPath='%(Filename)%(Extension)' />
+                          <iin1 Include='g/h.foo' TargetPath='%(Filename)%(Extension)' />
+                        </ItemGroup>
+                        <Message Text="iin1=[@(iin1)]" Importance='High' />
+                        <Message Text="iin1-target-paths=[@(iin1->'%(TargetPath)')]" Importance='High' />
+                      </Target>
+                    </Project>
+                """;
+            string projFileName = "test.proj";
+            var projectFile = env.CreateFile(projFileName, ObjectModelHelpers.CleanupFileContents(projectContent));
+
+            MockLogger logger = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile.Path, logger);
+
+            _testOutput.WriteLine(logger.FullLog);
+
+            logger.AssertLogDoesntContain("iin1=[a/b.foo;c/d.foo;g/h.foo]");
+            logger.AssertLogDoesntContain("iin1-target-paths=[b.foo;d.foo;h.foo]");
+            logger.AssertLogContains("iin1=[a/b.foo;c/d.foo;g/h.foo;g/h.foo]");
+            logger.AssertLogContains("iin1-target-paths=[;b.foo;b.foo;d.foo]");
+
+            logger.AssertLogContains(string.Format(ResourceUtilities.GetResourceString("ItemReferencingSelfInTarget"), "iin1", "Filename"));
+            logger.AssertLogContains(string.Format(ResourceUtilities.GetResourceString("ItemReferencingSelfInTarget"), "iin1", "Extension"));
+            logger.AssertMessageCount("MSB4120", 6);
+            // The location of the offending attribute (TargetPath) is transferred - for both metadatums (%(Filename) and %(Extension)) on correct locations in xml
+            logger.AssertMessageCount($"{projFileName}(4,34):", 2, false);
+            logger.AssertMessageCount($"{projFileName}(5,34):", 2, false);
+            logger.AssertMessageCount($"{projFileName}(6,34):", 2, false);
+            Assert.Equal(0, logger.WarningCount);
+            Assert.Equal(0, logger.ErrorCount);
+        }
+
+        /// <summary>
+        /// Referring to an unrelated item within target leads to expected expansion.
+        /// </summary>
+        [Fact]
+        public void UnrelatedItemsRecursionWithinTarget()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectContent = """
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <ItemGroup>
+                        <iout1 Include='a/b.foo'/>
+                        <iout1 Include='c/d.foo'/>
+                        <iout1 Include='g/h.foo'/>
+                      </ItemGroup>
+
+                      <Target Name='a'>
+                        <ItemGroup>
+                          <iin1 Include='@(iout1)' TargetPath='%(Filename)%(Extension)' />
+                        </ItemGroup>
+                        <Message Text="iin1=[@(iin1)]" Importance='High' />
+                        <Message Text="iin1-target-paths=[@(iin1->'%(TargetPath)')]" Importance='High' />
+                      </Target>
+                    </Project>
+                """;
+            var projectFile = env.CreateFile("test.proj", ObjectModelHelpers.CleanupFileContents(projectContent));
+
+            MockLogger logger = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile.Path, logger);
+
+            _testOutput.WriteLine(logger.FullLog);
+
+            logger.AssertLogContains("iin1=[a/b.foo;c/d.foo;g/h.foo]");
+            logger.AssertLogContains("iin1-target-paths=[b.foo;d.foo;h.foo]");
+
+            logger.AssertLogDoesntContain("MSB4120");
+            Assert.Equal(0, logger.WarningCount);
+            Assert.Equal(0, logger.ErrorCount);
+        }
+
         /// <summary>
         /// Check if passing different global properties via metadata works
         /// </summary>
@@ -1214,7 +1400,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify stopOnFirstFailure with BuildInParallel override message are correctly logged when there are multiple nodes
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void StopOnFirstFailureandBuildInParallelMultipleNode()
         {
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"

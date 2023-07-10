@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -69,7 +69,7 @@ namespace Microsoft.Build.Tasks
             // If the EntryPoint specified is apphost.exe or singlefilehost.exe, we need to replace the EntryPoint
             // with the AssemblyName instead since apphost.exe/singlefilehost.exe is an intermediate file for
             // for final published {assemblyname}.exe.
-            if ((entryPointFileName.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) || 
+            if ((entryPointFileName.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) ||
                 entryPointFileName.Equals(Constants.SingleFileHostExe, StringComparison.InvariantCultureIgnoreCase)) &&
                 !string.IsNullOrEmpty(AssemblyName))
             {

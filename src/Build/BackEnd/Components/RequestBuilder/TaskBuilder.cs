@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -13,6 +13,7 @@ using System.Runtime.ExceptionServices;
 #endif
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -371,8 +372,7 @@ namespace Microsoft.Build.BackEnd
             ParserOptions parserOptions = (_taskNode == null) ? ParserOptions.AllowPropertiesAndItemLists : ParserOptions.AllowAll;
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
 
-            bool condition = ConditionEvaluator.EvaluateCondition
-                (
+            bool condition = ConditionEvaluator.EvaluateCondition(
                 _targetChildInstance.Condition,
                 parserOptions,
                 bucket.Expander,
@@ -391,12 +391,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
-            if (MSBuildEventSource.Log.IsEnabled())
-            {
-                TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
-                MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
-            }
-
             // If this is an Intrinsic task, it gets handled in a special fashion.
             if (_taskNode == null)
             {
@@ -433,6 +427,7 @@ namespace Microsoft.Build.BackEnd
                     if (requirements != null)
                     {
                         TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+                        MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
                         _buildRequestEntry.Request.CurrentTaskContext = taskLoggingContext.BuildEventContext;
 
                         try
@@ -487,6 +482,8 @@ namespace Microsoft.Build.BackEnd
                                 // We coerce the failing result to a successful result.
                                 taskResult = new WorkUnitResult(WorkUnitResultCode.Success, taskResult.ActionCode, taskResult.Exception);
                             }
+
+                            MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
                         }
                     }
                 }
@@ -494,11 +491,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     ErrorUtilities.VerifyThrow(howToExecuteTask == TaskExecutionMode.InferOutputsOnly, "should be inferring");
 
-                    ErrorUtilities.VerifyThrow
-                        (
+                    ErrorUtilities.VerifyThrow(
                         GatherTaskOutputs(null, howToExecuteTask, bucket),
-                        "The method GatherTaskOutputs() should never fail when inferring task outputs."
-                        );
+                        "The method GatherTaskOutputs() should never fail when inferring task outputs.");
 
                     if (lookupHash != null)
                     {
@@ -514,13 +509,6 @@ namespace Microsoft.Build.BackEnd
 
                     taskResult = new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null);
                 }
-            }
-
-            // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
-            if (MSBuildEventSource.Log.IsEnabled())
-            {
-                TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
-                MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
             }
 
             return taskResult;
@@ -629,14 +617,12 @@ namespace Microsoft.Build.BackEnd
                         // Whilst we are within the processing of the task, we haven't actually started executing it, so
                         // our skip task message needs to be in the context of the target. However any errors should be reported
                         // at the point where the task appears in the project.
-                        _targetLoggingContext.LogComment
-                            (
+                        _targetLoggingContext.LogComment(
                             MessageImportance.Low,
                             "TaskSkippedFalseCondition",
                             _taskNode.Name,
                             _targetChildInstance.Condition,
-                            expanded
-                            );
+                            expanded);
                     }
                 }
             }
@@ -647,8 +633,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void ExecuteIntrinsicTask(ItemBucket bucket)
         {
-            IntrinsicTask task = IntrinsicTask.InstantiateTask
-                (
+            IntrinsicTask task = IntrinsicTask.InstantiateTask(
                 _targetChildInstance,
                 _targetLoggingContext,
                 _buildRequestEntry.RequestConfiguration.Project,
@@ -666,6 +651,8 @@ namespace Microsoft.Build.BackEnd
             {
                 ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
             }
+
+            using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, (_taskExecutionHost as TaskExecutionHost)?.TaskInstance?.GetType());
 
             try
             {
@@ -929,8 +916,7 @@ namespace Microsoft.Build.BackEnd
                         // from failures in the task.
                         if (_continueOnError == ContinueOnError.WarnAndContinue)
                         {
-                            taskLoggingContext.LogTaskWarningFromException
-                            (
+                            taskLoggingContext.LogTaskWarningFromException(
                                 exceptionToLog,
                                 new BuildEventFileInfo(_targetChildInstance.Location),
                                 _taskNode.Name);
@@ -940,8 +926,7 @@ namespace Microsoft.Build.BackEnd
                         }
                         else
                         {
-                            taskLoggingContext.LogFatalTaskError
-                            (
+                            taskLoggingContext.LogFatalTaskError(
                                 exceptionToLog,
                                 new BuildEventFileInfo(_targetChildInstance.Location),
                                 _taskNode.Name);
@@ -961,11 +946,15 @@ namespace Microsoft.Build.BackEnd
                     && !taskResult // and it returned false
                     && !taskLoggingContext.HasLoggedErrors // and it didn't log any errors
                     && (be is TaskHost th ? th.BuildRequestsSucceeded : false)
-                    && (be is IBuildEngine7 be7 ? !be7.AllowFailureWithoutError : true) // and it's not allowed to fail unless it logs an error
                     && !(_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested)) // and it wasn't cancelled
                 {
                     // Then decide how to log MSB4181
-                    if (_continueOnError == ContinueOnError.WarnAndContinue)
+                    if (be is IBuildEngine7 be7 && be7.AllowFailureWithoutError)
+                    {
+                        // If it's allowed to fail without error, log as a message
+                        taskLoggingContext.LogComment(MessageImportance.Normal, "TaskReturnedFalseButDidNotLogError", _taskNode.Name);
+                    }
+                    else if (_continueOnError == ContinueOnError.WarnAndContinue)
                     {
                         taskLoggingContext.LogWarning(null,
                             new BuildEventFileInfo(_targetChildInstance.Location),
@@ -1009,14 +998,12 @@ namespace Microsoft.Build.BackEnd
                             settingString = bucket.Expander.ExpandIntoStringAndUnescape(_taskNode.ContinueOnError, ExpanderOptions.ExpandAll, _taskNode.ContinueOnErrorLocation); // expand embedded item vectors after expanding properties and item metadata
                         }
 
-                        taskLoggingContext.LogComment
-                        (
+                        taskLoggingContext.LogComment(
                             MessageImportance.Normal,
                             "TaskContinuedDueToContinueOnError",
                             "ContinueOnError",
                             _taskNode.Name,
-                            settingString
-                        );
+                            settingString);
 
                         actionCode = WorkUnitActionCode.Continue;
                     }
@@ -1030,7 +1017,8 @@ namespace Microsoft.Build.BackEnd
 
         private List<string> GetUndeclaredProjects(MSBuild msbuildTask)
         {
-            if (!_componentHost.BuildParameters.IsolateProjects)
+            ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
+            if (isolateProjects == ProjectIsolationMode.False || isolateProjects == ProjectIsolationMode.MessageUponIsolationViolation)
             {
                 return null;
             }
@@ -1057,11 +1045,7 @@ namespace Microsoft.Build.BackEnd
                     !(declaredProjects.Contains(normalizedMSBuildProject)
                       || _buildRequestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(normalizedMSBuildProject)))
                 {
-                    if (undeclaredProjects == null)
-                    {
-                        undeclaredProjects = new List<string>(projectReferenceItems.Count);
-                    }
-
+                    undeclaredProjects ??= new List<string>(projectReferenceItems.Count);
                     undeclaredProjects.Add(normalizedMSBuildProject);
                 }
             }
@@ -1085,8 +1069,7 @@ namespace Microsoft.Build.BackEnd
             foreach (ProjectTaskInstanceChild taskOutputSpecification in _taskNode.Outputs)
             {
                 // if the task's outputs are supposed to be gathered
-                bool condition = ConditionEvaluator.EvaluateCondition
-                    (
+                bool condition = ConditionEvaluator.EvaluateCondition(
                     taskOutputSpecification.Condition,
                     ParserOptions.AllowAll,
                     bucket.Expander,
@@ -1113,16 +1096,14 @@ namespace Microsoft.Build.BackEnd
                         outputTargetName = bucket.Expander.ExpandIntoStringAndUnescape(taskOutputItemInstance.ItemType, ExpanderOptions.ExpandAll, taskOutputItemInstance.ItemTypeLocation);
                         taskParameterName = taskOutputItemInstance.TaskParameter;
 
-                        ProjectErrorUtilities.VerifyThrowInvalidProject
-                        (
+                        ProjectErrorUtilities.VerifyThrowInvalidProject(
                             outputTargetName.Length > 0,
                             taskOutputItemInstance.ItemTypeLocation,
                             "InvalidEvaluatedAttributeValue",
                             outputTargetName,
                             taskOutputItemInstance.ItemType,
                             XMakeAttributes.itemName,
-                            XMakeElements.output
-                        );
+                            XMakeElements.output);
                     }
                     else
                     {
@@ -1133,31 +1114,27 @@ namespace Microsoft.Build.BackEnd
                         outputTargetName = bucket.Expander.ExpandIntoStringAndUnescape(taskOutputPropertyInstance.PropertyName, ExpanderOptions.ExpandAll, taskOutputPropertyInstance.PropertyNameLocation);
                         taskParameterName = taskOutputPropertyInstance.TaskParameter;
 
-                        ProjectErrorUtilities.VerifyThrowInvalidProject
-                        (
+                        ProjectErrorUtilities.VerifyThrowInvalidProject(
                             outputTargetName.Length > 0,
                             taskOutputPropertyInstance.PropertyNameLocation,
                             "InvalidEvaluatedAttributeValue",
                             outputTargetName,
                             taskOutputPropertyInstance.PropertyName,
                             XMakeAttributes.propertyName,
-                            XMakeElements.output
-                        );
+                            XMakeElements.output);
                     }
 
                     string unexpandedTaskParameterName = taskParameterName;
                     taskParameterName = bucket.Expander.ExpandIntoStringAndUnescape(taskParameterName, ExpanderOptions.ExpandAll, taskOutputSpecification.TaskParameterLocation);
 
-                    ProjectErrorUtilities.VerifyThrowInvalidProject
-                    (
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(
                         taskParameterName.Length > 0,
                         taskOutputSpecification.TaskParameterLocation,
                         "InvalidEvaluatedAttributeValue",
                         taskParameterName,
                         unexpandedTaskParameterName,
                         XMakeAttributes.taskParameter,
-                        XMakeElements.output
-                    );
+                        XMakeElements.output);
 
                     // if we're gathering outputs by .NET reflection
                     if (howToExecuteTask == TaskExecutionMode.ExecuteTaskAndGatherOutputs)
@@ -1192,15 +1169,13 @@ namespace Microsoft.Build.BackEnd
         /// <param name="itemName">can be null</param>
         /// <param name="propertyName">can be null</param>
         /// <param name="bucket">The bucket for the batch.</param>
-        private void InferTaskOutputs
-        (
+        private void InferTaskOutputs(
             Lookup lookup,
             ProjectTaskInstanceChild taskOutputSpecification,
             string taskParameterName,
             string itemName,
             string propertyName,
-            ItemBucket bucket
-        )
+            ItemBucket bucket)
         {
             string taskParameterAttribute = _taskNode.GetParameter(taskParameterName);
 

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_XML_SCHEMA_VALIDATION
 using System;
@@ -21,7 +21,7 @@ namespace Microsoft.Build.CommandLine
     {
         // Set to true if there was a syntax error in the project file.
         private bool _syntaxError;
-
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Methods
 
         /// <summary>
@@ -33,12 +33,10 @@ namespace Microsoft.Build.CommandLine
         /// <param name="binPath">Path to the framework directory where the default schema for 
         /// this ToolsVersion can be found.</param>
         /// <returns>True if the project was successfully validated against the given schema, false otherwise</returns>
-        internal static void VerifyProjectSchema
-        (
+        internal static void VerifyProjectSchema(
             string projectFile,
             string schemaFile,
-            string binPath
-        )
+            string binPath)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
             ErrorUtilities.VerifyThrowArgumentNull(binPath, nameof(binPath));
@@ -57,11 +55,9 @@ namespace Microsoft.Build.CommandLine
             else
             {
                 // If we've gotten to this point, there is no schema to validate against -- just exit. 
-                InitializationException.Throw
-                    (
+                InitializationException.Throw(
                     ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SchemaNotFoundErrorWithFile", schemaFile),
-                    null /* No associated command line switch */
-                    );
+                    null); /* No associated command line switch */
             }
 
             ProjectSchemaValidationHandler validationHandler = new ProjectSchemaValidationHandler();
@@ -72,11 +68,9 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Validates a project against the given schema.  A schema file must be provided.
         /// </summary>
-        private void VerifyProjectSchema
-        (
+        private void VerifyProjectSchema(
             string projectFile,
-            string schemaFile
-        )
+            string schemaFile)
         {
             ErrorUtilities.VerifyThrowArgumentNull(schemaFile, nameof(schemaFile));
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
@@ -124,24 +118,21 @@ namespace Microsoft.Build.CommandLine
                                 }
                             }
 
-                            VerifyThrowInitializationExceptionWithResource
-                                    (
+                            VerifyThrowInitializationExceptionWithResource(
                                      !_syntaxError,
                                      projectFile,
                                      0 /* line */,
                                      0 /* end line */,
                                      0 /* column */,
                                      0 /* end column */,
-                                     "ProjectSchemaErrorHalt"
-                                    );
+                                     "ProjectSchemaErrorHalt");
                         }
                     }
                 }
                 // handle errors in the schema itself
                 catch (XmlException e)
                 {
-                    ThrowInitializationExceptionWithResource
-                            (
+                    ThrowInitializationExceptionWithResource(
                              (e.SourceUri.Length == 0) ? String.Empty : new Uri(e.SourceUri).LocalPath,
                              e.LineNumber,
                              0 /* end line */,
@@ -149,14 +140,12 @@ namespace Microsoft.Build.CommandLine
                              0 /* end column */,
                              "InvalidSchemaFile",
                              schemaFile,
-                             e.Message
-                            );
+                             e.Message);
                 }
                 // handle errors in the schema itself
                 catch (XmlSchemaException e)
                 {
-                    ThrowInitializationExceptionWithResource
-                            (
+                    ThrowInitializationExceptionWithResource(
                              (e.SourceUri.Length == 0) ? String.Empty : new Uri(e.SourceUri).LocalPath,
                              e.LineNumber,
                              0 /* end line */,
@@ -164,8 +153,7 @@ namespace Microsoft.Build.CommandLine
                              0 /* end column */,
                              "InvalidSchemaFile",
                              schemaFile,
-                             e.Message
-                            );
+                             e.Message);
                 }
             }
         }
@@ -174,8 +162,7 @@ namespace Microsoft.Build.CommandLine
         /// Given the parameters passed in, if the condition is false, builds an 
         /// error message and throws an InitializationException with that message. 
         /// </summary>
-        private static void VerifyThrowInitializationExceptionWithResource
-                (
+        private static void VerifyThrowInitializationExceptionWithResource(
                  bool condition,
                  string projectFile,
                  int fileLine,
@@ -183,21 +170,18 @@ namespace Microsoft.Build.CommandLine
                  int fileColumn,
                  int fileEndColumn,
                  string resourceName,
-                 params object[] args
-                )
+                 params object[] args)
         {
             if (!condition)
             {
-                ThrowInitializationExceptionWithResource
-                        (
+                ThrowInitializationExceptionWithResource(
                          projectFile,
                          fileLine,
                          fileEndLine,
                          fileColumn,
                          fileEndColumn,
                          resourceName,
-                         args
-                        );
+                         args);
             }
         }
 
@@ -205,54 +189,45 @@ namespace Microsoft.Build.CommandLine
         /// Given the parameters passed in, builds an error message and throws an 
         /// InitializationException with that message. 
         /// </summary>
-        private static void ThrowInitializationExceptionWithResource
-                (
+        private static void ThrowInitializationExceptionWithResource(
                  string projectFile,
                  int fileLine,
                  int fileEndLine,
                  int fileColumn,
                  int fileEndColumn,
                  string resourceName,
-                 params object[] args
-                )
+                 params object[] args)
         {
-            InitializationException.Throw
-                    (
-                     BuildStringFromResource
-                        (
+            InitializationException.Throw(
+                     BuildStringFromResource(
                          projectFile,
                          fileLine,
                          fileEndLine,
                          fileColumn,
                          fileEndColumn,
                          resourceName,
-                         args
-                        ),
-                     null /* No associated command line switch */
-                    );
+                         args),
+                     null); /* No associated command line switch */
         }
 
         /// <summary>
         /// Given a resource string and information about a file, builds up a string
         /// containing the message.
         /// </summary>
-        private static string BuildStringFromResource
-                (
+        private static string BuildStringFromResource(
                  string projectFile,
                  int fileLine,
                  int fileEndLine,
                  int fileColumn,
                  int fileEndColumn,
                  string resourceName,
-                 params object[] args
-                )
+                 params object[] args)
         {
             string errorCode;
             string helpKeyword;
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, resourceName, args);
 
-            return EventArgsFormatting.FormatEventMessage
-                (
+            return EventArgsFormatting.FormatEventMessage(
                     "error",
                     AssemblyResources.GetString("SubCategoryForSchemaValidationErrors"),
                     message,
@@ -262,8 +237,7 @@ namespace Microsoft.Build.CommandLine
                     fileEndLine,
                     fileColumn,
                     fileEndColumn,
-                    0 /* thread id */
-                );
+                    0); /* thread id */
         }
 
         #endregion // Methods
@@ -287,22 +261,19 @@ namespace Microsoft.Build.CommandLine
                 filePath = (new Uri(args.Exception.SourceUri)).LocalPath;
             }
 
-            Console.WriteLine
-                    (
-                     BuildStringFromResource
-                        (
+            Console.WriteLine(
+                     BuildStringFromResource(
                          filePath,
                          args.Exception.LineNumber,
                          0 /* end line */,
                          args.Exception.LinePosition,
                          0 /* end column */,
                          "SchemaValidationError",
-                         args.Exception.Message
-                        )
-                    );
+                         args.Exception.Message));
         }
 
         #endregion // Event Handlers
+#pragma warning restore format
     }
 }
 #endif

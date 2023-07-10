@@ -1,7 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-// </copyright>
-// <summary>Sink which will take in a build event and raise it on its internal event source</summary>
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.Build.Framework;
@@ -95,7 +93,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// occurred.  It is raised on every event.
         /// </summary>
         public event AnyEventHandler AnyEventRaised;
-        
+
         /// <summary>
         /// This event is raised to log telemetry.
         /// </summary>

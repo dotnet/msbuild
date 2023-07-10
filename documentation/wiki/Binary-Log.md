@@ -66,12 +66,7 @@ https://msbuildlog.com/
 
 # Collecting binary logs from Visual Studio builds
 
-If you need to capture a binary log in Visual Studio, instead of the command line, you'll need a Visual Studio plugin:
-
-- https://marketplace.visualstudio.com/items?itemName=VisualStudioProductTeam.ProjectSystemTools for VS 2017 & 2019
-- https://marketplace.visualstudio.com/items?itemName=VisualStudioProductTeam.ProjectSystemTools2022 for VS 2022
-
-After installing that, enable logging and run your build ([more details](https://github.com/dotnet/project-system-tools)).
+[see more details](Providing-Binary-Logs.md#capturing-binary-logs-through-visual-studio)
 
 # Binary log file format
 

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <ResultsDirectory>C:\Test\Results</ResultsDirectory>
+    <TargetPlatform>X86</TargetPlatform>
+    <MaxCpuCount>1</MaxCpuCount>
+    <BatchSize>10</BatchSize>
+    <TestSessionTimeout>21600000</TestSessionTimeout>
+    <DesignMode>False</DesignMode>
+    <InIsolation>False</InIsolation>
+    <CollectSourceInformation>False</CollectSourceInformation>
+    <DisableAppDomain>False</DisableAppDomain>
+    <DisableParallelization>False</DisableParallelization>
+    <TargetFrameworkVersion>.NETFramework,Version=v4.0</TargetFrameworkVersion>
+    <ExecutionThreadApartmentState>STA</ExecutionThreadApartmentState>
+    <TestAdaptersPaths>%SystemDrive%\Test</TestAdaptersPaths>
+    <TreatTestAdapterErrorsAsWarnings>False</TreatTestAdapterErrorsAsWarnings>
+  </RunConfiguration>
+  <SessionConfiguration>
+    <!-- Generated -->
+  </SessionConfiguration>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector uri="datacollector://microsoft/DevDiv/TestExtensions/ProcDumpCollector/v1" friendlyName="ProcDump Collector" enabled="True">
+        <Configuration>
+          <RootDumpDirectory>C:\Test\Dumps</RootDumpDirectory>
+          <Deployment PackageName = "Microsoft.DevDiv.TestExtensions.ProcDumpCollector" />
+        </Configuration>
+      </DataCollector>
+      <DataCollector uri="datacollector://microsoft/DevDiv/TestExtensions/LingeringProcessCollector/v1" friendlyName="Lingering Process Collector" enabled="True">
+        <Configuration>
+          <KillLingeringProcesses>true</KillLingeringProcesses>          
+          <ShutdownCommands>
+            <ShutdownCommand Process="VBCSCompiler" Command="%ProcessPath%" Arguments="-shutdown" Timeout="60000" />
+          </ShutdownCommands>
+          <LoggingBehavior>Warning</LoggingBehavior>
+          <Deployment PackageName = "Microsoft.DevDiv.TestExtensions.LingeringProcessCollector" />
+        </Configuration>
+      </DataCollector>
+      <DataCollector uri="datacollector://microsoft/DevDiv/VideoRecorder/2.0" friendlyName="Screen and Voice Recorder" enabled="True">
+        <Configuration>
+          <Deployment PackageName = "Microsoft.DevDiv.Validation.MediaRecorder" />
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+  <InProcDataCollectionRunSettings>
+    <InProcDataCollectors>
+      <InProcDataCollector uri="datacollector://microsoft/DevDiv/TestExtensions/OptProfDataCollector/v2" assemblyQualifiedName="Microsoft.DevDiv.TestExtensions.OptProfDataCollector, Microsoft.DevDiv.TestExtensions.OptProfDataCollector, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null" friendlyName="OptProf Data Collector" enabled="True" codebase="C:\Test\Extensions\Microsoft.DevDiv.TestExtensions.OptProfDataCollector\lib\net461\Microsoft.DevDiv.TestExtensions.OptProfDataCollector.dll">
+        <Configuration>
+          <WorkingDirectory>C:\OptProf</WorkingDirectory>
+          <ProfilesDirectory>C:\Profiles</ProfilesDirectory>
+          <IgnoreProfileNotGeneratedExceptions>true</IgnoreProfileNotGeneratedExceptions>
+          <Deployment PackageName="Microsoft.DevDiv.TestExtensions.OptProfDataCollector" />
+        </Configuration>
+      </InProcDataCollector>
+    </InProcDataCollectors>
+  </InProcDataCollectionRunSettings>
+  <TestRunParameters />
+  <LoggerRunSettings>
+    <Loggers />
+  </LoggerRunSettings>
+  <VisualStudioConfiguration>
+    <!-- MSBuild-OptProf specific VS configuration element -->
+    <InstallationUnderTest>
+      <Components All="false">
+        <Include ID="Microsoft.VisualStudio.Component.VC.CLI.Support" />
+        <Include ID="Microsoft.VisualStudio.Component.Windows81SDK" />
+        <Include ID="Microsoft.VisualStudio.ComponentGroup.UWP.VC" />
+        <Include ID="Microsoft.VisualStudio.Component.VC.ATLMFC" />
+        <Include ID="Microsoft.VisualStudio.Component.Windows10SDK.15063.Desktop" />
+        <Include ID="Microsoft.VisualStudio.Component.Windows10SDK.16299" />
+        <Include ID="Microsoft.VisualStudio.Component.Windows10SDK.16299.UWP" />
+        <Include ID="Microsoft.Net.ComponentGroup.4.7.2.DeveloperTools" />
+        <Exclude ID="Component.Incredibuild" />
+        <Exclude ID="Component.JavaJDK" />
+        <Exclude ID="Microsoft.VisualStudio.Component.AspNet45" />
+      </Components>
+      <Workloads All="false" IncludeComponents="Required,Recommended">
+        <Include ID="Microsoft.VisualStudio.Workload.CoreEditor" IncludeComponents="Required" />
+        <Include ID="Microsoft.VisualStudio.Workload.ManagedDesktop" IncludeComponents="Required" />
+        <Include ID="Microsoft.VisualStudio.Workload.NativeCrossPlat" IncludeComponents="Required" />
+        <Include ID="Microsoft.VisualStudio.Workload.NativeDesktop" IncludeComponents="Required" />
+        <Include ID="Microsoft.VisualStudio.Workload.NetWeb" IncludeComponents="Required" />
+        <Include ID="Microsoft.VisualStudio.Workload.Office" IncludeComponents="Required" />
+        <Include ID="Microsoft.VisualStudio.Workload.Universal" IncludeComponents="Required" />
+        <Include ID="Microsoft.VisualStudio.Workload.VisualStudioExtension" IncludeComponents="Required" />
+        <Include ID="Microsoft.VisualStudio.Workload.Webcrossplat" IncludeComponents="Required" />
+      </Workloads>
+    </InstallationUnderTest>
+  </VisualStudioConfiguration>
+</RunSettings>

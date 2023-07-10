@@ -1,7 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +23,7 @@ namespace Microsoft.Build.Shared.FileSystem
             get
             {
 #if !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0) && NativeMethodsShared.IsWindows;
+                return NativeMethodsShared.IsWindows;
 #else
                 // We need to mock usage of ChangeWaves class,
                 // because Microsoft.Build.Engine.OM.UnitTests should not have access to internals of Microsoft.Build.Framework.
@@ -60,8 +59,7 @@ namespace Microsoft.Build.Shared.FileSystem
             Func<string, string, Microsoft.IO.SearchOption, IEnumerable<string>> enumerateFunctionDelegate,
             string path,
             string searchPattern,
-            Microsoft.IO.SearchOption searchOption
-        )
+            Microsoft.IO.SearchOption searchOption)
         {
             try
             {
@@ -90,8 +88,7 @@ namespace Microsoft.Build.Shared.FileSystem
                     (path, searchPattern, searchOption) => Microsoft.IO.Directory.EnumerateFiles(path, searchPattern, searchOption),
                     path,
                     searchPattern,
-                    (Microsoft.IO.SearchOption)searchOption
-                )
+                    (Microsoft.IO.SearchOption)searchOption)
                 : Directory.EnumerateFiles(path, searchPattern, searchOption);
 #else
             return Directory.EnumerateFiles(path, searchPattern, searchOption);
@@ -106,8 +103,7 @@ namespace Microsoft.Build.Shared.FileSystem
                     (path, searchPattern, searchOption) => Microsoft.IO.Directory.EnumerateDirectories(path, searchPattern, searchOption),
                     path,
                     searchPattern,
-                    (Microsoft.IO.SearchOption)searchOption
-                )
+                    (Microsoft.IO.SearchOption)searchOption)
                 : Directory.EnumerateDirectories(path, searchPattern, searchOption);
 #else
             return Directory.EnumerateDirectories(path, searchPattern, searchOption);
@@ -121,8 +117,7 @@ namespace Microsoft.Build.Shared.FileSystem
                 ? HandleFileLoadException(
                     (path, searchPattern, searchOption) => Microsoft.IO.Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption),
                     path,
-                    searchPattern, (Microsoft.IO.SearchOption)searchOption
-                )
+                    searchPattern, (Microsoft.IO.SearchOption)searchOption)
                 : Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption);
 #else
             return Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption);

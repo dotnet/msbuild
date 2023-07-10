@@ -1,19 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
-// mansign.cs
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Security.Cryptography;
-using System.Security.Cryptography.Xml;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Xml;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography.Xml;
+using System.Text;
+using System.Xml;
 using _FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
 #nullable disable
@@ -124,59 +120,59 @@ namespace System.Deployment.Internal.CodeSigning
         // DllImport declarations.
         //
         [DllImport(KERNEL32, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         IntPtr GetProcessHeap();
 
         [DllImport(KERNEL32, CharSet = CharSet.Auto, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal extern static
+        internal static extern
         bool HeapFree(
-            [In]    IntPtr hHeap,
-            [In]    uint dwFlags,
-            [In]    IntPtr lpMem);
+            [In] IntPtr hHeap,
+            [In] uint dwFlags,
+            [In] IntPtr lpMem);
 
         [DllImport(MSCORWKS, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         int CertTimestampAuthenticodeLicense(
-            [In]      ref CRYPT_DATA_BLOB pSignedLicenseBlob,
-            [In]      string pwszTimestampURI,
-            [In, Out]  ref CRYPT_DATA_BLOB pTimestampSignatureBlob);
+            [In] ref CRYPT_DATA_BLOB pSignedLicenseBlob,
+            [In] string pwszTimestampURI,
+            [In, Out] ref CRYPT_DATA_BLOB pTimestampSignatureBlob);
 
         [DllImport(MSCORWKS, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         int CertVerifyAuthenticodeLicense(
-            [In]      ref CRYPT_DATA_BLOB pLicenseBlob,
-            [In]      uint dwFlags,
-            [In, Out]  ref AXL_SIGNER_INFO pSignerInfo,
-            [In, Out]  ref AXL_TIMESTAMPER_INFO pTimestamperInfo);
+            [In] ref CRYPT_DATA_BLOB pLicenseBlob,
+            [In] uint dwFlags,
+            [In, Out] ref AXL_SIGNER_INFO pSignerInfo,
+            [In, Out] ref AXL_TIMESTAMPER_INFO pTimestamperInfo);
 
         [DllImport(MSCORWKS, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         int CertFreeAuthenticodeSignerInfo(
-            [In]      ref AXL_SIGNER_INFO pSignerInfo);
+            [In] ref AXL_SIGNER_INFO pSignerInfo);
 
         [DllImport(MSCORWKS, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         int CertFreeAuthenticodeTimestamperInfo(
-            [In]      ref AXL_TIMESTAMPER_INFO pTimestamperInfo);
+            [In] ref AXL_TIMESTAMPER_INFO pTimestamperInfo);
 
         [DllImport(MSCORWKS, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         int _AxlGetIssuerPublicKeyHash(
-            [In]     IntPtr pCertContext,
+            [In] IntPtr pCertContext,
             [In, Out] ref IntPtr ppwszPublicKeyHash);
 
         [DllImport(MSCORWKS, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         int _AxlRSAKeyValueToPublicKeyToken(
-            [In]     ref CRYPT_DATA_BLOB pModulusBlob,
-            [In]     ref CRYPT_DATA_BLOB pExponentBlob,
+            [In] ref CRYPT_DATA_BLOB pModulusBlob,
+            [In] ref CRYPT_DATA_BLOB pExponentBlob,
             [In, Out] ref IntPtr ppwszPublicKeyToken);
 
         [DllImport(MSCORWKS, CharSet = CharSet.Auto, SetLastError = true)]
-        internal extern static
+        internal static extern
         int _AxlPublicKeyBlobToPublicKeyToken(
-            [In]     ref CRYPT_DATA_BLOB pCspPublicKeyBlob,
+            [In] ref CRYPT_DATA_BLOB pCspPublicKeyBlob,
             [In, Out] ref IntPtr ppwszPublicKeyToken);
 
         // RFC3161 timestamp support
@@ -213,15 +209,15 @@ namespace System.Deployment.Internal.CodeSigning
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         [DllImport(CRYPT32, CallingConvention = CallingConvention.Winapi, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal extern static
+        internal static extern
         bool CryptRetrieveTimeStamp(
-            [In]     [MarshalAs(UnmanagedType.LPWStr)]  string wszUrl,
-            [In]     uint dwRetrievalFlags,
-            [In]     int dwTimeout,
-            [In]     [MarshalAs(UnmanagedType.LPStr)]   string pszHashId,
+            [In][MarshalAs(UnmanagedType.LPWStr)] string wszUrl,
+            [In] uint dwRetrievalFlags,
+            [In] int dwTimeout,
+            [In][MarshalAs(UnmanagedType.LPStr)] string pszHashId,
             [In, Out] ref CRYPT_TIMESTAMP_PARA pPara,
-            [In]     byte[] pbData,
-            [In]     int cbData,
+            [In] byte[] pbData,
+            [In] int cbData,
             [In, Out] ref IntPtr ppTsContext,
             [In, Out] ref IntPtr ppTsSigner,
             [In, Out] ref IntPtr phStore);
@@ -286,11 +282,16 @@ namespace System.Deployment.Internal.CodeSigning
         {
             // We only care about Id references inside of the KeyInfo section
             if (_verify)
+            {
                 return base.GetIdElement(document, idValue);
+            }
 
             KeyInfo keyInfo = this.KeyInfo;
             if (keyInfo.Id != idValue)
+            {
                 return null;
+            }
+
             return keyInfo.GetXml();
         }
     }
@@ -382,7 +383,10 @@ namespace System.Deployment.Internal.CodeSigning
             nsm.AddNamespace("asm", AssemblyNamespaceUri);
             XmlNode assemblyIdentityNode = _manifestDom.SelectSingleNode("asm:assembly/asm:assemblyIdentity", nsm);
             if (assemblyIdentityNode == null)
+            {
                 throw new CryptographicException(Win32.TRUST_E_SUBJECT_FORM_UNKNOWN);
+            }
+
             return assemblyIdentityNode as XmlElement;
         }
 
@@ -442,7 +446,9 @@ namespace System.Deployment.Internal.CodeSigning
             nsm.AddNamespace("ds", SignedXml.XmlDsigNamespaceUrl);
             XmlNode signatureNode = manifestDom.SelectSingleNode("asm:assembly/ds:Signature", nsm);
             if (signatureNode != null)
+            {
                 signatureNode.ParentNode.RemoveChild(signatureNode);
+            }
         }
 
         /// <summary>
@@ -555,11 +561,13 @@ namespace System.Deployment.Internal.CodeSigning
 
                 if (useSha256)
                 {
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                     using (SHA256 sha2 = SHA256.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                         "System.Security.Cryptography.SHA256CryptoServiceProvider"
 #endif
                 ))
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                     {
                         byte[] hash = sha2.ComputeHash(exc.GetOutput() as MemoryStream);
                         if (hash == null)
@@ -572,11 +580,13 @@ namespace System.Deployment.Internal.CodeSigning
                 }
                 else
                 {
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                     using (SHA1 sha1 = SHA1.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                         "System.Security.Cryptography.SHA1CryptoServiceProvider"
 #endif
                         ))
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                     {
                         byte[] hash = sha1.ComputeHash(exc.GetOutput() as MemoryStream);
                         if (hash == null)
@@ -611,11 +621,13 @@ namespace System.Deployment.Internal.CodeSigning
 
                 if (useSha256)
                 {
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                     using (SHA256 sha2 = SHA256.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                         "System.Security.Cryptography.SHA256CryptoServiceProvider"
 #endif
                         ))
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                     {
                         byte[] hash = sha2.ComputeHash(exc.GetOutput() as MemoryStream);
                         if (hash == null)
@@ -628,11 +640,13 @@ namespace System.Deployment.Internal.CodeSigning
                 }
                 else
                 {
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                     using (SHA1 sha1 = SHA1.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                         "System.Security.Cryptography.SHA1CryptoServiceProvider"
 #endif
                          ))
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                     {
                         byte[] hash = sha1.ComputeHash(exc.GetOutput() as MemoryStream);
                         if (hash == null)
@@ -836,13 +850,19 @@ namespace System.Deployment.Internal.CodeSigning
                 finally
                 {
                     if (ppTsContext != IntPtr.Zero)
+                    {
                         Win32.CryptMemFree(ppTsContext);
+                    }
 
                     if (ppTsSigner != IntPtr.Zero)
+                    {
                         Win32.CertFreeCertificateContext(ppTsSigner);
+                    }
 
                     if (phStore != IntPtr.Zero)
+                    {
                         Win32.CertCloseStore(phStore, 0);
+                    }
                 }
             }
 
@@ -863,7 +883,7 @@ namespace System.Deployment.Internal.CodeSigning
                 // Try RFC3161 first
                 XmlElement signatureValueNode = licenseDom.SelectSingleNode("r:license/r:issuer/ds:Signature/ds:SignatureValue", nsm) as XmlElement;
                 string signatureValue = signatureValueNode.InnerText;
-                timestamp = ObtainRFC3161Timestamp(timeStampUrl, signatureValue, useSha256);
+                timestamp = ObtainRFC3161Timestamp(timeStampUrl, signatureValue, true);
             }
             // Catch CryptographicException to ensure fallback to old code (non-RFC3161)
             catch (CryptographicException)
@@ -1063,12 +1083,16 @@ namespace System.Deployment.Internal.CodeSigning
         internal CmiManifestSigner2(AsymmetricAlgorithm strongNameKey, X509Certificate2 certificate, bool useSha256)
         {
             if (strongNameKey == null)
+            {
                 throw new ArgumentNullException(nameof(strongNameKey));
+            }
 
 #if (true) // BUGBUG: Fusion only supports RSA. Do we throw if not RSA???
             RSA rsa = strongNameKey as RSA;
             if (rsa == null)
+            {
                 throw new ArgumentNullException(nameof(strongNameKey));
+            }
 #endif
             _strongNameKey = strongNameKey;
             _certificate = certificate;
@@ -1143,9 +1167,15 @@ namespace System.Deployment.Internal.CodeSigning
             set
             {
                 if (value < X509IncludeOption.None || value > X509IncludeOption.WholeChain)
+                {
                     throw new ArgumentException("value");
+                }
+
                 if (_includeOption == X509IncludeOption.None)
+                {
                     throw new NotSupportedException();
+                }
+
                 _includeOption = value;
             }
         }
@@ -1161,7 +1191,9 @@ namespace System.Deployment.Internal.CodeSigning
                 unchecked
                 {
                     if ((value & ((CmiManifestSignerFlag)~CimManifestSignerFlagMask)) != 0)
+                    {
                         throw new ArgumentException("value");
+                    }
                 }
                 _signerFlag = value;
             }

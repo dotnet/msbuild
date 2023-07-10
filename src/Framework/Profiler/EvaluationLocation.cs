@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -101,7 +101,7 @@ namespace Microsoft.Build.Framework.Profiler
         public EvaluationLocationKind Kind { get; }
 
         /// <nodoc/>
-        public bool IsEvaluationPass => File == null;
+        public readonly bool IsEvaluationPass => File == null;
 
         /// <nodoc/>
         public static EvaluationLocation CreateLocationForCondition(long? parentId, EvaluationPass evaluationPass, string evaluationDescription, string file,
@@ -143,7 +143,7 @@ namespace Microsoft.Build.Framework.Profiler
             int? line, string elementName, string elementDescription, EvaluationLocationKind kind)
         {
             Id = id;
-            ParentId = parentId == EmptyLocation.Id? null : parentId; // The empty location doesn't count as a parent id, since it's just a dummy starting point
+            ParentId = parentId == EmptyLocation.Id ? null : parentId; // The empty location doesn't count as a parent id, since it's just a dummy starting point
             EvaluationPass = evaluationPass;
             EvaluationPassDescription = evaluationPassDescription;
             File = file;
@@ -181,9 +181,9 @@ namespace Microsoft.Build.Framework.Profiler
         /// An empty location, used as the starting instance.
         /// </summary>
         public static EvaluationLocation EmptyLocation { get; } = CreateEmptyLocation();
-        
+
         /// <nodoc/>
-        public EvaluationLocation WithEvaluationPass(EvaluationPass evaluationPass, string passDescription = null)
+        public readonly EvaluationLocation WithEvaluationPass(EvaluationPass evaluationPass, string passDescription = null)
         {
             return new EvaluationLocation(this.Id, evaluationPass, passDescription ?? PassDefaultDescription[evaluationPass],
                 this.File, this.Line, this.ElementName, this.ElementDescription, this.Kind);
@@ -240,7 +240,7 @@ namespace Microsoft.Build.Framework.Profiler
                     Line == other.Line &&
                     ElementName == other.ElementName &&
                     ElementDescription == other.ElementDescription &&
-					Kind == other.Kind;
+                    Kind == other.Kind;
             }
             return false;
         }

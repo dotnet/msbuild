@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -42,7 +42,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// - The only goal for <see cref="GenerateBindingRedirects"/> task is to add specified redirects to the output app.config.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TargetAppConfigShouldContainsBindingRedirects()
         {
             // Arrange
@@ -68,7 +67,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// - The only goal for <see cref="GenerateBindingRedirects"/> task is to add specified redirects to the output app.config.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TargetAppConfigShouldContainsBindingRedirectsFromAppConfig()
         {
             // Arrange
@@ -103,7 +101,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         ///   should respect that.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GenerateBindingRedirectsFromTwoDependentAssemblySections()
         {
             // Arrange
@@ -163,7 +160,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         ///   But due to MSDN documentation, dependentAssembly could have only probing element without any other elements inside.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void AppConfigWithProbingPathAndWithoutDependentAssemblyShouldNotProduceWarningsBug1161241()
         {
             // Arrange
@@ -191,7 +187,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         ///   But due to MSDN documentation, dependentAssembly could have only probing element without any other elements inside.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void AppConfigWithEmptyAssemblyBindingShouldNotProduceWarnings()
         {
             // Arrange
@@ -217,7 +212,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// - Due to app.config xsd schema this is a valid configuration.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void DependentAssemblySectionWithoutBindingRedirectShouldNotProduceWarnings()
         {
             // Arrange
@@ -281,7 +275,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             redirectResults.TargetAppConfigContent.ShouldContain("newVersion=\"40.0.0.0\"");
 
             var oldTimestamp = DateTime.Now.Subtract(TimeSpan.FromDays(30));
-            
+
             File.SetCreationTime(outputAppConfigFile, oldTimestamp);
             File.SetLastWriteTime(outputAppConfigFile, oldTimestamp);
 
@@ -295,10 +289,9 @@ namespace Microsoft.Build.Tasks.UnitTests
             // Verify it ran correctly and that it's still old
             redirectResults2.ExecuteResult.ShouldBeTrue();
             redirectResults2.TargetAppConfigContent.ShouldContain("<assemblyIdentity name=\"System\" publicKeyToken=\"b77a5c561934e089\" culture=\"neutral\" />");
-            redirectResults.TargetAppConfigContent.ShouldContain("newVersion=\"40.0.0.0\"");
+            redirectResults2.TargetAppConfigContent.ShouldContain("newVersion=\"40.0.0.0\"");
 
-            File.GetCreationTime(outputAppConfigFile).ShouldBe(oldTimestamp, TimeSpan.FromSeconds(5));
-            File.GetLastWriteTime(outputAppConfigFile).ShouldBe(oldTimestamp, TimeSpan.FromSeconds(5));
+            File.GetLastWriteTime(outputAppConfigFile).ShouldBeGreaterThan(oldTimestamp);
         }
 
         private BindingRedirectsExecutionResult GenerateBindingRedirects(string appConfigFile, string targetAppConfigFile,
@@ -348,7 +341,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Helper class that contains execution results for <see cref="GenerateBindingRedirects"/>.
         /// </summary>
-        private class BindingRedirectsExecutionResult
+        private sealed class BindingRedirectsExecutionResult
         {
             public MockEngine Engine { get; set; }
 
@@ -364,7 +357,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Mock implementation of the <see cref="ITaskItem"/>.
         /// </summary>
-        private class TaskItemMock : ITaskItem
+        private sealed class TaskItemMock : ITaskItem
         {
             public TaskItemMock(string assemblyName, string maxVersion)
             {

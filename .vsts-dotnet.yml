@@ -23,12 +23,9 @@ variables:
   - name: SourceBranch
     value: $(IbcSourceBranchName)
   # If we're not on a vs* branch, use main as our optprof collection branch
-  # NOTE: the code is temporarily fixed. For the branches that should use opt-prof from the main branch we should use the latest working Opt-Prof 20220901.6-001 collected from main 20220901.6.
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
-    - name: OptProfDrop
-      value: 'OptimizationData/DotNet-msbuild-Trusted/main/20220901.6/1387996/1'
     - name: SourceBranch
-      value: ''
+      value: main
   # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
   - ${{ if ne(parameters.OptProfDropName, 'default') }}:
     - name: OptProfDrop
@@ -39,6 +36,8 @@ variables:
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
     value: .NETCoreValidation
+  - name: EnableReleaseOneLocBuild
+    value: true
   - name: Codeql.Enabled
     value: true
 
@@ -47,13 +46,30 @@ stages:
   displayName: Build
 
   jobs:
-  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}: # should track next-release's active dev branch
-    - template: /eng/common/templates/job/onelocbuild.yml
-      parameters:
-        LclSource: lclFilesfromPackage
-        LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
-        MirrorRepo: 'msbuild'
-        MirrorBranch: 'main' # should match condition above
+  - ${{ if and( ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    # The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
+    # Used for vs17.2, vs17.4, vs17.6 etc. branches only.
+    # When the branch is setup for localization (the localization ticket needs to be created - https://aka.ms/ceChangeLocConfig, requesting change from one release branch to another),
+    #  set 'EnableReleaseOneLocBuild' to true.
+    - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs') }}:
+      - template: /eng/common/templates/job/onelocbuild.yml
+        parameters:
+          MirrorRepo: 'msbuild'
+          LclSource: lclFilesfromPackage
+          LclPackageId: 'LCL-JUNO-PROD-MSBUILDREL'
+          MirrorBranch: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
+          JobNameSuffix: '_release'
+          condition: ${{ variables.EnableReleaseOneLocBuild }}
+    # The localization setup for main branch. Note difference in package ID. Should not be used with release/ branches.
+    - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+      - template: /eng/common/templates/job/onelocbuild.yml
+        parameters:
+          MirrorRepo: 'msbuild'
+          LclSource: lclFilesfromPackage
+          LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
+          MirrorBranch: 'main'
+          JobNameSuffix: '_main'
+          condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
 
   - job: Windows_NT
     pool:
@@ -147,7 +163,7 @@ stages:
 
     # Build VS bootstrapper
     # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-    - task: MicroBuildBuildVSBootstrapper@2
+    - task: MicroBuildBuildVSBootstrapper@3
       inputs:
         vsMajorVersion: $(VisualStudio.MajorVersion)
         channelName: $(VisualStudio.ChannelName)
@@ -165,6 +181,7 @@ stages:
                   -task VisualStudio.BuildIbcTrainingSettings
                   /p:VisualStudioDropName=$(VisualStudio.DropName)
                   /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+                  /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
       displayName: 'OptProf - Build IBC training settings'
       condition: succeeded()
 
@@ -248,6 +265,13 @@ stages:
     - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
       displayName: Execute cleanup tasks
       condition: succeededOrFailed()
+      
+    - template: /eng/common/templates/steps/component-governance.yml
+      parameters:
+        ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))) }}:
+          disableComponentGovernance: false
+        ${{ else }}:
+          disableComponentGovernance: true
 
   - template: /eng/common/templates/job/source-build.yml
     parameters:

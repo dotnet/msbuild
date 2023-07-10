@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -278,7 +278,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             get
             {
-                if (String.IsNullOrEmpty(_oSMajor)) return null;
+                if (String.IsNullOrEmpty(_oSMajor))
+                {
+                    return null;
+                }
+
                 Version v;
                 try
                 {
@@ -435,7 +439,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 if (assembly.ReferenceType == AssemblyReferenceType.NativeAssembly && !assembly.IsPrerequisite && !String.IsNullOrEmpty(assembly.ResolvedPath))
                 {
-                    ComInfo[] comInfoArray = ManifestReader.GetComInfo(assembly.ResolvedPath); 
+                    ComInfo[] comInfoArray = ManifestReader.GetComInfo(assembly.ResolvedPath);
                     if (comInfoArray != null)
                     {
                         foreach (ComInfo comInfo in comInfoArray)
@@ -509,9 +513,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private void ValidateConfig()
         {
-            if (String.IsNullOrEmpty(ConfigFile)) return;
+            if (String.IsNullOrEmpty(ConfigFile))
+            {
+                return;
+            }
+
             FileReference configFile = FileReferences.FindTargetPath(ConfigFile);
-            if (configFile == null) return;
+            if (configFile == null)
+            {
+                return;
+            }
 
             if (!TrustInfo.IsFullTrust)
             {

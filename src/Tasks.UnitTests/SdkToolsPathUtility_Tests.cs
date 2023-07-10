@@ -1,18 +1,19 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using System.IO;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class SdkToolsPathUtility_Tests
+    public sealed class SdkToolsPathUtility_Tests
     {
         private string _defaultSdkToolsPath = NativeMethodsShared.IsWindows ? "C:\\ProgramFiles\\WIndowsSDK\\bin" : "/ProgramFiles/WindowsSDK/bin";
         private TaskLoggingHelper _log = null;
@@ -181,14 +182,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where there are illegal chars in the sdktoolspath and Path.combine has a problem.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("No invalid path characters under Unix.")]
         public void VerifyErrorWithIllegalChars()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "No invalid path characters under Unix"
-            }
-
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileDoesNotExist, ProcessorArchitecture.X86, "./?><;)(*&^%$#@!", _toolName, _log, true);
             Assert.Null(toolPath);
             _mockEngine.AssertLogContains("MSB3666");
@@ -214,7 +210,7 @@ namespace Microsoft.Build.UnitTests
 
         #region Helper Classes
         // Task just so we can access to a real taskLogging helper and inspect the log.
-        internal class TaskToLogFrom : Task
+        internal sealed class TaskToLogFrom : Task
         {
             /// <summary>
             /// Empty execute, this task will never be executed
@@ -230,7 +226,7 @@ namespace Microsoft.Build.UnitTests
         /// This class is used for testing the ability of the SdkToolsPathUtility class to handle situations when
         /// the toolname exists or does not exist.
         /// </summary>
-        internal class MockFileExists
+        internal sealed class MockFileExists
         {
             #region Data
             /// <summary>

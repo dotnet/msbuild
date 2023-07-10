@@ -1,13 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -16,7 +16,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Remove the specified directories.
     /// </summary>
-    public class RemoveDir : TaskExtension
+    public class RemoveDir : TaskExtension, IIncrementalTask
     {
         //-----------------------------------------------------------------------------------
         // Property:  directory to remove
@@ -41,6 +41,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] RemovedDirectories { get; set; }
 
+        public bool FailIfNotIncremental { get; set; }
+
         //-----------------------------------------------------------------------------------
         // Execute -- this runs the task
         //-----------------------------------------------------------------------------------
@@ -61,6 +63,12 @@ namespace Microsoft.Build.Tasks
 
                 if (FileSystems.Default.DirectoryExists(directory.ItemSpec))
                 {
+                    if (FailIfNotIncremental)
+                    {
+                        Log.LogErrorFromResources("RemoveDir.Removing", directory.ItemSpec);
+                        continue;
+                    }
+
                     // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                     Log.LogMessageFromResources(MessageImportance.Normal, "RemoveDir.Removing", directory.ItemSpec);
 

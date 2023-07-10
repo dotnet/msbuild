@@ -1,8 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Runtime.Serialization;
+using Microsoft.Build.Framework.BuildException;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
@@ -19,7 +20,7 @@ namespace Microsoft.Build.BackEnd
     /// If you add fields to this class, add a custom serialization constructor and override GetObjectData().
     /// </remarks>
     [Serializable]
-    internal class NodeFailedToLaunchException : Exception
+    internal class NodeFailedToLaunchException : BuildExceptionBase
     {
         /// <summary>
         /// Constructs a standard NodeFailedToLaunchException.
@@ -31,6 +32,10 @@ namespace Microsoft.Build.BackEnd
 
         internal NodeFailedToLaunchException(Exception innerException)
             : base(innerException.Message, innerException)
+        { }
+
+        public NodeFailedToLaunchException(string message, Exception inner)
+            : base(message, inner)
         { }
 
         /// <summary>
@@ -78,7 +83,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
-        override public void GetObjectData(SerializationInfo info, StreamingContext context)
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
 

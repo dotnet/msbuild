@@ -47,7 +47,7 @@ When `Clean`ing the output of a project, `CleanReferencedProjects` ensures that 
 
 ## Targets required to be referenceable
 
-These targets should exist in a project to be compatible with the common targets' `ProjectReference`. Some are called only conditionally.
+These targets should exist in a project to be compatible with the common targets' `ProjectReference` (unless [marked with the `SkipNonexistentTargets='true'` metadatum](#targets-marked-with-skipnonexistenttargetstrue-metadatum)). Some are called only conditionally.
 
 These targets are all defined in `Microsoft.Common.targets` and are defined in Microsoft SDKs. You should only have to implement them yourself if you require custom behavior or are authoring a project that doesn't import the common targets.
 
@@ -85,6 +85,10 @@ If implementing a project with an “outer” (determine what properties to pass
   * As of 15.7, this is _optional_. If a project does not contain a `GetCopyToOutputDirectoryItems` target, projects that reference it will not copy any of its outputs to their own output folders, but the build can succeed.
 * `Clean` should delete all outputs of the project.
   * It is not called during a normal build, only during "Clean" and "Rebuild".
+
+### Targets Marked With `SkipNonexistentTargets='true'` Metadatum
+`GetTargetFrameworks` and `GetTargetFrameworksWithPlatformForSingleTargetFramework` are skippable if nonexistent since some project types (for example, `wixproj` projects) may not define them. See [this comment](https://github.com/dotnet/msbuild/blob/cc55017f88688cbe3f9aa810cdf44273adea76ea/src/Tasks/Microsoft.Managed.After.targets#L74-L77) for more details.
+
 ## Other protocol requirements
 
 As with all MSBuild logic, targets can be added to do other work with `ProjectReference`s.
@@ -138,13 +142,12 @@ In addition to the above task and target, `.vcxproj` and `.nativeproj` projects 
 This means most projects will see an evaluation with no global properties defined, unless set by the user.
 
 ### How To Opt In
-First, set the properties `EnableDynamicPlatformResolution` and `DisableTransitiveProjectReferences` to `true` for **every project** in your solution. The easiest way to do this is by creating a `Directory.Build.props` file and placing it at the root of your project directory:
+First, set the property `EnableDynamicPlatformResolution` to `true` for **every project** in your solution. The easiest way to do this is by creating a `Directory.Build.props` file and placing it at the root of your project directory:
 
 ```xml
 <Project>
   <PropertyGroup>
     <EnableDynamicPlatformResolution>true</EnableDynamicPlatformResolution>
-    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
   </PropertyGroup>
 </Project>
 ```

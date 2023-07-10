@@ -1,17 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -48,8 +46,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read import with empty project attribute
@@ -66,8 +63,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read import with unexpected attribute
@@ -84,8 +80,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read basic valid imports
@@ -149,8 +144,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectImportElement import = (ProjectImportElement)Helpers.GetFirst(project.Children);
 
                 import.Project = String.Empty;
-            }
-           );
+            });
         }
         /// <summary>
         /// Setting the project attribute should dirty the project
@@ -163,23 +157,21 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             try
             {
-                file1 = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file1 = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                 ProjectRootElement importProject1 = ProjectRootElement.Create();
                 importProject1.AddProperty("p", "v1");
                 importProject1.Save(file1);
 
-                file2 = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file2 = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                 ProjectRootElement importProject2 = ProjectRootElement.Create();
                 importProject2.AddProperty("p", "v2");
                 importProject2.Save(file2);
 
-                string content = String.Format
-                    (
+                string content = String.Format(
     @"<Project>
     <Import Project='{0}'/>
 </Project>",
-                    file1
-                    );
+                    file1);
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
                 ProjectImportElement import = Helpers.GetFirst(project.Xml.Imports);
@@ -208,18 +200,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             try
             {
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                 ProjectRootElement importProject = ProjectRootElement.Create();
                 importProject.AddProperty("p", "v1");
                 importProject.Save(file);
 
-                string content = String.Format
-                    (
+                string content = String.Format(
     @"<Project>
     <Import Project='{0}'/>
 </Project>",
-                    file
-                    );
+                    file);
 
                 Project project = new Project(XmlReader.Create(new StringReader(content)));
                 ProjectImportElement import = Helpers.GetFirst(project.Xml.Imports);
@@ -247,15 +237,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             string testTempPath = Path.Combine(tempPath, "UnitTestsPublicOm");
             string projectfile = Path.Combine(testTempPath, "a.proj");
             string targetsFile = Path.Combine(tempPath, "x.targets");
-            string projectfileContent = String.Format
-                (
+            string projectfileContent = String.Format(
                 @"
                     <Project>
                         <Import Project='{0}'/>
                     </Project>
                 ",
-                 testTempPath + "\\..\\x.targets"
-                 );
+                 testTempPath + "\\..\\x.targets");
             string targetsfileContent = @"
                     <Project>
                     </Project>

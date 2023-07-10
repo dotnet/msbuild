@@ -6,30 +6,6 @@ For more information on MSBuild, see the [MSBuild documentation](https://docs.mi
 
 The [changelog](documentation/Changelog.md) has detailed information about changes made in different releases.
 
-### Build Status
-
-The current development branch is `main`. Changes in `main` will go into a future update of MSBuild, which will release with Visual Studio 17.5 and a corresponding version of the .NET Core SDK.
-
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=main)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=main)
-
-We have forked for MSBuild 17.4 in the branch [`vs17.4`](https://github.com/Microsoft/msbuild/tree/vs17.4). Changes to that branch need special approval.
-
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs17.4)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs17.4)
-
-17.2 builds from the branch [`vs17.2`](https://github.com/Microsoft/msbuild/tree/vs17.2). Only high-priority bugfixes will be considered for servicing 17.2.
-
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs17.2)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs17.2)
-
-17.0 builds from the branch [`vs17.0`](https://github.com/Microsoft/msbuild/tree/vs17.0). Only high-priority bugfixes will be considered for servicing 17.0.
-
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs17.0)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs17.0)
-
-16.11 builds from the branch [`vs16.11`](https://github.com/Microsoft/msbuild/tree/vs16.11). Only high-priority bugfixes will be considered for servicing 16.11.
-
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.11)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=887&branchName=vs16.11)
-
-MSBuild 15.9 builds from the branch [`vs15.9`](https://github.com/dotnet/msbuild/tree/vs15.9). Only very-high-priority bugfixes will be considered for servicing 15.9.
-
 ## Building
 
 ### Building MSBuild with Visual Studio 2022 on Windows
@@ -47,9 +23,6 @@ To get started on **Visual Studio 2022**:
   - You may have to [download Git](https://git-scm.com/downloads) first.
 5. Run `.\build.cmd` from the root of the repo to build the code. This also restores packages needed to open the projects in Visual Studio.
 6. Open `MSBuild.sln` or `MSBuild.Dev.slnf` in Visual Studio 2022.
-
-Note: To create a usable MSBuild with your changes, run `.\build.cmd /p:CreateBootstrap=true`.
-To build release, add `-c Release`: `.\build.cmd -c Release /p:CreateBootstrap=true`.
 
 This newly-built MSBuild will be located at `artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe`. It may not work for all scenarios, including C++ builds.
 

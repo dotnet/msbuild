@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Runtime.Serialization;
@@ -9,6 +9,8 @@ using System.Security.Permissions;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.BuildException;
+using System.Collections.Generic;
 
 #nullable disable
 
@@ -22,7 +24,7 @@ namespace Microsoft.Build.Exceptions
     // promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type
     // without following certain special FX guidelines, can break both forward and backward compatibility
     [Serializable]
-    public sealed class InternalLoggerException : Exception
+    public sealed class InternalLoggerException : BuildExceptionBase
     {
         #region Unusable constructors
 
@@ -63,9 +65,7 @@ namespace Microsoft.Build.Exceptions
         /// <exception cref="InvalidOperationException"></exception>
         public InternalLoggerException(string message, Exception innerException)
             : base(message, innerException)
-        {
-            ErrorUtilities.ThrowInvalidOperation("InternalLoggerExceptionOnlyThrownByEngine");
-        }
+        { }
 
         #endregion
 
@@ -80,22 +80,20 @@ namespace Microsoft.Build.Exceptions
         /// <param name="errorCode"></param>
         /// <param name="helpKeyword"></param>
         /// <param name="initializationException"></param>
-        internal InternalLoggerException
-        (
+        internal InternalLoggerException(
             string message,
             Exception innerException,
             BuildEventArgs e,
             string errorCode,
             string helpKeyword,
-            bool initializationException
-         )
+            bool initializationException)
             : base(message, innerException)
         {
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(message), "Need error message.");
             ErrorUtilities.VerifyThrow(innerException != null || initializationException, "Need the logger exception.");
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(errorCode), "Must specify the error message code.");
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(helpKeyword), "Must specify the help keyword for the IDE.");
-            
+
             this.e = e;
             this.errorCode = errorCode;
             this.helpKeyword = helpKeyword;
@@ -128,7 +126,7 @@ namespace Microsoft.Build.Exceptions
 #if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
-        override public void GetObjectData(SerializationInfo info, StreamingContext context)
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
 
@@ -136,6 +134,23 @@ namespace Microsoft.Build.Exceptions
             info.AddValue("errorCode", errorCode);
             info.AddValue("helpKeyword", helpKeyword);
             info.AddValue("initializationException", initializationException);
+        }
+
+        protected override IDictionary<string, string> FlushCustomState()
+        {
+            return new Dictionary<string, string>()
+            {
+                { nameof(errorCode), errorCode },
+                { nameof(helpKeyword), helpKeyword },
+                { nameof(initializationException), initializationException.ToString() },
+            };
+        }
+
+        protected override void InitializeCustomState(IDictionary<string, string> state)
+        {
+            errorCode = state[nameof(errorCode)];
+            helpKeyword = state[nameof(helpKeyword)];
+            initializationException = bool.Parse(state[nameof(initializationException)]);
         }
 
         /// <summary>
@@ -216,14 +231,12 @@ namespace Microsoft.Build.Exceptions
         /// <param name="messageResourceName"></param>
         /// <param name="initializationException"></param>
         /// <param name="messageArgs"></param>
-        internal static void Throw
-        (
+        internal static void Throw(
             Exception innerException,
             BuildEventArgs e,
             string messageResourceName,
             bool initializationException,
-            params string[] messageArgs
-        )
+            params string[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(messageResourceName != null, "Need error message.");
 

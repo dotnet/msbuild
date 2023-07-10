@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -37,8 +37,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 BuildRequestEntry entry = new BuildRequestEntry(null, null);
-            }
-           );
+            });
         }
         [Fact]
         public void TestSimpleStateProgression()
@@ -189,8 +188,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 BuildRequest waitingRequest1 = CreateNewBuildRequest(2, new string[1] { "bar" });
                 entry.WaitForResult(waitingRequest1);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -207,8 +205,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildResult requiredResult = new BuildResult(request);
                 requiredResult.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
                 entry.Complete(requiredResult);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -232,8 +229,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildResult requiredResult = new BuildResult(request);
                 requiredResult.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
                 entry.Complete(requiredResult);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -256,8 +252,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 BuildRequest waitingRequest1 = CreateNewBuildRequest(2, new string[1] { "bar" });
                 entry.WaitForResult(waitingRequest1);
-            }
-           );
+            });
         }
         [Fact]
         public void TestResultsWithNoMatch1()

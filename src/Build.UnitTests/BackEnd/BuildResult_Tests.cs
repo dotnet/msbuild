@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -64,8 +64,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InternalErrorException>(() =>
             {
                 BuildResult result = new BuildResult(null);
-            }
-           );
+            });
         }
         [Fact]
         public void TestConfigurationId()
@@ -142,8 +141,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 ITargetResult targetResult = result["foo"];
-            }
-           );
+            });
         }
 
         [Fact]
@@ -155,8 +153,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
                 ITargetResult targetResult = result["bar"];
-            }
-           );
+            });
         }
 
         [Fact]
@@ -167,8 +164,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget(null, BuildResultUtilities.GetEmptySucceedingTargetResult());
-            }
-           );
+            });
         }
 
         [Fact]
@@ -179,8 +175,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget("foo", null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -191,8 +186,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget(null, BuildResultUtilities.GetEmptySucceedingTargetResult());
-            }
-           );
+            });
         }
         [Fact]
         public void TestMergeResults()
@@ -229,8 +223,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
                 result.MergeResults(null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -247,8 +240,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 result2.AddResultsForTarget("bar", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
                 result.MergeResults(result2);
-            }
-           );
+            });
         }
         [Fact]
         public void TestHasResultsForTarget()
@@ -334,16 +326,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(result.ConfigurationId, deserializedResult.ConfigurationId);
             Assert.True(TranslationHelpers.CompareCollections(result.DefaultTargets, deserializedResult.DefaultTargets, StringComparer.Ordinal));
-            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception));
+            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception, out string diffReason), diffReason);
             Assert.Equal(result.Exception.Message, deserializedResult.Exception.Message);
             Assert.Equal(result.GlobalRequestId, deserializedResult.GlobalRequestId);
             Assert.True(TranslationHelpers.CompareCollections(result.InitialTargets, deserializedResult.InitialTargets, StringComparer.Ordinal));
             Assert.Equal(result.NodeRequestId, deserializedResult.NodeRequestId);
             Assert.Equal(result["alpha"].ResultCode, deserializedResult["alpha"].ResultCode);
-            Assert.True(TranslationHelpers.CompareExceptions(result["alpha"].Exception, deserializedResult["alpha"].Exception));
+            Assert.True(TranslationHelpers.CompareExceptions(result["alpha"].Exception, deserializedResult["alpha"].Exception, out diffReason), diffReason);
             Assert.True(TranslationHelpers.CompareCollections(result["alpha"].Items, deserializedResult["alpha"].Items, TaskItemComparer.Instance));
             Assert.Equal(result["omega"].ResultCode, deserializedResult["omega"].ResultCode);
-            Assert.True(TranslationHelpers.CompareExceptions(result["omega"].Exception, deserializedResult["omega"].Exception));
+            Assert.True(TranslationHelpers.CompareExceptions(result["omega"].Exception, deserializedResult["omega"].Exception, out diffReason), diffReason);
             Assert.True(TranslationHelpers.CompareCollections(result["omega"].Items, deserializedResult["omega"].Items, TaskItemComparer.Instance));
         }
 

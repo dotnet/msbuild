@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
+#if DEBUG
 using System.Diagnostics;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -97,11 +99,11 @@ namespace Microsoft.Build.Tasks
         /// The culture will only be stripped if it is a valid culture identifier.
         /// So for example,
         /// 
-        ///      MyCrazyFile.XX.txt
+        ///      MyDifferentFile.XX.txt
         /// 
         /// will result in exactly the same file name:
         /// 
-        ///      MyCrazyFile.XX.txt
+        ///      MyDifferentFile.XX.txt
         /// 
         /// because 'XX' is not a valid culture identifier.
         /// </summary>
@@ -111,7 +113,7 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region ITask Members
-        
+
         /// <summary>
         /// Execute.
         /// </summary>
@@ -132,14 +134,12 @@ namespace Microsoft.Build.Tasks
                     AssignedFiles[i] = new TaskItem(Files[i]);
 
                     string dependentUpon = AssignedFiles[i].GetMetadata(ItemMetadataNames.dependentUpon);
-                    Culture.ItemCultureInfo info = Culture.GetItemCultureInfo
-                        (
+                    Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(
                             AssignedFiles[i].ItemSpec,
                             dependentUpon,
                             // If 'WithCulture' is explicitly set to false, treat as 'culture-neutral' and keep the original name of the resource.
                             // https://github.com/dotnet/msbuild/issues/3064
-                            AssignedFiles[i].GetMetadata("WithCulture").Equals("false", StringComparison.OrdinalIgnoreCase)
-                        );
+                            AssignedFiles[i].GetMetadata("WithCulture").Equals("false", StringComparison.OrdinalIgnoreCase));
 
                     if (!string.IsNullOrEmpty(info.culture))
                     {
@@ -156,13 +156,11 @@ namespace Microsoft.Build.Tasks
                     CultureNeutralAssignedFiles[i] =
                         new TaskItem(AssignedFiles[i]) { ItemSpec = info.cultureNeutralFilename };
 
-                    Log.LogMessageFromResources
-                    (
+                    Log.LogMessageFromResources(
                         MessageImportance.Low,
                         "AssignCulture.Comment",
                         AssignedFiles[i].GetMetadata("Culture"),
-                        AssignedFiles[i].ItemSpec
-                    );
+                        AssignedFiles[i].ItemSpec);
                 }
                 catch (ArgumentException e)
                 {
@@ -172,8 +170,8 @@ namespace Microsoft.Build.Tasks
 #if DEBUG
                 catch (Exception e)
                 {
-                    Debug.Assert(false, "Unexpected exception in AssignCulture.Execute. " + 
-                        "Please log a MSBuild bug specifying the steps to reproduce the problem. " + 
+                    Debug.Assert(false, "Unexpected exception in AssignCulture.Execute. " +
+                        "Please log a MSBuild bug specifying the steps to reproduce the problem. " +
                         e);
                     throw;
                 }

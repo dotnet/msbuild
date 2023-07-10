@@ -1,11 +1,10 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
-
-using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared;
 using Xunit;
 
 #nullable disable
@@ -15,7 +14,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests from Orcas
     /// </summary>
-    sealed public class TargetsFile_Test
+    public sealed class TargetsFile_Test
     {
 #if FEATURE_COMPILE_IN_TESTS
         /// <summary>
@@ -50,8 +49,7 @@ namespace Microsoft.Build.UnitTests
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -102,8 +100,7 @@ namespace Microsoft.Build.UnitTests
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -153,8 +150,7 @@ namespace Microsoft.Build.UnitTests
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -209,8 +205,7 @@ namespace Microsoft.Build.UnitTests
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                    </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -266,8 +261,7 @@ namespace Microsoft.Build.UnitTests
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                    </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -316,8 +310,7 @@ namespace Microsoft.Build.UnitTests
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -367,8 +360,7 @@ namespace Microsoft.Build.UnitTests
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -417,8 +409,7 @@ namespace Microsoft.Build.UnitTests
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -468,8 +459,7 @@ namespace Microsoft.Build.UnitTests
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                     </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -524,8 +514,7 @@ namespace Microsoft.Build.UnitTests
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                    </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -581,8 +570,7 @@ namespace Microsoft.Build.UnitTests
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                    </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -633,8 +621,7 @@ namespace Microsoft.Build.UnitTests
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                    </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -683,8 +670,7 @@ namespace Microsoft.Build.UnitTests
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
                    </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -735,8 +721,7 @@ namespace Microsoft.Build.UnitTests
                       <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` Condition=`!Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v1.0\Microsoft.Windows.UI.Xaml.CSharp.targets')` />
                    </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -773,8 +758,7 @@ namespace Microsoft.Build.UnitTests
   </Target>
   <Import Project=`$(MSBuildToolsPath)\Microsoft.CSharp.targets` />
 </Project>",
-             logger
-             );
+             logger);
 
             project.Build();
 
@@ -808,12 +792,10 @@ namespace Microsoft.Build.UnitTests
       DependsOnTargets='GetFrameworkPaths'>
     <Message Text='Target Framework Folder = @(_TargetedFrameworkDirectoryItem)' />
   </Target>
-</Project>"
-                   );
+</Project>");
                 Project project = ObjectModelHelpers.CreateInMemoryProject(
                  projString,
-                 logger
-                 );
+                 logger);
 
                 project.SetProperty("TargetFrameworkVersion", version);
                 project.Build();
@@ -861,7 +843,7 @@ namespace Microsoft.Build.UnitTests
         public void NoLinkMetadataSynthesisWhenDefinedInProject()
         {
             string[] files = null;
-            string outputPath = Path.Combine(Path.GetTempPath(),Guid.NewGuid().ToString("N"));
+            string outputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
             try
             {
@@ -893,8 +875,7 @@ namespace Microsoft.Build.UnitTests
                       </Target>
                     </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -917,10 +898,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Synthesizes Link metadata if the items are defined in an import and are on the whitelist
+        /// Synthesizes Link metadata if the items are defined in an import and are on the allowlist
         /// </summary>
         [Fact]
-        public void SynthesizeLinkMetadataForItemsOnWhitelist()
+        public void SynthesizeLinkMetadataForItemsOnAllowlist()
         {
             string outputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string directoryToDelete = null;
@@ -974,8 +955,7 @@ namespace Microsoft.Build.UnitTests
                       </Target>
                     </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 
@@ -1052,8 +1032,7 @@ namespace Microsoft.Build.UnitTests
                       </Target>
                     </Project>
                 ",
-                 logger
-                 );
+                 logger);
 
                 project.Build();
 

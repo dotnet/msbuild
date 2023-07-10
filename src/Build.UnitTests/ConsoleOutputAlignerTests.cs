@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.Build.BackEnd.Logging;
@@ -75,8 +75,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("",   "123")]
-        [InlineData(" ",  "12")]
+        [InlineData("", "123")]
+        [InlineData(" ", "12")]
         [InlineData("  ", "1")]
         public void SmallerThanBuffer_NotAligned(string indent, string input)
         {
@@ -107,7 +107,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(" ", "12345678", " 12\n" +
                                      " 34\n" +
                                      " 56\n" +
-                                     " 78\n" )]
+                                     " 78\n")]
         [InlineData("  ", "1234", "  1\n" +
                                   "  2\n" +
                                   "  3\n" +
@@ -311,7 +311,7 @@ namespace Microsoft.Build.UnitTests
         // +----+----+---+---+---+---+---+---+
         // | b  |    |   |   |   |   |   |   |
         // +----+----+---+---+---+---+---+---+
-        [InlineData("", "\t1\na\tb", "\t\n1\na\t\nb\n",  8, false)]
+        [InlineData("", "\t1\na\tb", "\t\n1\na\t\nb\n", 8, false)]
         // +---+---+---+----+---+---+---+---+----+
         // | 1 | 2 | 3 | 4  | 5 | 6 | 7 | 8 | 9  |
         // +---+---+---+----+---+---+---+---+----+

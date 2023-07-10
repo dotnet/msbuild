@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Threading;
@@ -10,10 +10,10 @@ namespace Microsoft.Build.Internal;
 
 internal static class ReaderWriterLockSlimExtensions
 {
-    public static UpgradeableReadLockDisposer EnterDisposableUpgradeableReadLock(this ReaderWriterLockSlim rwLock)
+    public static DisposableReadLock EnterDisposableReadLock(this ReaderWriterLockSlim rwLock)
     {
-        rwLock.EnterUpgradeableReadLock();
-        return new UpgradeableReadLockDisposer(rwLock);
+        rwLock.EnterReadLock();
+        return new DisposableReadLock(rwLock);
     }
 
     public static DisposableWriteLock EnterDisposableWriteLock(this ReaderWriterLockSlim rwLock)
@@ -22,44 +22,21 @@ internal static class ReaderWriterLockSlimExtensions
         return new DisposableWriteLock(rwLock);
     }
 
-    // Officially, Dispose() being called more than once is allowable, but in this case if that were to happen
-    // that means something is very, very wrong. Since it's an internal type, better to be strict.
-
-    internal struct UpgradeableReadLockDisposer : IDisposable
+    internal readonly struct DisposableReadLock : IDisposable
     {
-        private ReaderWriterLockSlim? _rwLock;
+        private readonly ReaderWriterLockSlim _rwLock;
 
-        public UpgradeableReadLockDisposer(ReaderWriterLockSlim rwLock) => _rwLock = rwLock;
+        public DisposableReadLock(ReaderWriterLockSlim rwLock) => _rwLock = rwLock;
 
-        public void Dispose()
-        {
-            var rwLockToDispose = Interlocked.Exchange(ref _rwLock, null);
-
-            if (rwLockToDispose is null)
-            {
-                throw new ObjectDisposedException($"Somehow a {nameof(UpgradeableReadLockDisposer)} is being disposed twice.");
-            }
-
-            rwLockToDispose.ExitUpgradeableReadLock();
-        }
+        public void Dispose() => _rwLock.ExitReadLock();
     }
 
-    internal struct DisposableWriteLock : IDisposable
+    internal readonly struct DisposableWriteLock : IDisposable
     {
-        private ReaderWriterLockSlim? _rwLock;
+        private readonly ReaderWriterLockSlim _rwLock;
 
         public DisposableWriteLock(ReaderWriterLockSlim rwLock) => _rwLock = rwLock;
 
-        public void Dispose()
-        {
-            var rwLockToDispose = Interlocked.Exchange(ref _rwLock, null);
-
-            if (rwLockToDispose is null)
-            {
-                throw new ObjectDisposedException($"Somehow a {nameof(DisposableWriteLock)} is being disposed twice.");
-            }
-
-            rwLockToDispose.ExitWriteLock();
-        }
+        public void Dispose() => _rwLock.ExitWriteLock();
     }
 }

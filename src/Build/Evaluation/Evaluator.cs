@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -201,6 +202,7 @@ namespace Microsoft.Build.Evaluation
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
+            IDirectoryCacheFactory directoryCacheFactory,
             ProjectRootElementCacheBase projectRootElementCache,
             ISdkResolverService sdkResolverService,
             int submissionId,
@@ -230,7 +232,7 @@ namespace Microsoft.Build.Evaluation
 
             // If the host wishes to provide a directory cache for this evaluation, create a new EvaluationContext with the right file system.
             _evaluationContext = evaluationContext;
-            IDirectoryCache directoryCache = project?.GetDirectoryCacheForEvaluation(_evaluationLoggingContext.BuildEventContext.EvaluationId);
+            IDirectoryCache directoryCache = directoryCacheFactory?.GetDirectoryCacheForEvaluation(_evaluationLoggingContext.BuildEventContext.EvaluationId);
             if (directoryCache is not null)
             {
                 IFileSystem fileSystem = new DirectoryCacheFileSystemWrapper(evaluationContext.FileSystem, directoryCache);
@@ -307,6 +309,7 @@ namespace Microsoft.Build.Evaluation
             ILoggingService loggingService,
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
+            IDirectoryCacheFactory directoryCacheFactory,
             ProjectRootElementCacheBase projectRootElementCache,
             BuildEventContext buildEventContext,
             ISdkResolverService sdkResolverService,
@@ -325,6 +328,7 @@ namespace Microsoft.Build.Evaluation
                 environmentProperties,
                 itemFactory,
                 toolsetProvider,
+                directoryCacheFactory,
                 projectRootElementCache,
                 sdkResolverService,
                 submissionId,
@@ -411,31 +415,27 @@ namespace Microsoft.Build.Evaluation
             {
                 if (output.IsOutputItem)
                 {
-                    ProjectTaskOutputItemInstance outputItem = new ProjectTaskOutputItemInstance
-                        (
+                    ProjectTaskOutputItemInstance outputItem = new ProjectTaskOutputItemInstance(
                         output.ItemType,
                         output.TaskParameter,
                         output.Condition,
                         output.Location,
                         output.ItemTypeLocation,
                         output.TaskParameterLocation,
-                        output.ConditionLocation
-                        );
+                        output.ConditionLocation);
 
                     taskOutputs.Add(outputItem);
                 }
                 else
                 {
-                    ProjectTaskOutputPropertyInstance outputProperty = new ProjectTaskOutputPropertyInstance
-                        (
+                    ProjectTaskOutputPropertyInstance outputProperty = new ProjectTaskOutputPropertyInstance(
                         output.PropertyName,
                         output.TaskParameter,
                         output.Condition,
                         output.Location,
                         output.PropertyNameLocation,
                         output.TaskParameterLocation,
-                        output.ConditionLocation
-                        );
+                        output.ConditionLocation);
 
                     taskOutputs.Add(outputProperty);
                 }
@@ -489,18 +489,15 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (ProjectMetadataElement metadataElement in itemElement.Metadata)
                 {
-                    metadata.Add(new ProjectItemGroupTaskMetadataInstance
-                        (
+                    metadata.Add(new ProjectItemGroupTaskMetadataInstance(
                         metadataElement.Name,
                         metadataElement.Value,
                         metadataElement.Condition,
                         metadataElement.Location,
-                        metadataElement.ConditionLocation
-                        ));
+                        metadataElement.ConditionLocation));
                 }
 
-                items.Add(new ProjectItemGroupTaskItemInstance
-                    (
+                items.Add(new ProjectItemGroupTaskItemInstance(
                     itemElement.ItemType,
                     itemElement.Include,
                     itemElement.Exclude,
@@ -521,8 +518,7 @@ namespace Microsoft.Build.Evaluation
                     itemElement.RemoveMetadataLocation,
                     itemElement.KeepDuplicatesLocation,
                     itemElement.ConditionLocation,
-                    metadata
-                    ));
+                    metadata));
             }
 
             ProjectItemGroupTaskInstance itemGroup = new ProjectItemGroupTaskInstance(itemGroupElement.Condition, itemGroupElement.Location, itemGroupElement.ConditionLocation, items);
@@ -570,8 +566,7 @@ namespace Microsoft.Build.Evaluation
             ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild> readOnlyTargetChildren = new ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild>(targetChildren);
             ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance> readOnlyTargetOnErrorChildren = new ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance>(targetOnErrorChildren);
 
-            ProjectTargetInstance targetInstance = new ProjectTargetInstance
-                (
+            ProjectTargetInstance targetInstance = new ProjectTargetInstance(
                 targetElement.Name,
                 targetElement.Condition,
                 targetElement.Inputs,
@@ -592,8 +587,7 @@ namespace Microsoft.Build.Evaluation
                 targetElement.AfterTargetsLocation,
                 readOnlyTargetChildren,
                 readOnlyTargetOnErrorChildren,
-                parentProjectSupportsReturnsAttribute
-                );
+                parentProjectSupportsReturnsAttribute);
 
             targetElement.TargetInstance = targetInstance;
             return targetInstance;
@@ -606,6 +600,7 @@ namespace Microsoft.Build.Evaluation
         private void Evaluate()
         {
             string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
+            using (AssemblyLoadsTracker.StartTracking(_evaluationLoggingContext, AssemblyLoadingContext.Evaluation))
             using (_evaluationProfiler.TrackPass(EvaluationPass.TotalEvaluation))
             {
                 ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
@@ -1025,8 +1020,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void EvaluateUsingTaskElement(string directoryOfImportingFile, ProjectUsingTaskElement projectUsingTaskElement)
         {
-            TaskRegistry.RegisterTasksFromUsingTaskElement<P, I>
-                (
+            TaskRegistry.RegisterTasksFromUsingTaskElement<P, I>(
                 _evaluationLoggingContext.LoggingService,
                 _evaluationLoggingContext.BuildEventContext,
                 directoryOfImportingFile,
@@ -1034,8 +1028,7 @@ namespace Microsoft.Build.Evaluation
                 _data.TaskRegistry,
                 _expander,
                 ExpanderOptions.ExpandPropertiesAndItems,
-                _evaluationContext.FileSystem
-                );
+                _evaluationContext.FileSystem);
         }
 
         /// <summary>
@@ -1300,8 +1293,7 @@ namespace Microsoft.Build.Evaluation
                 // of this project (or import).
                 if (
                         ((IDictionary<string, ProjectPropertyInstance>)_data.GlobalPropertiesDictionary).ContainsKey(propertyElement.Name) &&
-                        !_data.GlobalPropertiesToTreatAsLocal.Contains(propertyElement.Name)
-                    )
+                        !_data.GlobalPropertiesToTreatAsLocal.Contains(propertyElement.Name))
                 {
                     _evaluationLoggingContext.LogComment(MessageImportance.Low, "OM_GlobalProperty", propertyElement.Name);
                     return;
@@ -1324,12 +1316,12 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Is the property we are currently setting in the list of properties which have been used but not initialized
                     IElementLocation elementWhichUsedProperty;
-                    bool isPropertyInList = _expander.UsedUninitializedProperties.Properties.TryGetValue(propertyElement.Name, out elementWhichUsedProperty);
+                    bool isPropertyInList = _expander.UsedUninitializedProperties.TryGetPropertyElementLocation(propertyElement.Name, out elementWhichUsedProperty);
 
                     if (isPropertyInList)
                     {
                         // Once we are going to warn for a property once, remove it from the list so we do not add it again.
-                        _expander.UsedUninitializedProperties.Properties.Remove(propertyElement.Name);
+                        _expander.UsedUninitializedProperties.RemoveProperty(propertyElement.Name);
                         _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(propertyElement.Location), "UsedUninitializedProperty", propertyElement.Name, elementWhichUsedProperty.LocationString);
                     }
                 }
@@ -1638,6 +1630,7 @@ namespace Microsoft.Build.Evaluation
             // paths will be returned (union of all files that match).
             var allProjects = new List<ProjectRootElement>();
             bool containsWildcards = FileMatcher.HasWildcards(importElement.Project);
+            bool missingDirectoryDespiteTrueCondition = false;
 
             // Try every extension search path, till we get a Hit:
             // 1. 1 or more project files loaded
@@ -1647,19 +1640,25 @@ namespace Microsoft.Build.Evaluation
                 // In the rare case that the property we've enabled for search paths hasn't been defined
                 // we will skip it, but continue with other paths in the fallback order.
                 if (string.IsNullOrEmpty(extensionPath))
-                    continue;
-
-                string extensionPathExpanded = _data.ExpandString(extensionPath);
-
-                if (!_fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded))
                 {
                     continue;
                 }
+
+                string extensionPathExpanded = _data.ExpandString(extensionPath);
 
                 var newExpandedCondition = importElement.Condition.Replace(extensionPropertyRefAsString, extensionPathExpanded, StringComparison.OrdinalIgnoreCase);
                 if (!EvaluateConditionCollectingConditionedProperties(importElement, newExpandedCondition, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties,
                             _projectRootElementCache))
                 {
+                    continue;
+                }
+
+                // If the whole fallback folder doesn't exist, short-circuit and don't
+                // bother constructing an exact file path.
+                if (!_fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded))
+                {
+                    // Set to log an error only if the change wave is enabled.
+                    missingDirectoryDespiteTrueCondition = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) && !containsWildcards;
                     continue;
                 }
 
@@ -1712,7 +1711,7 @@ namespace Microsoft.Build.Evaluation
             // atleastOneExactFilePathWasLookedAtAndNotFound would be false, eg, if the expression
             // was a wildcard and it resolved to zero files!
             if (allProjects.Count == 0 &&
-                atleastOneExactFilePathWasLookedAtAndNotFound &&
+                (atleastOneExactFilePathWasLookedAtAndNotFound || missingDirectoryDespiteTrueCondition) &&
                 (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) == 0)
             {
                 ThrowForImportedProjectWithSearchPathsNotFound(fallbackSearchPathMatch, importElement);
@@ -1771,7 +1770,7 @@ namespace Microsoft.Build.Evaluation
 
                     _evaluationLoggingContext.LogBuildEvent(eventArgs);
                 }
-                
+
                 return;
             }
 
@@ -1786,7 +1785,11 @@ namespace Microsoft.Build.Evaluation
                 // for backward compatibility, we shouldn't change that. But resolvers should be exposed to a string
                 // that's null or a full path, so correct that here.
                 var solutionPath = _data.GetProperty(SolutionProjectGenerator.SolutionPathPropertyName)?.EvaluatedValue;
-                if (solutionPath == "*Undefined*") solutionPath = null;
+                if (solutionPath == "*Undefined*")
+                {
+                    solutionPath = null;
+                }
+
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
                 CompareInfo compareInfo = CultureInfo.InvariantCulture.CompareInfo;
@@ -1805,13 +1808,17 @@ namespace Microsoft.Build.Evaluation
                     if (mode != SdkReferencePropertyExpansionMode.NoExpansion)
                     {
                         if (mode == SdkReferencePropertyExpansionMode.DefaultExpand)
+                        {
                             mode = SdkReferencePropertyExpansionMode.ExpandUnescape;
+                        }
 
                         static string EvaluateProperty(string value, IElementLocation location,
                             Expander<P, I> expander, SdkReferencePropertyExpansionMode mode)
                         {
                             if (value == null)
+                            {
                                 return null;
+                            }
 
                             const ExpanderOptions Options = ExpanderOptions.ExpandProperties;
 
@@ -1834,15 +1841,17 @@ namespace Microsoft.Build.Evaluation
                         sdkReference = new SdkReference(
                             EvaluateProperty(sdkReference.Name, sdkReferenceOrigin, _expander, mode),
                             EvaluateProperty(sdkReference.Version, sdkReferenceOrigin, _expander, mode),
-                            EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander, mode)
-                        );
+                            EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander, mode));
                     }
                 }
 
                 // Combine SDK path with the "project" relative path
                 try
                 {
-                    sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio);
+                    using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(_evaluationLoggingContext, AssemblyLoadingContext.SdkResolution, _sdkResolverService.GetType());
+
+                    sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio,
+                        failOnUnresolvedSdk: !_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) || _loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk));
                 }
                 catch (SdkResolverException e)
                 {
@@ -2438,8 +2447,7 @@ namespace Microsoft.Build.Evaluation
 
             using (_evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
             {
-                bool result = ConditionEvaluator.EvaluateCondition
-                    (
+                bool result = ConditionEvaluator.EvaluateCondition(
                     condition,
                     parserOptions,
                     _expander,
@@ -2449,8 +2457,7 @@ namespace Microsoft.Build.Evaluation
                     _evaluationLoggingContext.LoggingService,
                     _evaluationLoggingContext.BuildEventContext,
                     _evaluationContext.FileSystem,
-                    loggingContext: _evaluationLoggingContext
-                    );
+                    loggingContext: _evaluationLoggingContext);
 
                 return result;
             }
@@ -2478,8 +2485,7 @@ namespace Microsoft.Build.Evaluation
 
             using (_evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
             {
-                bool result = ConditionEvaluator.EvaluateConditionCollectingConditionedProperties
-                    (
+                bool result = ConditionEvaluator.EvaluateConditionCollectingConditionedProperties(
                     condition,
                     parserOptions,
                     _expander,
@@ -2490,8 +2496,7 @@ namespace Microsoft.Build.Evaluation
                     _evaluationLoggingContext.LoggingService,
                     _evaluationLoggingContext.BuildEventContext,
                     _evaluationContext.FileSystem,
-                    projectRootElementCache
-                    );
+                    projectRootElementCache);
 
                 return result;
             }

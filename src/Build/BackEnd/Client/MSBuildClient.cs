@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -138,11 +138,17 @@ namespace Microsoft.Build.Experimental
 
         private void CreateNodePipeStream()
         {
-            _nodeStream = new NamedPipeClientStream(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            _nodeStream = new NamedPipeClientStream(
+                serverName: ".",
+                _pipeName,
+                PipeDirection.InOut,
+                PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
                 | PipeOptions.CurrentUserOnly
 #endif
             );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
             _packetPump = new MSBuildClientPacketPump(_nodeStream);
         }
 
@@ -168,9 +174,9 @@ namespace Microsoft.Build.Experimental
             try
             {
                 bool serverIsAlreadyRunning = ServerIsRunning();
-                if (KnownTelemetry.BuildTelemetry != null)
+                if (KnownTelemetry.PartialBuildTelemetry != null)
                 {
-                    KnownTelemetry.BuildTelemetry.InitialServerState = serverIsAlreadyRunning ? "hot" : "cold";
+                    KnownTelemetry.PartialBuildTelemetry.InitialServerState = serverIsAlreadyRunning ? "hot" : "cold";
                 }
                 if (!serverIsAlreadyRunning)
                 {
@@ -223,11 +229,7 @@ namespace Microsoft.Build.Experimental
                 CommunicationsUtilities.Trace("Build finished.");
             }
 
-            if (NativeMethodsShared.IsWindows && _originalConsoleMode is not null)
-            {
-                IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
-                NativeMethodsShared.SetConsoleMode(stdOut, _originalConsoleMode.Value);
-            }
+            NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode);
 
             return _exitResult;
         }
@@ -259,9 +261,10 @@ namespace Microsoft.Build.Experimental
                 return true;
             }
 
-            // Check that server is not busy.
-            bool serverWasBusy = ServerWasBusy();
-            if (serverWasBusy)
+            // Check and wait for server to be not busy for some short time to avoid race condition when server reports build is finished but had not released ServerBusy mutex yet.
+            // If during that short time, a script would try to shutdown server, it would be rejected and server would continue to run.
+            bool serverIsBusy = ServerIsBusyWithWaitAndRetry(250);
+            if (serverIsBusy)
             {
                 CommunicationsUtilities.Trace("Server cannot be shut down for it is not idle.");
                 return false;
@@ -283,6 +286,20 @@ namespace Microsoft.Build.Experimental
             ReadPacketsLoop(cancellationToken);
 
             return _exitResult.MSBuildClientExitType == MSBuildClientExitType.Success;
+        }
+
+        private bool ServerIsBusyWithWaitAndRetry(int milliseconds)
+        {
+            bool isBusy = ServerWasBusy();
+            Stopwatch sw = Stopwatch.StartNew();
+            while (isBusy && sw.ElapsedMilliseconds < milliseconds)
+            {
+                CommunicationsUtilities.Trace("Wait for server to be not busy - will retry soon...");
+                Thread.Sleep(100);
+                isBusy = ServerWasBusy();
+            }
+
+            return isBusy;
         }
 
         internal bool ServerIsRunning()
@@ -356,63 +373,13 @@ namespace Microsoft.Build.Experimental
 
         private void ConfigureAndQueryConsoleProperties()
         {
-            var (acceptAnsiColorCodes, outputIsScreen) = QueryIsScreenAndTryEnableAnsiColorCodes();
+            (var acceptAnsiColorCodes, var outputIsScreen, _originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
             int bufferWidth = QueryConsoleBufferWidth();
             ConsoleColor backgroundColor = QueryConsoleBackgroundColor();
 
             _consoleConfiguration = new TargetConsoleConfiguration(bufferWidth, acceptAnsiColorCodes, outputIsScreen, backgroundColor);
         }
 
-        private (bool acceptAnsiColorCodes, bool outputIsScreen) QueryIsScreenAndTryEnableAnsiColorCodes()
-        {
-            bool acceptAnsiColorCodes = false;
-            bool outputIsScreen = false;
-
-            if (NativeMethodsShared.IsWindows)
-            {
-                try
-                {
-                    IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
-                    if (NativeMethodsShared.GetConsoleMode(stdOut, out uint consoleMode))
-                    {
-                        bool success;
-                        if ((consoleMode & NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING) == NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING)
-                        {
-                            // Console is already in required state
-                            success = true;
-                        }
-                        else
-                        {
-                            _originalConsoleMode = consoleMode;
-                            consoleMode |= NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-                            success = NativeMethodsShared.SetConsoleMode(stdOut, consoleMode);
-                        }
-
-                        if (success)
-                        {
-                            acceptAnsiColorCodes = true;
-                        }
-
-                        uint fileType = NativeMethodsShared.GetFileType(stdOut);
-                        // The std out is a char type(LPT or Console)
-                        outputIsScreen = fileType == NativeMethodsShared.FILE_TYPE_CHAR;
-                        acceptAnsiColorCodes &= outputIsScreen;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    CommunicationsUtilities.Trace("MSBuild client warning: problem during enabling support for VT100: {0}.", ex);
-                }
-            }
-            else
-            {
-                // On posix OSes we expect console always supports VT100 coloring unless it is redirected
-                acceptAnsiColorCodes = outputIsScreen = !Console.IsOutputRedirected;
-            }
-
-            return (acceptAnsiColorCodes: acceptAnsiColorCodes, outputIsScreen: outputIsScreen);
-        }
-        
         private int QueryConsoleBufferWidth()
         {
             int consoleBufferWidth = -1;
@@ -492,7 +459,7 @@ namespace Microsoft.Build.Experimental
             }
             catch (IOException ex) when (ex is not PathTooLongException)
             {
-                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}",  ex);
+                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}", ex);
                 CommunicationsUtilities.Trace("HResult: {0}.", ex.HResult);
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
                 return false;
@@ -525,8 +492,9 @@ namespace Microsoft.Build.Experimental
 
         private bool TrySendShutdownCommand()
         {
+            CommunicationsUtilities.Trace("Sending shutdown command to server.");
             _packetPump.ServerWillDisconnect();
-            return  TrySendPacket(() => new NodeBuildComplete(false /* no node reuse */));
+            return TrySendPacket(() => new NodeBuildComplete(false /* no node reuse */));
         }
 
         private ServerNodeBuildCommand GetServerNodeBuildCommand()
@@ -546,14 +514,14 @@ namespace Microsoft.Build.Experimental
             // We remove env variable used to invoke MSBuild server as that might be equal to 1, so we do not get an infinite recursion here. 
             envVars.Remove(Traits.UseMSBuildServerEnvVarName);
 
-            Debug.Assert(KnownTelemetry.BuildTelemetry == null || KnownTelemetry.BuildTelemetry.StartAt.HasValue, "BuildTelemetry.StartAt was not initialized!");
+            Debug.Assert(KnownTelemetry.PartialBuildTelemetry == null || KnownTelemetry.PartialBuildTelemetry.StartAt.HasValue, "BuildTelemetry.StartAt was not initialized!");
 
-            PartialBuildTelemetry? partialBuildTelemetry = KnownTelemetry.BuildTelemetry == null
+            PartialBuildTelemetry? partialBuildTelemetry = KnownTelemetry.PartialBuildTelemetry == null
                 ? null
                 : new PartialBuildTelemetry(
-                    startedAt: KnownTelemetry.BuildTelemetry.StartAt.GetValueOrDefault(),
-                    initialServerState: KnownTelemetry.BuildTelemetry.InitialServerState,
-                    serverFallbackReason: KnownTelemetry.BuildTelemetry.ServerFallbackReason);
+                    startedAt: KnownTelemetry.PartialBuildTelemetry.StartAt.GetValueOrDefault(),
+                    initialServerState: KnownTelemetry.PartialBuildTelemetry.InitialServerState,
+                    serverFallbackReason: KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason);
 
             return new ServerNodeBuildCommand(
                         _commandLine,

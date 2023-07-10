@@ -1,13 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
+using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
@@ -32,7 +34,11 @@ namespace Microsoft.Build.Graph
         private const string PlatformLookupTableMetadataName = "PlatformLookupTable";
         private const string PlatformMetadataName = "Platform";
         private const string PlatformsMetadataName = "Platforms";
-        private const string EnableDynamicPlatformResolutionMetadataName = "EnableDynamicPlatformResolution";
+        private const string EnableDynamicPlatformResolutionPropertyName = "EnableDynamicPlatformResolution";
+        private const string OverridePlatformNegotiationValue = "OverridePlatformNegotiationValue";
+        private const string ShouldUnsetParentConfigurationAndPlatformPropertyName = "ShouldUnsetParentConfigurationAndPlatform";
+        private const string ProjectMetadataName = "Project";
+        private const string ConfigurationMetadataName = "Configuration";
 
         private static readonly char[] PropertySeparator = MSBuildConstants.SemicolonChar;
 
@@ -51,19 +57,28 @@ namespace Microsoft.Build.Graph
             NonMultitargeting,
         }
 
-        internal readonly struct ReferenceInfo
-        {
-            public ConfigurationMetadata ReferenceConfiguration { get; }
-            public ProjectItemInstance ProjectReferenceItem { get; }
+        internal readonly record struct ReferenceInfo(ConfigurationMetadata ReferenceConfiguration, ProjectItemInstance ProjectReferenceItem);
 
-            public ReferenceInfo(ConfigurationMetadata referenceConfiguration, ProjectItemInstance projectReferenceItem)
+        private readonly struct TargetSpecification
+        {
+            public TargetSpecification(string target, bool skipIfNonexistent)
             {
-                ReferenceConfiguration = referenceConfiguration;
-                ProjectReferenceItem = projectReferenceItem;
+                // Verify that if this target is skippable then it equals neither 
+                // ".default" nor ".projectReferenceTargetsOrDefaultTargets".
+                ErrorUtilities.VerifyThrow(
+                    !skipIfNonexistent || (!target.Equals(MSBuildConstants.DefaultTargetsMarker)
+                    && !target.Equals(MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker)),
+                    target + " cannot be marked as SkipNonexistentTargets");
+                Target = target;
+                SkipIfNonexistent = skipIfNonexistent;
             }
+
+            public string Target { get; }
+
+            public bool SkipIfNonexistent { get; }
         }
 
-        public IEnumerable<ReferenceInfo> GetReferences(ProjectInstance requesterInstance, ProjectCollection _projectCollection, ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory)
+        public IEnumerable<ReferenceInfo> GetReferences(ProjectInstance requesterInstance, ProjectCollection projectCollection, ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory)
         {
             IEnumerable<ProjectItemInstance> projectReferenceItems;
             IEnumerable<GlobalPropertiesModifier> globalPropertiesModifiers = null;
@@ -85,7 +100,14 @@ namespace Microsoft.Build.Graph
                     throw new ArgumentOutOfRangeException();
             }
 
-            foreach (var projectReferenceItem in projectReferenceItems)
+            SolutionConfiguration solutionConfiguration = null;
+            string solutionConfigurationXml = requesterInstance.GetPropertyValue(SolutionProjectGenerator.CurrentSolutionConfigurationContents);
+            if (!string.IsNullOrWhiteSpace(solutionConfigurationXml))
+            {
+                solutionConfiguration = new SolutionConfiguration(solutionConfigurationXml);
+            }
+
+            foreach (ProjectItemInstance projectReferenceItem in projectReferenceItems)
             {
                 if (!String.IsNullOrEmpty(projectReferenceItem.GetMetadataValue(ToolsVersionMetadataName)))
                 {
@@ -98,24 +120,64 @@ namespace Microsoft.Build.Graph
                             requesterInstance.FullPath));
                 }
 
-                var projectReferenceFullPath = projectReferenceItem.GetMetadataValue(FullPathMetadataName);
+                string projectReferenceFullPath = projectReferenceItem.GetMetadataValue(FullPathMetadataName);
+                bool enableDynamicPlatformResolution = ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionPropertyName));
 
-                var referenceGlobalProperties = GetGlobalPropertiesForItem(projectReferenceItem, requesterInstance.GlobalPropertiesDictionary, globalPropertiesModifiers);
+                PropertyDictionary<ProjectPropertyInstance> referenceGlobalProperties = GetGlobalPropertiesForItem(
+                    projectReferenceItem,
+                    requesterInstance.GlobalPropertiesDictionary,
+                    // Only allow reuse in scenarios where we will not mutate the collection.
+                    // TODO: Should these mutations be moved to globalPropertiesModifiers in the future?
+                    allowCollectionReuse: solutionConfiguration == null && !enableDynamicPlatformResolution,
+                    globalPropertiesModifiers);
 
-                var requesterPlatform = "";
-                var requesterPlatformLookupTable = "";
-
-                if ( !projectReferenceItem.HasMetadata(SetPlatformMetadataName) && ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionMetadataName)))
+                // Match what AssignProjectConfiguration does to resolve project references.
+                if (solutionConfiguration != null)
                 {
-                    requesterPlatform = requesterInstance.GetPropertyValue("Platform");
-                    requesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");
+                    string projectGuid = projectReferenceItem.GetMetadataValue(ProjectMetadataName);
+                    if (solutionConfiguration.TryGetProjectByGuid(projectGuid, out XmlElement projectElement)
+                        || solutionConfiguration.TryGetProjectByAbsolutePath(projectReferenceFullPath, out projectElement))
+                    {
+                        // Note: AssignProjectConfiguration sets various metadata on the ProjectReference item, but ultimately it just translates to the Configuration and Platform global properties on the MSBuild task.
+                        string projectConfiguration = projectElement.InnerText;
+                        string[] configurationPlatformParts = projectConfiguration.Split(SolutionConfiguration.ConfigPlatformSeparator[0]);
+                        SetProperty(referenceGlobalProperties, ConfigurationMetadataName, configurationPlatformParts[0]);
 
-                    var  projectInstance = _projectInstanceFactory(
+                        if (configurationPlatformParts.Length > 1)
+                        {
+                            SetProperty(referenceGlobalProperties, PlatformMetadataName, configurationPlatformParts[1]);
+                        }
+                        else
+                        {
+                            referenceGlobalProperties.Remove(PlatformMetadataName);
+                        }
+                    }
+                    else
+                    {
+                        // Note: ShouldUnsetParentConfigurationAndPlatform defaults to true in the AssignProjectConfiguration target when building a solution, so check that it's not false instead of checking that it's true.
+                        bool shouldUnsetParentConfigurationAndPlatform = !ConversionUtilities.ValidBooleanFalse(requesterInstance.GetPropertyValue(ShouldUnsetParentConfigurationAndPlatformPropertyName));
+                        if (shouldUnsetParentConfigurationAndPlatform)
+                        {
+                            referenceGlobalProperties.Remove(ConfigurationMetadataName);
+                            referenceGlobalProperties.Remove(PlatformMetadataName);
+                        }
+                    }
+                }
+
+                // Note: Dynamic platform resolution is not enabled for sln-based builds.
+                else if (!projectReferenceItem.HasMetadata(SetPlatformMetadataName) && enableDynamicPlatformResolution)
+                {
+                    string requesterPlatform = requesterInstance.GetPropertyValue("Platform");
+                    string requesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");
+
+                    var projectInstance = projectInstanceFactory(
                         projectReferenceFullPath,
                         null, // Platform negotiation requires an evaluation with no global properties first
-                        _projectCollection);
+                        projectCollection);
 
-                    var selectedPlatform = PlatformNegotiation.GetNearestPlatform(projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), requesterInstance.GetPropertyValue(PlatformLookupTableMetadataName), projectInstance.FullPath, requesterInstance.GetPropertyValue(PlatformMetadataName));
+                    string overridePlatformNegotiationMetadataValue = projectReferenceItem.GetMetadataValue(OverridePlatformNegotiationValue);
+
+                    var selectedPlatform = PlatformNegotiation.GetNearestPlatform(overridePlatformNegotiationMetadataValue, projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), requesterInstance.GetPropertyValue(PlatformLookupTableMetadataName), projectInstance.FullPath, requesterInstance.GetPropertyValue(PlatformMetadataName));
 
                     if (selectedPlatform.Equals(String.Empty))
                     {
@@ -123,14 +185,19 @@ namespace Microsoft.Build.Graph
                     }
                     else
                     {
-                        var platformPropertyInstance = ProjectPropertyInstance.Create(PlatformMetadataName, selectedPlatform);
-                        referenceGlobalProperties[PlatformMetadataName] = platformPropertyInstance;
+                        SetProperty(referenceGlobalProperties, PlatformMetadataName, selectedPlatform);
                     }
                 }
 
                 var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties);
 
                 yield return new ReferenceInfo(referenceConfig, projectReferenceItem);
+
+                static void SetProperty(PropertyDictionary<ProjectPropertyInstance> properties, string propertyName, string propertyValue)
+                {
+                    ProjectPropertyInstance propertyInstance = ProjectPropertyInstance.Create(propertyName, propertyValue);
+                    properties[propertyName] = propertyInstance;
+                }
             }
         }
 
@@ -164,30 +231,28 @@ namespace Microsoft.Build.Graph
         }
 
         /// <summary>
-        /// To avoid calling nuget at graph construction time, the graph is initially constructed with outer build nodes referencing inner build nodes.
-        /// However, at build time, for non root outer builds, the inner builds are NOT referenced by the outer build, but by the nodes referencing the
-        /// outer build. Change the graph to mimic this behaviour.
-        /// Examples
-        /// OuterAsRoot -> Inner go to OuterAsRoot -> Inner. Inner builds remain the same, parented to their outer build
-        /// Node -> Outer -> Inner go to: Node -> Outer; Node->Inner; Outer -> empty. Inner builds get reparented to Node
+        /// To avoid calling nuget at graph construction time, the graph is initially constructed with nodes referencing outer build nodes which in turn
+        /// reference inner build nodes. However at build time, the inner builds are referenced directly by the nodes referencing the outer build.
+        /// Change the graph to mimic this behaviour.
+        /// Example: Node -> Outer -> Inner go to: Node -> Outer; Node->Inner; Outer -> Inner. Inner build edges get added to Node.
         /// </summary>
-        public void ReparentInnerBuilds(Dictionary<ConfigurationMetadata, ParsedProject> allNodes, GraphBuilder graphBuilder)
+        public void AddInnerBuildEdges(Dictionary<ConfigurationMetadata, ParsedProject> allNodes, GraphBuilder graphBuilder)
         {
-            foreach (var node in allNodes)
+            foreach (KeyValuePair<ConfigurationMetadata, ParsedProject> node in allNodes)
             {
-                var outerBuild = node.Value.GraphNode;
+                ProjectGraphNode outerBuild = node.Value.GraphNode;
 
                 if (GetProjectType(outerBuild.ProjectInstance) == ProjectType.OuterBuild && outerBuild.ReferencingProjects.Count != 0)
                 {
-                    foreach (var innerBuild in outerBuild.ProjectReferences)
+                    foreach (ProjectGraphNode innerBuild in outerBuild.ProjectReferences)
                     {
-                        foreach (var outerBuildReferencingProject in outerBuild.ReferencingProjects)
+                        foreach (ProjectGraphNode outerBuildReferencingProject in outerBuild.ReferencingProjects)
                         {
                             // Which edge should be used to connect the outerBuildReferencingProject to the inner builds?
                             // Decided to use the outerBuildBuildReferencingProject -> outerBuild edge in order to preserve any extra metadata
                             // information that may be present on the edge, like the "Targets" metadata which specifies what
                             // targets to call on the references.
-                            var newInnerBuildEdge = graphBuilder.Edges[(outerBuildReferencingProject, outerBuild)];
+                            ProjectItemInstance newInnerBuildEdge = graphBuilder.Edges[(outerBuildReferencingProject, outerBuild)];
 
                             if (outerBuildReferencingProject.ProjectReferences.Contains(innerBuild))
                             {
@@ -204,8 +269,6 @@ namespace Microsoft.Build.Graph
                             outerBuildReferencingProject.AddProjectReference(innerBuild, newInnerBuildEdge, graphBuilder.Edges);
                         }
                     }
-
-                    outerBuild.RemoveReferences(graphBuilder.Edges);
                 }
             }
         }
@@ -237,8 +300,7 @@ namespace Microsoft.Build.Graph
         /// </remarks>
         private static GlobalPropertyPartsForMSBuildTask ProjectReferenceGlobalPropertiesModifier(
             GlobalPropertyPartsForMSBuildTask defaultParts,
-            ProjectItemInstance projectReference
-        )
+            ProjectItemInstance projectReference)
         {
             // ProjectReference defines yet another metadata name containing properties to undefine. Merge it in if non empty.
             var globalPropertiesToRemove = SplitPropertyNames(projectReference.GetMetadataValue(GlobalPropertiesToRemoveMetadataName));
@@ -298,7 +360,7 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        delegate GlobalPropertyPartsForMSBuildTask GlobalPropertiesModifier(GlobalPropertyPartsForMSBuildTask defaultParts, ProjectItemInstance projectReference);
+        private delegate GlobalPropertyPartsForMSBuildTask GlobalPropertiesModifier(GlobalPropertyPartsForMSBuildTask defaultParts, ProjectItemInstance projectReference);
 
         /// <summary>
         ///     Gets the effective global properties for an item that will get passed to <see cref="MSBuild.Projects"/>.
@@ -310,7 +372,8 @@ namespace Microsoft.Build.Graph
         private static PropertyDictionary<ProjectPropertyInstance> GetGlobalPropertiesForItem(
             ProjectItemInstance projectReference,
             PropertyDictionary<ProjectPropertyInstance> requesterGlobalProperties,
-            IEnumerable<GlobalPropertiesModifier> globalPropertyModifiers = null)
+            bool allowCollectionReuse,
+            IEnumerable<GlobalPropertiesModifier> globalPropertyModifiers)
         {
             ErrorUtilities.VerifyThrowInternalNull(projectReference, nameof(projectReference));
             ErrorUtilities.VerifyThrowArgumentNull(requesterGlobalProperties, nameof(requesterGlobalProperties));
@@ -323,7 +386,7 @@ namespace Microsoft.Build.Graph
 
             var globalPropertyParts = globalPropertyModifiers?.Aggregate(defaultParts, (currentProperties, modifier) => modifier(currentProperties, projectReference)) ?? defaultParts;
 
-            if (globalPropertyParts.AllEmpty())
+            if (globalPropertyParts.AllEmpty() && allowCollectionReuse)
             {
                 return requesterGlobalProperties;
             }
@@ -396,10 +459,10 @@ namespace Microsoft.Build.Graph
 
         public readonly struct TargetsToPropagate
         {
-            private readonly ImmutableList<string> _outerBuildTargets;
-            private readonly ImmutableList<string> _allTargets;
+            private readonly ImmutableList<TargetSpecification> _outerBuildTargets;
+            private readonly ImmutableList<TargetSpecification> _allTargets;
 
-            private TargetsToPropagate(ImmutableList<string> outerBuildTargets, ImmutableList<string> nonOuterBuildTargets)
+            private TargetsToPropagate(ImmutableList<TargetSpecification> outerBuildTargets, ImmutableList<TargetSpecification> nonOuterBuildTargets)
             {
                 _outerBuildTargets = outerBuildTargets;
 
@@ -421,23 +484,22 @@ namespace Microsoft.Build.Graph
             /// <returns></returns>
             public static TargetsToPropagate FromProjectAndEntryTargets(ProjectInstance project, ImmutableList<string> entryTargets)
             {
-                var targetsForOuterBuild = ImmutableList.CreateBuilder<string>();
-                var targetsForInnerBuild = ImmutableList.CreateBuilder<string>();
+                ImmutableList<TargetSpecification>.Builder targetsForOuterBuild = ImmutableList.CreateBuilder<TargetSpecification>();
+                ImmutableList<TargetSpecification>.Builder targetsForInnerBuild = ImmutableList.CreateBuilder<TargetSpecification>();
 
-                var projectReferenceTargets = project.GetItems(ItemTypeNames.ProjectReferenceTargets);
+                ICollection<ProjectItemInstance> projectReferenceTargets = project.GetItems(ItemTypeNames.ProjectReferenceTargets);
 
-                foreach (var entryTarget in entryTargets)
+                foreach (string entryTarget in entryTargets)
                 {
-                    foreach (var projectReferenceTarget in projectReferenceTargets)
+                    foreach (ProjectItemInstance projectReferenceTarget in projectReferenceTargets)
                     {
                         if (projectReferenceTarget.EvaluatedInclude.Equals(entryTarget, StringComparison.OrdinalIgnoreCase))
                         {
-                            var targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
-
-                            var targetsAreForOuterBuild = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName));
-
-                            var targets = ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue).ToArray();
-
+                            string targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+                            bool skipNonexistentTargets = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue("SkipNonexistentTargets"));
+                            bool targetsAreForOuterBuild = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName));
+                            TargetSpecification[] targets = ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue)
+                                .Select(t => new TargetSpecification(t, skipNonexistentTargets)).ToArray();
                             if (targetsAreForOuterBuild)
                             {
                                 targetsForOuterBuild.AddRange(targets);
@@ -455,11 +517,20 @@ namespace Microsoft.Build.Graph
 
             public ImmutableList<string> GetApplicableTargetsForReference(ProjectInstance reference)
             {
-                return (GetProjectType(reference)) switch
+                ImmutableList<string> RemoveNonexistentTargetsIfSkippable(ImmutableList<TargetSpecification> targets)
                 {
-                    ProjectType.InnerBuild => _allTargets,
-                    ProjectType.OuterBuild => _outerBuildTargets,
-                    ProjectType.NonMultitargeting => _allTargets,
+                    // Keep targets that are non-skippable or that exist but are skippable.
+                    return targets
+                        .Where(t => !t.SkipIfNonexistent || reference.Targets.ContainsKey(t.Target))
+                        .Select(t => t.Target)
+                        .ToImmutableList();
+                }
+
+                return GetProjectType(reference) switch
+                {
+                    ProjectType.InnerBuild => RemoveNonexistentTargetsIfSkippable(_allTargets),
+                    ProjectType.OuterBuild => RemoveNonexistentTargetsIfSkippable(_outerBuildTargets),
+                    ProjectType.NonMultitargeting => RemoveNonexistentTargetsIfSkippable(_allTargets),
                     _ => throw new ArgumentOutOfRangeException(),
                 };
             }

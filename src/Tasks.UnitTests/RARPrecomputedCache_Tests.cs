@@ -1,12 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
+using System.Collections.Generic;
+using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using Xunit;
 
 #nullable disable
@@ -20,14 +21,18 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                DateTime now = DateTime.Now;
                 TransientTestFile standardCache = env.CreateFile(".cache");
                 ResolveAssemblyReference t = new ResolveAssemblyReference()
                 {
                     _cache = new SystemState()
                 };
                 t._cache.instanceLocalFileStateCache = new Dictionary<string, SystemState.FileState>() {
-                    { Path.Combine(standardCache.Path, "assembly1"), new SystemState.FileState(DateTime.Now) },
-                    { Path.Combine(standardCache.Path, "assembly2"), new SystemState.FileState(DateTime.Now) { Assembly = new Shared.AssemblyNameExtension("hi") } } };
+                    { Path.Combine(standardCache.Path, "assembly1"), new SystemState.FileState(now) },
+                    { Path.Combine(standardCache.Path, "assembly2"), new SystemState.FileState(now) { Assembly = new Shared.AssemblyNameExtension("hi") } } };
+                t._cache.SetGetLastWriteTime(_ => now);
+                _ = t._cache.GetFileState("assembly1");
+                _ = t._cache.GetFileState("assembly2");
                 t._cache.IsDirty = true;
                 t.StateFile = standardCache.Path;
                 t.WriteStateFile();
@@ -51,13 +56,18 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                DateTime now = DateTime.Now;
                 TransientTestFile standardCache = env.CreateFile(".cache");
                 ResolveAssemblyReference rarWriterTask = new ResolveAssemblyReference()
                 {
                     _cache = new SystemState()
                 };
-                rarWriterTask._cache.instanceLocalFileStateCache = new Dictionary<string, SystemState.FileState>();
+                rarWriterTask._cache.instanceLocalFileStateCache = new() {
+                    { "path1", new SystemState.FileState(now) },
+                };
+                rarWriterTask._cache.SetGetLastWriteTime(_ => now);
                 rarWriterTask.StateFile = standardCache.Path;
+                _ = rarWriterTask._cache.GetFileState("path1");
                 rarWriterTask._cache.IsDirty = true;
                 // Write standard cache
                 rarWriterTask.WriteStateFile();

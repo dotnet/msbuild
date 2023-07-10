@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -8,14 +8,12 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-
-using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
+using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
 
 #nullable disable
@@ -75,11 +73,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public void ParseParameters()
         {
-            if (Parameters == null) return;
+            if (Parameters == null)
+            {
+                return;
+            }
 
             foreach (string parameter in Parameters.Split(parameterDelimiters))
             {
-                if (string.IsNullOrWhiteSpace(parameter)) continue;
+                if (string.IsNullOrWhiteSpace(parameter))
+                {
+                    continue;
+                }
 
                 string[] parameterAndValue = parameter.Split(s_parameterValueSplitCharacter);
                 ApplyParameter(parameterAndValue[0], parameterAndValue.Length > 1 ? parameterAndValue[1] : null);
@@ -99,7 +103,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             public int Compare(DictionaryEntry a, DictionaryEntry b)
             {
-                return string.Compare((string) a.Key, (string) b.Key, StringComparison.CurrentCultureIgnoreCase);
+                return string.Compare((string)a.Key, (string)b.Key, StringComparison.CurrentCultureIgnoreCase);
             }
         }
 
@@ -127,7 +131,10 @@ namespace Microsoft.Build.BackEnd.Logging
         internal string IndentString(string s, int indent)
         {
             // It's possible the event has a null message
-            if (s == null) return string.Empty;
+            if (s == null)
+            {
+                return string.Empty;
+            }
 
             // This will never return an empty array.  The returned array will always
             // have at least one non-null element, even if "s" is totally empty.
@@ -578,7 +585,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WriteItems(SortedList itemTypes)
         {
-            if (Verbosity != LoggerVerbosity.Diagnostic || !showItemAndPropertyList || itemTypes.Count == 0) return;
+            if (Verbosity != LoggerVerbosity.Diagnostic || !showItemAndPropertyList || itemTypes.Count == 0)
+            {
+                return;
+            }
 
             // Write the banner
             setColor(ConsoleColor.Green);
@@ -587,8 +597,8 @@ namespace Microsoft.Build.BackEnd.Logging
             // Write each item type and its itemspec, one per line
             foreach (DictionaryEntry entry in itemTypes)
             {
-                string itemType = (string) entry.Key;
-                ArrayList itemTypeList = (ArrayList) entry.Value;
+                string itemType = (string)entry.Key;
+                ArrayList itemTypeList = (ArrayList)entry.Value;
 
                 if (itemTypeList.Count == 0)
                 {
@@ -961,7 +971,7 @@ namespace Microsoft.Build.BackEnd.Logging
             if (eventSource != null)
             {
                 eventSource.BuildStarted += BuildStartedHandler;
-                eventSource.BuildFinished +=BuildFinishedHandler;
+                eventSource.BuildFinished += BuildFinishedHandler;
                 eventSource.ProjectStarted += ProjectStartedHandler;
                 eventSource.ProjectFinished += ProjectFinishedHandler;
                 eventSource.TargetStarted += TargetStartedHandler;

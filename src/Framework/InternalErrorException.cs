@@ -1,9 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+using Microsoft.Build.Framework.BuildException;
 
 #nullable disable
 
@@ -15,7 +16,7 @@ namespace Microsoft.Build.Framework
     /// did wrong.
     /// </summary>
     [Serializable]
-    internal sealed class InternalErrorException : Exception
+    internal sealed class InternalErrorException : BuildExceptionBase
     {
         /// <summary>
         /// Default constructor.
@@ -30,10 +31,8 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Creates an instance of this exception using the given message.
         /// </summary>
-        internal InternalErrorException
-        (
-            String message
-        ) :
+        internal InternalErrorException(
+            String message) :
             base("MSB0001: Internal MSBuild Error: " + message)
         {
             ConsiderDebuggerLaunch(message, null);
@@ -44,14 +43,30 @@ namespace Microsoft.Build.Framework
         /// Adds the inner exception's details to the exception message because most bug reporters don't bother
         /// to provide the inner exception details which is typically what we care about.
         /// </summary>
-        internal InternalErrorException
-        (
+        internal InternalErrorException(
             String message,
-            Exception innerException
-        ) :
-            base("MSB0001: Internal MSBuild Error: " + message + (innerException == null ? String.Empty : ("\n=============\n" + innerException.ToString() + "\n\n")), innerException)
+            Exception innerException) :
+            this(message, innerException, false)
+        { }
+
+        internal static InternalErrorException CreateFromRemote(string message, Exception innerException)
         {
-            ConsiderDebuggerLaunch(message, innerException);
+            return new InternalErrorException(message, innerException, true /* calledFromDeserialization */);
+        }
+
+        private InternalErrorException(string message, Exception innerException, bool calledFromDeserialization)
+            : base(
+                calledFromDeserialization
+                    ? message
+                    : "MSB0001: Internal MSBuild Error: " + message + (innerException == null
+                        ? String.Empty
+                        : ("\n=============\n" + innerException.ToString() + "\n\n")),
+                innerException)
+        {
+            if (!calledFromDeserialization)
+            {
+                ConsiderDebuggerLaunch(message, innerException);
+            }
         }
 
         #region Serialization (update when adding new class members)

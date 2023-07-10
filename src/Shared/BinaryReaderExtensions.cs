@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -10,13 +10,25 @@ namespace Microsoft.Build.Shared
 {
     internal static class BinaryReaderExtensions
     {
+#if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static string? ReadOptionalString(this BinaryReader reader)
         {
             return reader.ReadByte() == 0 ? null : reader.ReadString();
         }
 
+#if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static int ReadOptionalInt32(this BinaryReader reader)
+        {
+            return reader.ReadByte() == 0 ? 0 : reader.ReadInt32();
+        }
+
+#if !TASKHOST
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static int Read7BitEncodedInt(this BinaryReader reader)
         {
             // Read out an Int32 7 bits at a time.  The high bit
@@ -41,7 +53,9 @@ namespace Microsoft.Build.Shared
             return count;
         }
 
+#if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static DateTime ReadTimestamp(this BinaryReader reader)
         {
             long timestampTicks = reader.ReadInt64();
@@ -50,6 +64,7 @@ namespace Microsoft.Build.Shared
             return timestamp;
         }
 
+#if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BuildEventContext? ReadOptionalBuildEventContext(this BinaryReader reader)
         {
@@ -74,6 +89,15 @@ namespace Microsoft.Build.Shared
 
             var buildEventContext = new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, targetId, taskId);
             return buildEventContext;
+        }
+#endif
+
+#if !TASKHOST
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static unsafe Guid ReadGuid(this BinaryReader reader)
+        {
+            return new Guid(reader.ReadBytes(sizeof(Guid)));
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.CodeDom;
@@ -23,9 +23,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
+using System.Runtime.Serialization.Formatters.Binary;
 #endif
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 #if !FEATURE_ASSEMBLYLOADCONTEXT
 using System.Runtime.Versioning;
 using System.Security;
@@ -40,7 +40,9 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Utilities;
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using Microsoft.Win32;
+#endif
 
 #nullable disable
 
@@ -51,10 +53,10 @@ namespace Microsoft.Build.Tasks
     /// to transform resource files.
     /// </summary>
     [RequiredRuntime("v2.0")]
-    public sealed partial class GenerateResource : TaskExtension
+    public sealed partial class GenerateResource : TaskExtension, IIncrementalTask
     {
 
-#region Fields
+        #region Fields
 
         // This cache helps us track the linked resource files listed inside of a resx resource file
         private ResGenDependencies _cache;
@@ -162,9 +164,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private List<ITaskItem> _satelliteInputs;
 
-#endregion  // fields
+        #endregion  // fields
 
-#region Properties
+        #region Properties
 
         /// <summary>
         /// The names of the items to be converted. The extension must be one of the
@@ -270,6 +272,12 @@ namespace Microsoft.Build.Tasks
             {
                 return _stronglyTypedLanguage;
             }
+        }
+
+        // Indicates whether any BinaryFormatter use should lead to a warning.
+        public bool WarnOnBinaryFormatterUse
+        {
+            get; set;
         }
 
         /// <summary>
@@ -534,7 +542,7 @@ namespace Microsoft.Build.Tasks
             set;
         }
 
-#endregion // properties
+        #endregion // properties
 
         /// <summary>
         /// Simple public constructor.
@@ -543,6 +551,8 @@ namespace Microsoft.Build.Tasks
         {
             // do nothing
         }
+
+        public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
         /// Logs a Resgen.exe command line that indicates what parameters were
@@ -568,11 +578,9 @@ namespace Microsoft.Build.Tasks
                 {
                     if (!ExtractResWFiles)
                     {
-                        commandLineBuilder.AppendFileNamesIfNotNull
-                        (
+                        commandLineBuilder.AppendFileNamesIfNotNull(
                             new string[] { inputFiles[i].ItemSpec, outputFiles[i].ItemSpec },
-                            ","
-                        );
+                            ",");
                     }
                     else
                     {
@@ -587,12 +595,10 @@ namespace Microsoft.Build.Tasks
                 commandLineBuilder.AppendFileNamesIfNotNull(outputFiles.ToArray(), " ");
 
                 // append the strongly-typed resource details
-                commandLineBuilder.AppendSwitchIfNotNull
-                (
+                commandLineBuilder.AppendSwitchIfNotNull(
                     "/str:",
                     new string[] { StronglyTypedLanguage, StronglyTypedNamespace, StronglyTypedClassName, StronglyTypedFileName },
-                    ","
-                );
+                    ",");
             }
 
             Log.LogCommandLine(MessageImportance.Low, commandLineBuilder.ToString());
@@ -717,6 +723,10 @@ namespace Microsoft.Build.Tasks
 
                     Log.LogMessageFromResources("GenerateResource.NothingOutOfDate");
                 }
+                else if (FailIfNotIncremental)
+                {
+                    Log.LogErrorFromResources("GenerateResource.OutOfDate");
+                }
                 else
                 {
                     if (!ComputePathToResGen())
@@ -772,18 +782,14 @@ namespace Microsoft.Build.Tasks
                                 // create the list that we'll use to disconnect the taskitems once we're done
                                 _remotedTaskItems = new List<ITaskItem>();
 
-                                appDomain = AppDomain.CreateDomain
-                                (
+                                appDomain = AppDomain.CreateDomain(
                                     "generateResourceAppDomain",
                                     null,
-                                    AppDomain.CurrentDomain.SetupInformation
-                                );
+                                    AppDomain.CurrentDomain.SetupInformation);
 
-                                object obj = appDomain.CreateInstanceFromAndUnwrap
-                                   (
+                                object obj = appDomain.CreateInstanceFromAndUnwrap(
                                        typeof(ProcessResourceFiles).Module.FullyQualifiedName,
-                                       typeof(ProcessResourceFiles).FullName
-                                   );
+                                       typeof(ProcessResourceFiles).FullName);
 
                                 Type processType = obj.GetType();
                                 ErrorUtilities.VerifyThrow(processType == typeof(ProcessResourceFiles), "Somehow got a wrong and possibly incompatible type for ProcessResourceFiles.");
@@ -814,7 +820,8 @@ namespace Microsoft.Build.Tasks
                                         StronglyTypedClassName,
                                         PublicClass,
                                         ExtractResWFiles,
-                                        OutputDirectory);
+                                        OutputDirectory,
+                                        WarnOnBinaryFormatterUse);
 
                             this.StronglyTypedClassName = process.StronglyTypedClassName; // in case a default was chosen
                             this.StronglyTypedFileName = process.StronglyTypedFilename;   // in case a default was chosen
@@ -905,24 +912,29 @@ namespace Microsoft.Build.Tasks
             return !Log.HasLoggedErrors && outOfProcExecutionSucceeded;
         }
 
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
         private static readonly bool AllowMOTW = !NativeMethodsShared.IsWindows || (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null) is string allowUntrustedFiles && allowUntrustedFiles.Equals("true", StringComparison.OrdinalIgnoreCase));
 
         private const string CLSID_InternetSecurityManager = "7b8a2d94-0ac9-11d1-896c-00c04fb6bfc4";
         private const uint ZoneInternet = 3;
         private static IInternetSecurityManager internetSecurityManager = null;
+#endif
 
         // Resources can have arbitrarily serialized objects in them which can execute arbitrary code
         // so check to see if we should trust them before analyzing them
         private bool IsDangerous(String filename)
         {
+#if !FEATURE_RESXREADER_LIVEDESERIALIZATION
+            return false;
+        }
+#else
             // If they are opted out, there's no work to do
-            if (AllowMOTW || !NativeMethodsShared.IsWindows)
+            if (AllowMOTW)
             {
                 return false;
             }
 
             // First check the zone, if they are not an untrusted zone, they aren't dangerous
-
             if (internetSecurityManager == null)
             {
                 Type iismType = Type.GetTypeFromCLSID(new Guid(CLSID_InternetSecurityManager));
@@ -989,7 +1001,6 @@ namespace Microsoft.Build.Tasks
             return dangerous;
         }
 
-#if FEATURE_APPDOMAIN
         /// <summary>
         /// For setting OutputResources and ensuring it can be read after the second AppDomain has been unloaded.
         /// </summary>
@@ -1210,11 +1221,9 @@ namespace Microsoft.Build.Tasks
             int i = initialResourceIndex;
             while (currentCommand.Length < s_maximumCommandLength && i < inputsToProcess.Count)
             {
-                currentCommand.AppendFileNamesIfNotNull
-                    (
+                currentCommand.AppendFileNamesIfNotNull(
                         new ITaskItem[] { inputsToProcess[i], outputsToProcess[i] },
-                        ","
-                    );
+                        ",");
                 i++;
             }
 
@@ -1514,9 +1523,9 @@ namespace Microsoft.Build.Tasks
             ResGenDependencies.ResXFile resxFileInfo;
             try
             {
-                resxFileInfo = _cache.GetResXFileInfo(sourceFilePath, UsePreserializedResources);
+                resxFileInfo = _cache.GetResXFileInfo(sourceFilePath, UsePreserializedResources, Log, WarnOnBinaryFormatterUse);
             }
-            catch (Exception e)  when (!ExceptionHandling.NotExpectedIoOrXmlException(e) || e is MSBuildResXException)
+            catch (Exception e) when (!ExceptionHandling.NotExpectedIoOrXmlException(e) || e is MSBuildResXException)
             {
                 // Return true, so that resource processing will display the error
                 // No point logging a duplicate error here as well
@@ -1798,15 +1807,13 @@ namespace Microsoft.Build.Tasks
                                             // we should create a separate app-domain, so that those assemblies
                                             // can be unlocked when the task is finished.
                                             // The type didn't start with "System." so return true.
-                                            Log.LogMessageFromResources
-                                            (
+                                            Log.LogMessageFromResources(
                                                 MessageImportance.Low,
                                                 "GenerateResource.SeparateAppDomainBecauseOfType",
                                                 name ?? String.Empty,
                                                 typeName,
                                                 source.ItemSpec,
-                                                ((IXmlLineInfo)reader).LineNumber
-                                            );
+                                                ((IXmlLineInfo)reader).LineNumber);
 
                                             return true;
                                         }
@@ -1844,15 +1851,13 @@ namespace Microsoft.Build.Tasks
                                     {
                                         if (NeedSeparateAppDomainBasedOnSerializedType(reader))
                                         {
-                                            Log.LogMessageFromResources
-                                            (
+                                            Log.LogMessageFromResources(
                                                 MessageImportance.Low,
                                                 "GenerateResource.SeparateAppDomainBecauseOfMimeType",
                                                 name ?? String.Empty,
                                                 mimeType,
                                                 source.ItemSpec,
-                                                ((IXmlLineInfo)reader).LineNumber
-                                            );
+                                                ((IXmlLineInfo)reader).LineNumber);
 
                                             return true;
                                         }
@@ -1876,28 +1881,24 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (XmlException e)
                     {
-                        Log.LogMessageFromResources
-                                    (
+                        Log.LogMessageFromResources(
                                         MessageImportance.Low,
                                         "GenerateResource.SeparateAppDomainBecauseOfExceptionLineNumber",
                                         source.ItemSpec,
                                         ((IXmlLineInfo)reader).LineNumber,
-                                        e.Message
-                                    );
+                                        e.Message);
 
                         return true;
                     }
                     catch (SerializationException e)
                     {
-                        Log.LogMessageFromResources
-                                    (
+                        Log.LogMessageFromResources(
                                         MessageImportance.Low,
                                         "GenerateResource.SeparateAppDomainBecauseOfErrorDeserializingLineNumber",
                                         source.ItemSpec,
                                         name ?? String.Empty,
                                         ((IXmlLineInfo)reader).LineNumber,
-                                        e.Message
-                                    );
+                                        e.Message);
 
                         return true;
                     }
@@ -1915,13 +1916,11 @@ namespace Microsoft.Build.Tasks
 
                         // If there was any problem parsing the .resx then log a message and
                         // fall back to using a separate AppDomain.
-                        Log.LogMessageFromResources
-                                    (
+                        Log.LogMessageFromResources(
                                         MessageImportance.Low,
                                         "GenerateResource.SeparateAppDomainBecauseOfException",
                                         source.ItemSpec,
-                                        e.Message
-                                    );
+                                        e.Message);
 
                         // In case we need more information from the customer (given this has been heavily reported
                         // and we don't understand it properly) let the usual debug switch dump the stack.
@@ -1974,7 +1973,6 @@ namespace Microsoft.Build.Tasks
             // Return true to err on the side of caution. Error will appear later.
             return true;
         }
-#endif
 
         /// <summary>
         /// Deserializes a base64 block from a resx in order to figure out if its type is in the GAC.
@@ -1986,7 +1984,7 @@ namespace Microsoft.Build.Tasks
         {
             byte[] serializedData = ByteArrayFromBase64WrappedString(data);
 
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            BinaryFormatter binaryFormatter = new();
 
             using (MemoryStream memoryStream = new MemoryStream(serializedData))
             {
@@ -1995,6 +1993,7 @@ namespace Microsoft.Build.Tasks
                 return result != null;
             }
         }
+#endif
 
         /// <summary>
         /// Chars that should be ignored in the nicely justified block of base64
@@ -2186,7 +2185,7 @@ namespace Microsoft.Build.Tasks
         : MarshalByRefObject
 #endif
     {
-#region fields
+        #region fields
         /// <summary>
         /// List of readers used for input.
         /// </summary>
@@ -2351,7 +2350,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool _useSourcePath = false;
 
-#endregion
+        private bool _logWarningForBinaryFormatter = false;
+
+        #endregion
 
         /// <summary>
         /// Process all files.
@@ -2371,7 +2372,8 @@ namespace Microsoft.Build.Tasks
             string classname,
             bool publicClass,
             bool extractingResWFiles,
-            string resWOutputDirectory)
+            string resWOutputDirectory,
+            bool logWarningForBinaryFormatter)
         {
             _logger = log;
             _assemblyFiles = assemblyFilesList;
@@ -2390,6 +2392,7 @@ namespace Microsoft.Build.Tasks
             _resWOutputDirectory = resWOutputDirectory;
             _portableLibraryCacheInfo = new List<ResGenDependencies.PortableLibraryFile>();
             _usePreserializedResources = usePreserializedResources;
+            _logWarningForBinaryFormatter = logWarningForBinaryFormatter;
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             // If references were passed in, we will have to give the ResxResourceReader an object
@@ -2715,7 +2718,7 @@ namespace Microsoft.Build.Tasks
                             && GetFormat(inFile) != Format.Assembly
                             // outFileOrDir is a directory when the input file is an assembly
                             && GetFormat(outFileOrDir) != Format.Assembly)
-                            // Never delete an assembly since we don't ever actually write to assemblies.
+                        // Never delete an assembly since we don't ever actually write to assemblies.
                         {
                             RemoveCorruptedFile(outFileOrDir);
                         }
@@ -2994,7 +2997,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, shouldUseSourcePath))
+                                foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, shouldUseSourcePath, _logger, _logWarningForBinaryFormatter))
                                 {
                                     AddResource(reader, resource, filename, 0, 0);
                                 }
@@ -3071,9 +3074,7 @@ namespace Microsoft.Build.Tasks
                             targetFrameworkAttribute != null &&
                             (
                                 targetFrameworkAttribute.FrameworkName.StartsWith("Silverlight,", StringComparison.OrdinalIgnoreCase) ||
-                                targetFrameworkAttribute.FrameworkName.StartsWith("WindowsPhone,", StringComparison.OrdinalIgnoreCase)
-                            )
-                        )
+                                targetFrameworkAttribute.FrameworkName.StartsWith("WindowsPhone,", StringComparison.OrdinalIgnoreCase)))
                     {
                         // Skip Silverlight assemblies.
                         _logger.LogMessageFromResources("GenerateResource.SkippingExtractingFromNonSupportedFramework", name, targetFrameworkAttribute.FrameworkName);
@@ -3126,13 +3127,17 @@ namespace Microsoft.Build.Tasks
                 {
                     satCulture = assemblyName.CultureInfo;
                     if (!satCulture.Equals(CultureInfo.InvariantCulture))
+                    {
                         expectedExt = '.' + satCulture.Name + ".resources";
+                    }
                 }
 
                 foreach (String resName in resources)
                 {
                     if (!resName.EndsWith(".resources", StringComparison.OrdinalIgnoreCase)) // Skip non-.resources assembly blobs
+                    {
                         continue;
+                    }
 
                     if (mainAssembly)
                     {
@@ -3184,7 +3189,9 @@ namespace Microsoft.Build.Tasks
                             {
                                 // Remove the culture from the filename
                                 if (reader.outputFileName.EndsWith("." + reader.cultureName, StringComparison.OrdinalIgnoreCase))
+                                {
                                     reader.outputFileName = reader.outputFileName.Remove(reader.outputFileName.Length - (reader.cultureName.Length + 1));
+                                }
                             }
                             _readers.Add(reader);
 
@@ -3228,7 +3235,9 @@ namespace Microsoft.Build.Tasks
                     neutralResourcesLanguageAttribute = (NeutralResourcesLanguageAttribute)attrs[0];
                     bool fallbackToSatellite = neutralResourcesLanguageAttribute.Location == UltimateResourceFallbackLocation.Satellite;
                     if (!fallbackToSatellite && neutralResourcesLanguageAttribute.Location != UltimateResourceFallbackLocation.MainAssembly)
+                    {
                         _logger.LogWarningWithCodeFromResources(null, name, 0, 0, 0, 0, "GenerateResource.UnrecognizedUltimateResourceFallbackLocation", neutralResourcesLanguageAttribute.Location, name);
+                    }
                     // This MSBuild task needs to not report an error for main assemblies that don't have managed resources.
                 }
             }
@@ -3247,7 +3256,9 @@ namespace Microsoft.Build.Tasks
                 }
 
                 if (!ContainsProperlyNamedResourcesFiles(a, false))
+                {
                     _logger.LogWarningWithCodeFromResources("GenerateResource.SatelliteAssemblyContainsNoResourcesFile", assemblyName.CultureInfo.Name);
+                }
             }
             return neutralResourcesLanguageAttribute;
         }
@@ -3258,7 +3269,9 @@ namespace Microsoft.Build.Tasks
             foreach (String manifestResourceName in a.GetManifestResourceNames())
             {
                 if (manifestResourceName.EndsWith(postfix, StringComparison.OrdinalIgnoreCase))
+                {
                     return true;
+                }
             }
 
             return false;
@@ -3416,8 +3429,7 @@ namespace Microsoft.Build.Tasks
                     _stronglyTypedResourcesNamespace,
                     provider,
                     generateInternalClass,
-                    out errors
-                    );
+                    out errors);
 
             CodeGeneratorOptions codeGenOptions = new CodeGeneratorOptions();
             using (TextWriter output = new StreamWriter(_stronglyTypedFilename))
@@ -3569,15 +3581,21 @@ namespace Microsoft.Build.Tasks
                     while (ch != '=')
                     {
                         if (ch == '\r' || ch == '\n')
+                        {
                             throw new TextFileException(_logger.FormatResourceString("GenerateResource.NoEqualsInLine", name), fileName, sr.LineNumber, sr.LinePosition);
+                        }
 
                         name.Append((char)ch);
                         ch = sr.Read();
                         if (ch == -1)
+                        {
                             break;
+                        }
                     }
                     if (name.Length == 0)
+                    {
                         throw new TextFileException(_logger.FormatResourceString("GenerateResource.NoNameInLine"), fileName, sr.LineNumber, sr.LinePosition);
+                    }
 
                     // For the INF file, we must allow a space on both sides of the equals
                     // sign.  Deal with it.
@@ -3588,7 +3606,9 @@ namespace Microsoft.Build.Tasks
                     ch = sr.Read(); // move past =
                     // If it exists, move past the first space after the equals sign.
                     if (ch == ' ')
+                    {
                         ch = sr.Read();
+                    }
 
                     // Read in value
                     value.Length = 0;
@@ -3627,7 +3647,10 @@ namespace Microsoft.Build.Tasks
                                     {
                                         int n = sr.Read(hex, index, numChars);
                                         if (n == 0)
+                                        {
                                             throw new TextFileException(_logger.FormatResourceString("GenerateResource.InvalidEscape", name.ToString(), (char)ch), fileName, sr.LineNumber, sr.LinePosition);
+                                        }
+
                                         index += n;
                                         numChars -= n;
                                     }
@@ -3947,7 +3970,7 @@ namespace Microsoft.Build.Tasks
                 get { return column; }
             }
         }
-#endregion // Code from ResGen.EXE
+        #endregion // Code from ResGen.EXE
     }
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT

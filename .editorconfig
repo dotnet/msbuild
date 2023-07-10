@@ -157,13 +157,16 @@ csharp_space_between_square_brackets = false
 dotnet_code_quality.ca1802.api_surface = private, internal
 dotnet_code_quality.ca2208.api_surface = public
 
+# CA1852: Seal internal types
+dotnet_diagnostic.ca1852.severity = warning
+
 # RS0037: Enable tracking of nullability of reference types in the declared API
 # Our API is not annotated but new classes get nullable enabled so disable this.
 # We'd be happy if everything was annotated and this could be removed.
 dotnet_diagnostic.RS0037.severity = none
 
 # License header
-file_header_template = Licensed to the .NET Foundation under one or more agreements.\nThe .NET Foundation licenses this file to you under the MIT license.\n
+file_header_template = Licensed to the .NET Foundation under one or more agreements.\nThe .NET Foundation licenses this file to you under the MIT license.
 
 # C++ Files
 [*.{cpp,h,in}]
@@ -200,5 +203,198 @@ end_of_line = lf
 end_of_line = crlf
 
 [src/**/*.{cs,vb}]
+# Code style checks
+dotnet_analyzer_diagnostic.category-Style.severity = warning
+
+# Cast is redundant
+dotnet_diagnostic.IDE0004.severity = suggestion
+
 # IDE0005: Remove unnecessary usings/imports
 dotnet_diagnostic.IDE0005.severity = warning
+
+# Use explicit type instead of 'var'
+dotnet_diagnostic.IDE0008.severity = suggestion
+
+# Populate switch
+dotnet_diagnostic.IDE0010.severity = suggestion
+
+# Null check can be simplified
+dotnet_diagnostic.IDE0016.severity = suggestion
+
+# Object initialization can be simplified
+dotnet_diagnostic.IDE0017.severity = suggestion
+
+# Variable declaration can be inlined
+dotnet_diagnostic.IDE0018.severity = suggestion
+
+# Use pattern matching
+dotnet_diagnostic.IDE0019.severity = suggestion
+dotnet_diagnostic.IDE0020.severity = suggestion
+
+# Use expression body for constructor
+dotnet_diagnostic.IDE0021.severity = suggestion
+
+# Use expression body for method
+dotnet_diagnostic.IDE0022.severity = suggestion
+
+# Use expression body for conversion operator
+dotnet_diagnostic.IDE0023.severity = suggestion
+
+# Use block body for operator
+dotnet_diagnostic.IDE0024.severity = suggestion
+
+# Use expression body for property
+dotnet_diagnostic.IDE0025.severity = suggestion
+
+# Use expression body for indexer
+dotnet_diagnostic.IDE0026.severity = suggestion
+
+# Use expression body for accessor
+dotnet_diagnostic.IDE0027.severity = suggestion
+
+# Collection initialization can be simplified
+dotnet_diagnostic.IDE0028.severity = suggestion
+
+# Null check can be simplified
+dotnet_diagnostic.IDE0031.severity = suggestion
+
+# Use auto property
+dotnet_diagnostic.IDE0032.severity = suggestion
+
+# 'default' expression can be simplified
+dotnet_diagnostic.IDE0034.severity = suggestion
+
+# Member name can be simplified
+dotnet_diagnostic.IDE0037.severity = suggestion
+
+# Use local function
+dotnet_diagnostic.IDE0039.severity = suggestion
+
+# Null check can be simplified
+dotnet_diagnostic.IDE0041.severity = suggestion
+
+# Variable declaration can be deconstructed
+dotnet_diagnostic.IDE0042.severity = suggestion
+
+# Made field readonly
+dotnet_diagnostic.IDE0044.severity = suggestion
+
+# 'if' statement can be simplified
+dotnet_diagnostic.IDE0045.severity = suggestion
+dotnet_diagnostic.IDE0046.severity = suggestion
+
+# Parentheses can be removed
+dotnet_diagnostic.IDE0047.severity = suggestion
+
+# Parentheses should be added for clarity
+dotnet_diagnostic.IDE0048.severity = suggestion
+
+# Member name can be simplified
+dotnet_diagnostic.IDE0049.severity = suggestion
+
+# Use compound assignment
+dotnet_diagnostic.IDE0054.severity = suggestion
+
+# Fix formatting
+dotnet_diagnostic.IDE0055.severity = suggestion
+
+# Indexing can be simplified
+dotnet_diagnostic.IDE0056.severity = suggestion
+
+# Slice can be simplified
+dotnet_diagnostic.IDE0057.severity = suggestion
+
+# Expression value is never used
+dotnet_diagnostic.IDE0058.severity = suggestion
+
+# Unnecessary assignment of a value
+dotnet_diagnostic.IDE0059.severity = suggestion
+
+# Remove unused parameter
+dotnet_diagnostic.IDE0060.severity = suggestion
+
+# Use expression body for a local function
+dotnet_diagnostic.IDE0061.severity = suggestion
+
+# Local function can be made static
+dotnet_diagnostic.IDE0062.severity = suggestion
+
+# Using directives must be placed outside of a namespace declaration
+dotnet_diagnostic.IDE0065.severity = suggestion
+
+# Use 'switch' expression
+dotnet_diagnostic.IDE0066.severity = suggestion
+
+# 'GetHashCode' implementation can be simplified
+dotnet_diagnostic.IDE0070.severity = suggestion
+
+# Interpolation can be simplified
+dotnet_diagnostic.IDE0071.severity = suggestion
+
+# Populate switch
+dotnet_diagnostic.IDE0072.severity = suggestion
+
+# Use compound assignment
+dotnet_diagnostic.IDE0074.severity = suggestion
+
+# Conditional expression can be simplified
+dotnet_diagnostic.IDE0075.severity = suggestion
+
+# Use pattern matching
+dotnet_diagnostic.IDE0078.severity = suggestion
+dotnet_diagnostic.IDE0083.severity = suggestion
+
+# 'typeof' can be converted to 'nameof'
+dotnet_diagnostic.IDE0082.severity = suggestion
+
+# 'new' expression can be simplified
+dotnet_diagnostic.IDE0090.severity = suggestion
+
+# Simplify LINQ expression
+dotnet_diagnostic.IDE0120.severity = suggestion
+
+# namespace does not match folder structure
+dotnet_diagnostic.IDE0130.severity = suggestion
+
+# Null check can be clarified
+dotnet_diagnostic.IDE0150.severity = suggestion
+
+# Convert to block scoped namespaces
+dotnet_diagnostic.IDE0160.severity = suggestion
+
+# Simplify property pattern
+dotnet_diagnostic.IDE0170.severity = suggestion
+
+# Use tuple to swap values
+dotnet_diagnostic.IDE0180.severity = suggestion
+
+# Use tuple to swap values
+dotnet_diagnostic.IDE0180.severity = suggestion
+
+# Lambda expression can be removed
+dotnet_diagnostic.IDE0200.severity = suggestion
+
+# Convert to top-level statements
+dotnet_diagnostic.IDE0210.severity = suggestion
+
+# 'foreach' statement implicitly converts
+dotnet_diagnostic.IDE0220.severity = suggestion
+
+# Use UTF-8 string literal
+dotnet_diagnostic.IDE0230.severity = suggestion
+
+# Nullable directives
+dotnet_diagnostic.IDE0240.severity = suggestion
+dotnet_diagnostic.IDE0241.severity = suggestion
+
+# Struct can be made 'readonly'
+dotnet_diagnostic.IDE0250.severity = suggestion
+
+# Struct methods can be made 'readonly'
+dotnet_diagnostic.IDE0251.severity = suggestion
+
+# Null check can be simplified
+dotnet_diagnostic.IDE0270.severity = suggestion
+
+# naming rule violation
+dotnet_diagnostic.IDE1006.severity = suggestion

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -58,7 +58,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     // INTERNAL WARNING: DO NOT USE the Log property in this class! Log points to resources in the task assembly itself, and
     // we want to use resources from Utilities. Use LogPrivate (for private Utilities resources) and LogShared (for shared MSBuild resources)
-    public abstract class ToolTask : Task, ICancelableTask
+    public abstract class ToolTask : Task, IIncrementalTask, ICancelableTask
     {
         private static readonly bool s_preserveTempFiles = string.Equals(Environment.GetEnvironmentVariable("MSBUILDPRESERVETOOLTEMPFILES"), "1", StringComparison.Ordinal);
 
@@ -351,7 +351,14 @@ namespace Microsoft.Build.Utilities
         /// Returns true if task execution is not necessary. Executed after ValidateParameters
         /// </summary>
         /// <returns></returns>
-        protected virtual bool SkipTaskExecution() => false;
+        protected virtual bool SkipTaskExecution() { canBeIncremental = false; return false; }
+
+        /// <summary>
+        /// ToolTask is not incremental by default. When a derived class overrides SkipTaskExecution, then Question feature can take into effect.
+        /// </summary>
+        protected bool canBeIncremental { get; set; } = true;
+
+        public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
         /// Returns a string with those switches and other information that can go into a response file.
@@ -545,7 +552,7 @@ namespace Microsoft.Build.Utilities
                 // have to worry about how long the command-line is going to be
 
                 // May throw IO-related exceptions
-                responseFile = FileUtilities.GetTemporaryFile(".rsp");
+                responseFile = FileUtilities.GetTemporaryFileName(".rsp");
 
                 // Use the encoding specified by the overridable ResponseFileEncoding property
                 using (StreamWriter responseFileStream = FileUtilities.OpenWrite(responseFile, false, ResponseFileEncoding))
@@ -566,12 +573,10 @@ namespace Microsoft.Build.Utilities
         /// <param name="commandLineCommands"></param>
         /// <param name="responseFileSwitch"></param>
         /// <returns>The information required to start the process.</returns>
-        protected virtual ProcessStartInfo GetProcessStartInfo
-        (
+        protected virtual ProcessStartInfo GetProcessStartInfo(
             string pathToTool,
             string commandLineCommands,
-            string responseFileSwitch
-        )
+            string responseFileSwitch)
         {
             // Build up the command line that will be spawned.
             string commandLine = commandLineCommands;
@@ -652,12 +657,10 @@ namespace Microsoft.Build.Utilities
         /// <param name="responseFileCommands">Command line arguments that should go into a temporary response file</param>
         /// <param name="commandLineCommands">Command line arguments that should be passed to the tool executable directly</param>
         /// <returns>exit code from the tool - if errors were logged and the tool has an exit code of zero, then we sit it to -1</returns>
-        protected virtual int ExecuteTool
-        (
+        protected virtual int ExecuteTool(
             string pathToTool,
             string responseFileCommands,
-            string commandLineCommands
-        )
+            string commandLineCommands)
         {
             if (!UseCommandProcessor)
             {
@@ -674,6 +677,7 @@ namespace Microsoft.Build.Utilities
             _standardOutputDataAvailable = new ManualResetEvent(false);
 
             _toolExited = new ManualResetEvent(false);
+            _terminatedTool = false;
             _toolTimeoutExpired = new ManualResetEvent(false);
 
             _eventsDisposed = false;
@@ -1027,13 +1031,11 @@ namespace Microsoft.Build.Utilities
         /// <param name="dataAvailableSignal"></param>
         /// <param name="messageImportance"></param>
         /// <param name="queueType"></param>
-        private void LogMessagesFromStandardErrorOrOutput
-        (
+        private void LogMessagesFromStandardErrorOrOutput(
             Queue dataQueue,
             ManualResetEvent dataAvailableSignal,
             MessageImportance messageImportance,
-            StandardOutputOrErrorQueueType queueType
-        )
+            StandardOutputOrErrorQueueType queueType)
         {
             ErrorUtilities.VerifyThrow(dataQueue != null,
                 "The data queue must be available.");
@@ -1330,6 +1332,11 @@ namespace Microsoft.Build.Utilities
                     // doing any actual work).
                     return true;
                 }
+                else if (canBeIncremental && FailIfNotIncremental)
+                {
+                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.NotUpToDate");
+                    return false;
+                }
 
                 string commandLineCommands = GenerateCommandLineCommands();
                 // If there are response file commands, then we need a response file later.
@@ -1391,7 +1398,7 @@ namespace Microsoft.Build.Utilities
 
                         string batchFileForCommandLine = _temporaryBatchFile;
 
-                        // If for some crazy reason the path has a & character and a space in it
+                        // If for some reason the path has a & character and a space in it
                         // then get the short path of the temp path, which should not have spaces in it
                         // and then escape the &
                         if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))

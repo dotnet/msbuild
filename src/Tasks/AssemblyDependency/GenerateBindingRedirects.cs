@@ -1,15 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Reflection;
 using Microsoft.Build.Shared.FileSystem;
+using System.IO;
 
 #nullable disable
 
@@ -104,8 +104,9 @@ namespace Microsoft.Build.Tasks
             runtimeNode.Add(redirectNodes);
 
             var writeOutput = true;
+            var outputExists = FileSystems.Default.FileExists(OutputAppConfigFile.ItemSpec);
 
-            if (FileSystems.Default.FileExists(OutputAppConfigFile.ItemSpec))
+            if (outputExists)
             {
                 try
                 {
@@ -115,7 +116,7 @@ namespace Microsoft.Build.Tasks
                         writeOutput = false;
                     }
                 }
-                catch(System.Xml.XmlException)
+                catch (System.Xml.XmlException)
                 {
                     writeOutput = true;
                 }
@@ -132,10 +133,18 @@ namespace Microsoft.Build.Tasks
 
             if (writeOutput)
             {
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateBindingRedirects.CreatingBindingRedirectionFile", OutputAppConfigFile.ItemSpec);
                 using (var stream = FileUtilities.OpenWrite(OutputAppConfigFile.ItemSpec, false))
                 {
                     doc.Save(stream);
                 }
+            }
+            else if (outputExists)
+            {
+                // if the file exists and the content is up to date, then touch the output file.
+                var now = DateTime.Now;
+                File.SetLastAccessTime(OutputAppConfigFile.ItemSpec, now);
+                File.SetLastWriteTime(OutputAppConfigFile.ItemSpec, now);
             }
 
             return !Log.HasLoggedErrors;

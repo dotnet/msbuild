@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -16,11 +16,7 @@ namespace Microsoft.Build.Tasks
     /// an earlier revision of a COM component, its timestamp can go back in time and we still need to regenerate its
     /// wrapper. So in ResolveComReference we compare the stored timestamp with the current component timestamp, and if 
     /// they are different, we regenerate the wrapper.
-    /// 
-    /// This is an on-disk serialization format, don't change field names or types or use readonly.
     /// </remarks>
-    /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
-    [Serializable]
     internal sealed class ResolveComReferenceCache : StateFileBase, ITranslatable
     {
         /// <summary>
@@ -36,7 +32,7 @@ namespace Microsoft.Build.Tasks
         /// indicates whether the cache contents have changed since it's been created
         /// </summary>
         internal bool Dirty => _dirty;
-        
+
         [NonSerialized]
         private bool _dirty;
 

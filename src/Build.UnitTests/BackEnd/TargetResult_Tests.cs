@@ -1,14 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Unittest;
+using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using Microsoft.Build.Unittest;
 using Xunit;
-using Microsoft.Build.Engine.UnitTests.TestComparers;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 
@@ -53,8 +53,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 TargetResult result = new TargetResult(null, BuildResultUtilities.GetStopWithErrorResult());
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests a constructor with an exception passed.
@@ -103,7 +102,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(result.ResultCode, deserializedResult.ResultCode);
             Assert.True(TranslationHelpers.CompareCollections(result.Items, deserializedResult.Items, TaskItemComparer.Instance));
-            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception));
+            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception, out string diffReason), diffReason);
             Assert.Equal(result.OriginalBuildEventContext, deserializedResult.OriginalBuildEventContext);
         }
 
@@ -123,7 +122,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(result.ResultCode, deserializedResult.ResultCode);
             Assert.True(TranslationHelpers.CompareCollections(result.Items, deserializedResult.Items, TaskItemComparer.Instance));
-            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception));
+            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception, out string diffReason), diffReason);
         }
 
         /// <summary>

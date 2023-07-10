@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +16,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     public class TaskTranslatorHelpers
     {
-        MemoryStream _serializationStream;
+        private MemoryStream _serializationStream;
 
         [Fact]
         public void NullFrameworkName()
@@ -51,10 +54,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         private ITranslator GetReadTranslator()
         {
             if (_serializationStream == null)
+            {
                 throw new InvalidOperationException("GetWriteTranslator has to be called before GetReadTranslator");
+            }
 
             _serializationStream.Seek(0, SeekOrigin.Begin);
-            return BinaryTranslator.GetReadTranslator(_serializationStream, null);
+            return BinaryTranslator.GetReadTranslator(_serializationStream, InterningBinaryReader.PoolingBuffer);
         }
 
         private ITranslator GetWriteTranslator()

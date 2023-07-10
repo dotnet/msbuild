@@ -1,12 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Xaml;
-using System.IO;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using XamlTypes = Microsoft.Build.Framework.XamlTypes;
@@ -126,7 +126,9 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 isRootedPath = Path.IsPathRooted(contentOrFile);
                 if (!isRootedPath)
+                {
                     maybeFullPath = Path.GetFullPath(contentOrFile);
+                }
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -138,7 +140,9 @@ namespace Microsoft.Build.Tasks.Xaml
                 // valid *absolute* file path
 
                 if (!FileSystems.Default.FileExists(contentOrFile))
+                {
                     throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Xaml.RuleFileNotFound", contentOrFile));
+                }
 
                 return ParseXamlDocument(new StreamReader(contentOrFile), desiredRule);
             }
@@ -146,23 +150,31 @@ namespace Microsoft.Build.Tasks.Xaml
             // On Windows, xml content string is not a valid path, so, maybeFullPath == null
             // On Unix, xml content string would be a valid path, so, maybeFullPath != null
             if (maybeFullPath == null)
+            {
                 // Unable to convert to a path, parse as XML
                 return ParseXamlDocument(new StringReader(contentOrFile), desiredRule);
+            }
 
             if (FileSystems.Default.FileExists(maybeFullPath))
+            {
                 // file found, parse as a file
                 return ParseXamlDocument(new StreamReader(maybeFullPath), desiredRule);
+            }
 
             // @maybeFullPath is either:
             //  - a non-existent fullpath
             //  - or xml content with the current dir prepended (like "/foo/bar/<abc .. />"),
             //    but not on Windows
             //
-            // On Windows, this means that @contentOrFile is really a non-existant file name
+            // On Windows, this means that @contentOrFile is really a non-existent file name
             if (NativeMethodsShared.IsWindows)
+            {
                 throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Xaml.RuleFileNotFound", maybeFullPath));
+            }
             else // On !Windows, try parsing as XML
+            {
                 return ParseXamlDocument(new StringReader(contentOrFile), desiredRule);
+            }
         }
 
         /// <summary>

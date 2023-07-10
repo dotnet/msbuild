@@ -1,14 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Construction;
-using Microsoft.Build.Exceptions;
-using Microsoft.Build.Shared;
-using Shouldly;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -35,11 +35,9 @@ namespace Microsoft.Build.UnitTests.Construction
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
-            p.ParseFirstProjectLine
-            (
+            p.ParseFirstProjectLine(
                 "Project(\"{Project GUID}\") = \"Project name\", \"Relative path to project file\", \"Unique name-GUID\"",
-                 proj
-            );
+                 proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("Project name");
             proj.RelativePath.ShouldBe("Relative path to project file");
@@ -51,7 +49,6 @@ namespace Microsoft.Build.UnitTests.Construction
         /// extension of vcproj is seen as invalid.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void ParseFirstProjectLine_VC()
@@ -62,11 +59,9 @@ namespace Microsoft.Build.UnitTests.Construction
                 p.FullPath = "c:\\foo.sln";
                 ProjectInSolution proj = new ProjectInSolution(p);
 
-                p.ParseFirstProjectLine
-                (
+                p.ParseFirstProjectLine(
                     "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"Project name.vcproj\", \"Relative path\\to\\Project name.vcproj\", \"Unique name-GUID\"",
-                     proj
-                );
+                     proj);
             });
         }
         /// <summary>
@@ -81,11 +76,9 @@ namespace Microsoft.Build.UnitTests.Construction
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
-            p.ParseFirstProjectLine
-            (
+            p.ParseFirstProjectLine(
                 "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"Project name.myvctype\", \"Relative path\\to\\Project name.myvctype\", \"Unique name-GUID\"",
-                 proj
-            );
+                 proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.KnownToBeMSBuildFormat);
             proj.ProjectName.ShouldBe("Project name.myvctype");
             proj.RelativePath.ShouldBe("Relative path\\to\\Project name.myvctype");
@@ -102,11 +95,9 @@ namespace Microsoft.Build.UnitTests.Construction
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
-            p.ParseFirstProjectLine
-            (
+            p.ParseFirstProjectLine(
                 "Project(\" {Project GUID} \")  = \" Project name \",  \" Relative path to project file \"    , \" Unique name-GUID \"",
-                 proj
-            );
+                 proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("Project name");
             proj.RelativePath.ShouldBe("Relative path to project file");
@@ -124,11 +115,9 @@ namespace Microsoft.Build.UnitTests.Construction
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
-            p.ParseFirstProjectLine
-            (
+            p.ParseFirstProjectLine(
                 "Project(\"{Project GUID}\") = \"\", \"src\\.proj\", \"Unique name-GUID\"",
-                 proj
-            );
+                 proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldStartWith("EmptyProjectName");
             proj.RelativePath.ShouldBe("src\\.proj");
@@ -508,7 +497,6 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test ParseEtpProject function.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void ParseNestedEtpProjectMultipleLevel()
@@ -566,6 +554,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         </References>
                     </GENERAL>
                 </EFPROJECT>";
+
                 // Create the directory for the third project
                 Directory.CreateDirectory(Path.Combine(FileUtilities.TempFileDirectory, "ETPProjUpgradeTest"));
                 File.WriteAllText(proj3Path, etpProjContent);
@@ -689,11 +678,9 @@ namespace Microsoft.Build.UnitTests.Construction
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
-            p.ParseFirstProjectLine
-            (
+            p.ParseFirstProjectLine(
                 "Project(\"{Project GUID}\")  = \"MyProject,(=IsGreat)\",  \"Relative path to project file\"    , \"Unique name-GUID\"",
-                 proj
-            );
+                 proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("MyProject,(=IsGreat)");
             proj.RelativePath.ShouldBe("Relative path to project file");
@@ -717,11 +704,9 @@ namespace Microsoft.Build.UnitTests.Construction
                 p.SolutionFileDirectory = Path.GetFullPath(solutionFolder.Path);
                 ProjectInSolution proj = new ProjectInSolution(p);
 
-                p.ParseFirstProjectLine
-                (
+                p.ParseFirstProjectLine(
                     "Project(\"{Project GUID}\")  = \"ProjectInSubdirectory\",  \"RelativePath\\project file\"    , \"Unique name-GUID\"",
-                    proj
-                );
+                    proj);
                 proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
                 proj.ProjectName.ShouldBe("ProjectInSubdirectory");
                 proj.RelativePath.ShouldBe(Path.Combine("RelativePath", "project file"));
@@ -735,7 +720,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// </summary>
         /// <param name="solutionFileContents"></param>
         /// <returns></returns>
-        static internal SolutionFile ParseSolutionHelper(string solutionFileContents)
+        internal static SolutionFile ParseSolutionHelper(string solutionFileContents)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
             StreamReader sr = StreamHelpers.StringToStreamReader(solutionFileContents);
@@ -782,8 +767,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Ensure that an unsupported version greater than the current maximum (10) in the .SLN file results in a
@@ -1735,8 +1719,7 @@ EndGlobal
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test some invalid cases for solution configuration parsing
@@ -1762,8 +1745,7 @@ EndGlobal
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test some invalid cases for solution configuration parsing
@@ -1789,8 +1771,7 @@ EndGlobal
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
 
         /// <summary>

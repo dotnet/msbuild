@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -123,9 +123,7 @@ namespace Microsoft.Build.BackEnd
             _continueOnError = false;
             _activeProxy = true;
             _callbackMonitor = new object();
-            _disableInprocNode = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                ? Traits.Instance.InProcNodeDisabled || host.BuildParameters.DisableInProcNode
-                : Traits.Instance.InProcNodeDisabled;
+            _disableInprocNode = Traits.Instance.InProcNodeDisabled || host.BuildParameters.DisableInProcNode;
             EngineServices = new EngineServicesImpl(this);
         }
 
@@ -260,16 +258,14 @@ namespace Microsoft.Build.BackEnd
         public bool BuildProjectFile(string projectFileName, string[] targetNames, System.Collections.IDictionary globalProperties, System.Collections.IDictionary targetOutputs, string toolsVersion)
         {
             VerifyActiveProxy();
-            return BuildProjectFilesInParallel
-            (
+            return BuildProjectFilesInParallel(
                 new string[] { projectFileName },
                 targetNames,
                 new IDictionary[] { globalProperties },
                 new IDictionary[] { targetOutputs },
                 new string[] { toolsVersion },
                 true,
-                false
-            );
+                false);
         }
 
         /// <summary>
@@ -427,8 +423,7 @@ namespace Microsoft.Build.BackEnd
                     // ContinueOnError is that a project author expects that the task might fail,
                     // but wants to ignore the failures.  This implies that we shouldn't be logging
                     // errors either, because you should never have a successful build with errors.
-                    BuildWarningEventArgs warningEvent = new BuildWarningEventArgs
-                            (
+                    BuildWarningEventArgs warningEvent = new BuildWarningEventArgs(
                                 e.Subcategory,
                                 e.Code,
                                 e.File,
@@ -438,8 +433,7 @@ namespace Microsoft.Build.BackEnd
                                 e.EndColumnNumber,
                                 e.Message,
                                 e.HelpKeyword,
-                                e.SenderName
-                            );
+                                e.SenderName);
 
                     warningEvent.BuildEventContext = _taskLoggingContext.BuildEventContext;
                     _taskLoggingContext.LoggingService.LogBuildEvent(warningEvent);
@@ -452,8 +446,8 @@ namespace Microsoft.Build.BackEnd
                     e.BuildEventContext = _taskLoggingContext.BuildEventContext;
                     _taskLoggingContext.LoggingService.LogBuildEvent(e);
                 }
-                
-                 _taskLoggingContext.HasLoggedErrors = true;
+
+                _taskLoggingContext.HasLoggedErrors = true;
             }
         }
 

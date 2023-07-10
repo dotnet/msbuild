@@ -1,9 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -14,7 +14,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A task that creates a directory
     /// </summary>
-    public class MakeDir : TaskExtension
+    public class MakeDir : TaskExtension, IIncrementalTask
     {
         [Required]
         public ITaskItem[] Directories
@@ -30,6 +30,8 @@ namespace Microsoft.Build.Tasks
 
         [Output]
         public ITaskItem[] DirectoriesCreated { get; private set; }
+
+        public bool FailIfNotIncremental { get; set; }
 
         private ITaskItem[] _directories;
 
@@ -59,10 +61,17 @@ namespace Microsoft.Build.Tasks
                             // Only log a message if we actually need to create the folder
                             if (!FileUtilities.DirectoryExistsNoThrow(directory.ItemSpec))
                             {
-                                // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                                Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", directory.ItemSpec);
+                                if (FailIfNotIncremental)
+                                {
+                                    Log.LogErrorFromResources("MakeDir.Comment", directory.ItemSpec);
+                                }
+                                else
+                                {
+                                    // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
+                                    Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", directory.ItemSpec);
 
-                                Directory.CreateDirectory(FileUtilities.FixFilePath(directory.ItemSpec));
+                                    Directory.CreateDirectory(FileUtilities.FixFilePath(directory.ItemSpec));
+                                }
                             }
 
                             items.Add(directory);

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.IO;
@@ -32,7 +32,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
                     @"<data name=""StringResource"" xml:space=""preserve"">
     <value>StringValue</value>
     <comment>Comment</comment>
-  </data>"));
+  </data>"), null, false);
 
             AssertSingleStringResource(resxWithSingleString, "StringResource", "StringValue");
         }
@@ -45,7 +45,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
                     @"<data name=""StringResource"">
     <value> StringValue </value>
     <comment>Comment</comment>
-  </data>"));
+  </data>"), null, false);
 
             AssertSingleStringResource(resxWithSingleString, "StringResource", " StringValue ");
         }
@@ -58,7 +58,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
                     @"<data name=""StringResource"" xml:space=""preserve"">
     <value> </value>
     <comment>Comment</comment>
-  </data>"));
+  </data>"), null, false);
 
             AssertSingleStringResource(resxWithSingleString, "StringResource", " ");
         }
@@ -71,7 +71,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
                     @"<data name=""StringResource"">
     <value> </value>
     <comment>Comment</comment>
-  </data>"));
+  </data>"), null, false);
 
             AssertSingleStringResource(resxWithSingleString, "StringResource", "");
         }
@@ -83,7 +83,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
                 ResXHelper.SurroundWithBoilerplate(
                     @"<data name=""StringResource"" type=""System.String"">
     <value>StringValue</value>
-  </data>"));
+  </data>"), null, false);
 
             AssertSingleStringResource(resxWithSingleString, "StringResource", "StringValue");
         }
@@ -100,7 +100,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
   </data>
   <data name=""2StringResource2"" xml:space=""preserve"">
     <value>2StringValue2</value>
-  </data>"));
+  </data>"), null, false);
 
             resxWithTwoStrings.Count.ShouldBe(2);
 
@@ -121,7 +121,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
 @"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
   <data name=""$this.AccessibleDescription"" type=""System.Resources.ResXNullRef, System.Windows.Forms, Version=1.0.5000.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"">
     <value />
-  </data>"));
+  </data>"), null, false);
 
             resxWithNullRef.ShouldHaveSingleItem();
 
@@ -143,7 +143,7 @@ namespace Microsoft.Build.Tasks.UnitTests.GenerateResource
 $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
   <data name=""TextFile1"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
     <value>ResourceHandling\TextFile1.txt;{stringType};utf-8</value>
-  </data>"));
+  </data>"), null, false);
 
             AssertSingleStringResource(resxWithLinkedString, "TextFile1", "Contents of TextFile1");
         }
@@ -174,6 +174,8 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
   <data name=""TextFile1"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
     <value>ResourceHandling\TextFileInShiftJIS.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;shift_jis</value>
   </data>"),
+                    null,
+                    false,
                     Path.Combine(baseDir.Path, nameof(LoadsStringFromFileRefAsStringWithShiftJISEncoding) + ".resx"),
                     useRelativePath: true);
 
@@ -210,7 +212,7 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
         b7eblRw4yy8Ta2GCpaZp1sIzz2LfCMS+EYh9401iw/gG1gYfvzjQIXcAAAAASUVORK5CYII=
 </value>
   </data>
-"));
+"), null, false);
             resxWithEmbeddedBitmap.ShouldHaveSingleItem();
             resxWithEmbeddedBitmap[0].ShouldBeOfType(typeof(TypeConverterByteArrayResource));
 
@@ -228,7 +230,7 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
     <data name=""color"" type=""System.Drawing.Color, System.Drawing"">
       <value>Blue</value>
     </data>
-"));
+"), null, false);
             resxWithEmbeddedBitmap.ShouldHaveSingleItem();
             resxWithEmbeddedBitmap[0].ShouldBeOfType(typeof(TypeConverterStringResource));
 
@@ -252,7 +254,7 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
                 ResXHelper.SurroundWithBoilerplate(
 @"  <assembly alias=""System.Drawing"" name=""System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
     <data name=""Color1"" type=""System.Drawing.Color, System.Drawing"">Blue</data>
-"));
+"), null, false);
             resxWithEmbeddedBitmap.ShouldHaveSingleItem();
             resxWithEmbeddedBitmap[0].ShouldBeOfType(typeof(TypeConverterStringResource));
 
@@ -272,7 +274,7 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
 $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Forms'>
     <value>{bitmapPath};System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-"));
+"), null, false);
             resxWithLinkedBitmap.ShouldHaveSingleItem();
             resxWithLinkedBitmap[0].ShouldBeOfType(typeof(FileStreamResource));
 
@@ -301,7 +303,7 @@ $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Form
 $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Forms'>
     <value>{linkedTextFile.Path};{typeNameInResx}</value>
   </data>
-"));
+"), null, false);
 
             var resource = resources.ShouldHaveSingleItem()
                 .ShouldBeOfType<LiveObjectResource>();
@@ -321,7 +323,7 @@ $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Form
                 ResXHelper.SurroundWithBoilerplate(
 @"  <assembly name=""System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
     <data name=""Color1"" type=""System.Drawing.Color, System.Drawing""><value>Blue</value></data>
-"));
+"), null, false);
             resxWithEmbeddedBitmap.ShouldHaveSingleItem();
             resxWithEmbeddedBitmap[0].ShouldBeOfType(typeof(TypeConverterStringResource));
 

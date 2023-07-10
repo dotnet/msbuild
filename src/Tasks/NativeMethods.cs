@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -13,9 +13,12 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Globalization;
 using System.Linq;
+#if FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS
 using System.Runtime.ExceptionServices;
+#endif
 using System.Text.RegularExpressions;
 using System.Runtime.Versioning;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -94,7 +97,7 @@ namespace Microsoft.Build.Tasks
         object DefineScope([In] ref Guid rclsid, [In] UInt32 dwCreateFlags, [In] ref Guid riid);
 
         [return: MarshalAs(UnmanagedType.Interface)]
-        object OpenScope([In][MarshalAs(UnmanagedType.LPWStr)]  string szScope, [In] UInt32 dwOpenFlags, [In] ref Guid riid);
+        object OpenScope([In][MarshalAs(UnmanagedType.LPWStr)] string szScope, [In] UInt32 dwOpenFlags, [In] ref Guid riid);
 
         [return: MarshalAs(UnmanagedType.Interface)]
         object OpenScopeOnMemory([In] IntPtr pData, [In] UInt32 cbData, [In] UInt32 dwOpenFlags, [In] ref Guid riid);
@@ -514,18 +517,12 @@ namespace Microsoft.Build.Tasks
         public int dwThreadId;
     }
 
-    internal enum SymbolicLink
-    {
-        File = 0,
-        Directory = 1
-    }
-
     /// <summary>
     /// Interop methods.
     /// </summary>
     internal static class NativeMethods
     {
-#region Constants
+        #region Constants
 
         internal static readonly IntPtr NullPtr = IntPtr.Zero;
         internal static readonly IntPtr InvalidIntPtr = new IntPtr(-1);
@@ -540,6 +537,7 @@ namespace Microsoft.Build.Tasks
 
         internal const int HRESULT_E_CLASSNOTREGISTERED = -2147221164;
 
+        internal const int ERROR_INVALID_FILENAME = -2147024773; // Illegal characters in name
         internal const int ERROR_ACCESS_DENIED = -2147024891; // ACL'd or r/o
         internal const int ERROR_SHARING_VIOLATION = -2147024864; // File locked by another use
 
@@ -630,9 +628,9 @@ namespace Microsoft.Build.Tasks
             MOVEFILE_FAIL_IF_NOT_TRACKABLE = 0x00000020
         }
 
-#endregion
+        #endregion
 
-#region NT header stuff
+        #region NT header stuff
 
         internal const uint IMAGE_NT_OPTIONAL_HDR32_MAGIC = 0x10b;
         internal const uint IMAGE_NT_OPTIONAL_HDR64_MAGIC = 0x20b;
@@ -783,9 +781,9 @@ namespace Microsoft.Build.Tasks
             internal IntPtr pbData;
         }
 
-#endregion
+        #endregion
 
-#region PInvoke
+        #region PInvoke
         private const string Crypt32DLL = "crypt32.dll";
         private const string Advapi32DLL = "advapi32.dll";
 #if !RUNTIME_TYPE_NETCORE
@@ -801,7 +799,7 @@ namespace Microsoft.Build.Tasks
         [DllImport("libc", SetLastError = true)]
         internal static extern int link(string oldpath, string newpath);
 
-        internal static bool MakeHardLink(string newFileName, string exitingFileName, ref string errorMessage)
+        internal static bool MakeHardLink(string newFileName, string exitingFileName, ref string errorMessage, TaskLoggingHelper log)
         {
             bool hardLinkCreated;
             if (NativeMethodsShared.IsWindows)
@@ -812,49 +810,20 @@ namespace Microsoft.Build.Tasks
             else
             {
                 hardLinkCreated = link(exitingFileName, newFileName) == 0;
-                errorMessage = hardLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
+                errorMessage = hardLinkCreated ? null : log.FormatResourceString("Copy.NonWindowsLinkErrorMessage", "link()", Marshal.GetLastWin32Error());
             }
 
             return hardLinkCreated;
         }
 
         //------------------------------------------------------------------------------
-        // CreateSymbolicLink
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        [return: MarshalAs(UnmanagedType.I1)]
-        internal static extern bool CreateSymbolicLink(string symLinkFileName, string targetFileName, SymbolicLink dwFlags);
-
-        [DllImport("libc", SetLastError = true)]
-        internal static extern int symlink(string oldpath, string newpath);
-
-        internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, ref string errorMessage)
-        {
-            bool symbolicLinkCreated;
-            if (NativeMethodsShared.IsWindows)
-            {
-                symbolicLinkCreated = CreateSymbolicLink(newFileName, exitingFileName, SymbolicLink.File);
-                errorMessage = symbolicLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
-            }
-            else
-            {
-                symbolicLinkCreated = symlink(exitingFileName, newFileName) == 0;
-                errorMessage = symbolicLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
-            }
-
-            return symbolicLinkCreated;
-        }
-
-        //------------------------------------------------------------------------------
         // MoveFileEx
         //------------------------------------------------------------------------------
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "MoveFileEx")]
-        internal static extern bool MoveFileExWindows
-        (
+        internal static extern bool MoveFileExWindows(
             [In] string existingFileName,
             [In] string newFileName,
-            [In] MoveFileFlags flags
-        );
+            [In] MoveFileFlags flags);
 
         /// <summary>
         /// Add implementation of this function when not running on windows. The implementation is
@@ -913,14 +882,12 @@ namespace Microsoft.Build.Tasks
         // UnRegisterTypeLib
         //------------------------------------------------------------------------------
         [DllImport("oleaut32", PreserveSig = false, EntryPoint = "UnRegisterTypeLib")]
-        internal static extern void UnregisterTypeLib
-        (
+        internal static extern void UnregisterTypeLib(
             [In] ref Guid guid,
             [In] short wMajorVerNum,
             [In] short wMinorVerNum,
             [In] int lcid,
-            [In] System.Runtime.InteropServices.ComTypes.SYSKIND syskind
-        );
+            [In] System.Runtime.InteropServices.ComTypes.SYSKIND syskind);
 
         //------------------------------------------------------------------------------
         // LoadTypeLib
@@ -988,8 +955,7 @@ namespace Microsoft.Build.Tasks
         //------------------------------------------------------------------------------
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CreateProcess
-        (
+        internal static extern bool CreateProcess(
             string lpApplicationName,
             string lpCommandLine,
             IntPtr lpProcessAttributes,
@@ -1000,8 +966,7 @@ namespace Microsoft.Build.Tasks
             IntPtr lpEnvironment,
             string lpCurrentDirectory,
             [In] ref STARTUPINFO lpStartupInfo,
-            out PROCESS_INFORMATION lpProcessInformation
-        );
+            out PROCESS_INFORMATION lpProcessInformation);
 
         //------------------------------------------------------------------------------
         // ImageNtHeader
@@ -1079,13 +1044,13 @@ namespace Microsoft.Build.Tasks
         //------------------------------------------------------------------------------
         [DllImport(Crypt32DLL, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CertCloseStore([In]   IntPtr CertStore, CertStoreClose Flags);
+        internal static extern bool CertCloseStore([In] IntPtr CertStore, CertStoreClose Flags);
 
         //------------------------------------------------------------------------------
         // CertEnumCertificatesInStore
         //------------------------------------------------------------------------------
         [DllImport(Crypt32DLL, SetLastError = true)]
-        internal static extern IntPtr CertEnumCertificatesInStore([In]   IntPtr CertStore, [In]   IntPtr PrevCertContext);
+        internal static extern IntPtr CertEnumCertificatesInStore([In] IntPtr CertStore, [In] IntPtr PrevCertContext);
 
         //------------------------------------------------------------------------------
         // CryptAcquireCertificatePrivateKey
@@ -1141,9 +1106,9 @@ namespace Microsoft.Build.Tasks
         [DllImport(MscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern unsafe uint GetFileVersion([MarshalAs(UnmanagedType.LPWStr)] string szFileName, [Out] char* szBuffer, int cchBuffer, out int dwLength);
 #endif
-#endregion
+        #endregion
 
-#region Methods
+        #region Methods
 #if FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS
         /// <summary>
         /// Given a pointer to a metadata blob, read the string parameter from it.  Returns true if
@@ -1264,8 +1229,8 @@ namespace Microsoft.Build.Tasks
 
             return count;
         }
-#endregion
-#region InternalClass
+        #endregion
+        #region InternalClass
         /// <summary>
         /// This class is a wrapper over the native GAC enumeration API.
         /// </summary>
@@ -1503,6 +1468,6 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
         }
-#endregion
+        #endregion
     }
 }

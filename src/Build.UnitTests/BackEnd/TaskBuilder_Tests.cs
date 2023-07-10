@@ -1,10 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Build.BackEnd;
@@ -15,14 +16,13 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using System.Threading;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 
 #nullable disable
 
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string projectFileContents = ObjectModelHelpers.CleanupFileContents(
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <Target Name='t'>
-                         <NonExistantTask Condition=""'1'=='1'""/>
+                         <NonExistentTask Condition=""'1'=='1'""/>
                          <Message Text='Made it'/>
                       </Target>
                       </Project>");
@@ -83,6 +83,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             logger.AssertLogContains("MSB4036");
             logger.AssertLogDoesntContain("Made it");
+        }
+
+        [Fact]
+        public void TasksOnlyLogStartedEventOnceEach()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectFileContents = ObjectModelHelpers.CleanupFileContents(
+            @"<Project>
+              <Target Name='t'>
+                  <Message Text='Made it'/>
+              </Target>
+            </Project>");
+
+            TransientTestFile projectFile = env.CreateFile("myProj.proj", projectFileContents);
+            env.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", @"C:\Users\namytelk\Desktop");
+
+            string results = RunnerUtilities.ExecMSBuild(projectFile.Path + " /v:diag", out bool success);
+
+            int count = 0;
+            for (int index = results.IndexOf("Task \"Message\""); index >= 0; index = results.IndexOf("Task \"Message\"", index))
+            {
+                count++;
+                index += 14; // Skip to the end of this string
+            }
+
+            count.ShouldBe(1);
         }
 
         /// <summary>
@@ -97,7 +123,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string projectFileContents = ObjectModelHelpers.CleanupFileContents(
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <Target Name='t'>
-                         <NonExistantTask Condition=""'1'=='2'""/>
+                         <NonExistentTask Condition=""'1'=='2'""/>
                          <Message Text='Made it'/>
                       </Target>
                       </Project>");
@@ -138,7 +164,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Loggers = new ILogger[] { logger },
                     EnableNodeReuse = false
                 };
-                ;
 
                 BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[] { "test" }, collection.HostServices);
                 manager.BeginBuild(_parameters);
@@ -527,7 +552,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NullMetadataOnOutputItems()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -544,7 +568,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
             logger.AssertLogContains("[foo: ]");
         }
 
@@ -552,7 +576,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NullMetadataOnLegacyOutputItems()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -569,8 +592,33 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
             logger.AssertLogContains("[foo: ]");
+        }
+
+        /// <summary>
+        /// If an item returned from a task has bare-minimum metadata implementation, we shouldn't crash.
+        /// </summary>
+        [Fact]
+        public void MinimalLegacyOutputItems()
+        {
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+
+            string projectContents = $"""
+                                     <Project>
+                                       <UsingTask TaskName="TaskThatReturnsMinimalItem" AssemblyFile="{customTaskPath}" />
+
+                                       <Target Name="Build">
+                                         <TaskThatReturnsMinimalItem>
+                                           <Output TaskParameter="MinimalTaskItemOutput" ItemName="Outputs"/>
+                                         </TaskThatReturnsMinimalItem>
+
+                                         <Message Text="[%(Outputs.Identity): %(Outputs.a)]" Importance="High" />
+                                       </Target>
+                                     </Project>
+                                     """;
+
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
         }
 
         /// <summary>
@@ -642,15 +690,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </Target>
                     </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
             logger.AssertLogContains("[foo: ]");
         }
 
         /// <summary>
         /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/6521")]
-        [Trait("Category", "non-mono-tests")]
+        [Fact(Skip = "This test fails when diagnostic logging is available, as deprecated EscapingUtilities.UnescapeAll method cannot handle null value. This is not relevant to non-deprecated version of this method.")]
         public void NullMetadataOnLegacyOutputItems_InlineTask()
         {
             string projectContents = @"
@@ -686,6 +733,47 @@ namespace Microsoft.Build.UnitTests.BackEnd
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
             logger.AssertLogContains("[foo: ]");
         }
+
+        /// <summary>
+        /// If an item being output from a task has null metadata, we shouldn't crash.
+        /// </summary>
+        [Fact(Skip = "This test fails when diagnostic logging is available, as deprecated EscapingUtilities.UnescapeAll method cannot handle null value. This is not relevant to non-deprecated version of this method.")]
+        [Trait("Category", "non-mono-tests")]
+        public void NullMetadataOnLegacyOutputItems_InlineTask_Diagnostic()
+        {
+            string projectContents = @"
+                    <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+                        <UsingTask TaskName=`NullMetadataTask_v4` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildFrameworkToolsPath)\Microsoft.Build.Tasks.v4.0.dll`>
+                            <ParameterGroup>
+                               <OutputItems ParameterType=`Microsoft.Build.Framework.ITaskItem[]` Output=`true` />
+                            </ParameterGroup>
+                            <Task>
+                                <Code>
+                                <![CDATA[
+                                    OutputItems = new ITaskItem[1];
+
+                                    IDictionary<string, string> metadata = new Dictionary<string, string>();
+                                    metadata.Add(`a`, null);
+
+                                    OutputItems[0] = new TaskItem(`foo`, (IDictionary)metadata);
+
+                                    return true;
+                                ]]>
+                                </Code>
+                            </Task>
+                        </UsingTask>
+                      <Target Name=`Build`>
+                        <NullMetadataTask_v4>
+                          <Output TaskParameter=`OutputItems` ItemName=`Outputs` />
+                        </NullMetadataTask_v4>
+
+                        <Message Text=`[%(Outputs.Identity): %(Outputs.a)]` Importance=`High` />
+                      </Target>
+                    </Project>";
+
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, loggerVerbosity: LoggerVerbosity.Diagnostic);
+            logger.AssertLogContains("[foo: ]");
+        }
 #endif
 
         /// <summary>
@@ -706,7 +794,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// which didn't support the defining project metadata.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ValidateDefiningProjectMetadataOnTaskOutputs_LegacyItems()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -718,7 +805,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests that putting the RunInSTA attribute on a task causes it to run in the STA thread.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadRequired()
         {
             TestSTATask(true, false, false);
@@ -728,7 +814,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an STA task with an exception
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadRequiredWithException()
         {
             TestSTATask(true, false, true);
@@ -738,7 +823,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an STA task with failure.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadRequiredWithFailure()
         {
             TestSTATask(true, true, false);
@@ -748,7 +832,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an MTA task.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadNotRequired()
         {
             TestSTATask(false, false, false);
@@ -758,7 +841,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an MTA task with an exception.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadNotRequiredWithException()
         {
             TestSTATask(false, false, true);
@@ -768,7 +850,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an MTA task with failure.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadNotRequiredWithFailure()
         {
             TestSTATask(false, true, false);
@@ -1145,7 +1226,7 @@ namespace ClassLibrary2
         /// <summary>
         /// The mock component host object.
         /// </summary>
-        private class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
+        private sealed class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
         {
             #region IBuildComponentHost Members
 

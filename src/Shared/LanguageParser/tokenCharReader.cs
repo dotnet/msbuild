@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -158,13 +158,10 @@ namespace Microsoft.Build.Shared.LanguageParser
 
             if
             (
-                String.Equals
-                (
+                String.Equals(
                     match,
                     compare,
-                    (ignoreCase /* ignore case */) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal
-                )
-            )
+                    (ignoreCase /* ignore case */) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
             {
                 Skip(match.Length);
                 return true;
@@ -243,8 +240,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                     || TokenChar.IsDecimalDigit(CurrentCharacter)
                     || TokenChar.IsConnecting(CurrentCharacter)
                     || TokenChar.IsCombining(CurrentCharacter)
-                    || TokenChar.IsFormatting(CurrentCharacter)
-                )
+                    || TokenChar.IsFormatting(CurrentCharacter))
             {
                 Skip();
                 return true;
