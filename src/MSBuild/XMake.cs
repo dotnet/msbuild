@@ -2309,7 +2309,7 @@ namespace Microsoft.Build.CommandLine
         /// performs deeper error checking on the switches and their parameters.
         /// </summary>
         /// <returns>true, if build can be invoked</returns>
-        internal static bool ProcessCommandLineSwitches(
+        private static bool ProcessCommandLineSwitches(
             CommandLineSwitches switchesFromAutoResponseFile,
             CommandLineSwitches switchesNotFromAutoResponseFile,
             ref string projectFile,
