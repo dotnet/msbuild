@@ -49,6 +49,9 @@ namespace Microsoft.Build.Framework
 
         IEnumerable<KeyValuePair<string, string>> IMetadataContainer.EnumerateMetadata() => Metadata;
 
+        void IMetadataContainer.ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata)
+            => throw new NotImplementedException();
+
         public int MetadataCount => Metadata.Count;
 
         public ICollection MetadataNames => (ICollection)Metadata.Keys;
