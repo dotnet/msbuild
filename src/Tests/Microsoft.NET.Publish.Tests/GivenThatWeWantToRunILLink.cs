@@ -970,6 +970,12 @@ namespace Microsoft.NET.Publish.Tests
                     .Should().BeFalse();
                 configProperties["System.Threading.Thread.EnableAutoreleasePool"].Value<bool>()
                     .Should().BeFalse();
+
+                if (parsedVersion.Major >= 8)
+                {
+                    configProperties["System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault"].Value<bool>()
+                        .Should().BeFalse();
+                }
             }
             else
             {
@@ -1698,8 +1704,12 @@ namespace Microsoft.NET.Publish.Tests
 
             // runtimeconfig has trim settings
             JObject runtimeConfig = JObject.Parse(File.ReadAllText(runtimeConfigPath));
-            JToken startupHookSupport = runtimeConfig["runtimeOptions"]["configProperties"]["System.StartupHookProvider.IsSupported"];
-            startupHookSupport.Value<bool>().Should().BeFalse();
+            JToken configProperties = runtimeConfig["runtimeOptions"]["configProperties"];
+
+            configProperties["System.StartupHookProvider.IsSupported"].Value<bool>().Should().BeFalse();
+
+            // Build with PublishTrimmed enabled should disable System.Text.Json reflection
+            configProperties["System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault"].Value<bool>().Should().BeFalse();
 
             // just setting PublishTrimmed doesn't inject the IsTrimmable attribute
             AssemblyInfo.Get(assemblyPath).ContainsKey("AssemblyMetadataAttribute").Should().BeFalse();
