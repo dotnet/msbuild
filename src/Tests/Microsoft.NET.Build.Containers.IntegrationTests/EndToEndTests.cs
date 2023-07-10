@@ -171,18 +171,6 @@ public class EndToEndTests : IDisposable
         newProjectDir.Create();
         privateNuGetAssets.Create();
 
-        var packageDirPath = Path.Combine(TestContext.Current.TestExecutionDirectory, "Container", "package");
-        var packagedir = new DirectoryInfo(packageDirPath);
-
-        // do not pollute the primary/global NuGet package store with the private package(s)
-        FileInfo[] nupkgs = packagedir.GetFiles("*.nupkg");
-        if (nupkgs == null || nupkgs.Length == 0)
-        {
-            // Build Microsoft.NET.Build.Containers.csproj & wait.
-            // for now, fail.
-            Assert.Fail("No nupkg found in expected package folder. You may need to rerun the build");
-        }
-
         new DotnetNewCommand(_testOutput, "webapi", "-f", ToolsetInfo.CurrentTargetFramework)
             .WithVirtualHive()  
             .WithWorkingDirectory(newProjectDir.FullName)
@@ -195,14 +183,16 @@ public class EndToEndTests : IDisposable
         {
             File.Copy(Path.Combine(TestContext.Current.TestExecutionDirectory, "NuGet.config"), Path.Combine(newProjectDir.FullName, "NuGet.config"));
 
-            new DotnetCommand(_testOutput, "nuget", "add", "source", packagedir.FullName, "--name", "local-temp")
+            (string packagePath, string packageVersion) = ToolsetUtils.GetContainersPackagePath();
+
+            new DotnetCommand(_testOutput, "nuget", "add", "source", Path.GetDirectoryName(packagePath), "--name", "local-temp")
                 .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
                 .WithWorkingDirectory(newProjectDir.FullName)
                 .Execute()
                 .Should().Pass();
 
             // Add package to the project
-            new DotnetCommand(_testOutput, "add", "package", "Microsoft.NET.Build.Containers", "-f", ToolsetInfo.CurrentTargetFramework, "-v", TestContext.Current.ToolsetUnderTest.SdkVersion)
+            new DotnetCommand(_testOutput, "add", "package", "Microsoft.NET.Build.Containers", "-f", ToolsetInfo.CurrentTargetFramework, "-v", packageVersion)
                 .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
                 .WithWorkingDirectory(newProjectDir.FullName)
                 .Execute()
@@ -325,17 +315,6 @@ public class EndToEndTests : IDisposable
         newProjectDir.Create();
         privateNuGetAssets.Create();
 
-        var packageDirPath = Path.Combine(TestContext.Current.TestExecutionDirectory, "Container", "package");
-        var packagedir = new DirectoryInfo(packageDirPath);
-
-        FileInfo[] nupkgs = packagedir.GetFiles("*.nupkg");
-        if (nupkgs == null || nupkgs.Length == 0)
-        {
-            // Build Microsoft.NET.Build.Containers.csproj & wait.
-            // for now, fail.
-            Assert.Fail("No nupkg found in expected package folder. You may need to rerun the build");
-        }
-
         new DotnetNewCommand(_testOutput, "console", "-f", ToolsetInfo.CurrentTargetFramework)
             .WithVirtualHive()
             .WithWorkingDirectory(newProjectDir.FullName)
@@ -346,14 +325,16 @@ public class EndToEndTests : IDisposable
 
         File.Copy(Path.Combine(TestContext.Current.TestExecutionDirectory, "NuGet.config"), Path.Combine(newProjectDir.FullName, "NuGet.config"));
 
-        new DotnetCommand(_testOutput, "nuget", "add", "source", packagedir.FullName, "--name", "local-temp")
+        (string packagePath, string packageVersion) = ToolsetUtils.GetContainersPackagePath();
+
+        new DotnetCommand(_testOutput, "nuget", "add", "source", Path.GetDirectoryName(packagePath), "--name", "local-temp")
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
             .Should().Pass();
 
         // Add package to the project
-        new DotnetCommand(_testOutput, "add", "package", "Microsoft.NET.Build.Containers", "-f", ToolsetInfo.CurrentTargetFramework, "-v", TestContext.Current.ToolsetUnderTest.SdkVersion)
+        new DotnetCommand(_testOutput, "add", "package", "Microsoft.NET.Build.Containers", "-f", ToolsetInfo.CurrentTargetFramework, "-v", packageVersion)
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
