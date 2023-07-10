@@ -2522,7 +2522,7 @@ namespace Microsoft.Build.Evaluation
 
         private void RecordEvaluatedItemElement(ProjectItemElement itemElement)
         {
-            if (_loadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements))
+            if ((_loadSettings & ProjectLoadSettings.RecordEvaluatedItemElements) == ProjectLoadSettings.RecordEvaluatedItemElements)
             {
                 _data.EvaluatedItemElements.Add(itemElement);
             }
