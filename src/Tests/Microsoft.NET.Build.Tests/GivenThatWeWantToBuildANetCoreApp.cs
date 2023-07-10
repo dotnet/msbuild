@@ -26,6 +26,7 @@ using Microsoft.NET.Build.Tasks;
 using NuGet.Versioning;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
+using Xunit.Sdk;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -798,6 +799,28 @@ class Program
             packageReferences
                 .Should()
                 .BeEmpty();
+        }
+
+        [WindowsOnlyFact]
+        public void ItResolvesPackageAssetsMultiTargetingNetStandard()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "MultiTargetedPackageReference",
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework +";netstandard2.1",
+                RuntimeIdentifier = "win-x64",
+                IsExe = true
+            };
+            testProject.PackageReferences.Add(new TestPackageReference("Nuget.Common","6.5.7"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
         }
 
         [WindowsOnlyFact]
