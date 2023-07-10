@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tools.Common
         public static string GetDefaultProjectTypeGuid(this ProjectInstance projectInstance)
         {
             string projectTypeGuid = projectInstance.GetPropertyValue("DefaultProjectTypeGuid");
-            if (string.IsNullOrEmpty(projectTypeGuid) && projectInstance.FullPath.EndsWith(".shproj"))
+            if (string.IsNullOrEmpty(projectTypeGuid) && projectInstance.FullPath.EndsWith(".shproj", StringComparison.OrdinalIgnoreCase))
             {
                 projectTypeGuid = ProjectTypeGuids.SharedProjectGuid;
             }
