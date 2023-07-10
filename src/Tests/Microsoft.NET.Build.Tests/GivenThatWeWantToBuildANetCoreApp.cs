@@ -820,7 +820,9 @@ class Program
             buildCommand
                 .Execute()
                 .Should()
-                .Pass();
+                .Pass()
+                .And
+                .HaveStdOutContaining("NU1603");
         }
 
         [WindowsOnlyFact]
