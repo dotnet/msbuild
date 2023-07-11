@@ -1520,7 +1520,8 @@ namespace Microsoft.NET.Build.Tasks
                         log.LibraryId == package.Name &&
                         log.TargetGraphs.Any(tg =>
                         {
-                            var parsedTargetGraph = NuGetFramework.Parse(tg);
+                            var parts = tg.Split(LockFile.DirectorySeparatorChar);
+                            var parsedTargetGraph = NuGetFramework.Parse(parts[0]);
                             var alias = _lockFile.PackageSpec.TargetFrameworks
                                 .FirstOrDefault(tf => tf.FrameworkName == parsedTargetGraph)
                                 ?.TargetAlias ?? tg;
