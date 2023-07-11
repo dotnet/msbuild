@@ -17,20 +17,22 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void RootElementNameNotValid()
         {
+            MockEngine e = new MockEngine();
             var task = new CombineTargetFrameworkInfoProperties();
+            task.BuildEngine = e;
             var items = new ITaskItem[]
             {
                 new TaskItemData("ItemSpec1", null)
             };
             task.PropertiesAndValues = items;
             task.UseAttributeForTargetFrameworkInfoPropertyNames = true;
-            var exp = Assert.Throws<ArgumentNullException>(() => task.Execute());
-            exp.Message.ShouldContain("RootElementName");
+            task.Execute().ShouldBe(false);
+            e.AssertLogContains("MSB3992");
 
             task.RootElementName = string.Empty;
             task.UseAttributeForTargetFrameworkInfoPropertyNames = false;
-            var exp1 = Assert.Throws<ArgumentException>(() => task.Execute());
-            exp1.Message.ShouldContain("RootElementName");
+            task.Execute().ShouldBe(false);
+            e.AssertLogContains("MSB3991");
         }
     }
 }
