@@ -921,7 +921,7 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1050: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
-        <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}. Download the .NET SDK from https://aka.ms/download-dotnet</source>
+        <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}. Download the .NET SDK from https://aka.ms/dotnet/download</source>
         <target state="needs-review-translation">NETSDK1045: la versione corrente di .NET SDK non supporta {0} {1} come destinazione. Impostare come destinazione {0} {2} o una versione precedente oppure usare una versione di .NET SDK che supporta {0} {1}.</target>
         <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>

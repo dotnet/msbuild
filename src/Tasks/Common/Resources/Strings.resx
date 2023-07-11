@@ -280,7 +280,7 @@
     <comment>{StrBegin="NETSDK1044: "}</comment>
   </data>
   <data name="UnsupportedTargetFrameworkVersion" xml:space="preserve">
-    <value>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}. Download the .NET SDK from https://aka.ms/download-dotnet</value>
+    <value>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}. Download the .NET SDK from https://aka.ms/dotnet/download</value>
     <comment>{StrBegin="NETSDK1045: "}</comment>
   </data>
   <data name="TargetFrameworkWithSemicolon" xml:space="preserve">

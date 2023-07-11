@@ -154,7 +154,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(NETCoreAppMaximumVersion)' != ''">
 
     <PropertyGroup>
-      <DisplayVSMessage Condition="$([MSBuild]::VersionLessThan($(MSBuildVersion), '$(MinimumVisualStudioVersionForUnsupportedTargetFrameworkVersion)')) and '$(BuildingInsideVisualStudio)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' == '$(UnsupportedTargetFrameworkVersion)'">true</DisplayVSMessage>
+      <DisplayVSMessage Condition="$([MSBuild]::VersionLessThan($(MSBuildVersion), '$(MinimumVisualStudioVersionForUnsupportedTargetFrameworkVersion)')) and '$(BuildingInsideVisualStudio)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' == '$(UnsupportedTargetFrameworkVersion)' and '$([MSBuild]::IsOSPlatform(`Windows`))' == 'true'">true</DisplayVSMessage>
     </PropertyGroup>
 
     <NETSdkError Condition="'$(_TargetFrameworkVersionWithoutV)' > '$(NETCoreAppMaximumVersion)' and '$(DisplayVSMessage)' != 'true'"
