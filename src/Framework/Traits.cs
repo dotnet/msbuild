@@ -477,10 +477,7 @@ namespace Microsoft.Build.Framework
         /// </remarks>
         internal static void ThrowInternalError(string message)
         {
-            if (s_throwExceptions)
-            {
-                throw new InternalErrorException(message);
-            }
+            throw new InternalErrorException(message);
         }
 
         /// <summary>
@@ -492,10 +489,7 @@ namespace Microsoft.Build.Framework
         /// </remarks>
         internal static void ThrowInternalError(string message, params object[] args)
         {
-            if (s_throwExceptions)
-            {
-                throw new InternalErrorException(FormatString(message, args));
-            }
+            throw new InternalErrorException(FormatString(message, args));
         }
 
         /// <summary>

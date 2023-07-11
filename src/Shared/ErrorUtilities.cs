@@ -58,10 +58,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void ThrowInternalError(string message, params object[] args)
         {
-            if (s_throwExceptions)
-            {
-                throw new InternalErrorException(ResourceUtilities.FormatString(message, args));
-            }
+            throw new InternalErrorException(ResourceUtilities.FormatString(message, args));
         }
 
         /// <summary>
@@ -70,10 +67,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void ThrowInternalError(string message, Exception innerException, params object[] args)
         {
-            if (s_throwExceptions)
-            {
-                throw new InternalErrorException(ResourceUtilities.FormatString(message, args), innerException);
-            }
+            throw new InternalErrorException(ResourceUtilities.FormatString(message, args), innerException);
         }
 
         /// <summary>
@@ -83,10 +77,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void ThrowInternalErrorUnreachable()
         {
-            if (s_throwExceptions)
-            {
-                throw new InternalErrorException("Unreachable?");
-            }
+            throw new InternalErrorException("Unreachable?");
         }
 
         /// <summary>
@@ -197,8 +188,6 @@ namespace Microsoft.Build.Shared
         /// code somewhere. This should not be used to throw errors based on bad
         /// user input or anything that the user did wrong.
         /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="unformattedMessage"></param>
         internal static void VerifyThrow(
             bool condition,
             string unformattedMessage)
@@ -214,9 +203,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Overload for one string format argument.
         /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="unformattedMessage"></param>
-        /// <param name="arg0"></param>
         internal static void VerifyThrow(
             bool condition,
             string unformattedMessage,
@@ -234,10 +220,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Overload for two string format arguments.
         /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="unformattedMessage"></param>
-        /// <param name="arg0"></param>
-        /// <param name="arg1"></param>
         internal static void VerifyThrow(
             bool condition,
             string unformattedMessage,
@@ -256,11 +238,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Overload for three string format arguments.
         /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="unformattedMessage"></param>
-        /// <param name="arg0"></param>
-        /// <param name="arg1"></param>
-        /// <param name="arg2"></param>
         internal static void VerifyThrow(
             bool condition,
             string unformattedMessage,
@@ -280,12 +257,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Overload for four string format arguments.
         /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="unformattedMessage"></param>
-        /// <param name="arg0"></param>
-        /// <param name="arg1"></param>
-        /// <param name="arg2"></param>
-        /// <param name="arg3"></param>
         internal static void VerifyThrow(
             bool condition,
             string unformattedMessage,
@@ -314,17 +285,12 @@ namespace Microsoft.Build.Shared
         /// <param name="args">Formatting args.</param>
         internal static void ThrowInvalidOperation(string resourceName, params object[] args)
         {
-            if (s_throwExceptions)
-            {
-                throw new InvalidOperationException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args));
-            }
+            throw new InvalidOperationException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args));
         }
 
         /// <summary>
         /// Throws an InvalidOperationException if the given condition is false.
         /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="resourceName"></param>
         internal static void VerifyThrowInvalidOperation(
             bool condition,
             string resourceName)
@@ -341,9 +307,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Overload for one string format argument.
         /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="resourceName"></param>
-        /// <param name="arg0"></param>
         internal static void VerifyThrowInvalidOperation(
             bool condition,
             string resourceName,
@@ -362,10 +325,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Overload for two string format arguments.
         /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="resourceName"></param>
-        /// <param name="arg0"></param>
-        /// <param name="arg1"></param>
         internal static void VerifyThrowInvalidOperation(
             bool condition,
             string resourceName,
@@ -385,11 +344,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Overload for three string format arguments.
         /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="resourceName"></param>
-        /// <param name="arg0"></param>
-        /// <param name="arg1"></param>
-        /// <param name="arg2"></param>
         internal static void VerifyThrowInvalidOperation(
             bool condition,
             string resourceName,
@@ -410,12 +364,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Overload for four string format arguments.
         /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="resourceName"></param>
-        /// <param name="arg0"></param>
-        /// <param name="arg1"></param>
-        /// <param name="arg2"></param>
-        /// <param name="arg3"></param>
         internal static void VerifyThrowInvalidOperation(
             bool condition,
             string resourceName,
@@ -471,18 +419,13 @@ namespace Microsoft.Build.Shared
             string resourceName,
             params object[] args)
         {
-            if (s_throwExceptions)
-            {
-                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args), innerException);
-            }
+            throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args), innerException);
         }
 
         /// <summary>
         /// Throws an ArgumentException if the given condition is false.
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
-        /// <param name="condition"></param>
-        /// <param name="resourceName"></param>
         internal static void VerifyThrowArgument(
             bool condition,
             string resourceName)
@@ -494,9 +437,6 @@ namespace Microsoft.Build.Shared
         /// Overload for one string format argument.
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
-        /// <param name="condition"></param>
-        /// <param name="resourceName"></param>
-        /// <param name="arg0"></param>
         internal static void VerifyThrowArgument(
             bool condition,
             string resourceName,
@@ -509,10 +449,6 @@ namespace Microsoft.Build.Shared
         /// Overload for two string format arguments.
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
-        /// <param name="condition"></param>
-        /// <param name="resourceName"></param>
-        /// <param name="arg0"></param>
-        /// <param name="arg1"></param>
         internal static void VerifyThrowArgument(
             bool condition,
             string resourceName,
@@ -577,10 +513,6 @@ namespace Microsoft.Build.Shared
         /// Overload for one string format argument.
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
-        /// <param name="condition"></param>
-        /// <param name="innerException"></param>
-        /// <param name="resourceName"></param>
-        /// <param name="arg0"></param>
         internal static void VerifyThrowArgument(
             bool condition,
             Exception innerException,
@@ -601,11 +533,6 @@ namespace Microsoft.Build.Shared
         /// Overload for two string format arguments.
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
-        /// <param name="condition"></param>
-        /// <param name="innerException"></param>
-        /// <param name="resourceName"></param>
-        /// <param name="arg0"></param>
-        /// <param name="arg1"></param>
         internal static void VerifyThrowArgument(
             bool condition,
             Exception innerException,
@@ -677,10 +604,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void ThrowArgumentOutOfRange(string parameterName)
         {
-            if (s_throwExceptions)
-            {
-                throw new ArgumentOutOfRangeException(parameterName);
-            }
+            throw new ArgumentOutOfRangeException(parameterName);
         }
 
         /// <summary>
@@ -699,8 +623,6 @@ namespace Microsoft.Build.Shared
         /// Throws an ArgumentNullException if the given string parameter is null
         /// and ArgumentException if it has zero length.
         /// </summary>
-        /// <param name="parameter"></param>
-        /// <param name="parameterName"></param>
         internal static void VerifyThrowArgumentLength(string parameter, string parameterName)
         {
             VerifyThrowArgumentNull(parameter, parameterName);
@@ -716,8 +638,6 @@ namespace Microsoft.Build.Shared
         /// Throws an ArgumentNullException if the given collection is null
         /// and ArgumentException if it has zero length.
         /// </summary>
-        /// <param name="parameter"></param>
-        /// <param name="parameterName"></param>
         internal static void VerifyThrowArgumentLength<T>(IReadOnlyCollection<T> parameter, string parameterName)
         {
             VerifyThrowArgumentNull(parameter, parameterName);
@@ -731,8 +651,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Throws an ArgumentException if the given collection is not null but of zero length.
         /// </summary>
-        /// <param name="parameter"></param>
-        /// <param name="parameterName"></param>
         internal static void VerifyThrowArgumentLengthIfNotNull<T>(IReadOnlyCollection<T> parameter, string parameterName)
         {
             if (parameter?.Count == 0)
@@ -743,25 +661,20 @@ namespace Microsoft.Build.Shared
 #endif
         private static void ThrowArgumentLength(string parameterName)
         {
-            if (s_throwExceptions)
-            {
-                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
-            }
+            throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
         }
 
         /// <summary>
         /// Throws an ArgumentNullException if the given string parameter is null
         /// and ArgumentException if it has zero length.
         /// </summary>
-        /// <param name="parameter"></param>
-        /// <param name="parameterName"></param>
         internal static void VerifyThrowArgumentInvalidPath(string parameter, string parameterName)
         {
             VerifyThrowArgumentNull(parameter, parameterName);
 
-            if (FileUtilities.PathIsInvalid(parameter) && s_throwExceptions)
+            if (FileUtilities.PathIsInvalid(parameter))
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveInvalidPathChars", parameterName, parameter));
+                ThrowArgument("Shared.ParameterCannotHaveInvalidPathChars", parameterName, parameter);
             }
         }
 
@@ -781,8 +694,6 @@ namespace Microsoft.Build.Shared
         /// Throws an ArgumentNullException if the given parameter is null.
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
-        /// <param name="parameter"></param>
-        /// <param name="parameterName"></param>
         internal static void VerifyThrowArgumentNull(object parameter, string parameterName)
         {
             VerifyThrowArgumentNull(parameter, parameterName, "Shared.ParameterCannotBeNull");
@@ -803,31 +714,24 @@ namespace Microsoft.Build.Shared
 
         internal static void ThrowArgumentNull(string parameterName, string resourceName)
         {
-            if (s_throwExceptions)
-            {
-                // Most ArgumentNullException overloads append its own rather clunky multi-line message.
-                // So use the one overload that doesn't.
-                throw new ArgumentNullException(
-                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, parameterName),
-                    (Exception)null);
-            }
+            // Most ArgumentNullException overloads append its own rather clunky multi-line message.
+            // So use the one overload that doesn't.
+            throw new ArgumentNullException(
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, parameterName),
+                (Exception)null);
         }
 
         /// <summary>
         /// Verifies the given arrays are not null and have the same length
         /// </summary>
-        /// <param name="parameter1"></param>
-        /// <param name="parameter2"></param>
-        /// <param name="parameter1Name"></param>
-        /// <param name="parameter2Name"></param>
         internal static void VerifyThrowArgumentArraysSameLength(Array parameter1, Array parameter2, string parameter1Name, string parameter2Name)
         {
             VerifyThrowArgumentNull(parameter1, parameter1Name);
             VerifyThrowArgumentNull(parameter2, parameter2Name);
 
-            if (parameter1.Length != parameter2.Length && s_throwExceptions)
+            if (parameter1.Length != parameter2.Length)
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParametersMustHaveTheSameLength", parameter1Name, parameter2Name));
+                ThrowArgument("Shared.ParametersMustHaveTheSameLength", parameter1Name, parameter2Name);
             }
         }
 
@@ -845,10 +749,7 @@ namespace Microsoft.Build.Shared
 
         internal static void ThrowObjectDisposed(string objectName)
         {
-            if (s_throwExceptions)
-            {
-                throw new ObjectDisposedException(objectName);
-            }
+            throw new ObjectDisposedException(objectName);
         }
 
         #endregion

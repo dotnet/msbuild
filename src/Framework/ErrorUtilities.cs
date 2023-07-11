@@ -55,10 +55,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         internal static void ThrowInternalError(string message, Exception innerException, params object[] args)
         {
-            if (s_throwExceptions)
-            {
-                throw new InternalErrorException(string.Format(message, args), innerException);
-            }
+            throw new InternalErrorException(string.Format(message, args), innerException);
         }
     }
 }
