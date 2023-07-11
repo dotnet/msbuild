@@ -22,14 +22,10 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="condition"></param>
         /// <param name="unformattedMessage"></param>
-        internal static void VerifyThrow(
-            bool condition,
-            string unformattedMessage)
+        internal static void VerifyThrow(bool condition, string unformattedMessage)
         {
             if (!condition)
             {
-                // PERF NOTE: explicitly passing null for the arguments array
-                // prevents memory allocation
                 ThrowInternalError(unformattedMessage, null, null);
             }
         }
