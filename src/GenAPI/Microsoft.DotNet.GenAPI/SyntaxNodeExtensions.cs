@@ -26,8 +26,13 @@ namespace Microsoft.DotNet.GenAPI
                 {
                     continue;
                 }
-                node = syntaxGenerator.AddAttributes(node, syntaxGenerator.Attribute(attribute));
 
+                if (attribute.IsReserved())
+                {
+                    continue;
+                }
+
+                node = syntaxGenerator.AddAttributes(node, syntaxGenerator.Attribute(attribute));
             }
             return node;
         }

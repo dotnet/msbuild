@@ -46,7 +46,8 @@ namespace Microsoft.DotNet.GenAPI.Tests
 
             using Stream assemblyStream = SymbolFactory.EmitAssemblyStreamFromSyntax(original, enableNullable: true, allowUnsafe: allowUnsafe, assemblyName: assemblyName);
             AssemblySymbolLoader assemblySymbolLoader = new AssemblySymbolLoader(resolveAssemblyReferences: true, includeInternalSymbols: includeInternalSymbols);
-            assemblySymbolLoader.AddReferenceSearchPaths(typeof(object).Assembly!.Location!);            
+            assemblySymbolLoader.AddReferenceSearchPaths(typeof(object).Assembly!.Location!);
+            assemblySymbolLoader.AddReferenceSearchPaths(typeof(DynamicAttribute).Assembly!.Location!);
             IAssemblySymbol assemblySymbol = assemblySymbolLoader.LoadAssembly(assemblyName, assemblyStream);
 
             csharpFileBuilder.WriteAssembly(assemblySymbol);
@@ -190,7 +191,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                 namespace Foo
                 {
-                    [System.Runtime.CompilerServices.NullableContext(1)]
                     public partial interface IPoint
                     {
                         // Property signatures:
@@ -345,16 +345,10 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                 namespace Foo
                 {
-                    [System.Runtime.CompilerServices.NullableContext(2)]
-                    [System.Runtime.CompilerServices.Nullable(0)]
                     public partial class BaseNodeMultiple <T, U> { }
 
-                    [System.Runtime.CompilerServices.NullableContext(2)]
-                    [Nullable(new[] { 0, 1 })]
                     public partial class Node4 <T> : BaseNodeMultiple<T, int> { }
 
-                    [System.Runtime.CompilerServices.NullableContext(2)]
-                    [Nullable(new[] { 0, 1, 1 })]
                     public partial class Node5 <T, U> : BaseNodeMultiple<T, U> { }
                 }
                 """);
@@ -470,15 +464,11 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                 namespace Foo
                 {
-                    [System.Runtime.CompilerServices.NullableContext(1)]
-                    [System.Runtime.CompilerServices.Nullable(0)]
                     public abstract partial class AbstractEvents
                     {
                         public abstract event System.EventHandler<bool> TextChanged;
                     }
 
-                    [System.Runtime.CompilerServices.NullableContext(1)]
-                    [System.Runtime.CompilerServices.Nullable(0)]
                     public partial class Events
                     {
                         public event System.EventHandler<string> OnNewMessage { add { } remove { } }
@@ -622,13 +612,9 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                 namespace Foo
                 {
-                    [System.Runtime.CompilerServices.NullableContext(1)]
-                    [System.Runtime.CompilerServices.Nullable(0)]
                     public partial class Car : System.IEquatable<Car>
                     {
-                        [System.Runtime.CompilerServices.NullableContext(2)]
                         public bool Equals(Car? c) { throw null; }
-                        [System.Runtime.CompilerServices.NullableContext(2)]
                         public override bool Equals(object? o) { throw null; }
                         public override int GetHashCode() { throw null; }
                         public static bool operator ==(Car lhs, Car rhs) { throw null; }
@@ -709,8 +695,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                 namespace Foo
                 {
-                    [System.Runtime.CompilerServices.NullableContext(2)]
-                    [System.Runtime.CompilerServices.Nullable(0)]
                     public partial class Bar
                     {
                         public int? AMember { get { throw null; } set { } }
@@ -739,7 +723,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     public static partial class MyExtensions
                     {
-                        [System.Runtime.CompilerServices.NullableContext(1)]
                         public static int WordCount(this string str) { throw null; }
                     }
                 }
@@ -763,7 +746,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     public partial class Bar
                     {
-                        [System.Runtime.CompilerServices.NullableContext(1)]
                         public void Execute(params int[] list) { }
                     }
                 }
@@ -931,7 +913,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 namespace Foo
                 {
                     public delegate void Action<in T>(T obj);
-                    [System.Runtime.CompilerServices.NullableContext(2)]
                     public partial interface IAsyncEnumerable<out T>
                     {
                     }
@@ -959,8 +940,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                 namespace Foo
                 {
-                    [System.Runtime.CompilerServices.NullableContext(1)]
-                    [System.Runtime.CompilerServices.Nullable(0)]
                     public partial class Bar<T>
                     {
                     #pragma warning disable CS8597
@@ -998,14 +977,12 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 {
                     public abstract partial class A
                     {
-                        [System.Runtime.CompilerServices.NullableContext(2)]
                         public abstract TResult? Accept<TResult>(int a);
                     }
 
                     public sealed partial class B : A
                     {
                     #pragma warning disable CS8597
-                        [System.Runtime.CompilerServices.NullableContext(2)]
                         public override TResult? Accept<TResult>(int a) where TResult : default { throw null; }
                     #pragma warning restore CS8597
                     }
@@ -1107,8 +1084,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
             expected: """
                 namespace Foo
                 {
-                    [System.Runtime.CompilerServices.NullableContext(1)]
-                    [System.Runtime.CompilerServices.Nullable(0)]
                     public partial struct Bar<T>
                     {
                         private System.Collections.Generic.Dictionary<int, System.Collections.Generic.List<T>> _field;
@@ -1141,7 +1116,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         private readonly System.Collections.Generic.List<Bar<T>> _Baz_k__BackingField;
                         private readonly object _dummy;
                         private readonly int _dummyPrimitive;
-                        [Nullable(new[] { 1, 0, 1 })]
                         public System.Collections.Generic.List<Bar<T>> Baz { get { throw null; } }
                     }
                 }
@@ -1322,8 +1296,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                             internal D() : base(default) {}
                         }
 
-                        [System.Runtime.CompilerServices.NullableContext(1)]
-                        [System.Runtime.CompilerServices.Nullable(0)]
                         public partial class E
                         {
                             internal E() {}
@@ -1382,8 +1354,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                             internal D(int i) : base(default) { }
                         }
 
-                        [System.Runtime.CompilerServices.NullableContext(1)]
-                        [System.Runtime.CompilerServices.Nullable(0)]
                         public partial class E
                         {
                             internal E(P p) { }
@@ -1465,7 +1435,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
 
                         public partial class B
                         {
-                            [System.Runtime.CompilerServices.NullableContext(1)]
                             public B(int p1, string p2, A p3) { }
                         }
 
@@ -1507,8 +1476,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         {
                         }
 
-                        [System.Runtime.CompilerServices.NullableContext(1)]
-                        [System.Runtime.CompilerServices.Nullable(0)]
                         public partial class B
                         {
                             public B(int p1, string p2, A p3) { }
@@ -1550,7 +1517,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                         {
                             public A(char c) { }
                             public A(int i) { }
-                            [System.Runtime.CompilerServices.NullableContext(1)]
                             public A(string s) { }
                         }
 
@@ -1589,8 +1555,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                     namespace Foo
                     {
-                        [System.Runtime.CompilerServices.NullableContext(1)]
-                        [System.Runtime.CompilerServices.Nullable(0)]
                         public partial class A
                         {
                             public A(Id id, System.Collections.Generic.IEnumerable<D> deps) { }
@@ -1635,7 +1599,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         public partial class B
                         {
-                            [System.Runtime.CompilerServices.NullableContext(1)]
                             public B(int p1, string p2) { }
                             [System.Obsolete("Constructor is deprecated.", true)]
                             public B(int p1) { }
@@ -1673,7 +1636,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         public partial class B
                         {
-                            [System.Runtime.CompilerServices.NullableContext(1)]
                             public B(int p1, string p2) { }
                             [System.Obsolete("Constructor is deprecated.")]
                             public B(int p1) { }
@@ -1711,7 +1673,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         public partial class B
                         {
-                            [System.Runtime.CompilerServices.NullableContext(1)]
                             public B(int p1, string p2) { }
                             [System.Obsolete(null)]
                             public B(int p1) { }
@@ -2177,7 +2138,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                     namespace A
                     {
-                        [System.Runtime.CompilerServices.NullableContext(1)]
                         public partial interface AreEqual<T>
                         {
                             bool Compare(T other);
@@ -2284,9 +2244,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                             public int Foo;
                             public int Baz { get { throw null; } }
                             public int ExplicitProperty { get { throw null; } }
-                            [System.Runtime.CompilerServices.Nullable(1)]
                             public C this[int i] { get { throw null; } set {} }
-                            [System.Runtime.CompilerServices.Nullable(1)]
                             public event System.EventHandler MyEvent { add {} remove {} }
                             void IExplicit.Explicit() {}
                             public void Do() {}
@@ -2294,7 +2252,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                             public static void DoStatic() {}
                             public void Explicit2() {}
                             public void Fun() {}
-                            [System.Runtime.CompilerServices.NullableContext(2)]
                             public void Gen<T>() {}
                             public void Zoo() {}
                             public partial class MyNestedClass {}
@@ -2308,9 +2265,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                             public new int Foo;
                             int IExplicit2.ExplicitProperty { get { throw null; } }
                             public new int Baz { get { throw null; } set {} }
-                            [System.Runtime.CompilerServices.Nullable(1)]
                             public new D this[int i] { get { throw null; } set {} }
-                            [System.Runtime.CompilerServices.Nullable(1)]
                             public new event System.EventHandler MyEvent { add {} remove {} }
                             void IExplicit2.Explicit2() {}
                             public new void Do() {}
@@ -2330,7 +2285,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                             public new const int Do = 30;
                             int IExplicit2.ExplicitProperty { get { throw null; } }
                             public new int Foo { get { throw null; } set {} }
-                            [System.Runtime.CompilerServices.Nullable(1)]
                             public new event System.EventHandler MyNestedClass { add {} remove {} }
                             void IExplicit.Explicit() {}
                             void IExplicit2.Explicit2() {}
@@ -2360,8 +2314,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
             string expected = includeInternalSymbols ? """
                     namespace A
                     {
-                        [System.Runtime.CompilerServices.NullableContext(1)]
-                        [System.Runtime.CompilerServices.Nullable(0)]
                         public partial class AnyTestAttribute : System.Attribute
                         {
                             public AnyTestAttribute(System.Type xType) { }
@@ -2382,8 +2334,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     """ : """
                     namespace A
                     {
-                        [System.Runtime.CompilerServices.NullableContext(1)]
-                        [System.Runtime.CompilerServices.Nullable(0)]
                         public partial class AnyTestAttribute : System.Attribute
                         {
                             public AnyTestAttribute(System.Type xType) { }
@@ -2452,8 +2402,6 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """
                     namespace A
                     {
-                        [System.Runtime.CompilerServices.NullableContext(1)]
-                        [System.Runtime.CompilerServices.Nullable(0)]
                         public partial class Foo<T> : System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.Generic.ICollection<T>, System.Collections.Generic.IEnumerable<T>
                         {
                             int System.Collections.Generic.ICollection<T>.Count { get { throw null; } }
@@ -2519,6 +2467,43 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ValueTuple<,,,,,,,>))]
                     """,
                 includeInternalSymbols: false);
+        }
+
+        [Fact]
+        public void ReservedAttributesAreOmitted()
+        {
+            RunTest(original: """
+                namespace N {
+                    public ref struct C<T>
+                        where T : unmanaged
+                    {
+                        public required (string? k, dynamic v, nint n) X { get; init; }    
+                    }
+
+                    public static class E
+                    {
+                        public static void M<T>(this object c, scoped System.ReadOnlySpan<T> values) { }
+                    }
+                }
+                """,
+                expected: """                
+                namespace N
+                {
+                    // ISSUE: https://github.com/dotnet/roslyn/issues/68957 should be T : unmanaged instead of T : struct
+                    public partial struct C<T>
+                        where T : struct
+                    {
+                        // ISSUE: https://github.com/dotnet/roslyn/issues/68957 should be init instead of set
+                        public required (string? k, dynamic v, nint n) X { get { throw null; } set { } }
+                    }
+
+                    public static partial class E
+                    {
+                        // ISSUE: https://github.com/dotnet/roslyn/issues/68959 should include scoped
+                        public static void M<T>(this object c, System.ReadOnlySpan<T> values) { }
+                    }
+                }
+                """);
         }
     }
 }
