@@ -27,6 +27,10 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 Description = "If true, generates a compatibility suppression file.",
                 Recursive = true
             };
+            CliOption<bool> preserveUnnecessarySuppressionsOption = new("--preserve-unnecessary-suppressions",
+                "If true, preserves unnecessary suppressions when re-generating the suppression file.");
+            CliOption<bool> permitUnnecessarySuppressionsOption = new("--permit-unnecessary-suppressions",
+                "If true, permits unnecessary suppressions in the suppression file.");
             CliOption<string[]> suppressionFilesOption = new("--suppression-file")
             {
                 Description = "The path to one or more suppression files to read from.",
@@ -59,7 +63,7 @@ namespace Microsoft.DotNet.ApiCompat.Tool
             CliOption<MessageImportance> verbosityOption = new("--verbosity", "-v")
             {
                 Description = "Controls the log level verbosity. Allowed values are high, normal, and low.",
-                DefaultValueFactory = _ => MessageImportance.High,
+                DefaultValueFactory = _ => MessageImportance.Normal,
                 Recursive = true
             };
             CliOption<bool> enableRuleAttributesMustMatchOption = new("--enable-rule-attributes-must-match")
@@ -140,6 +144,8 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 TreatUnmatchedTokensAsErrors = true
             };
             rootCommand.Options.Add(generateSuppressionFileOption);
+            rootCommand.Options.Add(preserveUnnecessarySuppressionsOption);
+            rootCommand.Options.Add(permitUnnecessarySuppressionsOption);
             rootCommand.Options.Add(suppressionFilesOption);
             rootCommand.Options.Add(suppressionOutputFileOption);
             rootCommand.Options.Add(noWarnOption);
@@ -168,6 +174,8 @@ namespace Microsoft.DotNet.ApiCompat.Tool
 
                 MessageImportance verbosity = parseResult.GetValue(verbosityOption);
                 bool generateSuppressionFile = parseResult.GetValue(generateSuppressionFileOption);
+                bool preserveUnnecessarySuppressions = parseResult.GetValue(preserveUnnecessarySuppressionsOption);
+                bool permitUnnecessarySuppressions = parseResult.GetValue(permitUnnecessarySuppressionsOption);
                 string[]? suppressionFiles = parseResult.GetValue(suppressionFilesOption);
                 string? suppressionOutputFile = parseResult.GetValue(suppressionOutputFileOption);
                 string? noWarn = parseResult.GetValue(noWarnOption);
@@ -188,6 +196,8 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 Func<ISuppressionEngine, SuppressableConsoleLog> logFactory = (suppressionEngine) => new(suppressionEngine, verbosity);
                 ValidateAssemblies.Run(logFactory,
                     generateSuppressionFile,
+                    preserveUnnecessarySuppressions,
+                    permitUnnecessarySuppressions,
                     suppressionFiles,
                     suppressionOutputFile,
                     noWarn,
@@ -276,6 +286,8 @@ namespace Microsoft.DotNet.ApiCompat.Tool
 
                 MessageImportance verbosity = parseResult.GetValue(verbosityOption);
                 bool generateSuppressionFile = parseResult.GetValue(generateSuppressionFileOption);
+                bool preserveUnnecessarySuppressions = parseResult.GetValue(preserveUnnecessarySuppressionsOption);
+                bool permitUnnecessarySuppressions = parseResult.GetValue(permitUnnecessarySuppressionsOption);
                 string[]? suppressionFiles = parseResult.GetValue(suppressionFilesOption);
                 string? suppressionOutputFile = parseResult.GetValue(suppressionOutputFileOption);
                 string? noWarn = parseResult.GetValue(noWarnOption);
@@ -297,6 +309,8 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 Func<ISuppressionEngine, SuppressableConsoleLog> logFactory = (suppressionEngine) => new(suppressionEngine, verbosity);
                 ValidatePackage.Run(logFactory,
                     generateSuppressionFile,
+                    preserveUnnecessarySuppressions,
+                    permitUnnecessarySuppressions,
                     suppressionFiles,
                     suppressionOutputFile,
                     noWarn,

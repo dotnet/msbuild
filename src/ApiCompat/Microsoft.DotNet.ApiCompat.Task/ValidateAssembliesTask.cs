@@ -4,8 +4,8 @@
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.NET.Build.Tasks;
 using Microsoft.DotNet.ApiCompatibility.Logging;
+using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.DotNet.ApiCompat.Task
 {
@@ -38,6 +38,16 @@ namespace Microsoft.DotNet.ApiCompat.Task
         /// If true, generates a suppression file that contains the api compatibility errors.
         /// </summary>
         public bool GenerateSuppressionFile { get; set; }
+
+        /// <summary>
+        /// If true, preserves unnecessary suppressions when re-generating the suppression file.
+        /// </summary>
+        public bool PreserveUnnecessarySuppressions { get; set; }
+
+        /// <summary>
+        /// If true, permits unnecessary suppressions in the suppression file.
+        /// </summary>
+        public bool PermitUnnecessarySuppressions { get; set; }
 
         /// <summary>
         /// The path to suppression files. If provided, the suppressions are read and stored.
@@ -127,6 +137,8 @@ namespace Microsoft.DotNet.ApiCompat.Task
             Func<ISuppressionEngine, SuppressableMSBuildLog> logFactory = (suppressionEngine) => new(Log, suppressionEngine);
             ValidateAssemblies.Run(logFactory,
                 GenerateSuppressionFile,
+                PreserveUnnecessarySuppressions,
+                PermitUnnecessarySuppressions,
                 SuppressionFiles,
                 SuppressionOutputFile,
                 NoWarn,

@@ -209,7 +209,7 @@ namespace CompatTests
         {
             string message = difference.Message;
 
-            // make sure it is separater by a space and it is not a substr of a word.
+            // make sure it is separated by a space and is not a substring of a word.
             string left = " " + expectedLeftName;
             string right = " " + expectedRightName; 
             if (leftFirst)

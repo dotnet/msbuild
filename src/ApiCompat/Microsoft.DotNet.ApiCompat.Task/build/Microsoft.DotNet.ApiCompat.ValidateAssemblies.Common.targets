@@ -18,6 +18,8 @@
       LeftAssemblies="@(ApiCompatLeftAssemblies)"
       RightAssemblies="@(ApiCompatRightAssemblies)"
       GenerateSuppressionFile="$(ApiCompatGenerateSuppressionFile)"
+      PreserveUnnecessarySuppressions="$(ApiCompatPreserveUnnecessarySuppressions)"
+      PermitUnnecessarySuppressions="$(ApiCompatPermitUnnecessarySuppressions)"
       SuppressionFiles="@(ApiCompatSuppressionFile)"
       SuppressionOutputFile="$(ApiCompatSuppressionOutputFile)"
       NoWarn="$(NoWarn)"
