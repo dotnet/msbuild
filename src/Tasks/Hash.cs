@@ -15,7 +15,12 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     /// <remarks>
     /// Currently uses SHA256. Implementation subject to change between MSBuild versions.
-    /// This class is not intended as a cryptographic security measure, only uniqueness between build executions.
+    /// This class is not intended as a cryptographic security measure, only uniqueness between build executions
+    /// - collisions can theoretically be possible in the future (should we move to noncrypto hash) and should be handled gracefully by the caller.
+    ///
+    /// Usage of cryptographic secure hash brings slight performance penalty, but it is considered acceptable.
+    /// Would this need to be revised - XxHash64 from System.Io.Hashing could be used instead for better performance.
+    /// (That however currently requires load of additional binary into VS process which has it's own costs)
     /// </remarks>
     public class Hash : TaskExtension
     {

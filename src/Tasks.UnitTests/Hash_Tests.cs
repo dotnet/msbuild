@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
@@ -81,44 +82,36 @@ namespace Microsoft.Build.Tasks.UnitTests
             Assert.Equal(expectedHash, actualHash);
         }
 
-#pragma warning disable CA5350
         // This test verifies that hash computes correctly for various numbers of characters.
         // We would like to process edge of the buffer use cases regardless on the size of the buffer.
         [Fact]
         public void HashTaskDifferentInputSizesTest()
         {
             int maxInputSize = 2000;
-            string input = "";
-            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            MockEngine mockEngine = new();
+
+            var hashGroups =
+                Enumerable.Range(0, maxInputSize)
+                    .Select(cnt => new string('a', cnt))
+                    .Select(GetHash)
+                    .GroupBy(h => h)
+                    .Where(g => g.Count() > 1)
+                    .Select(g => g.Key);
+            // none of the hashes should repeat
+            Assert.Empty(hashGroups);
+
+            string GetHash(string input)
             {
-                var stringBuilder = new System.Text.StringBuilder(sha256.HashSize);
-                MockEngine mockEngine = new();
-                for (int i = 0; i < maxInputSize; i++)
+                Hash hashTask = new()
                 {
-                    input += "a";
-
-                    Hash hashTask = new()
-                    {
-                        BuildEngine = mockEngine,
-                        ItemsToHash = new ITaskItem[] { new TaskItem(input) },
-                        IgnoreCase = false
-                    };
-                    Assert.True(hashTask.Execute());
-                    string actualHash = hashTask.HashResult;
-
-                    byte[] hash = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input + '\u2028'));
-                    stringBuilder.Clear();
-                    foreach (var b in hash)
-                    {
-                        stringBuilder.Append(b.ToString("x2"));
-                    }
-                    string expectedHash = stringBuilder.ToString();
-
-                    Assert.Equal(expectedHash, actualHash);
-                }
+                    BuildEngine = mockEngine,
+                    ItemsToHash = new ITaskItem[] { new TaskItem(input) },
+                    IgnoreCase = false
+                };
+                Assert.True(hashTask.Execute());
+                return hashTask.HashResult;
             }
         }
-#pragma warning restore CA5350
 
         [Fact]
         public void HashTaskIgnoreCaseTest()
