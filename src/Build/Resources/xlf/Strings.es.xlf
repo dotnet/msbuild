@@ -191,11 +191,6 @@
         <target state="translated">Los parámetros se han truncado a partir de este punto. Para ver todos los parámetros, borre la variable de entorno MSBUILDTRUNCATETASKINPUTLOGGING.</target>
         <note />
       </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="new">MSB6005: Task attempted to log before it was initialized. Message was: {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
-      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Se generó el metaproyecto "{0}".</target>

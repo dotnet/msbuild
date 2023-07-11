@@ -191,11 +191,6 @@
         <target state="translated">Od tohoto místa dále jsou parametry zkrácené. Pokud si chcete zobrazit všechny parametry, vymažte proměnnou prostředí MSBUILDTRUNCATETASKINPUTLOGGING.</target>
         <note />
       </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="new">MSB6005: Task attempted to log before it was initialized. Message was: {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
-      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Metaprojekt {0} byl vygenerován.</target>

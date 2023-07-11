@@ -191,11 +191,6 @@
         <target state="translated">이 지점 이후의 매개 변수가 잘렸습니다. 모든 매개 변수를 보려면 MSBUILDTRUNCATETASKINPUTLOGGING 환경 변수를 지우세요.</target>
         <note />
       </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="new">MSB6005: Task attempted to log before it was initialized. Message was: {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
-      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">메타프로젝트 "{0}"이(가) 생성되었습니다.</target>

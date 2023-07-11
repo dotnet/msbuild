@@ -120,10 +120,6 @@
     <data name="General.ToolCommandFailedNoErrorCode">
         <value>The command exited with code {0}.</value>
     </data>
-    <data name="LoggingBeforeTaskInitialization" UESanitized="false" Visibility="Public">
-        <value>MSB6005: Task attempted to log before it was initialized. Message was: {0}</value>
-        <comment>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</comment>
-    </data>
     <data name="PlatformManifest.MissingPlatformXml" UESanitized="false" Visibility="Private_OM">
         <value>MSB6010: Could not find platform manifest file at "{0}".</value>
         <comment>{StrBegin="MSB6010: "}</comment>

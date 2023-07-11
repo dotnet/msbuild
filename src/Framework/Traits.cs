@@ -470,16 +470,6 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Emergency escape hatch. If a customer hits a bug in the shipped product causing an internal exception,
-        /// and fortuitously it happens that ignoring the VerifyThrow allows execution to continue in a reasonable way,
-        /// then we can give them this undocumented environment variable as an immediate workaround.
-        /// </summary>
-        /// <remarks>
-        /// Clone from ErrorUtilities which isn't available in Framework.
-        /// </remarks>
-        private static readonly bool s_throwExceptions = String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDONOTTHROWINTERNAL"));
-
-        /// <summary>
         /// Throws InternalErrorException.
         /// </summary>
         /// <remarks>

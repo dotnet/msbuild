@@ -191,11 +191,6 @@
         <target state="translated">參數已在此點之後截斷。若要檢視所有參數，請清除 MSBUILDTRUNCATETASKINPUTLOGGING 環境變數。</target>
         <note />
       </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="new">MSB6005: Task attempted to log before it was initialized. Message was: {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
-      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">已產生中繼專案 "{0}"。</target>

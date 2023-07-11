@@ -22,12 +22,6 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class ErrorUtilities
     {
-        /// <summary>
-        /// Emergency escape hatch. If a customer hits a bug in the shipped product causing an internal exception,
-        /// and fortuitously it happens that ignoring the VerifyThrow allows execution to continue in a reasonable way,
-        /// then we can give them this undocumented environment variable as an immediate workaround.
-        /// </summary>
-        private static readonly bool s_throwExceptions = String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDONOTTHROWINTERNAL"));
         private static readonly bool s_enableMSBuildDebugTracing = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDENABLEDEBUGTRACING"));
 
         #region DebugTracing
@@ -119,7 +113,7 @@ namespace Microsoft.Build.Shared
             // Check it has a real implementation of ToString()
             if (String.Equals(param.GetType().ToString(), param.ToString(), StringComparison.Ordinal))
             {
-                ErrorUtilities.ThrowInternalError("This type does not implement ToString() properly {0}", param.GetType().FullName);
+                ThrowInternalError("This type does not implement ToString() properly {0}", param.GetType().FullName);
             }
 #endif
         }
@@ -187,7 +181,7 @@ namespace Microsoft.Build.Shared
         /// This should be used ONLY if this would indicate a bug in MSBuild rather than
         /// anything caused by user action.
         /// </summary>
-        /// <param name="value">Parameter that should be a rooted path</param>
+        /// <param name="value">Parameter that should be a rooted path.</param>
         internal static void VerifyThrowInternalRooted(string value)
         {
             if (!Path.IsPathRooted(value))
@@ -431,6 +425,7 @@ namespace Microsoft.Build.Shared
             object arg3)
         {
             ResourceUtilities.VerifyResourceStringExists(resourceName);
+
             // PERF NOTE: check the condition here instead of pushing it into
             // the ThrowInvalidOperation() method, because that method always
             // allocates memory for its variable array of arguments

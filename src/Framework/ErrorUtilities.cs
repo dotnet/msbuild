@@ -14,13 +14,6 @@ namespace Microsoft.Build.Framework
     internal class FrameworkErrorUtilities
     {
         /// <summary>
-        /// Emergency escape hatch. If a customer hits a bug in the shipped product causing an internal exception,
-        /// and fortuitously it happens that ignoring the VerifyThrow allows execution to continue in a reasonable way,
-        /// then we can give them this undocumented environment variable as an immediate workaround.
-        /// </summary>
-        private static readonly bool s_throwExceptions = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDONOTTHROWINTERNAL"));
-
-        /// <summary>
         /// This method should be used in places where one would normally put
         /// an "assert". It should be used to validate that our assumptions are
         /// true, where false would indicate that there must be a bug in our
@@ -47,7 +40,7 @@ namespace Microsoft.Build.Framework
         /// anything caused by user action.
         /// </summary>
         /// <param name="parameter">The value of the argument.</param>
-        /// <param name="parameterName">Parameter that should not be null</param>
+        /// <param name="parameterName">Parameter that should not be null.</param>
         internal static void VerifyThrowInternalNull(object parameter, string parameterName)
         {
             if (parameter == null)

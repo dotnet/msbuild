@@ -463,10 +463,6 @@
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</comment>
   </data>
-  <data name="LoggingBeforeTaskInitialization" UESanitized="false" Visibility="Public">
-    <value>MSB6005: Task attempted to log before it was initialized. Message was: {0}</value>
-    <comment>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</comment>
-  </data>
   <data name="General.TwoVectorsMustHaveSameLength">
     <value>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</value>
     <comment>{StrBegin="MSB3094: "}</comment>
