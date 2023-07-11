@@ -28,6 +28,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                                             Condition="$([MSBuild]::VersionGreaterThanOrEquals($(MSBuildVersion), '17.4.0'))"/>
     </ItemGroup>
 
+    <PropertyGroup>
+        <UnsupportedTargetFrameworkVersion>8.0</UnsupportedTargetFrameworkVersion>
+        <MinimumVisualStudioVersionForUnsupportedTargetFrameworkVersion>17.8</MinimumVisualStudioVersionForUnsupportedTargetFrameworkVersion>
+    </PropertyGroup>
+
     <!-- .NET Standard -->
     <ItemGroup>
         <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.0" DisplayName=".NET Standard 1.0" Alias="netstandard1.0" />
