@@ -63,6 +63,7 @@ xunit
 /?
 /h
 create
+details
 install
 list
 search

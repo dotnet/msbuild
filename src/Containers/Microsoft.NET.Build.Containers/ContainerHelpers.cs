@@ -17,13 +17,8 @@ public static class ContainerHelpers
 
     internal const string HostObjectPass = "SDK_CONTAINER_REGISTRY_PWORD";
 
-    internal const string ChunkedUploadEnabled = "SDK_CONTAINER_REGISTRY_CHUNKED_UPLOAD";
-    internal const string ChunkedUploadSizeBytes = "SDK_CONTAINER_REGISTRY_CHUNKED_UPLOAD_SIZE_BYTES";
-
-    internal const string ParallelUploadEnabled = "SDK_CONTAINER_REGISTRY_PARALLEL_UPLOAD";
-
     internal const string DockerRegistryAlias = "docker.io";
-
+    
     /// <summary>
     /// Matches an environment variable name - must start with a letter or underscore, and can only contain letters, numbers, and underscores.
     /// </summary>

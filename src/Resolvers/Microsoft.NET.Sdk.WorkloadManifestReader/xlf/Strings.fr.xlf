@@ -77,6 +77,16 @@
         <target state="translated">La version {0}' de la dépendance du manifeste de charge de travail est inférieure à la version '{1}' requise par {2}le manifeste '{3}' [{4}].</target>
         <note />
       </trans-unit>
+      <trans-unit id="ManifestFromInstallStateNotFound">
+        <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
+        <target state="new">Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
+      <trans-unit id="ManifestFromWorkloadSetNotFound">
+        <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
+        <target state="new">Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Impossible de trouver la charge de travail '{0}' prolongée par la charge de travail '{1}' dans le manifeste '{2}' [{3}].</target>
@@ -102,16 +112,6 @@
         <target state="translated">La charge de travail de redirection « {0} » a des clés autres que « redirection vers ».</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifiedManifestNotFound">
-        <source>Specified workload manifest was not found: {0}</source>
-        <target state="translated">Le manifeste de charge de travail spécifié est introuvable : {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SpecifiedWorkloadSetNotFound">
-        <source>Specified workload set was not found: {0}</source>
-        <target state="translated">L’ensemble de charge de travail spécifié est introuvable : {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">Jeton '{0}' inattendu à l'offset {1}</target>
@@ -135,6 +135,16 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Cible non résolue « {0} » pour la redirection de charge de travail « {1} » dans le manifeste « {2} » [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="new">Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</target>
+        <note>{Locked="dotnet workload restore"}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromInstallStateNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found.</source>
+        <target state="new">Workload version {0}, which was specified in {1}, was not found.</target>
         <note />
       </trans-unit>
     </body>

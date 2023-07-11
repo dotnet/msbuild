@@ -12,8 +12,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Func<ParseResult, ITemplateEngineHost> hostBuilder)
             : base(hostBuilder, "--alias")
         {
-            AddAlias("-a");
-            IsHidden = true;
+            Aliases.Add("-a");
+            Hidden = true;
         }
     }
 }

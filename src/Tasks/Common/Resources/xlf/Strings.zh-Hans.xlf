@@ -702,13 +702,13 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageContainsIncorrectlyCasedLocale">
         <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
-        <target state="translated">NETSDK1187:包 {0} {1} 具有具有区域设置'{2}'的资源。此区域设置已规范化为标准格式'{3}'以防止生成中出现大小写问题。请考虑就此大小写问题通知包作者。</target>
-        <note>Error code is NETSDK1187. 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
+        <target state="translated">NETSDK1187: 包 {0} {1} 具有具有区域设置'{2}'的资源。此区域设置已规范化为标准格式'{3}'以防止生成中出现大小写问题。请考虑就此大小写问题通知包作者。</target>
+        <note>{StrBegin="NETSDK1187: "} 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
       </trans-unit>
       <trans-unit id="PackageContainsUnknownLocale">
         <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
-        <target state="translated">NETSDK1188:包 {0} {1} 具有具有区域设置'{2}'的资源。.NET 无法识别此区域设置。请考虑通知包作者它似乎正在使用无效的区域设置。</target>
-        <note>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
+        <target state="translated">NETSDK1188: 包 {0} {1} 具有具有区域设置'{2}'的资源。.NET 无法识别此区域设置。请考虑通知包作者它似乎正在使用无效的区域设置。</target>
+        <note>{StrBegin="NETSDK1188: "} 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
@@ -967,15 +967,20 @@ The following are names of parameters or literal values and should not be transl
         <target state="new">NETSDK1200: If UseArtifactsPath is set to true and ArtifactsPath is not set, there must be a Directory.Build.props file in order to determine where the artifacts folder should be located.</target>
         <note>{StrBegin="NETSDK1200: "}</note>
       </trans-unit>
+      <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">
+        <source>NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</source>
+        <target state="translated">NETSDK1208: 无法识别目标平台标识符 {0}。这是因为 MSBuildEnableWorkloadResolver 设置为 false，这将禁用此标识符所需的 .NET SDK 工作负载。若要启用这些工作负载，请取消设置此环境变量或 MSBuild 属性。</target>
+        <note>{StrBegin="NETSDK1208: "}</note>
+      </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
         <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>
         <target state="translated">NETSDK1107: 要构建 Windows 桌面应用程序，需使用 Microsoft.NET.Sdk.WindowsDesktop。当前 SDK 不支持 "UseWpf" 和 "UseWindowsForms"。</target>
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
-      <trans-unit id="UsingPreviewSdk_Info">
+      <trans-unit id="UsingPreviewSdk">
         <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
         <target state="translated">NETSDK1057: 你正在使用 .NET 的预览版。请参阅 https://aka.ms/dotnet-support-policy</target>
-        <note />
+        <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">
         <source>NETSDK1131: Producing a managed Windows Metadata component with WinMDExp is not supported when targeting {0}.</source>

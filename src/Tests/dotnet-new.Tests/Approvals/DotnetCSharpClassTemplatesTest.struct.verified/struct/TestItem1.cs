@@ -1,7 +1,6 @@
-﻿namespace ClassLib
-{
-    public struct TestItem1
-    {
+﻿namespace ClassLib;
 
-    }
+public struct TestItem1
+{
+
 }

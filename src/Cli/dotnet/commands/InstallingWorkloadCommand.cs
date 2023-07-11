@@ -17,7 +17,6 @@ using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Versioning;
-using Command = System.CommandLine.Command;
 using Product = Microsoft.DotNet.Cli.Utils.Product;
 using Strings = Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings;
 
@@ -32,8 +31,6 @@ namespace Microsoft.DotNet.Workloads.Workload
         protected readonly string _dotnetPath;
         protected readonly string _userProfileDir;
         protected readonly bool _checkIfManifestExist;
-        protected readonly ReleaseVersion _sdkVersion;
-        protected readonly ReleaseVersion _installedSdkVersion;
         protected readonly SdkFeatureBand _sdkFeatureBand;
         protected readonly SdkFeatureBand _installedFeatureBand;
         protected readonly string _fromRollbackDefinition;
@@ -62,13 +59,6 @@ namespace Microsoft.DotNet.Workloads.Workload
             _fromCacheOption = parseResult.GetValue(InstallingWorkloadCommandParser.FromCacheOption);
             _includePreviews = parseResult.GetValue(InstallingWorkloadCommandParser.IncludePreviewOption);
             _downloadToCacheOption = parseResult.GetValue(InstallingWorkloadCommandParser.DownloadToCacheOption);
-            _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
-            _userProfileDir = userProfileDir ?? CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            _checkIfManifestExist = !(_printDownloadLinkOnly);      // don't check for manifest existence when print download link is passed
-            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.GetValue(InstallingWorkloadCommandParser.VersionOption), version, _dotnetPath, _userProfileDir, _checkIfManifestExist);
-            _sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            _installedSdkVersion = new ReleaseVersion(version ?? Product.Version);
-            _installedFeatureBand = new SdkFeatureBand(installedFeatureBand ?? Product.Version);
 
             _fromRollbackDefinition = parseResult.GetValue(InstallingWorkloadCommandParser.FromRollbackFileOption);
             var configOption = parseResult.GetValue(InstallingWorkloadCommandParser.ConfigOption);
@@ -76,8 +66,25 @@ namespace Microsoft.DotNet.Workloads.Workload
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
 
-            var sdkWorkloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _installedSdkVersion.ToString(), userProfileDir);
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(sdkWorkloadManifestProvider, _dotnetPath, _installedSdkVersion.ToString(), _userProfileDir);
+            var creationParameters = new WorkloadResolverFactory.CreationParameters()
+            {
+                DotnetPath = dotnetDir,
+                UserProfileDir = userProfileDir,
+                GlobalJsonStartDir = null,
+                SdkVersionFromOption = parseResult.GetValue(InstallingWorkloadCommandParser.VersionOption),
+                VersionForTesting = version,
+                CheckIfFeatureBandManifestExists = !(_printDownloadLinkOnly),    // don't check for manifest existence when print download link is passed
+                WorkloadResolverForTesting = workloadResolver,
+                UseInstalledSdkVersionForResolver = true
+            };
+
+            var creationResult = WorkloadResolverFactory.Create(creationParameters);
+
+            _dotnetPath = creationResult.DotnetPath;
+            _userProfileDir = creationResult.UserProfileDir;
+            _sdkFeatureBand = new SdkFeatureBand(creationResult.SdkVersion);
+            _installedFeatureBand = new SdkFeatureBand(creationResult.InstalledSdkVersion);
+            _workloadResolver = creationResult.WorkloadResolver;
 
             _workloadInstallerFromConstructor = workloadInstaller;
             _workloadManifestUpdaterFromConstructor = workloadManifestUpdater;
@@ -183,61 +190,67 @@ namespace Microsoft.DotNet.Workloads.Workload
 
     internal static class InstallingWorkloadCommandParser
     {
-        public static readonly Option<bool> PrintDownloadLinkOnlyOption =
-            new Option<bool>("--print-download-link-only", Strings.PrintDownloadLinkOnlyDescription)
-            {
-                IsHidden = true
-            };
-
-        public static readonly Option<string> FromCacheOption = new Option<string>("--from-cache", Strings.FromCacheOptionDescription)
+        public static readonly CliOption<bool> PrintDownloadLinkOnlyOption = new("--print-download-link-only")
         {
-            ArgumentHelpName = Strings.FromCacheOptionArgumentName,
-            IsHidden = true
+            Description = Strings.PrintDownloadLinkOnlyDescription,
+            Hidden = true
         };
 
-        public static readonly Option<bool> IncludePreviewOption =
-            new Option<bool>("--include-previews", Strings.IncludePreviewOptionDescription);
-
-        public static readonly Option<string> DownloadToCacheOption = new Option<string>("--download-to-cache", Strings.DownloadToCacheOptionDescription)
+        public static readonly CliOption<string> FromCacheOption = new("--from-cache")
         {
-            ArgumentHelpName = Strings.DownloadToCacheOptionArgumentName,
-            IsHidden = true
+            Description = Strings.FromCacheOptionDescription,
+            HelpName = Strings.FromCacheOptionArgumentName,
+            Hidden = true
         };
 
-        public static readonly Option<string> VersionOption =
-            new Option<string>("--sdk-version", Strings.VersionOptionDescription)
-            {
-                ArgumentHelpName = Strings.VersionOptionName,
-                IsHidden = true
-            };
-
-        public static readonly Option<string> FromRollbackFileOption = new Option<string>("--from-rollback-file", Update.LocalizableStrings.FromRollbackDefinitionOptionDescription)
+        public static readonly CliOption<bool> IncludePreviewOption =
+        new("--include-previews")
         {
-            IsHidden = true
+            Description = Strings.IncludePreviewOptionDescription
         };
 
-        public static readonly Option<string> ConfigOption =
-            new Option<string>("--configfile", Strings.ConfigFileOptionDescription)
-            {
-                ArgumentHelpName = Strings.ConfigFileOptionName
-            };
-
-        public static readonly Option<string[]> SourceOption =
-            new Option<string[]>(new string[] { "-s", "--source" }, Strings.SourceOptionDescription)
-            {
-                ArgumentHelpName = Strings.SourceOptionName
-            }.AllowSingleArgPerToken();
-
-        internal static void AddWorkloadInstallCommandOptions(Command command)
+        public static readonly CliOption<string> DownloadToCacheOption = new("--download-to-cache")
         {
-            command.AddOption(VersionOption);
-            command.AddOption(ConfigOption);
-            command.AddOption(SourceOption);
-            command.AddOption(PrintDownloadLinkOnlyOption);
-            command.AddOption(FromCacheOption);
-            command.AddOption(DownloadToCacheOption);
-            command.AddOption(IncludePreviewOption);
-            command.AddOption(FromRollbackFileOption);
+            Description = Strings.DownloadToCacheOptionDescription,
+            HelpName = Strings.DownloadToCacheOptionArgumentName,
+            Hidden = true
+        };
+
+        public static readonly CliOption<string> VersionOption = new("--sdk-version")
+        {
+            Description = Strings.VersionOptionDescription,
+            HelpName = Strings.VersionOptionName,
+            Hidden = true
+        };
+
+        public static readonly CliOption<string> FromRollbackFileOption = new("--from-rollback-file")
+        {
+            Description = Update.LocalizableStrings.FromRollbackDefinitionOptionDescription,
+            Hidden = true
+        };
+
+        public static readonly CliOption<string> ConfigOption = new("--configfile")
+        {
+            Description = Strings.ConfigFileOptionDescription,
+            HelpName = Strings.ConfigFileOptionName
+        };
+
+        public static readonly CliOption<string[]> SourceOption = new CliOption<string[]>("--source", "-s")
+        {
+            Description = Strings.SourceOptionDescription,
+            HelpName = Strings.SourceOptionName
+        }.AllowSingleArgPerToken();
+
+        internal static void AddWorkloadInstallCommandOptions(CliCommand command)
+        {
+            command.Options.Add(VersionOption);
+            command.Options.Add(ConfigOption);
+            command.Options.Add(SourceOption);
+            command.Options.Add(PrintDownloadLinkOnlyOption);
+            command.Options.Add(FromCacheOption);
+            command.Options.Add(DownloadToCacheOption);
+            command.Options.Add(IncludePreviewOption);
+            command.Options.Add(FromRollbackFileOption);
         }
     }
 }

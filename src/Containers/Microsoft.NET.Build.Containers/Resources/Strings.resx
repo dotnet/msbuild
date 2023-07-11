@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!--
-    Microsoft ResX Schema
-
+  <!-- 
+    Microsoft ResX Schema 
+    
     Version 2.0
-
-    The primary goals of this format is to allow a simple XML format
-    that is mostly human readable. The generation and parsing of the
-    various data types are done through the TypeConverter classes
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
     associated with the data types.
-
+    
     Example:
-
+    
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-
-    There are any number of "resheader" rows that contain simple
+                
+    There are any number of "resheader" rows that contain simple 
     name/value pairs.
-
-    Each data row contains a name, and value. The row also contains a
-    type or mimetype. Type corresponds to a .NET class that support
-    text/value conversion through the TypeConverter architecture.
-    Classes that don't support this are serialized and stored with the
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
     mimetype set.
-
-    The mimetype is used for serialized objects, and tells the
-    ResXResourceReader how to depersist the object. This is currently not
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
     extensible. For a given mimetype the value must be set accordingly:
-
-    Note - application/x-microsoft.net.object.binary.base64 is the format
-    that the ResXResourceWriter will generate, however the reader can
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
     read any of the formats listed below.
-
+    
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-
+    
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array
+    value   : The object must be serialized into a byte array 
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -142,7 +142,7 @@
     <comment>{StrBegin="CONTAINER1011: "}</comment>
   </data>
   <data name="BlobUploadFailed" xml:space="preserve">
-    <value>CONTAINER1001: Failed to upload blob to {0}; received {1} with detail {2}.</value>
+    <value>CONTAINER1001: Failed to upload blob using {0}; received status code '{1}'.</value>
     <comment>{StrBegin="CONTAINER1001: "}</comment>
   </data>
   <data name="CouldntDeserializeJsonToken" xml:space="preserve">
@@ -334,5 +334,55 @@
   <data name="_Test" xml:space="preserve">
     <value>CONTAINER0000: Value for unit test {0}</value>
     <comment>Used only for unit tests</comment>
+  </data>
+  <data name="ContainerBuilder_ImageUploadedToLocalDaemon" xml:space="preserve">
+    <value>Pushed container '{0}' to Docker daemon.</value>
+  </data>
+  <data name="ContainerBuilder_ImageUploadedToRegistry" xml:space="preserve">
+    <value>Pushed container '{0}' to registry '{1}'.</value>
+  </data>
+  <data name="ContainerBuilder_StartBuildingImage" xml:space="preserve">
+    <value>Building image '{0}' with tags '{1}' on top of base image '{2}'.</value>
+  </data>
+  <data name="LocalDocker_FailedToGetConfig" xml:space="preserve">
+    <value>Error while reading daemon config: {0}</value>
+    <comment>{0} is the exception message that ends with period</comment>
+  </data>
+  <data name="LocalDocker_LocalDaemonErrors" xml:space="preserve">
+    <value>The daemon server reported errors: {0}</value>
+    <comment>{0} are the list of messages, each message starts with new line</comment>
+  </data>
+  <data name="Registry_ConfigUploaded" xml:space="preserve">
+    <value>Uploaded config to registry.</value>
+  </data>
+  <data name="Registry_ConfigUploadStarted" xml:space="preserve">
+    <value>Uploading config to registry at blob '{0}',</value>
+  </data>
+  <data name="Registry_LayerExists" xml:space="preserve">
+    <value>Layer '{0}' already exists.</value>
+  </data>
+  <data name="Registry_LayerUploaded" xml:space="preserve">
+    <value>Finished uploading layer '{0}' to '{1}'.</value>
+    <comment>{0} is the layer digest, {1} is the registry name</comment>
+  </data>
+  <data name="Registry_LayerUploadStarted" xml:space="preserve">
+    <value>Uploading layer '{0}' to '{1}'.</value>
+    <comment>{0} is the layer digest, {1} is the registry name</comment>
+  </data>
+  <data name="Registry_ManifestUploaded" xml:space="preserve">
+    <value>Uploaded manifest to '{0}'.</value>
+    <comment>{0} is the registry name</comment>
+  </data>
+  <data name="Registry_ManifestUploadStarted" xml:space="preserve">
+    <value>Uploading manifest to registry '{0}' as blob '{1}'.</value>
+    <comment>{0} is the registry name</comment>
+  </data>
+  <data name="Registry_TagUploaded" xml:space="preserve">
+    <value>Uploaded tag '{0}' to '{1}'.</value>
+    <comment>{1} is the registry name</comment>
+  </data>
+  <data name="Registry_TagUploadStarted" xml:space="preserve">
+    <value>Uploading tag '{0}' to '{1}'.</value>
+    <comment>{1} is the registry name</comment>
   </data>
 </root>

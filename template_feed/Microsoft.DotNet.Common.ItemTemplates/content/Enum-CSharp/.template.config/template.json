@@ -29,10 +29,25 @@
       "binding": "msbuild:RootNamespace",
       "replaces": "Company.ClassLibrary1"
     },
-    "langVersion": {
+    "evaluatedLangVersion": {
       "type": "bind",
       "binding": "msbuild:LangVersion",
       "dataType": "string"
+    },
+    "latestLangVersion": {
+      "type": "generated",
+      "generator": "constant",
+      "parameters": {
+        "value": "latest"
+      }
+    },
+    "langVersion": {
+      "type": "generated",
+      "generator": "coalesce",
+      "parameters": {
+        "sourceVariableName": "evaluatedLangVersion",
+        "fallbackVariableName": "latestLangVersion"
+      }
     },
     "csharp9orOlder": {
       "type": "generated",

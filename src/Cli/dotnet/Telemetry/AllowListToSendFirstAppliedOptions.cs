@@ -26,8 +26,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
             if (_topLevelCommandNameAllowList.Contains(topLevelCommandNameFromParse))
             {
                 var firstOption = parseResult.RootCommandResult.Children
-                    .FirstOrDefault(c => c.Token() != default && c.Token().Type.Equals(TokenType.Command))?
-                    .Children.FirstOrDefault(c => c is System.CommandLine.Parsing.CommandResult)?.Symbol.Name ?? null;
+                    .OfType<System.CommandLine.Parsing.CommandResult>().FirstOrDefault()?
+                    .Children.OfType<System.CommandLine.Parsing.CommandResult>().FirstOrDefault()?.Command.Name ?? null;
                 if (firstOption != null)
                 {
                     result.Add(new ApplicationInsightsEntryFormat(

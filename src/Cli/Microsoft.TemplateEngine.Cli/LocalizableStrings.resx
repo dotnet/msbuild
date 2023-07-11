@@ -182,6 +182,16 @@
   <data name="Generic_Info_NoMatchingTemplates" xml:space="preserve">
     <value>No templates found matching: {0}.</value>
   </data>
+  <data name="Generic_Info_NoMatchingTemplatePackage" xml:space="preserve">
+    <value>
+      No template packages found matching: {0}.
+      
+      To list installed template packages, run:
+        dotnet new uninstall
+      To search for the template packages on NuGet.org, run:
+        dotnet new search --package {0}
+    </value>
+  </data>
   <data name="OptionalWorkloadsSyncFailed" xml:space="preserve">
     <value>Error during synchronization with the Optional SDK Workloads.</value>
   </data>
@@ -848,6 +858,69 @@ The header is followed by the list of parameters and their errors (might be seve
   </data>
   <data name="Generic_CommandHints_List" xml:space="preserve">
     <value>To list installed templates, run:</value>
+  </data>
+  <data name="DetailsCommand_Argument_PackageIdentifier">
+    <value>Package identifier</value>
+  </data>
+  <data name="DetailsCommand_Option_Version">
+    <value>Specifies a concrete version for displaying details. If not specified the last is taken.</value>
+  </data>
+  <data name="DetailsCommand_Property_Authors">
+    <value>Authors</value>
+  </data>
+  <data name="DetailsCommand_Property_Description">
+    <value>Details</value>
+  </data>
+  <data name="DetailsCommand_Property_SourceFeed">
+    <value>Source Feed</value>
+  </data>
+  <data name="DetailsCommand_Property_Version">
+    <value>Package version</value>
+  </data>
+  <data name="DetailsCommand_Property_PrefixReserved">
+    <value>Reserved</value>
+  </data>
+  <data name="DetailsCommand_Property_Languages">
+    <value>Languages</value>
+    <comment></comment>
+  </data>
+  <data name="DetailsCommand_Property_LicenseMetadata">
+    <value>License Metadata</value>
+  </data>
+  <data name="DetailsCommand_Property_LicenseExpression">
+    <value>License Expression</value>
+  </data>
+  <data name="DetailsCommand_Property_License">
+    <value>License</value>
+  </data>
+  <data name="DetailsCommand_Property_LicenseUrl">
+    <value>License Url</value>
+  </data>
+  <data name="DetailsCommand_Property_Owners">
+    <value>Owners</value>
+  </data>
+  <data name="DetailsCommand_Property_RepoUrl">
+    <value>Repository Url</value>
+  </data>
+  <data name="DetailsCommand_Property_ShortNames">
+    <value>Short Names</value>
+    <comment></comment>
+  </data>
+  <data name="DetailsCommand_Property_Tags">
+    <value>Tags</value>
+    <comment></comment>
+  </data>
+  <data name="DetailsCommand_Property_Templates">
+    <value>Templates</value>
+  </data>
+  <data name="DetailsCommand_NoNuGetSources">
+    <value>No NuGet sources are defined or enabled</value>
+  </data>
+  <data name="DetailsCommand_UnableToLoadResorces">
+    <value>Failed to load NuGet sources configured for the folder {0}</value>
+  </data>
+  <data name="DetailsCommand_UnableToLoadResorce">
+    <value>Could not parse NuGet source '{0}', so it was discarded</value>
   </data>
   <data name="OperationCancelled" xml:space="preserve">
     <value>The operation was cancelled.</value>

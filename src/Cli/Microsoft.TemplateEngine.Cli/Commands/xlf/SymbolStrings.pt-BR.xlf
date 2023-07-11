@@ -17,6 +17,15 @@
         <target state="translated">Cria ou exibe os aliases definidos.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Command_Details_Description">
+        <source>
+      Provides the details for specified template package.
+      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</source>
+        <target state="new">
+      Provides the details for specified template package.
+      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Command_Install_Argument_Package">
         <source>NuGet package ID or path to folder or NuGet package to install. 
 To install the NuGet package of certain version, use &lt;package ID&gt;::&lt;version&gt;.
@@ -104,8 +113,8 @@ Se o comando for especificado sem o argumento, ele listará todos os pacotes de 
         <note />
       </trans-unit>
       <trans-unit id="Option_AddSource">
-        <source>Specifies a NuGet source to use during install.</source>
-        <target state="translated">Especifica uma fonte do NuGet a ser usada durante a instalação.</target>
+        <source>Specifies a NuGet source to use.</source>
+        <target state="needs-review-translation">Especifica uma fonte do NuGet a ser usada durante a instalação.</target>
         <note />
       </trans-unit>
       <trans-unit id="Option_AuthorFilter">

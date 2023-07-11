@@ -76,6 +76,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                   @(LinkResource);
                   $(ResolvedCodeAnalysisRuleSet);
                   @(AdditionalFiles);
+                  @(EditorConfigFiles);
                   @(_RazorCoreCompileResourceInputs)"
           Outputs="@(RazorIntermediateAssembly);
                    @(_RazorDebugSymbolsIntermediatePath);
@@ -120,6 +121,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          AddModules="@(AddModules)"
          AdditionalFiles="@(AdditionalFiles)"
          AllowUnsafeBlocks="$(AllowUnsafeBlocks)"
+         AnalyzerConfigFiles="@(EditorConfigFiles)"
          Analyzers="@(Analyzer)"
          ApplicationConfiguration="$(AppConfigForCompiler)"
          BaseAddress="$(BaseAddress)"

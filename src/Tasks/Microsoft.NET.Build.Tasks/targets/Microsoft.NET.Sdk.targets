@@ -513,6 +513,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Value="$(InvariantGlobalization)"
                                     Trim="true" />
 
+    <RuntimeHostConfigurationOption Include="System.Globalization.Hybrid"
+                                    Condition="'$(HybridGlobalization)' != ''"
+                                    Value="$(HybridGlobalization)"
+                                    Trim="true" />
+
     <RuntimeHostConfigurationOption Include="System.Globalization.PredefinedCulturesOnly"
                                     Condition="'$(PredefinedCulturesOnly)' != ''"
                                     Value="$(PredefinedCulturesOnly)"

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Diagnostics;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
 
@@ -52,5 +53,5 @@ static class ContainerCli
     }
 
     private static readonly Lazy<bool> _isPodman =
-      new(() => new DockerCli(logger: s => { }).GetCommand() == DockerCli.PodmanCommand);
+      new(() => new DockerCli(loggerFactory: new TestLoggerFactory()).GetCommand() == DockerCli.PodmanCommand);
 }

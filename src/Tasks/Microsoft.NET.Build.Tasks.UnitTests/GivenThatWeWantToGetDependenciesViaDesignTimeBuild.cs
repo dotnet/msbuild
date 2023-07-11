@@ -21,7 +21,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ItShouldIgnoreAllDependenciesWithTypeNotEqualToPackageOrUnresolved()
         {
             var testRoot = _testAssetsManager.CreateTestDirectory().Path;
@@ -54,7 +54,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             Assert.Equal("top.package2/1.0.0", item2.ItemSpec);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ItShouldIdentifyDefaultImplicitPackages()
         {
             var testRoot = _testAssetsManager.CreateTestDirectory().Path;
@@ -89,7 +89,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             Assert.Equal("True", item3.GetMetadata(MetadataKeys.IsImplicitlyDefined));
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ItShouldOnlyReturnPackagesInTheSpecifiedTarget()
         {
             var testRoot = _testAssetsManager.CreateTestDirectory().Path;
@@ -356,7 +356,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             Assert.Equal("top.package1/1.0.0", item1.ItemSpec);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ItShouldOnlyReturnTopLevelPackages()
         {
             var testRoot = _testAssetsManager.CreateTestDirectory().Path;

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
@@ -13,20 +12,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         public LegacyInstallCommand(NewCommand parentCommand, Func<ParseResult, ITemplateEngineHost> hostBuilder)
             : base(parentCommand, hostBuilder, "--install")
         {
-            this.IsHidden = true;
-            this.AddAlias("-i");
+            this.Hidden = true;
+            this.Aliases.Add("-i");
 
-            parentCommand.AddNoLegacyUsageValidators(this, except: new Option[] { InteractiveOption, AddSourceOption });
+            parentCommand.AddNoLegacyUsageValidators(this, except: new CliOption[] { InteractiveOption, AddSourceOption });
         }
 
-        internal override Option<bool> InteractiveOption => ParentCommand.InteractiveOption;
+        internal override CliOption<bool> InteractiveOption => ParentCommand.InteractiveOption;
 
-        internal override Option<string[]> AddSourceOption => ParentCommand.AddSourceOption;
+        internal override CliOption<string[]> AddSourceOption => ParentCommand.AddSourceOption;
 
-        protected override Task<NewCommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, InvocationContext context)
+        protected override Task<NewCommandStatus> ExecuteAsync(InstallCommandArgs args, IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, ParseResult parseResult, CancellationToken cancellationToken)
         {
             PrintDeprecationMessage<LegacyInstallCommand, InstallCommand>(args.ParseResult);
-            return base.ExecuteAsync(args, environmentSettings, templatePackageManager, context);
+            return base.ExecuteAsync(args, environmentSettings, templatePackageManager, parseResult, cancellationToken);
         }
     }
 }

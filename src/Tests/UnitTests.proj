@@ -17,7 +17,12 @@
     <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="containerize.UnitTests\containerize.UnitTests.csproj" />
     <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="Microsoft.NET.Build.Containers.IntegrationTests\Microsoft.NET.Build.Containers.IntegrationTests.csproj" />
     <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="Microsoft.NET.Build.Containers.UnitTests\Microsoft.NET.Build.Containers.UnitTests.csproj" />
-    
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="..\Tasks\Microsoft.NET.Build.Extensions.Tasks.UnitTests\Microsoft.NET.Build.Extensions.Tasks.UnitTests.csproj">
+      <ExcludeAdditionalParameters>true</ExcludeAdditionalParameters>
+    </SDKCustomXUnitProject>
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="..\Tasks\Microsoft.NET.Build.Tasks.UnitTests\Microsoft.NET.Build.Tasks.UnitTests.csproj" >
+      <ExcludeAdditionalParameters>true</ExcludeAdditionalParameters>
+    </SDKCustomXUnitProject>
     <SDKCustomXUnitProject Condition="'$(RunAoTTests)' == 'true'" Include="**\*.AoT.Tests.csproj" />
     <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true' And $(_AGENTOSNAME) == 'Windows_NT_FullFramework'"  Include="Microsoft.DotNet.MSBuildSdkResolver.Tests\Microsoft.DotNet.MSBuildSdkResolver.Tests.csproj">
       <TargetFramework>net472</TargetFramework>
@@ -64,6 +69,10 @@
       <!-- include Container artifacts for running test in Helix -->
       <ContainerFiles Include="$(ArtifactsTmpDir)Container\**\*.*"/>
 
+      <LockFiles Include="..\Tasks\Microsoft.NET.Build.Tasks.UnitTests\LockFiles\**\*.*"/>
+
+      <AssetFiles Include="..\Assets\**\*.*"/>
+
       <!-- Files in testExecutionDirectory to prevent environment interference -->
       <TestExecutionDirectoryFiles Include="$(ArtifactsTmpDir)NuGet.config"/>
       <TestExecutionDirectoryFiles Include="$(ArtifactsTmpDir)Directory.Build.props"/>
@@ -92,6 +101,8 @@
     <Copy SourceFiles="@(DotnetCliHome)" DestinationFiles="@(DotnetCliHome->'$(HelixPayloadOnHost)\TestExecutionDirectoryFiles\.dotnet\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(Testpackages)" DestinationFiles="@(Testpackages->'$(HelixPayloadOnHost)\TestExecutionDirectoryFiles\Testpackages\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(ContainerFiles)" DestinationFiles="@(ContainerFiles->'$(HelixPayloadOnHost)\TestExecutionDirectoryFiles\Container\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(LockFiles)" DestinationFiles="@(LockFiles->'$(HelixPayloadOnHost)\TestExecutionDirectoryFiles\LockFiles\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(AssetFiles)" DestinationFiles="@(AssetFiles->'$(HelixPayloadOnHost)\TestExecutionDirectoryFiles\Assets\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
 

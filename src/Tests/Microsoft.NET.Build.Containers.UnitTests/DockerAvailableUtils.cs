@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.NET.TestFramework;
 using Xunit;
 
 namespace Microsoft.NET.Build.Containers.UnitTests;
@@ -46,7 +47,7 @@ file static class DockerCliStatus
 
     static DockerCliStatus()
     {
-        DockerCli cli = new(Console.WriteLine);
+        DockerCli cli = new(new TestLoggerFactory());
         IsAvailable = cli.IsAvailable();
         Command = cli.GetCommand();
     }

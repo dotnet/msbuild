@@ -13,6 +13,7 @@ using Microsoft.NET.TestFramework;
 using FakeItEasy;
 using Microsoft.Build.Framework;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.NET.Build.Containers.Tasks.IntegrationTests;
 
@@ -215,9 +216,11 @@ public class CreateNewImageTests
         const string RootlessBase ="dotnet/rootlessbase";
         const string AppImage = "dotnet/testimagerootless";
         const string RootlessUser = "101";
+        var loggerFactory = new TestLoggerFactory(_testOutput);
+        var logger = loggerFactory.CreateLogger(nameof(CreateNewImage_RootlessBaseImage));
 
         // Build a rootless base runtime image.
-        Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.LocalRegistry));
+        Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.LocalRegistry), logger);
 
         ImageBuilder imageBuilder = await registry.GetImageManifestAsync(
             DockerRegistryManager.RuntimeBaseImage,
@@ -235,7 +238,7 @@ public class CreateNewImageTests
         var sourceReference = new ImageReference(registry, DockerRegistryManager.RuntimeBaseImage, DockerRegistryManager.Net8PreviewImageTag);
         var destinationReference = new ImageReference(registry, RootlessBase, "latest");
 
-        await registry.PushAsync(builtImage, sourceReference, destinationReference, Console.WriteLine, cancellationToken: default).ConfigureAwait(false);
+        await registry.PushAsync(builtImage, sourceReference, destinationReference, cancellationToken: default).ConfigureAwait(false);
 
         // Build an application image on top of the rootless base runtime image.
         DirectoryInfo newProjectDir = new DirectoryInfo(Path.Combine(TestSettings.TestArtifactsDirectory, nameof(CreateNewImage_RootlessBaseImage)));
@@ -259,6 +262,8 @@ public class CreateNewImageTests
             .Should().Pass();
 
         CreateNewImage task = new CreateNewImage();
+        var (buildEngine, errors) = SetupBuildEngine();
+        task.BuildEngine = buildEngine;
         task.BaseRegistry = "localhost:5010";
         task.BaseImageName = RootlessBase;
         task.BaseImageTag = "latest";

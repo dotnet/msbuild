@@ -40,20 +40,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal static TemplateResult FromParseResult(TemplateCommand templateCommand, ParseResult parseResult)
         {
             TemplateResult result = new TemplateResult(templateCommand, parseResult);
-            result.IsLanguageMatch = templateCommand.LanguageOption == null || !parseResult.HasErrorFor(templateCommand.LanguageOption);
-            result.IsTypeMatch = templateCommand.TypeOption == null || !parseResult.HasErrorFor(templateCommand.TypeOption);
-            result.IsBaselineMatch = templateCommand.BaselineOption == null || !parseResult.HasErrorFor(templateCommand.BaselineOption);
+            result.IsLanguageMatch = templateCommand.LanguageOption == null || !parseResult.HasErrorFor(templateCommand.LanguageOption, out _);
+            result.IsTypeMatch = templateCommand.TypeOption == null || !parseResult.HasErrorFor(templateCommand.TypeOption, out _);
+            result.IsBaselineMatch = templateCommand.BaselineOption == null || !parseResult.HasErrorFor(templateCommand.BaselineOption, out _);
 
             if (templateCommand.LanguageOption != null && result.IsTemplateMatch)
             {
-                result.Language = parseResult.FindResultFor(templateCommand.LanguageOption);
+                result.Language = parseResult.GetResult(templateCommand.LanguageOption);
             }
 
             foreach (var option in templateCommand.TemplateOptions)
             {
-                if (parseResult.HasErrorFor(option.Value.Option))
+                if (parseResult.HasErrorFor(option.Value.Option, out var parseError))
                 {
-                    result._parametersInfo.Add(InvalidTemplateOptionResult.FromParseResult(option.Value, parseResult));
+                    result._parametersInfo.Add(InvalidTemplateOptionResult.FromParseError(option.Value, parseResult, parseError));
                 }
                 else
                 {

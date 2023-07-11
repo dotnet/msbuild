@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
+using Microsoft.NET.Sdk.Localization;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.NET.TestFramework;
 
@@ -53,7 +54,7 @@ namespace ManifestReaderTests
             File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "iOS", "WorkloadManifest.json"), iosManifestFileContent);
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -70,7 +71,7 @@ namespace ManifestReaderTests
             File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Android", "WorkloadManifest.json"), androidManifestFileContent);
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -83,7 +84,7 @@ namespace ManifestReaderTests
             Initialize();
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null, globalJsonPath: null);
             sdkDirectoryWorkloadManifestProvider.GetManifests().Should().BeEmpty();
         }
 
@@ -95,7 +96,7 @@ namespace ManifestReaderTests
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "Android"));
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null, globalJsonPath: null);
 
             sdkDirectoryWorkloadManifestProvider.GetManifests()
                 .Should()
@@ -114,7 +115,7 @@ namespace ManifestReaderTests
             CreateMockManifest(_manifestRoot, "5.0.100", "ios", "11.0.2-rc.1", true);
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -134,7 +135,7 @@ namespace ManifestReaderTests
             CreateMockManifest(_manifestRoot, "5.0.100", "ios", "12.0.1", false);
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -159,7 +160,7 @@ namespace ManifestReaderTests
             CreateMockManifest(_manifestRoot, "7.0.400", "ios", "18.0.1", true);
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.100", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.100", userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -194,17 +195,39 @@ namespace ManifestReaderTests
                 """);
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
                 .BeEquivalentTo("ios: 11.0.2/8.0.100", "android: 33.0.2-rc.1/8.0.200", "maui: 15.0.1-rc.456/8.0.200-rc.2");
         }
 
-        [Fact]
-        public void ItUsesLatestWorkloadSet()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ItUsesLatestWorkloadSet(bool globalJsonExists)
         {
-            Initialize("8.0.200");
+            Initialize("8.0.200", identifier: globalJsonExists.ToString());
+
+            string? globalJsonPath;
+            if (globalJsonExists)
+            {
+                globalJsonPath = Path.Combine(_testDirectory, "global.json");
+                File.WriteAllText(globalJsonPath, """
+                    {
+                        "sdk": {
+                            "version": "1.0.42",
+                        },
+                        "msbuild-sdks": {
+                            "Microsoft.DotNet.Arcade.Sdk": "7.0.0-beta.23254.2",
+                        }
+                    }
+                    """);
+            }
+            else
+            {
+                globalJsonPath = null;
+            }
 
             CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
             CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
@@ -223,7 +246,7 @@ namespace ManifestReaderTests
     """);
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: globalJsonPath);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -256,7 +279,7 @@ namespace ManifestReaderTests
                 """);
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -290,7 +313,7 @@ namespace ManifestReaderTests
                 """);
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.201", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.201", userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -312,7 +335,7 @@ namespace ManifestReaderTests
                 }
                 """);
 
-            Assert.Throws<FormatException>(() => new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null));
+            Assert.Throws<FormatException>(() => new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null));
         }
 
         [Fact]
@@ -330,7 +353,7 @@ namespace ManifestReaderTests
                 }
                 """);
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null);
 
             Assert.Throws<FileNotFoundException>(() => GetManifestContents(sdkDirectoryWorkloadManifestProvider).ToList());
         }
@@ -363,7 +386,7 @@ namespace ManifestReaderTests
                 """);
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -399,7 +422,492 @@ namespace ManifestReaderTests
                 """);
 
             Assert.Throws<ArgumentException>(() =>
-                new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null));
+                new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null));
+        }
+
+        [Fact]
+        public void ItUsesWorkloadSetFromGlobalJson()
+        {
+            Initialize("8.0.200");
+
+            string? globalJsonPath = Path.Combine(_testDirectory, "global.json");
+            File.WriteAllText(globalJsonPath, """
+            {
+                "sdk": {
+                    "version": "8.0.200",
+                    "workloadversion": "8.0.201"
+                },
+                "msbuild-sdks": {
+                    "Microsoft.DotNet.Arcade.Sdk": "7.0.0-beta.23254.2",
+                }
+            }
+            """);
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.201", """
+{
+  "ios": "11.0.2/8.0.100"
+}
+""");
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: globalJsonPath);
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("ios: 11.0.2/8.0.100");
+        }
+
+        [Fact]
+        public void ItFailsIfWorkloadSetFromGlobalJsonIsNotInstalled()
+        {
+            Initialize("8.0.200");
+
+            string? globalJsonPath = Path.Combine(_testDirectory, "global.json");
+            File.WriteAllText(globalJsonPath, """
+            {
+                "sdk": {
+                    "version": "8.0.200",
+                    "workloadversion": "8.0.201"
+                },
+                "msbuild-sdks": {
+                    "Microsoft.DotNet.Arcade.Sdk": "7.0.0-beta.23254.2",
+                }
+            }
+            """);
+
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+
+            var ex = Assert.Throws<FileNotFoundException>(() => new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: globalJsonPath));
+            ex.Message.Should().Be(string.Format(Strings.WorkloadVersionFromGlobalJsonNotFound, "8.0.201", globalJsonPath));
+        }
+
+        [Fact]
+        public void ItFailsIfGlobalJsonIsMalformed()
+        {
+            Initialize("8.0.200");
+
+            string? globalJsonPath = Path.Combine(_testDirectory, "global.json");
+            File.WriteAllText(globalJsonPath, """
+            {
+                "sdk": {
+                    "workloadversion": [ "8.0.202" ]
+                }
+            }
+            """);
+
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+
+            var ex = Assert.Throws<SdkDirectoryWorkloadManifestProvider.JsonFormatException>(
+                () => new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: globalJsonPath));
+        }
+
+        [Fact]
+        public void ItUsesWorkloadSetFromInstallState()
+        {
+            Initialize("8.0.200");
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.201", """
+{
+  "ios": "11.0.2/8.0.100"
+}
+""");
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+            CreateMockInstallState("8.0.200", 
+                """
+                {
+                    "workloadVersion": "8.0.201"
+                }
+                """);
+
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null);
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("ios: 11.0.2/8.0.100");
+        }
+
+        [Fact]
+        public void ItFailsIfWorkloadSetFromInstallStateIsNotInstalled()
+        {
+            Initialize("8.0.200");
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.201", """
+{
+  "ios": "11.0.2/8.0.100"
+}
+""");
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+            var installStatePath = CreateMockInstallState("8.0.200",
+                """
+                {
+                    "workloadVersion": "8.0.203"
+                }
+                """);
+
+
+            var ex = Assert.Throws<FileNotFoundException>(
+                () => new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null));
+
+            ex.Message.Should().Be(string.Format(Strings.WorkloadVersionFromInstallStateNotFound, "8.0.203", installStatePath));
+        }
+
+        [Fact]
+        public void ItFailsIfManifestFromWorkloadSetFromInstallStateIsNotInstalled()
+        {
+            Initialize("8.0.200");
+
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.201", """
+{
+  "ios": "11.0.2/8.0.100"
+}
+""");
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+            var installStatePath = CreateMockInstallState("8.0.200",
+                """
+                {
+                    "workloadVersion": "8.0.201"
+                }
+                """);
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null);
+
+            var ex = Assert.Throws<FileNotFoundException>(() => sdkDirectoryWorkloadManifestProvider.GetManifests().ToList());
+
+            ex.Message.Should().Be(string.Format(Strings.ManifestFromWorkloadSetNotFound, "ios: 11.0.2/8.0.100", "8.0.201"));
+        }
+
+        [Fact]
+        public void ItUsesWorkloadManifestFromInstallState()
+        {
+            Initialize("8.0.200");
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.201", """
+{
+  "ios": "11.0.2/8.0.100"
+}
+""");
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+            CreateMockInstallState("8.0.200",
+                """
+                {
+                    "manifests": {
+                        "ios": "11.0.1/8.0.100",
+                    }
+                }
+                """);
+
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null);
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("ios: 11.0.1/8.0.100");
+        }
+
+        [Fact]
+        public void ItFailsIfManifestFromInstallStateIsNotInstalled()
+        {
+            Initialize("8.0.200");
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.201", """
+{
+  "ios": "11.0.2/8.0.100"
+}
+""");
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+            var installStatePath = CreateMockInstallState("8.0.200",
+                """
+                {
+                    "manifests": {
+                        "ios": "12.0.2/8.0.200",
+                    }
+                }
+                """);
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null);
+
+            var ex = Assert.Throws<FileNotFoundException>(() => sdkDirectoryWorkloadManifestProvider.GetManifests().ToList());
+
+            ex.Message.Should().Be(string.Format(Strings.ManifestFromInstallStateNotFound, "ios: 12.0.2/8.0.200", installStatePath));
+        }
+
+        [Fact]
+        public void ItUsesWorkloadSetAndManifestFromInstallState()
+        {
+            Initialize("8.0.200");
+
+            CreateMockManifest(_manifestRoot, "8.0.200", "tizen", "8.0.0", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "tizen", "8.0.1", true);
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.201", """
+{
+  "ios": "11.0.2/8.0.100"
+}
+""");
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+            CreateMockInstallState("8.0.200",
+                """
+                {
+                    "workloadVersion": "8.0.201",
+                    "manifests": {
+                        "tizen": "8.0.0/8.0.200",
+                    }
+                }
+                """);
+
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null);
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("ios: 11.0.2/8.0.100", "tizen: 8.0.0/8.0.200");
+        }
+
+        [Fact]
+        public void WorkloadManifestFromInstallStateOverridesWorkloadSetFromInstallState()
+        {
+            Initialize("8.0.200");
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.201", """
+{
+  "ios": "11.0.2/8.0.100"
+}
+""");
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+            CreateMockInstallState("8.0.200",
+                """
+                {
+                    "workloadVersion": "8.0.201",
+                    "manifests": {
+                        "ios": "11.0.1/8.0.100",
+                    }
+                }
+                """);
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null);
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("ios: 11.0.1/8.0.100");
+        }
+
+        //  Falls back for manifest not in install state
+        [Fact]
+        public void ItFallsBackForManifestNotInInstallState()
+        {
+            Initialize("8.0.200");
+
+            var knownWorkloadsFilePath = Path.Combine(_fakeDotnetRootDirectory, "sdk", "8.0.201", "IncludedWorkloadManifests.txt");
+            Directory.CreateDirectory(Path.GetDirectoryName(knownWorkloadsFilePath)!);
+            File.WriteAllText(knownWorkloadsFilePath, "android\nios\nmaui");
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "android", "33.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "android", "33.0.2-rc.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "android", "33.0.2", true);
+
+            CreateMockInstallState("8.0.200",
+                """
+                {
+                    "manifests": {
+                        "ios": "12.0.1/8.0.200",
+                    }
+                }
+                """);
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.201", userProfileDir: null, globalJsonPath: null);
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("ios: 12.0.1/8.0.200", "android: 33.0.2/8.0.100");
+        }
+
+        [Fact]
+        public void GlobalJsonOverridesInstallState()
+        {
+            Initialize("8.0.200");
+
+            string? globalJsonPath = Path.Combine(_testDirectory, "global.json");
+            File.WriteAllText(globalJsonPath, """
+            {
+                "sdk": {
+                    "version": "8.0.200",
+                    "workloadversion": "8.0.201"
+                },
+                "msbuild-sdks": {
+                    "Microsoft.DotNet.Arcade.Sdk": "7.0.0-beta.23254.2",
+                }
+            }
+            """);
+
+            CreateMockInstallState("8.0.200",
+                """
+                {
+                    "workloadVersion": "8.0.202",
+                }
+                """);
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.201", """
+{
+  "ios": "11.0.2/8.0.100"
+}
+""");
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: globalJsonPath);
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("ios: 11.0.2/8.0.100");
+        }
+
+        [Fact]
+        public void GlobalJsonWithoutWorkloadVersionDoesNotOverrideInstallState()
+        {
+            Initialize("8.0.200");
+
+            string? globalJsonPath = Path.Combine(_testDirectory, "global.json");
+            File.WriteAllText(globalJsonPath, "{}");
+
+            CreateMockInstallState("8.0.200",
+                """
+                {
+                    "workloadVersion": "8.0.200",
+                }
+                """);
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.200", """
+{
+  "ios": "11.0.1/8.0.100"
+}
+""");
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.201", """
+{
+  "ios": "11.0.2/8.0.100"
+}
+""");
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.202", """
+{
+  "ios": "12.0.1/8.0.200"
+}
+""");
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: globalJsonPath);
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("ios: 11.0.1/8.0.100");
         }
 
         [Fact]
@@ -417,11 +925,11 @@ namespace ManifestReaderTests
 
             //  Manifest in test hook directory
             Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, sdkVersion, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory, sdkVersion, "Android", "WorkloadManifest.json"), "AndroidContent");
+            File.WriteAllText(Path.Combine(additionalManifestDirectory, sdkVersion, "Android", "WorkloadManifest.json"), "Android: AndroidContent");
 
             //  Manifest in default directory
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "iOS"));
-            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "iOS", "WorkloadManifest.json"), "iOSContent");
+            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "iOS", "WorkloadManifest.json"), "iOS: iOSContent");
 
 
             var sdkDirectoryWorkloadManifestProvider
@@ -429,7 +937,7 @@ namespace ManifestReaderTests
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("AndroidContent", "iOSContent");
+                .BeEquivalentTo("Android: AndroidContent", "iOS: iOSContent");
         }
 
         [Fact]
@@ -447,18 +955,18 @@ namespace ManifestReaderTests
 
             //  Manifest in test hook directory
             Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, sdkVersion, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory, sdkVersion, "Android", "WorkloadManifest.json"), "OverridingAndroidContent");
+            File.WriteAllText(Path.Combine(additionalManifestDirectory, sdkVersion, "Android", "WorkloadManifest.json"), "Android: OverridingAndroidContent");
 
             //  Manifest in default directory
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "Android"));
-            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Android", "WorkloadManifest.json"), "OverriddenAndroidContent");
+            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Android", "WorkloadManifest.json"), "Android: OverriddenAndroidContent");
 
             var sdkDirectoryWorkloadManifestProvider
                 = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable, userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("OverridingAndroidContent");
+                .BeEquivalentTo("Android: OverridingAndroidContent");
 
         }
 
@@ -480,28 +988,28 @@ namespace ManifestReaderTests
 
             //  Manifests in default directory
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "iOS"));
-            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "iOS", "WorkloadManifest.json"), "iOSContent");
+            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "iOS", "WorkloadManifest.json"), "iOS: iOSContent");
 
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "Android"));
-            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Android", "WorkloadManifest.json"), "DefaultAndroidContent");
+            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Android", "WorkloadManifest.json"), "Android: DefaultAndroidContent");
 
             //  Manifests in first additional directory
             Directory.CreateDirectory(Path.Combine(additionalManifestDirectory1, sdkVersion, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory1, sdkVersion, "Android", "WorkloadManifest.json"), "AndroidContent1");
+            File.WriteAllText(Path.Combine(additionalManifestDirectory1, sdkVersion, "Android", "WorkloadManifest.json"), "Android: AndroidContent1");
 
             //  Manifests in second additional directory
             Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, sdkVersion, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory2, sdkVersion, "Android", "WorkloadManifest.json"), "AndroidContent2");
+            File.WriteAllText(Path.Combine(additionalManifestDirectory2, sdkVersion, "Android", "WorkloadManifest.json"), "Android: AndroidContent2");
 
             Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, sdkVersion, "Test"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory2, sdkVersion, "Test", "WorkloadManifest.json"), "TestContent2");
+            File.WriteAllText(Path.Combine(additionalManifestDirectory2, sdkVersion, "Test", "WorkloadManifest.json"), "Test: TestContent2");
 
             var sdkDirectoryWorkloadManifestProvider
                 = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable, userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("AndroidContent1", "iOSContent", "TestContent2");
+                .BeEquivalentTo("Android: AndroidContent1", "iOS: iOSContent", "Test: TestContent2");
          
         }
 
@@ -517,14 +1025,14 @@ namespace ManifestReaderTests
 
             //  Manifest in default directory
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "Android"));
-            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Android", "WorkloadManifest.json"), "AndroidContent");
+            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Android", "WorkloadManifest.json"), "Android: AndroidContent");
 
             var sdkDirectoryWorkloadManifestProvider
                 = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", environmentMock.GetEnvironmentVariable, userProfileDir: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("AndroidContent");
+                .BeEquivalentTo("Android: AndroidContent");
          
         }
 
@@ -534,16 +1042,16 @@ namespace ManifestReaderTests
             Initialize();
 
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "iOS"));
-            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "iOS", "WorkloadManifest.json"), "iOSContent");
+            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "iOS", "WorkloadManifest.json"), "iOS: iOSContent");
             Directory.CreateDirectory(Path.Combine(_manifestVersionBandDirectory, "Microsoft.NET.Workload.Android"));
-            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Microsoft.NET.Workload.Android", "WorkloadManifest.json"), "iOSContent");
+            File.WriteAllText(Path.Combine(_manifestVersionBandDirectory, "Microsoft.NET.Workload.Android", "WorkloadManifest.json"), "Microsoft.NET.Workload.Android: AndroidContent");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("iOSContent");
+                .BeEquivalentTo("iOS: iOSContent");
         }
 
         [Fact]
@@ -570,7 +1078,7 @@ namespace ManifestReaderTests
             File.WriteAllText(knownWorkloadsFilePath, "Android\niOS");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "6.0.100", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "6.0.100", userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -601,7 +1109,7 @@ namespace ManifestReaderTests
             File.WriteAllText(knownWorkloadsFilePath, "Android\niOS");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: prev4Version, userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: prev4Version, userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -632,7 +1140,7 @@ namespace ManifestReaderTests
             File.WriteAllText(knownWorkloadsFilePath, "Android\niOS");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: prev4Version, userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: prev4Version, userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -664,7 +1172,7 @@ Microsoft.Net.Workload.Emscripten.net6
 Microsoft.Net.Workload.Emscripten.net7"
                 .Trim());
 
-            var sdkDirectoryWorkloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: currentSdkVersion, userProfileDir: null);
+            var sdkDirectoryWorkloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: currentSdkVersion, userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -701,6 +1209,18 @@ Microsoft.Net.Workload.Emscripten.net7"
             File.WriteAllText(Path.Combine(workloadSetDirectory, "workloadset.workloadset.json"), workloadSetContents);
         }
 
+        private string CreateMockInstallState(string featureBand, string installStateContents)
+        {
+            var installStateFolder = Path.Combine(_fakeDotnetRootDirectory!, "metadata", "workloads", "8.0.200", "InstallState");
+            Directory.CreateDirectory(installStateFolder);
+
+            string installStatePath = Path.Combine(installStateFolder, "default.json");
+
+            File.WriteAllText(installStatePath, installStateContents);
+
+            return installStatePath;
+        }
+
         [Fact]
         public void ItShouldIgnoreManifestsNotFoundInFallback()
         {
@@ -711,24 +1231,32 @@ Microsoft.Net.Workload.Emscripten.net7"
             var manifestDirectory6 = Path.Combine(fakeDotnetRootDirectory, "sdk-manifests", "6.0.100");
             Directory.CreateDirectory(manifestDirectory6);
             Directory.CreateDirectory(Path.Combine(manifestDirectory6, "iOS"));
-            File.WriteAllText(Path.Combine(manifestDirectory6, "iOS", "WorkloadManifest.json"), "iOS-6.0.100");
+            File.WriteAllText(Path.Combine(manifestDirectory6, "iOS", "WorkloadManifest.json"), "iOS: iOS-6.0.100");
 
             var knownWorkloadsFilePath = Path.Combine(fakeDotnetRootDirectory, "sdk", "6.0.100", "KnownWorkloadManifests.txt");
             Directory.CreateDirectory(Path.GetDirectoryName(knownWorkloadsFilePath)!);
             File.WriteAllText(knownWorkloadsFilePath, "Android\niOS");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: fakeDotnetRootDirectory, sdkVersion: "6.0.100", userProfileDir: null);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: fakeDotnetRootDirectory, sdkVersion: "6.0.100", userProfileDir: null, globalJsonPath: null);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
-                .BeEquivalentTo("iOS-6.0.100");
+                .BeEquivalentTo("iOS: iOS-6.0.100");
 
         }
 
         private IEnumerable<string> GetManifestContents(SdkDirectoryWorkloadManifestProvider manifestProvider)
         {
-            return manifestProvider.GetManifests().Select(manifest => new StreamReader(manifest.OpenManifestStream()).ReadToEnd());
+            return manifestProvider.GetManifests().Select(manifest =>
+                {
+                    var contents = new StreamReader(manifest.OpenManifestStream()).ReadToEnd();
+
+                    string manifestId = contents.Split(':')[0];
+                    manifest.ManifestId.Should().Be(manifestId);
+
+                    return contents;
+                });
         }
 
         private class EnvironmentMock

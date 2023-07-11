@@ -1,0 +1,24 @@
+﻿Uno.ProjectTemplates.Dotnet
+   Package version: 4.8.0-dev.792
+   Reserved: True
+   Details: Package Description
+   Source Feed: NuGet.org [https://api.nuget.org/v3/index.json]
+   Authors:
+      nventive
+   Owners:
+      https://nuget.org/profiles/unoplatform
+   License Metadata:
+      Repository Url: https://github.com/unoplatform/uno
+   Templates:
+      Template Name                                    Short Name            Type     Tags                                                                   Language
+      -----------------------------------------------  --------------------  -------  ---------------------------------------------------------------------  --------
+      Multi-Platform App (Windows App SDK)             unoapp                project  Multi-platform/Uno Platform/Android/iOS/Windows/Mac Catalyst/Linux...  C#      
+      Cross-Platform App (Prism)                       unoapp-prism          project  Cross-platform/Uno Platform/Prism/Android/iOS/Windows/macOS/WebAss...  C#      
+      Cross-Platform UI Tests Library                  unoapp-uitest         project  Cross-platform/Uno Platform/UITest/Android/iOS/WebAssembly/dotnet-new  C#      
+      Multi-Platform App (Xamarin, UWP)                unoapp-uwp            project  Multi-platform/Uno Platform/Android/iOS/Windows/macOS/Linux/Tizen/...  C#      
+      Multi-Platform App (.NET 6, UWP)                 unoapp-uwp-net6       project  Multi-platform/Uno Platform/Android/iOS/Windows/macOS/Linux/WebAss...  C#      
+      Multi-Platform App (Xamarin, Windows App SDK)    unoapp-winui-xamarin  project  Multi-platform/Uno Platform/Android/iOS/Windows/macOS/Linux/WebAss...  C#      
+      Cross-Platform Library                           unolib                project  Cross-platform/Uno Platform/Library/Android/iOS/Windows/macOS/Linu...  C#      
+      Cross-Runtime Library (Xamarin, UWP)             unolib-crossruntime   project  Cross-platform/Uno Platform/Library/Android/iOS/Windows/macOS/Linu...  C#      
+      Uno Platform WebAssembly Head for Xamarin.Forms  wasmxfhead            project  Cross-platform/Uno Platform/Xamarin.Forms/WebAssembly/dotnet-new       C#      
+      

@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             a.Should().Throw<GracefulException>().And.Message
                 .Should().Contain(string.Format(
                     LocalizableStrings.UpdateToolCommandInvalidGlobalAndLocalAndToolPath,
-                    "global tool-path"));
+                    "--global --tool-path"));
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             a.Should().Throw<GracefulException>().And.Message
                 .Should().Contain(
                     string.Format(LocalizableStrings.UpdateToolCommandInvalidGlobalAndLocalAndToolPath,
-                        "local tool-path"));
+                        "--local --tool-path"));
         }
 
         [Fact]

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Help;
 using System.CommandLine.Parsing;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -19,11 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ParseResult = parseResult;
             Command = command;
             RootCommand = GetNewCommandFromParseResult(parseResult);
-            HasHelpOption = parseResult.CommandResult
-                .Children
-                .OfType<OptionResult>()
-                .Select(r => r.Option)
-                .Any(o => o.HasAlias(Constants.KnownHelpAliases[0]));
+            HasHelpOption = parseResult.CommandResult.Children.Any(child => child is OptionResult optionResult && optionResult.Option is HelpOption);
         }
 
         protected GlobalArgs(GlobalArgs args) : this(args.Command, args.ParseResult) { }
@@ -34,7 +31,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         public ParseResult ParseResult { get; }
 
-        Command ICommandArgs.Command => Command;
+        CliCommand ICommandArgs.Command => Command;
 
         internal bool DebugAttach { get; private set; }
 

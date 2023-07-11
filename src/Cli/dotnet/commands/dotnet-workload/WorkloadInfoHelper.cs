@@ -42,12 +42,12 @@ namespace Microsoft.DotNet.Workloads.Workload.List
 
             _targetSdkVersion = targetSdkVersion;
             userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(
-                dotnetPath,
-                string.IsNullOrWhiteSpace(_targetSdkVersion)
-                    ? currentSdkReleaseVersion.ToString()
-                    : _targetSdkVersion,
-                userProfileDir);
+            var workloadManifestProvider =
+                new SdkDirectoryWorkloadManifestProvider(dotnetPath,
+                    string.IsNullOrWhiteSpace(_targetSdkVersion)
+                        ? currentSdkReleaseVersion.ToString()
+                        : _targetSdkVersion,
+                    userProfileDir, SdkDirectoryWorkloadManifestProvider.GetGlobalJsonPath(Environment.CurrentDirectory));
             WorkloadResolver = workloadResolver ?? NET.Sdk.WorkloadManifestReader.WorkloadResolver.Create(
                 workloadManifestProvider, dotnetPath,
                 currentSdkReleaseVersion.ToString(), userProfileDir);

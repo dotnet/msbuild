@@ -77,6 +77,16 @@
         <target state="translated">ワークロード マニフェストの依存関係 '{0}' のバージョン '{1}' は、マニフェスト '{3}' [{4}] で必要とされるバージョン '{2}' 以前のものです</target>
         <note />
       </trans-unit>
+      <trans-unit id="ManifestFromInstallStateNotFound">
+        <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
+        <target state="new">Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
+      <trans-unit id="ManifestFromWorkloadSetNotFound">
+        <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
+        <target state="new">Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">マニフェスト '{2}' [{3}] 内のワークロード '{1}' によって拡張されたワークロード '{0}' が見つかりません</target>
@@ -102,16 +112,6 @@
         <target state="translated">リダイレクト ワークロード '{0}' に 'redirect-to' 以外のキーがあります</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifiedManifestNotFound">
-        <source>Specified workload manifest was not found: {0}</source>
-        <target state="translated">指定されたワークロード マニフェストが見つかりませんでした: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SpecifiedWorkloadSetNotFound">
-        <source>Specified workload set was not found: {0}</source>
-        <target state="translated">指定されたワークロード セットが見つかりませんでした: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">オフセット {1} に予期しないトークン '{0}' があります</target>
@@ -135,6 +135,16 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">マニフェスト '{2}' [{3}] 内のワークロード リダイレクト '{1}' に対する未解決のターゲット '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="new">Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</target>
+        <note>{Locked="dotnet workload restore"}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromInstallStateNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found.</source>
+        <target state="new">Workload version {0}, which was specified in {1}, was not found.</target>
         <note />
       </trans-unit>
     </body>

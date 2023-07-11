@@ -12,7 +12,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Func<ParseResult, ITemplateEngineHost> hostBuilder)
             : base(hostBuilder, "show")
         {
-            IsHidden = true;
+            Hidden = true;
         }
     }
 }

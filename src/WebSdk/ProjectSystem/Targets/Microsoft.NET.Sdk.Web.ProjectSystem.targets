@@ -46,11 +46,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableUnsafeBinaryFormatterSerialization Condition="'$(EnableUnsafeBinaryFormatterSerialization)' == ''">false</EnableUnsafeBinaryFormatterSerialization>
   </PropertyGroup>
 
-  <!-- Default settings for trimmed and aot'd apps. -->
-  <PropertyGroup Condition="'$(PublishTrimmed)' == 'true' Or '$(PublishAot)' == 'true'">
-    <JsonSerializerIsReflectionEnabledByDefault Condition="'$(JsonSerializerIsReflectionEnabledByDefault)' == ''">false</JsonSerializerIsReflectionEnabledByDefault>
-  </PropertyGroup>
-
   <!-- Default settings for aot'd apps. -->
   <PropertyGroup Condition="'$(PublishAot)' == 'true'">
     <!-- Enable the built-in source generators. -->

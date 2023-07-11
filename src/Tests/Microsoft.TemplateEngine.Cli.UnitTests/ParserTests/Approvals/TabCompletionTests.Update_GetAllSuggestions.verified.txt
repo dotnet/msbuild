@@ -4,7 +4,7 @@
     Kind: Keyword,
     SortText: --add-source,
     InsertText: --add-source,
-    Detail: Specifies a NuGet source to use during install.
+    Detail: Specifies a NuGet source to use.
   },
   {
     Label: --check-only,
@@ -32,6 +32,6 @@
     Kind: Keyword,
     SortText: --nuget-source,
     InsertText: --nuget-source,
-    Detail: Specifies a NuGet source to use during install.
+    Detail: Specifies a NuGet source to use.
   }
 ]

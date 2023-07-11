@@ -2,32 +2,30 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class InternalReportinstallsuccessCommandParser
     {
-        public static readonly Argument<string> Argument = new Argument<string>("internal-reportinstallsuccess-arg");
+        public static readonly CliArgument<string> Argument = new("internal-reportinstallsuccess-arg");
 
-        private static readonly Command Command = ConstructCommand();
+        private static readonly CliCommand Command = ConstructCommand();
 
-        public static Command GetCommand()
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            var command = new Command("internal-reportinstallsuccess")
+            CliCommand command = new("internal-reportinstallsuccess")
             {
-                IsHidden = true
+                Hidden = true
             };
 
-            command.AddArgument(Argument);
+            command.Arguments.Add(Argument);
 
-            command.SetHandler(InternalReportinstallsuccess.Run);
+            command.SetAction(InternalReportinstallsuccess.Run);
 
             return command;
         }

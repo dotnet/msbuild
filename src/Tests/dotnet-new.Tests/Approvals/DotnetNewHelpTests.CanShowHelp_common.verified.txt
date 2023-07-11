@@ -27,3 +27,5 @@ Commands:
   update                                        Checks the currently installed template packages for update, and install the updates.
   search <template-name>                        Searches for the templates on NuGet.org.
   list <template-name>                          Lists templates containing the specified template name. If no name is specified, lists all templates.
+  details <package-identifier>                  Provides the details for specified template package.
+                                                      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.

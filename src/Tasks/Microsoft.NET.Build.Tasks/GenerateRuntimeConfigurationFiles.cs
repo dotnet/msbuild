@@ -91,7 +91,7 @@ namespace Microsoft.NET.Build.Tasks
 
             if (!string.IsNullOrEmpty(RollForward))
             {
-                if (!RollForwardValues.Any(v => string.Equals(RollForward, v, StringComparison.OrdinalIgnoreCase)))
+                if (!RollForwardValues.Contains(RollForward, StringComparer.OrdinalIgnoreCase))
                 {
                     Log.LogError(Strings.InvalidRollForwardValue, RollForward, string.Join(", ", RollForwardValues));
                     return;
@@ -267,9 +267,12 @@ namespace Microsoft.NET.Build.Tasks
                 return;
             }
 
-            var rawRuntimeOptions = File.ReadAllText(UserRuntimeConfig);
+            JObject runtimeOptionsFromProject;
+            using (JsonTextReader reader = new JsonTextReader(File.OpenText(UserRuntimeConfig)))
+            {
+                runtimeOptionsFromProject = JObject.Load(reader);
+            }
 
-            var runtimeOptionsFromProject = JObject.Parse(rawRuntimeOptions);
             foreach (var runtimeOption in runtimeOptionsFromProject)
             {
                 runtimeOptions.RawOptions.Add(runtimeOption.Key, runtimeOption.Value);

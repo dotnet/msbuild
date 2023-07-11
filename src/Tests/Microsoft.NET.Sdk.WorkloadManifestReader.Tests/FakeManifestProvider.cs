@@ -34,6 +34,7 @@ namespace ManifestReaderTests
             {
                 yield return new(
                     Path.GetFileNameWithoutExtension(filePath.manifest),
+                    Path.GetDirectoryName(filePath.manifest)!,
                     filePath.manifest,
                     () => new FileStream(filePath.manifest, FileMode.Open, FileAccess.Read),
                     () => filePath.localizationCatalog != null ? new FileStream(filePath.localizationCatalog, FileMode.Open, FileAccess.Read) : null
@@ -54,6 +55,7 @@ namespace ManifestReaderTests
         public IEnumerable<ReadableWorkloadManifest> GetManifests()
             => _manifests.Select(m => new ReadableWorkloadManifest(
                 m.id,
+                $@"C:\fake\{m.id}",
                 $@"C:\fake\{m.id}\WorkloadManifest.json",
                 (Func<Stream>)(() => new MemoryStream(m.content)),
                 (Func<Stream?>)(() => null)

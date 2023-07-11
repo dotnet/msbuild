@@ -35,6 +35,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
                 yield return new(
                     manifestId,
+                    workloadManifestDirectory,
                     workloadManifestPath,
                     () => File.OpenRead(workloadManifestPath),
                     () => WorkloadManifestReader.TryOpenLocalizationCatalogForManifest(workloadManifestPath)

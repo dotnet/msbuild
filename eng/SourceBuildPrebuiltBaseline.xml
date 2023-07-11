@@ -19,5 +19,23 @@
     <UsagePattern IdentityGlob="Microsoft.CodeAnalysis.AnalyzerUtilities/*3.3.0*" />
     <UsagePattern IdentityGlob="System.Text.Json/*8.0.0*" />
     <UsagePattern IdentityGlob="System.Text.Encodings.Web/*8.0.0*" />
+
+    <!-- These are upgraded to latest versions in product build and can be baselined for repo build -->
+    <UsagePattern IdentityGlob="Microsoft.Build/*16.11.0*" />
+    <UsagePattern IdentityGlob="Microsoft.Build.Framework/*16.11.0*" />
+    <UsagePattern IdentityGlob="Microsoft.Build.Tasks.Core/*16.11.0*" />
+    <UsagePattern IdentityGlob="Microsoft.Build.Utilities.Core/*16.11.0*" />
+    <UsagePattern IdentityGlob="Microsoft.Extensions.FileProviders.Abstractions/*6.0.0*" />
+    <UsagePattern IdentityGlob="Microsoft.Extensions.FileSystemGlobbing/*6.0.0*" />
+    <UsagePattern IdentityGlob="System.Composition/*7.0.0*" />
+    <UsagePattern IdentityGlob="System.Composition.AttributedModel/*7.0.0*" />
+    <UsagePattern IdentityGlob="System.Configuration.ConfigurationManager/*7.0.0*" />
+    <UsagePattern IdentityGlob="System.Composition.Convention/*7.0.0*" />
+    <UsagePattern IdentityGlob="System.Composition.Hosting/*7.0.0*" />
+    <UsagePattern IdentityGlob="System.Composition.Runtime/*7.0.0*" />
+    <UsagePattern IdentityGlob="System.Composition.TypedParts/*7.0.0*" />
+    <UsagePattern IdentityGlob="System.Diagnostics.EventLog/*7.0.0*" />
+    <UsagePattern IdentityGlob="System.Reflection.MetadataLoadContext/*7.0.0*" />
+    <UsagePattern IdentityGlob="System.Security.Cryptography.ProtectedData/*7.0.0*" />
   </IgnorePatterns>
 </UsageData>

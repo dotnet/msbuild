@@ -175,6 +175,15 @@
     Detail: Instantiates a template with given short name. An alias of 'dotnet new <template name>'.
   },
   {
+    Label: details,
+    Kind: Keyword,
+    SortText: details,
+    InsertText: details,
+    Detail:
+      Provides the details for specified template package.
+      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.
+  },
+  {
     Label: install,
     Kind: Keyword,
     SortText: install,

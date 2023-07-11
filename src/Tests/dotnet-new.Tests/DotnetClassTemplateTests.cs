@@ -7,7 +7,6 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.Authoring.TemplateVerifier;
-using Microsoft.TemplateEngine.TestHelper;
 using NuGet.Packaging;
 using Xunit.Abstractions;
 
@@ -23,8 +22,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             _fixture = fixture;
             _log = log;
-            _logger = new XunitLoggerProvider(log)
-                .CreateLogger("TestRun");
+            _logger = new TestLoggerFactory(log).CreateLogger(nameof(DotnetClassTemplateTests));
         }
 
         [Theory]
@@ -47,6 +45,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [InlineData("enum", "10", "net6.0")]
         [InlineData("enum", "", "net7.0")]
         [InlineData("enum", "9.0", "netstandard2.0")]
+        [InlineData("enum", "", "netstandard2.0")]
         public async void DotnetCSharpClassTemplatesTest(
             string templateShortName,
             string langVersion = "",
@@ -91,7 +90,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                        content
                        .UnixifyNewlines()
                        .ScrubAndReplace(
-                           "Warning: Failed to evaluate bind symbol \'langVersion\', it will be skipped.",
+                           "Warning: Failed to evaluate bind symbol \'evaluatedLangVersion\', it will be skipped.",
                            string.Empty);
 
                        content.ScrubAndReplace("\n", string.Empty);
@@ -171,7 +170,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                        content
                        .UnixifyNewlines()
                        .ScrubAndReplace(
-                           "Warning: Failed to evaluate bind symbol \'langVersion\', it will be skipped.",
+                           "Warning: Failed to evaluate bind symbol \'evaluatedLangVersion\', it will be skipped.",
                            string.Empty);
 
                        content.ScrubAndReplace("\n", string.Empty);
