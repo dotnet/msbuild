@@ -30,7 +30,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <PropertyGroup>
-        <UnsupportedTargetFrameworkVersion>8.0</UnsupportedTargetFrameworkVersion>
+        <UnsupportedTargetFrameworkVersion>9.0</UnsupportedTargetFrameworkVersion>
         <MinimumVisualStudioVersionForUnsupportedTargetFrameworkVersion>17.8</MinimumVisualStudioVersionForUnsupportedTargetFrameworkVersion>
     </PropertyGroup>
 
