@@ -535,7 +535,7 @@ namespace Microsoft.Build.Evaluation
             List<ProjectTargetInstanceChild> targetChildren = new List<ProjectTargetInstanceChild>(targetElement.Count);
             List<ProjectOnErrorInstance> targetOnErrorChildren = new List<ProjectOnErrorInstance>();
 
-            foreach (ProjectElement targetChildElement in targetElement.Children)
+            foreach (ProjectElement targetChildElement in targetElement.ChildrenEnumerable)
             {
                 using (evaluationProfiler.TrackElement(targetChildElement))
                 {
@@ -881,7 +881,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                foreach (ProjectElement element in currentProjectOrImport.Children)
+                foreach (ProjectElement element in currentProjectOrImport.ChildrenEnumerable)
                 {
                     switch (element)
                     {
@@ -1499,7 +1499,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (EvaluateConditionCollectingConditionedProperties(whenElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties))
                     {
-                        EvaluateWhenOrOtherwiseChildren(whenElement.Children);
+                        EvaluateWhenOrOtherwiseChildren(whenElement.ChildrenEnumerable);
                         return;
                     }
                 }
@@ -1507,7 +1507,7 @@ namespace Microsoft.Build.Evaluation
                 // "Otherwise" elements never have a condition
                 if (chooseElement.OtherwiseElement != null)
                 {
-                    EvaluateWhenOrOtherwiseChildren(chooseElement.OtherwiseElement.Children);
+                    EvaluateWhenOrOtherwiseChildren(chooseElement.OtherwiseElement.ChildrenEnumerable);
                 }
             }
         }
@@ -1517,7 +1517,7 @@ namespace Microsoft.Build.Evaluation
         /// Returns true if the condition was true, so subsequent
         /// WhenElements and Otherwise can be skipped.
         /// </summary>
-        private bool EvaluateWhenOrOtherwiseChildren(IEnumerable<ProjectElement> children)
+        private bool EvaluateWhenOrOtherwiseChildren(ProjectElementContainer.ProjectElementSiblingEnumerable children)
         {
             foreach (ProjectElement element in children)
             {

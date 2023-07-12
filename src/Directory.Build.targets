@@ -79,7 +79,7 @@
     <PackageReference Update="Microsoft.NETCore.App" PrivateAssets="All" />
 
     <!-- Configure analyzer to forbid certain API calls -->
-    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" Condition=" '$(IsUnitTestProject)' != 'true' " />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true'">
