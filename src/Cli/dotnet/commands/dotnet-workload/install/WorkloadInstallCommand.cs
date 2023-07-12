@@ -200,15 +200,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             var transaction = new CliTransaction
             {
-                RollbackStarted = () =>
-                {
-                    Reporter.WriteLine(LocalizableStrings.RollingBackInstall);
-                },
+                RollbackStarted = () => Reporter.WriteLine(LocalizableStrings.RollingBackInstall),
                 // Don't hide the original error if roll back fails, but do log the rollback failure
-                RollbackFailed = ex =>
-                {
-                    Reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message));
-                }
+                RollbackFailed = ex => Reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message))
             };
 
             transaction.Run(
