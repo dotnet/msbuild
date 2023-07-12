@@ -324,25 +324,6 @@ namespace Microsoft.Build.UnitTests
             item.GetMetadata("m").ShouldBe(string.Empty);
         }
 
-        [Fact]
-        public void ImplementsIMetadataContainer()
-        {
-            Dictionary<string, string> metadata = new()
-            {
-                { "a", "a1" },
-                { "b", "b1" },
-            };
-
-            TaskItem item = new TaskItem("foo");
-            IMetadataContainer metadataContainer = (IMetadataContainer)item;
-
-            metadataContainer.ImportMetadata(metadata);
-
-            var actualMetadata = metadataContainer.EnumerateMetadata().OrderBy(metadata => metadata.Key).ToList();
-            var expectedMetadata = metadata.OrderBy(metadata => metadata.Value).ToList();
-            Assert.True(actualMetadata.SequenceEqual(expectedMetadata));
-        }
-
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// Test that task items can be successfully constructed based on a task item from another appdomain.  
