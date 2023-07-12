@@ -202,6 +202,32 @@ namespace ManifestReaderTests
                 .BeEquivalentTo("ios: 11.0.2/8.0.100", "android: 33.0.2-rc.1/8.0.200", "maui: 15.0.1-rc.456/8.0.200-rc.2");
         }
 
+
+        [Fact]
+        public void WorkloadSetCanHaveTrailingCommasInJson()
+        {
+            Initialize("8.0.200");
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "android", "33.0.2-rc.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.200-rc.2", "maui", "15.0.1-rc.456", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.200", """
+                {
+                "ios": "11.0.2/8.0.100",
+                "android": "33.0.2-rc.1/8.0.200",
+                "maui": "15.0.1-rc.456/8.0.200-rc.2",
+                }
+                """);
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null);
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("ios: 11.0.2/8.0.100", "android: 33.0.2-rc.1/8.0.200", "maui: 15.0.1-rc.456/8.0.200-rc.2");
+        }
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -1183,7 +1209,7 @@ Microsoft.Net.Workload.Emscripten.net7"
                        $"NotInIncudedWorkloadsFile: 1/{currentSdkVersion}");
         }
 
-        private void CreateMockManifest(string manifestRoot, string featureBand, string manifestId, string manifestVersion, bool useVersionFolder = false)
+        private void CreateMockManifest(string manifestRoot, string featureBand, string manifestId, string manifestVersion, bool useVersionFolder = false, string? manifestContents = null)
         {
             var manifestDirectory = Path.Combine(manifestRoot, featureBand, manifestId);
             if (useVersionFolder)
@@ -1196,7 +1222,12 @@ Microsoft.Net.Workload.Emscripten.net7"
                 Directory.CreateDirectory(manifestDirectory);
             }
 
-            File.WriteAllText(Path.Combine(manifestDirectory, "WorkloadManifest.json"), $"{manifestId}: {manifestVersion}/{featureBand}");
+            if (manifestContents == null)
+            {
+                manifestContents = $"{manifestId}: {manifestVersion}/{featureBand}";
+            }
+
+            File.WriteAllText(Path.Combine(manifestDirectory, "WorkloadManifest.json"), manifestContents);
         }
 
         private void CreateMockWorkloadSet(string manifestRoot, string featureBand, string workloadSetVersion, string workloadSetContents)
@@ -1243,7 +1274,99 @@ Microsoft.Net.Workload.Emscripten.net7"
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
                 .BeEquivalentTo("iOS: iOS-6.0.100");
+        }
 
+        [Fact]
+        public void WorkloadResolverUsesManifestsFromWorkloadSet()
+        {
+            Initialize("8.0.200");
+
+            string manifestContents1 = """
+    {
+        "version": "11.0.1",
+        "workloads": {
+            "ios": {
+                "description": "iOS workload",
+                "kind": "dev",
+                "packs": [ "Microsoft.NET.iOS.Workload" ]
+            },
+        },
+        "packs": {
+            "Microsoft.NET.iOS.Workload" : {
+                "kind": "sdk",
+                "version": "1"
+            }
+        }
+    }
+    """;
+
+            string manifestContents2 = """
+    {
+        "version": "11.0.2",
+        "workloads": {
+            "ios": {
+                "description": "iOS workload",
+                "kind": "dev",
+                "packs": [ "Microsoft.NET.iOS.Workload" ]
+            },
+        },
+        "packs": {
+            "Microsoft.NET.iOS.Workload" : {
+                "kind": "sdk",
+                "version": "2"
+            }
+        }
+    }
+    """;
+
+            string manifestContents3 = """
+    {
+        "version": "12.0.1",
+        "workloads": {
+            "ios": {
+                "description": "iOS workload",
+                "kind": "dev",
+                "packs": [ "Microsoft.NET.iOS.Workload" ]
+            },
+        },
+        "packs": {
+            "Microsoft.NET.iOS.Workload" : {
+                "kind": "sdk",
+                "version": "3"
+            }
+        }
+    }
+    """;
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.1", true, manifestContents1);
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true, manifestContents2);
+            CreateMockManifest(_manifestRoot, "8.0.200", "ios", "12.0.1", true, manifestContents3);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.200", """
+                {
+                  "ios": "11.0.2/8.0.100"
+                }
+                """);
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null);
+
+            var workloadResolver = WorkloadResolver.CreateForTests(sdkDirectoryWorkloadManifestProvider, _fakeDotnetRootDirectory);
+
+            var workloads = workloadResolver.GetAvailableWorkloads();
+            workloads.Count().Should().Be(1);
+            var expectedPackId = new WorkloadPackId("Microsoft.NET.iOS.Workload");
+            workloadResolver.GetPacksInWorkload(workloads.Single().Id).Should().BeEquivalentTo(new[] { expectedPackId });
+            var packInfo = workloadResolver.TryGetPackInfo(expectedPackId);
+            packInfo.Should().NotBeNull();
+            packInfo!.Version.Should().Be("2");
+
+            workloadResolver.GetInstalledManifests().Count().Should().Be(1);
+            var manifestInfo = workloadResolver.GetInstalledManifests().Single();
+            manifestInfo.Id.Should().Be("ios");
+            manifestInfo.Version.Should().Be("11.0.2");
+            manifestInfo.ManifestFeatureBand.Should().Be("8.0.100");
+            manifestInfo.ManifestDirectory.Should().Be(Path.Combine(_manifestRoot, "8.0.100", "ios", "11.0.2"));
         }
 
         private IEnumerable<string> GetManifestContents(SdkDirectoryWorkloadManifestProvider manifestProvider)

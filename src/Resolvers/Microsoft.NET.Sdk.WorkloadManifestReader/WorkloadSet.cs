@@ -71,7 +71,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         public static WorkloadSet FromJson(string json, SdkFeatureBand defaultFeatureBand)
         {
 #if USE_SYSTEM_TEXT_JSON
-            return FromDictionaryForJson(JsonSerializer.Deserialize<IDictionary<string, string>>(json)!, defaultFeatureBand);
+            var jsonSerializerOptions = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                ReadCommentHandling = JsonCommentHandling.Skip
+            };
+            return FromDictionaryForJson(JsonSerializer.Deserialize<IDictionary<string, string>>(json, jsonSerializerOptions)!, defaultFeatureBand);
 #else
             return FromDictionaryForJson(JsonConvert.DeserializeObject<IDictionary<string, string>>(json)!, defaultFeatureBand);
 #endif
