@@ -119,18 +119,19 @@ namespace Microsoft.DotNet.Cli
 
         internal static int ProcessArgs(string[] args, TimeSpan startupTime, ITelemetry telemetryClient = null)
         {
-            Dictionary<string, double> performanceData = new Dictionary<string, double>();
+            Dictionary<string, double> performanceData = new();
 
             PerformanceLogEventSource.Log.BuiltInCommandParserStart();
-            Stopwatch parseStartTime = Stopwatch.StartNew();
-            var parseResult = Parser.Instance.Parse(args);
+            ParseResult parseResult;
+            using (_ = new PerformanceMeasurement(performanceData, "Parse Time"))
+            {
+                parseResult = Parser.Instance.Parse(args);
 
-            // Avoid create temp directory with root permission and later prevent access in non sudo
-            // This method need to be run very early before temp folder get created
-            // https://github.com/dotnet/sdk/issues/20195
-            SudoEnvironmentDirectoryOverride.OverrideEnvironmentVariableToTmp(parseResult);
-
-            performanceData.Add("Parse Time", parseStartTime.Elapsed.TotalMilliseconds);
+                // Avoid create temp directory with root permission and later prevent access in non sudo
+                // This method need to be run very early before temp folder get created
+                // https://github.com/dotnet/sdk/issues/20195
+                SudoEnvironmentDirectoryOverride.OverrideEnvironmentVariableToTmp(parseResult);
+            }
             PerformanceLogEventSource.Log.BuiltInCommandParserStop();
 
             using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
@@ -204,10 +205,7 @@ namespace Microsoft.DotNet.Cli
 
                 PerformanceLogEventSource.Log.TelemetryRegistrationStart();
 
-                if (telemetryClient == null)
-                {
-                    telemetryClient = new Telemetry.Telemetry(firstTimeUseNoticeSentinel);
-                }
+                telemetryClient ??= new Telemetry.Telemetry(firstTimeUseNoticeSentinel);
                 TelemetryEventEntry.Subscribe(telemetryClient.TrackEvent);
                 TelemetryEventEntry.TelemetryFilter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
 
@@ -321,7 +319,6 @@ namespace Microsoft.DotNet.Cli
                 toolPathSentinel,
                 dotnetFirstRunConfiguration,
                 Reporter.Output,
-                CliFolderPathCalculator.CliFallbackFolderPath,
                 environmentPath,
                 performanceMeasurements);
 

@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Configurer
         public DotnetFirstRunConfiguration(
             bool generateAspNetCertificate,
             bool telemetryOptout,
-            bool addGlobalToolsToPath, 
+            bool addGlobalToolsToPath,
             bool nologo)
         {
             GenerateAspNetCertificate = generateAspNetCertificate;

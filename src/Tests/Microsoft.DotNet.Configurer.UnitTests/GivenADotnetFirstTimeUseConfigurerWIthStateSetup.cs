@@ -19,8 +19,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
     [Collection(TestConstants.UsesStaticTelemetryState)]
     public class GivenADotnetFirstTimeUseConfigurerWithStateSetup
     {
-        private const string CliFallbackFolderPath = "some path";
-
         private MockBasicSentinel _firstTimeUseNoticeSentinelMock;
         private MockBasicSentinel _aspNetCertificateSentinelMock;
         private Mock<IAspNetCoreCertificateGenerator> _aspNetCoreCertificateGeneratorMock;
@@ -29,13 +27,9 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         private Mock<IEnvironmentPath> _pathAdderMock;
         private Mock<IEnvironmentProvider> _environmentProvider;
 
-        private readonly ITestOutputHelper _output;
-
         public GivenADotnetFirstTimeUseConfigurerWithStateSetup(ITestOutputHelper output)
         {
             ResetObjectState();
-
-            _output = output;
         }
 
         private void ResetObjectState()
@@ -113,7 +107,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 = new FirstRunExperienceAction(
                     () => _reporterMock.Lines.Contains(string.Format(
                     Configurer.LocalizableStrings.FirstTimeMessageWelcome,
-                    DotnetFirstTimeUseConfigurer.DeriveDotnetVersionFromProductVersion(Product.Version),
+                    DotnetFirstTimeUseConfigurer.ParseDotNetVersion(Product.Version),
                     Product.Version))
                             && _reporterMock.Lines.Contains(LocalizableStrings.FirstTimeMessageMoreInformation),
                     "printFirstTimeWelcomeMessage");
@@ -254,7 +248,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                      nologo: nologo
                  ),
                  reporter: _reporterMock,
-                 cliFallbackFolderPath: CliFallbackFolderPath,
                  pathAdder: _pathAdderMock.Object);
 
             configurer.Configure();

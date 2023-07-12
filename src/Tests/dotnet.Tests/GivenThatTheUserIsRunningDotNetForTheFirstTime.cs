@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.Tests
                 .Should()
                 .ContainVisuallySameFragment(string.Format(
                     Configurer.LocalizableStrings.FirstTimeMessageWelcome,
-                    DotnetFirstTimeUseConfigurer.DeriveDotnetVersionFromProductVersion(expectedVersion),
+                    DotnetFirstTimeUseConfigurer.ParseDotNetVersion(expectedVersion),
                     expectedVersion))
                 .And.ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeMessageMoreInformation)
                 .And.NotContain("Restore completed in");
@@ -178,7 +178,7 @@ namespace Microsoft.DotNet.Tests
                 .Should()
                 .ContainVisuallySameFragment(string.Format(
                     Configurer.LocalizableStrings.FirstTimeMessageWelcome,
-                    DotnetFirstTimeUseConfigurer.DeriveDotnetVersionFromProductVersion(expectedVersion),
+                    DotnetFirstTimeUseConfigurer.ParseDotNetVersion(expectedVersion),
                     expectedVersion))
                 .And.ContainVisuallySameFragment(Configurer.LocalizableStrings.FirstTimeMessageMoreInformation);
         }
