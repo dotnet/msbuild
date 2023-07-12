@@ -1182,7 +1182,7 @@
     <value>[default]</value>
   </data>
   <data name="DeprecatedEventSerialization" UESanitized="false" Visibility="Public">
-    <value>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/metadata-self-ref</value>
+    <value>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</value>
   </data>
 
   <!--
