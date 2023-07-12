@@ -33,16 +33,16 @@
   <Target Name="GatherNuGetDependencies" AfterTargets="ResolvePackageAssets">
     <ItemGroup>
         <!-- Collect known NuGet dependencies after resolving packages -->
-        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGet.'))' == 'True'" />
-        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Newtonsoft.Json'))' == 'True'" />
-        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGetSdkResolver'))' == 'True'" />
-        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Microsoft.Extensions.'))' == 'True'" />
+        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGet.'))' == 'true'" />
+        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Newtonsoft.Json'))' == 'true'" />
+        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGetSdkResolver'))' == 'true'" />
+        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Microsoft.Extensions.'))' == 'true'" />
 
         <!-- NuGet.targets and NuGet.RestoreEx.targets will be in the RuntimeTargetsCopyLocalItems ItemGroup -->
-        <_NuGetRuntimeDependencies Include="%(RuntimeTargetsCopyLocalItems.Identity)" Condition="'@(RuntimeTargetsCopyLocalItems->Contains('NuGet.'))' == 'True'" />
+        <_NuGetRuntimeDependencies Include="%(RuntimeTargetsCopyLocalItems.Identity)" Condition="'@(RuntimeTargetsCopyLocalItems->Contains('NuGet.'))' == 'true'" />
 
         <!-- NuGet.Build.Tasks.Console.exe will be in the None ItemGroup -->
-        <_NuGetRuntimeDependencies Include="%(None.Identity)" Condition="'@(None->Contains('NuGet.'))' == 'True'" />
+        <_NuGetRuntimeDependencies Include="%(None.Identity)" Condition="'@(None->Contains('NuGet.'))' == 'true'" />
 
         <_NuGetRuntimeDependencies Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\RuntimeIdentifierGraph.json" />
     </ItemGroup>
@@ -56,11 +56,11 @@
          need to be in a specific location that does not mesh with NuGet. To resolve this, we include the default
          PackageReference assets but will remove them from the Reference ItemGroup before RAR runs and avoid the warnings -->
     <ItemGroup>
-        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Build'))' == 'True'" />
-        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGet.'))' == 'True'" />
-        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Newtonsoft.Json'))' == 'True'" />
-        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGetSdkResolver'))' == 'True'" />
-        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Extensions.'))' == 'True'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Build'))' == 'true'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGet.'))' == 'true'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Newtonsoft.Json'))' == 'true'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGetSdkResolver'))' == 'true'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Extensions.'))' == 'true'" />
     </ItemGroup>
   </Target>
 

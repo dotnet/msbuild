@@ -1933,6 +1933,11 @@ elementFormDefault="qualified">
         </xs:annotation>
     </xs:element>
     <xs:element name="OSVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="BaseOutputPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="BaseOutputPath" _locComment="" -->Base path of output folder, where all configuration-specific output folders will be created. Default value is bin\.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="OutputPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OutputPath" _locComment="" -->Path to output folder, with trailing slash</xs:documentation>
