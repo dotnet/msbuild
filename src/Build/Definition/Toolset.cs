@@ -1062,7 +1062,7 @@ namespace Microsoft.Build.Evaluation
                             preserveFormatting: false);
                     }
 
-                    foreach (ProjectElement elementXml in projectRootElement.Children)
+                    foreach (ProjectElement elementXml in projectRootElement.ChildrenEnumerable)
                     {
                         ProjectUsingTaskElement usingTask = elementXml as ProjectUsingTaskElement;
 
