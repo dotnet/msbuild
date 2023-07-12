@@ -62,17 +62,17 @@ namespace Microsoft.DotNet.ApiCompat.Task
         public bool RunApiCompat { get; set; } = true;
 
         /// <summary>
-        /// Enables strict mode api comparison checks enqueued by the compatible tfm validator.
+        /// Validates api compatibility in strict mode for contract and implementation assemblies for all compatible target frameworks.
         /// </summary>
-        public bool EnableStrictModeForCompatibleTfms { get; set; }
+        public bool EnableStrictModeForCompatibleTfms { get; set; } = true;
 
         /// <summary>
-        /// Enables strict mode api comparison checks enqueued by the compatible framework in package validator.
+        /// Validates api compatibility in strict mode for assemblies that are compatible based on their target framework.
         /// </summary>
         public bool EnableStrictModeForCompatibleFrameworksInPackage { get; set; }
 
         /// <summary>
-        /// Enables strict mode api comparison checks enqueued by the baseline package validator.
+        /// Validates api compatibility in strict mode for package baseline checks.
         /// </summary>
         public bool EnableStrictModeForBaselineValidation { get; set; }
 
