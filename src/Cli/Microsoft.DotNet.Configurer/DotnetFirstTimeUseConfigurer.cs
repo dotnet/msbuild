@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Configurer
         {
             if (_dotnetFirstRunConfiguration.AddGlobalToolsToPath && !_toolPathSentinel.Exists())
             {
-                using(_ = new PerformanceMeasurement(_performanceMeasurements, "AddPackageExecutablePath Time"))
+                using (_ = new PerformanceMeasurement(_performanceMeasurements, "AddPackageExecutablePath Time"))
                 {
                     _pathAdder.AddPackageExecutablePathToUserPath();
                     _toolPathSentinel.Create();
