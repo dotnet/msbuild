@@ -202,6 +202,32 @@ namespace ManifestReaderTests
                 .BeEquivalentTo("ios: 11.0.2/8.0.100", "android: 33.0.2-rc.1/8.0.200", "maui: 15.0.1-rc.456/8.0.200-rc.2");
         }
 
+
+        [Fact]
+        public void WorkloadSetCanHaveTrailingCommasInJson()
+        {
+            Initialize("8.0.200");
+
+            CreateMockManifest(_manifestRoot, "8.0.100", "ios", "11.0.2", true);
+            CreateMockManifest(_manifestRoot, "8.0.200", "android", "33.0.2-rc.1", true);
+            CreateMockManifest(_manifestRoot, "8.0.200-rc.2", "maui", "15.0.1-rc.456", true);
+
+            CreateMockWorkloadSet(_manifestRoot, "8.0.200", "8.0.200", """
+                {
+                "ios": "11.0.2/8.0.100",
+                "android": "33.0.2-rc.1/8.0.200",
+                "maui": "15.0.1-rc.456/8.0.200-rc.2",
+                }
+                """);
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "8.0.200", userProfileDir: null, globalJsonPath: null);
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("ios: 11.0.2/8.0.100", "android: 33.0.2-rc.1/8.0.200", "maui: 15.0.1-rc.456/8.0.200-rc.2");
+        }
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
