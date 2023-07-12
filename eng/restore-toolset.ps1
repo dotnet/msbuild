@@ -93,9 +93,10 @@ function CreateVSShortcut()
     return
   }
 
-  # Note: The VS version in this call would need to be updated as new VS major versions release.
-  $vsVersion = 17.0
-  $devenvPath = (& "$installerPath\vswhere.exe" -all -prerelease -latest -version $vsVersion -find Common7\IDE\devenv.exe) | Select-Object -First 1
+  $versionFilePath = Join-Path $RepoRoot 'src\Layout\redist\minimumMSBuildVersion'
+  # Gets the first digit (ex. 17) and appends '.0' to it.
+  $vsMajorVersion = "$(((Get-Content $versionFilePath).Split('.'))[0]).0"
+  $devenvPath = (& "$installerPath\vswhere.exe" -all -prerelease -latest -version $vsMajorVersion -find Common7\IDE\devenv.exe) | Select-Object -First 1
   if(-Not $devenvPath)
   {
     return
