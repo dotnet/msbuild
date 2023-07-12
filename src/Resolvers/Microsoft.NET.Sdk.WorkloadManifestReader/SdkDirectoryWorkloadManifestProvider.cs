@@ -129,14 +129,29 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         public IEnumerable<ReadableWorkloadManifest> GetManifests()
         {
             //  Scan manifest directories
-            var manifestIdsToDirectories = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var manifestIdsToManifests = new Dictionary<string, ReadableWorkloadManifest>(StringComparer.OrdinalIgnoreCase);
 
-            void ProbeDirectory(string manifestDirectory)
+            void AddManifest(string manifestId, string manifestDirectory, string featureBand)
+            {
+                var workloadManifestPath = Path.Combine(manifestDirectory, "WorkloadManifest.json");
+
+                var readableManifest = new ReadableWorkloadManifest(
+                    manifestId,
+                    manifestDirectory,
+                    workloadManifestPath,
+                    featureBand,
+                    () => File.OpenRead(workloadManifestPath),
+                    () => WorkloadManifestReader.TryOpenLocalizationCatalogForManifest(workloadManifestPath));
+
+                manifestIdsToManifests[manifestId] = readableManifest;
+            }
+
+            void ProbeDirectory(string manifestDirectory, string featureBand)
             {
                 (string? id, string? finalManifestDirectory) = ResolveManifestDirectory(manifestDirectory);
                 if (id != null && finalManifestDirectory != null)
                 {
-                    manifestIdsToDirectories.Add(id, finalManifestDirectory);
+                    AddManifest(id, finalManifestDirectory, featureBand);
                 }
             }
 
@@ -148,7 +163,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 {
                     foreach (var workloadManifestDirectory in Directory.EnumerateDirectories(manifestVersionBandDirectory))
                     {
-                        ProbeDirectory(workloadManifestDirectory);
+                        ProbeDirectory(workloadManifestDirectory, _sdkVersionBand.ToString());
                     }
                 }
             }
@@ -170,7 +185,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
                 foreach (var workloadManifestDirectory in directoriesWithManifests.Values)
                 {
-                    ProbeDirectory(workloadManifestDirectory);
+                    ProbeDirectory(workloadManifestDirectory, _sdkVersionBand.ToString());
                 }
             }
 
@@ -185,7 +200,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     {
                         throw new FileNotFoundException(string.Format(Strings.ManifestFromWorkloadSetNotFound, manifestSpecifier.ToString(), _workloadSet.Version));
                     }
-                    manifestIdsToDirectories[kvp.Key.ToString()] = manifestDirectory;
+                    AddManifest(manifestSpecifier.Id.ToString(), manifestDirectory, manifestSpecifier.FeatureBand.ToString());
+                    
                 }
             }
 
@@ -200,26 +216,26 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     {
                         throw new FileNotFoundException(string.Format(Strings.ManifestFromInstallStateNotFound, manifestSpecifier.ToString(), _installStateFilePath));
                     }
-                    manifestIdsToDirectories[kvp.Key.ToString()] = manifestDirectory;
+                    AddManifest(manifestSpecifier.Id.ToString(), manifestDirectory, manifestSpecifier.FeatureBand.ToString());
                 }
             }
 
-            if (_knownManifestIdsAndOrder != null && _knownManifestIdsAndOrder.Keys.Any(id => !manifestIdsToDirectories.ContainsKey(id)))
+            if (_knownManifestIdsAndOrder != null && _knownManifestIdsAndOrder.Keys.Any(id => !manifestIdsToManifests.ContainsKey(id)))
             {
-                var missingManifestIds = _knownManifestIdsAndOrder.Keys.Where(id => !manifestIdsToDirectories.ContainsKey(id));
+                var missingManifestIds = _knownManifestIdsAndOrder.Keys.Where(id => !manifestIdsToManifests.ContainsKey(id));
                 foreach (var missingManifestId in missingManifestIds)
                 {
-                    var manifestDir = FallbackForMissingManifest(missingManifestId);
+                    var (manifestDir, featureBand) = FallbackForMissingManifest(missingManifestId);
                     if (!string.IsNullOrEmpty(manifestDir))
                     {
-                        manifestIdsToDirectories.Add(missingManifestId, manifestDir);
+                        AddManifest(missingManifestId, manifestDir, featureBand);
                     }
                 }
             }
 
             //  Return manifests in a stable order.  Manifests in the KnownWorkloadManifests.txt file will be first, and in the same order they appear in that file.
             //  Then the rest of the manifests (if any) will be returned in (ordinal case-insensitive) alphabetical order.
-            return manifestIdsToDirectories
+            return manifestIdsToManifests
                 .OrderBy(kvp =>
                 {
                     if (_knownManifestIdsAndOrder != null &&
@@ -230,19 +246,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     return int.MaxValue;
                 })
                 .ThenBy(kvp => kvp.Key, StringComparer.OrdinalIgnoreCase)
-                .Select(kvp =>
-                {
-                    var manifestId = kvp.Key;
-                    var manifestDirectory = kvp.Value;
-                    var workloadManifestPath = Path.Combine(manifestDirectory, "WorkloadManifest.json");
-
-                    return new ReadableWorkloadManifest(
-                        manifestId,
-                        manifestDirectory,
-                        workloadManifestPath,
-                        () => File.OpenRead(workloadManifestPath),
-                        () => WorkloadManifestReader.TryOpenLocalizationCatalogForManifest(workloadManifestPath));
-                })
+                .Select(kvp => kvp.Value)
                 .ToList();
         }
 
@@ -283,13 +287,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return (null, null);
         }
 
-        private string FallbackForMissingManifest(string manifestId)
+        private (string manifestDirectory, string manifestFeatureBand) FallbackForMissingManifest(string manifestId)
         {
             //  Only use the last manifest root (usually the dotnet folder itself) for fallback
             var sdkManifestPath = _manifestRoots.Last();
             if (!Directory.Exists(sdkManifestPath))
             {
-                return string.Empty;
+                return (string.Empty, string.Empty);
             }
 
             var candidateFeatureBands = Directory.GetDirectories(sdkManifestPath)
@@ -297,7 +301,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 .Select(featureBand => new SdkFeatureBand(featureBand))
                 .Where(featureBand => featureBand < _sdkVersionBand || _sdkVersionBand.ToStringWithoutPrerelease().Equals(featureBand.ToString(), StringComparison.Ordinal));
 
-            var matchingManifestFatureBandsAndResolvedManifestDirectories = candidateFeatureBands
+            var matchingManifestFeatureBandsAndResolvedManifestDirectories = candidateFeatureBands
                 //  Calculate path to <FeatureBand>\<ManifestID>
                 .Select(featureBand => (featureBand, manifestDirectory: Path.Combine(sdkManifestPath, featureBand.ToString(), manifestId)))
                 //  Filter out directories that don't exist
@@ -308,14 +312,15 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 .Where(t => t.res.id != null && t.res.manifestDirectory != null)
                 .ToList();
 
-            if (matchingManifestFatureBandsAndResolvedManifestDirectories.Any())
+            if (matchingManifestFeatureBandsAndResolvedManifestDirectories.Any())
             {
-                return matchingManifestFatureBandsAndResolvedManifestDirectories.OrderByDescending(t => t.featureBand).First().res.manifestDirectory!;
+                var selectedFeatureBandAndManifestDirectory = matchingManifestFeatureBandsAndResolvedManifestDirectories.OrderByDescending(t => t.featureBand).First();
+                return (selectedFeatureBandAndManifestDirectory.res.manifestDirectory!, selectedFeatureBandAndManifestDirectory.featureBand.ToString());
             }
             else
             {
                 // Manifest does not exist
-                return string.Empty;
+                return (string.Empty, string.Empty);
             }
         }
 

@@ -37,6 +37,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     manifestId,
                     workloadManifestDirectory,
                     workloadManifestPath,
+                    _sdkVersionBand,
                     () => File.OpenRead(workloadManifestPath),
                     () => WorkloadManifestReader.TryOpenLocalizationCatalogForManifest(workloadManifestPath)
                 );
