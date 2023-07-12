@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Configurer
         {
             if (_dotnetFirstRunConfiguration.AddGlobalToolsToPath && !_toolPathSentinel.Exists())
             {
-                using (_ = new PerformanceMeasurement(_performanceMeasurements, "AddPackageExecutablePath Time"))
+                using (new PerformanceMeasurement(_performanceMeasurements, "AddPackageExecutablePath Time"))
                 {
                     _pathAdder.AddPackageExecutablePathToUserPath();
                     _toolPathSentinel.Create();
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Configurer
             var canShowFirstUseMessages = isFirstTimeUse && !_dotnetFirstRunConfiguration.NoLogo;
             if (isFirstTimeUse)
             {
-                using (_ = new PerformanceMeasurement(_performanceMeasurements, "FirstTimeUseNotice Time"))
+                using (new PerformanceMeasurement(_performanceMeasurements, "FirstTimeUseNotice Time"))
                 {
                     // Migrate the NuGet state from earlier SDKs
                     NuGet.Common.Migrations.MigrationRunner.Run();
@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Configurer
 
             if (CanGenAspNetCert())
             {
-                using (_ = new PerformanceMeasurement(_performanceMeasurements, "GenerateAspNetCertificate Time"))
+                using (new PerformanceMeasurement(_performanceMeasurements, "GenerateAspNetCertificate Time"))
                 {
                     _aspNetCoreCertificateGenerator.GenerateAspNetCoreDevelopmentCertificate();
                     _aspNetCertificateSentinel.CreateIfNotExists();

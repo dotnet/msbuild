@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Cli
 
             PerformanceLogEventSource.Log.BuiltInCommandParserStart();
             ParseResult parseResult;
-            using (_ = new PerformanceMeasurement(performanceData, "Parse Time"))
+            using (new PerformanceMeasurement(performanceData, "Parse Time"))
             {
                 parseResult = Parser.Instance.Parse(args);
 

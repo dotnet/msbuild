@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Utils
         }
     }
 
-    public class PerformanceMeasurement : IDisposable
+    public sealed class PerformanceMeasurement : IDisposable
     {
         private readonly Stopwatch _timer;
         private readonly Dictionary<string, double> _data;
