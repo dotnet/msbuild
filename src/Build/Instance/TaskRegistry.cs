@@ -762,7 +762,7 @@ namespace Microsoft.Build.Execution
 
             private static IDictionary<string, string> CreateTaskIdentityParametersDictionary(IDictionary<string, string> initialState = null, int? initialCount = null)
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(initialState == null || initialCount == null, "at most one can be non-null");
+                ErrorUtilities.VerifyThrow(initialState == null || initialCount == null, "at most one can be non-null");
 
                 if (initialState != null)
                 {

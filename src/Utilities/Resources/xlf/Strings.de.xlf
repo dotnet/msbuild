@@ -27,11 +27,6 @@
         <target state="translated">Der Befehl wurde mit dem Code {0} beendet.</target>
         <note />
       </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="translated">MSB6005: Die Aufgabe hat versucht, eine Protokollierung durchzuführen, bevor sie initialisiert wurde. Meldung: {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
-      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: Plattform-Manifestdatei in "{0}" nicht gefunden.</target>
