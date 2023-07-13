@@ -55,6 +55,11 @@
       LOCALIZATION: Do not localize the following words: ProjectReference, ProjectReferenceTargets
     </note>
       </trans-unit>
+      <trans-unit id="CannotCopyFromElementOfThatType">
+        <source>MSB4277: Cannot copy from object of that type.</source>
+        <target state="new">MSB4277: Cannot copy from object of that type.</target>
+        <note>{StrBegin="MSB4277: "}</note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: Nie można rozwinąć metadanych w wyrażeniu „{0}”. {1}</target>
@@ -133,6 +138,11 @@
         <target state="translated">Nie można rozpoznać zestawu SDK „{0}”. Dokładnie jeden z poniższych komunikatów sondujących wskazuje, dlaczego nie mogliśmy rozpoznać zestawu SDK. Zbadaj i rozwiąż ten komunikat, aby poprawnie określić zestaw SDK.
   {1}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="General.TwoVectorsMustHaveSameLength">
+        <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
+        <target state="new">MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</target>
+        <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
