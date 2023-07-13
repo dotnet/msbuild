@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Configurer
                 }
             }
 
-            if (CanGenAspNetCert())
+            if (CanGenerateAspNetCertificate())
             {
                 using (new PerformanceMeasurement(_performanceMeasurements, "GenerateAspNetCertificate Time"))
                 {
@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.Configurer
             }
         }
 
-        private bool CanGenAspNetCert() =>
+        private bool CanGenerateAspNetCertificate() =>
 #if EXCLUDE_ASPNETCORE
             false;
 #else
