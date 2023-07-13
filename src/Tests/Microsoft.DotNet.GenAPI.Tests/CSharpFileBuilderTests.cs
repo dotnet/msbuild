@@ -2489,17 +2489,14 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 expected: """                
                 namespace N
                 {
-                    // ISSUE: https://github.com/dotnet/roslyn/issues/68957 should be T : unmanaged instead of T : struct
                     public partial struct C<T>
-                        where T : struct
+                        where T : unmanaged
                     {
-                        // ISSUE: https://github.com/dotnet/roslyn/issues/68957 should be init instead of set
-                        public required (string? k, dynamic v, nint n) X { get { throw null; } set { } }
+                        public required (string? k, dynamic v, nint n) X { get { throw null; } init; }
                     }
 
                     public static partial class E
                     {
-                        // ISSUE: https://github.com/dotnet/roslyn/issues/68959 should include scoped
                         public static void M<T>(this object c, System.ReadOnlySpan<T> values) { }
                     }
                 }
