@@ -159,9 +159,18 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_CheckForUnsupportedNETCoreVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences"
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(NETCoreAppMaximumVersion)' != ''">
 
-    <NETSdkError Condition="'$(_TargetFrameworkVersionWithoutV)' > '$(NETCoreAppMaximumVersion)'"
+    <PropertyGroup>
+      <DisplayVSMessage Condition="$([MSBuild]::VersionLessThan($(MSBuildVersion), '$(MinimumVisualStudioVersionForUnsupportedTargetFrameworkVersion)')) and '$(BuildingInsideVisualStudio)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' == '$(UnsupportedTargetFrameworkVersion)' and '$([MSBuild]::IsOSPlatform(`Windows`))' == 'true'">true</DisplayVSMessage>
+    </PropertyGroup>
+
+    <NETSdkError Condition="'$(_TargetFrameworkVersionWithoutV)' > '$(NETCoreAppMaximumVersion)' and '$(DisplayVSMessage)' != 'true'"
                  ResourceName="UnsupportedTargetFrameworkVersion"
                  FormatArguments=".NET;$(_TargetFrameworkVersionWithoutV);$(NETCoreAppMaximumVersion)"
+      />
+
+    <NETSdkError Condition="'$(DisplayVSMessage)' == 'true'"
+                 ResourceName="UnsupportedVisualStudioVersion"
+                 FormatArguments=".NET;$(_TargetFrameworkVersionWithoutV);$(NETCoreAppMaximumVersion);$(MinimumVisualStudioVersionForUnsupportedTargetFrameworkVersion)"
       />
   </Target>
 
