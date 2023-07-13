@@ -77,6 +77,16 @@
         <target state="translated">La dipendenza del manifesto del carico di lavoro '{0}' versione '{1}' è inferiore alla versione '{2}' richiesta dal manifesto '{3}' [{4}]</target>
         <note />
       </trans-unit>
+      <trans-unit id="ManifestFromInstallStateNotFound">
+        <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
+        <target state="new">Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
+      <trans-unit id="ManifestFromWorkloadSetNotFound">
+        <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
+        <target state="new">Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Non è stato possibile trovare il carico di lavoro '{0}' esteso dal carico di lavoro '{1}' nel manifesto '{2}' [{3}]</target>
@@ -100,11 +110,6 @@
       <trans-unit id="RedirectWorkloadHasOtherKeys">
         <source>Redirect workload '{0}' has keys other than 'redirect-to'</source>
         <target state="translated">Il carico di lavoro '{0}' di reindirizzamento ha chiavi diverse da ' Redirect-to '</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SpecifiedManifestNotFound">
-        <source>Specified workload manifest was not found: {0}</source>
-        <target state="translated">Il manifesto del carico di lavoro specificato non è stato trovato: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
@@ -134,7 +139,12 @@
       </trans-unit>
       <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
         <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
-        <target state="translated">La versione del carico di lavoro {0}, specificata in {1}, non è stata trovata. Eseguire "dotnet workload restore" per installare questa versione del carico di lavoro.</target>
+        <target state="new">Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</target>
+        <note>{Locked="dotnet workload restore"}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromInstallStateNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found.</source>
+        <target state="new">Workload version {0}, which was specified in {1}, was not found.</target>
         <note />
       </trans-unit>
     </body>

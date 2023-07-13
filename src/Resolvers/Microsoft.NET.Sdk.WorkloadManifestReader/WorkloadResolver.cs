@@ -21,7 +21,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// </remarks>
     public class WorkloadResolver : IWorkloadResolver
     {
-        private readonly Dictionary<string, WorkloadManifest> _manifests = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, (WorkloadManifest manifest, WorkloadManifestInfo info)> _manifests = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<WorkloadId, (WorkloadDefinition workload, WorkloadManifest manifest)> _workloads = new();
         private readonly Dictionary<WorkloadPackId, (WorkloadPack pack, WorkloadManifest manifest)> _packs = new();
         private IWorkloadManifestProvider? _manifestProvider;
@@ -118,9 +118,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 using (Stream? localizationStream = readableManifest.OpenLocalizationStream())
                 {
                     var manifest = WorkloadManifestReader.ReadWorkloadManifest(readableManifest.ManifestId, manifestStream, localizationStream, readableManifest.ManifestPath);
-                    if (!_manifests.TryAdd(readableManifest.ManifestId, manifest))
+                    var manifestInfo = new WorkloadManifestInfo(manifest.Id, manifest.Version, readableManifest.ManifestDirectory, readableManifest.ManifestFeatureBand);
+                    if (!_manifests.TryAdd(readableManifest.ManifestId, (manifest, manifestInfo)))
                     {
-                        var existingManifest = _manifests[readableManifest.ManifestId];
+                        var existingManifest = _manifests[readableManifest.ManifestId].manifest;
                         throw new WorkloadManifestCompositionException(Strings.DuplicateManifestID, manifestProvider.GetType().FullName, readableManifest.ManifestId, readableManifest.ManifestPath, existingManifest.ManifestPath);
                     }
                 }
@@ -134,14 +135,15 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             Dictionary<WorkloadId, (WorkloadRedirect redirect, WorkloadManifest manifest)>? redirects = null;
 
-            foreach (var manifest in _manifests.Values)
+            foreach (var (manifest, info) in _manifests.Values)
             {
                 if (manifest.DependsOnManifests != null)
                 {
                     foreach (var dependency in manifest.DependsOnManifests)
                     {
-                        if (_manifests.TryGetValue(dependency.Key, out var resolvedDependency))
+                        if (_manifests.TryGetValue(dependency.Key, out var t))
                         {
+                            var resolvedDependency = t.manifest;
                             if (FXVersion.Compare(dependency.Value, resolvedDependency.ParsedVersion) > 0)
                             {
                                 throw new WorkloadManifestCompositionException(Strings.ManifestDependencyVersionTooLow, dependency.Key, resolvedDependency.Version, dependency.Value, manifest.Id, manifest.ManifestPath);
@@ -711,11 +713,17 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         private bool IsWorkloadImplicitlyAbstract(WorkloadDefinition workload, WorkloadManifest manifest) => !GetPacksInWorkload(workload, manifest).Any();
 
-        public string GetManifestVersion(string manifestId) =>
-            (_manifests.TryGetValue(manifestId, out WorkloadManifest? value)? value : null)?.Version
-            ?? throw new Exception($"Manifest with id {manifestId} does not exist.");
+        public string GetManifestVersion(string manifestId)
+        {
+            if (_manifests.TryGetValue(manifestId, out var value))
+            {
+                return value.manifest.Version;
+            }
+            throw new Exception($"Manifest with id {manifestId} does not exist.");
+        }
+            
 
-        public IEnumerable<WorkloadManifestInfo> GetInstalledManifests() => _manifests.Select(m => new WorkloadManifestInfo(m.Value.Id, m.Value.Version, Path.GetDirectoryName(m.Value.ManifestPath)!));
+        public IEnumerable<WorkloadManifestInfo> GetInstalledManifests() => _manifests.Select(t => t.Value.info);
     }
 
     static class DictionaryExtensions
