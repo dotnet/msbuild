@@ -96,8 +96,9 @@ namespace Microsoft.Build.Utilities
                 if (FileSystems.Default.FileExists(platformManifestPath))
                 {
                     XmlDocument doc = new XmlDocument();
-                    XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                    XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
 
+                    FileStream fs = File.OpenRead(platformManifestPath);
                     using (XmlReader xmlReader = XmlReader.Create(platformManifestPath, readerSettings))
                     {
                         doc.Load(xmlReader);
