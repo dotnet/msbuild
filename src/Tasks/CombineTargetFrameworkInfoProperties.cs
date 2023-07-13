@@ -41,7 +41,7 @@ namespace Microsoft.Build.Tasks
                 if ((!UseAttributeForTargetFrameworkInfoPropertyNames && string.IsNullOrEmpty(RootElementName)) || (UseAttributeForTargetFrameworkInfoPropertyNames && RootElementName == null))
                 {
                     string resource = UseAttributeForTargetFrameworkInfoPropertyNames ? "CombineTargetFrameworkInfoProperties.NotNullRootElementName" : "CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName";
-                    Log.LogErrorWithCodeFromResources(resource, "RootElementName");
+                    Log.LogErrorWithCodeFromResources(resource, nameof(RootElementName), nameof(UseAttributeForTargetFrameworkInfoPropertyNames));
                 }
                 else
                 {

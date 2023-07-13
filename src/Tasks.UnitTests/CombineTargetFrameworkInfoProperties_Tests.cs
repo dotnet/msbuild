@@ -14,8 +14,11 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// https://github.com/dotnet/msbuild/issues/8320
         /// </summary>
-        [Fact]
-        public void RootElementNameNotValid()
+        [Theory]
+        [InlineData(null, false, "MSB3991")]
+        [InlineData("", false, "MSB3991")]
+        [InlineData(null, true, "MSB3992")]
+        public void RootElementNameNotValid(string rootElementName, bool UseAttributeForTargetFrameworkInfoPropertyNames, string errorCode)
         {
             MockEngine e = new MockEngine();
             var task = new CombineTargetFrameworkInfoProperties();
@@ -24,15 +27,11 @@ namespace Microsoft.Build.UnitTests
             {
                 new TaskItemData("ItemSpec1", null)
             };
+            task.RootElementName = rootElementName;
             task.PropertiesAndValues = items;
-            task.UseAttributeForTargetFrameworkInfoPropertyNames = true;
+            task.UseAttributeForTargetFrameworkInfoPropertyNames = UseAttributeForTargetFrameworkInfoPropertyNames;
             task.Execute().ShouldBe(false);
-            e.AssertLogContains("MSB3992");
-
-            task.RootElementName = string.Empty;
-            task.UseAttributeForTargetFrameworkInfoPropertyNames = false;
-            task.Execute().ShouldBe(false);
-            e.AssertLogContains("MSB3991");
+            e.AssertLogContains(errorCode);
         }
     }
 }

@@ -2990,11 +2990,11 @@
         MSB3991 - MSB3999   Task: CombineTargetFrameworkInfoProperties
   -->
   <data name="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
-    <value>MSB3991: '{0}' is not set or empty. When UseAttributeForTargetFrameworkInfoPropertyNames is false, make sure to set a non-empty value for '{0}'.</value>
+    <value>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</value>
     <comment>{StrBegin="MSB3991: "}</comment>
   </data>
   <data name="CombineTargetFrameworkInfoProperties.NotNullRootElementName">
-    <value>MSB3992: '{0}' is not set. When UseAttributeForTargetFrameworkInfoPropertyNames is true, make sure to set a value for '{0}'.</value>
+    <value>MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</value>
     <comment>{StrBegin="MSB3992: "}</comment>
   </data>
   <!--
