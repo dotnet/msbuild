@@ -99,7 +99,7 @@ namespace Microsoft.Build.Utilities
                     XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
 
                     FileStream fs = File.OpenRead(platformManifestPath);
-                    using (XmlReader xmlReader = XmlReader.Create(platformManifestPath, readerSettings))
+                    using (XmlReader xmlReader = XmlReader.Create(fs, readerSettings))
                     {
                         doc.Load(xmlReader);
                     }
