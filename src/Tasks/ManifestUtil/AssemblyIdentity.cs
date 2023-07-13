@@ -211,7 +211,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static AssemblyIdentity FromManifest(Stream s)
         {
             var document = new XmlDocument();
-            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
             try
             {
                 using (XmlReader xr = XmlReader.Create(s, xrSettings))
