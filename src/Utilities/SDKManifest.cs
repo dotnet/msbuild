@@ -318,7 +318,7 @@ namespace Microsoft.Build.Utilities
                     XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
 
                     FileStream fs = File.OpenRead(sdkManifestPath);
-                    using (XmlReader xmlReader = XmlReader.Create(sdkManifestPath, readerSettings))
+                    using (XmlReader xmlReader = XmlReader.Create(fs, readerSettings))
                     {
                         doc.Load(xmlReader);
                     }
