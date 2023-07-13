@@ -888,10 +888,11 @@ namespace Microsoft.Build.Construction
                 *</EFPROJECT>
                 **********************************************************************************/
                 // Make sure the XML reader ignores DTD processing
-                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
 
                 // Load the .etp project file thru the XML reader
-                using (XmlReader xmlReader = XmlReader.Create(fullPathToEtpProj, readerSettings))
+                FileStream fs = File.OpenRead(fullPathToEtpProj);
+                using (XmlReader xmlReader = XmlReader.Create(fs, readerSettings))
                 {
                     etpProjectDocument.Load(xmlReader);
                 }
