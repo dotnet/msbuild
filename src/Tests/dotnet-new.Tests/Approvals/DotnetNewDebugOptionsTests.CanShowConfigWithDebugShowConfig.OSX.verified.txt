@@ -17,7 +17,6 @@ Common templates are:
 Template Name         Short Name    Language    Tags               
 %TABLE HEADER DELIMITER%
 ASP.NET Core Web App  webapp,razor  [C#]        Web/MVC/Razor Pages
-Blazor Server App     blazorserver  [C#]        Web/Blazor         
 Class Library         classlib      [C#],F#,VB  Common/Library     
 Console App           console       [C#],F#,VB  Common/Console     
 
