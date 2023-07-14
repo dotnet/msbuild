@@ -12,7 +12,6 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.MSBuildSdkResolver;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -76,7 +75,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                           reporter,
                                           verifySignatures: SignCheck.IsDotNetSigned());
             var installer = WorkloadInstallerFactory.GetWorkloadInstaller(reporter, new SdkFeatureBand(sdkVersion),
-                workloadResolver, Cli.VerbosityOptions.normal, userProfileDir, verifySignatures: false);
+                workloadResolver, VerbosityOptions.normal, userProfileDir, verifySignatures: false);
             var workloadRecordRepo = installer.GetWorkloadInstallationRecordRepository();
 
             return new WorkloadManifestUpdater(reporter, workloadResolver, nugetPackageDownloader, userProfileDir, tempPackagesDir.Value, workloadRecordRepo, installer);

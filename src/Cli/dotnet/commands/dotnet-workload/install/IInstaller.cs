@@ -8,7 +8,6 @@ using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
-using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -36,8 +35,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         void ReplaceWorkloadResolver(IWorkloadResolver workloadResolver);
 
         void Shutdown();
-
-
     }
 
     // Interface to pass to workload manifest updater
@@ -66,6 +63,5 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             NuGetPackageId = nuGetPackageId;
             NuGetPackageVersion = nuGetPackageVersion;
         }
-
     }
 }

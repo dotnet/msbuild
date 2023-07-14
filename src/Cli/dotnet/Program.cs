@@ -16,6 +16,7 @@ using Microsoft.DotNet.CommandFactory;
 using NuGet.Frameworks;
 using CommandResult = System.CommandLine.Parsing.CommandResult;
 using System.CommandLine;
+using Microsoft.DotNet.Workloads.Workload;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -309,6 +310,7 @@ namespace Microsoft.DotNet.Cli
            IEnvironmentProvider environmentProvider,
            Dictionary<string, double> performanceMeasurements)
         {
+            var isFirstTimeUse = !firstTimeUseNoticeSentinel.Exists();
             var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(isDotnetBeingInvokedFromNativeInstaller, environmentProvider);
             var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
             var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
@@ -327,6 +329,12 @@ namespace Microsoft.DotNet.Cli
             if (isDotnetBeingInvokedFromNativeInstaller && OperatingSystem.IsWindows())
             {
                 DotDefaultPathCorrector.Correct();
+            }
+
+            // TODO: Add mechanism to DotnetFirstRunConfiguration for disabling this process.
+            if (isFirstTimeUse)
+            {
+                WorkloadIntegrityChecker.RunFirstUseCheck();
             }
         }
 

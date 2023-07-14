@@ -3,12 +3,9 @@
 
 using System;
 using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.IO;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Configurer;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.Linq;
 using Microsoft.DotNet.Workloads.Workload.Install;
