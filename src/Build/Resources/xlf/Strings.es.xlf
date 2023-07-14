@@ -144,11 +144,6 @@
   {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="General.TwoVectorsMustHaveSameLength">
-        <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
-        <target state="new">MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</target>
-        <note>{StrBegin="MSB3094: "}</note>
-      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: Espacio inesperado en la posición "{1}" de la condición "{0}". ¿Olvidó quitar un espacio?</target>
@@ -195,11 +190,6 @@
         <source>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</source>
         <target state="translated">Los parámetros se han truncado a partir de este punto. Para ver todos los parámetros, borre la variable de entorno MSBUILDTRUNCATETASKINPUTLOGGING.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="new">MSB6005: Task attempted to log before it was initialized. Message was: {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>

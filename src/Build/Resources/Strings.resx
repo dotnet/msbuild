@@ -466,7 +466,6 @@
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</comment>
   </data>
-  </data>
   <data name="FatalTaskError" xml:space="preserve">
     <value>MSB4018: The "{0}" task failed unexpectedly.</value>
     <comment>{StrBegin="MSB4018: "}UE: This message is shown when a task terminates because of an unhandled exception. The cause is most likely a
