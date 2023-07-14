@@ -39,7 +39,7 @@ namespace Microsoft.NET.Sdk.Web.Tests
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}").Should().Pass();
 
             var buildProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework);
-            buildProperties["TrimMode"].Should().Be("partial");
+            buildProperties["TrimMode"].Should().Be("");
 
             string outputDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
             string runtimeConfigFile = Path.Combine(outputDirectory, $"{projectName}.runtimeconfig.json");
