@@ -79,8 +79,7 @@ internal static class OptimizedStringIndenter
                 output = output.Slice(state.indent);
 
                 // Append string segment
-                input.Slice(0, segment.Length).CopyTo(output);
-                input = input.Slice(segment.TotalLength);
+                input.Slice(segment.Start, segment.Length).CopyTo(output);
                 output = output.Slice(segment.Length);
 
                 // Append newline
@@ -116,7 +115,7 @@ internal static class OptimizedStringIndenter
         if (input.IsEmpty)
         {
             segments = segments.Slice(0, 1);
-            segments[0] = new StringSegment(0, 0, 0);
+            segments[0] = new StringSegment(0, 0);
             pooledArray = null;
             return segments;
         }
@@ -147,7 +146,7 @@ internal static class OptimizedStringIndenter
             int index = input.IndexOf('\n');
             if (index < 0)
             {
-                segments[i] = new StringSegment(start, input.Length, 0);
+                segments[i] = new StringSegment(start, input.Length);
                 break;
             }
 
@@ -159,7 +158,7 @@ internal static class OptimizedStringIndenter
             }
 
             int totalLength = index + newLineLength;
-            segments[i] = new StringSegment(start, index, totalLength);
+            segments[i] = new StringSegment(start, index);
 
             start += totalLength;
             input = input.Slice(totalLength);
@@ -170,15 +169,13 @@ internal static class OptimizedStringIndenter
 
     private struct StringSegment
     {
-        public StringSegment(int start, int length, int totalLength)
+        public StringSegment(int start, int length)
         {
             Start = start;
             Length = length;
-            TotalLength = totalLength;
         }
 
         public int Start { get; }
         public int Length { get; }
-        public int TotalLength { get; }
     }
 }
