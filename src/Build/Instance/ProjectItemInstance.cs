@@ -8,6 +8,9 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+#if FEATURE_APPDOMAIN
+using System.Runtime.Remoting;
+#endif
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -1408,9 +1411,19 @@ namespace Microsoft.Build.Execution
                 {
                     // The destination implements IMetadataContainer so we can use the ImportMetadata bulk-set operation.
                     IEnumerable<ProjectMetadataInstance> metadataEnumerable = MetadataCollection;
-                    destinationItemAsMetadataContainer.ImportMetadata(metadataEnumerable
+                    IEnumerable<KeyValuePair<string, string>> metadataToImport = metadataEnumerable
                         .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Name)))
-                        .Select(metadatum => new KeyValuePair<string, string>(metadatum.Name, GetMetadataEscaped(metadatum.Name))));
+                        .Select(metadatum => new KeyValuePair<string, string>(metadatum.Name, GetMetadataEscaped(metadatum.Name)));
+
+#if FEATURE_APPDOMAIN
+                    if (RemotingServices.IsTransparentProxy(destinationItem))
+                    {
+                        // Linq is not serializable so materialize the collection before making the call.
+                        metadataToImport = metadataToImport.ToList();
+                    }
+#endif
+
+                    destinationItemAsMetadataContainer.ImportMetadata(metadataToImport);
                 }
                 else
                 {
