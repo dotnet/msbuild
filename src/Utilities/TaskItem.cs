@@ -480,6 +480,12 @@ namespace Microsoft.Build.Utilities
             return EnumerateMetadataLazy();
         }
 
+        void IMetadataContainer.ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata)
+        {
+            _metadata ??= new CopyOnWriteDictionary<string>(MSBuildNameIgnoreCaseComparer.Default);
+            _metadata.SetItems(metadata.Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value ?? string.Empty)));
+        }
+
         private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager()
         {
             if (_metadata == null)
