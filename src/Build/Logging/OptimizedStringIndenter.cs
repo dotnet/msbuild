@@ -8,8 +8,8 @@ using System.Buffers;
 using System.Runtime.CompilerServices;
 #else
 using System.Text;
-using Microsoft.Build.Framework;
 #endif
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd.Logging;
 
@@ -52,7 +52,7 @@ internal static class OptimizedStringIndenter
 #if NET7_0_OR_GREATER
     [SkipLocalsInit]
 #endif
-    internal static unsafe string IndentString(string? s, int indent)
+    internal static unsafe string IndentString(string? s, int indent, IReusableStringBuilderProvider stringBuilderProvider)
     {
         if (s is null)
         {
@@ -89,7 +89,7 @@ internal static class OptimizedStringIndenter
         });
 #pragma warning restore CS8500
 #else
-        StringBuilder builder = StringBuilderCache.Acquire(indentedStringLength);
+        StringBuilder builder = stringBuilderProvider.Acquire(indentedStringLength);
 
         foreach (StringSegment segment in segments)
         {
@@ -99,7 +99,7 @@ internal static class OptimizedStringIndenter
                 .AppendLine();
         }
 
-        string result = StringBuilderCache.GetStringAndRelease(builder);
+        string result = stringBuilderProvider.GetStringAndRelease(builder);
 #endif
 
         if (pooledArray is not null)
