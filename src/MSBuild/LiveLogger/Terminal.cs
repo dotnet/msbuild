@@ -30,7 +30,7 @@ internal sealed class Terminal : ITerminal
     /// </summary>
     private bool _isBuffering = false;
 
-    internal TextWriter Output { private get; set; } = Console.Out;
+    internal TextWriter Output { private get; set; }
 
     private const int BigUnknownDimension = 2 << 23;
 
@@ -66,6 +66,8 @@ internal sealed class Terminal : ITerminal
     {
         _originalOutputEncoding = Console.OutputEncoding;
         Console.OutputEncoding = Encoding.UTF8;
+
+        Output = Console.Out;
     }
 
     internal Terminal(TextWriter output)
