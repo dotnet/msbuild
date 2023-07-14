@@ -160,9 +160,7 @@ namespace Microsoft.Build.Exceptions
             string resourceName,
             params string[] args)
         {
-#if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             string errorCode;
             string helpKeyword;
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, resourceName, (object[])args);

@@ -466,9 +466,15 @@
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</comment>
   </data>
+<<<<<<< HEAD
   <data name="LoggingBeforeTaskInitialization" UESanitized="false" Visibility="Public">
     <value>MSB6005: Task attempted to log before it was initialized. Message was: {0}</value>
     <comment>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</comment>
+=======
+  <data name="General.TwoVectorsMustHaveSameLength">
+    <value>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</value>
+    <comment>{StrBegin="MSB3094: "}</comment>
+>>>>>>> main
   </data>
   <data name="FatalTaskError" xml:space="preserve">
     <value>MSB4018: The "{0}" task failed unexpectedly.</value>
@@ -1994,4 +2000,15 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</value>
     <comment>{StrBegin="MSB4120: "}</comment>
   </data>
+  <data name="CannotCopyFromElementOfThatType" xml:space="preserve">
+    <value>MSB4277: Cannot copy from object of that type.</value>
+    <comment>{StrBegin="MSB4277: "}</comment>
+  </data>
+  <!--
+        The Build message bucket is: MSB4000 - MSB4999
+
+        Next message code should be MSB4278
+
+        Don't forget to update this comment after using a new code.
+  -->
 </root>

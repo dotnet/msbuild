@@ -620,6 +620,7 @@
     <Compile Include="Logging\LoggerDescription.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Logging\OptimizedStringIndenter.cs" />
     <Compile Include="Logging\ParallelLogger\ParallelLoggerHelpers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -801,9 +802,5 @@
       <SubType>Designer</SubType>
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Collections\RetrievableEntryHashSet\Originals\*" />
   </ItemGroup>
 </Project>

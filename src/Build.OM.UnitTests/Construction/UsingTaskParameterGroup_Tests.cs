@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             UsingTaskParameterGroupElement parameterGroup = GetParameterGroupXml(s_contentEmptyParameterGroup);
             Assert.NotNull(parameterGroup);
             Assert.Equal(0, parameterGroup.Count);
-            Assert.Null(parameterGroup.Parameters.GetEnumerator().Current);
+            Assert.Empty(parameterGroup.Parameters);
         }
 
         /// <summary>
