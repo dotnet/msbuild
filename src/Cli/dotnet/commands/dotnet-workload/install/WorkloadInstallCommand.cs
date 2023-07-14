@@ -55,14 +55,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                      workloadResolver ?? _workloadResolver, Verbosity, _userProfileDir, VerifySignatures, PackageDownloader, _dotnetPath, TempDirectoryPath,
                                      _packageSourceLocation, RestoreActionConfiguration, elevationRequired: !_printDownloadLinkOnly && string.IsNullOrWhiteSpace(_downloadToCacheOption));
 
-            bool displayManifestUpdates = false;
-            if (Verbosity.IsDetailedOrDiagnostic())
-            {
-                displayManifestUpdates = true;
-            }
             _workloadManifestUpdater = _workloadManifestUpdaterFromConstructor ?? new WorkloadManifestUpdater(Reporter, workloadResolver ?? _workloadResolver, PackageDownloader, _userProfileDir, TempDirectoryPath,
-                _workloadInstaller.GetWorkloadInstallationRecordRepository(), (IWorkloadManifestInstaller)_workloadInstaller, _packageSourceLocation, displayManifestUpdates: displayManifestUpdates);
-
+                _workloadInstaller.GetWorkloadInstallationRecordRepository(), _workloadInstaller, _packageSourceLocation, displayManifestUpdates: Verbosity.IsDetailedOrDiagnostic());
 
             ValidateWorkloadIdsInput();
         }
@@ -74,14 +68,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 if (!availableWorkloads.Select(workload => workload.Id.ToString()).Contains(workloadId))
                 {
-                    if (_workloadResolver.IsPlatformIncompatibleWorkload(new WorkloadId(workloadId)))
-                    {
-                        throw new GracefulException(string.Format(LocalizableStrings.WorkloadNotSupportedOnPlatform, workloadId), isUserError: false);
-                    }
-                    else
-                    {
-                        throw new GracefulException(string.Format(LocalizableStrings.WorkloadNotRecognized, workloadId), isUserError: false);
-                    }
+                    var exceptionMessage = _workloadResolver.IsPlatformIncompatibleWorkload(new WorkloadId(workloadId)) ?
+                        LocalizableStrings.WorkloadNotSupportedOnPlatform : LocalizableStrings.WorkloadNotRecognized;
+
+                    throw new GracefulException(string.Format(exceptionMessage, workloadId), isUserError: false);
                 }
             }
         }
@@ -208,16 +198,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IEnumerable<PackInfo> workloadPackToInstall = new List<PackInfo>();
             IEnumerable<WorkloadId> newWorkloadInstallRecords = new List<WorkloadId>();
 
-            var transaction = new CliTransaction();
-
-            transaction.RollbackStarted = () =>
+            var transaction = new CliTransaction
             {
-                Reporter.WriteLine(LocalizableStrings.RollingBackInstall);
-            };
-            // Don't hide the original error if roll back fails, but do log the rollback failure
-            transaction.RollbackFailed = ex =>
-            {
-                Reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message));
+                RollbackStarted = () => Reporter.WriteLine(LocalizableStrings.RollingBackInstall),
+                // Don't hide the original error if roll back fails, but do log the rollback failure
+                RollbackFailed = ex => Reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message))
             };
 
             transaction.Run(

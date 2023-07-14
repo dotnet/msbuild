@@ -17,8 +17,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 {
     public class GivenADotnetFirstTimeUseConfigurer
     {
-        private const string CliFallbackFolderPath = "some path";
-
         private Mock<IFirstTimeUseNoticeSentinel> _firstTimeUseNoticeSentinelMock;
         private Mock<IAspNetCertificateSentinel> _aspNetCertificateSentinelMock;
         private Mock<IAspNetCoreCertificateGenerator> _aspNetCoreCertificateGeneratorMock;
@@ -54,7 +52,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     nologo: false
                 ),
                 _reporterMock.Object,
-                CliFallbackFolderPath,
                 _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
@@ -81,7 +78,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     nologo: false
                 ),
                 _reporterMock.Object,
-                CliFallbackFolderPath,
                 _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
@@ -108,7 +104,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     nologo: false
                 ),
                 _reporterMock.Object,
-                CliFallbackFolderPath,
                 _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
@@ -135,7 +130,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     nologo: false
                 ),
                 _reporterMock.Object,
-                CliFallbackFolderPath,
                 _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
@@ -162,7 +156,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     nologo: false
                 ),
                 _reporterMock.Object,
-                CliFallbackFolderPath,
                 _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
@@ -188,7 +181,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     nologo: false
                 ),
                 _reporterMock.Object,
-                CliFallbackFolderPath,
                 _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
@@ -214,7 +206,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     nologo: false
                 ),
                 _reporterMock.Object,
-                CliFallbackFolderPath,
                 _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
@@ -239,7 +230,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     nologo: false
                 ),
                 _reporterMock.Object,
-                CliFallbackFolderPath,
                 _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
@@ -263,7 +253,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     nologo: false
                 ),
                 _reporterMock.Object,
-                CliFallbackFolderPath,
                 _pathAdderMock.Object);
 
             dotnetFirstTimeUseConfigurer.Configure();
@@ -291,7 +280,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     nologo: false
                 ),
                 _reporterMock.Object,
-                CliFallbackFolderPath,
                 _pathAdderMock.Object,
                 measurements);
 
@@ -331,7 +319,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     nologo: false
                 ),
                 _reporterMock.Object,
-                CliFallbackFolderPath,
                 _pathAdderMock.Object,
                 measurements);
 

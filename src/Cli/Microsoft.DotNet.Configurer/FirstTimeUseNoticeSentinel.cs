@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Configurer
     {
         public static readonly string SENTINEL = $"{Product.Version}.dotnetFirstUseSentinel";
 
-        private string _dotnetUserProfileFolderPath;
+        private readonly string _dotnetUserProfileFolderPath;
         private readonly IFileSystem _fileSystem;
 
         private string SentinelPath => Path.Combine(_dotnetUserProfileFolderPath, SENTINEL);
