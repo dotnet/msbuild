@@ -101,7 +101,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            _consoleOutputAligner = new ConsoleOutputAligner(_bufferWidth, _alignMessages, (IReusableStringBuilderProvider)this);
+            _consoleOutputAligner = new ConsoleOutputAligner(_bufferWidth, _alignMessages, (IStringBuilderProvider)this);
         }
 
         #endregion

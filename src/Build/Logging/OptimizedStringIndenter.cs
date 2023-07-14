@@ -52,7 +52,7 @@ internal static class OptimizedStringIndenter
 #if NET7_0_OR_GREATER
     [SkipLocalsInit]
 #endif
-    internal static unsafe string IndentString(string? s, int indent, IReusableStringBuilderProvider stringBuilderProvider)
+    internal static unsafe string IndentString(string? s, int indent, IStringBuilderProvider stringBuilderProvider)
     {
         if (s is null)
         {

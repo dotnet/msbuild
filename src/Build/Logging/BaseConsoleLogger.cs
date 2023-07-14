@@ -26,7 +26,7 @@ namespace Microsoft.Build.BackEnd.Logging
     internal delegate void WriteLinePrettyFromResourceDelegate(int indentLevel, string resourceString, params object[] args);
     #endregion
 
-    internal abstract class BaseConsoleLogger : INodeLogger, IReusableStringBuilderProvider
+    internal abstract class BaseConsoleLogger : INodeLogger, IStringBuilderProvider
     {
         #region Properties
 
@@ -132,7 +132,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="indent">Depth to indent.</param>
         internal string IndentString(string s, int indent)
         {
-            return OptimizedStringIndenter.IndentString(s, indent, (IReusableStringBuilderProvider)this);
+            return OptimizedStringIndenter.IndentString(s, indent, (IStringBuilderProvider)this);
         }
 
         /// <summary>
@@ -1191,7 +1191,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// Since logging messages are processed serially, we can use a single StringBuilder wherever needed.
-        /// It should not be done directly, but rather through the <see cref="IReusableStringBuilderProvider"/> interface methods.
+        /// It should not be done directly, but rather through the <see cref="IStringBuilderProvider"/> interface methods.
         /// </summary>
         private StringBuilder _sharedStringBuilder = new StringBuilder(0x100);
 
@@ -1244,7 +1244,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Since logging messages are processed serially, we can reuse a single StringBuilder wherever needed.
         /// </summary>
-        StringBuilder IReusableStringBuilderProvider.Acquire(int capacity)
+        StringBuilder IStringBuilderProvider.Acquire(int capacity)
         {
             StringBuilder shared = Interlocked.Exchange(ref _sharedStringBuilder, null);
 
@@ -1299,7 +1299,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Acquired StringBuilder must be returned before next use.
         /// Unbalanced releases are not supported.
         /// </summary>
-        string IReusableStringBuilderProvider.GetStringAndRelease(StringBuilder builder)
+        string IStringBuilderProvider.GetStringAndRelease(StringBuilder builder)
         {
             // This is not supposed to be used concurrently. One method is expected to return it before next acquire.
             // But just for sure if _sharedBuilder was already returned, keep the former.

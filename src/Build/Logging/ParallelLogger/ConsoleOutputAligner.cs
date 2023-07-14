@@ -21,7 +21,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         private readonly int _bufferWidth;
         private readonly bool _alignMessages;
-        private readonly IReusableStringBuilderProvider _stringBuilderProvider;
+        private readonly IStringBuilderProvider _stringBuilderProvider;
 
         /// <summary>
         /// Constructor.
@@ -29,7 +29,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="bufferWidth">Console buffer width. -1 if unknown/unlimited</param>
         /// <param name="alignMessages">Whether messages are aligned/wrapped into console buffer width</param>
         /// <param name="stringBuilderProvider"></param>
-        public ConsoleOutputAligner(int bufferWidth, bool alignMessages, IReusableStringBuilderProvider stringBuilderProvider)
+        public ConsoleOutputAligner(int bufferWidth, bool alignMessages, IStringBuilderProvider stringBuilderProvider)
         {
             _bufferWidth = bufferWidth;
             _alignMessages = alignMessages;
