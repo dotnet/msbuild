@@ -157,6 +157,11 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("ll")]
+        [InlineData("LL")]
+        [InlineData("livelogger")]
+        [InlineData("LiveLogger")]
+        [InlineData("LIVELOGGER")]
         [InlineData("tl")]
         [InlineData("TL")]
         [InlineData("terminallogger")]
