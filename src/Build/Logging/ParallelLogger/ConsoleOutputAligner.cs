@@ -3,6 +3,7 @@
 
 using System;
 using System.Text;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Logging
@@ -18,19 +19,21 @@ namespace Microsoft.Build.BackEnd.Logging
     {
         internal const int ConsoleTabWidth = 8;
 
-        private readonly StringBuilder _reusedStringBuilder = new(1024);
         private readonly int _bufferWidth;
         private readonly bool _alignMessages;
+        private readonly IReusableStringBuilderProvider _stringBuilderProvider;
 
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="bufferWidth">Console buffer width. -1 if unknown/unlimited</param>
         /// <param name="alignMessages">Whether messages are aligned/wrapped into console buffer width</param>
-        public ConsoleOutputAligner(int bufferWidth, bool alignMessages)
+        /// <param name="stringBuilderProvider"></param>
+        public ConsoleOutputAligner(int bufferWidth, bool alignMessages, IReusableStringBuilderProvider stringBuilderProvider)
         {
             _bufferWidth = bufferWidth;
             _alignMessages = alignMessages;
+            _stringBuilderProvider = stringBuilderProvider;
         }
 
         /// <summary>
@@ -50,9 +53,12 @@ namespace Microsoft.Build.BackEnd.Logging
             int i = 0;
             int j = message.IndexOfAny(MSBuildConstants.CrLf);
 
-            StringBuilder sb = _reusedStringBuilder;
-            // prepare reused StringBuilder instance for new use.
-            sb.Length = 0;
+            // Empiric value of average line length in console output. Used to estimate number of lines in message for StringBuilder capacity.
+            // Wrongly estimated capacity is not a problem as StringBuilder will grow as needed. It is just optimization to avoid multiple reallocations.
+            const int averageLineLength = 40;
+            int estimatedCapacity = message.Length + ((prefixAlreadyWritten ? 0 : prefixWidth)  + Environment.NewLine.Length) * (message.Length / averageLineLength + 1);
+            StringBuilder sb = _stringBuilderProvider.Acquire(estimatedCapacity);
+
             // The string contains new lines, treat each new line as a different string to format and send to the console
             while (j >= 0)
             {
@@ -64,7 +70,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // Process rest of message
             AlignAndIndentLineOfMessage(sb, prefixAlreadyWritten, prefixWidth, message, i, message.Length - i);
 
-            return sb.ToString();
+            return _stringBuilderProvider.GetStringAndRelease(sb);
         }
 
         /// <summary>
