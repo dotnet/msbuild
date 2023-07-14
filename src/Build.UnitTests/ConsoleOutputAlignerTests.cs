@@ -375,7 +375,7 @@ namespace Microsoft.Build.UnitTests
             output.ShouldBe(expected);
         }
 
-        private sealed class TestStringBuilderProvider : IReusableStringBuilderProvider
+        private sealed class TestStringBuilderProvider : IStringBuilderProvider
         {
             public StringBuilder Acquire(int capacity) => new StringBuilder(capacity);
             public string GetStringAndRelease(StringBuilder builder) => builder.ToString();
