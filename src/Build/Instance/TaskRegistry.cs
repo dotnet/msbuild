@@ -150,14 +150,14 @@ namespace Microsoft.Build.Execution
         /// keyed by the task name declared.
         /// Task name may be qualified or not.
         /// This field may be null.
-        /// This is not expected to be accessed concurrently for writes and reads - so no need for a concurrent dictionary.
+        /// This is expected to be modified only during initialization via a single call, and all reads will occur only after the initialization is done - so no need for a concurrent dictionary.
         /// </summary>
         private Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> _taskRegistrations;
 
         /// <summary>
         /// Create another set containing architecture-specific task entries.
         ///  Then when we look for them, check if the name exists in that.
-        /// This is not expected to be accessed concurrently for writes and reads - so no need for a concurrent dictionary.
+        /// This is expected to be modified only during initialization via a single call, and all reads will occur only after the initialization is done - so no need for a concurrent dictionary.
         /// </summary>
         private readonly Dictionary<string, List<RegisteredTaskRecord>> _overriddenTasks = new Dictionary<string, List<RegisteredTaskRecord>>();
 
@@ -297,7 +297,7 @@ namespace Microsoft.Build.Execution
         {
             ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile, nameof(directoryOfImportingFile));
 #if DEBUG
-            ErrorUtilities.VerifyThrowInternalError(!taskRegistry._isInitialized, "Attempt to modify TaskFactory after it was initialized.");
+            ErrorUtilities.VerifyThrowInternalError(!taskRegistry._isInitialized, "Attempt to modify TaskRegistry after it was initialized.");
 #endif
 
             if (!ConditionEvaluator.EvaluateCondition(
@@ -467,7 +467,7 @@ namespace Microsoft.Build.Execution
             ElementLocation elementLocation)
         {
 #if DEBUG
-            ErrorUtilities.VerifyThrowInternalError(_isInitialized, "Attempt to read from TaskFactory before its initialization was finished.");
+            ErrorUtilities.VerifyThrowInternalError(_isInitialized, "Attempt to read from TaskRegistry before its initialization was finished.");
 #endif
             TaskFactoryWrapper taskFactory = null;
 
