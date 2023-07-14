@@ -14,7 +14,7 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 /// </summary>
 internal sealed class NodesFrame
 {
-    private readonly List<string> _nodeStrings = new();
+    private readonly NodeStatus[] _nodes;
     private readonly StringBuilder _renderBuilder = new();
 
     public int Width { get; }
@@ -25,54 +25,36 @@ internal sealed class NodesFrame
     {
         Width = width;
         Height = height;
-        Init(nodes);
+
+        _nodes = new NodeStatus[nodes.Length];
+
+            foreach (NodeStatus? status in nodes)
+            {
+                if (status is not null)
+                {
+                    _nodes[NodesCount++] = status;
+                }
+            }
     }
 
-    public string NodeString(int index)
+    private ReadOnlySpan<char> RenderNodeStatus(NodeStatus status)
     {
-        if (index >= NodesCount)
+        string durationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+            "DurationDisplay",
+            status.Stopwatch.Elapsed.TotalSeconds);
+
+        int totalWidth = TerminalLogger.Indentation.Length +
+                         status.Project.Length + 1 +
+                         (status.TargetFramework?.Length ?? -1) + 1 +
+                         status.Target.Length + 1 +
+                         durationString.Length;
+
+        if (Width > totalWidth)
         {
-            throw new ArgumentOutOfRangeException(nameof(index));
+            return $"{TerminalLogger.Indentation}{status.Project} {status.TargetFramework} {status.Target} {durationString}".AsSpan();
         }
 
-        return _nodeStrings[index];
-    }
-
-    private void Init(NodeStatus?[] nodes)
-    {
-        int i = 0;
-        foreach (NodeStatus? n in nodes)
-        {
-            if (n is null)
-            {
-                continue;
-            }
-            string str = n.ToString();
-
-            if (i < _nodeStrings.Count)
-            {
-                _nodeStrings[i] = str;
-            }
-            else
-            {
-                _nodeStrings.Add(str);
-            }
-            i++;
-
-            // We cant output more than what fits on screen
-            // -2 because cursor command F cant reach, in Windows Terminal, very 1st line, and last line is empty caused by very last WriteLine
-            if (i >= Height - 2)
-            {
-                break;
-            }
-        }
-
-        NodesCount = i;
-    }
-
-    private ReadOnlySpan<char> FitToWidth(ReadOnlySpan<char> input)
-    {
-        return input.Slice(0, Math.Min(input.Length, Width - 1));
+        return string.Empty.AsSpan();
     }
 
     /// <summary>
@@ -86,12 +68,12 @@ internal sealed class NodesFrame
         int i = 0;
         for (; i < NodesCount; i++)
         {
-            var needed = FitToWidth(NodeString(i).AsSpan());
+            var needed = RenderNodeStatus(_nodes[i]);
 
             // Do we have previous node string to compare with?
             if (previousFrame.NodesCount > i)
             {
-                var previous = FitToWidth(previousFrame.NodeString(i).AsSpan());
+                var previous = RenderNodeStatus(previousFrame._nodes[i]);
 
                 if (!previous.SequenceEqual(needed))
                 {
