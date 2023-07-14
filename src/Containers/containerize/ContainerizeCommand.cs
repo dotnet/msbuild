@@ -63,7 +63,6 @@ internal class ContainerizeCommand : CliRootCommand
     internal CliOption<string[]> EntrypointOption { get; } = new("--entrypoint")
     {
         Description = "The entrypoint application of the container.",
-        Required = true,
         AllowMultipleArgumentsPerToken = true
     };
 
@@ -73,21 +72,38 @@ internal class ContainerizeCommand : CliRootCommand
         AllowMultipleArgumentsPerToken = true
     };
 
+    internal CliOption<string[]> DefaultArgsOption { get; } = new CliOption<string[]>("--defaultargs")
+    {
+        Description = "Default arguments passed. These can be overridden by the user when the container is created.",
+        AllowMultipleArgumentsPerToken = true
+    };
+
+    internal CliOption<string[]> AppCommandOption { get; } = new("--appcommand")
+    {
+        Description = "The file name and arguments that launch the application. For example: ['dotnet', 'app.dll'].",
+        AllowMultipleArgumentsPerToken = true
+    };
+
+    internal CliOption<string[]> AppCommandArgsOption { get; } = new("--appcommandargs")
+    {
+        Description = "Arguments always passed to the application.",
+        AllowMultipleArgumentsPerToken = true
+    };
+
+    internal CliOption<string> AppCommandInstructionOption { get; } = new CliOption<string>("--appcommandinstruction")
+    {
+        Description = "The Dockerfile instruction used for AppCommand. Can be set to 'DefaultArgs', 'Entrypoint', 'None', '' (default)."
+    };
+
     internal CliOption<string> LocalRegistryOption { get; } = new CliOption<string>("--localregistry")
     {
-        Description = "The local registry to push to"
+        Description = "The local registry to push to."
     };
 
     internal CliOption<Dictionary<string, string>> LabelsOption { get; } = new("--labels")
     {
         Description = "Labels that the image configuration will include in metadata.",
         CustomParser = result => ParseDictionary(result, errorMessage: "Incorrectly formatted labels: "),
-        AllowMultipleArgumentsPerToken = true
-    };
-
-    internal CliOption<string[]> CmdOption { get; } = new CliOption<string[]>("--cmd")
-    {
-        Description = "The Cmd of the container image.",
         AllowMultipleArgumentsPerToken = true
     };
 
@@ -177,7 +193,10 @@ internal class ContainerizeCommand : CliRootCommand
         this.Options.Add(WorkingDirectoryOption);
         this.Options.Add(EntrypointOption);
         this.Options.Add(EntrypointArgsOption);
-        this.Options.Add(CmdOption);
+        this.Options.Add(DefaultArgsOption);
+        this.Options.Add(AppCommandOption);
+        this.Options.Add(AppCommandArgsOption);
+        this.Options.Add(AppCommandInstructionOption);
         this.Options.Add(LabelsOption);
         this.Options.Add(PortsOption);
         this.Options.Add(EnvVarsOption);
@@ -197,9 +216,12 @@ internal class ContainerizeCommand : CliRootCommand
             string _name = parseResult.GetValue(RepositoryOption)!;
             string[] _tags = parseResult.GetValue(ImageTagsOption)!;
             string _workingDir = parseResult.GetValue(WorkingDirectoryOption)!;
-            string[] _entrypoint = parseResult.GetValue(EntrypointOption)!;
-            string[]? _cmdArgs = parseResult.GetValue(CmdOption);
-            string[]? _entrypointArgs = parseResult.GetValue(EntrypointArgsOption);
+            string[] _entrypoint = parseResult.GetValue(EntrypointOption) ?? Array.Empty<string>();
+            string[] _entrypointArgs = parseResult.GetValue(EntrypointArgsOption) ?? Array.Empty<string>();
+            string[] _defaultArgs = parseResult.GetValue(DefaultArgsOption) ?? Array.Empty<string>();
+            string[] _appCommand = parseResult.GetValue(AppCommandOption) ?? Array.Empty<string>();
+            string[] _appCommandArgs = parseResult.GetValue(AppCommandArgsOption) ?? Array.Empty<string>();
+            string _appCommandInstruction = parseResult.GetValue(AppCommandInstructionOption) ?? "";
             Dictionary<string, string> _labels = parseResult.GetValue(LabelsOption) ?? new Dictionary<string, string>();
             Port[]? _ports = parseResult.GetValue(PortsOption);
             Dictionary<string, string> _envVars = parseResult.GetValue(EnvVarsOption) ?? new Dictionary<string, string>();
@@ -220,7 +242,11 @@ internal class ContainerizeCommand : CliRootCommand
                 _baseName,
                 _baseTag,
                 _entrypoint,
-                _cmdArgs,
+                _entrypointArgs,
+                _defaultArgs,
+                _appCommand,
+                _appCommandArgs,
+                _appCommandInstruction,
                 _name,
                 _tags,
                 _outputReg,

@@ -54,14 +54,12 @@ namespace Microsoft.DotNet.Cli
                 return;
             }
 
+            var manifestInfoDict =  workloadInfoHelper.WorkloadResolver.GetInstalledManifests().ToDictionary(info => info.Id, StringComparer.OrdinalIgnoreCase);
 
             foreach (var workload in installedWorkloads.AsEnumerable())
             {
                 var workloadManifest = workloadInfoHelper.WorkloadResolver.GetManifestFromWorkload(new WorkloadId(workload.Key));
-                var workloadFeatureBand = new WorkloadManifestInfo(
-                    workloadManifest.Id,
-                    workloadManifest.Version,
-                    Path.GetDirectoryName(workloadManifest.ManifestPath)!).ManifestFeatureBand;
+                var workloadFeatureBand = manifestInfoDict[workloadManifest.Id].ManifestFeatureBand;
 
                 const int align = 10;
                 const string separator = "   ";

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
@@ -35,5 +36,37 @@ namespace Microsoft.DotNet.GenAPI
 
         public static bool IsDefaultMemberAttribute(this AttributeData attribute) =>
              attribute.AttributeClass?.ToDisplayString() == typeof(DefaultMemberAttribute).FullName;
+
+        private static readonly HashSet<string> _reservedTypes = new(StringComparer.Ordinal)
+        {
+            "DynamicAttribute",
+            "IsReadOnlyAttribute",
+            "IsUnmanagedAttribute",
+            "IsByRefLikeAttribute",
+            "TupleElementNamesAttribute",
+            "NullableAttribute",
+            "NullableContextAttribute",
+            "NullablePublicOnlyAttribute",
+            "NativeIntegerAttribute",
+            "ExtensionAttribute",
+            "RequiredMemberAttribute",
+            "ScopedRefAttribute",
+            "RefSafetyRulesAttribute"
+        };
+
+        /// <summary>
+        /// Determines if an attribute is a reserved attribute class -- these are attributes that may
+        /// only be applied by the compiler and are an error to be applied by the user in source.
+        /// See https://github.com/dotnet/roslyn/blob/b8f6dd56f1a0860fcd822bc1e70bec56dc1e97ea/src/Compilers/CSharp/Portable/Symbols/Symbol.cs#L1421
+        /// </summary>
+        /// <param name="attribute">The attribute to check</param>
+        /// <returns>True if the attribute type is reserved.</returns>
+        public static bool IsReserved(this AttributeData attribute)
+        {
+            INamedTypeSymbol? attributeClass = attribute.AttributeClass;
+
+            return attributeClass != null && _reservedTypes.Contains(attributeClass.Name) &&
+                attributeClass.ContainingNamespace.ToDisplayString().Equals("System.Runtime.CompilerServices", StringComparison.Ordinal);
+        }
     }
 }

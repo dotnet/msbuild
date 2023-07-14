@@ -953,8 +953,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1050: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
-        <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="translated">NETSDK1045: Das aktuelle .NET SDK unterstützt {0} {1} nicht als Ziel. Geben Sie entweder {0} {2} oder niedriger als Ziel an, oder verwenden Sie eine .NET SDK-Version, die {0} {1} unterstützt.</target>
+        <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}. Download the .NET SDK from https://aka.ms/dotnet/download</source>
+        <target state="needs-review-translation">NETSDK1045: Das aktuelle .NET SDK unterstützt {0} {1} nicht als Ziel. Geben Sie entweder {0} {2} oder niedriger als Ziel an, oder verwenden Sie eine .NET SDK-Version, die {0} {1} unterstützt.</target>
         <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifier">
@@ -966,6 +966,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1200: If UseArtifactsPath is set to true and ArtifactsPath is not set, there must be a Directory.Build.props file in order to determine where the artifacts folder should be located.</source>
         <target state="new">NETSDK1200: If UseArtifactsPath is set to true and ArtifactsPath is not set, there must be a Directory.Build.props file in order to determine where the artifacts folder should be located.</target>
         <note>{StrBegin="NETSDK1200: "}</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedVisualStudioVersion">
+        <source>NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</source>
+        <target state="new">NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</target>
+        <note>{StrBegin="NETSDK1209: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">
         <source>NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</source>

@@ -120,4 +120,7 @@
   <data name="BreakingChangesFoundRegenerateSuppressionFileCommandHelp" xml:space="preserve">
     <value>API breaking changes found. If those are intentional, the APICompat suppression file can be updated by rebuilding with '/p:ApiCompatGenerateSuppressionFile=true'</value>
   </data>
+  <data name="UnnecessarySuppressionsFoundRegenerateSuppressionFileCommandHelp" xml:space="preserve">
+    <value>Unnecessary suppressions found. The APICompat suppression file can be updated by rebuilding with '/p:ApiCompatGenerateSuppressionFile=true'</value>
+  </data>
 </root>

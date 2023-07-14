@@ -37,11 +37,6 @@ namespace Microsoft.DotNet.ApiCompat.Task
         public string? RuntimeGraph { get; set; }
 
         /// <summary>
-        /// A NoWarn string contains the error codes that should be ignored.
-        /// </summary>
-        public string? NoWarn { get; set; }
-
-        /// <summary>
         /// If true, includes both internal and public API.
         /// </summary>
         public bool RespectInternals { get; set; }
@@ -67,17 +62,17 @@ namespace Microsoft.DotNet.ApiCompat.Task
         public bool RunApiCompat { get; set; } = true;
 
         /// <summary>
-        /// Enables strict mode api comparison checks enqueued by the compatible tfm validator.
+        /// Validates api compatibility in strict mode for contract and implementation assemblies for all compatible target frameworks.
         /// </summary>
-        public bool EnableStrictModeForCompatibleTfms { get; set; }
+        public bool EnableStrictModeForCompatibleTfms { get; set; } = true;
 
         /// <summary>
-        /// Enables strict mode api comparison checks enqueued by the compatible framework in package validator.
+        /// Validates api compatibility in strict mode for assemblies that are compatible based on their target framework.
         /// </summary>
         public bool EnableStrictModeForCompatibleFrameworksInPackage { get; set; }
 
         /// <summary>
-        /// Enables strict mode api comparison checks enqueued by the baseline package validator.
+        /// Validates api compatibility in strict mode for package baseline checks.
         /// </summary>
         public bool EnableStrictModeForBaselineValidation { get; set; }
 
@@ -92,6 +87,16 @@ namespace Microsoft.DotNet.ApiCompat.Task
         public bool GenerateSuppressionFile { get; set; }
 
         /// <summary>
+        /// If true, preserves unnecessary suppressions when re-generating the suppression file.
+        /// </summary>
+        public bool PreserveUnnecessarySuppressions { get; set; }
+
+        /// <summary>
+        /// If true, permits unnecessary suppressions in the suppression file.
+        /// </summary>
+        public bool PermitUnnecessarySuppressions { get; set; }
+
+        /// <summary>
         /// The path to suppression files. If provided, the suppressions are read and stored.
         /// </summary>
         public string[]? SuppressionFiles { get; set; }
@@ -100,6 +105,11 @@ namespace Microsoft.DotNet.ApiCompat.Task
         /// The path to the suppression output file that is written to, when <see cref="GenerateSuppressionFile"/> is true.
         /// </summary>
         public string? SuppressionOutputFile { get; set; }
+
+        /// <summary>
+        /// A NoWarn string contains the error codes that should be ignored.
+        /// </summary>
+        public string? NoWarn { get; set; }
 
         /// <summary>
         /// Assembly references grouped by target framework, for the assets inside the package.
@@ -129,6 +139,8 @@ namespace Microsoft.DotNet.ApiCompat.Task
             Func<ISuppressionEngine, SuppressableMSBuildLog> logFactory = (suppressionEngine) => new(Log, suppressionEngine);
             ValidatePackage.Run(logFactory,
                 GenerateSuppressionFile,
+                PreserveUnnecessarySuppressions,
+                PermitUnnecessarySuppressions,
                 SuppressionFiles,
                 SuppressionOutputFile,
                 NoWarn,

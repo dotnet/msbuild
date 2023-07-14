@@ -127,6 +127,7 @@ namespace Microsoft.DotNet.ApiSymbolExtensions.Tests
         private static IEnumerable<MetadataReference> DefaultReferences { get; } = new[]
         {
             MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(DynamicAttribute).Assembly.Location),
         };
     }
 }

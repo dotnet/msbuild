@@ -192,10 +192,13 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 File.WriteAllText(Path.Combine(AdManifestPath, "AdvertisedManifestFeatureBand.txt"), currentFeatureBand);
             }
 
-            var manifestDirs = expectedManifestUpdates.Select(manifest => Path.Combine(testDir, "dotnet", "sdk-manifests", manifest.ExistingFeatureBand, manifest.ManifestId.ToString(), "WorkloadManifest.json"))
-                .Concat(expectedManifestNotUpdated.Select(manifest => Path.Combine(testDir, "dotnet", "sdk-manifests", currentFeatureBand, manifest.ToString(), "WorkloadManifest.json")))
+            var manifestInfo = expectedManifestUpdates.Select(
+                    manifest => (manifest.ManifestId.ToString(), Path.Combine(testDir, "dotnet", "sdk-manifests", manifest.ExistingFeatureBand, manifest.ManifestId.ToString(), "WorkloadManifest.json"), manifest.ExistingFeatureBand))
+                .Concat(expectedManifestNotUpdated.Select(
+                    manifestId => (manifestId.ToString(), Path.Combine(testDir, "dotnet", "sdk-manifests", currentFeatureBand, manifestId.ToString(), "WorkloadManifest.json"), currentFeatureBand)))
                 .ToArray();
-            var workloadManifestProvider = new MockManifestProvider(manifestDirs);
+
+            var workloadManifestProvider = new MockManifestProvider(manifestInfo);
             workloadManifestProvider.SdkFeatureBand = new SdkFeatureBand(currentFeatureBand);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, dotnetRoot);
@@ -231,7 +234,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             Directory.CreateDirectory(Path.Combine(installedManifestDir6_0_200, testManifestName));
             File.WriteAllText(Path.Combine(installedManifestDir6_0_200, testManifestName, _manifestFileName), GetManifestContent(new ManifestVersion("1.0.0")));
 
-            var workloadManifestProvider = new MockManifestProvider(Path.Combine(installedManifestDir6_0_200, testManifestName, _manifestFileName))
+            string manifestPath = Path.Combine(installedManifestDir6_0_200, testManifestName, _manifestFileName);
+
+            var workloadManifestProvider = new MockManifestProvider((testManifestName, manifestPath, "6.0.200"))
             {
                 SdkFeatureBand = new SdkFeatureBand(sdkFeatureBand)
             };
@@ -309,7 +314,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             Directory.CreateDirectory(Path.Combine(emptyInstalledManifestsDir, testManifestName));
             File.WriteAllText(Path.Combine(emptyInstalledManifestsDir, testManifestName, _manifestFileName), GetManifestContent(new ManifestVersion("1.0.0")));
 
-            var workloadManifestProvider = new MockManifestProvider(Path.Combine(emptyInstalledManifestsDir, testManifestName, _manifestFileName)) 
+            var workloadManifestProvider = new MockManifestProvider((testManifestName, Path.Combine(emptyInstalledManifestsDir, testManifestName, _manifestFileName), "6.0.200")) 
             {
                 SdkFeatureBand = new SdkFeatureBand(sdkFeatureBand)
             };        

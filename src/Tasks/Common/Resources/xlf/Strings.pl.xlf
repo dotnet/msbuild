@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="AotNotSupported">
         <source>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
-        <target state="translated">NETSDK1196: Zestaw SDK nie obsługuje kompilacji z wyprzedzeniem. Ustaw właściwość PublishAot na wartość false.</target>
+        <target state="new">NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</target>
         <note>{StrBegin="NETSDK1196: "}</note>
       </trans-unit>
       <trans-unit id="AotUnsupportedHostRuntimeIdentifier">
@@ -119,7 +119,7 @@
       </trans-unit>
       <trans-unit id="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework">
         <source>NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</source>
-        <target state="translated">NETSDK1205: Pakiet Microsoft.Net.Compilers.Toolset.Framework nie powinien być ustawiany bezpośrednio. Zamiast tego ustaw właściwość „BuildWithNetFrameworkHostedCompiler” na wartość „prawda”, jeśli jest to potrzebne.</target>
+        <target state="new">NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</target>
         <note>{StrBegin="NETSDK1205: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</note>
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
@@ -316,7 +316,7 @@
       </trans-unit>
       <trans-unit id="Crossgen2MissingRequiredMetadata">
         <source>NETSDK1158: Required '{0}' metadata missing on Crossgen2Tool item.</source>
-        <target state="translated">NETSDK1158: brak wymaganych metadanych "{0}" w elemencie Crossgen2Tool.</target>
+        <target state="new">NETSDK1158: Required '{0}' metadata missing on Crossgen2Tool item.</target>
         <note>{StrBegin="NETSDK1158: "}</note>
       </trans-unit>
       <trans-unit id="Crossgen2RequiresSelfContained">
@@ -336,7 +336,7 @@
       </trans-unit>
       <trans-unit id="Crossgen5CannotEmitSymbolsInCompositeMode">
         <source>NETSDK1166: Cannot emit symbols when publishing for .NET 5 with Crossgen2 using composite mode.</source>
-        <target state="translated">NETSDK1166: nie można emitować symboli podczas publikowania w przypadku platformy .NET 5 z Crossgen2 przy użyciu trybu złożonego.</target>
+        <target state="new">NETSDK1166: Cannot emit symbols when publishing for .NET 5 with Crossgen2 using composite mode.</target>
         <note>{StrBegin="NETSDK1166: "}</note>
       </trans-unit>
       <trans-unit id="CrossgenToolExecutableNotFound">
@@ -346,7 +346,7 @@
       </trans-unit>
       <trans-unit id="CrossgenToolMissingInPDBCompilationMode">
         <source>NETSDK1153: CrossgenTool not specified in PDB compilation mode.</source>
-        <target state="translated">NETSDK1153: nie określono elementu CrossgenTool w trybie kompilacji pliku PDB.</target>
+        <target state="new">NETSDK1153: CrossgenTool not specified in PDB compilation mode.</target>
         <note>{StrBegin="NETSDK1153: "}</note>
       </trans-unit>
       <trans-unit id="CrossgenToolMissingWhenUseCrossgen2IsNotSet">
@@ -386,7 +386,7 @@
       </trans-unit>
       <trans-unit id="DuplicatePublishOutputFiles">
         <source>NETSDK1152: Found multiple publish output files with the same relative path: {0}.</source>
-        <target state="translated">NETSDK1152: znaleziono wiele opublikowanych plików wyjściowych z taką samą ścieżką względną: {0}.</target>
+        <target state="new">NETSDK1152: Found multiple publish output files with the same relative path: {0}.</target>
         <note>{StrBegin="NETSDK1152: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
@@ -582,7 +582,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="MissingOutputPDBImagePath">
         <source>NETSDK1164: Missing output PDB path in PDB generation mode (OutputPDBImage metadata).</source>
-        <target state="translated">NETSDK1164: brak ścieżki wyjściowej pliku PDB w trybie generowania pliku PDB (metadane OutputPDBImage).</target>
+        <target state="new">NETSDK1164: Missing output PDB path in PDB generation mode (OutputPDBImage metadata).</target>
         <note>{StrBegin="NETSDK1164: "}</note>
       </trans-unit>
       <trans-unit id="MissingOutputR2RImageFileName">
@@ -702,12 +702,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageContainsIncorrectlyCasedLocale">
         <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
-        <target state="translated">NETSDK1187: Pakiet {0} {1} ma zasób z ustawieniami regionalnymi „{2}”. Te ustawienia regionalne zostały znormalizowane do standardowego formatu „{3}”, aby zapobiec problemom z wielkością liter w kompilacji. Rozważ powiadomienie autora pakietu o tym problemie z wielkością liter.</target>
+        <target state="new">NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</target>
         <note>{StrBegin="NETSDK1187: "} 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
       </trans-unit>
       <trans-unit id="PackageContainsUnknownLocale">
         <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
-        <target state="translated">NETSDK1188: Pakiet {0} {1} ma zasób z ustawieniami regionalnymi „{2}”. To ustawienie regionalne nie jest rozpoznawane przez platformę .NET. Rozważ powiadomienie autora pakietu, że prawdopodobnie używa on nieprawidłowych ustawień regionalnych.</target>
+        <target state="new">NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</target>
         <note>{StrBegin="NETSDK1188: "} 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
@@ -953,8 +953,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1050: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
-        <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="new">NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</target>
+        <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}. Download the .NET SDK from https://aka.ms/dotnet/download</source>
+        <target state="new">NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}. Download the .NET SDK from https://aka.ms/dotnet/download</target>
         <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifier">
@@ -969,8 +969,13 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">
         <source>NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</source>
-        <target state="translated">NETSDK1208: Identyfikator {0} platformy docelowej nie został rozpoznany. Jest to spowodowane tym, że parametr MSBuildEnableWorkloadResolver ma wartość false, co powoduje wyłączenie obciążeń zestawu .NET SDK wymaganych dla tego identyfikatora. Cofnij ustawienie tej zmiennej środowiskowej lub właściwości MSBuild, aby włączyć obciążenia.</target>
+        <target state="new">NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</target>
         <note>{StrBegin="NETSDK1208: "}</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedVisualStudioVersion">
+        <source>NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</source>
+        <target state="new">NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</target>
+        <note>{StrBegin="NETSDK1209: "}</note>
       </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
         <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>
@@ -979,7 +984,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UsingPreviewSdk">
         <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
-        <target state="translated">NETSDK1057: Korzystasz z wersji zapoznawczej platformy .NET. Zobacz: ttps://aka.ms/dotnet-support-policy</target>
+        <target state="new">NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">
@@ -1024,7 +1029,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WorkloadIsEol">
         <source>NETSDK1202: The workload '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</source>
-        <target state="translated">NETSDK1202: Obciążenie „{0}” nie jest obsługiwane i nie będzie otrzymywać aktualizacji zabezpieczeń w przyszłości. Aby uzyskać więcej informacji na temat zasad pomocy technicznej, zapoznaj się z {1} .</target>
+        <target state="new">NETSDK1202: The workload '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</target>
         <note>{StrBegin="NETSDK1202: "}</note>
       </trans-unit>
       <trans-unit id="WorkloadNotAvailable">

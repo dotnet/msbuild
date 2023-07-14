@@ -15,6 +15,8 @@ namespace Microsoft.DotNet.ApiCompat
     {
         public static void Run(Func<ISuppressionEngine, ISuppressableLog> logFactory,
             bool generateSuppressionFile,
+            bool preserveUnnecessarySuppressions,
+            bool permitUnnecessarySuppressions,
             string[]? suppressionFiles,
             string? suppressionOutputFile,
             string? noWarn,
@@ -34,7 +36,7 @@ namespace Microsoft.DotNet.ApiCompat
         {
             // Initialize the service provider
             ApiCompatServiceProvider serviceProvider = new(logFactory,
-                () => new SuppressionEngine(suppressionFiles, noWarn, generateSuppressionFile),
+                () => SuppressionFileHelper.CreateSuppressionEngine(suppressionFiles, noWarn, generateSuppressionFile),
                 (log) => new RuleFactory(log,
                     enableRuleAttributesMustMatch,
                     enableRuleCannotChangeParameterName),
@@ -85,8 +87,13 @@ namespace Microsoft.DotNet.ApiCompat
             {
                 SuppressionFileHelper.GenerateSuppressionFile(serviceProvider.SuppressionEngine,
                     serviceProvider.SuppressableLog,
+                    preserveUnnecessarySuppressions,
                     suppressionFiles,
                     suppressionOutputFile);
+            }
+            else if (!permitUnnecessarySuppressions)
+            {
+                SuppressionFileHelper.ValidateUnnecessarySuppressions(serviceProvider.SuppressionEngine, serviceProvider.SuppressableLog);
             }
         }
     }
