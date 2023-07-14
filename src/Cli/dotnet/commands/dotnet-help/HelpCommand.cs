@@ -5,7 +5,7 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
-using System.Linq;
+using System.IO;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Help
             {
                 psInfo = new ProcessStartInfo
                 {
-                    FileName = "cmd",
+                    FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe"),
                     Arguments = $"/c start {docUrl}"
                 };
             }
@@ -62,15 +62,19 @@ namespace Microsoft.DotNet.Tools.Help
             {
                 psInfo = new ProcessStartInfo
                 {
-                    FileName = "open",
+                    FileName = @"/usr/bin/open",
                     Arguments = docUrl
                 };
             }
             else
             {
+                var fileName = File.Exists(@"/usr/bin/xdg-open") ? @"/usr/bin/xdg-open" :
+                               File.Exists(@"/usr/sbin/xdg-open") ? @"/usr/sbin/xdg-open" :
+                               File.Exists(@"/sbin/xdg-open") ? @"/sbin/xdg-open" :
+                               "xdg-open";
                 psInfo = new ProcessStartInfo
                 {
-                    FileName = "xdg-open",
+                    FileName = fileName,
                     Arguments = docUrl
                 };
             }
