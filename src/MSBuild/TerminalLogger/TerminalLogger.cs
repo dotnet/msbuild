@@ -1,9 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Microsoft.Build.Framework;
@@ -52,35 +51,11 @@ internal sealed partial class TerminalLogger : INodeLogger
     }
 
     /// <summary>
-    /// Encapsulates the per-node data shown in live node output.
-    /// </summary>
-    internal record NodeStatus(string Project, string? TargetFramework, string Target, Stopwatch Stopwatch)
-    {
-        public override string ToString()
-        {
-            string duration = Stopwatch.Elapsed.TotalSeconds.ToString("F1");
-
-            return string.IsNullOrEmpty(TargetFramework)
-                ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectBuilding_NoTF",
-                    Indentation,
-                    Project,
-                    Target,
-                    duration)
-                : ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectBuilding_WithTF",
-                    Indentation,
-                    Project,
-                    AnsiCodes.Colorize(TargetFramework, TargetFrameworkColor),
-                    Target,
-                    duration);
-        }
-    }
-
-    /// <summary>
     /// The indentation to use for all build output.
     /// </summary>
-    private const string Indentation = "  ";
+    internal const string Indentation = "  ";
 
-    private const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
+    internal const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
 
     /// <summary>
     /// Protects access to state shared between the logger callbacks and the rendering thread.
