@@ -14,7 +14,10 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 /// </summary>
 internal sealed class NodesFrame
 {
+    private const int MaxColumn = 120;
+
     private readonly NodeStatus[] _nodes;
+
     private readonly StringBuilder _renderBuilder = new();
 
     public int Width { get; }
@@ -23,38 +26,58 @@ internal sealed class NodesFrame
 
     public NodesFrame(NodeStatus?[] nodes, int width, int height)
     {
-        Width = width;
+        Width = Math.Min(width, MaxColumn);
         Height = height;
 
         _nodes = new NodeStatus[nodes.Length];
 
-            foreach (NodeStatus? status in nodes)
+        foreach (NodeStatus? status in nodes)
+        {
+            if (status is not null)
             {
-                if (status is not null)
-                {
-                    _nodes[NodesCount++] = status;
-                }
+                _nodes[NodesCount++] = status;
             }
+        }
     }
 
-    private ReadOnlySpan<char> RenderNodeStatus(NodeStatus status)
+    internal ReadOnlySpan<char> RenderNodeStatus(NodeStatus status)
     {
         string durationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
             "DurationDisplay",
             status.Stopwatch.Elapsed.TotalSeconds);
 
-        int totalWidth = TerminalLogger.Indentation.Length +
-                         status.Project.Length + 1 +
-                         (status.TargetFramework?.Length ?? -1) + 1 +
-                         status.Target.Length + 1 +
-                         durationString.Length;
+        string project = status.Project;
+        string? targetFramework = status.TargetFramework;
+        string target = status.Target;
 
-        if (Width > totalWidth)
+        int renderedWidth = Length(durationString, project, targetFramework, target);
+
+        if (renderedWidth > Width)
         {
-            return $"{TerminalLogger.Indentation}{status.Project} {status.TargetFramework} {status.Target} {durationString}".AsSpan();
+            renderedWidth -= target.Length;
+            target = string.Empty;
+
+            if (renderedWidth > Width)
+            {
+                int lastDotInProject = project.LastIndexOf('.');
+                renderedWidth -= lastDotInProject;
+                project = project.Substring(lastDotInProject + 1);
+
+                if (renderedWidth > Width)
+                {
+                    return project.AsSpan();
+                }
+            }
         }
 
-        return string.Empty.AsSpan();
+        return $"{TerminalLogger.Indentation}{project}{(targetFramework is null ? string.Empty : " ")}{AnsiCodes.Colorize(targetFramework, TerminalLogger.TargetFrameworkColor)} {AnsiCodes.SetCursorHorizontal(MaxColumn)}{AnsiCodes.MoveCursorBackward(target.Length + durationString.Length + 1)}{target} {durationString}".AsSpan();
+
+        static int Length(string durationString, string project, string? targetFramework, string target) =>
+                TerminalLogger.Indentation.Length +
+                project.Length + 1 +
+                (targetFramework?.Length ?? -1) + 1 +
+                target.Length + 1 +
+                durationString.Length;
     }
 
     /// <summary>
@@ -68,33 +91,22 @@ internal sealed class NodesFrame
         int i = 0;
         for (; i < NodesCount; i++)
         {
-            var needed = RenderNodeStatus(_nodes[i]);
+            ReadOnlySpan<char> needed = RenderNodeStatus(_nodes[i]);
 
             // Do we have previous node string to compare with?
             if (previousFrame.NodesCount > i)
             {
-                var previous = RenderNodeStatus(previousFrame._nodes[i]);
-
-                if (!previous.SequenceEqual(needed))
+                if (previousFrame._nodes[i] == _nodes[i])
                 {
-                    int commonPrefixLen = previous.CommonPrefixLength(needed);
-
-                    if (commonPrefixLen != 0 && needed.Slice(0, commonPrefixLen).IndexOf('\x1b') == -1)
-                    {
-                        // no escape codes, so can trivially skip substrings
-                        sb.Append($"{AnsiCodes.CSI}{commonPrefixLen}{AnsiCodes.MoveForward}");
-                        sb.Append(needed.Slice(commonPrefixLen));
-                    }
-                    else
-                    {
-                        sb.Append(needed);
-                    }
-
-                    // Shall we clear rest of line
-                    if (needed.Length < previous.Length)
-                    {
-                        sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInLine}");
-                    }
+                    // Same everything except time
+                    string durationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("DurationDisplay", _nodes[i].Stopwatch.Elapsed.TotalSeconds);
+                    sb.Append($"{AnsiCodes.SetCursorHorizontal(MaxColumn)}{AnsiCodes.MoveCursorBackward(durationString.Length)}{durationString}");
+                }
+                else
+                {
+                    // TODO: check components to figure out skips and optimize this
+                    sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInLine}");
+                    sb.Append(needed);
                 }
             }
             else

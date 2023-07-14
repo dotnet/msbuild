@@ -38,12 +38,12 @@ internal class NodeStatus
         string duration = Stopwatch.Elapsed.TotalSeconds.ToString("F1");
 
         return string.IsNullOrEmpty(TargetFramework)
-            ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectBuilding_NoTF",
+            ? string.Format("{0}{1} {2} ({3}s)",
                 TerminalLogger.Indentation,
                 Project,
                 Target,
                 duration)
-            : ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectBuilding_WithTF",
+            : string.Format("{0}{1} {2} {3} ({4}s)",
                 TerminalLogger.Indentation,
                 Project,
                 AnsiCodes.Colorize(TargetFramework, TerminalLogger.TargetFrameworkColor),

@@ -1483,29 +1483,6 @@ arquivo de resposta.
         <target state="translated">Processo = "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectBuilding_NoTF">
-        <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3}s)</target>
-        <note>
-      Project building.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target
-      {3}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectBuilding_WithTF">
-        <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
-        <note>
-      Project building including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: target
-      {4}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
         <target state="translated">{0}{1} {2} ({3}s)</target>
