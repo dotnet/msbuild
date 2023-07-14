@@ -711,10 +711,15 @@ namespace Microsoft.Build.Evaluation
                 MSBuildEventSource.Log.EvaluatePass4Start(projectFile);
                 using (_evaluationProfiler.TrackPass(EvaluationPass.UsingTasks))
                 {
-                    foreach (var entry in _usingTaskElements)
-                    {
-                        EvaluateUsingTaskElement(entry.Key, entry.Value);
-                    }
+                    // Evaluate the usingtask and add the result into the data passed in
+                    TaskRegistry.InitializeTaskRegistryFromUsingTaskElements<P, I>(
+                        _evaluationLoggingContext.LoggingService,
+                        _evaluationLoggingContext.BuildEventContext,
+                        _usingTaskElements.Select(p => (p.Value, p.Key)),
+                        _data.TaskRegistry,
+                        _expander,
+                        ExpanderOptions.ExpandPropertiesAndItems,
+                        _evaluationContext.FileSystem);
                 }
 
                 // If there was no DefaultTargets attribute found in the depth first pass,
@@ -1013,22 +1018,6 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Evaluate the usingtask and add the result into the data passed in
-        /// </summary>
-        private void EvaluateUsingTaskElement(string directoryOfImportingFile, ProjectUsingTaskElement projectUsingTaskElement)
-        {
-            TaskRegistry.RegisterTasksFromUsingTaskElement<P, I>(
-                _evaluationLoggingContext.LoggingService,
-                _evaluationLoggingContext.BuildEventContext,
-                directoryOfImportingFile,
-                projectUsingTaskElement,
-                _data.TaskRegistry,
-                _expander,
-                ExpanderOptions.ExpandPropertiesAndItems,
-                _evaluationContext.FileSystem);
         }
 
         /// <summary>
