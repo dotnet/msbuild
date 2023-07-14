@@ -22,12 +22,32 @@ internal sealed class LocalDocker : ILocalDaemon
         _logger = logger;
     }
 
+    private static string? FindFullPathFromPath(string? command)
+    {
+        if (string.IsNullOrEmpty(command))
+        {
+            return command;
+        }
+
+        foreach (string directory in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(Path.PathSeparator))
+        {
+            string fullPath = Path.Combine(directory, command + FileNameSuffixes.CurrentPlatform.Exe);
+            if (File.Exists(fullPath))
+            {
+                return fullPath;
+            }
+        }
+
+        return command;
+    }
+
     public async Task LoadAsync(BuiltImage image, ImageReference sourceReference, ImageReference destinationReference, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        string dockerPath = FindFullPathFromPath("docker") ?? "docker";
 
         // call `docker load` and get it ready to receive input
-        ProcessStartInfo loadInfo = new("docker", $"load");
+        ProcessStartInfo loadInfo = new(dockerPath, $"load");
         loadInfo.RedirectStandardInput = true;
         loadInfo.RedirectStandardOutput = true;
         loadInfo.RedirectStandardError = true;
@@ -100,9 +120,10 @@ internal sealed class LocalDocker : ILocalDaemon
     /// <exception cref="DockerLoadException">when failed to retrieve docker configuration.</exception>
     internal static JsonDocument GetConfig()
     {
+        string dockerPath = FindFullPathFromPath("docker") ?? "docker";
         Process proc = new()
         {
-            StartInfo = new ProcessStartInfo("docker", "info --format=\"{{json .}}\"")
+            StartInfo = new ProcessStartInfo(dockerPath, "info --format=\"{{json .}}\"")
         };
 
         try

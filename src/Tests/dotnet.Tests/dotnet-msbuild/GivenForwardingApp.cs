@@ -17,14 +17,14 @@ namespace Microsoft.DotNet.Cli
         public void DotnetExeIsExecuted()
         {
             new ForwardingApp("<apppath>", new string[0])
-                .GetProcessStartInfo().FileName.Should().Be("dotnet.exe");
+                .GetProcessStartInfo().FileName.Should().EndWith("dotnet.exe");
         }
 
         [UnixOnlyFact]
         public void DotnetIsExecuted()
         {
             new ForwardingApp("<apppath>", new string[0])
-                .GetProcessStartInfo().FileName.Should().Be("dotnet");
+                .GetProcessStartInfo().FileName.Should().EndWith("dotnet");
         }
 
         [Fact]
