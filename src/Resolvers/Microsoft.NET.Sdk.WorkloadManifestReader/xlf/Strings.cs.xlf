@@ -139,7 +139,7 @@
       </trans-unit>
       <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
         <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
-        <target state="new">Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</target>
+        <target state="translated">Verze {0} úlohy, která byla zadána v {1}, nebyla nalezena. Spuštěním příkazu dotnet workload restore nainstalujte tuto verzi úlohy.</target>
         <note>{Locked="dotnet workload restore"}</note>
       </trans-unit>
       <trans-unit id="WorkloadVersionFromInstallStateNotFound">
