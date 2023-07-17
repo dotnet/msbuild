@@ -149,6 +149,56 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Equal(String.Empty, item.GetMetadataValue("X"));
         }
 
+        [Fact]
+        public void CopyMetadataToTaskItem()
+        {
+            ProjectItemInstance fromItem = GetItemInstance();
+
+            fromItem.SetMetadata("m1", "v1");
+            fromItem.SetMetadata("m2", "v2");
+
+            ITaskItem toItem = new Utilities.TaskItem();
+
+            ((ITaskItem)fromItem).CopyMetadataTo(toItem);
+
+            Assert.Equal("v1", toItem.GetMetadata("m1"));
+            Assert.Equal("v2", toItem.GetMetadata("m2"));
+        }
+
+#if FEATURE_APPDOMAIN
+        private sealed class RemoteTaskItemFactory : MarshalByRefObject
+        {
+            public ITaskItem CreateTaskItem() => new Utilities.TaskItem();
+        }
+
+        [Fact]
+        public void CopyMetadataToRemoteTaskItem()
+        {
+            ProjectItemInstance fromItem = GetItemInstance();
+
+            fromItem.SetMetadata("m1", "v1");
+            fromItem.SetMetadata("m2", "v2");
+
+            AppDomain appDomain = null;
+            try
+            {
+                appDomain = AppDomain.CreateDomain("CopyMetadataToRemoteTaskItem", null, AppDomain.CurrentDomain.SetupInformation);
+                RemoteTaskItemFactory itemFactory = (RemoteTaskItemFactory)appDomain.CreateInstanceFromAndUnwrap(typeof(RemoteTaskItemFactory).Module.FullyQualifiedName, typeof(RemoteTaskItemFactory).FullName);
+
+                ITaskItem toItem = itemFactory.CreateTaskItem();
+
+                ((ITaskItem)fromItem).CopyMetadataTo(toItem);
+
+                Assert.Equal("v1", toItem.GetMetadata("m1"));
+                Assert.Equal("v2", toItem.GetMetadata("m2"));
+            }
+            finally
+            {
+                AppDomain.Unload(appDomain);
+            }
+        }
+#endif
+
         /// <summary>
         /// Set include
         /// </summary>
