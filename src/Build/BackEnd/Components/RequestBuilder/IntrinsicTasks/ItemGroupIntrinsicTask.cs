@@ -463,34 +463,34 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            // Evaluate, split, expand and subtract any Exclude
-            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            //// Evaluate, split, expand and subtract any Exclude
+            //HashSet<string> excludesUnescapedForComparison = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (string excludeSplit in excludes)
-            {
-                string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(
-                    Project.Directory,
-                    excludeSplit,
-                    loggingMechanism: LoggingContext,
-                    excludeLocation: originalItem.ExcludeLocation);
+            //foreach (string excludeSplit in excludes)
+            //{
+            //    string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(
+            //        Project.Directory,
+            //        excludeSplit,
+            //        loggingMechanism: LoggingContext,
+            //        excludeLocation: originalItem.ExcludeLocation);
 
-                foreach (string excludeSplitFile in excludeSplitFiles)
-                {
-                    excludesUnescapedForComparison.Add(excludeSplitFile.NormalizeForPathComparison());
-                }
-            }
+            //    foreach (string excludeSplitFile in excludeSplitFiles)
+            //    {
+            //        excludesUnescapedForComparison.Add(excludeSplitFile.NormalizeForPathComparison());
+            //    }
+            //}
 
-            List<ProjectItemInstance> remainingItems = new List<ProjectItemInstance>();
+            //List<ProjectItemInstance> remainingItems = new List<ProjectItemInstance>();
 
-            for (int i = 0; i < items.Count; i++)
-            {
-                if (!excludesUnescapedForComparison.Contains(((IItem)items[i]).EvaluatedInclude.NormalizeForPathComparison()))
-                {
-                    remainingItems.Add(items[i]);
-                }
-            }
+            //for (int i = 0; i < items.Count; i++)
+            //{
+            //    if (!excludesUnescapedForComparison.Contains(((IItem)items[i]).EvaluatedInclude.NormalizeForPathComparison()))
+            //    {
+            //        remainingItems.Add(items[i]);
+            //    }
+            //}
 
-            items = remainingItems;
+            //items = remainingItems;
 
             // Filter the metadata as appropriate
             if (keepMetadata != null)
