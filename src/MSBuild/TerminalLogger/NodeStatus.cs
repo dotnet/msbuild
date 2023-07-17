@@ -9,8 +9,30 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 /// <summary>
 /// Encapsulates the per-node data shown in live node output.
 /// </summary>
-internal record NodeStatus(string Project, string? TargetFramework, string Target, Stopwatch Stopwatch)
+internal class NodeStatus
 {
+    public string Project { get; }
+    public string? TargetFramework { get; }
+    public string Target { get; }
+    public Stopwatch Stopwatch { get; }
+
+    public NodeStatus(string project, string? targetFramework, string target, Stopwatch stopwatch)
+    {
+        Project = project;
+        TargetFramework = targetFramework;
+        Target = target;
+        Stopwatch = stopwatch;
+    }
+
+    /// <summary>
+    /// Equality is based on the project, target framework, and target, but NOT the elapsed time.
+    /// </summary>
+    public override bool Equals(object? obj) =>
+        obj is NodeStatus status &&
+        Project == status.Project &&
+        TargetFramework == status.TargetFramework &&
+        Target == status.Target;
+
     public override string ToString()
     {
         string duration = Stopwatch.Elapsed.TotalSeconds.ToString("F1");
@@ -27,5 +49,10 @@ internal record NodeStatus(string Project, string? TargetFramework, string Targe
                 AnsiCodes.Colorize(TargetFramework, TerminalLogger.TargetFrameworkColor),
                 Target,
                 duration);
+    }
+
+    public override int GetHashCode()
+    {
+        throw new System.NotImplementedException();
     }
 }
