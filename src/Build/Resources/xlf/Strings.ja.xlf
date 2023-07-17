@@ -141,7 +141,7 @@
       </trans-unit>
       <trans-unit id="General.TwoVectorsMustHaveSameLength">
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
-        <target state="new">MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</target>
+        <target state="translated">MSB3094: "{2}" は {0} 項目を参照し、"{3}" は {1} 項目を参照します。これらは同じ項目数を持たなければなりません。</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">

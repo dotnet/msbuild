@@ -57,7 +57,7 @@
       </trans-unit>
       <trans-unit id="CannotCopyFromElementOfThatType">
         <source>MSB4277: Cannot copy from object of that type.</source>
-        <target state="new">MSB4277: Cannot copy from object of that type.</target>
+        <target state="translated">MSB4277: не удается скопировать из объекта этого типа.</target>
         <note>{StrBegin="MSB4277: "}</note>
       </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
@@ -141,7 +141,7 @@
       </trans-unit>
       <trans-unit id="General.TwoVectorsMustHaveSameLength">
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
-        <target state="new">MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</target>
+        <target state="translated">MSB3094: "{2}" ссылается на следующее число элементов: {0}, а "{3}" — на {1}. Число элементов должно быть одинаковым.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
