@@ -4,10 +4,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -24,7 +26,7 @@ namespace Microsoft.Build.BackEnd.Logging
     internal delegate void WriteLinePrettyFromResourceDelegate(int indentLevel, string resourceString, params object[] args);
     #endregion
 
-    internal abstract class BaseConsoleLogger : INodeLogger
+    internal abstract class BaseConsoleLogger : INodeLogger, IStringBuilderProvider
     {
         #region Properties
 
@@ -130,28 +132,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="indent">Depth to indent.</param>
         internal string IndentString(string s, int indent)
         {
-            // It's possible the event has a null message
-            if (s == null)
-            {
-                return string.Empty;
-            }
-
-            // This will never return an empty array.  The returned array will always
-            // have at least one non-null element, even if "s" is totally empty.
-            String[] subStrings = SplitStringOnNewLines(s);
-
-            StringBuilder result = new StringBuilder(
-                (subStrings.Length * indent) +
-                (subStrings.Length * Environment.NewLine.Length) +
-                s.Length);
-
-            for (int i = 0; i < subStrings.Length; i++)
-            {
-                result.Append(' ', indent).Append(subStrings[i]);
-                result.AppendLine();
-            }
-
-            return result.ToString();
+            return OptimizedStringIndenter.IndentString(s, indent, (IStringBuilderProvider)this);
         }
 
         /// <summary>
@@ -1208,6 +1189,14 @@ namespace Microsoft.Build.BackEnd.Logging
 
         internal bool runningWithCharacterFileType = false;
 
+        /// <summary>
+        /// Since logging messages are processed serially, we can use a single StringBuilder wherever needed.
+        /// It should not be done directly, but rather through the <see cref="IStringBuilderProvider"/> interface methods.
+        /// </summary>
+        private StringBuilder _sharedStringBuilder = new StringBuilder(0x100);
+
+        #endregion
+
         #region Per-build Members
 
         /// <summary>
@@ -1252,6 +1241,72 @@ namespace Microsoft.Build.BackEnd.Logging
 
         #endregion
 
-        #endregion
+        /// <summary>
+        /// Since logging messages are processed serially, we can reuse a single StringBuilder wherever needed.
+        /// </summary>
+        StringBuilder IStringBuilderProvider.Acquire(int capacity)
+        {
+            StringBuilder shared = Interlocked.Exchange(ref _sharedStringBuilder, null);
+
+            Debug.Assert(shared != null, "This is not supposed to be used in multiple threads or multiple time. One method is expected to return it before next acquire. Most probably it was not returned.");
+            if (shared == null)
+            {
+                // This is not supposed to be used concurrently. One method is expected to return it before next acquire.
+                // However to avoid bugs in production, we will create new string builder
+                return StringBuilderCache.Acquire(capacity);
+            }
+
+            if (shared.Capacity < capacity)
+            {
+                const int minimumCapacity = 0x100; // 256 characters, 512 bytes
+                const int maximumBracketedCapacity = 0x80_000; // 512K characters, 1MB
+
+                if (capacity <= minimumCapacity)
+                {
+                    capacity = minimumCapacity;
+                }
+                else if (capacity < maximumBracketedCapacity)
+                {
+                    // GC likes arrays allocated with power of two bytes. Lets make it happy.
+
+                    // Find next power of two http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+                    int v = capacity;
+
+                    v--;
+                    v |= v >> 1;
+                    v |= v >> 2;
+                    v |= v >> 4;
+                    v |= v >> 8;
+                    v |= v >> 16;
+                    v++;
+
+                    capacity = v;
+                }
+                // If capacity is > maximumCapacity we will respect it and use it as is.
+
+                // Lets create new instance with enough capacity.
+                shared = new StringBuilder(capacity);
+            }
+
+            // Prepare for next use.
+            // Equivalent of sb.Clear() that works on .Net 3.5
+            shared.Length = 0; 
+
+            return shared;
+        }
+
+        /// <summary>
+        /// Acquired StringBuilder must be returned before next use.
+        /// Unbalanced releases are not supported.
+        /// </summary>
+        string IStringBuilderProvider.GetStringAndRelease(StringBuilder builder)
+        {
+            // This is not supposed to be used concurrently. One method is expected to return it before next acquire.
+            // But just for sure if _sharedBuilder was already returned, keep the former.
+            StringBuilder previous = Interlocked.CompareExchange(ref _sharedStringBuilder, builder, null);
+            Debug.Assert(previous == null, "This is not supposed to be used in multiple threads or multiple time. One method is expected to return it before next acquire. Most probably it was double returned.");
+
+            return builder.ToString();
+        }
     }
 }
