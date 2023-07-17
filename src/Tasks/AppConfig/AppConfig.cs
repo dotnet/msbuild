@@ -19,8 +19,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Read the .config from a file.
         /// </summary>
-        /// <param name="appConfigFile"></param>
-        internal void Load(string appConfigFile)
+        /// <param name="appConfigFilePath"></param>
+        internal void Load(string appConfigFilePath)
         {
             XmlReader reader = null;
             try
@@ -29,11 +29,11 @@ namespace Microsoft.Build.Tasks
 
                 // it's important to normalize the path as it may contain two slashes
                 // see https://github.com/dotnet/msbuild/issues/4335 for details.
-                appConfigFile = FileUtilities.NormalizePath(appConfigFile);
+                appConfigFilePath = FileUtilities.NormalizePath(appConfigFilePath);
 
                 // Need a filestream as the XmlReader doesn't support nonstandard unicode characters in path.
                 // No need to dispose - as 'CloseInput' was passed to XmlReaderSettings
-                FileStream fs = File.OpenRead(appConfigFile);
+                FileStream fs = File.OpenRead(appConfigFilePath);
                 reader = XmlReader.Create(fs, readerSettings);
                 Read(reader);
             }
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Tasks
                     linePosition = info.LinePosition;
                 }
 
-                throw new AppConfigException(e.Message, appConfigFile, lineNumber, linePosition, e);
+                throw new AppConfigException(e.Message, appConfigFilePath, lineNumber, linePosition, e);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Tasks
                     linePosition = info.LinePosition;
                 }
 
-                throw new AppConfigException(e.Message, appConfigFile, lineNumber, linePosition, e);
+                throw new AppConfigException(e.Message, appConfigFilePath, lineNumber, linePosition, e);
             }
             finally
             {
