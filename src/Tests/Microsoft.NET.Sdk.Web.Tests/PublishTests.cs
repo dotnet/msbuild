@@ -52,6 +52,28 @@ namespace Microsoft.NET.Sdk.Web.Tests
                     .Should().BeFalse();
         }
 
+        [Fact]
+        public void TrimMode_Defaulted_Correctly_On_Trimmed_Apps_Pre_Net8()
+        {
+            var projectName = "HelloWorld";
+            var targetFramework = "net7.0";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            testProject.AdditionalProperties["PublishTrimmed"] = "true";
+            testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+            testProject.SelfContained = "true";
+            testProject.PropertiesToRecord.Add("TrimMode");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: projectName + targetFramework);
+
+            var publishCommand = new PublishCommand(testAsset);
+            publishCommand.Execute().Should().Pass();
+
+            var buildProperties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework);
+            buildProperties["TrimMode"].Should().Be("partial");
+        }
+
         [Theory]
         [MemberData(nameof(SupportedTfms))]
         public void TrimmingOptions_Are_Defaulted_Correctly_On_Aot_Apps(string targetFramework)

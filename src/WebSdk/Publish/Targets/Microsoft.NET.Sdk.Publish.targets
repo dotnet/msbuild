@@ -93,6 +93,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishIntermediateOutputPath Condition="'$(DockerPublish)' == 'true'">obj/Docker/publish/</PublishIntermediateOutputPath>
 
     <EFSQLScriptsFolderName Condition="$(EFSQLScriptsFolderName) == ''">EFSQLScripts</EFSQLScriptsFolderName>
+
+    <!-- Use default TrimMode for projects targeting net8.0 and above and retain TrimMode=partial for back-compat. -->
+    <TrimMode Condition="'$(TrimMode)' == '' And
+      '$(PublishTrimmed)' == 'true' And
+      !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">partial</TrimMode>
   </PropertyGroup>
 
   <!--
