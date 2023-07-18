@@ -420,7 +420,8 @@ namespace Microsoft.Build.BackEnd
                 // If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                 bool throwaway;
 
-                IList<ProjectItemInstance> itemsFromSplit = expander.ExpandSingleItemVectorExpressionIntoItems(includeSplit,
+                IList<ProjectItemInstance> itemsFromSplit = expander.ExpandSingleItemVectorExpressionIntoItems(
+                    includeSplit,
                     itemFactory,
                     ExpanderOptions.ExpandItems,
                     false /* do not include null expansion results */,
