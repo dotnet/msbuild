@@ -95,12 +95,19 @@ Microsoft.NET.Build.Containers.PlatformSpecificManifest.PlatformSpecificManifest
 Microsoft.NET.Build.Containers.PlatformSpecificManifest.size.get -> long
 Microsoft.NET.Build.Containers.PlatformSpecificManifest.size.set -> void
 Microsoft.NET.Build.Containers.Port
+Microsoft.NET.Build.Containers.Port.Deconstruct(out int Number, out Microsoft.NET.Build.Containers.PortType Type) -> void
+Microsoft.NET.Build.Containers.Port.Equals(Microsoft.NET.Build.Containers.Port other) -> bool
 Microsoft.NET.Build.Containers.Port.Number.get -> int
 Microsoft.NET.Build.Containers.Port.Number.set -> void
 Microsoft.NET.Build.Containers.Port.Port() -> void
 Microsoft.NET.Build.Containers.Port.Port(int Number, Microsoft.NET.Build.Containers.PortType Type) -> void
 Microsoft.NET.Build.Containers.Port.Type.get -> Microsoft.NET.Build.Containers.PortType
 Microsoft.NET.Build.Containers.Port.Type.set -> void
+~override Microsoft.NET.Build.Containers.Port.ToString() -> string
+static Microsoft.NET.Build.Containers.Port.operator !=(Microsoft.NET.Build.Containers.Port left, Microsoft.NET.Build.Containers.Port right) -> bool
+static Microsoft.NET.Build.Containers.Port.operator ==(Microsoft.NET.Build.Containers.Port left, Microsoft.NET.Build.Containers.Port right) -> bool
+override Microsoft.NET.Build.Containers.Port.GetHashCode() -> int
+~override Microsoft.NET.Build.Containers.Port.Equals(object obj) -> bool
 Microsoft.NET.Build.Containers.PortType
 Microsoft.NET.Build.Containers.PortType.tcp = 0 -> Microsoft.NET.Build.Containers.PortType
 Microsoft.NET.Build.Containers.PortType.udp = 1 -> Microsoft.NET.Build.Containers.PortType
@@ -193,3 +200,50 @@ override Microsoft.NET.Build.Containers.Tasks.ParseContainerProperties.Execute()
 static Microsoft.NET.Build.Containers.ContainerHelpers.TryParsePort(string! input, out Microsoft.NET.Build.Containers.Port? port, out Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError? error) -> bool
 static Microsoft.NET.Build.Containers.ContainerHelpers.TryParsePort(string? portNumber, string? portType, out Microsoft.NET.Build.Containers.Port? port, out Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError? error) -> bool
 static readonly Microsoft.NET.Build.Containers.KnownLocalRegistryTypes.SupportedLocalRegistryTypes -> string![]!
+~override Microsoft.NET.Build.Containers.PlatformInformation.ToString() -> string
+~override Microsoft.NET.Build.Containers.PlatformSpecificManifest.ToString() -> string
+static Microsoft.NET.Build.Containers.PlatformInformation.operator !=(Microsoft.NET.Build.Containers.PlatformInformation left, Microsoft.NET.Build.Containers.PlatformInformation right) -> bool
+static Microsoft.NET.Build.Containers.PlatformSpecificManifest.operator !=(Microsoft.NET.Build.Containers.PlatformSpecificManifest left, Microsoft.NET.Build.Containers.PlatformSpecificManifest right) -> bool
+static Microsoft.NET.Build.Containers.PlatformInformation.operator ==(Microsoft.NET.Build.Containers.PlatformInformation left, Microsoft.NET.Build.Containers.PlatformInformation right) -> bool
+~override Microsoft.NET.Build.Containers.ManifestConfig.ToString() -> string
+static Microsoft.NET.Build.Containers.PlatformSpecificManifest.operator ==(Microsoft.NET.Build.Containers.PlatformSpecificManifest left, Microsoft.NET.Build.Containers.PlatformSpecificManifest right) -> bool
+override Microsoft.NET.Build.Containers.PlatformInformation.GetHashCode() -> int
+static Microsoft.NET.Build.Containers.ManifestConfig.operator !=(Microsoft.NET.Build.Containers.ManifestConfig left, Microsoft.NET.Build.Containers.ManifestConfig right) -> bool
+override Microsoft.NET.Build.Containers.PlatformSpecificManifest.GetHashCode() -> int
+static Microsoft.NET.Build.Containers.ManifestConfig.operator ==(Microsoft.NET.Build.Containers.ManifestConfig left, Microsoft.NET.Build.Containers.ManifestConfig right) -> bool
+~override Microsoft.NET.Build.Containers.PlatformInformation.Equals(object obj) -> bool
+~override Microsoft.NET.Build.Containers.Descriptor.ToString() -> string
+~override Microsoft.NET.Build.Containers.ManifestLayer.ToString() -> string
+override Microsoft.NET.Build.Containers.ManifestConfig.GetHashCode() -> int
+~override Microsoft.NET.Build.Containers.PlatformSpecificManifest.Equals(object obj) -> bool
+Microsoft.NET.Build.Containers.PlatformInformation.Equals(Microsoft.NET.Build.Containers.PlatformInformation other) -> bool
+~override Microsoft.NET.Build.Containers.ManifestConfig.Equals(object obj) -> bool
+static Microsoft.NET.Build.Containers.ManifestLayer.operator !=(Microsoft.NET.Build.Containers.ManifestLayer left, Microsoft.NET.Build.Containers.ManifestLayer right) -> bool
+Microsoft.NET.Build.Containers.PlatformSpecificManifest.Equals(Microsoft.NET.Build.Containers.PlatformSpecificManifest other) -> bool
+static Microsoft.NET.Build.Containers.Descriptor.operator !=(Microsoft.NET.Build.Containers.Descriptor left, Microsoft.NET.Build.Containers.Descriptor right) -> bool
+Microsoft.NET.Build.Containers.PlatformInformation.Deconstruct(out string! architecture, out string! os, out string? variant, out string![]! features, out string? version) -> void
+Microsoft.NET.Build.Containers.ManifestConfig.Equals(Microsoft.NET.Build.Containers.ManifestConfig other) -> bool
+static Microsoft.NET.Build.Containers.ManifestLayer.operator ==(Microsoft.NET.Build.Containers.ManifestLayer left, Microsoft.NET.Build.Containers.ManifestLayer right) -> bool
+Microsoft.NET.Build.Containers.PlatformSpecificManifest.Deconstruct(out string! mediaType, out long size, out string! digest, out Microsoft.NET.Build.Containers.PlatformInformation platform) -> void
+Microsoft.NET.Build.Containers.ManifestConfig.Deconstruct(out string! mediaType, out long size, out string! digest) -> void
+static Microsoft.NET.Build.Containers.Descriptor.operator ==(Microsoft.NET.Build.Containers.Descriptor left, Microsoft.NET.Build.Containers.Descriptor right) -> bool
+override Microsoft.NET.Build.Containers.ManifestLayer.GetHashCode() -> int
+~override Microsoft.NET.Build.Containers.ManifestLayer.Equals(object obj) -> bool
+override Microsoft.NET.Build.Containers.Descriptor.GetHashCode() -> int
+Microsoft.NET.Build.Containers.ManifestLayer.Equals(Microsoft.NET.Build.Containers.ManifestLayer other) -> bool
+~override Microsoft.NET.Build.Containers.Descriptor.Equals(object obj) -> bool
+Microsoft.NET.Build.Containers.ManifestLayer.Deconstruct(out string! mediaType, out long size, out string! digest, out string![]? urls) -> void
+Microsoft.NET.Build.Containers.Descriptor.Equals(Microsoft.NET.Build.Containers.Descriptor other) -> bool
+~override Microsoft.NET.Build.Containers.ManifestV2.ToString() -> string
+static Microsoft.NET.Build.Containers.ManifestV2.operator !=(Microsoft.NET.Build.Containers.ManifestV2 left, Microsoft.NET.Build.Containers.ManifestV2 right) -> bool
+static Microsoft.NET.Build.Containers.ManifestV2.operator ==(Microsoft.NET.Build.Containers.ManifestV2 left, Microsoft.NET.Build.Containers.ManifestV2 right) -> bool
+override Microsoft.NET.Build.Containers.ManifestV2.GetHashCode() -> int
+~override Microsoft.NET.Build.Containers.ManifestV2.Equals(object obj) -> bool
+Microsoft.NET.Build.Containers.ManifestV2.Equals(Microsoft.NET.Build.Containers.ManifestV2 other) -> bool
+~override Microsoft.NET.Build.Containers.ManifestListV2.ToString() -> string
+static Microsoft.NET.Build.Containers.ManifestListV2.operator !=(Microsoft.NET.Build.Containers.ManifestListV2 left, Microsoft.NET.Build.Containers.ManifestListV2 right) -> bool
+static Microsoft.NET.Build.Containers.ManifestListV2.operator ==(Microsoft.NET.Build.Containers.ManifestListV2 left, Microsoft.NET.Build.Containers.ManifestListV2 right) -> bool
+override Microsoft.NET.Build.Containers.ManifestListV2.GetHashCode() -> int
+~override Microsoft.NET.Build.Containers.ManifestListV2.Equals(object obj) -> bool
+Microsoft.NET.Build.Containers.ManifestListV2.Equals(Microsoft.NET.Build.Containers.ManifestListV2 other) -> bool
+Microsoft.NET.Build.Containers.ManifestListV2.Deconstruct(out int schemaVersion, out string! mediaType, out Microsoft.NET.Build.Containers.PlatformSpecificManifest[]! manifests) -> void
