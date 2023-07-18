@@ -46,7 +46,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void It_enables_requestdelegategenerator_for_PublishAot()
+        public void It_enables_requestdelegategenerator_and_configbindinggenerator_for_PublishAot()
         {
             var asset = _testAssetsManager
                 .CopyTestAsset("WebApp")
@@ -58,10 +58,28 @@ namespace Microsoft.NET.Build.Tests
                 });
 
             VerifyRequestDelegateGeneratorIsUsed(asset, expectEnabled: true);
+            VerifyConfigBindingGeneratorIsUsed(asset, expectEnabled: true);
             VerifyInterceptorsFeatureEnabled(asset, expectEnabled: true);
         }
 
-        private void VerifyRequestDelegateGeneratorIsUsed(TestAsset asset, bool? expectEnabled)
+        [Fact]
+        public void It_enables_requestdelegategenerator_and_configbindinggenerator_for_PublishTrimmed()
+        {
+            var asset = _testAssetsManager
+                .CopyTestAsset("WebApp")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    project.Root.Add(new XElement(ns + "PropertyGroup", new XElement("PublishTrimmed", "true")));
+                });
+
+            VerifyRequestDelegateGeneratorIsUsed(asset, expectEnabled: true);
+            VerifyConfigBindingGeneratorIsUsed(asset, expectEnabled: true);
+            VerifyInterceptorsFeatureEnabled(asset, expectEnabled: true);
+        }
+
+        private void VerifyGeneratorIsUsed(TestAsset asset, bool? expectEnabled, string generatorName)
         {
             var command = new GetValuesCommand(
                 Log,
@@ -77,8 +95,14 @@ namespace Microsoft.NET.Build.Tests
 
             var analyzers = command.GetValues();
 
-            Assert.Equal(expectEnabled ?? false, analyzers.Any(analyzer => analyzer.Contains("Microsoft.AspNetCore.Http.RequestDelegateGenerator.dll")));
+            Assert.Equal(expectEnabled ?? false, analyzers.Any(analyzer => analyzer.Contains(generatorName)));
         }
+
+        private void VerifyRequestDelegateGeneratorIsUsed(TestAsset asset, bool? expectEnabled)
+            => VerifyGeneratorIsUsed(asset, expectEnabled, "Microsoft.AspNetCore.Http.RequestDelegateGenerator.dll");
+
+        private void VerifyConfigBindingGeneratorIsUsed(TestAsset asset, bool? expectEnabled)
+            => VerifyGeneratorIsUsed(asset, expectEnabled, "Microsoft.Extensions.Configuration.Binder.SourceGeneration.dll");
 
         private void VerifyInterceptorsFeatureEnabled(TestAsset asset, bool? expectEnabled)
         {
