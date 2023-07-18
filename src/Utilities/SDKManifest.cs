@@ -315,9 +315,10 @@ namespace Microsoft.Build.Utilities
                 if (FileSystems.Default.FileExists(sdkManifestPath))
                 {
                     XmlDocument doc = new XmlDocument();
-                    XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                    XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
 
-                    using (XmlReader xmlReader = XmlReader.Create(sdkManifestPath, readerSettings))
+                    FileStream fs = File.OpenRead(sdkManifestPath);
+                    using (XmlReader xmlReader = XmlReader.Create(fs, readerSettings))
                     {
                         doc.Load(xmlReader);
                     }
