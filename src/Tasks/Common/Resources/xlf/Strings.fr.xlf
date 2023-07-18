@@ -954,7 +954,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}. Download the .NET SDK from https://aka.ms/dotnet/download</source>
-        <target state="needs-review-translation">NETSDK1045: Le kit .NET SDK actuel ne prend pas en charge le ciblage de {0} {1}. Vous devez soit cibler {0} {2} ou une version antérieure, soit utiliser une version du kit .NET SDK qui prend en charge {0} {1}.</target>
+        <target state="translated">NETSDK1045: le SDK .NET actuel ne prend pas en charge le ciblage {0} {1}.  Ciblez {0} {2} ou inférieur, ou utilisez une version du Kit de développement logiciel (SDK) .NET qui prend en charge {0} {1}. Télécharger le Kit de développement logiciel (SDK) .NET à partir de https://aka.ms/dotnet/download</target>
         <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifier">
@@ -969,7 +969,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedVisualStudioVersion">
         <source>NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</source>
-        <target state="new">NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</target>
+        <target state="translated">NETSDK1209: la version Visual Studio actuelle ne prend pas en charge le ciblage de {0} {1}.  Ciblez {0} {2} ou une version antérieure, ou utilisez Visual Studio version {3} ou ultérieure</target>
         <note>{StrBegin="NETSDK1209: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">

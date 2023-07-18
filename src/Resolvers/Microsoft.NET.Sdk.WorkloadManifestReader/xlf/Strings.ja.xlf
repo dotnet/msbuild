@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="ManifestFromInstallStateNotFound">
         <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
-        <target state="new">Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</target>
+        <target state="translated">{1} で指定されたワークロード マニフェスト {0} が見つかりませんでした。"dotnet workload repair" を実行すると、これを解決できる場合があります。</target>
         <note>{Locked="dotnet workload repair"}</note>
       </trans-unit>
       <trans-unit id="ManifestFromWorkloadSetNotFound">
         <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
-        <target state="new">Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</target>
+        <target state="translated">ワークロード バージョン {1} のワークロード マニフェスト {0} がインストールされませんでした。"dotnet workload repair" を実行すると、これを解決できる場合があります。</target>
         <note>{Locked="dotnet workload repair"}</note>
       </trans-unit>
       <trans-unit id="MissingBaseWorkload">
@@ -139,12 +139,12 @@
       </trans-unit>
       <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
         <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
-        <target state="new">Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</target>
+        <target state="translated">{1} で指定されたワークロード バージョン {0} が見つかりませんでした。"dotnet workload restore" を実行して、このワークロード バージョンをインストールします。</target>
         <note>{Locked="dotnet workload restore"}</note>
       </trans-unit>
       <trans-unit id="WorkloadVersionFromInstallStateNotFound">
         <source>Workload version {0}, which was specified in {1}, was not found.</source>
-        <target state="new">Workload version {0}, which was specified in {1}, was not found.</target>
+        <target state="translated">{1} で指定されたワークロード バージョン {0} が見つかりませんでした。</target>
         <note />
       </trans-unit>
     </body>

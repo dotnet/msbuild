@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="ManifestFromInstallStateNotFound">
         <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
-        <target state="new">Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</target>
+        <target state="translated">{1}에 지정된 워크로드 매니페스트 {0}을(를) 찾을 수 없습니다. "dotnet workload repair"를 실행하면 이 문제를 해결할 수 있습니다.</target>
         <note>{Locked="dotnet workload repair"}</note>
       </trans-unit>
       <trans-unit id="ManifestFromWorkloadSetNotFound">
         <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
-        <target state="new">Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</target>
+        <target state="translated">워크로드 버전 {1}의 워크로드 매니페스트 {0}이(가) 설치되지 않았습니다. "dotnet workload repair"를 실행하면 이 문제를 해결할 수 있습니다.</target>
         <note>{Locked="dotnet workload repair"}</note>
       </trans-unit>
       <trans-unit id="MissingBaseWorkload">
@@ -139,12 +139,12 @@
       </trans-unit>
       <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
         <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
-        <target state="new">Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</target>
+        <target state="translated">{1}에 지정된 워크로드 버전 {0}을(를) 찾을 수 없습니다. "dotnet workload restore"을 실행하여 이 워크로드 버전을 설치합니다.</target>
         <note>{Locked="dotnet workload restore"}</note>
       </trans-unit>
       <trans-unit id="WorkloadVersionFromInstallStateNotFound">
         <source>Workload version {0}, which was specified in {1}, was not found.</source>
-        <target state="new">Workload version {0}, which was specified in {1}, was not found.</target>
+        <target state="translated">{1}에 지정된 워크로드 버전 {0}을(를) 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
     </body>
