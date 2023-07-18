@@ -185,7 +185,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_DocumentationFileProduced Condition="'$(DocumentationFile)'==''">false</_DocumentationFileProduced>
 
     <!-- Whether or not a reference assembly is produced. -->
-    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == ''">true</ProduceReferenceAssembly>
+    <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == ''">false</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <!--
