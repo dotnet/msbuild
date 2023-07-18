@@ -56,7 +56,6 @@
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemTextJsonVersion>7.0.0</SystemTextJsonVersion>
     <SystemThreadingTasksDataflowVersion>7.0.0</SystemThreadingTasksDataflowVersion>
-    <XunitVersion>2.4.2</XunitVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386

@@ -7,6 +7,7 @@
     <IsTestProject>false</IsTestProject><!-- while this project references xunit it isn't itself a test -->
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="xunit.core" Version="$(XUnitVersion)" />
     <PackageReference Include="xunit.core" />
   </ItemGroup>
 </Project>
