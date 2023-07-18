@@ -427,10 +427,10 @@ namespace Microsoft.Build.BackEnd
                     itemFactory,
                     ExpanderOptions.ExpandItems,
                     false /* do not include null expansion results */,
-                    out bool isTransformExpression,
+                    out _,
                     originalItem.IncludeLocation);
 
-                if (isTransformExpression)
+                if (itemsFromSplit != null)
                 {
                     // Expression is in form "@(X)", so add these items directly.
                     items.AddRange(itemsFromSplit);
