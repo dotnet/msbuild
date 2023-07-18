@@ -470,7 +470,7 @@ namespace Microsoft.Build.BackEnd
                 // Calculate all Exclude
                 var excludesUnescapedForComparison = EvaluateExcludePaths(excludes, originalItem.ExcludeLocation);
 
-                //// Subtract any Exclude
+                // Subtract any Exclude
                 items = items
                     .Where(i => !excludesUnescapedForComparison.Contains(((IItem)i).EvaluatedInclude.NormalizeForPathComparison()))
                     .ToList();
