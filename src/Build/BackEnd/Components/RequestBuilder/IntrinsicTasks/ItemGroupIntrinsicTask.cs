@@ -413,27 +413,28 @@ namespace Microsoft.Build.BackEnd
 
             // Split Include on any semicolons, and take each split in turn
             var includeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedInclude);
-            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(this.Project, originalItem.ItemType);
+            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(Project, originalItem.ItemType);
+
+            // EngineFileUtilities.GetFileListEscaped api invocation evaluates excludes by default.
+            // If the code process any expression like "@(x)", we need to handle excludes explicitly using EvaluateExcludePaths().
+            bool anyTransformExprProceeded = false;
 
             foreach (string includeSplit in includeSplits)
             {
                 // If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
-                bool throwaway;
-
-                IList<ProjectItemInstance> itemsFromSplit = expander.ExpandSingleItemVectorExpressionIntoItems(includeSplit,
+                IList<ProjectItemInstance> itemsFromSplit = expander.ExpandSingleItemVectorExpressionIntoItems(
+                    includeSplit,
                     itemFactory,
                     ExpanderOptions.ExpandItems,
                     false /* do not include null expansion results */,
-                    out throwaway,
+                    out bool isTransformExpression,
                     originalItem.IncludeLocation);
 
-                if (itemsFromSplit != null)
+                if (isTransformExpression)
                 {
                     // Expression is in form "@(X)", so add these items directly.
-                    foreach (ProjectItemInstance item in itemsFromSplit)
-                    {
-                        items.Add(item);
-                    }
+                    items.AddRange(itemsFromSplit);
+                    anyTransformExprProceeded = true;
                 }
                 else
                 {
@@ -463,34 +464,17 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            // Evaluate, split, expand and subtract any Exclude
-            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (string excludeSplit in excludes)
+            // There is a need to Evaluate Exclude part explicitly because of of the expressions had the form "@(X)".
+            if (anyTransformExprProceeded)
             {
-                string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(
-                    Project.Directory,
-                    excludeSplit,
-                    loggingMechanism: LoggingContext,
-                    excludeLocation: originalItem.ExcludeLocation);
+                // Calculate all Exclude
+                var excludesUnescapedForComparison = EvaluateExcludePaths(excludes, originalItem.ExcludeLocation);
 
-                foreach (string excludeSplitFile in excludeSplitFiles)
-                {
-                    excludesUnescapedForComparison.Add(excludeSplitFile.NormalizeForPathComparison());
-                }
+                //// Subtract any Exclude
+                items = items
+                    .Where(i => !excludesUnescapedForComparison.Contains(((IItem)i).EvaluatedInclude.NormalizeForPathComparison()))
+                    .ToList();
             }
-
-            List<ProjectItemInstance> remainingItems = new List<ProjectItemInstance>();
-
-            for (int i = 0; i < items.Count; i++)
-            {
-                if (!excludesUnescapedForComparison.Contains(((IItem)items[i]).EvaluatedInclude.NormalizeForPathComparison()))
-                {
-                    remainingItems.Add(items[i]);
-                }
-            }
-
-            items = remainingItems;
 
             // Filter the metadata as appropriate
             if (keepMetadata != null)
@@ -517,6 +501,32 @@ namespace Microsoft.Build.BackEnd
             }
 
             return items;
+        }
+
+        /// <summary>
+        /// Returns a list of all items specified in Exclude parameter.
+        /// If no items match, returns empty list.
+        /// </summary>
+        /// <param name="excludes">The items to match</param>
+        /// <param name="excludeLocation">The specification to match against the items.</param>
+        /// <returns>A list of matching items</returns>
+        private HashSet<string> EvaluateExcludePaths(IReadOnlyList<string> excludes, ElementLocation excludeLocation)
+        {
+            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string excludeSplit in excludes)
+            {
+                string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(
+                    Project.Directory,
+                    excludeSplit,
+                    loggingMechanism: LoggingContext,
+                    excludeLocation: excludeLocation);
+                foreach (string excludeSplitFile in excludeSplitFiles)
+                {
+                    excludesUnescapedForComparison.Add(excludeSplitFile.NormalizeForPathComparison());
+                }
+            }
+
+            return excludesUnescapedForComparison;
         }
 
         /// <summary>
