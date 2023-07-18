@@ -132,6 +132,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       of built-in and source generated COM interop
     -->
     <CompilerVisibleProperty Include="EnableComHosting" />
+    <CompilerVisibleProperty Include="EnableGeneratedComInterfaceComImportInterop" />
   </ItemGroup>
 
   <!-- C# Code Style Analyzers -->
