@@ -234,4 +234,4 @@ jobs:
     continueOnError: true
     condition: always()
 
-- template: /eng/common/templates/job/source-build.yml
+- template: /eng/common/templates/jobs/source-build.yml
