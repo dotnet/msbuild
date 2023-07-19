@@ -194,7 +194,7 @@ namespace Microsoft.Build.Internal
             var noWildcards = !FilespecHasWildcards(filespecEscaped) || FilespecMatchesLazyWildcard(filespecEscaped, forceEvaluateWildCards);
 
             // It is possible to return original string if no wildcard matches and no entries in Exclude set. 
-            if (noWildcards && excludeSpecsEscaped?.Any() == false)
+            if (noWildcards && excludeSpecsEscaped?.Any() != true)
             {
                 // Just return the original string.
                 fileList = new string[] { returnEscaped ? filespecEscaped : EscapingUtilities.UnescapeAll(filespecEscaped) };
