@@ -57,7 +57,7 @@
       </trans-unit>
       <trans-unit id="CannotCopyFromElementOfThatType">
         <source>MSB4277: Cannot copy from object of that type.</source>
-        <target state="new">MSB4277: Cannot copy from object of that type.</target>
+        <target state="translated">MSB4277: 無法從該類型的物件複製。</target>
         <note>{StrBegin="MSB4277: "}</note>
       </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
