@@ -64,7 +64,7 @@ if [ $host_type = "core" ]
 then
   _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
   _InitializeBuildToolCommand="$bootstrapRoot/net8.0/MSBuild/MSBuild.dll"
-  _InitializeBuildToolFramework="netcoreapp3.1"
+  _InitializeBuildToolFramework="net8.0"
 elif [ $host_type = "mono" ]
 then
   export _InitializeBuildTool="mono"
