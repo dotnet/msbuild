@@ -424,7 +424,7 @@ namespace Microsoft.Build.BackEnd
                         _requestEntry.RequestConfiguration.Project.Targets.ContainsKey(targetName),
                         currentTargetEntry.ReferenceLocation,
                         "TargetDoesNotExist",
-                        currentTargetEntry.Name);
+                        targetName);
 
                         // If we already have results for this target which were not skipped, we can ignore it.  In 
                         // addition, we can also ignore its before and after targets -- if this target has already run, 
@@ -435,7 +435,7 @@ namespace Microsoft.Build.BackEnd
                             _targetsToBuild.Pop();
 
                             // Push our after targets, if any.  Our parent is the parent of the target after which we are running.
-                            IList<TargetSpecification> afterTargets = _requestEntry.RequestConfiguration.Project.GetTargetsWhichRunAfter(currentTargetEntry.Name);
+                            IList<TargetSpecification> afterTargets = _requestEntry.RequestConfiguration.Project.GetTargetsWhichRunAfter(targetName);
                             bool didPushTargets = await PushTargets(afterTargets, currentTargetEntry.ParentEntry, currentTargetEntry.Lookup, currentTargetEntry.ErrorTarget, currentTargetEntry.StopProcessingOnCompletion, TargetBuiltReason.AfterTargets);
 
                             // If we have after targets, the last one to run will inherit the stopProcessing flag and we will reset ours.  If we didn't push any targets, then we shouldn't clear the
@@ -456,7 +456,7 @@ namespace Microsoft.Build.BackEnd
                             // happen if our current target was supposed to stop processing AND we had no after targets, then our last before target should 
                             // inherit the stop processing flag and we will reset it.
                             // Our parent is the target before which we run, just like a depends-on target.
-                            IList<TargetSpecification> beforeTargets = _requestEntry.RequestConfiguration.Project.GetTargetsWhichRunBefore(currentTargetEntry.Name);
+                            IList<TargetSpecification> beforeTargets = _requestEntry.RequestConfiguration.Project.GetTargetsWhichRunBefore(targetName);
                             bool pushedTargets = await PushTargets(beforeTargets, currentTargetEntry, currentTargetEntry.Lookup, currentTargetEntry.ErrorTarget, stopProcessingStack, TargetBuiltReason.BeforeTargets);
                             if (beforeTargets.Count != 0 && pushedTargets)
                             {

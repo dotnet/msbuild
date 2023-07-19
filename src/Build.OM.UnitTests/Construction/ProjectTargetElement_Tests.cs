@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void AddTargetInvalidName()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.CreateTargetElement("@#$invalid@#$");
