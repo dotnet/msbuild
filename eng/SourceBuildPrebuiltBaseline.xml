@@ -29,7 +29,7 @@
     <UsagePattern IdentityGlob="System.Security.Permissions/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Text.Encoding.CodePages/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Text.Encodings.Web/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Json/*7.0.0*" />
+    <UsagePattern IdentityGlob="System.Text.Json/*7.0.3*" />
     <UsagePattern IdentityGlob="System.Threading.Tasks.Dataflow/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Windows.Extensions/*7.0.0*" />
   </IgnorePatterns>
