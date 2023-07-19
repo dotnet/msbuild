@@ -2534,16 +2534,23 @@ namespace Microsoft.Build.CommandLine
             }
             else
             {
+                // Keep MSBUILDLIVELOGGER supporitng existing use. But MSBUILDTERMINALLOGGER takes precedence.
+                string liveLoggerArg = Environment.GetEnvironmentVariable("MSBUILDLIVELOGGER");
                 terminalloggerArg = Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER");
-
-                if (string.IsNullOrWhiteSpace(terminalloggerArg))
-                {
-                    return false;
-                }
-                else
+                if (!string.IsNullOrEmpty(terminalloggerArg))
                 {
                     s_globalMessagesToLogInBuildLoggers.Add(
                         new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDTERMINALLOGGER was set to {terminalloggerArg}.", MessageImportance.Low));
+                }
+                else if (!string.IsNullOrEmpty(liveLoggerArg))
+                {
+                    terminalloggerArg = liveLoggerArg;
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDLIVELOGGER was set to {liveLoggerArg}.", MessageImportance.Low));
+                }
+                else
+                {
+                    return false;
                 }
             }
 
