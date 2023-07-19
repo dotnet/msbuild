@@ -5,39 +5,11 @@
   <IgnorePatterns>
     <UsagePattern IdentityGlob="Microsoft.SourceBuild.Intermediate.*/*" />
 
-    <!-- These dependencies are a result of building for netframework TFMs. These are filtered out
-         in full source-build, and would be filtered out if msbuild was using an 8.0 arcade + 8.0 SDK -->
-         <UsagePattern IdentityGlob="Microsoft.NETFramework.ReferenceAssemblies/*1.0.3*" />
-         <UsagePattern IdentityGlob="Microsoft.NETFramework.ReferenceAssemblies.net472/*1.0.3*" />
-
-    <!-- Baseline 7.0 dependencies until msbuild targets net8 and uses a net8 arcade, SBRP, etc.
-         These cannot be added to 7.0 SBRP, because they would are produced in the 7.0 build. -->
-    <UsagePattern IdentityGlob="Microsoft.Bcl.AsyncInterfaces/*7.0.0*" />
-    <UsagePattern IdentityGlob="Microsoft.Win32.SystemEvents/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.CodeDom/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Collections.Immutable/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Configuration.ConfigurationManager/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Diagnostics.EventLog/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Drawing.Common/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Formats.Asn1/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Reflection.Metadata/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Reflection.MetadataLoadContext/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Resources.Extensions/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Security.Cryptography.Pkcs/*7.0.2*" />
     <UsagePattern IdentityGlob="System.Security.Cryptography.ProtectedData/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Security.Cryptography.Xml/*7.0.1*" />
-    <UsagePattern IdentityGlob="System.Security.Permissions/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Encoding.CodePages/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Encodings.Web/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Json/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Threading.Tasks.Dataflow/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Windows.Extensions/*7.0.0*" />
   </IgnorePatterns>
   <Usages>
-    <Usage Id="Microsoft.Build.Tasks.Git" Version="8.0.0-beta.23211.2" />
-    <Usage Id="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.23211.1" IsDirectDependency="true" IsAutoReferenced="true" />
-    <Usage Id="Microsoft.SourceLink.AzureRepos.Git" Version="8.0.0-beta.23211.2" IsDirectDependency="true" IsAutoReferenced="true" />
-    <Usage Id="Microsoft.SourceLink.Common" Version="8.0.0-beta.23211.2" />
-    <Usage Id="Microsoft.SourceLink.GitHub" Version="8.0.0-beta.23211.2" IsDirectDependency="true" IsAutoReferenced="true" />
   </Usages>
 </UsageData>
