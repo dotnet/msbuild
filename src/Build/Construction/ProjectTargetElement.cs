@@ -109,7 +109,7 @@ namespace Microsoft.Build.Construction
                 int indexOfSpecialCharacter = unescapedValue.IndexOfAny(XMakeElements.InvalidTargetNameCharacters);
                 if (indexOfSpecialCharacter >= 0)
                 {
-                    ErrorUtilities.ThrowArgument("OM_NameInvalid", unescapedValue, unescapedValue[indexOfSpecialCharacter]);
+                    ProjectErrorUtilities.ThrowInvalidProject(ElementLocation.Create("MSBUILD"), "NameInvalid", unescapedValue, unescapedValue[indexOfSpecialCharacter]);
                 }
 
                 SetOrRemoveAttribute(XMakeAttributes.name, unescapedValue, "Set target Name {0}", value);
@@ -171,7 +171,7 @@ namespace Microsoft.Build.Construction
                 if (String.IsNullOrEmpty(value) && !BuildParameters.KeepDuplicateOutputs)
                 {
                     // In 4.0, by default we do NOT keep duplicate outputs unless they user has either set the attribute
-                    // explicitly or overridden it globally with MSBUILDKEEPDUPLICATEOUTPUTS set to a non-empty value.                    
+                    // explicitly or overridden it globally with MSBUILDKEEPDUPLICATEOUTPUTS set to a non-empty value.
                     value = "False";
                 }
 
@@ -273,11 +273,11 @@ namespace Microsoft.Build.Construction
                         value,
                         true); /* only remove the element if the value is null -- setting to empty string is OK */
 
-                // if this target's Returns attribute is non-null, then there is at least one target in the 
-                // parent project that has the returns attribute.  
-                // NOTE: As things are currently, if a project is created that has targets with Returns, but then 
-                // all of those targets are set to not have Returns anymore, the PRE will still claim that it 
-                // contains targets with the Returns attribute.  Do we care? 
+                // if this target's Returns attribute is non-null, then there is at least one target in the
+                // parent project that has the returns attribute.
+                // NOTE: As things are currently, if a project is created that has targets with Returns, but then
+                // all of those targets are set to not have Returns anymore, the PRE will still claim that it
+                // contains targets with the Returns attribute.  Do we care?
                 if (returnsAttribute != null)
                 {
                     ((ProjectRootElement)Parent).ContainsTargetsWithReturnsAttribute = true;
@@ -313,7 +313,7 @@ namespace Microsoft.Build.Construction
                 if ((location == null) && !BuildParameters.KeepDuplicateOutputs)
                 {
                     // In 4.0, by default we do NOT keep duplicate outputs unless they user has either set the attribute
-                    // explicitly or overridden it globally with MSBUILDKEEPDUPLICATEOUTPUTS set to a non-empty value.                    
+                    // explicitly or overridden it globally with MSBUILDKEEPDUPLICATEOUTPUTS set to a non-empty value.
                     location = NameLocation;
                 }
 
