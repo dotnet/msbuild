@@ -33,7 +33,7 @@
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
-    <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="System.Text.Json" Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
