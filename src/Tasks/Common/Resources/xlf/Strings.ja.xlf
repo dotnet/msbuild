@@ -922,7 +922,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}. Download the .NET SDK from https://aka.ms/dotnet/download</source>
-        <target state="needs-review-translation">NETSDK1045: 現在の .NET SDK は、ターゲットとする {0} {1} をサポートしていません。{0} {2} 以下をターゲットとするか、{0} {1} をサポートする .NET SDK のバージョンを使用してください。</target>
+        <target state="translated">NETSDK1045: 現在の .NET SDK は、ターゲットとする {0} {1} をサポートしていません。{0} {2} 以下をターゲットとするか、{0} {1} をサポートする .NET SDK のバージョンを使用してください。https://aka.ms/dotnet/download から .NET SDK をダウンロードしてください</target>
         <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifier">
@@ -932,7 +932,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedVisualStudioVersion">
         <source>NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</source>
-        <target state="new">NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</target>
+        <target state="translated">NETSDK1209: 現在の Visual Studio バージョンは、ターゲット {0} {1} をサポートしていません。 ターゲット {0} {2} 以下、または Visual Studio バージョン {3} 以上を使用してください</target>
         <note>{StrBegin="NETSDK1209: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">

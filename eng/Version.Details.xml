@@ -58,13 +58,13 @@
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>971bf70db73ebd5d5e1dde5eb27b8265be9f3169</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.7.0-beta.23328.4">
+    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.7.0-beta.23364.5">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>521a4efba79d9afcfb18bc946d3dda5133252939</Sha>
+      <Sha>159a701477f5ca1e2d960e9bf79ce05769b3c671</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.fsharp" Version="7.0.400-beta.23328.4">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.fsharp" Version="7.0.400-beta.23364.5">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>521a4efba79d9afcfb18bc946d3dda5133252939</Sha>
+      <Sha>159a701477f5ca1e2d960e9bf79ce05769b3c671</Sha>
       <SourceBuild RepoName="fsharp" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="dotnet-format" Version="7.4.431902">
@@ -72,34 +72,34 @@
       <Sha>3c30490bb2ecae8967a3b5e79c97ab98de334676</Sha>
       <SourceBuildTarball RepoName="format" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.7.0-3.23361.9">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.7.0-3.23366.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>91c9c05370d84a902010c9e1f80aebcc3a467792</Sha>
+      <Sha>dad7898acd6372d4380612b9f225db0c2cbfa1e9</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis" Version="4.7.0-3.23361.9">
+    <Dependency Name="Microsoft.CodeAnalysis" Version="4.7.0-3.23366.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>91c9c05370d84a902010c9e1f80aebcc3a467792</Sha>
+      <Sha>dad7898acd6372d4380612b9f225db0c2cbfa1e9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.CSharp" Version="4.7.0-3.23361.9">
+    <Dependency Name="Microsoft.CodeAnalysis.CSharp" Version="4.7.0-3.23366.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>91c9c05370d84a902010c9e1f80aebcc3a467792</Sha>
+      <Sha>dad7898acd6372d4380612b9f225db0c2cbfa1e9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.7.0-3.23361.9">
+    <Dependency Name="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.7.0-3.23366.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>91c9c05370d84a902010c9e1f80aebcc3a467792</Sha>
+      <Sha>dad7898acd6372d4380612b9f225db0c2cbfa1e9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.CSharp.Features" Version="4.7.0-3.23361.9">
+    <Dependency Name="Microsoft.CodeAnalysis.CSharp.Features" Version="4.7.0-3.23366.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>91c9c05370d84a902010c9e1f80aebcc3a467792</Sha>
+      <Sha>dad7898acd6372d4380612b9f225db0c2cbfa1e9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.7.0-3.23361.9">
+    <Dependency Name="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.7.0-3.23366.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>91c9c05370d84a902010c9e1f80aebcc3a467792</Sha>
+      <Sha>dad7898acd6372d4380612b9f225db0c2cbfa1e9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.7.0-3.23361.9">
+    <Dependency Name="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.7.0-3.23366.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>91c9c05370d84a902010c9e1f80aebcc3a467792</Sha>
+      <Sha>dad7898acd6372d4380612b9f225db0c2cbfa1e9</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="7.0.10-servicing.23364.39">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
@@ -113,9 +113,9 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>13f2b6af6e9864711e815cfbffd7aa5015c52cec</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.7.0-preview-23362-01">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.7.0-preview-23364-03">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>d7f4faa42b22ba20d697b530dd6809a0c02e6278</Sha>
+      <Sha>bc17bb9693cfc4778ded51aa0ab7f1065433f989</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="7.0.100-1.23321.1">
       <Uri>https://github.com/dotnet/linker</Uri>

@@ -79,12 +79,12 @@
       </trans-unit>
       <trans-unit id="ManifestFromInstallStateNotFound">
         <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
-        <target state="new">Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</target>
+        <target state="translated">找不到 {1} 中指定的工作負載資訊清單 {0}。執行 "dotnet workload repair" 可能會解決這個問題。</target>
         <note>{Locked="dotnet workload repair"}</note>
       </trans-unit>
       <trans-unit id="ManifestFromWorkloadSetNotFound">
         <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
-        <target state="new">Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</target>
+        <target state="translated">未安裝工作負載版本 {1} 中的工作負載資訊清單 {0}。執行 "dotnet workload repair" 可能會解決這個問題。</target>
         <note>{Locked="dotnet workload repair"}</note>
       </trans-unit>
       <trans-unit id="MissingBaseWorkload">
@@ -139,12 +139,12 @@
       </trans-unit>
       <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
         <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
-        <target state="new">Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</target>
+        <target state="translated">找不到 {1} 中指定的工作負載版本 {0}。執行 "dotnet workload restore" 以安裝此工作負載版本。</target>
         <note>{Locked="dotnet workload restore"}</note>
       </trans-unit>
       <trans-unit id="WorkloadVersionFromInstallStateNotFound">
         <source>Workload version {0}, which was specified in {1}, was not found.</source>
-        <target state="new">Workload version {0}, which was specified in {1}, was not found.</target>
+        <target state="translated">找不到 {1} 中指定的工作負載版本 {0}。</target>
         <note />
       </trans-unit>
     </body>
