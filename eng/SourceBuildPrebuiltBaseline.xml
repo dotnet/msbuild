@@ -5,6 +5,8 @@
   <IgnorePatterns>
     <UsagePattern IdentityGlob="Microsoft.SourceBuild.Intermediate.*/*" />
 
+    <!-- Baseline 7.0 dependencies until msbuild targets net8 and uses a net8 arcade, SBRP, etc.
+         These cannot be added to 7.0 SBRP, because they would are produced in the 7.0 build. -->
     <UsagePattern IdentityGlob="System.Configuration.ConfigurationManager/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Diagnostics.EventLog/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Reflection.MetadataLoadContext/*7.0.0*" />
