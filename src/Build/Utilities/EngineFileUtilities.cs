@@ -191,10 +191,9 @@ namespace Microsoft.Build.Internal
             FileMatcher.SearchAction action = FileMatcher.SearchAction.None;
             string excludeFileSpec = string.Empty;
 
-            var noWildcards = !FilespecHasWildcards(filespecEscaped) || FilespecMatchesLazyWildcard(filespecEscaped, forceEvaluateWildCards);
-            var noExcludeSpecs = excludeSpecsEscaped == null || !excludeSpecsEscaped.Any();
-            // It is possible to return original string if no entries in Exclude set and no wildcard matches. 
-            if (noWildcards && noExcludeSpecs)
+            var hasWildcards = !FilespecHasWildcards(filespecEscaped) || FilespecMatchesLazyWildcard(filespecEscaped, forceEvaluateWildCards);
+            // It is possible to return original string if no wildcard matches and no entries in Exclude set . 
+            if (!(hasWildcards || excludeSpecsEscaped?.Any() == true))
             {
                 fileList = new string[] { returnEscaped ? filespecEscaped : EscapingUtilities.UnescapeAll(filespecEscaped) };
             }
