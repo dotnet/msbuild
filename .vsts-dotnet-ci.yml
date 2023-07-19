@@ -235,7 +235,3 @@ jobs:
     condition: always()
 
 - template: /eng/common/templates/job/source-build.yml
-  parameters:
-    platform:
-      name: 'Managed'
-      container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7'
