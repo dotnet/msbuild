@@ -412,16 +412,9 @@ namespace Microsoft.Build.BackEnd
                 switch (currentTargetEntry.State)
                 {
                     case TargetEntryState.Dependencies:
-                        var targetName = currentTargetEntry.Name;
-                        int indexOfSpecialCharacter = targetName.IndexOfAny(XMakeElements.InvalidTargetNameCharacters);
-                        if (indexOfSpecialCharacter >= 0)
-                        {
-                            ProjectErrorUtilities.ThrowInvalidProject(currentTargetEntry.ReferenceLocation, "NameInvalid", targetName, targetName[indexOfSpecialCharacter]);
-                        }
-
-                        // Ensure we are dealing with a target which actually exists
+                        // Ensure we are dealing with a target which actually exists.
                         ProjectErrorUtilities.VerifyThrowInvalidProject(
-                        _requestEntry.RequestConfiguration.Project.Targets.ContainsKey(targetName),
+                        _requestEntry.RequestConfiguration.Project.Targets.ContainsKey(currentTargetEntry.Name),
                         currentTargetEntry.ReferenceLocation,
                         "TargetDoesNotExist",
                         currentTargetEntry.Name);
