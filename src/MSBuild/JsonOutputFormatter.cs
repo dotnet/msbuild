@@ -126,11 +126,6 @@ namespace Microsoft.Build.CommandLine
                         jsonItem[metadatumName] = item.GetMetadata(metadatumName);
                     }
 
-                    foreach (KeyValuePair<string, string> metadatum in item.EnumerateMetadata())
-                    {
-                        jsonItem[metadatum.Key] = metadatum.Value;
-                    }
-
                     outputArray.Add(jsonItem);
                 }
 
