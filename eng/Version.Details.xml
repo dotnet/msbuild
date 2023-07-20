@@ -39,28 +39,28 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.23313.5">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="8.0.0-beta.23213.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>91616785a1a6578c83f7e93d98c34a1eb83d6223</Sha>
+      <Sha>fb14cae30eacbe844468ac297b3d4c61e0bb9dc0</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-21480-02" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
+    <Dependency Name="Microsoft.SourceLink.GitHub" Version="8.0.0-beta.23211.2" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
       <Uri>https://github.com/dotnet/sourcelink</Uri>
-      <Sha>8031e5220baf2acad991e661d8308b783d2acf3e</Sha>
+      <Sha>4cf2eb17c295905edeca76a9afe6dda42988359e</Sha>
       <SourceBuild RepoName="sourcelink" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.21431.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
+    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.23211.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
       <Uri>https://github.com/dotnet/xliff-tasks</Uri>
-      <Sha>bc3233146e1fcd393ed471d5005333c83363e0fe</Sha>
+      <Sha>ce5066cd85c138c257a981f9c95257e9c577a5ee</Sha>
       <SourceBuild RepoName="xliff-tasks" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.7.0-rc.106">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.7.0-rc.111">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>4b6a87bfe90d247f961eba41d63dbf418a56fdcc</Sha>
+      <Sha>13f2b6af6e9864711e815cfbffd7aa5015c52cec</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.7.0-3.23324.1">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.7.0-3.23361.9">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>d0f4099ffa7f8ff31fd397a4a96f404e1cd7dfc7</Sha>
+      <Sha>91c9c05370d84a902010c9e1f80aebcc3a467792</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="6.0.0-beta.23313.5">

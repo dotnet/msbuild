@@ -16,7 +16,7 @@ namespace Microsoft.Build.Logging.LiveLogger;
 internal sealed class Terminal : ITerminal
 {
     /// <summary>
-    /// The encoding read from <see cref="Console.OutputEncoding"/> when the terminal is instantiated.
+    /// The encoding read from <see cref="Console.OutputEncoding"/> when the terminal is constructed.
     /// </summary>
     private readonly Encoding _originalOutputEncoding;
 
@@ -30,7 +30,7 @@ internal sealed class Terminal : ITerminal
     /// </summary>
     private bool _isBuffering = false;
 
-    internal TextWriter Output { private get; set; } = Console.Out;
+    internal TextWriter Output { private get; set; }
 
     private const int BigUnknownDimension = 2 << 23;
 
@@ -66,6 +66,12 @@ internal sealed class Terminal : ITerminal
     {
         _originalOutputEncoding = Console.OutputEncoding;
         Console.OutputEncoding = Encoding.UTF8;
+
+        // Capture the TextWriter AFTER setting the encoding, because setting
+        // the encoding creates a new TextWriter in the Console class, but it's
+        // possible to hang on to the old one (with the wrong encoding) and emit
+        // garbage, as in https://github.com/dotnet/msbuild/issues/9030.
+        Output = Console.Out;
     }
 
     internal Terminal(TextWriter output)

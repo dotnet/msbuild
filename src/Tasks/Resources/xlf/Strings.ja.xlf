@@ -121,6 +121,16 @@
         <target state="translated">MSB3654: 遅延署名には、最低でも 1 つの公開キーを指定する必要があります。KeyFile または KeyContainer プロパティを使用して公開キーを提供するか、遅延署名を無効にしてください。</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
+      <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
+        <source>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</source>
+        <target state="new">MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</target>
+        <note>{StrBegin="MSB3991: "}</note>
+      </trans-unit>
+      <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullRootElementName">
+        <source>MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</source>
+        <target state="new">MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</target>
+        <note>{StrBegin="MSB3992: "}</note>
+      </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
         <source>MSB3881: Fatal Error: more than {0} command line arguments.</source>
         <target state="translated">MSB3881: 致命的なエラー: コマンド ライン引数が {0} を超えています。</target>

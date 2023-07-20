@@ -1582,8 +1582,8 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
-                FileUtilities.ClearCacheDirectory();
                 projectCollection?.Dispose();
+                FileUtilities.ClearCacheDirectory();
 
                 // Build manager shall be reused for all build sessions.
                 // If, for one reason or another, this behavior needs to change in future

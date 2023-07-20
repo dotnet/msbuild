@@ -27,11 +27,6 @@
         <target state="translated">Uscita dal comando con codice {0}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="translated">MSB6005: tentativo di registrazione prima dell'inizializzazione dell'attività. Messaggio: {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
-      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: il file manifesto della piattaforma non è stato trovato in "{0}".</target>
