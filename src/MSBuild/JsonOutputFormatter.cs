@@ -121,6 +121,11 @@ namespace Microsoft.Build.CommandLine
                 foreach (ITaskItem item in targetResult.Items)
                 {
                     JsonObject jsonItem = new();
+                    foreach (string metadatumName in item.MetadataNames)
+                    {
+                        jsonItem[metadatumName] = item.GetMetadata(metadatumName);
+                    }
+
                     foreach (KeyValuePair<string, string> metadatum in item.EnumerateMetadata())
                     {
                         jsonItem[metadatum.Key] = metadatum.Value;
@@ -133,7 +138,7 @@ namespace Microsoft.Build.CommandLine
                 targetResultsNode[targetName] = targetResults;
             }
 
-            _topLevelNode["Target Results"] = targetResultsNode;
+            _topLevelNode["TargetResults"] = targetResultsNode;
         }
     }
 }

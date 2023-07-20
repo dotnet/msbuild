@@ -479,7 +479,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void EvaluationFromCommandLineSwitchIdentificationTests()
+        public void GetPropertySwitchIdentificationTest()
         {
             CommandLineSwitches.IsParameterizedSwitch(
                 "getProperty",
@@ -494,13 +494,17 @@ namespace Microsoft.Build.UnitTests
             duplicateSwitchErrorMessage.ShouldBeNull();
             multipleParametersAllowed.ShouldBeTrue();
             missingParametersErrorMessage.ShouldNotBeNullOrEmpty();
+        }
 
+        [Fact]
+        public void GetItemSwitchIdentificationTest()
+        {
             CommandLineSwitches.IsParameterizedSwitch(
                 "getItem",
-                out parameterizedSwitch,
-                out duplicateSwitchErrorMessage,
-                out multipleParametersAllowed,
-                out missingParametersErrorMessage,
+                out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch,
+                out string duplicateSwitchErrorMessage,
+                out bool multipleParametersAllowed,
+                out string missingParametersErrorMessage,
                 out _,
                 out _);
 
@@ -508,13 +512,17 @@ namespace Microsoft.Build.UnitTests
             duplicateSwitchErrorMessage.ShouldBeNull();
             multipleParametersAllowed.ShouldBeTrue();
             missingParametersErrorMessage.ShouldNotBeNullOrEmpty();
+        }
 
+        [Fact]
+        public void GetTargetResultSwitchIdentificationTest()
+        {
             CommandLineSwitches.IsParameterizedSwitch(
                 "getTargetResult",
-                out parameterizedSwitch,
-                out duplicateSwitchErrorMessage,
-                out multipleParametersAllowed,
-                out missingParametersErrorMessage,
+                out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch,
+                out string duplicateSwitchErrorMessage,
+                out bool multipleParametersAllowed,
+                out string missingParametersErrorMessage,
                 out _,
                 out _);
 
