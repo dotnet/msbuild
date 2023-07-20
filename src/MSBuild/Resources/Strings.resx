@@ -1481,6 +1481,9 @@
       {4}: duration in seconds with 1 decimal point
     </comment>
   </data>
+  <data name="OM_NameInvalid" xml:space="preserve">
+    <value>The name "{0}" contains an invalid character "{1}".</value>
+  </data>
   <!-- **** LiveLogger strings end **** -->
 
     <!--

@@ -1372,6 +1372,11 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <target state="translated">MSBUILD : error MSB1062: Přepínač -warnnotaserror nelze zadat, pokud není zadán také přepínač -warnaserror a není prázdný.</target>
         <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="OM_NameInvalid">
+        <source>The name "{0}" contains an invalid character "{1}".</source>
+        <target state="new">The name "{0}" contains an invalid character "{1}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
         <target state="translated">Zadaný protokolovací nástroj nebylo možné vytvořit a nebude se používat. {0}</target>

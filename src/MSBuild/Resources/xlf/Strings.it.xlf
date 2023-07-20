@@ -1375,6 +1375,11 @@ Nota: livello di dettaglio dei logger di file
         <target state="translated">MSBUILD : error MSB1062: non è possibile specificare l'opzione -warnnotaserror a meno che non venga specificata e lasciata vuota anche l'opzione -warnaserror.</target>
         <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="OM_NameInvalid">
+        <source>The name "{0}" contains an invalid character "{1}".</source>
+        <target state="new">The name "{0}" contains an invalid character "{1}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
         <target state="translated">Non è stato possibile creare il logger specificato, che quindi non verrà usato. {0}</target>

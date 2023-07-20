@@ -1365,6 +1365,11 @@
         <target state="translated">MSBUILD : error MSB1062: -warnaserror 스위치도 지정하고 비어 있지 않으면 -warnnotaserror 스위치를 지정할 수 없습니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="OM_NameInvalid">
+        <source>The name "{0}" contains an invalid character "{1}".</source>
+        <target state="new">The name "{0}" contains an invalid character "{1}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
         <target state="translated">지정된 로거를 만들 수 없어 지정된 로거가 사용되지 않습니다. {0}</target>

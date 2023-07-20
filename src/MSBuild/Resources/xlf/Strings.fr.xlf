@@ -1365,6 +1365,11 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <target state="translated">MSBUILD : error MSB1062: Impossible de spécifier le commutateur -warnnotaserror, sauf si le commutateur -warnaserror est également spécifié et laissé vide.</target>
         <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="OM_NameInvalid">
+        <source>The name "{0}" contains an invalid character "{1}".</source>
+        <target state="new">The name "{0}" contains an invalid character "{1}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
         <target state="translated">Le journaliseur spécifié n'a pas pu être créé et ne sera pas utilisé. {0}</target>

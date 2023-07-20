@@ -1365,6 +1365,11 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
         <target state="translated">MSBUILD : error MSB1062: Der „-warnnotaserror“-Switch kann nur angegeben werden, wenn auch der „-warnaserror“-Switch angegeben wurde und leer gelassen wird.</target>
         <note>{StrBegin="MSBUILD : error MSB1062: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-warnnotaserror" and "-warnaserror" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="OM_NameInvalid">
+        <source>The name "{0}" contains an invalid character "{1}".</source>
+        <target state="new">The name "{0}" contains an invalid character "{1}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionalLoggerCreationMessage">
         <source>The specified logger could not be created and will not be used. {0}</source>
         <target state="translated">Die angegebene Protokollierung konnte nicht erstellt werden und wird nicht verwendet. {0}</target>
