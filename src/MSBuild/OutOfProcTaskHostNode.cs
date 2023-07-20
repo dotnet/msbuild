@@ -1159,8 +1159,9 @@ namespace Microsoft.Build.CommandLine
                 LogMessagePacket logMessage = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
                 _nodeEndpoint.SendData(logMessage);
 
-#if RUNTIME_TYPE_NETCORE
-                if (logMessage.EventType == LoggingEventType.CustomEvent && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
+                if (logMessage.EventType == LoggingEventType.CustomEvent
+                    && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8)
+                    && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
                 {
                     BuildEventArgs buildEvent = logMessage.NodeBuildEvent.Value.Value;
 
@@ -1171,7 +1172,6 @@ namespace Microsoft.Build.CommandLine
                         "DeprecatedEventSerialization",
                         buildEvent?.GetType().Name ?? string.Empty);
                 }
-#endif
             }
         }
 

@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 #nullable disable
 
@@ -369,6 +370,29 @@ namespace Microsoft.Build.Framework
                 }
 
                 return _sdkReferencePropertyExpansionValue;
+            }
+        }
+
+        /// <summary>
+        /// Allows displaying the deprecation warning for BinaryFormatter in your current environment.
+        /// </summary>
+        public bool EnableWarningOnCustomBuildEvent
+        {
+            get
+            {
+                var value = Environment.GetEnvironmentVariable("MSBUILDCUSTOMBUILDEVENTWARNING");
+
+                if (value == null)
+                {
+                    // If variable is not set explicitly, for .NETCORE warning appears.
+#if RUNTIME_TYPE_NETCORE
+                    return true;
+#else
+                    return false;
+#endif
+                }
+
+                return value == "1";
             }
         }
 
