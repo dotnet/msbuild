@@ -86,7 +86,6 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
-    <PackageVersion Include="xunit.console" Version="$(XUnitVersion)" />
     <PackageReference Include="xunit.console" />
   </ItemGroup>
 

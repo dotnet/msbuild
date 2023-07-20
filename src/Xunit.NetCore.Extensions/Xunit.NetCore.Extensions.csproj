@@ -7,6 +7,7 @@
     <IsTestProject>false</IsTestProject><!-- while this project references xunit it isn't itself a test -->
   </PropertyGroup>
   <ItemGroup>
+    <!-- Implicit reference to xunit.core and xunit.assert in the test project by .NET SDK causes it's not able to put PackageVersion in .props file. -->
     <PackageVersion Include="xunit.core" Version="$(XUnitVersion)" />
     <PackageReference Include="xunit.core" />
   </ItemGroup>
