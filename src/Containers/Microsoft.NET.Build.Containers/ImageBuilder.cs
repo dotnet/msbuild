@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.NET.Build.Containers;
+
+using System.Collections.ObjectModel;
 using Microsoft.NET.Build.Containers.Resources;
 
 /// <summary>
@@ -64,6 +66,8 @@ internal sealed class ImageBuilder
         _manifest.Layers.Add(new(l.Descriptor.MediaType, l.Descriptor.Size, l.Descriptor.Digest, l.Descriptor.Urls));
         _baseImageConfig.AddLayer(l);
     }
+
+    internal ReadOnlyDictionary<string, string> EnvironmentVariables => _baseImageConfig.EnvironmentVariables;
 
     /// <summary>
     /// Adds a label to a base image.

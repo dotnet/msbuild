@@ -14,6 +14,7 @@
 
     <!-- Allow the packaging project to use the name `Microsoft.NET.Build.Containers` for the nuget package -->
     <Packageid>.</Packageid>
+    <OutputType>Library</OutputType>
 
     <!-- While in prerelease, ship the symbols to everyone all the time. -->
     <DebugType>embedded</DebugType>
@@ -64,6 +65,7 @@
     <Compile Remove="net472Definitions.cs" />
     <Compile Remove="VSHostObject.cs" />
   </ItemGroup>
+
   <ItemGroup>
     <Compile Update="Resources\Strings.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -71,6 +73,7 @@
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
   </ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Update="Resources\Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>

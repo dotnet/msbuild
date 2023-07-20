@@ -90,13 +90,65 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
             imageBuilder.AddLabel(label.ItemSpec, label.GetMetadata("Value"));
         }
 
-        SetEnvironmentVariables(imageBuilder, ContainerEnvironmentVariables);
+        SetEnvironmentVariables(imageBuilder, ContainerEnvironmentVariables, logger);
 
         SetPorts(imageBuilder, ExposedPorts);
 
         if (ContainerUser is { Length: > 0 } user)
         {
             imageBuilder.SetUser(user);
+        }
+
+        // it's a common convention to apply custom users with the APP_UID convention - we check and apply that here
+        if (imageBuilder.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.APP_UID, out string? appUid))
+        {
+            imageBuilder.SetUser(appUid);
+        }
+
+        // asp.net images control port bindings via three environment variables. we should check for those variables and ensure that ports are created for them
+        if (imageBuilder.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_HTTP_PORTS, out string? httpPorts))
+        {
+            logger.LogTrace("Setting ports from ASPNETCORE_HTTP_PORTS environment variable");
+            foreach(var port in httpPorts.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                if (int.TryParse(port, out int parsedPort))
+                {
+                    logger.LogTrace("Added port {port}", parsedPort);
+                    imageBuilder.ExposePort(parsedPort, PortType.tcp);
+                }
+                else
+                {
+                    logger.LogTrace("Skipped port {port} because it could not be parsed as an integer", port);
+                }
+            }
+        }
+        else if (imageBuilder.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_HTTPS_PORTS, out string? httpsPorts))
+        {
+            logger.LogTrace("Setting ports from ASPNETCORE_HTTPS_PORTS environment variable");
+            foreach(var port in httpsPorts.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                if (int.TryParse(port, out int parsedPort))
+                {
+                    logger.LogTrace("Added port {port}", parsedPort);
+                    imageBuilder.ExposePort(parsedPort, PortType.tcp);
+                }
+                else
+                {
+                    logger.LogTrace("Skipped port {port} because it could not be parsed as an integer", port);
+                }
+            }
+        }
+        else if (imageBuilder.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_URLS, out string? urls))
+        {
+            foreach(var url in urls.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                logger.LogTrace("Setting ports from ASPNETCORE_HTTPS_PORTS environment variable");
+                try {
+                    // TODO: parse urls
+                } catch (FormatException fex) {
+                    logger.LogTrace("Could not parse ASPNETCORE_URLS value {url} as a binding address: {exception}", url, fex.Message);
+                }
+            }
         }
 
         // at the end of this step, if any failed then bail out.
@@ -204,11 +256,12 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         }
     }
 
-    private static void SetEnvironmentVariables(ImageBuilder img, ITaskItem[] envVars)
+    private void SetEnvironmentVariables(ImageBuilder img, ITaskItem[] envVars, ILogger logger)
     {
         foreach (ITaskItem envVar in envVars)
         {
-            img.AddEnvironmentVariable(envVar.ItemSpec, envVar.GetMetadata("Value"));
+            var value = envVar.GetMetadata("Value");
+            img.AddEnvironmentVariable(envVar.ItemSpec, value);
         }
     }
 

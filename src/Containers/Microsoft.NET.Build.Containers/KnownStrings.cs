@@ -52,4 +52,12 @@ internal static class KnownStrings
         public static readonly string CONTAINER4003 = nameof(CONTAINER4003);
         public static readonly string CONTAINER4004 = nameof(CONTAINER4004);
     }
+
+    public static class EnvironmentVariables
+    {
+        public static readonly string APP_UID = nameof(APP_UID);
+        public static readonly string ASPNETCORE_URLS = nameof(ASPNETCORE_URLS);
+        public static readonly string ASPNETCORE_HTTP_PORTS = nameof(ASPNETCORE_HTTP_PORTS);
+        public static readonly string ASPNETCORE_HTTPS_PORTS = nameof(ASPNETCORE_HTTPS_PORTS);
+    }
 }

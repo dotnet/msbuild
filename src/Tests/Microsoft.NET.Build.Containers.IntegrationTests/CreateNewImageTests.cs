@@ -196,6 +196,10 @@ public class CreateNewImageTests
         cni.LocalRegistry = global::Microsoft.NET.Build.Containers.KnownLocalRegistryTypes.Docker;
 
         Assert.True(cni.Execute(), FormatBuildMessages(errors));
+        var config = System.Text.Json.JsonDocument.Parse(cni.GeneratedContainerConfiguration);
+        // because we're building off of .net 8 images for this test, we can validate the user id and aspnet https urls
+        var actualConfig = config.RootElement.GetProperty("config");
+        Assert.Equal("1654", actualConfig.GetProperty("User").GetString());
 
         ContainerCli.RunCommand(_testOutput, "--rm", $"{pcp.NewContainerRepository}:latest")
             .Execute()
@@ -208,7 +212,7 @@ public class CreateNewImageTests
     {
         const string RootlessBase ="dotnet/rootlessbase";
         const string AppImage = "dotnet/testimagerootless";
-        const string RootlessUser = "101";
+        const string RootlessUser = "1654";
         var loggerFactory = new TestLoggerFactory(_testOutput);
         var logger = loggerFactory.CreateLogger(nameof(CreateNewImage_RootlessBaseImage));
 
@@ -224,7 +228,6 @@ public class CreateNewImageTests
 
         Assert.NotNull(imageBuilder);
 
-        imageBuilder.SetUser(RootlessUser);
 
         BuiltImage builtImage = imageBuilder.Build();
 
