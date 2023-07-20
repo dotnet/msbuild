@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
@@ -59,7 +57,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get any contained parameters.
         /// </summary>
-        public ICollection<ProjectUsingTaskParameterElement> Parameters => new ReadOnlyCollection<ProjectUsingTaskParameterElement>(Children.OfType<ProjectUsingTaskParameterElement>());
+        public ICollection<ProjectUsingTaskParameterElement> Parameters => GetChildrenOfType<ProjectUsingTaskParameterElement>();
 
         /// <summary>
         /// This does not allow conditions, so it should not be called.

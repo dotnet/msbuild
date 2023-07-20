@@ -852,7 +852,8 @@ namespace Microsoft.Build.Tasks
                 name = item.GetMetadata(FileUtilities.ItemSpecModifiers.Filename);
             }
 
-            return new AssemblyNameExtension($"{name}, Version={version}, Culture=neutral, PublicKeyToken={publicKeyToken}");
+            AssemblyName assemblyName = new AssemblyName($"{name}, Version={version}, Culture=neutral, PublicKeyToken={publicKeyToken}");
+            return new AssemblyNameExtension(assemblyName);
         }
 
         /// <summary>
@@ -2676,9 +2677,36 @@ namespace Microsoft.Build.Tasks
             // Set up the main item.
             TaskItem referenceItem = new TaskItem();
             referenceItem.ItemSpec = reference.FullPath;
+            referenceItem.SetMetadata(ItemMetadataNames.resolvedFrom, reference.ResolvedSearchPath);
 
-            IMetadataContainer referenceItemAsMetadataContainer = referenceItem;
-            referenceItemAsMetadataContainer.ImportMetadata(EnumerateCommonMetadata());
+            // Set the CopyLocal metadata.
+            referenceItem.SetMetadata(ItemMetadataNames.copyLocal, reference.IsCopyLocal ? "true" : "false");
+
+            // Set the Redist name metadata.
+            if (!String.IsNullOrEmpty(reference.RedistName))
+            {
+                referenceItem.SetMetadata(ItemMetadataNames.redist, reference.RedistName);
+            }
+
+            if (Reference.IsFrameworkFile(reference.FullPath, _frameworkPaths) || (_installedAssemblies?.FrameworkAssemblyEntryInRedist(assemblyName) == true))
+            {
+                if (!IsAssemblyRemovedFromDotNetFramework(assemblyName, reference.FullPath, _frameworkPaths, _installedAssemblies))
+                {
+                    referenceItem.SetMetadata(ItemMetadataNames.frameworkFile, "true");
+                }
+            }
+
+            if (!String.IsNullOrEmpty(reference.ImageRuntime))
+            {
+                referenceItem.SetMetadata(ItemMetadataNames.imageRuntime, reference.ImageRuntime);
+            }
+
+            // The redist root is "null" when there was no IsRedistRoot flag in the Redist XML
+            // (or there was no redist XML at all for this item).
+            if (reference.IsRedistRoot != null)
+            {
+                referenceItem.SetMetadata(ItemMetadataNames.isRedistRoot, (bool)reference.IsRedistRoot ? "true" : "false");
+            }
 
             // If there was a primary source item, then forward metadata from it.
             // It's important that the metadata from the primary source item
@@ -2852,45 +2880,13 @@ namespace Microsoft.Build.Tasks
             // nonForwardableMetadata should be null here if relatedFileExtensions, satellites, serializationAssemblyFiles, and scatterFiles were all empty.
             if (nonForwardableMetadata != null)
             {
-                referenceItemAsMetadataContainer.ImportMetadata(nonForwardableMetadata);
+                foreach (KeyValuePair<string, string> kvp in nonForwardableMetadata)
+                {
+                    referenceItem.SetMetadata(kvp.Key, kvp.Value);
+                }
             }
 
             return referenceItem;
-
-            // Enumerate common metadata with an iterator to allow using a more efficient bulk-set operation.
-            IEnumerable<KeyValuePair<string, string>> EnumerateCommonMetadata()
-            {
-                yield return new KeyValuePair<string, string>(ItemMetadataNames.resolvedFrom, reference.ResolvedSearchPath);
-
-                // Set the CopyLocal metadata.
-                yield return new KeyValuePair<string, string>(ItemMetadataNames.copyLocal, reference.IsCopyLocal ? "true" : "false");
-
-                // Set the Redist name metadata.
-                if (!string.IsNullOrEmpty(reference.RedistName))
-                {
-                    yield return new KeyValuePair<string, string>(ItemMetadataNames.redist, reference.RedistName);
-                }
-
-                if (Reference.IsFrameworkFile(reference.FullPath, _frameworkPaths) || (_installedAssemblies?.FrameworkAssemblyEntryInRedist(assemblyName) == true))
-                {
-                    if (!IsAssemblyRemovedFromDotNetFramework(assemblyName, reference.FullPath, _frameworkPaths, _installedAssemblies))
-                    {
-                        yield return new KeyValuePair<string, string>(ItemMetadataNames.frameworkFile, "true");
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(reference.ImageRuntime))
-                {
-                    yield return new KeyValuePair<string, string>(ItemMetadataNames.imageRuntime, reference.ImageRuntime);
-                }
-
-                // The redist root is "null" when there was no IsRedistRoot flag in the Redist XML
-                // (or there was no redist XML at all for this item).
-                if (reference.IsRedistRoot != null)
-                {
-                    yield return new KeyValuePair<string, string>(ItemMetadataNames.isRedistRoot, (bool)reference.IsRedistRoot ? "true" : "false");
-                }
-            }
         }
 
         /// <summary>
