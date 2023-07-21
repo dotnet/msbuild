@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.NET.Build.Containers.Logging;
@@ -140,13 +141,15 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         }
         if (imageBuilder.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_URLS, out string? urls))
         {
+            var aspnetPortRegex = new Regex(@"(?<scheme>\w+)://(?<domain>([*+]|).+):(?<port>\d+)");
             foreach(var url in urls.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             {
                 logger.LogTrace("Setting ports from ASPNETCORE_HTTPS_PORTS environment variable");
-                try {
-                    // TODO: parse urls
-                } catch (FormatException fex) {
-                    logger.LogTrace("Could not parse ASPNETCORE_URLS value {url} as a binding address: {exception}", url, fex.Message);
+                var match = aspnetPortRegex.Match(url);
+                if (match.Success && int.TryParse(match.Groups["port"].Value, out int port))
+                {
+                    logger.LogTrace("Added port {port}", port);
+                    imageBuilder.ExposePort(port, PortType.tcp);
                 }
             }
         }
