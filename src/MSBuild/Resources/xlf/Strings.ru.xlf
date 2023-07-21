@@ -28,35 +28,35 @@
         <source>failed</source>
         <target state="translated">сбой</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with errors</source>
         <target state="translated">сбой с ошибками</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with warnings</source>
         <target state="translated">сбой с предупреждениями</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_Succeeded">
         <source>succeeded</source>
         <target state="translated">успешно выполнено</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
         <target state="translated">успешно выполнено с предупреждением</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="CommandLine">

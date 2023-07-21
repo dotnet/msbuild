@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Logging.LiveLogger;
+using Microsoft.Build.Logging.TerminalLogger;
 
 using VerifyTests;
 using VerifyXunit;
@@ -22,7 +22,7 @@ using static VerifyXunit.Verifier;
 namespace Microsoft.Build.UnitTests
 {
     [UsesVerify]
-    public class LiveLogger_Tests : IEventSource, IDisposable
+    public class TerminalLogger_Tests : IEventSource, IDisposable
     {
         private const int _nodeCount = 8;
         private const string _eventSender = "Test";
@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
         private StringWriter _outputWriter = new();
 
         private readonly Terminal _mockTerminal;
-        private readonly LiveLogger _liveLogger;
+        private readonly TerminalLogger _terminallogger;
 
         private readonly DateTime _buildStartTime = new DateTime(2023, 3, 30, 16, 30, 0);
         private readonly DateTime _buildFinishTime = new DateTime(2023, 3, 30, 16, 30, 5);
@@ -40,12 +40,12 @@ namespace Microsoft.Build.UnitTests
 
         private static Regex s_elapsedTime = new($@"\d+{Regex.Escape(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)}\ds", RegexOptions.Compiled);
 
-        public LiveLogger_Tests()
+        public TerminalLogger_Tests()
         {
             _mockTerminal = new Terminal(_outputWriter);
-            _liveLogger = new LiveLogger(_mockTerminal);
+            _terminallogger = new TerminalLogger(_mockTerminal);
 
-            _liveLogger.Initialize(this, _nodeCount);
+            _terminallogger.Initialize(this, _nodeCount);
 
             UseProjectRelativeDirectory("Snapshots");
 
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests
 
         public void Dispose()
         {
-            _liveLogger.Shutdown();
+            _terminallogger.Shutdown();
         }
 
         #endregion
@@ -251,7 +251,7 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, async () =>
             {
-                _liveLogger.DisplayNodes();
+                _terminallogger.DisplayNodes();
 
                 await Verify(_outputWriter.ToString(), _settings);
             });
@@ -270,7 +270,7 @@ namespace Microsoft.Build.UnitTests
             TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build"));
             TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "Task"));
 
-            _liveLogger.DisplayNodes();
+            _terminallogger.DisplayNodes();
 
             // This is a bit fast and loose with the events that would be fired
             // in a real "stop building that TF for the project and start building
@@ -281,7 +281,7 @@ namespace Microsoft.Build.UnitTests
             ProjectStarted?.Invoke(_eventSender, pse2);
             TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build"));
 
-            _liveLogger.DisplayNodes();
+            _terminallogger.DisplayNodes();
 
             await Verify(_outputWriter.ToString(), _settings);
         }

@@ -168,13 +168,13 @@ namespace Microsoft.Build.UnitTests
         [InlineData("terminallogger")]
         [InlineData("TerminalLogger")]
         [InlineData("TERMINALLOGGER")]
-        public void LiveLoggerSwitchIdentificationTests(string livelogger)
+        public void TerminalLoggerSwitchIdentificationTests(string terminallogger)
         {
             CommandLineSwitches.ParameterizedSwitch parameterlessSwitch;
             string duplicateSwitchErrorMessage;
 
-            CommandLineSwitches.IsParameterizedSwitch(livelogger, out parameterlessSwitch, out duplicateSwitchErrorMessage, out bool multipleParametersAllowed, out string missingParametersErrorMessage, out bool unquoteParameters, out bool emptyParametersAllowed).ShouldBeTrue();
-            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.LiveLogger);
+            CommandLineSwitches.IsParameterizedSwitch(terminallogger, out parameterlessSwitch, out duplicateSwitchErrorMessage, out bool multipleParametersAllowed, out string missingParametersErrorMessage, out bool unquoteParameters, out bool emptyParametersAllowed).ShouldBeTrue();
+            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.TerminalLogger);
             duplicateSwitchErrorMessage.ShouldBeNull();
             multipleParametersAllowed.ShouldBeTrue();
             missingParametersErrorMessage.ShouldBeNull();

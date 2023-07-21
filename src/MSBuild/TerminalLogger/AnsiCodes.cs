@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Microsoft.Build.Logging.LiveLogger;
+namespace Microsoft.Build.Logging.TerminalLogger;
 
 /// <summary>
 /// A collection of standard ANSI/VT100 control codes.

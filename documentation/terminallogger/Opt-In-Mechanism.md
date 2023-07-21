@@ -15,7 +15,7 @@ Using the `/terminallogger` or `/tl` command line switches, users are able to op
 
 ### Enabling for all builds
 
-Users can set the `MSBUILDLIVELOGGER` environment variable to enable TerminalLogger without adding a swtich to all build invocations.
+Users can set the `MSBUILDTERMINALLOGGER` environment variable to enable TerminalLogger without adding a swtich to all build invocations.
 
 ### TerminalLogger parameters
 
