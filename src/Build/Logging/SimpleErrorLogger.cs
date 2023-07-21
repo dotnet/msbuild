@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Text;
+using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -11,11 +11,9 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
 {
     public class SimpleErrorLogger : INodeLogger
     {
-        public StringBuilder errorList;
-
+        public bool hasLoggedErrors = false;
         public SimpleErrorLogger()
         {
-            errorList = new StringBuilder();
         }
 
         public LoggerVerbosity Verbosity
@@ -33,11 +31,22 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
         public void Initialize(IEventSource eventSource, int nodeCount)
         {
             eventSource.ErrorRaised += HandleErrorEvent;
+            eventSource.WarningRaised += HandleWarningEvent;
         }
 
         private void HandleErrorEvent(object sender, BuildErrorEventArgs e)
         {
-            errorList.AppendLine(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true));
+            hasLoggedErrors = true;
+            Console.Error.Write("\x1b[31;1m");
+            Console.Error.Write(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true));
+            Console.Error.WriteLine("\x1b[m");
+        }
+
+        private void HandleWarningEvent(object sender, BuildWarningEventArgs e)
+        {
+            Console.Error.Write("\x1b[33;1m");
+            Console.Error.Write(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true));
+            Console.Error.WriteLine("\x1b[m");
         }
 
         public void Initialize(IEventSource eventSource)

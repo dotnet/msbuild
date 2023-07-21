@@ -11,10 +11,8 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="BuildFailedWithPropertiesItemsOrTargetResultsRequested">
-        <source>Build failed. Properties, Items, and Target results cannot be obtained. See error below:
-    {0}</source>
-        <target state="new">Build failed. Properties, Items, and Target results cannot be obtained. See error below:
-    {0}</target>
+        <source>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</source>
+        <target state="new">Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">

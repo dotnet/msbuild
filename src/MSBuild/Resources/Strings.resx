@@ -1513,8 +1513,7 @@
     </comment>
   </data>
   <data name="BuildFailedWithPropertiesItemsOrTargetResultsRequested" xml:space="preserve">
-    <value>Build failed. Properties, Items, and Target results cannot be obtained. See error below:
-    {0}</value>
+    <value>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</value>
   </data>
   <!-- **** LiveLogger strings end **** -->
 

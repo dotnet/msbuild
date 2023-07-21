@@ -791,7 +791,7 @@ namespace Microsoft.Build.CommandLine
                     }
                     else if ((getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0) && FileUtilities.IsSolutionFilename(projectFile))
                     {
-
+                        exitType = ExitType.BuildError;
                         CommandLineSwitchException.Throw("SolutionBuildInvalidForCommandLineEvaluation",
                             getProperty.Length > 0 ? "getProperty" :
                             getItem.Length > 0 ? "getItem" :
@@ -822,6 +822,7 @@ namespace Microsoft.Build.CommandLine
                         }
                         catch (InvalidProjectFileException e)
                         {
+                            exitType = ExitType.BuildError;
                             Console.Error.WriteLine(e.Message);
                         }
                     }
@@ -877,12 +878,16 @@ namespace Microsoft.Build.CommandLine
                     {
                         ProjectInstance builtProject = result.ProjectStateAfterBuild;
 
+                        ILogger logger = loggers.FirstOrDefault(l => l is SimpleErrorLogger);
+                        if (logger is not null)
+                        {
+                            exitType = exitType == ExitType.Success && (logger as SimpleErrorLogger).hasLoggedErrors ? ExitType.BuildError : exitType;
+                        }
+
                         if (builtProject is null)
                         {
                             // Build failed; do not proceed
-                            ILogger simpleLogger = loggers.FirstOrDefault(l => l is SimpleErrorLogger);
-                            string errorMessage = simpleLogger is null ? "internal error" : (simpleLogger as SimpleErrorLogger).errorList.ToString();
-                            Console.Error.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildFailedWithPropertiesItemsOrTargetResultsRequested", errorMessage));
+                            Console.Error.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
                         }
                         // Special case if the user requests exactly one property: skip the json formatting
                         else if (getProperty.Length == 1 && getItem.Length == 0 && getTargetResult.Length == 0)
