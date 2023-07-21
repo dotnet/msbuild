@@ -14,7 +14,6 @@
 
     <!-- Allow the packaging project to use the name `Microsoft.NET.Build.Containers` for the nuget package -->
     <Packageid>.</Packageid>
-    <OutputType>Library</OutputType>
 
     <!-- While in prerelease, ship the symbols to everyone all the time. -->
     <DebugType>embedded</DebugType>

@@ -91,7 +91,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
             imageBuilder.AddLabel(label.ItemSpec, label.GetMetadata("Value"));
         }
 
-        SetEnvironmentVariables(imageBuilder, ContainerEnvironmentVariables, logger);
+        SetEnvironmentVariables(imageBuilder, ContainerEnvironmentVariables);
 
         SetPorts(imageBuilder, ExposedPorts);
 
@@ -208,7 +208,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         }
     }
 
-    private void SetEnvironmentVariables(ImageBuilder img, ITaskItem[] envVars, ILogger logger)
+    private void SetEnvironmentVariables(ImageBuilder img, ITaskItem[] envVars)
     {
         foreach (ITaskItem envVar in envVars)
         {
