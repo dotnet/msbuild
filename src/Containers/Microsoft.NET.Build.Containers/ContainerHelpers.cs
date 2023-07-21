@@ -6,6 +6,7 @@ using System;
 #endif
 #if NET
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 #endif
 using System.Text.RegularExpressions;
 using Microsoft.NET.Build.Containers.Resources;
@@ -18,7 +19,7 @@ public static class ContainerHelpers
     internal const string HostObjectPass = "SDK_CONTAINER_REGISTRY_PWORD";
 
     internal const string DockerRegistryAlias = "docker.io";
-    
+
     /// <summary>
     /// Matches an environment variable name - must start with a letter or underscore, and can only contain letters, numbers, and underscores.
     /// </summary>
@@ -281,4 +282,86 @@ public static class ContainerHelpers
             return false;
         }
     }
+
+#if NET8_0_OR_GREATER
+
+    /// <summary>
+    /// The APP_UID environment variable is a convention used to set the user in a data-driven manner. we should respect it if it's present.
+    /// </summary>
+    internal static void AssignUserFromEnvironment(ImageBuilder imageBuilder, ILogger logger)
+    {
+        // it's a common convention to apply custom users with the APP_UID convention - we check and apply that here
+        if (imageBuilder.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.APP_UID, out string? appUid))
+        {
+            logger.LogTrace("Setting user from APP_UID environment variable");
+            imageBuilder.SetUser(appUid);
+        }
+    }
+
+    internal static string[] Split(string input)
+    {
+        return input.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    }
+
+    /// <summary>
+    /// This is a parser for ASPNETCORE_URLS based on https://github.com/dotnet/aspnetcore/blob/main/src/Http/Http/src/BindingAddress.cs
+    /// We can cut corners a bit here because we really only care about ports, if they exist.
+    /// </summary>
+    internal static Regex aspnetPortRegex = new Regex(@"(?<scheme>\w+)://(?<domain>([*+]|).+):(?<port>\d+)");
+
+    /// <summary>
+    /// ASP.NET can have urls/ports set via three environment variables - if we see any of them we should create ExposedPorts for them
+    /// to ensure tooling can automatically create port mappings.
+    /// </summary>
+    internal static void AssignPortsFromEnvironment(ImageBuilder imageBuilder, ILogger logger)
+    {
+        // asp.net images control port bindings via three environment variables. we should check for those variables and ensure that ports are created for them
+        if (imageBuilder.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_HTTP_PORTS, out string? httpPorts))
+        {
+            logger.LogTrace("Setting ports from ASPNETCORE_HTTP_PORTS environment variable");
+            foreach(var port in Split(httpPorts))
+            {
+                if (int.TryParse(port, out int parsedPort))
+                {
+                    logger.LogTrace("Added port {port}", parsedPort);
+                    imageBuilder.ExposePort(parsedPort, PortType.tcp);
+                }
+                else
+                {
+                    logger.LogTrace("Skipped port {port} because it could not be parsed as an integer", port);
+                }
+            }
+        }
+        if (imageBuilder.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_HTTPS_PORTS, out string? httpsPorts))
+        {
+            logger.LogTrace("Setting ports from ASPNETCORE_HTTPS_PORTS environment variable");
+            foreach(var port in Split(httpsPorts))
+            {
+                if (int.TryParse(port, out int parsedPort))
+                {
+                    logger.LogTrace("Added port {port}", parsedPort);
+                    imageBuilder.ExposePort(parsedPort, PortType.tcp);
+                }
+                else
+                {
+                    logger.LogTrace("Skipped port {port} because it could not be parsed as an integer", port);
+                }
+            }
+        }
+        if (imageBuilder.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_URLS, out string? urls))
+        {
+            foreach(var url in Split(urls))
+            {
+                logger.LogTrace("Setting ports from ASPNETCORE_HTTPS_PORTS environment variable");
+                var match = aspnetPortRegex.Match(url);
+                if (match.Success && int.TryParse(match.Groups["port"].Value, out int port))
+                {
+                    logger.LogTrace("Added port {port}", port);
+                    imageBuilder.ExposePort(port, PortType.tcp);
+                }
+            }
+        }
+    }
+#endif
+
 }
