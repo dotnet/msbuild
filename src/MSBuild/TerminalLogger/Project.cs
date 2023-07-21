@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Microsoft.Build.Logging.LiveLogger;
+namespace Microsoft.Build.Logging.TerminalLogger;
 
 /// <summary>
 /// Represents a project being built.

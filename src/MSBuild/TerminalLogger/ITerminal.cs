@@ -3,10 +3,10 @@
 
 using System;
 
-namespace Microsoft.Build.Logging.LiveLogger;
+namespace Microsoft.Build.Logging.TerminalLogger;
 
 /// <summary>
-/// An abstraction of a terminal, built specifically to fit the <see cref="LiveLogger"/> needs.
+/// An abstraction of a terminal, built specifically to fit the <see cref="TerminalLogger"/> needs.
 /// </summary>
 internal interface ITerminal : IDisposable
 {

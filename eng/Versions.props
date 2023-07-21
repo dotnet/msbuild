@@ -54,7 +54,7 @@
     <MicrosoftNetCompilersToolsetVersion>4.7.0-3.23361.9</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>6.7.0-rc.111</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
-    <SystemTextJsonVersion>7.0.0</SystemTextJsonVersion>
+    <SystemTextJsonVersion>7.0.3</SystemTextJsonVersion>
     <SystemThreadingTasksDataflowVersion>7.0.0</SystemThreadingTasksDataflowVersion>
     <XunitVersion>2.4.2</XunitVersion>
   </PropertyGroup>
