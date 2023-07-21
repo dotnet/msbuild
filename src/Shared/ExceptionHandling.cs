@@ -14,7 +14,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security;
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -157,7 +156,9 @@ namespace Microsoft.Build.Shared
             return e is UnauthorizedAccessException
                    || e is NotSupportedException
                    || (e is ArgumentException && !(e is ArgumentNullException))
-                   || e is SecurityException
+#if NETFRAMEWORK
+                   || e is System.Security.SecurityException
+#endif
                    || e is IOException;
         }
 
@@ -167,7 +168,9 @@ namespace Microsoft.Build.Shared
         internal static bool IsXmlException(Exception e)
         {
             return e is XmlException
-                || e is XmlSyntaxException
+#if !NETFRAMEWORK
+                || e is System.Security.XmlSyntaxException
+#endif
                 || e is XmlSchemaException
                 || e is UriFormatException; // XmlTextReader for example uses this under the covers
         }
@@ -281,8 +284,10 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool NotExpectedRegistryException(Exception e)
         {
-            if (e is SecurityException
-             || e is UnauthorizedAccessException
+            if (e is UnauthorizedAccessException
+#if NETFRAMEWORK
+             || e is System.Security.SecurityException
+#endif
              || e is IOException
              || e is ObjectDisposedException
              || e is ArgumentException)

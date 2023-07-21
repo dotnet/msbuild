@@ -26,7 +26,6 @@
     <UsagePattern IdentityGlob="System.Security.Cryptography.Pkcs/*7.0.2*" />
     <UsagePattern IdentityGlob="System.Security.Cryptography.ProtectedData/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Security.Cryptography.Xml/*7.0.1*" />
-    <UsagePattern IdentityGlob="System.Security.Permissions/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Text.Encoding.CodePages/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Text.Encodings.Web/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Text.Json/*7.0.3*" />
