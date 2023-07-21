@@ -1360,9 +1360,11 @@
     </note>
       </trans-unit>
       <trans-unit id="NameInvalid">
-        <source>MSB5016: The name "{0}" contains an invalid character "{1}".</source>
-        <target state="new">MSB5016: The name "{0}" contains an invalid character "{1}".</target>
-        <note>{StrBegin="MSB5016: "}</note>
+        <source>MSBUILD: error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
+        <target state="new">MSBUILD: error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB5016: "}
+    </note>
       </trans-unit>
       <trans-unit id="NotWarnAsErrorWithoutWarnAsError">
         <source>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</source>

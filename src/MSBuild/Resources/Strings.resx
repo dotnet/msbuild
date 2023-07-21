@@ -1380,8 +1380,10 @@
     <value>The '{0}' switch is not supported for solution files.</value>
   </data>
   <data name="NameInvalid" Visibility="Public">
-    <value>MSB5016: The name "{0}" contains an invalid character "{1}".</value>
-    <comment>{StrBegin="MSB5016: "}</comment>
+    <value>MSBUILD: error MSB5016: The name "{0}" contains an invalid character "{1}".</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB5016: "}
+    </comment>
   </data>
   <!-- **** TerminalLogger strings begin **** -->
   <data name="RestoreComplete" xml:space="preserve">
