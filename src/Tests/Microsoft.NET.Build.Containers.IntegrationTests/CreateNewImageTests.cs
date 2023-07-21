@@ -201,6 +201,11 @@ public class CreateNewImageTests
         var actualConfig = config.RootElement.GetProperty("config");
         Assert.Equal("1654", actualConfig.GetProperty("User").GetString());
 
+        var thing = actualConfig.GetProperty("ExposedPorts").EnumerateObject();
+        var ports = thing.Select(thing => thing.Name).ToList();
+        Assert.Single(ports);
+        Assert.Equal("8080/tcp", ports[0]);
+
         ContainerCli.RunCommand(_testOutput, "--rm", $"{pcp.NewContainerRepository}:latest")
             .Execute()
             .Should().Pass()
