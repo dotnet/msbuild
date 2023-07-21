@@ -122,7 +122,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 }
             }
         }
-        else if (imageBuilder.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_HTTPS_PORTS, out string? httpsPorts))
+        if (imageBuilder.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_HTTPS_PORTS, out string? httpsPorts))
         {
             logger.LogTrace("Setting ports from ASPNETCORE_HTTPS_PORTS environment variable");
             foreach(var port in httpsPorts.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
@@ -138,7 +138,7 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                 }
             }
         }
-        else if (imageBuilder.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_URLS, out string? urls))
+        if (imageBuilder.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_URLS, out string? urls))
         {
             foreach(var url in urls.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             {

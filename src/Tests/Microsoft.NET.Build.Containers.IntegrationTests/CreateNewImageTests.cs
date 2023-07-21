@@ -66,6 +66,79 @@ public class CreateNewImageTests
     }
 
     [DockerAvailableFact]
+    public void CanParseAspnetCoreUrls()
+    {
+        DirectoryInfo newProjectDir = new(GetTestDirectoryName());
+        if (newProjectDir.Exists)
+        {
+            newProjectDir.Delete(recursive: true);
+        }
+
+        newProjectDir.Create();
+
+        new DotnetNewCommand(_testOutput, "console", "-f", ToolsetInfo.CurrentTargetFramework)
+            .WithVirtualHive()
+            .WithWorkingDirectory(newProjectDir.FullName)
+            .Execute()
+            .Should().Pass();
+
+        new DotnetCommand(_testOutput, "publish", "-c", "Release", "-r", "linux-arm64", "--no-self-contained")
+            .WithWorkingDirectory(newProjectDir.FullName)
+            .Execute()
+            .Should().Pass();
+
+        CreateNewImage task = new();
+
+        (IBuildEngine buildEngine, List<string?> errors) = SetupBuildEngine();
+        task.BuildEngine = buildEngine;
+
+        task.BaseRegistry = "mcr.microsoft.com";
+        task.BaseImageName = "dotnet/runtime";
+        task.BaseImageTag = "8.0-preview";
+
+        // set up a bunch of variations on the aspnetcore urls
+        task.ContainerEnvironmentVariables = new[] {
+            new TaskItem("ASPNETCORE_URLS", new Dictionary<string, string> { { "Value", "https://*:12345;http://+:1234;http://localhost:123;http://1.2.3.4:12" } }) ,
+            new TaskItem("ASPNETCORE_HTTP_PORTS", new Dictionary<string, string> { { "Value", "999;666" } }),
+            new TaskItem("ASPNETCORE_HTTPS_PORTS", new Dictionary<string, string> { { "Value", "456;789" } })
+        };
+
+        task.OutputRegistry = "localhost:5010";
+        task.LocalRegistry = "Docker";
+        task.PublishDirectory = Path.Combine(newProjectDir.FullName, "bin", "Release", ToolsetInfo.CurrentTargetFramework, "linux-arm64", "publish");
+        task.Repository = "dotnet/create-new-image-aspnetcore-urls";
+        task.ImageTags = new[] { "latest" };
+        task.WorkingDirectory = "app/";
+        task.ContainerRuntimeIdentifier = "linux-arm64";
+        task.Entrypoint = new TaskItem[] { new("dotnet"), new("build") };
+        task.RuntimeIdentifierGraphPath = ToolsetUtils.GetRuntimeGraphFilePath();
+
+        Assert.True(task.Execute(), FormatBuildMessages(errors));
+
+        // extract out the config
+        var config = GetImageConfigFromTask(task);
+        Assert.Equal(new HashSet<Port>(new [] {
+            // aspnetcore_urls
+            new Port(12, PortType.tcp),
+            new Port(123, PortType.tcp),
+            new Port(1234, PortType.tcp),
+            new Port(12345, PortType.tcp),
+            // aspnetcore_http_ports
+            new Port(999, PortType.tcp),
+            new Port(666, PortType.tcp),
+            // aspnetcore_https_ports
+            new Port(456, PortType.tcp),
+            new Port(789, PortType.tcp),
+        }), config.Ports);
+
+        newProjectDir.Delete(true);
+    }
+
+    private static ImageConfig GetImageConfigFromTask(CreateNewImage task) {
+        return new(task.GeneratedContainerConfiguration);
+    }
+
+    [DockerAvailableFact]
     public void ParseContainerProperties_EndToEnd()
     {
         DirectoryInfo newProjectDir = new(GetTestDirectoryName());
@@ -196,15 +269,14 @@ public class CreateNewImageTests
         cni.LocalRegistry = global::Microsoft.NET.Build.Containers.KnownLocalRegistryTypes.Docker;
 
         Assert.True(cni.Execute(), FormatBuildMessages(errors));
-        var config = System.Text.Json.JsonDocument.Parse(cni.GeneratedContainerConfiguration);
-        // because we're building off of .net 8 images for this test, we can validate the user id and aspnet https urls
-        var actualConfig = config.RootElement.GetProperty("config");
-        Assert.Equal("1654", actualConfig.GetProperty("User").GetString());
 
-        var thing = actualConfig.GetProperty("ExposedPorts").EnumerateObject();
-        var ports = thing.Select(thing => thing.Name).ToList();
+        var config = GetImageConfigFromTask(cni);
+        // because we're building off of .net 8 images for this test, we can validate the user id and aspnet https urls
+        Assert.Equal("1654", config.GetUser());
+
+        var ports = config.Ports;
         Assert.Single(ports);
-        Assert.Equal("8080/tcp", ports[0]);
+        Assert.Equal(new(8080, PortType.tcp), ports.First());
 
         ContainerCli.RunCommand(_testOutput, "--rm", $"{pcp.NewContainerRepository}:latest")
             .Execute()

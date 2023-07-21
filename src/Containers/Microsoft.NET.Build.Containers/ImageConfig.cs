@@ -35,6 +35,7 @@ internal sealed class ImageConfig
     public bool IsWindows => "windows".Equals(_os, StringComparison.OrdinalIgnoreCase);
 
     public ReadOnlyDictionary<string, string> EnvironmentVariables => _environmentVariables.AsReadOnly();
+    public HashSet<Port> Ports => _exposedPorts;
 
     internal ImageConfig(string imageConfigJson) : this(JsonNode.Parse(imageConfigJson)!)
     {
