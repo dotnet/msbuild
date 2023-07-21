@@ -8,7 +8,7 @@ using System.Text;
 using Microsoft.Build.Shared;
 #endif
 
-namespace Microsoft.Build.Logging.LiveLogger;
+namespace Microsoft.Build.Logging.TerminalLogger;
 
 /// <summary>
 /// An <see cref="ITerminal"/> implementation for ANSI/VT100 terminals.

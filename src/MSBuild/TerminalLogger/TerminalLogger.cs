@@ -15,7 +15,7 @@ using Microsoft.IO;
 using System.IO;
 #endif
 
-namespace Microsoft.Build.Logging.LiveLogger;
+namespace Microsoft.Build.Logging.TerminalLogger;
 
 /// <summary>
 /// A logger which updates the console output "live" during the build.
@@ -23,7 +23,7 @@ namespace Microsoft.Build.Logging.LiveLogger;
 /// <remarks>
 /// Uses ANSI/VT100 control codes to erase and overwrite lines as the build is progressing.
 /// </remarks>
-internal sealed class LiveLogger : INodeLogger
+internal sealed class TerminalLogger : INodeLogger
 {
     /// <summary>
     /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
@@ -144,9 +144,9 @@ internal sealed class LiveLogger : INodeLogger
     /// List of events the logger needs as parameters to the <see cref="ConfigurableForwardingLogger"/>.
     /// </summary>
     /// <remarks>
-    /// If LiveLogger runs as a distributed logger, MSBuild out-of-proc nodes might filter the events that will go to the main
+    /// If TerminalLogger runs as a distributed logger, MSBuild out-of-proc nodes might filter the events that will go to the main
     /// node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
-    /// Important: Note that LiveLogger is special-cased in <see cref="BackEnd.Logging.LoggingService.UpdateMinimumMessageImportance"/>
+    /// Important: Note that TerminalLogger is special-cased in <see cref="BackEnd.Logging.LoggingService.UpdateMinimumMessageImportance"/>
     /// so changing this list may impact the minimum message importance logging optimization.
     /// </remarks>
     public static readonly string[] ConfigurableForwardingLoggerParameters =
@@ -166,7 +166,7 @@ internal sealed class LiveLogger : INodeLogger
     /// <summary>
     /// Default constructor, used by the MSBuild logger infra.
     /// </summary>
-    public LiveLogger()
+    public TerminalLogger()
     {
         Terminal = new Terminal();
     }
@@ -174,7 +174,7 @@ internal sealed class LiveLogger : INodeLogger
     /// <summary>
     /// Internal constructor accepting a custom <see cref="ITerminal"/> for testing.
     /// </summary>
-    internal LiveLogger(ITerminal terminal)
+    internal TerminalLogger(ITerminal terminal)
     {
         Terminal = terminal;
         _manualRefresh = true;
