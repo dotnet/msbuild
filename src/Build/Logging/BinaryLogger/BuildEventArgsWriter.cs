@@ -220,13 +220,16 @@ namespace Microsoft.Build.Logging
 
         public void WriteBlob(BinaryLogRecordKind kind, Stream stream)
         {
-            // write the blob directly to the underlying writer,
-            // bypassing the memory stream
-            using var redirection = RedirectWritesToOriginalWriter();
+            if (stream.Length <= int.MaxValue)
+            {
+                // write the blob directly to the underlying writer,
+                // bypassing the memory stream
+                using var redirection = RedirectWritesToOriginalWriter();
 
-            Write(kind);
-            Write(stream.Length);
-            Write(stream);
+                Write(kind);
+                Write((int)stream.Length);
+                Write(stream);
+            }
         }
 
         /// <summary>
