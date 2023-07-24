@@ -25,6 +25,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Implement required constructors for serialization
         /// </summary>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         private ReferenceResolutionException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }

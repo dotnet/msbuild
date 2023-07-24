@@ -337,7 +337,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool IsEventSerializable(BuildEventArgs e)
         {
+#pragma warning disable SYSLIB0050
             if (!e.GetType().GetTypeInfo().IsSerializable)
+#pragma warning restore SYSLIB0050
             {
                 _loggingContext.LogWarning(null, new BuildEventFileInfo(string.Empty), "ExpectedEventToBeSerializable", e.GetType().Name);
                 return false;
