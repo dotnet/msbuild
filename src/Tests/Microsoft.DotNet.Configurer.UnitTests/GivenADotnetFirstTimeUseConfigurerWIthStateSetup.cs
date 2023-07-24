@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Utilities;
 using Moq;

@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Configurer

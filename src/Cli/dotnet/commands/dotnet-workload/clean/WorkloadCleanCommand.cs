@@ -7,9 +7,12 @@ using System.CommandLine;
 using System.IO;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Installer.Windows;
 using Microsoft.DotNet.Workloads.Workload.Install;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.DotNet.Workloads.Workload.List;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 
