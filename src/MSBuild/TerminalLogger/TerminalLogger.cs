@@ -236,9 +236,7 @@ internal sealed class TerminalLogger : INodeLogger
 
         _buildStartTime = e.Timestamp;
 
-        // dotnet/msbuild#8958: iTerm2 treats ;9 code to post a notification instead,
-        // so disable progress reporting on Mac.
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        if (Terminal.SupportsProgressReporting)
         {
             Terminal.Write(AnsiCodes.SetProgressIndeterminate);
         }
@@ -276,9 +274,7 @@ internal sealed class TerminalLogger : INodeLogger
         }
         finally
         {
-            // dotnet/msbuild#8958: iTerm2 treats ;9 code to post a notification instead,
-            // so disable progress reporting on Mac.
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (Terminal.SupportsProgressReporting)
             {
                 Terminal.Write(AnsiCodes.RemoveProgress);
             }
