@@ -42,11 +42,11 @@ public static class ContainerBuilder
         logger.LogTrace("Trace logging: enabled.");
 
         bool isLocalPull = string.IsNullOrEmpty(baseRegistry);
-        Registry? sourceRegistry = isLocalPull ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(baseRegistry), logger);
+        Registry? sourceRegistry = isLocalPull ? null : new Registry(baseRegistry, logger);
         ImageReference sourceImageReference = new(sourceRegistry, baseImageName, baseImageTag);
 
         bool isLocalPush = string.IsNullOrEmpty(outputRegistry);
-        Registry? destinationRegistry = isLocalPush ? null : new Registry(ContainerHelpers.TryExpandRegistryToUri(outputRegistry!), logger);
+        Registry? destinationRegistry = isLocalPush ? null : new Registry(outputRegistry!, logger);
         IEnumerable<ImageReference> destinationImageReferences = imageTags.Select(t => new ImageReference(destinationRegistry, imageName, t));
 
         ImageBuilder? imageBuilder;

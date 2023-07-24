@@ -11,7 +11,14 @@ internal static class ContentStore
     public static string ArtifactRoot { get; set; } = Path.Combine(Path.GetTempPath(), "Containers");
     public static string ContentRoot
     {
-        get => Path.Combine(ArtifactRoot, "Content");
+        get
+        {
+            string contentPath = Path.Join(ArtifactRoot, "Content");
+
+            Directory.CreateDirectory(contentPath);
+
+            return contentPath;
+        }
     }
 
     public static string TempPath
