@@ -15,7 +15,12 @@
     <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="**\*.Tests.csproj" Exclude="**\*.AoT.Tests.csproj" />
     <!--containers tests end with UnitTests and IntegrationTests, therefore included manually -->
     <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="containerize.UnitTests\containerize.UnitTests.csproj" />
-    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="Microsoft.NET.Build.Containers.IntegrationTests\Microsoft.NET.Build.Containers.IntegrationTests.csproj" />
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true' And $(_AGENTOSNAME) != 'Windows_NT_FullFramework'" Include="Microsoft.NET.Build.Containers.IntegrationTests\Microsoft.NET.Build.Containers.IntegrationTests.csproj" />
+    <!-- on Windows_NT_FullFramework leg, net472 tests should be run -->
+    <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true' And $(_AGENTOSNAME) == 'Windows_NT_FullFramework'"  Include="Microsoft.NET.Build.Containers.IntegrationTests\Microsoft.NET.Build.Containers.IntegrationTests.csproj">
+      <TargetFramework>net472</TargetFramework>
+      <RuntimeTargetFramework>net472</RuntimeTargetFramework>
+    </SDKCustomXUnitProject>
     <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="Microsoft.NET.Build.Containers.UnitTests\Microsoft.NET.Build.Containers.UnitTests.csproj" />
     <SDKCustomXUnitProject Condition="'$(RunAoTTests)' != 'true'" Include="..\Tasks\Microsoft.NET.Build.Extensions.Tasks.UnitTests\Microsoft.NET.Build.Extensions.Tasks.UnitTests.csproj">
       <ExcludeAdditionalParameters>true</ExcludeAdditionalParameters>
