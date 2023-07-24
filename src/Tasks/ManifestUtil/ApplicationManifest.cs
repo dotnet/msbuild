@@ -527,9 +527,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (!TrustInfo.IsFullTrust)
             {
                 var document = new XmlDocument();
-                var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
-                FileStream fs = File.OpenRead(configFile.ResolvedPath);
-                using (XmlReader xr = XmlReader.Create(fs, xrs))
+                var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                //
+                // XmlReader.Create(string, ...) treats the first parameter as a Uri and escapes GB18030 chars in PUA block.
+                // In order to open such files, we use StreamReader and pass that to pass that to XmlReader.Create
+                //
+                using (StreamReader sr = new StreamReader(configFile.ResolvedPath))
+                using (XmlReader xr = XmlReader.Create(sr, xrs))
                 {
                     document.Load(xr);
                 }

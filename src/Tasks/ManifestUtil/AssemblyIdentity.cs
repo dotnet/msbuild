@@ -193,9 +193,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             var document = new XmlDocument();
             try
             {
-                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
-                FileStream fs = File.OpenRead(path);
-                using (XmlReader xmlReader = XmlReader.Create(fs, readerSettings))
+                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                //
+                // XmlReader.Create(string, ...) treats the first parameter as a Uri and escapes GB18030 chars in PUA block.
+                // In order to open such files, we use StreamReader and pass that to pass that to XmlReader.Create
+                //
+                using (StreamReader sr = new StreamReader(path))
+                using (XmlReader xmlReader = XmlReader.Create(sr, readerSettings))
                 {
                     document.Load(xmlReader);
                 }
