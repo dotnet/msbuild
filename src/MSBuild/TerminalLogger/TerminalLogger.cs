@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System.Runtime.InteropServices;
 #if NETFRAMEWORK
 using Microsoft.IO;
 #else
@@ -235,7 +236,12 @@ internal sealed class TerminalLogger : INodeLogger
 
         _buildStartTime = e.Timestamp;
 
-        Terminal.Write(AnsiCodes.SetProgressIndeterminate);
+        // dotnet/msbuild#8958: iTerm2 treats ;9 code to post a notification instead,
+        // so disable progress reporting on Mac.
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            Terminal.Write(AnsiCodes.SetProgressIndeterminate);
+        }
     }
 
     /// <summary>
@@ -270,7 +276,13 @@ internal sealed class TerminalLogger : INodeLogger
         }
         finally
         {
-            Terminal.Write(AnsiCodes.RemoveProgress);
+            // dotnet/msbuild#8958: iTerm2 treats ;9 code to post a notification instead,
+            // so disable progress reporting on Mac.
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Terminal.Write(AnsiCodes.RemoveProgress);
+            }
+
             Terminal.EndUpdate();
         }
 
