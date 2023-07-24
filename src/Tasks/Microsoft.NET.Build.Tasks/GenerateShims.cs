@@ -9,8 +9,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.HostModel;
 using Microsoft.NET.HostModel.AppHost;
-using NuGet.Frameworks;
-using NuGet.ProjectModel;
 using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks

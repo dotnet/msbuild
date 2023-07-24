@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using Microsoft.NET.Sdk.Localization;
 
 
 #if USE_SYSTEM_TEXT_JSON

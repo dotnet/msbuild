@@ -6,9 +6,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
-using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.ToolPackage.ToolConfigurationDeserialization;
-using Microsoft.DotNet.Tools;
 
 namespace Microsoft.DotNet.Cli.NuGetPackageDownloader.WorkloadUnixFilePermissions
 {

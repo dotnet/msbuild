@@ -6,9 +6,6 @@ using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using System.IO;
-using System.Linq;
-using System.Xml.Linq;
 using Xunit;
 using Xunit.Abstractions;
 

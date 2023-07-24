@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli.Utils
 {

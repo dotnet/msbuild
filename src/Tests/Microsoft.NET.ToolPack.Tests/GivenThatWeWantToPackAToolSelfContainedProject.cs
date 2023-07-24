@@ -11,7 +11,6 @@ using Xunit;
 using Xunit.Abstractions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Build.Tasks;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.ToolPack.Tests

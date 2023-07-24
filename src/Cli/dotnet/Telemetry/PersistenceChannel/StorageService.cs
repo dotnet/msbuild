@@ -9,7 +9,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 
 namespace Microsoft.DotNet.Cli.Telemetry.PersistenceChannel

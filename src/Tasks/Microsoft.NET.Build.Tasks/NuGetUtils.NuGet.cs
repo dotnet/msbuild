@@ -3,12 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using NuGet.Frameworks;
-using NuGet.Packaging.Core;
-using NuGet.ProjectModel;
 using NuGet.RuntimeModel;
 
 namespace Microsoft.NET.Build.Tasks

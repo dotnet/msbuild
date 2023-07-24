@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Common;
 

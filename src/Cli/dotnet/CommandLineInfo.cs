@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
 using RuntimeEnvironment = Microsoft.DotNet.Cli.Utils.RuntimeEnvironment;
-using WorkloadCommandParser = Microsoft.DotNet.Cli.WorkloadCommandParser;
 
 namespace Microsoft.DotNet.Cli
 {

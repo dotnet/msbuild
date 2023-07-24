@@ -5,8 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.DotNet.MSBuildSdkResolver;
 using Strings = Microsoft.NET.Sdk.Localization.Strings;
 

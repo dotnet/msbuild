@@ -3,11 +3,9 @@
 
 using Microsoft.DotNet.Cli.Utils;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework.Commands

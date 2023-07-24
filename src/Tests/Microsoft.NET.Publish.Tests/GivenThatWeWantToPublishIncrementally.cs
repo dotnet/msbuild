@@ -12,7 +12,6 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Publish.Tests
 {

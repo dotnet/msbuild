@@ -6,11 +6,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
-using NuGet.Common;
-using NuGet.Packaging;
-using NuGet.Packaging.Core;
 using System.IO;
-using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
 

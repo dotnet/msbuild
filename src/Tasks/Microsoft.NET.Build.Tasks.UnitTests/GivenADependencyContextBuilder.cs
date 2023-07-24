@@ -17,7 +17,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
-using Xunit.Sdk;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {

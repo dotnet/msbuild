@@ -10,7 +10,6 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using NuGet.Packaging;
 
 namespace Microsoft.DotNet.ToolManifest
 {

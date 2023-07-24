@@ -10,7 +10,6 @@ using Microsoft.NET.TestFramework.Commands;
 using System.Collections.Generic;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
-using NuGet.Frameworks;
 
 namespace Microsoft.NET.TestFramework
 {

@@ -7,8 +7,6 @@ using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using Xunit;
 using FluentAssertions;
 using System.Runtime.InteropServices;

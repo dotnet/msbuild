@@ -12,7 +12,6 @@ using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using NuGet.Packaging.Core;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ToolPackage;
 
 namespace Microsoft.DotNet.Tools.Tool.Search
 {

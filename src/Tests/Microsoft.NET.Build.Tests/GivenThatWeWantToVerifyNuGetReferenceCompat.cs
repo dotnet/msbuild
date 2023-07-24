@@ -14,7 +14,6 @@ using System.Runtime.InteropServices;
 using System.Linq;
 using Xunit.Abstractions;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 
 namespace Microsoft.NET.Build.Tests
 {

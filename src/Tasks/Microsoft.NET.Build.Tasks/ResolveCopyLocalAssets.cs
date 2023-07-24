@@ -6,7 +6,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
-using NuGet.Versioning;
 using System.Collections.Generic;
 
 namespace Microsoft.NET.Build.Tasks

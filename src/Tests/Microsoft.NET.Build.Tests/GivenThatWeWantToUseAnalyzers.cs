@@ -12,7 +12,6 @@ using System.Xml.Linq;
 using System.Collections.Generic;
 using System;
 using Xunit.Abstractions;
-using System.Runtime.InteropServices;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.Build.Tests

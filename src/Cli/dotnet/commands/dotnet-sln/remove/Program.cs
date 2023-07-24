@@ -4,12 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Sln.Internal;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Tools.Sln.Remove

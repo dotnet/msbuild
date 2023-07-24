@@ -6,8 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
-
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -17,10 +15,7 @@ using FluentAssertions;
 using Xunit;
 
 using Xunit.Abstractions;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Reflection.Metadata;
 
 namespace Microsoft.NET.Build.Tests
 {

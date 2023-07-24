@@ -2,9 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using Microsoft.DotNet.Tools.Sln;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.Sln.List;
 using LocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 

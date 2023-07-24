@@ -8,7 +8,6 @@ using Microsoft.NET.TestFramework.Commands;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit.Abstractions;
-using Xunit;
 
 namespace Microsoft.NET.Build.Tests
 {
