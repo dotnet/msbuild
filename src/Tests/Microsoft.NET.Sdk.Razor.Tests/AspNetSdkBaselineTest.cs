@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -172,7 +172,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             string wwwRootFolder = Path.Combine(publishFolder, "wwwroot");
             var wwwRootFiles = Directory.Exists(wwwRootFolder) ?
                 Directory.GetFiles(wwwRootFolder, "*", fileEnumerationOptions)
-                    .Select(f => _baselineFactory.TemplatizeFilePath(f, null, null, intermediateOutputPath, publishFolder)) :
+                    .Select(f => _baselineFactory.TemplatizeFilePath(f, null, null, intermediateOutputPath, publishFolder, null)) :
                 Array.Empty<string>();
 
             // Computed publish assets must exist on disk (we do this check to quickly identify when something is not being
@@ -234,6 +234,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             StaticWebAssetsManifest manifest,
             StaticWebAssetsManifest expected,
             string suffix = "",
+            string runtimeIdentifier = null,
             [CallerMemberName] string name = "")
         {
             if (!_generateBaselines)
@@ -244,15 +245,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                     manifest,
                     ProjectDirectory.Path,
                     TestContext.Current.NuGetCachePath,
-                    RuntimeVersion,
-                    DefaultTfm,
-                    DefaultPackageVersion);
+                    runtimeIdentifier);
 
                 _comparer.AssertManifest(expected, manifest);
             }
             else
             {
-                var template = Templatize(manifest, ProjectDirectory.Path, TestContext.Current.NuGetCachePath);
+                var template = Templatize(manifest, ProjectDirectory.Path, TestContext.Current.NuGetCachePath, runtimeIdentifier);
                 if (!Directory.Exists(Path.Combine(BaselinesFolder)))
                 {
                     Directory.CreateDirectory(Path.Combine(BaselinesFolder));
@@ -275,9 +274,9 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         private Stream GetExpectedFilesEmbeddedResource(string suffix, string name, string manifestType)
             => TestAssembly.GetManifestResourceStream(string.Join('.', EmbeddedResourcePrefix, $"{name}{(!string.IsNullOrEmpty(suffix) ? $"_{suffix}" : "")}.{manifestType}.files.json"));
 
-        private string Templatize(StaticWebAssetsManifest manifest, string projectRoot, string restorePath)
+        private string Templatize(StaticWebAssetsManifest manifest, string projectRoot, string restorePath, string runtimeIdentifier)
         {
-            _baselineFactory.ToTemplate(manifest, projectRoot, restorePath, RuntimeVersion, DefaultTfm, DefaultPackageVersion);
+            _baselineFactory.ToTemplate(manifest, projectRoot, restorePath, runtimeIdentifier);
             return JsonSerializer.Serialize(manifest, BaselineSerializationOptions);
         }
     }

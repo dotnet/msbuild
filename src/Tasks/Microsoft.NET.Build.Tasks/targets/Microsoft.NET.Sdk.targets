@@ -27,7 +27,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="GenerateDepsFile" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="GenerateRuntimeConfigurationFiles" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="GetAssemblyVersion" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  <UsingTask TaskName="GenerateSatelliteAssemblies" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />  
+  <UsingTask TaskName="GenerateSatelliteAssemblies" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <PropertyGroup>
     <DisableStandardFrameworkResolution Condition="'$(DisableStandardFrameworkResolution)' == ''">$(_IsNETCoreOrNETStandard)</DisableStandardFrameworkResolution>
@@ -147,7 +147,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     If the property is explicitly set to TRUE:
       - The APIs are obsolete as warning, and calls to the APIs will succeed at runtime.
-    
+
     If the property is explicitly set to FALSE:
       - On .NET 5 & 6, the APIs are obsolete as warning, and calls to the APIs will fail at runtime.
       - On .NET 7+, the APIs are obsolete as error, and calls to the APIs will fail at runtime.
@@ -157,7 +157,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       - On .NET 7, the APIs are obsolete as error, but calls to the APIs will succeed at runtime.
       - On .NET 8+, the APIs are obsolete as error, and calls to the APIs will fail at runtime
         unless the SDK has opted in to keeping legacy BinaryFormatter behavior around.
-    
+
     n.b. The APIs are already marked obsolete (as warning) in .NET 5, so we don't need to special-case
     them unless we want to upgrade them to warn-as-error.
   -->
@@ -206,7 +206,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          If they do, and they also set BuildWithNetFrameworkHostedCompiler, we will have
          a duplicate PackageReference. This makes it more explicit that that is not supported. -->
     <NETSdkWarning ResourceName="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework"
-        Condition="'@(PackageReference->AnyHaveMetadataValue('Identity', 'Microsoft.Net.Compilers.Toolset.Framework'))' == 'true'" /> 
+        Condition="'@(PackageReference->AnyHaveMetadataValue('Identity', 'Microsoft.Net.Compilers.Toolset.Framework'))' == 'true'" />
 
     <ItemGroup Condition="'$(BuildWithNetFrameworkHostedCompiler)' == 'true' and '$(OS)' == 'Windows_NT'">
       <PackageReference Include="Microsoft.Net.Compilers.Toolset.Framework" PrivateAssets="all" Version="$(_NetFrameworkHostedCompilersVersion)" IsImplicitlyDefined="true" />
@@ -503,7 +503,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeHostConfigurationOption Include="System.GC.DynamicAdaptationMode"
                                     Condition="'$(GarbageCollectionAdaptationMode)' != ''"
                                     Value="$(GarbageCollectionAdaptationMode)" />
-    
+
     <RuntimeHostConfigurationOption Include="System.GC.RetainVM"
                                     Condition="'$(RetainVMGarbageCollection)' != ''"
                                     Value="$(RetainVMGarbageCollection)" />
@@ -571,6 +571,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.EnableCppCLIHostActivation"
                                     Condition="'$(EnableCppCLIHostActivation)' != ''"
                                     Value="$(EnableCppCLIHostActivation)"
+                                    Trim="true" />
+
+    <RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.Marshalling.EnableGeneratedComInterfaceComImportInterop"
+                                    Condition="'$(EnableGeneratedComInterfaceComImportInterop)' != ''"
+                                    Value="$(EnableGeneratedComInterfaceComImportInterop)"
                                     Trim="true" />
 
     <RuntimeHostConfigurationOption Include="System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization"
@@ -1205,7 +1210,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <_UseAttributeForTargetFrameworkInfoPropertyNames Condition="$([MSBuild]::VersionGreaterThanOrEquals($(MSBuildVersion), '17.0'))">true</_UseAttributeForTargetFrameworkInfoPropertyNames>
   </PropertyGroup>
-  
+
   <Target Name="ValidateExecutableReferences"
           AfterTargets="_GetProjectReferenceTargetFrameworkProperties"
           Condition="'$(ValidateExecutableReferencesMatchSelfContained)' != 'false'">

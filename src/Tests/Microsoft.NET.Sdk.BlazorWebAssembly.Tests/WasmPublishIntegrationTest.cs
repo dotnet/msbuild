@@ -643,8 +643,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             bootJsonData.resources.satelliteResources.Should().BeNull();
 
-            bootJsonData.config.Should().Contain("appsettings.json");
-            bootJsonData.config.Should().Contain("appsettings.development.json");
+            bootJsonData.config.Should().Contain("../appsettings.json");
+            bootJsonData.config.Should().Contain("../appsettings.development.json");
         }
 
         [Fact]

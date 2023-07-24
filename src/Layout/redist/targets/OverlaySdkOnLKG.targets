@@ -68,6 +68,9 @@
       <WasmWorkloads Include="microsoft.net.workload.emscripten.current" Version="$(EmscriptenWorkloadManifestVersion)/$(EmscriptenWorkloadFeatureBand)"/>
 	    <WasmWorkloads Include="microsoft.net.workload.emscripten.net6" Version="$(EmscriptenWorkloadManifestVersion)/$(EmscriptenWorkloadFeatureBand)"/>
 	    <WasmWorkloads Include="microsoft.net.workload.emscripten.net7" Version="$(EmscriptenWorkloadManifestVersion)/$(EmscriptenWorkloadFeatureBand)"/>
+
+      <WasmRuntimePackVersion Include="_RuntimePackInWorkloadVersion6" Version="$(_RuntimePackInWorkloadVersion6)" />
+      <WasmRuntimePackVersion Include="_RuntimePackInWorkloadVersion7" Version="$(_RuntimePackInWorkloadVersion7)" />
     </ItemGroup>
 
     <!-- Create a rollback file for installing workloads during the build  -->
@@ -93,6 +96,9 @@
     <Exec Condition="Exists('$(RedistLayoutPath)TestRollback.json')"
           Command="$(RedistLayoutPath)dotnet workload update --from-rollback-file $(RedistLayoutPath)TestRollback.json"
           EnvironmentVariables="DOTNET_CLI_HOME=$(ArtifactsTmpDir)"/>
+
+    <OverrideWasmRuntimePackVersions Properties="@(WasmRuntimePackVersion)" 
+      WorkloadManifestPath="$(RedistLayoutPath)\sdk-manifests\$(MonoWorkloadFeatureBand)\microsoft.net.workload.mono.toolchain.current\WorkloadManifest.targets" />
   </Target>
 
 

@@ -220,7 +220,7 @@ public class CreateNewImageTests
         var logger = loggerFactory.CreateLogger(nameof(CreateNewImage_RootlessBaseImage));
 
         // Build a rootless base runtime image.
-        Registry registry = new Registry(ContainerHelpers.TryExpandRegistryToUri(DockerRegistryManager.LocalRegistry), logger);
+        Registry registry = new Registry(DockerRegistryManager.LocalRegistry, logger);
 
         ImageBuilder imageBuilder = await registry.GetImageManifestAsync(
             DockerRegistryManager.RuntimeBaseImage,

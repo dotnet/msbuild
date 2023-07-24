@@ -55,6 +55,11 @@ public class CreateNewImageToolTaskTests
 
         task.WorkingDirectory = "MyWorkingDirectory";
 
+        e = Assert.Throws<InvalidOperationException>(() => task.GenerateCommandLineCommandsInt());
+        Assert.Equal("CONTAINER4002: Required 'Entrypoint' items were not set.", e.Message);
+
+        task.Entrypoint = new[] { new TaskItem("MyEntryPoint") };
+
         string args = task.GenerateCommandLineCommandsInt();
         string workDir = GetPathToContainerize();
 
@@ -279,12 +284,12 @@ public class CreateNewImageToolTaskTests
     }
 
     [InlineData(nameof(CreateNewImage.Entrypoint), "entrypoint")]
-    [InlineData(nameof(CreateNewImage.EntrypointArgs), "entrypointargs")]
-    [InlineData(nameof(CreateNewImage.DefaultArgs), "defaultargs")]
-    [InlineData(nameof(CreateNewImage.AppCommand), "appcommand")]
-    [InlineData(nameof(CreateNewImage.AppCommandArgs), "appcommandargs")]
+    [InlineData(nameof(CreateNewImage.EntrypointArgs), "entrypointargs", true)]
+    [InlineData(nameof(CreateNewImage.DefaultArgs), "defaultargs", true)]
+    [InlineData(nameof(CreateNewImage.AppCommand), "appcommand", true)]
+    [InlineData(nameof(CreateNewImage.AppCommandArgs), "appcommandargs", true)]
     [Theory]
-    public void GenerateCommandLineCommands_EntryPointAndCommand(string propertyName, string commandArgName)
+    public void GenerateCommandLineCommands_EntryPointAndCommand(string propertyName, string commandArgName, bool warningExpected = false)
     {
         CreateNewImage task = new();
 
@@ -307,8 +312,6 @@ public class CreateNewImageToolTaskTests
             case nameof(CreateNewImage.Entrypoint):
                 task.Entrypoint = new[]
                 {
-                    new TaskItem(""),
-                    new TaskItem(" "),
                     new TaskItem("Valid1"),
                     new TaskItem("Valid2"),
                     new TaskItem("Quoted item")
@@ -361,7 +364,11 @@ public class CreateNewImageToolTaskTests
         Assert.Contains($"""
                                       --{commandArgName} Valid1 Valid2 "Quoted item"
                                       """, args);
-        Assert.Equal($"Items '{propertyName}' contain empty item(s) which will be ignored.", Assert.Single(warnings));
+
+        if (warningExpected)
+        {
+            Assert.Equal($"Items '{propertyName}' contain empty item(s) which will be ignored.", Assert.Single(warnings));
+        }
 
         string workDir = GetPathToContainerize();
 
@@ -370,6 +377,30 @@ public class CreateNewImageToolTaskTests
             .WithWorkingDirectory(workDir)
             .Execute().Should().Fail()
             .And.NotHaveStdOutContaining("Description:"); //standard help output for parse error
+    }
+
+    [InlineData("")]
+    [InlineData("  ")]
+    [Theory]
+    public void GenerateCommandLineCommands_EntryPointCannotHaveEmptyItems(string itemValue)
+    {
+        CreateNewImage task = new();
+        List<string?> warnings = new();
+        IBuildEngine buildEngine = A.Fake<IBuildEngine>();
+        A.CallTo(() => buildEngine.LogWarningEvent(A<BuildWarningEventArgs>.Ignored)).Invokes((BuildWarningEventArgs e) => warnings.Add(e.Message));
+
+        task.BuildEngine = buildEngine;
+
+        DirectoryInfo publishDir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), DateTime.Now.ToString("yyyyMMddHHmmssfff")));
+        task.PublishDirectory = publishDir.FullName;
+        task.BaseRegistry = "MyBaseRegistry";
+        task.BaseImageName = "MyBaseImageName";
+        task.Repository = "MyImageName";
+        task.WorkingDirectory = "MyWorkingDirectory";
+        task.Entrypoint = new[] { new TaskItem(itemValue) };
+
+        Exception e = Assert.Throws<InvalidOperationException>(() => task.GenerateCommandLineCommandsInt());
+        Assert.Equal("CONTAINER4003: Required 'Entrypoint' items contain empty items.", e.Message);
     }
 
     [Theory]

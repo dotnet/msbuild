@@ -94,9 +94,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <EFSQLScriptsFolderName Condition="$(EFSQLScriptsFolderName) == ''">EFSQLScripts</EFSQLScriptsFolderName>
 
-    <!-- If TrimMode has not already been set, default to partial trimming, as AspNet is not currently fully trim-compatible -->
-    <!-- We allow the full trimming default with PublishAot enabled, because the parts that are not trim-compatible are not aot-compatible either -->
-    <TrimMode Condition="'$(TrimMode)' == '' and '$(PublishTrimmed)' == 'true' and '$(PublishAot)' != 'true'">partial</TrimMode>
+    <!-- Use default TrimMode for projects targeting net8.0 and above and retain TrimMode=partial for back-compat. -->
+    <TrimMode Condition="'$(TrimMode)' == '' And
+      '$(PublishTrimmed)' == 'true' And
+      !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">partial</TrimMode>
   </PropertyGroup>
 
   <!--

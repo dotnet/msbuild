@@ -26,5 +26,6 @@
   <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(ToolsetTaskDll)"/>
   <UsingTask TaskName="ZipFileCreateFromDirectory" AssemblyFile="$(ToolsetTaskDll)"/>
   <UsingTask TaskName="OverrideAndCreateBundledNETCoreAppPackageVersion" AssemblyFile="$(ToolsetTaskDll)"/>
+  <UsingTask TaskName="OverrideWasmRuntimePackVersions" AssemblyFile="$(ToolsetTaskDll)"/>
 
 </Project>

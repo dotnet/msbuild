@@ -31,18 +31,24 @@ static class ContainerCli
     public static RunExeCommand LogsCommand(ITestOutputHelper log, params string[] args)
       => CreateCommand(log, "logs", args);
 
+    public static RunExeCommand LoginCommand(ITestOutputHelper log, params string[] args)
+      => CreateCommand(log, "login", args);
+
+    public static RunExeCommand InspectCommand(ITestOutputHelper log, params string[] args)
+      => CreateCommand(log, "inspect", args);
+
     private static RunExeCommand CreateCommand(ITestOutputHelper log, string command, string[] args)
     {
         string commandPath = IsPodman ? "podman" : "docker";
 
         // The local registry is not accessible via https.
         // Podman doesn't want to use it unless we set 'tls-verify' to 'false'.
-        if (IsPodman && (command == "push" || command == "pull"))
+        if (IsPodman && (command == "push" || command == "pull" || command == "login"))
         {
             if (args.Length > 0)
             {
                 string image = args[args.Length - 1];
-                if (image.StartsWith($"{DockerRegistryManager.LocalRegistry}/"))
+                if (image.StartsWith($"localhost:"))
                 {
                     args = new[] { "--tls-verify=false" }.Concat(args).ToArray();
                 }

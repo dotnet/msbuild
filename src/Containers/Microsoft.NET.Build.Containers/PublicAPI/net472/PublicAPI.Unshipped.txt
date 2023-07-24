@@ -5,12 +5,19 @@ Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError.InvalidPortType =
 Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError.MissingPortNumber = 0 -> Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError
 Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError.UnknownPortFormat = Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError.InvalidPortNumber | Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError.InvalidPortType -> Microsoft.NET.Build.Containers.ContainerHelpers.ParsePortError
 Microsoft.NET.Build.Containers.Port
+Microsoft.NET.Build.Containers.Port.Deconstruct(out int Number, out Microsoft.NET.Build.Containers.PortType Type) -> void
+Microsoft.NET.Build.Containers.Port.Equals(Microsoft.NET.Build.Containers.Port other) -> bool
 Microsoft.NET.Build.Containers.Port.Number.get -> int
 Microsoft.NET.Build.Containers.Port.Number.set -> void
 Microsoft.NET.Build.Containers.Port.Port() -> void
 Microsoft.NET.Build.Containers.Port.Port(int Number, Microsoft.NET.Build.Containers.PortType Type) -> void
 Microsoft.NET.Build.Containers.Port.Type.get -> Microsoft.NET.Build.Containers.PortType
 Microsoft.NET.Build.Containers.Port.Type.set -> void
+~override Microsoft.NET.Build.Containers.Port.ToString() -> string
+static Microsoft.NET.Build.Containers.Port.operator !=(Microsoft.NET.Build.Containers.Port left, Microsoft.NET.Build.Containers.Port right) -> bool
+static Microsoft.NET.Build.Containers.Port.operator ==(Microsoft.NET.Build.Containers.Port left, Microsoft.NET.Build.Containers.Port right) -> bool
+override Microsoft.NET.Build.Containers.Port.GetHashCode() -> int
+~override Microsoft.NET.Build.Containers.Port.Equals(object obj) -> bool
 Microsoft.NET.Build.Containers.PortType
 Microsoft.NET.Build.Containers.PortType.tcp = 0 -> Microsoft.NET.Build.Containers.PortType
 Microsoft.NET.Build.Containers.PortType.udp = 1 -> Microsoft.NET.Build.Containers.PortType

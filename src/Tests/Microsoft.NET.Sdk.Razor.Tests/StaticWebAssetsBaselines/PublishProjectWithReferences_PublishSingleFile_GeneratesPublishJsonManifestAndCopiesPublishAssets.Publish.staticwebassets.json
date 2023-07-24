@@ -85,10 +85,10 @@
       "OriginalItemSpec": "wwwroot\\js\\project-direct-dep.js"
     },
     {
-      "Identity": "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css",
+      "Identity": "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\${Rid}\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css",
       "SourceId": "AppWithPackageAndP2PReference",
       "SourceType": "Computed",
-      "ContentRoot": "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\",
+      "ContentRoot": "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\${Rid}\\scopedcss\\bundle\\",
       "BasePath": "_content/AppWithPackageAndP2PReference",
       "RelativePath": "AppWithPackageAndP2PReference.styles.css",
       "AssetKind": "All",
@@ -101,7 +101,7 @@
       "AssetTraitValue": "ApplicationBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css"
+      "OriginalItemSpec": "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\${Tfm}\\${Rid}\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css"
     },
     {
       "Identity": "${ProjectPath}\\ClassLibrary\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\ClassLibrary.bundle.scp.css",

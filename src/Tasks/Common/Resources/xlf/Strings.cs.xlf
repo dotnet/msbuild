@@ -954,7 +954,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}. Download the .NET SDK from https://aka.ms/dotnet/download</source>
-        <target state="needs-review-translation">NETSDK1045: Aktuální sada .NET SDK nepodporuje cílení {0} {1}. Buď zacilte {0} {2} nebo nižší, nebo použijte verzi sady .NET SDK, která podporuje {0} {1}.</target>
+        <target state="translated">NETSDK1045: Aktuální sada .NET SDK nepodporuje cílení {0} {1}. Buď zacilte {0} {2} nebo nižší, nebo použijte verzi sady .NET SDK, která podporuje {0} {1}. Sada .NET SDK je ke stažení na https://aka.ms/dotnet/download</target>
         <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifier">
@@ -969,7 +969,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedVisualStudioVersion">
         <source>NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</source>
-        <target state="new">NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</target>
+        <target state="translated">NETSDK1209: Aktuální verze Visual Studio nepodporuje cílení {0} {1}. Buď zacilte {0} {2} nebo nižší, nebo použijte Visual Studio ve verzi {3} nebo vyšší.</target>
         <note>{StrBegin="NETSDK1209: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">

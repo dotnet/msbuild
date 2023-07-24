@@ -16,7 +16,6 @@ ASP.NET Core Web App (Model-View-Controller)  mvc                         [C#],F
 ASP.NET Core with Angular                     angular                     [C#]        Web/MVC/SPA                     
 ASP.NET Core with React.js                    react                       [C#]        Web/MVC/SPA                     
 Blazor Server App                             blazorserver                [C#]        Web/Blazor                      
-Blazor Server App Empty                       blazorserver-empty          [C#]        Web/Blazor/Empty                
 Blazor Web App                                blazor                      [C#]        Web/Blazor/WebAssembly/PWA      
 Blazor WebAssembly App                        blazorwasm                  [C#]        Web/Blazor/WebAssembly/PWA      
 Blazor WebAssembly App Empty                  blazorwasm-empty            [C#]        Web/Blazor/WebAssembly/PWA/Empty

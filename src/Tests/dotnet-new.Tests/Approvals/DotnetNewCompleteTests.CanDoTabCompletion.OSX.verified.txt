@@ -2,8 +2,6 @@
 api
 apicontroller
 blazor
-blazorserver
-blazorserver-empty
 blazorwasm
 blazorwasm-empty
 buildprops

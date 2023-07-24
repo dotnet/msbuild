@@ -954,7 +954,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}. Download the .NET SDK from https://aka.ms/dotnet/download</source>
-        <target state="needs-review-translation">NETSDK1045: Geçerli .NET SDK’sı {0} {1} sürümünü hedeflemeyi desteklemiyor. {0} {2} veya daha düşük bir sürümü hedefleyin veya {0} {1} destekleyen bir .NET SDK’sı kullanın.</target>
+        <target state="translated">NETSDK1045: Geçerli .NET SDK’sı {0} {1} sürümünü hedeflemeyi desteklemiyor. {0} {2} veya daha düşük bir sürümü hedefleyin ya da {0} {1} destekleyen bir .NET SDK’sı kullanın. .NET SDK’yı https://aka.ms/dotnet/download sayfasından indirebilirsiniz</target>
         <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifier">
@@ -969,7 +969,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="UnsupportedVisualStudioVersion">
         <source>NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</source>
-        <target state="new">NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</target>
+        <target state="translated">NETSDK1209: Geçerli Visual Studio sürümü {0} {1} sürümünü hedeflemeyi desteklemiyor. {0} {2} veya daha düşük bir sürümü hedefleyin ya da Visual Studio sürümü {3} veya daha üzerini kullanın</target>
         <note>{StrBegin="NETSDK1209: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">
