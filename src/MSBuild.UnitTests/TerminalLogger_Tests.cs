@@ -212,7 +212,7 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () => { });
 
-            return Verify(_outputWriter.ToString(), _settings);
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
         [Fact]
@@ -223,14 +223,14 @@ namespace Microsoft.Build.UnitTests
                 WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning!"));
             });
 
-            return Verify(_outputWriter.ToString(), _settings);
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
         [Fact]
         public Task PrintBuildSummary_Failed()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () => { });
-            return Verify(_outputWriter.ToString(), _settings);
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
         [Fact]
@@ -241,7 +241,7 @@ namespace Microsoft.Build.UnitTests
                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
            });
 
-           return Verify(_outputWriter.ToString(), _settings);
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
         #endregion
@@ -253,7 +253,7 @@ namespace Microsoft.Build.UnitTests
             {
                 _terminallogger.DisplayNodes();
 
-                await Verify(_outputWriter.ToString(), _settings);
+                await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
             });
         }
 
@@ -283,7 +283,7 @@ namespace Microsoft.Build.UnitTests
 
             _terminallogger.DisplayNodes();
 
-            await Verify(_outputWriter.ToString(), _settings);
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
     }
 }

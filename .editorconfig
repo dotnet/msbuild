@@ -15,6 +15,9 @@ trim_trailing_whitespace = true
 [project.json]
 indent_size = 2
 
+[*.txt]
+insert_final_newline = false
+
 # C# files
 [*.cs]
 # New line preferences
