@@ -4,7 +4,6 @@
 using System;
 using System.IO.Pipes;
 using System.Runtime.Versioning;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using static Microsoft.Win32.Msi.Error;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 

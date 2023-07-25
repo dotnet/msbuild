@@ -8,8 +8,6 @@ using System.Runtime.InteropServices;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using Xunit;
-using Microsoft.DotNet.Cli.Utils;
 using System.Xml.Linq;
 using System.Runtime.CompilerServices;
 using Xunit.Abstractions;

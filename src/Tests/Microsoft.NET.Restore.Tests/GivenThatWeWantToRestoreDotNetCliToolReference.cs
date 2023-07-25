@@ -3,7 +3,6 @@
 
 using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;

@@ -7,7 +7,6 @@ using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using NuGet.Frameworks;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ToolManifest

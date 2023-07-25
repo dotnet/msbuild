@@ -3,9 +3,7 @@
 
 using System;
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics;
-using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 

@@ -11,7 +11,6 @@ using Microsoft.Build.Framework;
 using Microsoft.NET.TestFramework;
 using Xunit;
 using Xunit.Abstractions;
-using static Microsoft.NET.Build.Tasks.ResolvePackageAssets;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {

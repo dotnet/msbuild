@@ -3,14 +3,11 @@
 
 using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
-using NuGet.Frameworks;
-using NuGet.ProjectModel;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests

@@ -3,7 +3,6 @@
 
 using Microsoft.DotNet.Cli.Sln.Internal;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Common

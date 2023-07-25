@@ -7,13 +7,10 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Xunit;
 using Xunit.Abstractions;
-using static System.Net.WebRequestMethods;
 
 namespace Microsoft.NET.Build.Tests
 {

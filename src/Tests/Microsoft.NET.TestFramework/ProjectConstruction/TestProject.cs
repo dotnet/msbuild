@@ -9,7 +9,6 @@ using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 using Microsoft.Build.Utilities;
 using NuGet.Frameworks;
-using Xunit.Sdk;
 
 namespace Microsoft.NET.TestFramework.ProjectConstruction
 {

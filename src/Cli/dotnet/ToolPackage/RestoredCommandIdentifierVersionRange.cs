@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
 using NuGet.Versioning;

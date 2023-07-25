@@ -4,7 +4,6 @@
 using System;
 using System.Text.Json;
 using System.IO;
-using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Common
 {

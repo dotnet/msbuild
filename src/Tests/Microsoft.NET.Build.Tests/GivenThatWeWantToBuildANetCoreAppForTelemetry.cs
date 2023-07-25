@@ -7,8 +7,6 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using System;
-using System.IO;
-using Xunit;
 using Xunit.Abstractions;
 using System.Reflection;
 

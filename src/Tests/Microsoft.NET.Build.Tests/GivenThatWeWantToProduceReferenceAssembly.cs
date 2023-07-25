@@ -9,7 +9,6 @@ using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
-using System.Collections.Generic;
 
 namespace Microsoft.NET.Build.Tests
 {

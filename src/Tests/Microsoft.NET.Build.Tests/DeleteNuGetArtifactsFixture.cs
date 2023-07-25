@@ -6,7 +6,6 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Microsoft.NET.Build.Tests
 {

@@ -10,10 +10,8 @@ using NuGet.RuntimeModel;
 using NuGet.ProjectModel;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Build.Tasks
 {

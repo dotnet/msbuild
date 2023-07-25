@@ -6,7 +6,6 @@ using Microsoft.Build.Framework;
 using Microsoft.NET.TestFramework;
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

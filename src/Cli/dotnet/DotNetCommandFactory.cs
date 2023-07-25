@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.CommandLine.Invocation;
 using System.Diagnostics;
-using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.CommandFactory;
 using NuGet.Frameworks;

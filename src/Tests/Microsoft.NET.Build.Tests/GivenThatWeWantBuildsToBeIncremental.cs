@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Threading;
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;

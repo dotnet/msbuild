@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.TestFramework.Commands;
 using System.Globalization;
 using System.Collections.Generic;
 

@@ -4,14 +4,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Resources;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using Xunit;
 using System.Linq;
 using System.Xml.Linq;
-using System.Reflection;
-using System.Reflection.Metadata;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {

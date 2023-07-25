@@ -24,7 +24,6 @@ using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.NET.Publish.Tests.PublishTestUtils;
-using System.Security.Permissions;
 
 namespace Microsoft.NET.Publish.Tests
 {

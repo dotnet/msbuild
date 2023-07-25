@@ -2,17 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
-using System.Xml.Linq;
-using System.Runtime.CompilerServices;
-using System;
-using Microsoft.Extensions.DependencyModel;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests

@@ -4,7 +4,6 @@
 using Microsoft.Build.Framework;
 using System.Xml.Linq;
 using System.IO;
-using System;
 
 namespace Microsoft.NET.Build.Tasks
 {

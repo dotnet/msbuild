@@ -5,7 +5,6 @@ using System;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
-using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.ShellShim
 {

@@ -3,9 +3,7 @@
 
 using System;
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Linq;
-using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli
 {

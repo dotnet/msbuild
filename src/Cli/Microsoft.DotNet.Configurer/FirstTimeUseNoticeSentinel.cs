@@ -4,7 +4,6 @@
 using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using NuGet.Configuration;
 
 namespace Microsoft.DotNet.Configurer
 {

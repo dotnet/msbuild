@@ -3,7 +3,6 @@
 
 using System.IO;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Microsoft.DotNet;
 
 namespace Microsoft.DotNet.InternalAbstractions
 {

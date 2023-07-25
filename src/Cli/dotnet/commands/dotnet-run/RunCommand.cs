@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Exceptions;
 using Microsoft.DotNet.Cli;

@@ -11,7 +11,6 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
 using Microsoft.DotNet.Cli.Utils;
-using System.Threading;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ToolPackage

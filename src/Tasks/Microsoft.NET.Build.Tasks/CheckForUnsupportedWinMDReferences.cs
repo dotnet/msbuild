@@ -7,8 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Tasks

@@ -3,15 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using System.Text.Json.Serialization;
-using NuGet.Frameworks;
 using NuGet.Versioning;
 using System.Text.Json;
 using System.Text;

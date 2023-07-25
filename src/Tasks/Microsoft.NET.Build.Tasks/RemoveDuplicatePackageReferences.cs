@@ -4,8 +4,6 @@
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using System.Globalization;
-using NuGet.ProjectModel;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 
