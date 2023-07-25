@@ -900,8 +900,28 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             LogMessagePacket loggingPacket = (LogMessagePacket)packet;
-            InjectNonSerializedData(loggingPacket);
-            ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
+
+            if (loggingPacket.EventType == LoggingEventType.CustomEvent
+                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8)
+                && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
+            {
+                BuildEventArgs buildEvent = loggingPacket.NodeBuildEvent.Value.Value;
+
+                // Serializing unknown CustomEvent which has to use unsecure BinaryFormatter by TranslateDotNet<T>
+                // Since BinaryFormatter is going to be deprecated, log warning so users can use new Extended*EventArgs instead of custom
+                // EventArgs derived from existing EventArgs.
+                LogWarning(
+                    buildEvent?.BuildEventContext ?? BuildEventContext.Invalid,
+                    null,
+                    BuildEventFileInfo.Empty,
+                    "DeprecatedEventSerialization",
+                    buildEvent?.GetType().Name ?? string.Empty);
+            }
+            else
+            {
+                InjectNonSerializedData(loggingPacket);
+                ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
+            }
         }
 
         /// <summary>
