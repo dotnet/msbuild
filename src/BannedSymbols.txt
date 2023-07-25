@@ -1,1 +1,2 @@
 M:System.Globalization.CompareInfo.IndexOf(System.String,System.Char);CompareInfo.IndexOf can unexpectedly allocate strings--use string.IndexOf
+P:Microsoft.Build.Construction.ProjectElementContainer.Children;Use ChildrenEnumerable instead to avoid boxing

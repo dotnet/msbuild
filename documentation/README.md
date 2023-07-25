@@ -74,7 +74,7 @@ The folder contains collection of docs and references for MSBuild, detailed info
 ### Logging
 
 * [Binary log](wiki/Binary-Log.md)
-* [Live logger: how to opt in](livelogger/Opt-In-Mechanism.md)
+* [Terminal logger: how to opt in](terminallogger/Opt-In-Mechanism.md)
 
 ## Archived Designs
 * [Resolve Assembly Reference as a service](specs/rar-as-service.md)

@@ -193,8 +193,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             var document = new XmlDocument();
             try
             {
-                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                using (XmlReader xmlReader = XmlReader.Create(path, readerSettings))
+                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                FileStream fs = File.OpenRead(path);
+                using (XmlReader xmlReader = XmlReader.Create(fs, readerSettings))
                 {
                     document.Load(xmlReader);
                 }

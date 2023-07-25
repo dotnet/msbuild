@@ -3951,6 +3951,9 @@ namespace Microsoft.Build.Tasks
             private int lineNumber;
             private int column;
 
+#if NET8_0_OR_GREATER
+            [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
             private TextFileException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {

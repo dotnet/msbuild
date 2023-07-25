@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 #if DEBUG
+using System.Globalization;
 using System.Reflection;
 #endif
 
@@ -58,7 +59,7 @@ namespace Microsoft.Build.Internal
 
             string val = Environment.GetEnvironmentVariable("MSBUILDTRACEINTERVAL");
             double seconds;
-            if (!String.IsNullOrEmpty(val) && System.Double.TryParse(val, out seconds))
+            if (!String.IsNullOrEmpty(val) && System.Double.TryParse(val, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture.NumberFormat, out seconds))
             {
                 s_interval = TimeSpan.FromSeconds(seconds);
             }
