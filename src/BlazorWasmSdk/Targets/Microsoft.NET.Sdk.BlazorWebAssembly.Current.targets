@@ -20,6 +20,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Similarly these feature switches must be configured before they are initialized in imported SDKs -->
     <JsonSerializerIsReflectionEnabledByDefault Condition="'$(JsonSerializerIsReflectionEnabledByDefault)' == ''">true</JsonSerializerIsReflectionEnabledByDefault>
+
+    <!-- EnableConfigurationBindingGenerator is enabled by default for trimmed apps, but Blazor WASM disables it by default -->
+    <EnableConfigurationBindingGenerator Condition="'$(EnableConfigurationBindingGenerator)' == ''">false</EnableConfigurationBindingGenerator>
   </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.targets" />
