@@ -239,7 +239,14 @@ namespace Microsoft.Build.Logging
                     {
                         using (FileStream fileStream = File.OpenRead(archiveFilePath))
                         {
-                            eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, fileStream);
+                            if (fileStream.Length > int.MaxValue)
+                            {
+                                LogMessage("Imported files archive exceeded 2GB limit and it's not embedded.");
+                            }
+                            else
+                            {
+                                eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, fileStream);
+                            }
                         }
 
                         File.Delete(archiveFilePath);
