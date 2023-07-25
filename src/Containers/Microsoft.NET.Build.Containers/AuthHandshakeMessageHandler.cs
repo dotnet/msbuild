@@ -1,20 +1,19 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-
-using Valleysoft.DockerCredsProvider;
-
+using Microsoft.Extensions.Logging;
 using Microsoft.NET.Build.Containers.Credentials;
-using System.Net.Sockets;
 using Microsoft.NET.Build.Containers.Resources;
-using System.Collections.Concurrent;
+using Valleysoft.DockerCredsProvider;
 
 namespace Microsoft.NET.Build.Containers;
 
@@ -25,11 +24,19 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
 {
     private const int MaxRequestRetries = 5; // Arbitrary but seems to work ok for chunked uploads to ghcr.io
 
+    private const string ClientID = "netsdkcontainers";
+
     private sealed record AuthInfo(string Realm, string? Service, string? Scope);
 
     private readonly string _registryName;
-
+    private readonly ILogger _logger;
     private static ConcurrentDictionary<string, AuthenticationHeaderValue?> _authenticationHeaders = new();
+
+    public AuthHandshakeMessageHandler(string registryName, HttpMessageHandler innerHandler, ILogger logger) : base(innerHandler)
+    {
+        _registryName = registryName;
+        _logger = logger;
+    }
 
     /// <summary>
     /// the www-authenticate header must have realm, service, and scope information, so this method parses it into that shape if present
@@ -96,11 +103,6 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
         }
     }
 
-    public AuthHandshakeMessageHandler(string registryName, HttpMessageHandler innerHandler) : base(innerHandler)
-    {
-        _registryName = registryName;
-    }
-
     /// <summary>
     /// Response to a request to get a token using some auth.
     /// </summary>
@@ -148,11 +150,20 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
         {
             Debug.Assert(bearerAuthInfo is not null);
 
+            AuthenticationHeaderValue? authenticationHeaderValue = await TryOAuthAsync(privateRepoCreds, bearerAuthInfo, cancellationToken).ConfigureAwait(false);
+            if (authenticationHeaderValue is not null)
+            {
+                return authenticationHeaderValue;
+            }
+
             // use those creds when calling the token provider
             var header = privateRepoCreds.Username == "<token>"
                             ? new AuthenticationHeaderValue("Bearer", privateRepoCreds.Password)
                             : new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{privateRepoCreds.Username}:{privateRepoCreds.Password}")));
             var builder = new UriBuilder(new Uri(bearerAuthInfo.Realm));
+
+
+            _logger.LogTrace("Attempting to authenticate on {uri} using GET.", bearerAuthInfo.Realm);
             var queryDict = System.Web.HttpUtility.ParseQueryString("");
             if (bearerAuthInfo.Service is string svc)
             {
@@ -167,20 +178,72 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
             message.Headers.Authorization = header;
 
             var tokenResponse = await base.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            if (!tokenResponse.IsSuccessStatusCode)
+            {
+                await tokenResponse.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
+            }
             tokenResponse.EnsureSuccessStatusCode();
+            _logger.LogTrace("Received '{statuscode}'.", tokenResponse.StatusCode);
 
             TokenResponse? token = JsonSerializer.Deserialize<TokenResponse>(tokenResponse.Content.ReadAsStream(cancellationToken));
             if (token is null)
             {
                 throw new ArgumentException(Resource.GetString(nameof(Strings.CouldntDeserializeJsonToken)));
             }
-
             return new AuthenticationHeaderValue("Bearer", token.ResolvedToken);
         }
         else
         {
             return null;
         }
+    }
+
+    private async Task<AuthenticationHeaderValue?> TryOAuthAsync(DockerCredentials privateRepoCreds, AuthInfo bearerAuthInfo, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        Uri uri = new(bearerAuthInfo.Realm);
+
+        _logger.LogTrace("Attempting to authenticate on {uri} using POST.", uri);
+        Dictionary<string, string?> parameters = new()
+        {
+            ["client_id"] = ClientID,
+        };
+        if (!string.IsNullOrWhiteSpace(privateRepoCreds.IdentityToken))
+        {
+            parameters["grant_type"] = "refresh_token";
+            parameters["refresh_token"] = privateRepoCreds.IdentityToken;
+        }
+        else
+        {
+            parameters["grant_type"] = "password";
+            parameters["username"] = privateRepoCreds.Username;
+            parameters["password"] = privateRepoCreds.Password;
+        }
+        if (bearerAuthInfo.Service is not null)
+        {
+            parameters["service"] = bearerAuthInfo.Service;
+        }
+        if (bearerAuthInfo.Scope is not null)
+        {
+            parameters["scope"] = bearerAuthInfo.Scope;
+        };
+        HttpRequestMessage postMessage = new(HttpMethod.Post, uri)
+        {
+            Content = new FormUrlEncodedContent(parameters)
+        };
+
+        HttpResponseMessage postResponse = await base.SendAsync(postMessage, cancellationToken).ConfigureAwait(false);
+        if (!postResponse.IsSuccessStatusCode)
+        {
+            await postResponse.LogHttpResponseAsync(_logger, cancellationToken).ConfigureAwait(false);
+            //return null to try HTTP GET instead
+            return null;
+        }
+        _logger.LogTrace("Received '{statuscode}'.", postResponse.StatusCode);
+        TokenResponse? tokenResponse = JsonSerializer.Deserialize<TokenResponse>(postResponse.Content.ReadAsStream(cancellationToken));
+        return tokenResponse is null
+            ? throw new ArgumentException(Resource.GetString(nameof(Strings.CouldntDeserializeJsonToken)))
+            : new AuthenticationHeaderValue("Bearer", tokenResponse.ResolvedToken);
     }
 
     private static async Task<DockerCredentials> GetLoginCredentials(string registry)
@@ -249,10 +312,8 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
             catch (HttpRequestException e) when (e.InnerException is IOException ioe && ioe.InnerException is SocketException se)
             {
                 retryCount += 1;
-
-                // TODO: log in a way that is MSBuild-friendly
-                Console.WriteLine($"Encountered a SocketException with message \"{se.Message}\". Pausing before retry.");
-
+                _logger.LogInformation("Encountered a SocketException with message \"{message}\". Pausing before retry.", se.Message);
+                _logger.LogTrace("Exception details: {ex}", se);
                 await Task.Delay(TimeSpan.FromSeconds(1.0 * Math.Pow(2, retryCount)), cancellationToken).ConfigureAwait(false);
 
                 // retry
