@@ -900,27 +900,61 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             LogMessagePacket loggingPacket = (LogMessagePacket)packet;
+            InjectNonSerializedData(loggingPacket);
 
+            WarnOnDeprecatedCustomArgsSerialization(loggingPacket);
+
+            ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
+        }
+
+        /// <summary>
+        /// Serializing unknown CustomEvent which has to use unsecure BinaryFormatter by TranslateDotNet<T>
+        /// Since BinaryFormatter is going to be deprecated, log warning so users can use new Extended*EventArgs instead of custom
+        /// EventArgs derived from existing EventArgs.
+        /// </summary>
+        private void WarnOnDeprecatedCustomArgsSerialization(LogMessagePacket loggingPacket)
+        {
             if (loggingPacket.EventType == LoggingEventType.CustomEvent
                 && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8)
                 && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
             {
                 BuildEventArgs buildEvent = loggingPacket.NodeBuildEvent.Value.Value;
 
-                // Serializing unknown CustomEvent which has to use unsecure BinaryFormatter by TranslateDotNet<T>
-                // Since BinaryFormatter is going to be deprecated, log warning so users can use new Extended*EventArgs instead of custom
-                // EventArgs derived from existing EventArgs.
-                LogWarning(
-                    buildEvent?.BuildEventContext ?? BuildEventContext.Invalid,
-                    null,
-                    BuildEventFileInfo.Empty,
-                    "DeprecatedEventSerialization",
+                BuildEventContext buildEventContext = buildEvent?.BuildEventContext ?? BuildEventContext.Invalid;
+
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string warningCode, out string helpKeyword, "DeprecatedEventSerialization",
                     buildEvent?.GetType().Name ?? string.Empty);
-            }
-            else
-            {
-                InjectNonSerializedData(loggingPacket);
-                ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
+
+                BuildWarningEventArgs warning = new(
+                    null,
+                    warningCode,
+                    BuildEventFileInfo.Empty.File,
+                    BuildEventFileInfo.Empty.Line,
+                    BuildEventFileInfo.Empty.Column,
+                    BuildEventFileInfo.Empty.EndLine,
+                    BuildEventFileInfo.Empty.EndColumn,
+                    message,
+                    helpKeyword,
+                    "MSBuild");
+
+                warning.BuildEventContext = buildEventContext;
+                if (warning.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+                {
+                    if (buildEvent is BuildMessageEventArgs buildMessageEvent)
+                    {
+                        warning.ProjectFile = buildMessageEvent.ProjectFile;
+                    }
+                    else if (buildEvent is BuildErrorEventArgs buildErrorEvent)
+                    {
+                        warning.ProjectFile = buildErrorEvent.ProjectFile;
+                    }
+                    else if (buildEvent is BuildWarningEventArgs buildWarningEvent)
+                    {
+                        warning.ProjectFile = buildWarningEvent.ProjectFile;
+                    }
+                }
+
+                ProcessLoggingEvent(warning);
             }
         }
 

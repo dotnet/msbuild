@@ -13,7 +13,7 @@ namespace Microsoft.Build.UnitTests
     {
         public override bool Execute()
         {
-            var customBuildEvent = new MyCustomBuildEventArgs();
+            MyCustomBuildEventArgs customBuildEvent = new() { RawMessage = "A message from MyCustomBuildEventArgs" };
             BuildEngine.LogCustomEvent(customBuildEvent);
 
             return true;

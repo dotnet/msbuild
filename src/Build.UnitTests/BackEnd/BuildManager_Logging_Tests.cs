@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,17 +12,16 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
-using Microsoft.Build.UnitTests.Shared;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 
 #nullable disable
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
-    public class BuildManager_Logging_Tests
+    public class BuildManager_Logging_Tests : IDisposable
     {
         /// <summary>
         /// The mock logger for testing.
@@ -109,12 +109,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
                 var result = submission.Execute();
 
-                var e = _logger.AllBuildEvents;
+                var allEvents = _logger.AllBuildEvents;
+
+                allEvents.OfType<BuildWarningEventArgs>().ShouldHaveSingleItem();
+                allEvents.First(x => x is BuildWarningEventArgs).Message.ShouldContain("MyCustomBuildEventArgs");
             }
             finally
             {
                 _buildManager.EndBuild();
-                _env.SetEnvironmentVariable("MSBUILDCUSTOMBUILDEVENTWARNING", null);
             }
         }
 
@@ -128,7 +130,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// <summary>
         /// TearDown
         /// </summary>
-        private void Dispose()
+        public void Dispose()
         {
             _buildManager.Dispose();
             _projectCollection.Dispose();
