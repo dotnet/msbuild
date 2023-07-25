@@ -167,14 +167,11 @@ namespace Microsoft.DotNet.Cli
 
                     var environmentProvider = new EnvironmentProvider();
 
-                    bool generateAspNetCertificate =
-                        environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", defaultValue: true);
-                    bool telemetryOptout =
-                      environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.TELEMETRY_OPTOUT, defaultValue: CompileOptions.TelemetryOptOutDefault);
-                    bool addGlobalToolsToPath =
-                        environmentProvider.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", defaultValue: true);
-                    bool nologo =
-                        environmentProvider.GetEnvironmentVariableAsBool("DOTNET_NOLOGO", defaultValue: false);
+                    bool generateAspNetCertificate = environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", defaultValue: true);
+                    bool telemetryOptout = environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.TELEMETRY_OPTOUT, defaultValue: CompileOptions.TelemetryOptOutDefault);
+                    bool addGlobalToolsToPath = environmentProvider.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", defaultValue: true);
+                    bool nologo = environmentProvider.GetEnvironmentVariableAsBool("DOTNET_NOLOGO", defaultValue: false);
+                    bool skipWorkloadIntegrityCheck = environmentProvider.GetEnvironmentVariableAsBool("DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK", defaultValue: false);
 
                     ReportDotnetHomeUsage(environmentProvider);
 
@@ -191,7 +188,8 @@ namespace Microsoft.DotNet.Cli
                         generateAspNetCertificate: generateAspNetCertificate,
                         telemetryOptout: telemetryOptout,
                         addGlobalToolsToPath: addGlobalToolsToPath,
-                        nologo: nologo);
+                        nologo: nologo,
+                        skipWorkloadIntegrityCheck: skipWorkloadIntegrityCheck);
 
                     ConfigureDotNetForFirstTimeUse(
                         firstTimeUseNoticeSentinel,
@@ -331,8 +329,7 @@ namespace Microsoft.DotNet.Cli
                 DotDefaultPathCorrector.Correct();
             }
 
-            // TODO: Add mechanism to DotnetFirstRunConfiguration for disabling this process.
-            if (isFirstTimeUse)
+            if (isFirstTimeUse && !dotnetFirstRunConfiguration.SkipWorkloadIntegrityCheck)
             {
                 WorkloadIntegrityChecker.RunFirstUseCheck();
             }
