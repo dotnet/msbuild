@@ -265,7 +265,7 @@ stages:
     - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
       displayName: Execute cleanup tasks
       condition: succeededOrFailed()
-      
+
     - template: /eng/common/templates/steps/component-governance.yml
       parameters:
         ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))) }}:
@@ -274,10 +274,6 @@ stages:
           disableComponentGovernance: true
 
   - template: /eng/common/templates/job/source-build.yml
-    parameters:
-      platform:
-        name: 'Managed'
-        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7'
 
   - template: /eng/common/templates/job/publish-build-assets.yml
     parameters:
