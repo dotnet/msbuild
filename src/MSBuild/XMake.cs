@@ -2586,6 +2586,14 @@ namespace Microsoft.Build.CommandLine
                         new BuildManager.DeferredBuildMessage("TerminalLogger was not used because the output is not supported.", MessageImportance.Low));
                     return false;
                 }
+
+                if (Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
+                {
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage("TerminalLogger was not used because build is run in context of process (e.g. 'dotnet test') that requests direct access to stdout stream.", MessageImportance.Low));
+                    return false;
+                }
+
                 return true;
             }
         }
