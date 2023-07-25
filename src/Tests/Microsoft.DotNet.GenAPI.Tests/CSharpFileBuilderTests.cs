@@ -1733,7 +1733,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         public partial class foo
                         {
-                            public void Execute(out int i) { throw null; }
+                            public void Execute(scoped out int i) { throw null; }
                         }
                     }
                     """,
