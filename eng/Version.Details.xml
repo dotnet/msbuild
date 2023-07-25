@@ -344,30 +344,30 @@
       <Uri>https://github.com/dotnet/deployment-tools</Uri>
       <Sha>9e870996b8bf0b91a791edd1039bfd23bdd01af8</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Tasks.Git" Version="8.0.0-beta.23372.2">
+    <Dependency Name="Microsoft.Build.Tasks.Git" Version="8.0.0-beta.23374.3">
       <Uri>https://github.com/dotnet/sourcelink</Uri>
-      <Sha>e6392ab95a4054dc8a39b44d8f73d31fa276e781</Sha>
+      <Sha>8ec80a181849eaa280065d88ec443c2e83ca6de7</Sha>
       <SourceBuild RepoName="sourcelink" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.SourceLink.Common" Version="8.0.0-beta.23372.2">
+    <Dependency Name="Microsoft.SourceLink.Common" Version="8.0.0-beta.23374.3">
       <Uri>https://github.com/dotnet/sourcelink</Uri>
-      <Sha>e6392ab95a4054dc8a39b44d8f73d31fa276e781</Sha>
+      <Sha>8ec80a181849eaa280065d88ec443c2e83ca6de7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceLink.AzureRepos.Git" Version="8.0.0-beta.23372.2">
+    <Dependency Name="Microsoft.SourceLink.AzureRepos.Git" Version="8.0.0-beta.23374.3">
       <Uri>https://github.com/dotnet/sourcelink</Uri>
-      <Sha>e6392ab95a4054dc8a39b44d8f73d31fa276e781</Sha>
+      <Sha>8ec80a181849eaa280065d88ec443c2e83ca6de7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceLink.GitHub" Version="8.0.0-beta.23372.2">
+    <Dependency Name="Microsoft.SourceLink.GitHub" Version="8.0.0-beta.23374.3">
       <Uri>https://github.com/dotnet/sourcelink</Uri>
-      <Sha>e6392ab95a4054dc8a39b44d8f73d31fa276e781</Sha>
+      <Sha>8ec80a181849eaa280065d88ec443c2e83ca6de7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceLink.GitLab" Version="8.0.0-beta.23372.2">
+    <Dependency Name="Microsoft.SourceLink.GitLab" Version="8.0.0-beta.23374.3">
       <Uri>https://github.com/dotnet/sourcelink</Uri>
-      <Sha>e6392ab95a4054dc8a39b44d8f73d31fa276e781</Sha>
+      <Sha>8ec80a181849eaa280065d88ec443c2e83ca6de7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceLink.Bitbucket.Git" Version="8.0.0-beta.23372.2">
+    <Dependency Name="Microsoft.SourceLink.Bitbucket.Git" Version="8.0.0-beta.23374.3">
       <Uri>https://github.com/dotnet/sourcelink</Uri>
-      <Sha>e6392ab95a4054dc8a39b44d8f73d31fa276e781</Sha>
+      <Sha>8ec80a181849eaa280065d88ec443c2e83ca6de7</Sha>
     </Dependency>
     <!-- Explicit dependency because Microsoft.Deployment.DotNet.Releases has different versioning
          than the SB intermediate -->
