@@ -194,7 +194,6 @@ _Pvt_Extensions
 ApiPort/
 *.xlsx
 Differences.txt
-Tools/
 Samples/MultiprocessBuild/PortableTask.dll
 
 # Visual Studio Code
