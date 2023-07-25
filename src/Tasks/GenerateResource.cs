@@ -725,16 +725,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else if (FailIfNotIncremental)
                 {
-                    int maxCount = Math.Min(inputsToProcess.Count, outputsToProcess.Count);
-                    maxCount = Math.Min(maxCount, 5);  // Limit to just 5
-
-                    for (int index = 0; index < maxCount; index++)
-                    {
-                        // Log the file that would be process as an error.
-                        Log.LogErrorFromResources("GenerateResource.ProcessingFile", inputsToProcess[index], outputsToProcess[index]);
-                    }
-
-                    return false;
+                    Log.LogErrorFromResources("GenerateResource.OutOfDate");
                 }
                 else
                 {
