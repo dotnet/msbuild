@@ -13,7 +13,7 @@ using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
 {
-    public class ZipDeploy : Task
+    public class ZipDeploy : MSBuildTask
     {
         private const string UserAgentName = "websdk";
 

@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Build.Tasks
 {
     /// <summary>
     /// </summary>
-    public sealed class OverrideWasmRuntimePackVersions : Task
+    public sealed class OverrideWasmRuntimePackVersions : MSBuildTask
     {
         [Required]
         public ITaskItem[] Properties { get; set; }

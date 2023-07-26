@@ -10,7 +10,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class ComputeCssScope : Task
+    public class ComputeCssScope : MSBuildTask
     {
         [Required]
         public ITaskItem[] ScopedCssInput { get; set; }

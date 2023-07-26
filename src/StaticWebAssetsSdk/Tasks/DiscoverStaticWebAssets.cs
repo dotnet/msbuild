@@ -11,7 +11,7 @@ using Microsoft.Extensions.FileSystemGlobbing;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class DiscoverStaticWebAssets : Task
+    public class DiscoverStaticWebAssets : MSBuildTask
     {
         [Required]
         public ITaskItem[] Candidates { get; set; }

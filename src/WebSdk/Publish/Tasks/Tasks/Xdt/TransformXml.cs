@@ -11,7 +11,7 @@ using System.Diagnostics;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
 {
-    public class TransformXml : Task
+    public class TransformXml : MSBuildTask
     {
         private string _sourceFile = null;
         private string _transformFile = null;

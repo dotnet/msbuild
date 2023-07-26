@@ -11,7 +11,7 @@ using Microsoft.Extensions.FileSystemGlobbing;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks;
 
-public class ResolveCompressedAssets : Task
+public class ResolveCompressedAssets : MSBuildTask
 {
     private const string GzipAssetTraitValue = "gzip";
     private const string BrotliAssetTraitValue = "br";

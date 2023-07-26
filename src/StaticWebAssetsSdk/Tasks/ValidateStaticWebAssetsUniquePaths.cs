@@ -9,7 +9,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class ValidateStaticWebAssetsUniquePaths : Task
+    public class ValidateStaticWebAssetsUniquePaths : MSBuildTask
     {
         private const string BasePath = "BasePath";
         private const string RelativePath = "RelativePath";

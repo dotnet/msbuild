@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
 
   <PropertyGroup>
     <BlazorWasmSdkRoot>$(RepoRoot)\src\BlazorWasmSdk\</BlazorWasmSdkRoot>
@@ -88,6 +88,13 @@
       <Content Include="$(PackageLayoutOutputPath)**\*" PackagePath="\" />
     </ItemGroup>
   </Target>
+
+  <!-- Global usings -->
+  <!-- See: https://learn.microsoft.com/dotnet/core/project-sdk/msbuild-props#using -->
+  <ItemGroup>
+    <!-- This causes conflicts with System.Threading.Tasks.Task. Giving it a unqiue alias avoids the conflict. -->
+     <Using Include="Microsoft.Build.Utilities.Task" Alias="MSBuildTask" /> 
+  </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>

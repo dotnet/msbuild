@@ -11,7 +11,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class UpdatePackageStaticWebAssets : Task
+    public class UpdatePackageStaticWebAssets : MSBuildTask
     {
         [Required]
         public ITaskItem[] Assets { get; set; }

@@ -14,7 +14,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class GenerateStaticWebAsssetsPropsFile : Task
+    public class GenerateStaticWebAsssetsPropsFile : MSBuildTask
     {
         private const string SourceType = "SourceType";
         private const string SourceId = "SourceId";

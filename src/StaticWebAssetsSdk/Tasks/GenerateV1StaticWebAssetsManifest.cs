@@ -14,7 +14,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class GenerateV1StaticWebAssetsManifest : Task
+    public class GenerateV1StaticWebAssetsManifest : MSBuildTask
     {
         private const string ContentRoot = "ContentRoot";
         private const string BasePath = "BasePath";

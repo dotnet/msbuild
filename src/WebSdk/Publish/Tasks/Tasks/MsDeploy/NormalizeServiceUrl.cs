@@ -17,7 +17,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
     /// So VS's behavior conforms to webmatrix and wdeploy as much as possible
     /// </summary>
     ///-----------------------------------------------------------------------------
-    sealed public class NormalizeServiceUrl : Task
+    sealed public class NormalizeServiceUrl : MSBuildTask
     {
         private string _serviceUrl = string.Empty;
         private string _resultUrl = string.Empty;

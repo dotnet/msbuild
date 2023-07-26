@@ -10,7 +10,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class MergeConfigurationProperties : Task
+    public class MergeConfigurationProperties : MSBuildTask
     {
         [Required]
         public ITaskItem[] CandidateConfigurations { get; set; }

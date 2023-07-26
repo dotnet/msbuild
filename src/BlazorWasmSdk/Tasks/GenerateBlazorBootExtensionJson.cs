@@ -14,7 +14,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly
 {
-    public class GenerateBlazorBootExtensionJson : Task
+    public class GenerateBlazorBootExtensionJson : MSBuildTask
     {
         [Required]
         public string OutputPath { get; set; }

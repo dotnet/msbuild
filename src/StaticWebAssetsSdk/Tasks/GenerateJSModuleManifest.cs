@@ -12,7 +12,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class GenerateJSModuleManifest : Task
+    public class GenerateJSModuleManifest : MSBuildTask
     {
         private static readonly JsonSerializerOptions ManifestSerializationOptions = new()
         {

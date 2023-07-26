@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli.Build
     /// ReplacementPattern could easily be a regex, but it isn't needed for current use cases, so leaving this
     /// as just a string that will be replaced.
     /// </summary>
-    public class ReplaceFileContents : Task
+    public class ReplaceFileContents : MSBuildTask
     {
         [Required]
         public ITaskItem[] InputFiles { get; set; }

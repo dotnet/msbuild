@@ -23,7 +23,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
     // There is also a RelativePathPattern that is used to automatically transform the relative path of the candidates to match
     // the expected path of the final asset. This is typically use to remove a common path prefix, like `wwwroot` from the target
     // path of the assets and so on.
-    public class DefineStaticWebAssets : Task
+    public class DefineStaticWebAssets : MSBuildTask
     {
         [Required]
         public ITaskItem[] CandidateAssets { get; set; }

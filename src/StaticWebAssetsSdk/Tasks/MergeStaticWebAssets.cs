@@ -10,7 +10,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks;
 
-public class MergeStaticWebAssets : Task
+public class MergeStaticWebAssets : MSBuildTask
 {
     [Required]
     public ITaskItem[] CandidateAssets { get; set; }

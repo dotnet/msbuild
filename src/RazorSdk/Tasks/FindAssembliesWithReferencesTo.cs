@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
+using MSBuildTask = Microsoft.Build.Utilities.Task;
 
 namespace Microsoft.AspNetCore.Razor.Tasks
 {
-    public class FindAssembliesWithReferencesTo : Task
+    public class FindAssembliesWithReferencesTo : MSBuildTask
     {
         [Required]
         public ITaskItem[] TargetAssemblyNames { get; set; }

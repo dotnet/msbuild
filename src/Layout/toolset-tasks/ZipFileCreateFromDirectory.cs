@@ -10,7 +10,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.DotNet.Build.Tasks
 {
-    public sealed class ZipFileCreateFromDirectory : Task
+    public sealed class ZipFileCreateFromDirectory : MSBuildTask
     {
         /// <summary>
         /// The path to the directory to be archived.

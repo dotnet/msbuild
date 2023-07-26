@@ -12,7 +12,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly
 {
-    public class GZipCompress : Task
+    public class GZipCompress : MSBuildTask
     {
         [Required]
         public ITaskItem[] FilesToCompress { get; set; }

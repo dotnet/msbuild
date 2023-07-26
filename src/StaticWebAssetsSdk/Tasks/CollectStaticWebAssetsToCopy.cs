@@ -11,7 +11,7 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
 
-    public class CollectStaticWebAssetsToCopy : Task
+    public class CollectStaticWebAssetsToCopy : MSBuildTask
     {
         [Required]
         public ITaskItem[] Assets { get; set; }

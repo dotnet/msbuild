@@ -9,7 +9,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly
 {
-    public class BlazorWriteSatelliteAssemblyFile : Task
+    public class BlazorWriteSatelliteAssemblyFile : MSBuildTask
     {
         [Required]
         public ITaskItem[] SatelliteAssembly { get; set; }

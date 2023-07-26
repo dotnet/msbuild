@@ -12,7 +12,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class ConcatenateCssFiles : Task
+    public class ConcatenateCssFiles : MSBuildTask
     {
         private static readonly IComparer<ITaskItem> _fullPathComparer =
             Comparer<ITaskItem>.Create((x, y) => StringComparer.OrdinalIgnoreCase.Compare(x.GetMetadata("FullPath"), y.GetMetadata("FullPath")));

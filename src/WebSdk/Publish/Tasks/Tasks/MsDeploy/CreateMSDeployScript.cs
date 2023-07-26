@@ -9,7 +9,7 @@ using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 {
-    public class CreateMSDeployScript : Task
+    public class CreateMSDeployScript : MSBuildTask
     {
         [Required]
         public string ProjectName { get; set; }

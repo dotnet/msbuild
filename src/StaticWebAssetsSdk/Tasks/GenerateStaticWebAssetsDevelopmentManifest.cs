@@ -16,7 +16,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
     // The manifest needs to always be case sensitive, since we don't know what the final runtime environment
     // will be. The runtime is responsible for merging the tree nodes in the manifest when the underlying OS
     // is case insensitive.
-    public class GenerateStaticWebAssetsDevelopmentManifest : Task
+    public class GenerateStaticWebAssetsDevelopmentManifest : MSBuildTask
     {
         // Since the manifest is only used at development time, it's ok for it to use the relaxed
         // json escaping (which is also what MVC uses by default) and to produce indented output

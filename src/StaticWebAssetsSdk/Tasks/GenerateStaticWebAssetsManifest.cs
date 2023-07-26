@@ -11,7 +11,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class GenerateStaticWebAssetsManifest : Task
+    public class GenerateStaticWebAssetsManifest : MSBuildTask
     {
         // Since the manifest is only used at development time, it's ok for it to use the relaxed
         // json escaping (which is also what MVC uses by default) and to produce indented output

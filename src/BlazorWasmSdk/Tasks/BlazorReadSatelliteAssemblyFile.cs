@@ -8,7 +8,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly
 {
-    public class BlazorReadSatelliteAssemblyFile : Task
+    public class BlazorReadSatelliteAssemblyFile : MSBuildTask
     {
         [Output]
         public ITaskItem[] SatelliteAssembly { get; set; }

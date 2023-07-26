@@ -8,7 +8,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class ComputeStaticWebAssetsTargetPaths : Task
+    public class ComputeStaticWebAssetsTargetPaths : MSBuildTask
     {
         [Required]
         public ITaskItem[] Assets { get; set; }

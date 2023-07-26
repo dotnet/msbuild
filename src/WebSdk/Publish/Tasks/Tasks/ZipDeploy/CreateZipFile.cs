@@ -9,7 +9,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
 {
-    public class CreateZipFile : Task
+    public class CreateZipFile : MSBuildTask
     {
         [Required]
         public string FolderToZip { get; set; }

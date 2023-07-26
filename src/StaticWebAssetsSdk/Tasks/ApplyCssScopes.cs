@@ -10,7 +10,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class ApplyCssScopes : Task
+    public class ApplyCssScopes : MSBuildTask
     {
         [Required]
         public ITaskItem[] RazorComponents { get; set; }

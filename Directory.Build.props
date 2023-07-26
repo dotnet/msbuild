@@ -43,5 +43,9 @@
     <!-- <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments> -->
   </PropertyGroup>
 
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
   <Import Project="build/GenerateResxSource.targets" />
 </Project>

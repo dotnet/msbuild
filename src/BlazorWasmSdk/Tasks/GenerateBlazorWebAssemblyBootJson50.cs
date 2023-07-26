@@ -14,7 +14,7 @@ using ResourceHashesByNameDictionary = System.Collections.Generic.Dictionary<str
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly
 {
-    public class GenerateBlazorWebAssemblyBootJson50 : Task
+    public class GenerateBlazorWebAssemblyBootJson50 : MSBuildTask
     {
         [Required]
         public string AssemblyPath { get; set; }

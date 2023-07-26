@@ -7,12 +7,12 @@ using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.DotNet.Watcher.Internal;
+using MSBuildTask = Microsoft.Build.Utilities.Task;
 
 namespace DotNetWatchTasks
 {
-    public class FileSetSerializer : Task
+    public class FileSetSerializer : MSBuildTask
     {
         public ITaskItem[] WatchFiles { get; set; } = null!;
 

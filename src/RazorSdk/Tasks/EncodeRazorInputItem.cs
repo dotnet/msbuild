@@ -7,7 +7,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
+using MSBuildTask = Microsoft.Build.Utilities.Task;
+using MSBuildTaskItem = Microsoft.Build.Utilities.TaskItem;
 
 namespace Microsoft.AspNetCore.Razor.Tasks
 {
@@ -19,7 +20,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
     // Characters like {} in the filename cause issues with resolving the type. To work
     // around this, we encode everything before writing it to the editorconfig then decode
     // inside the Razor source generator.
-    public class EncodeRazorInputItem : Task
+    public class EncodeRazorInputItem : MSBuildTask
     {
         [Required]
         public ITaskItem[] RazorInputItems { get; set; }
@@ -36,7 +37,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 var input = RazorInputItems[i];
                 var targetPath = Convert.ToBase64String(Encoding.UTF8.GetBytes(input.GetMetadata("TargetPath")));
 
-                var outputItem = new TaskItem(input);
+                var outputItem = new MSBuildTaskItem(input);
                 outputItem.SetMetadata("TargetPath", targetPath);
 
                 EncodedRazorInputItems[i] = outputItem;

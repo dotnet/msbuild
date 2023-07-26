@@ -7,7 +7,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks
 {
-    public class TransformAppSettings : Task
+    public class TransformAppSettings : MSBuildTask
     {
         /// <summary>
         /// Full Path to the Project Folder. This is used to determine the default appsettings location.

@@ -9,7 +9,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class ComputeReferenceStaticWebAssetItems : Task
+    public class ComputeReferenceStaticWebAssetItems : MSBuildTask
     {
         [Required]
         public ITaskItem[] Assets { get; set; }

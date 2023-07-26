@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class RemoveAssetFromDepsPackages : Task
+    public class RemoveAssetFromDepsPackages : MSBuildTask
     {
         [Required]
         public string DepsFile { get; set; }

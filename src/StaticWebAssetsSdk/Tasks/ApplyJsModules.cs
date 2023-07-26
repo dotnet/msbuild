@@ -11,7 +11,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class ApplyJsModules : Task
+    public class ApplyJsModules : MSBuildTask
     {
         [Required]
         public ITaskItem[] RazorComponents { get; set; }
