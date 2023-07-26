@@ -77,6 +77,16 @@
         <target state="translated">工作负荷清单依赖项“{0}”版本“{1}”低于清单“{2}”所需的版本“{3}”[{4}]</target>
         <note />
       </trans-unit>
+      <trans-unit id="ManifestFromInstallStateNotFound">
+        <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
+        <target state="translated">找不到 {1} 中指定的工作负载清单 {0}。运行 "dotnet workload repair" 可能会解决此问题。</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
+      <trans-unit id="ManifestFromWorkloadSetNotFound">
+        <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
+        <target state="translated">未安装工作负载版本 {0} 中的工作负载清单 {1}。运行 "dotnet workload repair" 可能会解决此问题。</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">无法找到由清单“{2}”[{3}] 中的工作负载“{1}”扩展的工作负载“{0}”</target>
@@ -102,16 +112,6 @@
         <target state="translated">重定向工作负荷“{0}”具有“重定向到”以外的键</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifiedManifestNotFound">
-        <source>Specified workload manifest was not found: {0}</source>
-        <target state="translated">找不到指定的工作负荷清单: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SpecifiedWorkloadSetNotFound">
-        <source>Specified workload set was not found: {0}</source>
-        <target state="translated">找不到指定的工作负荷集: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">偏移为 {1} 时意外出现的标记“{0}”</target>
@@ -135,6 +135,16 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">工作负载未解析的目标“{0}”重定向到清单“{2}”[{3}] 中的“{1}”</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="translated">找不到在 {1} 中指定的工作负载版本 {0}。运行“dotnet workload restore”以安装此工作负载版本。</target>
+        <note>{Locked="dotnet workload restore"}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromInstallStateNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found.</source>
+        <target state="translated">找不到 {1} 中指定的工作负荷版本 {0}。</target>
         <note />
       </trans-unit>
     </body>

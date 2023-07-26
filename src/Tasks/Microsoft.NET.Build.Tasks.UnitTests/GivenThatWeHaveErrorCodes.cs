@@ -32,12 +32,28 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             1039,
             1040,
             1041,
-            1057,
             1062,
             1066,
             1101,
             1108,
             1180,
+            1195,
+            1197,
+            1199,
+            1200,
+            1201,
+            1203,
+            1204,
+            1206,
+            1207
+        };
+
+        //ILLink lives in other repos and violated the _info requirement for no error code
+        //Adding them to an exclusion list as it's difficult and not worth it to unwind
+        private static readonly IReadOnlyList<string> _infoExceptions = new string[]
+        {
+            "ILLinkRunning",
+            "ILLinkOptimizedAssemblies"
         };
 
         [Fact]
@@ -57,14 +73,17 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
                 else
                 {
-                    match.Success
-                        .Should()
-                        .BeTrue(because: $"all non-informational should have correctly formatted error codes ({key} does not).");
+                    if (!_infoExceptions.Contains(key))
+                    {
+                        match.Success
+                            .Should()
+                            .BeTrue(because: $"all non-informational should have correctly formatted error codes ({key} does not).");
 
-                    int code = int.Parse(match.Groups[1].Value);
-                    codes.Add(code)
-                        .Should()
-                        .BeTrue(because: $"error codes should not be duplicated (NETSDK{code} is used more than once)");
+                        int code = int.Parse(match.Groups[1].Value);
+                        codes.Add(code)
+                            .Should()
+                            .BeTrue(because: $"error codes should not be duplicated (NETSDK{code} is used more than once)");
+                    }
                 }
             }
 
@@ -95,10 +114,11 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     comment.Should().NotContain("StrBegin",
                         because: "informational messages should not have error codes.");
                 }
-                else
+                else if (!_infoExceptions.Contains(name))
                 {
+
                     comment.Should().StartWith($@"{{StrBegin=""{prefix} ""}}",
-                        because: "localization instructions should indicate invariant error code as preceding translatable message.");
+                        because: $"localization instructions should indicate invariant error code as preceding translatable message.");
                 }
             }
         }

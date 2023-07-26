@@ -54,7 +54,12 @@ namespace Microsoft.DotNet.TemplateLocator
                     nameof(dotnetRootPath));
             }
 
-            _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion, userProfileDir);
+            //  Will the current directory correspond to the folder we are creating a project in?  If we need
+            //  to honor global.json workload version selection for template creation in Visual Studio, we may
+            //  need to update this interface to pass a folder where we should start the search for global.json
+            string? globalJsonPath = SdkDirectoryWorkloadManifestProvider.GetGlobalJsonPath(Environment.CurrentDirectory);
+
+            _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion, userProfileDir, globalJsonPath);
             _workloadResolver ??= WorkloadResolver.Create(_workloadManifestProvider, dotnetRootPath, sdkVersion, userProfileDir);
 
             return _workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template)

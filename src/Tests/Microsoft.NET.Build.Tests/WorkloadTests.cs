@@ -171,20 +171,20 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-workloadtestplatform"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-android"
             };
 
             var testAsset = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            //  NETSDK1139: The target platform identifier workloadtestplatform was not recognized.
+            //  NETSDK1208: The target platform identifier android was not recognized.
             new BuildCommand(testAsset)
                 .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "false")
                 .Execute()
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("NETSDK1139");
+                .HaveStdOutContaining("NETSDK1208");
         }
 
         [Fact]

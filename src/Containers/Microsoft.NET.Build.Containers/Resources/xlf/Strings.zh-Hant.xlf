@@ -28,9 +28,24 @@
         <note>{StrBegin="CONTAINER1011: "}</note>
       </trans-unit>
       <trans-unit id="BlobUploadFailed">
-        <source>CONTAINER1001: Failed to upload blob to {0}; received {1} with detail {2}.</source>
-        <target state="translated">CONTAINER1001: 無法上傳 Blob 至 {0}; 收到 {1}，具有詳細資料 {2}。</target>
+        <source>CONTAINER1001: Failed to upload blob using {0}; received status code '{1}'.</source>
+        <target state="translated">CONTAINER1001: 無法使用 {0} 上傳 blob; 收到狀態碼 '{1}'。</target>
         <note>{StrBegin="CONTAINER1001: "}</note>
+      </trans-unit>
+      <trans-unit id="ContainerBuilder_ImageUploadedToLocalDaemon">
+        <source>Pushed container '{0}' to Docker daemon.</source>
+        <target state="translated">已推送容器 '{0}' 至 Docker 精靈。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ContainerBuilder_ImageUploadedToRegistry">
+        <source>Pushed container '{0}' to registry '{1}'.</source>
+        <target state="translated">已將容器 '{0}' 推送至登錄 '{1}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ContainerBuilder_StartBuildingImage">
+        <source>Building image '{0}' with tags '{1}' on top of base image '{2}'.</source>
+        <target state="translated">在基礎映像 '{2}' 上建立具有標記 '{1}' 的映像 '{0}'。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldntDeserializeJsonToken">
         <source>CONTAINER1007: Could not deserialize token from JSON.</source>
@@ -152,6 +167,16 @@
         <target state="translated">CONTAINER1012: 無法使用本機 Docker 精靈，但已要求推送至本機 Docker 精靈。請啟動精靈，然後再試一次。</target>
         <note>{StrBegin="CONTAINER1012: "}</note>
       </trans-unit>
+      <trans-unit id="LocalDocker_FailedToGetConfig">
+        <source>Error while reading daemon config: {0}</source>
+        <target state="translated">讀取精靈設定時發生錯誤: {0}</target>
+        <note>{0} is the exception message that ends with period</note>
+      </trans-unit>
+      <trans-unit id="LocalDocker_LocalDaemonErrors">
+        <source>The daemon server reported errors: {0}</source>
+        <target state="translated">精靈伺服器報告錯誤: {0}</target>
+        <note>{0} are the list of messages, each message starts with new line</note>
+      </trans-unit>
       <trans-unit id="MissingLinkToRegistry">
         <source>CONTAINER2004: Unable to download layer with descriptor '{0}' from registry '{1}' because it does not exist.</source>
         <target state="translated">CONTAINER2004: 無法從登錄 '{1}' 下載描述元為 '{0}' 的層，因為它不存在。</target>
@@ -186,6 +211,51 @@
         <source>CONTAINER1005: Registry push failed.</source>
         <target state="translated">CONTAINER1005: 登錄推送失敗。</target>
         <note>{StrBegin="CONTAINER1005: "}</note>
+      </trans-unit>
+      <trans-unit id="Registry_ConfigUploadStarted">
+        <source>Uploading config to registry at blob '{0}',</source>
+        <target state="translated">上傳設定至位於 blob '{0}' 的登錄，</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Registry_ConfigUploaded">
+        <source>Uploaded config to registry.</source>
+        <target state="translated">已上傳設定至登錄。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Registry_LayerExists">
+        <source>Layer '{0}' already exists.</source>
+        <target state="translated">圖層 '{0}' 已存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Registry_LayerUploadStarted">
+        <source>Uploading layer '{0}' to '{1}'.</source>
+        <target state="translated">上傳圖層 '{0}' 至 '{1}'。</target>
+        <note>{0} is the layer digest, {1} is the registry name</note>
+      </trans-unit>
+      <trans-unit id="Registry_LayerUploaded">
+        <source>Finished uploading layer '{0}' to '{1}'.</source>
+        <target state="translated">已完成上傳圖層 '{0}' 至 '{1}'。</target>
+        <note>{0} is the layer digest, {1} is the registry name</note>
+      </trans-unit>
+      <trans-unit id="Registry_ManifestUploadStarted">
+        <source>Uploading manifest to registry '{0}' as blob '{1}'.</source>
+        <target state="translated">上傳資訊清單至登錄 '{0}' 做為 blob '{1}'。</target>
+        <note>{0} is the registry name</note>
+      </trans-unit>
+      <trans-unit id="Registry_ManifestUploaded">
+        <source>Uploaded manifest to '{0}'.</source>
+        <target state="translated">已上傳資訊清單清單至 '{0}'。</target>
+        <note>{0} is the registry name</note>
+      </trans-unit>
+      <trans-unit id="Registry_TagUploadStarted">
+        <source>Uploading tag '{0}' to '{1}'.</source>
+        <target state="translated">上傳標記 '{0}' 至 '{1}'。</target>
+        <note>{1} is the registry name</note>
+      </trans-unit>
+      <trans-unit id="Registry_TagUploaded">
+        <source>Uploaded tag '{0}' to '{1}'.</source>
+        <target state="translated">已上傳標記 '{0}' 至 '{1}'。</target>
+        <note>{1} is the registry name</note>
       </trans-unit>
       <trans-unit id="RequiredItemsContainsEmptyItems">
         <source>CONTAINER4003: Required '{0}' items contain empty items.</source>

@@ -13,9 +13,9 @@
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AotNotSupported">
-        <source>NETSDK1195: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
-        <target state="translated">NETSDK1195: Le Kit de développement logiciel (SDK) ne prend pas en charge la compilation anticipée. Définissez la propriété PublishAot sur false.</target>
-        <note>{StrBegin="NETSDK1195: "}</note>
+        <source>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
+        <target state="translated">NETSDK1196: le SDK ne prend pas en charge la compilation à l’avance. Définissez la propriété PublishAot sur false.</target>
+        <note>{StrBegin="NETSDK1196: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
@@ -96,6 +96,11 @@
         <source>NETSDK1001: At least one possible target framework must be specified.</source>
         <target state="translated">NETSDK1001: Vous devez spécifier au moins un framework cible.</target>
         <note>{StrBegin="NETSDK1001: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework">
+        <source>NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</source>
+        <target state="translated">NETSDK1205: le package Microsoft.Net.Compilers.Toolset.Framework ne doit pas être défini directement. Définissez la propriété ’BuildWithNetFrameworkHostedCompiler’ sur « true » à la place si vous en avez besoin.</target>
+        <note>{StrBegin="NETSDK1205: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</note>
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
@@ -677,13 +682,13 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="PackageContainsIncorrectlyCasedLocale">
         <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
-        <target state="translated">NETSDK1187 : package {0} {1} a une ressource avec les paramètres régionaux '{2}'. Ces paramètres régionaux ont été normalisés au format standard '{3}' pour éviter les problèmes de casse dans la build. Envisagez d’avertir l’auteur du package de ce problème de casse.</target>
-        <note>Error code is NETSDK1187. 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
+        <target state="translated">NETSDK1187: package {0} {1} a une ressource avec les paramètres régionaux '{2}'. Ces paramètres régionaux ont été normalisés au format standard '{3}' pour éviter les problèmes de casse dans la build. Envisagez d’avertir l’auteur du package de ce problème de casse.</target>
+        <note>{StrBegin="NETSDK1187: "} 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
       </trans-unit>
       <trans-unit id="PackageContainsUnknownLocale">
         <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
         <target state="translated">NETSDK1188: Package {0} {1} a une ressource avec les paramètres régionaux '{2}'. Ces paramètres régionaux ne sont pas reconnus par .NET. Envisagez d’avertir l’auteur du package qu’il semble utiliser des paramètres régionaux non valides.</target>
-        <note>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
+        <note>{StrBegin="NETSDK1188: "} 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
@@ -916,8 +921,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1050: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
-        <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="translated">NETSDK1045: Le kit .NET SDK actuel ne prend pas en charge le ciblage de {0} {1}. Vous devez soit cibler {0} {2} ou une version antérieure, soit utiliser une version du kit .NET SDK qui prend en charge {0} {1}.</target>
+        <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}. Download the .NET SDK from https://aka.ms/dotnet/download</source>
+        <target state="translated">NETSDK1045: le SDK .NET actuel ne prend pas en charge le ciblage {0} {1}.  Ciblez {0} {2} ou inférieur, ou utilisez une version du Kit de développement logiciel (SDK) .NET qui prend en charge {0} {1}. Télécharger le Kit de développement logiciel (SDK) .NET à partir de https://aka.ms/dotnet/download</target>
         <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifier">
@@ -925,15 +930,25 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1139: L'identificateur de la plateforme cible {0} n'a pas été reconnu.</target>
         <note>{StrBegin="NETSDK1139: "}</note>
       </trans-unit>
+      <trans-unit id="UnsupportedVisualStudioVersion">
+        <source>NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</source>
+        <target state="translated">NETSDK1209: la version Visual Studio actuelle ne prend pas en charge le ciblage de {0} {1}.  Ciblez {0} {2} ou une version antérieure, ou utilisez Visual Studio version {3} ou ultérieure</target>
+        <note>{StrBegin="NETSDK1209: "}</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">
+        <source>NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</source>
+        <target state="translated">NETSDK1208: l’identificateur de plateforme cible {0} n’a pas été reconnu. Cela est dû au fait que MSBuildEnableWorkloadResolver a la valeur false, ce qui désactive les charges de travail SDK .NET requises pour cet identificateur. Annulez la définition de cette variable d’environnement ou propriété MSBuild pour activer les charges de travail.</target>
+        <note>{StrBegin="NETSDK1208: "}</note>
+      </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
         <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>
         <target state="translated">NETSDK1107: vous devez disposer de Microsoft.NET.Sdk.WindowsDesktop pour générer des applications de bureau Windows. 'UseWpf' et 'UseWindowsForms' ne sont pas pris en charge par le kit SDK actuel.</target>
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
-      <trans-unit id="UsingPreviewSdk_Info">
+      <trans-unit id="UsingPreviewSdk">
         <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
-        <target state="translated">NETSDK1057 : vous utilisez une version d'aperçu de .NET. Voir : https://aka.ms/dotnet-support-policy</target>
-        <note />
+        <target state="translated">NETSDK1057: vous utilisez une version d'aperçu de .NET. Voir : https://aka.ms/dotnet-support-policy</target>
+        <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">
         <source>NETSDK1131: Producing a managed Windows Metadata component with WinMDExp is not supported when targeting {0}.</source>

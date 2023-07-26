@@ -13,9 +13,9 @@
         <note>{StrBegin="NETSDK1183: "}</note>
       </trans-unit>
       <trans-unit id="AotNotSupported">
-        <source>NETSDK1195: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
-        <target state="translated">NETSDK1195: SDK 不支援提前編譯。請將 PublishAot 屬性設定為 false。</target>
-        <note>{StrBegin="NETSDK1195: "}</note>
+        <source>NETSDK1196: The SDK does not support ahead-of-time compilation. Set the PublishAot property to false.</source>
+        <target state="translated">NETSDK1196: SDK 不支援提前編譯。請將 PublishAot 屬性設定為 false。</target>
+        <note>{StrBegin="NETSDK1196: "}</note>
       </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
@@ -96,6 +96,11 @@
         <source>NETSDK1001: At least one possible target framework must be specified.</source>
         <target state="translated">NETSDK1001: 至少必須指定一個可能的目標架構。</target>
         <note>{StrBegin="NETSDK1001: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotDirectlyReferenceMicrosoftNetCompilersToolsetFramework">
+        <source>NETSDK1205: The Microsoft.Net.Compilers.Toolset.Framework package should not be set directly. Set the property 'BuildWithNetFrameworkHostedCompiler' to 'true' instead if you need it.</source>
+        <target state="translated">NETSDK1205: 不應直接設定 Microsoft.Net.Compilers.Toolset.Framework 套件。而是在您需要時，將屬性 'BuildWithNetFrameworkHostedCompiler' 設為 'true'。</target>
+        <note>{StrBegin="NETSDK1205: "}{Locked="Microsoft.Net.Compilers.Toolset.Framework"}{Locked="BuildWithNetFrameworkHostedCompiler"}</note>
       </trans-unit>
       <trans-unit id="CannotEmbedClsidMapIntoComhost">
         <source>NETSDK1092: The CLSIDMap cannot be embedded on the COM host because adding resources requires that the build be performed on Windows (excluding Nano Server).</source>
@@ -678,12 +683,12 @@ The following are names of parameters or literal values and should not be transl
       <trans-unit id="PackageContainsIncorrectlyCasedLocale">
         <source>NETSDK1187: Package {0} {1} has a resource with the locale '{2}'. This locale has been normalized to the standard format '{3}' to prevent casing issues in the build. Consider notifying the package author about this casing issue.</source>
         <target state="translated">NETSDK1187: 封裝 {0} {1} 具有地區設定 '{2}' 的資源。此地區設定已標準化為標準格式 '{3}' 以避免組建中發生大小寫問題。請考慮通知封裝作者這個大小寫問題。</target>
-        <note>Error code is NETSDK1187. 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
+        <note>{StrBegin="NETSDK1187: "} 0 is a package name, 1 is a package version, 2 is the incorrect locale string, and 3 is the correct locale string.</note>
       </trans-unit>
       <trans-unit id="PackageContainsUnknownLocale">
         <source>NETSDK1188: Package {0} {1} has a resource with the locale '{2}'. This locale is not recognized by .NET. Consider notifying the package author that it appears to be using an invalid locale.</source>
         <target state="translated">NETSDK1188: 封裝 {0} {1} 具有地區設定為 '{2}' 的資源。.NET 無法辨識此地區設定。請考慮通知封裝作者，其似乎使用不正確的地區設定。</target>
-        <note>Error code is NETSDK1188. 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
+        <note>{StrBegin="NETSDK1188: "} 0 is a package name, 1 is a package version, and 2 is the incorrect locale string</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
@@ -916,8 +921,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1050: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
-        <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="translated">NETSDK1045: 目前的 .NET SDK 不支援以 {0} {1} 作為目標。請以 {0} {2} 或更低版本作為目標，或是使用支援 {0} {1} 的 .NET SDK 版本。</target>
+        <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}. Download the .NET SDK from https://aka.ms/dotnet/download</source>
+        <target state="translated">NETSDK1045: 目前的 .NET SDK 不支援將 {0} {1} 設定為目標。請將 {0} {2} 或更低版本設定為目標，或是使用支援 {0} {1} 的 .NET SDK 版本。若要下載 .NET SDK，請至 https://aka.ms/dotnet/download</target>
         <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetPlatformIdentifier">
@@ -925,15 +930,25 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1139: 無法辨識目標平台識別碼 {0}。</target>
         <note>{StrBegin="NETSDK1139: "}</note>
       </trans-unit>
+      <trans-unit id="UnsupportedVisualStudioVersion">
+        <source>NETSDK1209: The current Visual Studio version does not support targeting {0} {1}.  Either target {0} {2} or lower, or use Visual Studio version {3} or higher</source>
+        <target state="translated">NETSDK1209: 目前的 Visual Studio 版本不支援將 {0} {1} 設定為目標。請將 {0} {2} 或更低版本設定為目標，或是使用 Visual Studio 版本 {3} 或更新版本</target>
+        <note>{StrBegin="NETSDK1209: "}</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedTargetPlatformIdentifierWithWorkloadsDisabled">
+        <source>NETSDK1208: The target platform identifier {0} was not recognized. This is because MSBuildEnableWorkloadResolver is set to false which disables .NET SDK Workloads which is required for this identifer. Unset this environment variable or MSBuild property to enable workloads.</source>
+        <target state="translated">NETSDK1208: 無法辨識目標平台識別碼 {0}。這是因為 MSBuildEnableWorkloadResolver 設為 false，這會停用此識別碼所需的 .NET SDK 工作負載。取消設定此環境變數或 MSBuild 屬性以啟用工作負載。</target>
+        <note>{StrBegin="NETSDK1208: "}</note>
+      </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
         <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>
         <target state="translated">NETSDK1107: 需有 Microsoft.NET.Sdk.WindowsDesktop 才能建置 Windows 傳統型應用程式。目前的 SDK 不支援 'UseWpf' 和 'UseWindowsForms'。</target>
         <note>{StrBegin="NETSDK1107: "}</note>
       </trans-unit>
-      <trans-unit id="UsingPreviewSdk_Info">
+      <trans-unit id="UsingPreviewSdk">
         <source>NETSDK1057: You are using a preview version of .NET. See: https://aka.ms/dotnet-support-policy</source>
         <target state="translated">NETSDK1057: 您目前使用的是 .NET 預覽版。請參閱: https://aka.ms/dotnet-support-policy</target>
-        <note />
+        <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="WinMDObjNotSupportedOnTargetFramework">
         <source>NETSDK1131: Producing a managed Windows Metadata component with WinMDExp is not supported when targeting {0}.</source>

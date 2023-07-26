@@ -6,6 +6,9 @@ using System.CommandLine.Parsing;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Text;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Microsoft.NET.Build.Containers;
 
 namespace containerize;
@@ -206,6 +209,12 @@ internal class ContainerizeCommand : RootCommand
             string _ridGraphPath = context.ParseResult.GetValueForOption(RidGraphPathOption)!;
             string _localContainerDaemon = context.ParseResult.GetValueForOption(LocalContainerDaemonOption)!;
             string? _containerUser = context.ParseResult.GetValueForOption(ContainerUserOption);
+
+            //setup basic logging
+            bool traceEnabled = Env.GetEnvironmentVariableAsBool("CONTAINERIZE_TRACE_LOGGING_ENABLED");
+            LogLevel verbosity = traceEnabled ? LogLevel.Trace : LogLevel.Information;
+            using ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddSimpleConsole(c => c.ColorBehavior = LoggerColorBehavior.Disabled).SetMinimumLevel(verbosity));
+
             context.ExitCode = await ContainerBuilder.ContainerizeAsync(
                 _publishDir,
                 _workingDir,
@@ -224,6 +233,7 @@ internal class ContainerizeCommand : RootCommand
                 _ridGraphPath,
                 _localContainerDaemon,
                 _containerUser,
+                loggerFactory,
                 context.GetCancellationToken()).ConfigureAwait(false);
         });
     }

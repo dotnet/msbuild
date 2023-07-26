@@ -77,6 +77,16 @@
         <target state="translated">'{0}' iş yükü bildirimi bağımlılığının '{1}' sürümü, '{3}' [{4}] bildirimi için gereken '{2}' sürümünden düşük</target>
         <note />
       </trans-unit>
+      <trans-unit id="ManifestFromInstallStateNotFound">
+        <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
+        <target state="translated">{1} içinde belirtilen iş yükü bildirimi {0} bulunamadı. Çalışan "dotnet workload repair" bu sorunu çözebilir.</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
+      <trans-unit id="ManifestFromWorkloadSetNotFound">
+        <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
+        <target state="translated">İş yükü sürümünden {1} iş yükü bildirimi {0} yüklenmedi. Çalışan "dotnet workload repair" bu sorunu çözebilir.</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">'{2}' [{3}] bildirimindeki '{1}' iş yükü tarafından uzatılan '{0}' iş yükü bulunamadı</target>
@@ -102,16 +112,6 @@
         <target state="translated">'{0}' yeniden yönlendirme iş yükünde 'redirect-to' dışında anahtarlar var</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifiedManifestNotFound">
-        <source>Specified workload manifest was not found: {0}</source>
-        <target state="translated">Belirtilen iş yükü bildirimi bulunamadı: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SpecifiedWorkloadSetNotFound">
-        <source>Specified workload set was not found: {0}</source>
-        <target state="translated">Belirtilen iş yükü bildirimi bulunamadı: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">{1} uzaklığında beklenmeyen '{0}' belirteci</target>
@@ -135,6 +135,16 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">'{2}' [{3}] bildirimindeki '{1}' iş akışı yeniden yönlendirmesi için '{0}' hedefi çözümlenemedi</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="translated">{1} konumunda belirtilen {0} iş yükü sürümü bulunamadı. Bu iş yükü sürümünü yüklemek için "dotnet workload restore" komutunu çalıştırın.</target>
+        <note>{Locked="dotnet workload restore"}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromInstallStateNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found.</source>
+        <target state="translated">{1} içinde belirtilen iş yükü sürümü {0} bulunamadı.</target>
         <note />
       </trans-unit>
     </body>

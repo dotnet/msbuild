@@ -28,9 +28,24 @@
         <note>{StrBegin="CONTAINER1011: "}</note>
       </trans-unit>
       <trans-unit id="BlobUploadFailed">
-        <source>CONTAINER1001: Failed to upload blob to {0}; received {1} with detail {2}.</source>
-        <target state="translated">CONTAINER1001: échec du chargement de l’objet blob vers {0}; reçu {1} avec des {2} détaillées.</target>
+        <source>CONTAINER1001: Failed to upload blob using {0}; received status code '{1}'.</source>
+        <target state="translated">CONTAINER1001: échec du chargement de l’objet blob à l’aide de {0}; le code d’état «{1}» a été reçu.</target>
         <note>{StrBegin="CONTAINER1001: "}</note>
+      </trans-unit>
+      <trans-unit id="ContainerBuilder_ImageUploadedToLocalDaemon">
+        <source>Pushed container '{0}' to Docker daemon.</source>
+        <target state="translated">Le conteneur «{0}» a été envoyé au démon Docker.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ContainerBuilder_ImageUploadedToRegistry">
+        <source>Pushed container '{0}' to registry '{1}'.</source>
+        <target state="translated">Le conteneur «{0}» a été envoyé au registre «{1}».</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ContainerBuilder_StartBuildingImage">
+        <source>Building image '{0}' with tags '{1}' on top of base image '{2}'.</source>
+        <target state="translated">Génération de l’image «{0}» avec des balises «{1}» au-dessus de l’image de base «{2}».</target>
+        <note />
       </trans-unit>
       <trans-unit id="CouldntDeserializeJsonToken">
         <source>CONTAINER1007: Could not deserialize token from JSON.</source>
@@ -152,6 +167,16 @@
         <target state="translated">CONTAINER1012: le démon Docker local n’est pas disponible, mais un envoi (push) vers un démon Docker local a été demandé. Démarrez le démon et réessayez.</target>
         <note>{StrBegin="CONTAINER1012: "}</note>
       </trans-unit>
+      <trans-unit id="LocalDocker_FailedToGetConfig">
+        <source>Error while reading daemon config: {0}</source>
+        <target state="translated">Erreur lors de la lecture de la configuration du démon : {0}</target>
+        <note>{0} is the exception message that ends with period</note>
+      </trans-unit>
+      <trans-unit id="LocalDocker_LocalDaemonErrors">
+        <source>The daemon server reported errors: {0}</source>
+        <target state="translated">Le serveur démon a signalé des erreurs : {0}</target>
+        <note>{0} are the list of messages, each message starts with new line</note>
+      </trans-unit>
       <trans-unit id="MissingLinkToRegistry">
         <source>CONTAINER2004: Unable to download layer with descriptor '{0}' from registry '{1}' because it does not exist.</source>
         <target state="translated">CONTAINER2004: impossible de télécharger la couche avec le descripteur '{0}' à partir du Registre '{1}', car elle n’existe pas.</target>
@@ -186,6 +211,51 @@
         <source>CONTAINER1005: Registry push failed.</source>
         <target state="translated">CONTAINER1005: échec de l’envoi (push) du Registre.</target>
         <note>{StrBegin="CONTAINER1005: "}</note>
+      </trans-unit>
+      <trans-unit id="Registry_ConfigUploadStarted">
+        <source>Uploading config to registry at blob '{0}',</source>
+        <target state="translated">Chargement de la configuration dans le Registre sur l’objet blob «{0}»,</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Registry_ConfigUploaded">
+        <source>Uploaded config to registry.</source>
+        <target state="translated">Configuration chargée dans le Registre.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Registry_LayerExists">
+        <source>Layer '{0}' already exists.</source>
+        <target state="translated">La couche '{0}' existe déjà.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Registry_LayerUploadStarted">
+        <source>Uploading layer '{0}' to '{1}'.</source>
+        <target state="translated">Chargement de la couche «{0}» vers «{1}».</target>
+        <note>{0} is the layer digest, {1} is the registry name</note>
+      </trans-unit>
+      <trans-unit id="Registry_LayerUploaded">
+        <source>Finished uploading layer '{0}' to '{1}'.</source>
+        <target state="translated">Fin du chargement de la couche «{0}» vers «{1}».</target>
+        <note>{0} is the layer digest, {1} is the registry name</note>
+      </trans-unit>
+      <trans-unit id="Registry_ManifestUploadStarted">
+        <source>Uploading manifest to registry '{0}' as blob '{1}'.</source>
+        <target state="translated">Chargement du manifeste dans le Registre '{0}' en tant qu’objet blob '{1}'.</target>
+        <note>{0} is the registry name</note>
+      </trans-unit>
+      <trans-unit id="Registry_ManifestUploaded">
+        <source>Uploaded manifest to '{0}'.</source>
+        <target state="translated">Manifeste chargé dans '{0}'.</target>
+        <note>{0} is the registry name</note>
+      </trans-unit>
+      <trans-unit id="Registry_TagUploadStarted">
+        <source>Uploading tag '{0}' to '{1}'.</source>
+        <target state="translated">Chargement de la balise «{0}» vers «{1}».</target>
+        <note>{1} is the registry name</note>
+      </trans-unit>
+      <trans-unit id="Registry_TagUploaded">
+        <source>Uploaded tag '{0}' to '{1}'.</source>
+        <target state="translated">Balise «{0}» chargée sur «{1}».</target>
+        <note>{1} is the registry name</note>
       </trans-unit>
       <trans-unit id="RequiredItemsContainsEmptyItems">
         <source>CONTAINER4003: Required '{0}' items contain empty items.</source>

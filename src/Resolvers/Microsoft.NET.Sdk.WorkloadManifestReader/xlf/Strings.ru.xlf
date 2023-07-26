@@ -77,6 +77,16 @@
         <target state="translated">Зависимость манифеста рабочей нагрузки "{0}" версии "{1}" ниже версии "{2}", необходимой для манифеста "{3}" [{4}]</target>
         <note />
       </trans-unit>
+      <trans-unit id="ManifestFromInstallStateNotFound">
+        <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
+        <target state="translated">Не найден манифест рабочей нагрузки {0}, указанный в {1}. Выполнение команды "dotnet workload repair" может устранить эту проблему.</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
+      <trans-unit id="ManifestFromWorkloadSetNotFound">
+        <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
+        <target state="translated">Манифест рабочей нагрузки {0} из версии рабочей нагрузки {1} не установлен. Выполнение команды "dotnet workload repair" может устранить эту проблему.</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Не удалось найти рабочую нагрузку "{0}", расширенную рабочей нагрузкой "{1}" в манифесте "{2}" [{3}]</target>
@@ -102,16 +112,6 @@
         <target state="translated">Перенаправление рабочей нагрузки "{0}" содержит ключи, отличные от "redirect-to"</target>
         <note />
       </trans-unit>
-      <trans-unit id="SpecifiedManifestNotFound">
-        <source>Specified workload manifest was not found: {0}</source>
-        <target state="translated">Указанный манифест рабочей нагрузки не найден: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SpecifiedWorkloadSetNotFound">
-        <source>Specified workload set was not found: {0}</source>
-        <target state="translated">Указанный набор рабочей нагрузки не найден: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">Непредвиденный токен "{0}" в смещении {1}</target>
@@ -135,6 +135,16 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Неразрешенный целевой объект "{0}" для перенаправления рабочей нагрузки "{1}" в манифесте "{2}" [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="translated">Версия рабочей нагрузки {0}, указанная в {1}, не найдена. Запустите команду "dotnet workload restore", чтобы установить эту версию рабочей нагрузки.</target>
+        <note>{Locked="dotnet workload restore"}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromInstallStateNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found.</source>
+        <target state="translated">Не найдена версия рабочей нагрузки {0}, указанная в {1}.</target>
         <note />
       </trans-unit>
     </body>

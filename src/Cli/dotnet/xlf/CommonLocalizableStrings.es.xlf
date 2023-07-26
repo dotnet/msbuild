@@ -99,7 +99,7 @@ Si usa zsh, puede agregarlo a su perfil mediante la ejecución del comando sigui
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.zprofile
 # Agregue las herramientas del SDK de .NET Core
-exporte PATH="$PATH:{0}"
+export PATH="$PATH:{0}"
 EOF
 
 Y ejecute "zsh -l" para que esté disponible para la sesión actual.

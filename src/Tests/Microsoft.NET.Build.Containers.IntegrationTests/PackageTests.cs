@@ -18,11 +18,14 @@ public class PackageTests
     {
         IReadOnlyList<string> knownPackageReferences = new List<string>()
         {
-            "System.CommandLine"
+            "System.CommandLine",
+            "Microsoft.Extensions.Logging",
+            "Microsoft.Extensions.Logging.Console"
         };
         IReadOnlyList<string> knownProjectReferences = new List<string>()
         {
-            "..\\Microsoft.NET.Build.Containers\\Microsoft.NET.Build.Containers.csproj"
+            "..\\Microsoft.NET.Build.Containers\\Microsoft.NET.Build.Containers.csproj",
+            "..\\..\\Cli\\Microsoft.DotNet.Cli.Utils\\Microsoft.DotNet.Cli.Utils.csproj"
         };
 
         string projectFilePath = Path.Combine(TestContext.Current.TestExecutionDirectory, "Container", "ProjectFiles", "containerize.csproj");
@@ -44,7 +47,9 @@ public class PackageTests
             "Microsoft.Build.Utilities.Core",
             "Microsoft.CodeAnalysis.PublicApiAnalyzers",
             "Nuget.Packaging",
-            "Valleysoft.DockerCredsProvider"
+            "Valleysoft.DockerCredsProvider",
+            "Microsoft.Extensions.Logging",
+            "Microsoft.Extensions.Logging.Abstractions"
         };
         IReadOnlyList<string> knownProjectReferences = new List<string>()
         {
@@ -76,6 +81,19 @@ public class PackageTests
               "containerize/containerize.dll",
               "containerize/containerize.runtimeconfig.json",
               "containerize/Microsoft.DotNet.Cli.Utils.dll",
+              "containerize/Microsoft.Extensions.Configuration.Abstractions.dll",
+              "containerize/Microsoft.Extensions.Configuration.Binder.dll",
+              "containerize/Microsoft.Extensions.Configuration.dll",
+              "containerize/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+              "containerize/Microsoft.Extensions.DependencyInjection.dll",
+              "containerize/Microsoft.Extensions.DependencyModel.dll",
+              "containerize/Microsoft.Extensions.Logging.Abstractions.dll",
+              "containerize/Microsoft.Extensions.Logging.Configuration.dll",
+              "containerize/Microsoft.Extensions.Logging.Console.dll",
+              "containerize/Microsoft.Extensions.Logging.dll",
+              "containerize/Microsoft.Extensions.Options.ConfigurationExtensions.dll",
+              "containerize/Microsoft.Extensions.Options.dll",
+              "containerize/Microsoft.Extensions.Primitives.dll",
               "containerize/Microsoft.NET.Build.Containers.dll",
               "containerize/Newtonsoft.Json.dll",
               "containerize/NuGet.Common.dll",
@@ -92,6 +110,13 @@ public class PackageTests
               "Icon.png",
               "Microsoft.NET.Build.Containers.nuspec",
               "README.md",
+              "tasks/net472/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+              "tasks/net472/Microsoft.Extensions.DependencyInjection.dll",
+              "tasks/net472/Microsoft.Extensions.DependencyModel.dll",
+              "tasks/net472/Microsoft.Extensions.Logging.Abstractions.dll",
+              "tasks/net472/Microsoft.Extensions.Logging.dll",
+              "tasks/net472/Microsoft.Extensions.Options.dll",
+              "tasks/net472/Microsoft.Extensions.Primitives.dll",
               "tasks/net472/Microsoft.NET.Build.Containers.dll",
               "tasks/net472/Newtonsoft.Json.dll",
               "tasks/net472/NuGet.Common.dll",
@@ -105,6 +130,13 @@ public class PackageTests
               "tasks/net472/NuGet.Protocol.dll",
               "tasks/net472/NuGet.Versioning.dll",
               "tasks/net7.0/Microsoft.DotNet.Cli.Utils.dll",
+              "tasks/net7.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+              "tasks/net7.0/Microsoft.Extensions.DependencyInjection.dll",
+              "tasks/net7.0/Microsoft.Extensions.DependencyModel.dll",
+              "tasks/net7.0/Microsoft.Extensions.Logging.Abstractions.dll",
+              "tasks/net7.0/Microsoft.Extensions.Logging.dll",
+              "tasks/net7.0/Microsoft.Extensions.Options.dll",
+              "tasks/net7.0/Microsoft.Extensions.Primitives.dll",
               "tasks/net7.0/Microsoft.NET.Build.Containers.deps.json",
               "tasks/net7.0/Microsoft.NET.Build.Containers.dll",
               "tasks/net7.0/Newtonsoft.Json.dll",
@@ -121,13 +153,16 @@ public class PackageTests
               "tasks/net7.0/Valleysoft.DockerCredsProvider.dll"
         };
 
-        string packageFilePath = Path.Combine(TestContext.Current.TestExecutionDirectory, "Container", "package", $"Microsoft.NET.Build.Containers.{Product.Version}.nupkg");
+        (string packageFilePath, string packageVersion) = ToolsetUtils.GetContainersPackagePath();
         using ZipArchive archive = new(File.OpenRead(packageFilePath), ZipArchiveMode.Read, false);
 
-        archive.Entries
-                .Select(e => e.FullName)
-                .Where(e => !e.StartsWith(ignoredZipFileEntriesPrefix, StringComparison.InvariantCultureIgnoreCase))
+        IEnumerable<string> actualEntries = archive.Entries
+            .Select(e => e.FullName)
+            .Where(e => !e.StartsWith(ignoredZipFileEntriesPrefix, StringComparison.InvariantCultureIgnoreCase))
+            .OrderBy(e => e);
+
+        actualEntries
                 .Should()
-                .BeEquivalentTo(packageContents, $"Microsoft.NET.Build.Containers.{Product.Version}.nupkg content differs from expected. Please add the entry to the list, if the addition is expected.");
+                .BeEquivalentTo(packageContents, $"{Path.GetFileName(packageFilePath)} content differs from expected. Please add the entry to the list, if the addition is expected.");
     }
 }

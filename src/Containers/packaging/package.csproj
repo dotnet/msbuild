@@ -41,7 +41,7 @@
 
     <Target Name="PreparePackageReleaseNotesFromFile" BeforeTargets="GenerateNuspec">
         <PropertyGroup>
-            <PackageReleaseNotesFile>../docs/ReleaseNotes/v7.0.300.md</PackageReleaseNotesFile>
+            <PackageReleaseNotesFile>../docs/ReleaseNotes/v7.0.400.md</PackageReleaseNotesFile>
             <PackageReleaseNotes>$([System.IO.File]::ReadAllText($(PackageReleaseNotesFile)))</PackageReleaseNotes>
         </PropertyGroup>
     </Target>
@@ -53,7 +53,8 @@
         <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">
             <NecessaryNet472ContainerTaskDependencies Include="@(_AllNet472ContainerTaskDependencies)" Condition="(
                                 $([MSBuild]::ValueOrDefault('%(_AllNet472ContainerTaskDependencies.NuGetPackageId)', '').Contains('NuGet')) or
-                                $([MSBuild]::ValueOrDefault('%(_AllNet472ContainerTaskDependencies.NuGetPackageId)', '').Contains('Newtonsoft'))
+                                $([MSBuild]::ValueOrDefault('%(_AllNet472ContainerTaskDependencies.NuGetPackageId)', '').Contains('Newtonsoft')) or
+                                $([MSBuild]::ValueOrDefault('%(_AllNet472ContainerTaskDependencies.NuGetPackageId)', '').Contains('Microsoft.Extensions'))
                             ) and
                             %(_AllNet472ContainerTaskDependencies.NuGetIsFrameworkReference) != true" />
             
@@ -65,6 +66,7 @@
             <Content Include="$(OutDir)Microsoft.DotNet.Cli.Utils.dll" Pack="true" PackagePath="containerize/" />
             <Content Include="$(OutDir)System.CommandLine.dll" Pack="true" PackagePath="containerize/" />
             <Content Include="$(OutDir)Valleysoft.DockerCredsProvider.dll" Pack="true" PackagePath="containerize/" />
+            <Content Include="$(OutDir)Microsoft.Extensions.*.dll" Pack="true" PackagePath="containerize/" />
             <Content Include="@(ContainerLibraryOutput)" Pack="true" PackagePath="containerize/" />
 
             <!-- net472 tasks -->
@@ -80,7 +82,8 @@
              <NecessaryNetContainerTaskDependencies Include="@(_AllNetContainerTaskDependencies)" Condition="(
                                 $([MSBuild]::ValueOrDefault('%(_AllNetContainerTaskDependencies.NuGetPackageId)', '').Contains('NuGet')) or
                                 $([MSBuild]::ValueOrDefault('%(_AllNetContainerTaskDependencies.NuGetPackageId)', '').Contains('Newtonsoft')) or
-                                $([MSBuild]::ValueOrDefault('%(_AllNetContainerTaskDependencies.NuGetPackageId)', '').Contains('Valleysoft'))
+                                $([MSBuild]::ValueOrDefault('%(_AllNetContainerTaskDependencies.NuGetPackageId)', '').Contains('Valleysoft')) or
+                                $([MSBuild]::ValueOrDefault('%(_AllNetContainerTaskDependencies.NuGetPackageId)', '').Contains('Microsoft.Extensions'))
                             ) and
                             %(_AllNetContainerTaskDependencies.NuGetIsFrameworkReference) != true" />
 

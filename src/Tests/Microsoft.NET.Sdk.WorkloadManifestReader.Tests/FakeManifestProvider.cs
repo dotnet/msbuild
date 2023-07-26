@@ -26,15 +26,15 @@ namespace ManifestReaderTests
             _filePaths = filePaths;
         }
 
-        public IEnumerable<string> GetManifestDirectories() => throw new NotImplementedException();
-
         public IEnumerable<ReadableWorkloadManifest> GetManifests()
         {
             foreach (var filePath in _filePaths)
             {
                 yield return new(
                     Path.GetFileNameWithoutExtension(filePath.manifest),
+                    Path.GetDirectoryName(filePath.manifest)!,
                     filePath.manifest,
+                    "8.0.100",
                     () => new FileStream(filePath.manifest, FileMode.Open, FileAccess.Read),
                     () => filePath.localizationCatalog != null ? new FileStream(filePath.localizationCatalog, FileMode.Open, FileAccess.Read) : null
                 );
@@ -49,12 +49,13 @@ namespace ManifestReaderTests
         readonly List<(string id, byte[] content)> _manifests = new List<(string, byte[])>();
 
         public void Add(string id, string content) => _manifests.Add((id, Encoding.UTF8.GetBytes(content)));
-        public IEnumerable<string> GetManifestDirectories() => throw new NotImplementedException();
 
         public IEnumerable<ReadableWorkloadManifest> GetManifests()
             => _manifests.Select(m => new ReadableWorkloadManifest(
                 m.id,
+                $@"C:\fake\{m.id}",
                 $@"C:\fake\{m.id}\WorkloadManifest.json",
+                "8.0.100",
                 (Func<Stream>)(() => new MemoryStream(m.content)),
                 (Func<Stream?>)(() => null)
             ));

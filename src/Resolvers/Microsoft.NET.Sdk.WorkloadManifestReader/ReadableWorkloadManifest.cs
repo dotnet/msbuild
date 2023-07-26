@@ -14,17 +14,24 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     public class ReadableWorkloadManifest
     {
         public string ManifestId { get; }
+
+        public string ManifestDirectory { get; }
+
         public string ManifestPath { get; }
+
+        public string ManifestFeatureBand { get; }
 
         readonly Func<Stream> _openManifestStreamFunc;
 
 
         readonly Func<Stream?> _openLocalizationStream;
 
-        public ReadableWorkloadManifest(string manifestId, string manifestPath, Func<Stream> openManifestStreamFunc, Func<Stream?> openLocalizationStream)
+        public ReadableWorkloadManifest(string manifestId, string manifestDirectory, string manifestPath, string manifestFeatureBand, Func<Stream> openManifestStreamFunc, Func<Stream?> openLocalizationStream)
         {
             ManifestId = manifestId;
             ManifestPath = manifestPath;
+            ManifestDirectory = manifestDirectory;
+            ManifestFeatureBand = manifestFeatureBand;
             _openManifestStreamFunc = openManifestStreamFunc;
             _openLocalizationStream = openLocalizationStream;
         }

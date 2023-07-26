@@ -103,6 +103,8 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
                 return null;
             }
 
+            xunitProject.TryGetMetadata("ExcludeAdditionalParameters", out string ExcludeAdditionalParameters);
+
             xunitProject.TryGetMetadata("Arguments", out string arguments);
 
             string assemblyName = Path.GetFileName(targetPath);
@@ -129,6 +131,12 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
             string testExecutionDirectory = netFramework ? "-e DOTNET_SDK_TEST_EXECUTION_DIRECTORY=%TestExecutionDirectory%" : IsPosixShell ? "-testExecutionDirectory $TestExecutionDirectory"  : "-testExecutionDirectory %TestExecutionDirectory%";
 
             string msbuildAdditionalSdkResolverFolder = netFramework ? "-e DOTNET_SDK_TEST_MSBUILDSDKRESOLVER_FOLDER=%HELIX_CORRELATION_PAYLOAD%\\r" : IsPosixShell ? "" : "-msbuildAdditionalSdkResolverFolder %HELIX_CORRELATION_PAYLOAD%\\r";
+
+            if (ExcludeAdditionalParameters.Equals("true"))
+            {
+                testExecutionDirectory = "";
+                msbuildAdditionalSdkResolverFolder = "";
+            }
 
             var scheduler = new AssemblyScheduler(methodLimit: !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("TestFullMSBuild")) ? 32 : 16);
             var assemblyPartitionInfos = scheduler.Schedule(targetPath, netFramework: netFramework);

@@ -14,6 +14,10 @@ mkdir $TestExecutionDirectory
 export DOTNET_CLI_HOME=$TestExecutionDirectory/.dotnet
 cp -a $HELIX_CORRELATION_PAYLOAD/t/TestExecutionDirectoryFiles/. $TestExecutionDirectory/
 
+export DOTNET_SDK_TEST_EXECUTION_DIRECTORY=$TestExecutionDirectory
+export DOTNET_SDK_TEST_MSBUILDSDKRESOLVER_FOLDER=$HELIX_CORRELATION_PAYLOAD/r
+export DOTNET_SDK_TEST_ASSETS_DIRECTORY=$TestExecutionDirectory/Assets
+
 # call dotnet new so the first run message doesn't interfere with the first test
 dotnet new --debug:ephemeral-hive
 # We downloaded a special zip of files to the .nuget folder so add that as a source
