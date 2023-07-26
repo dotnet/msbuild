@@ -27,11 +27,6 @@
         <target state="translated">Выход из команды с кодом "{0}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="translated">MSB6005: задачей предпринята попытка вести журнал до своей инициализации. Сообщение: {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
-      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: не удалось найти файл манифеста платформы по адресу "{0}".</target>

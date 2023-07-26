@@ -20,7 +20,7 @@ namespace Microsoft.Build.Collections
     /// Thus this is an omission from the BCL.
     /// </remarks>
     /// <typeparam name="T">Type of element in the collection</typeparam>
-    internal class ReadOnlyCollection<T> : ICollection<T>, ICollection
+    internal sealed class ReadOnlyCollection<T> : ICollection<T>, ICollection
     {
         /// <summary>
         /// Backing live enumerable.

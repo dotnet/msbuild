@@ -1764,8 +1764,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 // The null logger has no effect on minimum verbosity.
                 Execution.BuildManager.NullLogger => null,
 
-                // The live logger consumes only high priority messages.
-                _ => innerLogger.GetType().FullName == "Microsoft.Build.Logging.LiveLogger.LiveLogger"
+                // The terminal logger consumes only high priority messages.
+                _ => innerLogger.GetType().FullName == "Microsoft.Build.Logging.TerminalLogger.TerminalLogger"
                     ? MessageImportance.High
                     // If the logger is not on our allow list, there are no importance guarantees. Fall back to "any importance".
                     : MessageImportance.Low,
