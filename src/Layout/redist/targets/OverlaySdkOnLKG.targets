@@ -75,7 +75,7 @@
 
     <!-- Create a rollback file for installing workloads during the build  -->
     <WriteLinesToFile File="$(RedistLayoutPath)TestRollback.json"
-                      Condition="!Exists('$(RedistLayoutPath)TestRollback.json')"
+                      Overwrite="true"
                       Lines="{;@(WasmWorkloads->'&quot;%(Identity)&quot;: &quot;%(Version)&quot;', ', ');}"/>
 
     <OverrideAndCreateBundledNETCoreAppPackageVersion
