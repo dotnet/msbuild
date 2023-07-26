@@ -15,6 +15,7 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 
 #nullable disable
@@ -23,6 +24,26 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public class BuildManager_Logging_Tests : IDisposable
     {
+        private string mainProject = @"
+<Project>
+
+  <Target Name=`MainTarget`>
+    <MSBuild Projects=`{0}` Targets=`ChildTarget` />
+  </Target>
+
+</Project>";
+
+        private string childProjectWithCustomBuildEvent = $@"
+<Project>
+
+    <UsingTask TaskName=""CustomBuildEventTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
+    <Target Name=`ChildTarget`>
+        <CustomBuildEventTask />
+    </Target>
+
+</Project>";
+
+
         /// <summary>
         /// The mock logger for testing.
         /// </summary>
@@ -57,34 +78,22 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _env = TestEnvironment.Create(output);
         }
 
-        [Fact]
-        public void Build_WithCustomBuildArgs_EnvVariableSet()
+        [DotNetOnlyTheory]
+        [InlineData("1", true)]
+        [InlineData("0", false)]
+        [InlineData("", true)]
+        public void Build_WithCustomBuildArgs_NetCore(string envVariableValue, bool isWarningExpected)
         {
-            const string mainProject = @"
-<Project>
-
-  <Target Name=`MainTarget`>
-    <MSBuild Projects=`{0}` Targets=`ChildTarget` />
-  </Target>
-
-</Project>";
-
-            string childProjectWithCustomBuildEvent = $@"
-<Project>
-
-    <UsingTask TaskName=""CustomBuildEventTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
-    <Target Name=`ChildTarget`>
-        <CustomBuildEventTask />
-    </Target>
-
-</Project>";
-
             var testFiles = _env.CreateTestProjectWithFiles(string.Empty, new[] { "main", "child1" }, string.Empty);
 
             ILoggingService service = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(_logger);
 
-            _env.SetEnvironmentVariable("MSBUILDCUSTOMBUILDEVENTWARNING", "1");
+            if (!string.IsNullOrEmpty(envVariableValue))
+            {
+                _env.SetEnvironmentVariable("MSBUILDCUSTOMBUILDEVENTWARNING", envVariableValue);
+            }
+            _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
 
             _buildManager.BeginBuild(BuildParameters);
 
@@ -111,8 +120,73 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
                 var allEvents = _logger.AllBuildEvents;
 
-                allEvents.OfType<BuildWarningEventArgs>().ShouldHaveSingleItem();
-                allEvents.First(x => x is BuildWarningEventArgs).Message.ShouldContain("MyCustomBuildEventArgs");
+                if (isWarningExpected)
+                {
+                    allEvents.OfType<BuildWarningEventArgs>().ShouldHaveSingleItem();
+                    allEvents.First(x => x is BuildWarningEventArgs).Message.ShouldContain("MyCustomBuildEventArgs");
+                }
+                else
+                {
+                    allEvents.OfType<BuildWarningEventArgs>().ShouldBeEmpty();
+                }
+            }
+            finally
+            {
+                _buildManager.EndBuild();
+            }
+        }
+
+        [Theory]
+        [InlineData("1", true)]
+        [InlineData("0", false)]
+        [InlineData("", false)]
+        public void Build_WithCustomBuildArgs_Framework(string envVariableValue, bool isWarningExpected)
+        {
+            var testFiles = _env.CreateTestProjectWithFiles(string.Empty, new[] { "main", "child1" }, string.Empty);
+
+            ILoggingService service = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            service.RegisterLogger(_logger);
+
+            if (!string.IsNullOrEmpty(envVariableValue))
+            {
+                _env.SetEnvironmentVariable("MSBUILDCUSTOMBUILDEVENTWARNING", envVariableValue);
+            }
+            _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
+
+            _buildManager.BeginBuild(BuildParameters);
+
+            try
+            {
+                var child1ProjectPath = testFiles.CreatedFiles[1];
+                var cleanedUpChildContents = CleanupFileContents(childProjectWithCustomBuildEvent);
+                File.WriteAllText(child1ProjectPath, cleanedUpChildContents);
+
+                var mainProjectPath = testFiles.CreatedFiles[0];
+                var cleanedUpMainContents = CleanupFileContents(string.Format(mainProject, child1ProjectPath));
+                File.WriteAllText(mainProjectPath, cleanedUpMainContents);
+
+                var buildRequestData = new BuildRequestData(
+                   mainProjectPath,
+                   new Dictionary<string, string>(),
+                   MSBuildConstants.CurrentToolsVersion,
+                   new[] { "MainTarget" },
+                   null);
+
+                var submission = _buildManager.PendBuildRequest(buildRequestData);
+
+                var result = submission.Execute();
+
+                var allEvents = _logger.AllBuildEvents;
+
+                if (isWarningExpected)
+                {
+                    allEvents.OfType<BuildWarningEventArgs>().ShouldHaveSingleItem();
+                    allEvents.First(x => x is BuildWarningEventArgs).Message.ShouldContain("MyCustomBuildEventArgs");
+                }
+                else
+                {
+                    allEvents.OfType<BuildWarningEventArgs>().ShouldBeEmpty();
+                }
             }
             finally
             {

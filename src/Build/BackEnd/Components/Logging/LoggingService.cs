@@ -908,7 +908,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Serializing unknown CustomEvent which has to use unsecure BinaryFormatter by TranslateDotNet<T>
+        /// Serializing unknown CustomEvent which has to use unsecure BinaryFormatter by TranslateDotNet.
         /// Since BinaryFormatter is going to be deprecated, log warning so users can use new Extended*EventArgs instead of custom
         /// EventArgs derived from existing EventArgs.
         /// </summary>
@@ -919,10 +919,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
             {
                 BuildEventArgs buildEvent = loggingPacket.NodeBuildEvent.Value.Value;
-
                 BuildEventContext buildEventContext = buildEvent?.BuildEventContext ?? BuildEventContext.Invalid;
 
-                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string warningCode, out string helpKeyword, "DeprecatedEventSerialization",
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                    out string warningCode,
+                    out string helpKeyword,
+                    "DeprecatedEventSerialization",
                     buildEvent?.GetType().Name ?? string.Empty);
 
                 BuildWarningEventArgs warning = new(
