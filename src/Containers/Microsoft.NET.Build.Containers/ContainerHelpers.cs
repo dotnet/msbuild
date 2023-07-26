@@ -3,6 +3,7 @@
 
 #if NETFRAMEWORK
 using System;
+using System.Linq;
 #endif
 #if NET
 using System.Diagnostics.CodeAnalysis;
@@ -279,7 +280,13 @@ public static class ContainerHelpers
                 throw new ArgumentException(Resources.Resource.GetString(nameof(Strings.InvalidImageName)));
             }
             var loweredImageName = containerImageName.ToLowerInvariant();
-            normalizedImageName = imageNameCharacters.Replace(loweredImageName, "-");
+            var potentialNormalizedName = imageNameCharacters.Replace(loweredImageName, "-");
+            if (potentialNormalizedName.All(c => c == '-'))
+            {
+                // The name was normalized to all dashes, so there was nothing recoverable. We should throw.
+                throw new ArgumentException(Resources.Resource.GetString(nameof(Strings.InvalidImageName)));
+            }
+            normalizedImageName = potentialNormalizedName;
             return false;
         }
     }

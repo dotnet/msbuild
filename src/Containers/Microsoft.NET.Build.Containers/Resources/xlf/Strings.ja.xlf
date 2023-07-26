@@ -98,8 +98,8 @@
         <note>{StrBegin="CONTAINER2015: "}</note>
       </trans-unit>
       <trans-unit id="InvalidImageName">
-        <source>CONTAINER2005: The first character of the image name must be a lowercase letter or a digit.</source>
-        <target state="translated">CONTAINER2005: イメージ名の最初の文字は、小文字または数字である必要があります。</target>
+        <source>CONTAINER2005: The first character of the image name must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</source>
+        <target state="needs-review-translation">CONTAINER2005: イメージ名の最初の文字は、小文字または数字である必要があります。</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_Number">
