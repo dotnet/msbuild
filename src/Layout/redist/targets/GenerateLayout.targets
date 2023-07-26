@@ -1,4 +1,16 @@
 <Project>
+
+  <Target Name="PublishPortableRuntimeIdentifierGraph"
+          BeforeTargets="Build">
+    
+      <UpdatePortableRuntimeIdentifierGraph
+        InputFile="PortableRuntimeIdentifierGraph.json"
+        OutputFile="$(OutputPath)/PortableRuntimeIdentifierGraph.json"
+        AdditionalRuntimeIdentifiers="@(AdditionalRuntimeIdentifier)"
+        />
+
+  </Target>
+
   <Target Name="PublishVersionFile"
           BeforeTargets="Build">
 
