@@ -136,7 +136,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("1", true)]
         [InlineData("0", false)]
         [InlineData("", false)]
