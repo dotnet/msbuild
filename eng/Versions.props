@@ -62,18 +62,18 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/nuget/nuget.client -->
-    <NuGetBuildTasksPackageVersion>6.8.0-preview.1.42</NuGetBuildTasksPackageVersion>
-    <NuGetBuildTasksConsolePackageVersion>6.8.0-preview.1.42</NuGetBuildTasksConsolePackageVersion>
+    <NuGetBuildTasksPackageVersion>6.8.0-preview.1.44</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksConsolePackageVersion>6.8.0-preview.1.44</NuGetBuildTasksConsolePackageVersion>
     <NuGetLocalizationPackageVersion>6.0.0-rc.278</NuGetLocalizationPackageVersion>
-    <NuGetBuildTasksPackPackageVersion>6.8.0-preview.1.42</NuGetBuildTasksPackPackageVersion>
-    <NuGetCommandLineXPlatPackageVersion>6.8.0-preview.1.42</NuGetCommandLineXPlatPackageVersion>
-    <NuGetProjectModelPackageVersion>6.8.0-preview.1.42</NuGetProjectModelPackageVersion>
-    <MicrosoftBuildNuGetSdkResolverPackageVersion>6.8.0-preview.1.42</MicrosoftBuildNuGetSdkResolverPackageVersion>
-    <NuGetCommonPackageVersion>6.8.0-preview.1.42</NuGetCommonPackageVersion>
-    <NuGetConfigurationPackageVersion>6.8.0-preview.1.42</NuGetConfigurationPackageVersion>
-    <NuGetFrameworksPackageVersion>6.8.0-preview.1.42</NuGetFrameworksPackageVersion>
-    <NuGetPackagingPackageVersion>6.8.0-preview.1.42</NuGetPackagingPackageVersion>
-    <NuGetVersioningPackageVersion>6.8.0-preview.1.42</NuGetVersioningPackageVersion>
+    <NuGetBuildTasksPackPackageVersion>6.8.0-preview.1.44</NuGetBuildTasksPackPackageVersion>
+    <NuGetCommandLineXPlatPackageVersion>6.8.0-preview.1.44</NuGetCommandLineXPlatPackageVersion>
+    <NuGetProjectModelPackageVersion>6.8.0-preview.1.44</NuGetProjectModelPackageVersion>
+    <MicrosoftBuildNuGetSdkResolverPackageVersion>6.8.0-preview.1.44</MicrosoftBuildNuGetSdkResolverPackageVersion>
+    <NuGetCommonPackageVersion>6.8.0-preview.1.44</NuGetCommonPackageVersion>
+    <NuGetConfigurationPackageVersion>6.8.0-preview.1.44</NuGetConfigurationPackageVersion>
+    <NuGetFrameworksPackageVersion>6.8.0-preview.1.44</NuGetFrameworksPackageVersion>
+    <NuGetPackagingPackageVersion>6.8.0-preview.1.44</NuGetPackagingPackageVersion>
+    <NuGetVersioningPackageVersion>6.8.0-preview.1.44</NuGetVersioningPackageVersion>
     <NuGetPackagingVersion>$(NuGetPackagingPackageVersion)</NuGetPackagingVersion>
     <NuGetProjectModelVersion>$(NuGetProjectModelPackageVersion)</NuGetProjectModelVersion>
   </PropertyGroup>
