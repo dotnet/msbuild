@@ -1,22 +1,18 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using FluentAssertions;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.TemplateEngine.TestHelper;
-using Xunit.Abstractions;
+using TESharedTestOutputHelper = Microsoft.TemplateEngine.TestHelper.SharedTestOutputHelper;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     public class TemplateDiscoveryTool : IDisposable
     {
         private readonly string dotnetNewTestExecutionDir;
-        private readonly SharedTestOutputHelper testOutputHelper;
+        private readonly TESharedTestOutputHelper testOutputHelper;
 
         public TemplateDiscoveryTool(IMessageSink messageSink)
         {
-            testOutputHelper = new SharedTestOutputHelper(messageSink);
+            testOutputHelper = new TESharedTestOutputHelper(messageSink);
             string home = Utilities.CreateTemporaryFolder("home");
             dotnetNewTestExecutionDir = Utilities.GetTestExecutionTempFolder();
             string toolManifestPath = Path.Combine(dotnetNewTestExecutionDir, @".config\dotnet-tools.json");

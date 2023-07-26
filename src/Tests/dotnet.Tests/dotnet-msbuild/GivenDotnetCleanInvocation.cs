@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Tools.Clean;
 using Microsoft.NET.TestFramework;
 using Xunit;
+using CLICleanCommand = Microsoft.DotNet.Tools.Clean.CleanCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -20,7 +21,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         public void ItAddsProjectToMsbuildInvocation()
         {
             var msbuildPath = "<msbuildpath>";
-            CleanCommand.FromArgs(new string[] { "<project>" }, msbuildPath)
+            CLICleanCommand.FromArgs(new string[] { "<project>" }, msbuildPath)
                 .GetArgumentsToMSBuild().Should().Be("-maxcpucount -verbosity:m -verbosity:normal <project> -target:Clean");
         }
 
@@ -46,7 +47,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Replace("<cwd>", WorkingDirectory);
 
                 var msbuildPath = "<msbuildpath>";
-                CleanCommand.FromArgs(args, msbuildPath)
+                CLICleanCommand.FromArgs(args, msbuildPath)
                     .GetArgumentsToMSBuild().Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });
         }

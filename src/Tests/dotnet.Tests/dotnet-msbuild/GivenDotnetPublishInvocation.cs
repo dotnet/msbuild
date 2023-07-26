@@ -7,6 +7,7 @@ using Microsoft.DotNet.Tools.Publish;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework;
+using CLIPublishCommand = Microsoft.DotNet.Tools.Publish.PublishCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -53,7 +54,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Replace("<cwd>", WorkingDirectory);
 
                 var msbuildPath = "<msbuildpath>";
-                var command = PublishCommand.FromArgs(args, msbuildPath);
+                var command = CLIPublishCommand.FromArgs(args, msbuildPath);
 
                 command.SeparateRestoreCommand
                     .Should()
@@ -73,7 +74,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             expectedAdditionalArgs = (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}");
 
             var msbuildPath = "<msbuildpath>";
-            var command = PublishCommand.FromArgs(args, msbuildPath);
+            var command = CLIPublishCommand.FromArgs(args, msbuildPath);
 
             command.SeparateRestoreCommand
                    .GetArgumentsToMSBuild()
@@ -89,7 +90,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         public void MsbuildInvocationIsCorrectForNoBuild()
         {
             var msbuildPath = "<msbuildpath>";
-            var command = PublishCommand.FromArgs(new[] { "--no-build" }, msbuildPath);
+            var command = CLIPublishCommand.FromArgs(new[] { "--no-build" }, msbuildPath);
 
             command.SeparateRestoreCommand
                    .Should()
@@ -105,7 +106,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         public void CommandAcceptsMultipleCustomProperties()
         {
             var msbuildPath = "<msbuildpath>";
-            var command = PublishCommand.FromArgs(new[] { "/p:Prop1=prop1", "/p:Prop2=prop2" }, msbuildPath);
+            var command = CLIPublishCommand.FromArgs(new[] { "/p:Prop1=prop1", "/p:Prop2=prop2" }, msbuildPath);
 
             command.GetArgumentsToMSBuild()
                .Should()

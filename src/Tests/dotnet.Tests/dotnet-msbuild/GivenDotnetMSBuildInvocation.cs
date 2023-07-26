@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.NET.TestFramework;
 using Xunit;
+using CLIMSBuildCommand = Microsoft.DotNet.Tools.MSBuild.MSBuildCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -25,7 +26,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Replace("<cwd>", WorkingDirectory);
 
                 var msbuildPath = "<msbuildpath>";
-                var command = MSBuildCommand.FromArgs(args, msbuildPath);
+                var command = CLIMSBuildCommand.FromArgs(args, msbuildPath);
  
                 command.GetArgumentsToMSBuild().Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });

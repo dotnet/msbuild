@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Tools.Build;
 using Microsoft.NET.TestFramework;
 using Xunit;
+using CLIBuildCommand = Microsoft.DotNet.Tools.Build.BuildCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -48,7 +49,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Replace("<cwd>", WorkingDirectory);
 
                 var msbuildPath = "<msbuildpath>";
-                var command = BuildCommand.FromArgs(args, msbuildPath);
+                var command = CLIBuildCommand.FromArgs(args, msbuildPath);
 
                 command.SeparateRestoreCommand.Should().BeNull();
 
@@ -80,7 +81,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 expectedAdditionalArgs = expectedAdditionalArgs.Replace("<cwd>", WorkingDirectory);
 
                 var msbuildPath = "<msbuildpath>";
-                var command = BuildCommand.FromArgs(args, msbuildPath);
+                var command = CLIBuildCommand.FromArgs(args, msbuildPath);
 
                 command.SeparateRestoreCommand.GetArgumentsToMSBuild()
                     .Should()

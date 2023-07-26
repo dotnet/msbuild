@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Tools.Restore;
 using Microsoft.NET.TestFramework;
 using Xunit;
+using CLIRestoreCommand = Microsoft.DotNet.Tools.Restore.RestoreCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -49,7 +50,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Replace("<cwd>", WorkingDirectory);
 
                 var msbuildPath = "<msbuildpath>";
-                RestoreCommand.FromArgs(args, msbuildPath)
+                CLIRestoreCommand.FromArgs(args, msbuildPath)
                     .GetArgumentsToMSBuild()
                     .Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });

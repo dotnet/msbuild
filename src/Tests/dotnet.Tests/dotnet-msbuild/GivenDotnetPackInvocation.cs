@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.NET.TestFramework;
+using CLIPackCommand = Microsoft.DotNet.Tools.Pack.PackCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -49,7 +50,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Replace("<cwd>", WorkingDirectory);
 
                 var msbuildPath = "<msbuildpath>";
-                var command = PackCommand.FromArgs(args, msbuildPath);
+                var command = CLIPackCommand.FromArgs(args, msbuildPath);
                 var expectedPrefix = args.FirstOrDefault() == "--no-build" ? ExpectedNoBuildPrefix : ExpectedPrefix;
 
                 command.SeparateRestoreCommand.Should().BeNull();

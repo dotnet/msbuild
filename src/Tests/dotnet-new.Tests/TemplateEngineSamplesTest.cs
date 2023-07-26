@@ -4,9 +4,7 @@
 using System.Text;
 using EmptyFiles;
 using Microsoft.Extensions.Logging;
-using Microsoft.NET.TestFramework;
 using Microsoft.TemplateEngine.Authoring.TemplateVerifier;
-using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {

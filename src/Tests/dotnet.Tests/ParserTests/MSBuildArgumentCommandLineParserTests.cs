@@ -10,6 +10,8 @@ using System.CommandLine;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
+using CLIBuildCommand = Microsoft.DotNet.Tools.Build.BuildCommand;
+using CLIPublishCommand = Microsoft.DotNet.Tools.Publish.PublishCommand;
 
 namespace Microsoft.DotNet.Tests.CommandLineParserTests
 {
@@ -34,8 +36,8 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
         public void MSBuildArgumentsAreForwardedCorrectly(string[] arguments, bool buildCommand)
         {
             RestoringCommand command = buildCommand ?
-                BuildCommand.FromArgs(arguments) :
-                PublishCommand.FromArgs(arguments);
+                CLIBuildCommand.FromArgs(arguments) :
+                CLIPublishCommand.FromArgs(arguments);
             var expectedArguments = arguments.Select(a => a.Replace("-property:", "--property:").Replace("-p:", "--property:"));
             var argString = command.MSBuildArguments;
 

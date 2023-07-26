@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Tools.Test;
 using Microsoft.NET.TestFramework;
 using Xunit;
+using CLITestCommand = Microsoft.DotNet.Tools.Test.TestCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -29,7 +30,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 var testSessionCorrelationId = "<testSessionCorrelationId>";
                 var msbuildPath = "<msbuildpath>";
 
-                TestCommand.FromArgs(args, testSessionCorrelationId, msbuildPath)
+                CLITestCommand.FromArgs(args, testSessionCorrelationId, msbuildPath)
                     .GetArgumentsToMSBuild()
                     .Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });
