@@ -852,7 +852,7 @@ internal sealed class TerminalLogger : INodeLogger
     /// <summary>
     /// Colorizes the filename part of the given path.
     /// </summary>
-    private string? HighlightFileName(string? path)
+    private static string? HighlightFileName(string? path)
     {
         if (path == null)
         {
