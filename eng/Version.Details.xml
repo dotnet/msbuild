@@ -33,7 +33,7 @@
     </Dependency>
     <!-- Necessary for source-build. This allows the package to be retrieved from previously-source-built artifacts
       and flow in as dependencies of the packages produced by msbuild. -->
-    <Dependency Name="System.Security.Cryptography.Pkcs" Version="7.0.0">
+    <Dependency Name="System.Security.Cryptography.Pkcs" Version="7.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>d099f075e45d2aa6007a22b71b45a08758559f80</Sha>
     </Dependency>
