@@ -40,6 +40,7 @@ internal static class KnownStrings
         public static readonly string CONTAINER2009 = nameof(CONTAINER2009);
         public static readonly string CONTAINER2010 = nameof(CONTAINER2010);
         public static readonly string CONTAINER2012 = nameof(CONTAINER2012);
+        public static readonly string CONTAINER2014 = nameof(CONTAINER2014);
 
         public static readonly string CONTAINER4001 = nameof(CONTAINER4001);
         public static readonly string CONTAINER4002 = nameof(CONTAINER4002);
