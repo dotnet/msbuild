@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         public async Task ItCanExtractNugetPackage()
         {
             string packageId = "Newtonsoft.Json";
-            string packageVersion = ToolsetInfo.NewtonsoftJsonPackageVersion();
+            string packageVersion = ToolsetInfo.GetNewtonsoftJsonPackageVersion();
             NuGetTestLogger logger = new NuGetTestLogger(Log);
             NuGetPackageDownloader installer =
                 new NuGetPackageDownloader(new DirectoryPath(Directory.GetCurrentDirectory()), null,

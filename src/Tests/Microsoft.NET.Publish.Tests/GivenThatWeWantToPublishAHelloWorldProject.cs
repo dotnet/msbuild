@@ -938,7 +938,7 @@ public static class Program
                     throw new ArgumentOutOfRangeException(nameof(type));
             }
 
-            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", ToolsetInfo.NewtonsoftJsonPackageVersion()));
+            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: type)
                 .WithProjectChanges(project =>

@@ -139,7 +139,7 @@ namespace Microsoft.NET.TestFramework
                             .Where(pr => pr.Attribute("Version").Value.Equals($"$({targetName})", StringComparison.OrdinalIgnoreCase));
                     foreach (var packageReference in packageReferencesToUpdate)
                     {
-                        packageReference.Attribute("Version").Value = ToolsetInfo.NewtonsoftJsonPackageVersion();
+                        packageReference.Attribute("Version").Value = ToolsetInfo.GetNewtonsoftJsonPackageVersion();
                     }
                 }
             });

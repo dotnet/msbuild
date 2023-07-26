@@ -711,8 +711,8 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.NewtonsoftJsonPackageVersion()));
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.NewtonsoftJsonPackageVersion()));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
             
             testProject.SourceFiles["Test.cs"] = @"
 public class Class1

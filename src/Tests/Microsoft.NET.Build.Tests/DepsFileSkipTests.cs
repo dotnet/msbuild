@@ -35,7 +35,7 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.NewtonsoftJsonPackageVersion()));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
 
             string filenameToSkip = "Newtonsoft.Json.dll";
 

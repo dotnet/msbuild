@@ -413,7 +413,7 @@ namespace DefaultReferences
 
                     itemGroup.Add(new XElement(ns + "PackageReference",
                                     new XAttribute("Include", "NewtonSoft.Json"),
-                                    new XAttribute("Version", ToolsetInfo.NewtonsoftJsonPackageVersion())));
+                                    new XAttribute("Version", ToolsetInfo.GetNewtonsoftJsonPackageVersion())));
                 });
 
             var buildCommand = new BuildCommand(testAsset);

@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Restore.Test
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.NewtonsoftJsonPackageVersion()));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
             if (extension == ".fsproj")
             {
                 testProject.PackageReferences.Add(new TestPackageReference("FSharp.Core", "6.0.1", updatePackageReference: true));
