@@ -48,15 +48,14 @@
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
     <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>6.0.0-beta.23313.5</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>8.0.0-beta.23364.2</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>7.0.0</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftIORedistVersion>6.0.0</MicrosoftIORedistVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.7.0-3.23318.1</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.7.0-rc.106</NuGetBuildTasksVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.8.0-1.23372.1</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>6.8.0-preview.1.41</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
-    <SystemTextJsonVersion>7.0.0</SystemTextJsonVersion>
+    <SystemTextJsonVersion>7.0.3</SystemTextJsonVersion>
     <SystemThreadingTasksDataflowVersion>7.0.0</SystemThreadingTasksDataflowVersion>
-    <XunitVersion>2.4.2</XunitVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386

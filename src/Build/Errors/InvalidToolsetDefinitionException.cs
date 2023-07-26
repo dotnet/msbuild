@@ -55,6 +55,9 @@ namespace Microsoft.Build.Exceptions
         /// <summary>
         /// Basic constructor.
         /// </summary>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         protected InvalidToolsetDefinitionException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -94,6 +97,9 @@ namespace Microsoft.Build.Exceptions
         /// <param name="context"></param>
 #if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
 #endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -160,9 +166,7 @@ namespace Microsoft.Build.Exceptions
             string resourceName,
             params string[] args)
         {
-#if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             string errorCode;
             string helpKeyword;
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, resourceName, (object[])args);

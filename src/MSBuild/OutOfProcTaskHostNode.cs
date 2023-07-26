@@ -1146,9 +1146,11 @@ namespace Microsoft.Build.CommandLine
         {
             if (_nodeEndpoint?.LinkStatus == LinkStatus.Active)
             {
+#pragma warning disable SYSLIB0050
                 // Types which are not serializable and are not IExtendedBuildEventArgs as
                 // those always implement custom serialization by WriteToStream and CreateFromStream.
                 if (!e.GetType().GetTypeInfo().IsSerializable && e is not IExtendedBuildEventArgs)
+#pragma warning disable SYSLIB0050
                 {
                     // log a warning and bail.  This will end up re-calling SendBuildEvent, but we know for a fact
                     // that the warning that we constructed is serializable, so everything should be good.

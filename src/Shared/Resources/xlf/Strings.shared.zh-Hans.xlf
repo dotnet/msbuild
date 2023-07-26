@@ -37,6 +37,11 @@
         <target state="translated">{0} ({1},{2})</target>
         <note>A file location to be embedded in a string.</note>
       </trans-unit>
+      <trans-unit id="LoggingBeforeTaskInitialization">
+        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
+        <target state="new">MSB6005: Task attempted to log before it was initialized. Message was: {0}</target>
+        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
+      </trans-unit>
       <trans-unit id="ModifyingTaskHostEnvironmentHeader">
         <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
         <target state="translated">先对从父节点收到的环境进行以下修改，然后再将其应用于任务宿主:</target>
