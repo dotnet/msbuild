@@ -6,7 +6,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly
 {
-    public class GenerateBlazorBootExtensionJson : MSBuildTask
+    public class GenerateBlazorBootExtensionJson : Task
     {
         [Required]
         public string OutputPath { get; set; }

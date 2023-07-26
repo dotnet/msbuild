@@ -4,8 +4,8 @@
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools;
 using System.CommandLine;
-using CLIBuildCommand = Microsoft.DotNet.Tools.Build.BuildCommand;
-using CLIPublishCommand = Microsoft.DotNet.Tools.Publish.PublishCommand;
+using BuildCommand = Microsoft.DotNet.Tools.Build.BuildCommand;
+using PublishCommand = Microsoft.DotNet.Tools.Publish.PublishCommand;
 
 namespace Microsoft.DotNet.Tests.CommandLineParserTests
 {
@@ -30,8 +30,8 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
         public void MSBuildArgumentsAreForwardedCorrectly(string[] arguments, bool buildCommand)
         {
             RestoringCommand command = buildCommand ?
-                CLIBuildCommand.FromArgs(arguments) :
-                CLIPublishCommand.FromArgs(arguments);
+                BuildCommand.FromArgs(arguments) :
+                PublishCommand.FromArgs(arguments);
             var expectedArguments = arguments.Select(a => a.Replace("-property:", "--property:").Replace("-p:", "--property:"));
             var argString = command.MSBuildArguments;
 

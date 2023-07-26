@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class RemoveAssetFromDepsPackages : MSBuildTask
+    public class RemoveAssetFromDepsPackages : Task
     {
         [Required]
         public string DepsFile { get; set; }

@@ -13,7 +13,7 @@ using Microsoft.Css.Parser.TreeItems.Selectors;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class RewriteCss : MSBuildTask
+    public class RewriteCss : Task
     {
         // Public for testing.
         public const string ImportNotAllowedErrorMessage =

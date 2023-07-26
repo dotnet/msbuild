@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using CLIBuildCommand = Microsoft.DotNet.Tools.Build.BuildCommand;
+using BuildCommand = Microsoft.DotNet.Tools.Build.BuildCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Replace("<cwd>", WorkingDirectory);
 
                 var msbuildPath = "<msbuildpath>";
-                var command = CLIBuildCommand.FromArgs(args, msbuildPath);
+                var command = BuildCommand.FromArgs(args, msbuildPath);
 
                 command.SeparateRestoreCommand.Should().BeNull();
 
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 expectedAdditionalArgs = expectedAdditionalArgs.Replace("<cwd>", WorkingDirectory);
 
                 var msbuildPath = "<msbuildpath>";
-                var command = CLIBuildCommand.FromArgs(args, msbuildPath);
+                var command = BuildCommand.FromArgs(args, msbuildPath);
 
                 command.SeparateRestoreCommand.GetArgumentsToMSBuild()
                     .Should()

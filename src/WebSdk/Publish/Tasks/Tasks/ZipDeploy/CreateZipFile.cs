@@ -6,7 +6,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
 {
-    public class CreateZipFile : MSBuildTask
+    public class CreateZipFile : Task
     {
         [Required]
         public string FolderToZip { get; set; }

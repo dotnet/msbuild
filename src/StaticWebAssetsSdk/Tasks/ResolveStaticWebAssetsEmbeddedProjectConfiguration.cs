@@ -16,7 +16,7 @@ namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
     // We filter the build configurations in cross targeting to reflect the dependencies between
     // TFMs, and we avoid building them in the multi-targeted build.
 
-    public class ResolveStaticWebAssetsEmbeddedProjectConfiguration : MSBuildTask
+    public class ResolveStaticWebAssetsEmbeddedProjectConfiguration : Task
     {
         [Required]
         public ITaskItem[] StaticWebAssetProjectConfiguration { get; set; }

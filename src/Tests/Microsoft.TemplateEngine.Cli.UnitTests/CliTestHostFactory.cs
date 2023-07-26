@@ -7,7 +7,7 @@ using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Utils;
-using TETestLoggerFactory = Microsoft.TemplateEngine.TestHelper.TestLoggerFactory;
+using TestLoggerFactory = Microsoft.TemplateEngine.TestHelper.TestLoggerFactory;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
@@ -69,7 +69,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 HostParamDefaults = new Dictionary<string, string>();
                 FileSystem = fileSystem ?? new PhysicalFileSystem();
 
-                _loggerFactory = new TETestLoggerFactory();
+                _loggerFactory = new TestLoggerFactory();
                 addLoggerProviders?.ToList().ForEach(_loggerFactory.AddProvider);
                 _logger = _loggerFactory.CreateLogger("Cli Test Host");
                 _fallbackNames = fallbackNames ?? new[] { "dotnetcli" };

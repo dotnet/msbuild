@@ -117,8 +117,8 @@
   <!-- Global usings -->
   <!-- See: https://learn.microsoft.com/dotnet/core/project-sdk/msbuild-props#using -->
   <ItemGroup>
-    <!-- This causes conflicts with System.Threading.Tasks.Task. Giving it a unqiue alias avoids the conflict. -->
-    <Using Include="Microsoft.Build.Utilities.Task" Alias="MSBuildTask" />
+    <!-- This causes conflicts with System.Threading.Tasks.Task. Giving it an alias to avoid the conflict. -->
+    <Using Include="Microsoft.Build.Utilities.Task" Alias="Task" />
   </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />

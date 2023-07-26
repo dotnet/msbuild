@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using CLIRestoreCommand = Microsoft.DotNet.Tools.Restore.RestoreCommand;
+using RestoreCommand = Microsoft.DotNet.Tools.Restore.RestoreCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Replace("<cwd>", WorkingDirectory);
 
                 var msbuildPath = "<msbuildpath>";
-                CLIRestoreCommand.FromArgs(args, msbuildPath)
+                RestoreCommand.FromArgs(args, msbuildPath)
                     .GetArgumentsToMSBuild()
                     .Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });

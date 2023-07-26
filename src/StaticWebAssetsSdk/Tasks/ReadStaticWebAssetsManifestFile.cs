@@ -5,7 +5,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class ReadStaticWebAssetsManifestFile : MSBuildTask
+    public class ReadStaticWebAssetsManifestFile : Task
     {
         [Required]
         public string ManifestPath { get; set; }

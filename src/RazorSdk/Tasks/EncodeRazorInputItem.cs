@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
-using MSBuildTask = Microsoft.Build.Utilities.Task;
-using MSBuildTaskItem = Microsoft.Build.Utilities.TaskItem;
+using Task = Microsoft.Build.Utilities.Task;
+using TaskItem = Microsoft.Build.Utilities.TaskItem;
 
 namespace Microsoft.AspNetCore.Razor.Tasks
 {
@@ -15,7 +15,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
     // Characters like {} in the filename cause issues with resolving the type. To work
     // around this, we encode everything before writing it to the editorconfig then decode
     // inside the Razor source generator.
-    public class EncodeRazorInputItem : MSBuildTask
+    public class EncodeRazorInputItem : Task
     {
         [Required]
         public ITaskItem[] RazorInputItems { get; set; }
@@ -32,7 +32,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 var input = RazorInputItems[i];
                 var targetPath = Convert.ToBase64String(Encoding.UTF8.GetBytes(input.GetMetadata("TargetPath")));
 
-                var outputItem = new MSBuildTaskItem(input);
+                var outputItem = new TaskItem(input);
                 outputItem.SetMetadata("TargetPath", targetPath);
 
                 EncodedRazorInputItems[i] = outputItem;

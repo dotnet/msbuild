@@ -6,7 +6,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly
 {
-    public class BlazorWriteSatelliteAssemblyFile : MSBuildTask
+    public class BlazorWriteSatelliteAssemblyFile : Task
     {
         [Required]
         public ITaskItem[] SatelliteAssembly { get; set; }

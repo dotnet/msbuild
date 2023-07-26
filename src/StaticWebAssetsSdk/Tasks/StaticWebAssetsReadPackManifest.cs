@@ -7,7 +7,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class StaticWebAssetsReadPackManifest : MSBuildTask
+    public class StaticWebAssetsReadPackManifest : Task
     {
         [Required]
         public string ManifestPath { get; set; }

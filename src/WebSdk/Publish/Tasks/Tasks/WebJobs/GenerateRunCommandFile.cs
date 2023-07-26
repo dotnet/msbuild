@@ -5,7 +5,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.WebJobs
 {
-    public class GenerateRunCommandFile : MSBuildTask
+    public class GenerateRunCommandFile : Task
     {
         private const string RunCommandFile = "run.cmd";
         [Required]

@@ -6,7 +6,7 @@ using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 {
-    public class CreateMSDeployScript : MSBuildTask
+    public class CreateMSDeployScript : Task
     {
         [Required]
         public string ProjectName { get; set; }

@@ -7,7 +7,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class GenerateStaticWebAsssetsPropsFile : MSBuildTask
+    public class GenerateStaticWebAsssetsPropsFile : Task
     {
         private const string SourceType = "SourceType";
         private const string SourceId = "SourceId";

@@ -5,7 +5,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks
 {
-    public class GenerateEnvTransform : MSBuildTask
+    public class GenerateEnvTransform : Task
     {
         [Required]
         public string WebConfigEnvironmentVariables { get; set; }

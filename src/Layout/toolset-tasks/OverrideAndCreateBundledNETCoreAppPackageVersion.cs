@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Build.Tasks
     /// Use a task to override since it was generated as a string literal replace anyway.
     /// And using C# can have better error when anything goes wrong.
     /// </summary>
-    public sealed class OverrideAndCreateBundledNETCoreAppPackageVersion : MSBuildTask
+    public sealed class OverrideAndCreateBundledNETCoreAppPackageVersion : Task
     {
         private static string _messageWhenMismatch =
             "{0} version {1} does not match BundledNETCoreAppPackageVersion {2}. " +

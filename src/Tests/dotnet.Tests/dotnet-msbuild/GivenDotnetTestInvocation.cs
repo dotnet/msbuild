@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using CLITestCommand = Microsoft.DotNet.Tools.Test.TestCommand;
+using TestCommand = Microsoft.DotNet.Tools.Test.TestCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 var testSessionCorrelationId = "<testSessionCorrelationId>";
                 var msbuildPath = "<msbuildpath>";
 
-                CLITestCommand.FromArgs(args, testSessionCorrelationId, msbuildPath)
+                TestCommand.FromArgs(args, testSessionCorrelationId, msbuildPath)
                     .GetArgumentsToMSBuild()
                     .Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });

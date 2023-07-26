@@ -7,7 +7,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly
 {
-    public partial class GenerateServiceWorkerAssetsManifest : MSBuildTask
+    public partial class GenerateServiceWorkerAssetsManifest : Task
     {
         [Required]
         public ITaskItem[] Assets { get; set; }

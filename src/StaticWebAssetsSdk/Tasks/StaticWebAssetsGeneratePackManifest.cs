@@ -8,7 +8,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class StaticWebAssetsGeneratePackManifest : MSBuildTask
+    public class StaticWebAssetsGeneratePackManifest : Task
     {
         // Since the manifest is only used at build time, it's ok for it to use the relaxed
         // json escaping (which is also what MVC uses by default) and to produce indented output

@@ -8,11 +8,11 @@
 
 using Microsoft.Build.Framework;
 using System.Globalization;
-using MSBuildTask = Microsoft.Build.Utilities.Task;
+using Task = Microsoft.Build.Utilities.Task;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public abstract class TaskBase : MSBuildTask
+    public abstract class TaskBase : Task
     {
         private Logger _logger;
 

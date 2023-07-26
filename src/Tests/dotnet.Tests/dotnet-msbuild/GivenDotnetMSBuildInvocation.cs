@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using CLIMSBuildCommand = Microsoft.DotNet.Tools.MSBuild.MSBuildCommand;
+using MSBuildCommand = Microsoft.DotNet.Tools.MSBuild.MSBuildCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Replace("<cwd>", WorkingDirectory);
 
                 var msbuildPath = "<msbuildpath>";
-                var command = CLIMSBuildCommand.FromArgs(args, msbuildPath);
+                var command = MSBuildCommand.FromArgs(args, msbuildPath);
  
                 command.GetArgumentsToMSBuild().Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });

@@ -5,7 +5,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class ResolveStaticWebAssetsEffectiveTargetFramework : MSBuildTask
+    public class ResolveStaticWebAssetsEffectiveTargetFramework : Task
     {
         [Required] public ITaskItem [] TargetFrameworks { get; set; }
 

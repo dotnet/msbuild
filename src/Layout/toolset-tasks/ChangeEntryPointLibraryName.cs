@@ -5,7 +5,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class ChangeEntryPointLibraryName : MSBuildTask
+    public class ChangeEntryPointLibraryName : Task
     {
         [Required]
         public string DepsFile { get; set; }

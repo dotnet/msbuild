@@ -6,7 +6,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class GZipCompress : MSBuildTask
+    public class GZipCompress : Task
     {
         [Required]
         public ITaskItem[] FilesToCompress { get; set; }

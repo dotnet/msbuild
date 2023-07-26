@@ -7,7 +7,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.DotNet.Build.Tasks
 {
-    public sealed class ZipFileCreateFromDirectory : MSBuildTask
+    public sealed class ZipFileCreateFromDirectory : Task
     {
         /// <summary>
         /// The path to the directory to be archived.

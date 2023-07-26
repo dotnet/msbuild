@@ -5,7 +5,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks;
 
-public class MergeStaticWebAssets : MSBuildTask
+public class MergeStaticWebAssets : Task
 {
     [Required]
     public ITaskItem[] CandidateAssets { get; set; }

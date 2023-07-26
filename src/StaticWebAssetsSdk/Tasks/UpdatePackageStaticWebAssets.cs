@@ -5,7 +5,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class UpdatePackageStaticWebAssets : MSBuildTask
+    public class UpdatePackageStaticWebAssets : Task
     {
         [Required]
         public ITaskItem[] Assets { get; set; }

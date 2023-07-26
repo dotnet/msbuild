@@ -6,7 +6,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks
 {
-    public class TransformWebConfig : MSBuildTask
+    public class TransformWebConfig : Task
     {
         /// <summary>
         /// The full path to the assembly or executable to be compiled, including file extension

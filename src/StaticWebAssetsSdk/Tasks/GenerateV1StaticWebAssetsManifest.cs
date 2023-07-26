@@ -7,7 +7,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class GenerateV1StaticWebAssetsManifest : MSBuildTask
+    public class GenerateV1StaticWebAssetsManifest : Task
     {
         private const string ContentRoot = "ContentRoot";
         private const string BasePath = "BasePath";

@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using CLICleanCommand = Microsoft.DotNet.Tools.Clean.CleanCommand;
+using CleanCommand = Microsoft.DotNet.Tools.Clean.CleanCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         public void ItAddsProjectToMsbuildInvocation()
         {
             var msbuildPath = "<msbuildpath>";
-            CLICleanCommand.FromArgs(new string[] { "<project>" }, msbuildPath)
+            CleanCommand.FromArgs(new string[] { "<project>" }, msbuildPath)
                 .GetArgumentsToMSBuild().Should().Be("-maxcpucount -verbosity:m -verbosity:normal <project> -target:Clean");
         }
 
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Replace("<cwd>", WorkingDirectory);
 
                 var msbuildPath = "<msbuildpath>";
-                CLICleanCommand.FromArgs(args, msbuildPath)
+                CleanCommand.FromArgs(args, msbuildPath)
                     .GetArgumentsToMSBuild().Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });
         }

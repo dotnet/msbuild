@@ -8,7 +8,7 @@ using Microsoft.Web.XmlTransform;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
 {
-    public class TransformXml : MSBuildTask
+    public class TransformXml : Task
     {
         private string _sourceFile = null;
         private string _transformFile = null;

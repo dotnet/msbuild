@@ -5,7 +5,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class DiscoverDefaultScopedCssItems : MSBuildTask
+    public class DiscoverDefaultScopedCssItems : Task
     {
         [Required]
         public ITaskItem[] Content { get; set; }

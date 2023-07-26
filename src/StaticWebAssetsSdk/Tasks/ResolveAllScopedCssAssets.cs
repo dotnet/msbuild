@@ -5,7 +5,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class ResolveAllScopedCssAssets : MSBuildTask
+    public class ResolveAllScopedCssAssets : Task
     {
         [Required]
         public ITaskItem[] StaticWebAssets { get; set; }

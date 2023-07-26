@@ -9,7 +9,7 @@ using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks
 {
-    public class GenerateEFSQLScripts : MSBuildTask
+    public class GenerateEFSQLScripts : Task
     {
         [Required]
         public string ProjectDirectory { get; set; }

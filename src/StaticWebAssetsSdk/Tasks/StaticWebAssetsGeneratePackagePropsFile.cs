@@ -7,7 +7,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.AspNetCore.StaticWebAssets.Tasks
 {
-    public class StaticWebAssetsGeneratePackagePropsFile : MSBuildTask
+    public class StaticWebAssetsGeneratePackagePropsFile : Task
     {
         [Required]
         public string PropsFileImport { get; set; }
