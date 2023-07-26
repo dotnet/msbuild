@@ -45,7 +45,7 @@ try {
       if (-not ($_['Args'])) { $_.Args = @() }
       $_
     }
-
+  
   Write-Host "List of tools to configure:"
   $ToolsList | ForEach-Object { $_ | Out-String | Write-Host }
 
