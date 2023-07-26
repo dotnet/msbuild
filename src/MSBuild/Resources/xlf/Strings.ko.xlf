@@ -1546,6 +1546,21 @@
         <target state="translated">MSBUILD : error MSB1059: 대상을 출력할 수 없습니다. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedDisabled">
+        <source>TerminalLogger was not used because build is run in context of process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
+        <target state="new">TerminalLogger was not used because build is run in context of process (e.g. 'dotnet test') that requests direct access to stdout stream.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedNotSupported">
+        <source>TerminalLogger was not used because the output is not supported.</source>
+        <target state="new">TerminalLogger was not used because the output is not supported.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedRedirected">
+        <source>TerminalLogger was not used because the output is being redirected to a file.</source>
+        <target state="new">TerminalLogger was not used because the output is being redirected to a file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
         <target state="translated">MSBUILD : error MSB1002: 이 스위치에는 매개 변수를 지정할 수 없습니다.</target>

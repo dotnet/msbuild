@@ -1481,6 +1481,15 @@
       {4}: duration in seconds with 1 decimal point
     </comment>
   </data>
+  <data name="TerminalLoggerNotUsedDisabled" xml:space="preserve">
+    <value>TerminalLogger was not used because build is run in context of process (e.g. 'dotnet test') that requests direct access to stdout stream.</value>
+  </data>
+  <data name="TerminalLoggerNotUsedNotSupported" xml:space="preserve">
+    <value>TerminalLogger was not used because the output is not supported.</value>
+  </data>
+  <data name="TerminalLoggerNotUsedRedirected" xml:space="preserve">
+    <value>TerminalLogger was not used because the output is being redirected to a file.</value>
+  </data>
   <!-- **** TerminalLogger strings end **** -->
 
     <!--
