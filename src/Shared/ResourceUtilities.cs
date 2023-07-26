@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-#if !BUILDINGAPPXTASKS && DEBUG
+#if !BUILDINGAPPXTASKS
 using System.Resources;
 using System.Diagnostics;
 #endif
@@ -261,9 +261,9 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
         /// <param name="resourceName">Resource string to check.</param>
+        [Conditional("DEBUG")]
         internal static void VerifyResourceStringExists(string resourceName)
         {
-#if DEBUG
             try
             {
                 // Look up the resource string in the engine's string table.
@@ -298,6 +298,5 @@ namespace Microsoft.Build.Shared
             }
 #endif
         }
-#endif
     }
 }

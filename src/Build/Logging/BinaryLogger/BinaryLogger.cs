@@ -6,6 +6,7 @@ using System.IO;
 using System.IO.Compression;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
 
@@ -226,12 +227,25 @@ namespace Microsoft.Build.Logging
 
             if (projectImportsCollector != null)
             {
+                projectImportsCollector.Close();
+
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
                 {
-                    eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, projectImportsCollector.GetAllBytes());
+                    var archiveFilePath = projectImportsCollector.ArchiveFilePath;
+
+                    // It is possible that the archive couldn't be created for some reason.
+                    // Only embed it if it actually exists.
+                    if (FileSystems.Default.FileExists(archiveFilePath))
+                    {
+                        using (FileStream fileStream = File.OpenRead(archiveFilePath))
+                        {
+                            eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, fileStream);
+                        }
+
+                        File.Delete(archiveFilePath);
+                    }
                 }
 
-                projectImportsCollector.Close();
                 projectImportsCollector = null;
             }
 
