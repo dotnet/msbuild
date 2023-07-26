@@ -3,8 +3,6 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.DotNet.Tools.Common;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Microsoft.DotNet.Cli.Utils
 {

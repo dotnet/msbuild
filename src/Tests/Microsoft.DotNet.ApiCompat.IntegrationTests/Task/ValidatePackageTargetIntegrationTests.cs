@@ -1,9 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Microsoft.DotNet.ApiCompat.IntegrationTests;
 using Microsoft.DotNet.ApiCompatibility;
 using Microsoft.DotNet.ApiCompatibility.Logging;
@@ -13,11 +10,6 @@ using Microsoft.DotNet.ApiCompatibility.Tests;
 using Microsoft.DotNet.PackageValidation;
 using Microsoft.DotNet.PackageValidation.Validators;
 using Microsoft.DotNet.ApiSymbolExtensions;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using Xunit;
-using Xunit.Abstractions;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ApiCompat.Task.IntegrationTests

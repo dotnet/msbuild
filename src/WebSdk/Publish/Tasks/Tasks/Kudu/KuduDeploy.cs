@@ -11,10 +11,6 @@
 
 using Framework = Microsoft.Build.Framework;
 using Utilities = Microsoft.Build.Utilities;
-using System.Threading.Tasks;
-using System;
-using System.IO;
-using System.Collections.Generic;
 using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu

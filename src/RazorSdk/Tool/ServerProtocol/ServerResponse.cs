@@ -1,11 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 // After the server pipe is connected, it forks off a thread to handle the connection, and creates
 // a new instance of the pipe to listen for new clients. When it gets a request, it validates

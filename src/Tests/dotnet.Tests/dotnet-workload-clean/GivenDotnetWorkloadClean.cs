@@ -2,24 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.IO;
-using Xunit.Abstractions;
-using Xunit;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Workload.Install.Tests;
 using ManifestReaderTests;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.DotNet.Workloads.Workload;
-using FluentAssertions;
 using Microsoft.DotNet.Workloads.Workload.Install;
-using Microsoft.DotNet.Workloads.Workload.Repair;
 using Microsoft.DotNet.Workloads.Workload.Clean;
-using Microsoft.DotNet.Workloads.Workload.List;
-using Microsoft.DotNet.Cli.Workload.List.Tests;
-using System.Collections.Generic;
-using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Cli.Workload.Clean.Tests
 {

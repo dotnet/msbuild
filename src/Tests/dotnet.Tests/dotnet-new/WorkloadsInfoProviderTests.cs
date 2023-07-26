@@ -3,18 +3,12 @@
 
 #nullable enable
 
-using FluentAssertions;
 using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.DotNet.Workloads.Workload.List;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Moq;
-using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.Abstractions.Components;
-using Xunit;
-using System.Linq;
-using System.Collections.Generic;
-using System;
 
 namespace Microsoft.DotNet.Cli.New.Tests
 {

@@ -3,9 +3,6 @@
 
 #nullable enable
 
-using Xunit;
-using System.IO;
-using System.Text;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
 

@@ -1,14 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
-using Microsoft.DotNet.ApiSymbolExtensions;
 
 namespace Microsoft.DotNet.GenAPI
 {

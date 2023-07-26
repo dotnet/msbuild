@@ -1,20 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
-using System.Linq;
 using System.Text.Json;
 using Microsoft.DotNet.ToolPackage;
 using NuGet.Versioning;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
-using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {

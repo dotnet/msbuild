@@ -6,9 +6,6 @@ using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.NativeWrapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Sdk.Check
 {

@@ -8,8 +8,6 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.NET.Build.Tasks.ConflictResolution;
-using System;
-using System.IO;
 
 namespace Microsoft.NET.Build.Tasks
 {

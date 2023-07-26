@@ -1,9 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Runtime.InteropServices;
-using System.Text;
 
 //  Work around https://github.com/dotnet/roslyn-analyzers/issues/6094
 #pragma warning disable CA1420

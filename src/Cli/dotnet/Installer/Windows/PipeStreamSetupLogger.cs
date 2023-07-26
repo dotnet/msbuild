@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO.Pipes;
-using System.Collections.Generic;
 using System.Runtime.Versioning;
-using System.Text;
 
 namespace Microsoft.DotNet.Installer.Windows
 {

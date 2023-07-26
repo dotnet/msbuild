@@ -7,8 +7,6 @@
 #pragma warning restore IDE0240 // Remove redundant nullable directive
 
 using Microsoft.Build.Framework;
-using System;
-using System.IO;
 
 #if EXTENSIONS
 using ConflictVersion = System.Version;

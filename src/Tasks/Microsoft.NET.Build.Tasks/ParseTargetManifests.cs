@@ -4,10 +4,6 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Packaging.Core;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
 namespace Microsoft.NET.Build.Tasks
 {

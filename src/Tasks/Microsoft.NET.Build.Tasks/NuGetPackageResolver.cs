@@ -4,9 +4,6 @@
 using NuGet.Packaging;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace Microsoft.NET.Build.Tasks
 {

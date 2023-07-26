@@ -4,11 +4,6 @@
 using FluentAssertions;
 using Microsoft.Build.Framework;
 using Microsoft.NET.TestFramework;
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 

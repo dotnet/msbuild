@@ -3,8 +3,6 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.New;
@@ -16,14 +14,12 @@ using Microsoft.TemplateEngine.Abstractions.Components;
 using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
 using Microsoft.TemplateEngine.MSBuildEvaluation;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
-using System.IO;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.DotNet.Tools.New.PostActionProcessors;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.Extensions.Logging;
 using Microsoft.DotNet.Tools;
 using System.CommandLine.Parsing;
-using System.Linq;
 
 namespace Microsoft.DotNet.Cli
 {

@@ -1,22 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using FluentAssertions;
-using Microsoft.NET.TestFramework;
-using Xunit;
-using Xunit.Abstractions;
-using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.DotNet.Workloads.Workload.List;
 using System.CommandLine;
-using System.CommandLine.Parsing;
-using Microsoft.NET.TestFramework.Utilities;
-using System.Collections.Generic;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using ManifestReaderTests;
-using System.IO;
-using System.Linq;
 using ListStrings = Microsoft.DotNet.Workloads.Workload.List.LocalizableStrings;
-using Microsoft.DotNet.Workloads.Workload;
 
 namespace Microsoft.DotNet.Cli.Workload.List.Tests
 {

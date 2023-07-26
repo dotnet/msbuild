@@ -7,8 +7,6 @@
 #pragma warning restore IDE0240 // Remove redundant nullable directive
 
 using Microsoft.Build.Framework;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {

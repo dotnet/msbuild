@@ -1,15 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.CommandLine;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
-using System.Linq;
 using Microsoft.DotNet.Workloads.Workload.Install;
-using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Workloads.Workload.Search
 {

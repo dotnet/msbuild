@@ -4,8 +4,6 @@
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using Microsoft.NET.TestFramework;
-using Xunit;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
 

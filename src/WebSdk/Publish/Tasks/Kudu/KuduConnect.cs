@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Utilities;
-using System;
-using System.Text;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
 {

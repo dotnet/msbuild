@@ -3,7 +3,6 @@
 
 using NuGet.Common;
 using NuGet.ProjectModel;
-using System.IO;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {

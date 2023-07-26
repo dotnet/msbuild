@@ -3,8 +3,6 @@
 
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using System.Collections.Generic;
-using System.Xml.Linq;
 
 namespace Microsoft.NET.Build.Tasks
 {

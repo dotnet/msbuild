@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using Xunit;
 
 namespace Microsoft.DotNet.ApiCompatibility.Runner.Tests
 {

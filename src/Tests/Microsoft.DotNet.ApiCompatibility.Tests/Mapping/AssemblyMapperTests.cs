@@ -3,14 +3,11 @@
 
 #nullable enable
 
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Mapping;
 using Microsoft.DotNet.ApiCompatibility.Rules;
 using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 using Moq;
-using Xunit;
 
 namespace Microsoft.DotNet.ApiCompatibility.Tests.Mapping
 {
