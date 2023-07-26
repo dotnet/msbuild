@@ -27,6 +27,26 @@ namespace Microsoft.Build.UnitTests
             _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
         }
 
+        [Fact]
+        public void WriteBlobFromStream()
+        {
+            byte[] bytes = new byte[] { 1, 2, 3, 4, 5 };
+            MemoryStream inputStream = new MemoryStream(bytes);
+
+            MemoryStream outputStream = new MemoryStream();
+            using BinaryWriter binaryWriter = new BinaryWriter(outputStream);
+            BuildEventArgsWriter writer = new BuildEventArgsWriter(binaryWriter);
+
+            writer.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, inputStream);
+            binaryWriter.Flush();
+
+            outputStream.Position = 0;
+            BinaryReader binaryReader = new BinaryReader(outputStream);
+            Assert.Equal(BinaryLogRecordKind.ProjectImportArchive, (BinaryLogRecordKind)binaryReader.Read7BitEncodedInt());
+            Assert.Equal(bytes.Length, binaryReader.Read7BitEncodedInt());
+            Assert.Equal(bytes, binaryReader.ReadBytes(bytes.Length));
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
