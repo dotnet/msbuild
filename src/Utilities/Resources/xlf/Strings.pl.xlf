@@ -27,11 +27,6 @@
         <target state="translated">Polecenie zostało zakończone z kodem {0}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="translated">MSB6005: Zadanie podjęło próbę zarejestrowania przed zainicjowaniem. Pojawił się komunikat: {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
-      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: nie można odnaleźć pliku manifestu platformy w lokalizacji „{0}”.</target>
@@ -64,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ToolTask.NotUpToDate">
         <source>Unable to skip task because it is not up-to-date.</source>
-        <target state="new">Unable to skip task because it is not up-to-date.</target>
+        <target state="translated">Nie można pominąć zadania, ponieważ nie jest ono aktualne.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">

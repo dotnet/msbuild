@@ -121,6 +121,16 @@
         <target state="translated">MSB3654: Gecikmeli imzalama, en azından bir ortak anahtar belirtilmesini gerektirir.  Lütfen KeyFile veya KeyContainer özelliklerini kullanarak bir ortak anahtar sağlayın veya gecikmeli imzalamayı devre dışı bırakın.</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
+      <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
+        <source>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</source>
+        <target state="new">MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</target>
+        <note>{StrBegin="MSB3991: "}</note>
+      </trans-unit>
+      <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullRootElementName">
+        <source>MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</source>
+        <target state="new">MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</target>
+        <note>{StrBegin="MSB3992: "}</note>
+      </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
         <source>MSB3881: Fatal Error: more than {0} command line arguments.</source>
         <target state="translated">MSB3881: Kritik Hata: Komut satırı bağımsız değişkenleri şu sayıdan fazla: {0}.</target>
@@ -188,7 +198,7 @@
       </trans-unit>
       <trans-unit id="Copy.NonWindowsLinkErrorMessage">
         <source>The {0} library call failed with the following error code: {1}.</source>
-        <target state="new">The {0} library call failed with the following error code: {1}.</target>
+        <target state="translated">Kitaplık çağrısı {0} şu hata koduyla başarısız oldu: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
@@ -208,7 +218,7 @@
       </trans-unit>
       <trans-unit id="Copy.RetryingAsSymbolicLink">
         <source>Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</source>
-        <target state="new">Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</target>
+        <target state="translated">"{0}" yolunu "{1}" yoluna kopyalamak için sabit bağlantı kullanılamadı. Dosya bunun yerine sembolik bağlantı ile kopyalanıyor. {2}</target>
         <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
       </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
@@ -308,17 +318,17 @@
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryCount">
         <source>MSB3028: {0} is an invalid retry count. Value must not be negative.</source>
-        <target state="new">MSB3028: {0} is an invalid retry count. Value must not be negative.</target>
+        <target state="translated">MSB3028: {0} geçersiz bir yeniden deneme sayısı. Değer negatif olamaz.</target>
         <note>{StrBegin="MSB3028: "} LOCALIZATION: {0} is a number.</note>
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryDelay">
         <source>MSB3029: {0} is an invalid retry delay. Value must not be negative.</source>
-        <target state="new">MSB3029: {0} is an invalid retry delay. Value must not be negative.</target>
+        <target state="translated">MSB3029: {0} geçersiz bir yeniden deneme gecikmesi. Değer negatif olamaz.</target>
         <note>{StrBegin="MSB3029: "} LOCALIZATION: {0} is a number.</note>
       </trans-unit>
       <trans-unit id="Delete.Retrying">
         <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</source>
-        <target state="new">MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</target>
+        <target state="translated">MSB3062: "{0}" dosyası silinemedi. {1}. yeniden deneme {2} ms içinde başlıyor. {3}</target>
         <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message.</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
@@ -626,7 +636,7 @@
       </trans-unit>
       <trans-unit id="GenerateBindingRedirects.CreatingBindingRedirectionFile">
         <source>Creating binding redirection file "{0}".</source>
-        <target state="new">Creating binding redirection file "{0}".</target>
+        <target state="translated">Bağlama yeniden yönlendirme dosyası "{0}" oluşturuluyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="GenerateBindingRedirects.MissingConfigurationNode">
@@ -1047,8 +1057,8 @@
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/msbuild/net8-binaryformatter</source>
-        <target state="new">MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://aka.ms/msbuild/net8-binaryformatter</target>
+        <target state="translated">MSB3825: "{1}" türündeki "{0}" kaynağı, çalışma zamanında BinaryFormatter aracılığıyla seri durumdan çıkarılır. BinaryFormatter, olası güvenlik riskleri nedeniyle kullanım dışı bırakıldı ve .NET 9 ile kaldırılacak. Kullanmaya devam etmek istiyorsanız, "GenerateResourceWarnOnBinaryFormatterUse" özelliğini false olarak ayarlayın.
+           Daha fazla bilgi: https://aka.ms/msbuild/net8-binaryformatter</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
@@ -1083,7 +1093,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
         <source>MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</source>
-        <target state="new">MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</target>
+        <target state="translated">MSB3826: \"{1}\" öğesindeki \"{0}\" kaynağı .NET üzerinde çalışırken MSBuild tarafından desteklenmeyen \"{2}\" MIME türünü kullanıyor.</target>
         <note>{StrBegin="MSB3826: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.OutputDoesntExist">
@@ -1405,12 +1415,12 @@
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.NoPlatformsListed">
         <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</source>
-        <target state="new">MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</target>
+        <target state="translated">MSB3982: EnableDynamicPlatformResolution doğru ancak başvurulan proje '{0}', 'Platforms' veya 'Platform' meta veri kümesine sahip değil. Proje belirli bir platform olmadan oluşturulur.</target>
         <note>{StrBegin="MSB3982: "}</note>
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
         <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
-        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
+        <target state="translated">Başvurulan '{0}' projesinin platform özelliği mevcut projenin platformuyla eşleşiyor: '{1}'. Başvurulan proje, genel bir Platform özelliği olmadan oluşturulur.</target>
         <note />
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.SamePlatform">
@@ -1596,7 +1606,7 @@
       </trans-unit>
       <trans-unit id="RemoveDir.EmptyPath">
         <source>MSB3232: An empty directory was passed to RemoveDir and was ignored.</source>
-        <target state="new">MSB3232: An empty directory was passed to RemoveDir and was ignored.</target>
+        <target state="translated">MSB3232: Boş bir dizin RemoveDir’e aktarıldı ve yoksayıldı.</target>
         <note>{StrBegin="MSB3232: "}</note>
       </trans-unit>
       <trans-unit id="RemoveDir.Error">
@@ -1656,7 +1666,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoBecauseBadImage">
         <source>This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</source>
-        <target state="new">This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</target>
+        <target state="translated">Hatalı bir görüntü olduğundan bu başvuru "CopyLocal" değil. Yerel bir ikili olabilir veya bütünleştirilmiş kod olmayabilir.</target>
         <note>
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
@@ -2127,7 +2137,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
         <source>TargetFramework Profile List Paths:</source>
-        <target state="new">TargetFramework Profile List Paths:</target>
+        <target state="translated">TargetFramework Profil Listesi Yolları:</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">
@@ -2152,7 +2162,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
         <source>Updating assembly cache file "{0}".</source>
-        <target state="new">Updating assembly cache file "{0}".</target>
+        <target state="translated">Derleme önbelleği dosyası "{0}" güncelleştiriliyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -2377,7 +2387,7 @@
       </trans-unit>
       <trans-unit id="ResolveKeySource.PfxUnsupported">
         <source>PFX signing not supported on .NET Core.</source>
-        <target state="new">PFX signing not supported on .NET Core.</target>
+        <target state="translated">PFX imzalama .NET Core üzerinde desteklenmiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveKeySource.ResolvedThumbprintEmpty">
@@ -2651,7 +2661,7 @@
       </trans-unit>
       <trans-unit id="Unzip.ZipSlipExploit">
         <source>Entry is outside the target directory: "{0}"</source>
-        <target state="new">Entry is outside the target directory: "{0}"</target>
+        <target state="translated">Girdi, hedef dizinin dışında: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
@@ -2731,7 +2741,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
         <source>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</source>
-        <target state="new">'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</target>
+        <target state="translated">"{0}" üzerindeki 'WriteOnlyWhenDifferent' özniteliği, yalnızca 'Overwrite="true"' olduğunda etkili olur.</target>
         <note />
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
@@ -2811,7 +2821,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.SecuritySettingsViaUseTrustedSettings">
         <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
-        <target state="new">You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</target>
+        <target state="translated">UseTrustedSettings parametresi aracılığıyla esnek XSLT güvenlik ayarlarını etkinleştiriyorsunuz. Bu ayarın güvenlik üzerindeki etkileri hakkında daha fazla bilgi için lütfen https://aka.ms/msbuild/xsltransformation-task adresine bakın.</target>
         <note />
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">

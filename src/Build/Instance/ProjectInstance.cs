@@ -561,7 +561,9 @@ namespace Microsoft.Build.Execution
             this.CreateTargetsSnapshot(data.Targets, data.DefaultTargets, data.InitialTargets, data.BeforeTargets, data.AfterTargets);
             this.CreateImportsSnapshot(data.ImportClosure, data.ImportClosureWithDuplicates);
 
-            this.Toolset = data.Toolset; // UNDONE: This isn't immutable, should be cloned or made immutable; it currently has a pointer to project collection
+            // Toolset and task registry are logically immutable after creation, and shareable by project instances
+            //  with same evaluation (global/local properties) - which is guaranteed here (the passed in data is recreated on evaluation if needed)
+            this.Toolset = data.Toolset;
             this.SubToolsetVersion = data.SubToolsetVersion;
             this.TaskRegistry = data.TaskRegistry;
 
@@ -609,7 +611,7 @@ namespace Microsoft.Build.Execution
                     _properties.Set(property.DeepClone(_isImmutable));
                 }
 
-                _items = new ItemDictionary<ProjectItemInstance>(that._items.ItemTypes.Count);
+                _items = new ItemDictionary<ProjectItemInstance>(that._items.Count);
 
                 foreach (ProjectItemInstance item in that.Items)
                 {
@@ -641,10 +643,8 @@ namespace Microsoft.Build.Execution
                     ProjectItemDefinitionInstance>)this).AfterTargets = CreateCloneDictionary(
                     ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
                         ProjectItemDefinitionInstance>)that).AfterTargets, StringComparer.OrdinalIgnoreCase);
-                this.TaskRegistry =
-                    that.TaskRegistry; // UNDONE: This isn't immutable, should be cloned or made immutable; it currently has a pointer to project collection
-
-                // These are immutable so we don't need to clone them:
+                // These are immutable (or logically immutable after creation) so we don't need to clone them:
+                this.TaskRegistry = that.TaskRegistry;
                 this.Toolset = that.Toolset;
                 this.SubToolsetVersion = that.SubToolsetVersion;
                 _targets = that._targets;

@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
@@ -47,12 +45,12 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get any contained properties.
         /// </summary>
-        public ICollection<ProjectPropertyElement> Properties => new ReadOnlyCollection<ProjectPropertyElement>(Children.OfType<ProjectPropertyElement>());
+        public ICollection<ProjectPropertyElement> Properties => GetChildrenOfType<ProjectPropertyElement>();
 
         /// <summary>
         /// Get any contained properties.
         /// </summary>
-        public ICollection<ProjectPropertyElement> PropertiesReversed => new ReadOnlyCollection<ProjectPropertyElement>(ChildrenReversed.OfType<ProjectPropertyElement>());
+        public ICollection<ProjectPropertyElement> PropertiesReversed => GetChildrenReversedOfType<ProjectPropertyElement>();
 
         /// <summary>
         /// Convenience method that picks a location based on a heuristic:

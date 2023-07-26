@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Text;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
 
@@ -18,7 +20,7 @@ namespace Microsoft.Build.UnitTests
         public void IndentBiggerThanBuffer_IndentedAndNotAligned(string input, bool aligned)
         {
             string indent = "    ";
-            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: aligned);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: aligned, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: false, prefixWidth: indent.Length);
 
@@ -30,7 +32,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("12345")]
         public void NoAlignNoIndent_NotAlignedEvenIfBiggerThanBuffer(string input)
         {
-            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: false);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: false, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: false, prefixWidth: 0);
 
@@ -43,7 +45,7 @@ namespace Microsoft.Build.UnitTests
         public void NoBufferWidthNoIndent_NotAligned(int sizeOfMessage)
         {
             string input = new string('.', sizeOfMessage);
-            var aligner = new ConsoleOutputAligner(bufferWidth: -1, alignMessages: false);
+            var aligner = new ConsoleOutputAligner(bufferWidth: -1, alignMessages: false, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: false, prefixWidth: 0);
 
@@ -55,7 +57,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("12345")]
         public void WithoutBufferWidthWithoutIndentWithAlign_NotIndentedAndNotAligned(string input)
         {
-            var aligner = new ConsoleOutputAligner(bufferWidth: -1, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: -1, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: false, prefixWidth: 0);
 
@@ -67,7 +69,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("12345")]
         public void NoAlignPrefixAlreadyWritten_NotChanged(string input)
         {
-            var aligner = new ConsoleOutputAligner(bufferWidth: 10, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 10, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: true, prefixWidth: 0);
 
@@ -80,7 +82,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("  ", "1")]
         public void SmallerThanBuffer_NotAligned(string indent, string input)
         {
-            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: false, prefixWidth: indent.Length);
 
@@ -93,7 +95,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("  ", "12", "  1", "  2")]
         public void BiggerThanBuffer_AlignedWithIndent(string indent, string input, string expected1stLine, string expected2ndLine)
         {
-            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: false, prefixWidth: indent.Length);
 
@@ -114,7 +116,7 @@ namespace Microsoft.Build.UnitTests
                                   "  4\n")]
         public void XTimesBiggerThanBuffer_AlignedToMultipleLines(string indent, string input, string expected)
         {
-            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: false, prefixWidth: indent.Length);
 
@@ -128,7 +130,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("  ", "12", "1", "  2")]
         public void BiggerThanBufferWithPrefixAlreadyWritten_AlignedWithIndentFromSecondLine(string indent, string input, string expected1stLine, string expected2ndLine)
         {
-            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: true, prefixWidth: indent.Length);
 
@@ -142,7 +144,7 @@ namespace Microsoft.Build.UnitTests
         public void MultiLineWithoutAlign_NotChanged(string input)
         {
             input = input.Replace("\n", Environment.NewLine);
-            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: false);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: false, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: true, prefixWidth: 0);
 
@@ -165,7 +167,7 @@ namespace Microsoft.Build.UnitTests
         {
             expected = expected.Replace("\n", Environment.NewLine) + Environment.NewLine;
 
-            var aligner = new ConsoleOutputAligner(bufferWidth: 10, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 10, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: true, prefixWidth: 2);
 
@@ -179,7 +181,7 @@ namespace Microsoft.Build.UnitTests
         public void ShortMultiLineWithAlign_NoChange(string input)
         {
             input = input.Replace("\n", Environment.NewLine);
-            var aligner = new ConsoleOutputAligner(bufferWidth: 10, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 10, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: true, prefixWidth: 0);
 
@@ -202,7 +204,7 @@ namespace Microsoft.Build.UnitTests
         public void ShortMultiLineWithMixedNewLines_NewLinesReplacedByActualEnvironmentNewLines(string input)
         {
             string expected = input.Replace("\r", "").Replace("\n", Environment.NewLine) + Environment.NewLine;
-            var aligner = new ConsoleOutputAligner(bufferWidth: 10, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 10, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: true, prefixWidth: 0);
 
@@ -217,7 +219,7 @@ namespace Microsoft.Build.UnitTests
         {
             input = input.Replace("\n", Environment.NewLine);
             expected = expected.Replace("\n", Environment.NewLine);
-            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: true, prefixWidth: prefix.Length);
 
@@ -231,7 +233,7 @@ namespace Microsoft.Build.UnitTests
         {
             input = input.Replace("\n", Environment.NewLine);
             expected = expected.Replace("\n", Environment.NewLine);
-            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 4, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: false, prefixWidth: prefix.Length);
 
@@ -244,7 +246,7 @@ namespace Microsoft.Build.UnitTests
         public void ShortTextWithTabs_NoChange(string input)
         {
             input = input.Replace("\n", Environment.NewLine);
-            var aligner = new ConsoleOutputAligner(bufferWidth: 50, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: 50, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: true, prefixWidth: 0);
 
@@ -259,7 +261,7 @@ namespace Microsoft.Build.UnitTests
         public void LastTabOverLimit_NoChange(string prefix, string input, int bufferWidthWithoutNewLine, bool prefixAlreadyWritten)
         {
             input = input.Replace("\n", Environment.NewLine);
-            var aligner = new ConsoleOutputAligner(bufferWidth: bufferWidthWithoutNewLine + 1, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: bufferWidthWithoutNewLine + 1, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: prefixAlreadyWritten, prefixWidth: prefix.Length);
 
@@ -274,7 +276,7 @@ namespace Microsoft.Build.UnitTests
         public void LastTabAtLimit_NoChange(string prefix, string input, int bufferWidthWithoutNewLine, bool prefixAlreadyWritten)
         {
             input = input.Replace("\n", Environment.NewLine);
-            var aligner = new ConsoleOutputAligner(bufferWidth: bufferWidthWithoutNewLine + 1, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: bufferWidthWithoutNewLine + 1, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: prefixAlreadyWritten, prefixWidth: prefix.Length);
 
@@ -289,7 +291,7 @@ namespace Microsoft.Build.UnitTests
         public void TabsMakesItJustOverLimit_IndentAndAlign(string prefix, string input, int bufferWidthWithoutNewLine, bool prefixAlreadyWritten)
         {
             input = input.Replace("\n", Environment.NewLine);
-            var aligner = new ConsoleOutputAligner(bufferWidth: bufferWidthWithoutNewLine + 1, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: bufferWidthWithoutNewLine + 1, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input + "x", prefixAlreadyWritten: prefixAlreadyWritten, prefixWidth: prefix.Length);
 
@@ -366,11 +368,17 @@ namespace Microsoft.Build.UnitTests
         {
             input = input.Replace("\n", Environment.NewLine);
             expected = expected.Replace("\n", Environment.NewLine);
-            var aligner = new ConsoleOutputAligner(bufferWidth: bufferWidthWithoutNewLine + 1, alignMessages: true);
+            var aligner = new ConsoleOutputAligner(bufferWidth: bufferWidthWithoutNewLine + 1, alignMessages: true, stringBuilderProvider: new TestStringBuilderProvider());
 
             string output = aligner.AlignConsoleOutput(message: input, prefixAlreadyWritten: prefixAlreadyWritten, prefixWidth: prefix.Length);
 
             output.ShouldBe(expected);
+        }
+
+        private sealed class TestStringBuilderProvider : IStringBuilderProvider
+        {
+            public StringBuilder Acquire(int capacity) => new StringBuilder(capacity);
+            public string GetStringAndRelease(StringBuilder builder) => builder.ToString();
         }
     }
 }

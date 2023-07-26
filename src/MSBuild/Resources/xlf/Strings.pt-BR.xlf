@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="new">Build {0} in {1}s</target>
+        <target state="translated">Construir {0} em {1}s</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -21,37 +21,37 @@
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
         <source>failed</source>
-        <target state="new">failed</target>
+        <target state="translated">falhou</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with errors</source>
-        <target state="new">failed with errors</target>
+        <target state="translated">falhou com erros</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with warnings</source>
-        <target state="new">failed with warnings</target>
+        <target state="translated">falhou com avisos</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_Succeeded">
         <source>succeeded</source>
-        <target state="new">succeeded</target>
+        <target state="translated">êxito</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
-        <target state="new">succeeded with warnings</target>
+        <target state="translated">êxito com avisos</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="CommandLine">
@@ -80,12 +80,12 @@
                      but isn't up to date.
                      (Short form: -q)
     </source>
-        <target state="new">  -question
-                     (Experimental) Question whether there is any build work.
-                     MSBuild will error out when it detects a target or task
-                     that can be incremental (has inputs and outputs),
-                     but isn't up to date.
-                     (Short form: -q)
+        <target state="translated">  -pergunta
+                     (Experimental) Questione se há algum trabalho de construção.
+                     O MSBuild apresentará um erro ao detectar um destino ou tarefa
+                     que pode ser incremental (possui entradas e saídas),
+                     não está atualizado.
+                     (forma abreviada: -q)
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -95,7 +95,7 @@
       </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1064: Low priority value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1064: o valor de baixa prioridade não é válido. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -105,7 +105,7 @@
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
-        <target state="new">MSBuild version {0} for {1}</target>
+        <target state="translated">Versão do MSBuild {0} para {1}</target>
         <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</note>
       </trans-unit>
       <trans-unit id="CurrentDirectory">
@@ -226,25 +226,25 @@ arquivo de resposta.
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -isolateProjects[:True|MessageUponIsolationViolation|False]
-                     Causes MSBuild to build each project in isolation.
+        <target state="translated">  -isolarProjects[:True|MessageUponIsolationViolation|False]
+                     Faz com que o MSBuild crie cada projeto isoladamente.
 
-                     When set to "MessageUponIsolationViolation" (or its short
-                     form "Message"), only the results from top-level targets
-                     are serialized if the -outputResultsCache switch is
-                     supplied. This is to mitigate the chances of an
-                     isolation-violating target on a dependency project using
-                     incorrect state due to its dependency on a cached target
-                     whose side effects would not be taken into account.
-                     (For example, the definition of a property.)
+                     Quando definido como "MessageUponIsolationViolation" (ou sua abreviação
+                     formulário "Mensagem"), apenas os resultados dos alvos de nível superior
+                     são serializados se a opção -outputResultsCache for
+                     fornecido. Isso é para mitigar as chances de um
+                     alvo de violação de isolamento em um projeto de dependência usando
+                     estado incorreto devido à sua dependência de um destino armazenado em cache
+                     cujos efeitos colaterais não seriam levados em consideração.
+                     (Por exemplo, a definição de uma propriedade.)
 
-                     This is a more restrictive mode of MSBuild as it requires
-                     that the project graph be statically discoverable at
-                     evaluation time, but can improve scheduling and reduce
-                     memory overhead when building a large set of projects.
-                     (Short form: -isolate)
+                     Este é um modo mais restritivo do MSBuild, pois requer
+                     que o gráfico do projeto seja descoberto estaticamente em
+                     tempo de avaliação, mas pode melhorar o agendamento e reduzir
+                     sobrecarga de memória ao criar um grande conjunto de projetos.
+                     (forma abreviada: -isolar)
 
-                     This flag is experimental and may not work as intended.
+                     Este sinalizador é experimental e pode não funcionar conforme o esperado.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -359,13 +359,13 @@ arquivo de resposta.
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="new">  -warnNotAsError[:code[;code2]]
-                     List of warning codes to treats not treat as errors.
-                     Use a semicolon or a comma to separate
-                     multiple warning codes. Has no effect if the -warnaserror
-                     switch is not set.
+        <target state="translated">  -warningNotAsError[:code[;code2]]
+                     Lista de códigos de aviso para tratar e não tratar como erros.
+                     Use ponto e vírgula ou vírgula para separar
+                     vários códigos de advertência. Não tem efeito se o -warnaserror
+                     interruptor não está definido.
 
-                     Example:
+                     Exemplo:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -556,11 +556,15 @@ arquivo de resposta.
                            is set separately by
                            -fileloggerparameters.
 </source>
-        <target state="needs-review-translation">  -verbosity:&lt;level&gt; Exibir este volume de informações no log de eventos.
-                     Os níveis de detalhamento disponíveis são: q[uiet], m[inimal],
-                     n[ormal], d[etailed] e diag[nostic]. (Forma abreviada: -v)
+        <target state="translated">  -verbosidade:&lt;level&gt; Exibe essa quantidade de informações no log de eventos.
+                     Os níveis de verbosidade disponíveis são: q[uiet], m[inimal],
+                     n[ormal], d[detalhado] e diag[nóstico]. (forma abreviada: -v)
                      Exemplo:
-                       -verbosity:quiet
+                       - verbosidade: quieto
+
+                     Nota: verbosidade dos registradores de arquivos
+                           é definido separadamente por
+                           -fileloggerparameters.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -609,42 +613,42 @@ arquivo de resposta.
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Parameters to console logger. (Short form: -clp)
-                     The available parameters are:
-                        PerformanceSummary--Show time spent in tasks, targets
-                            and projects.
-                        Summary--Show error and warning summary at the end.
-                        NoSummary--Don't show error and warning summary at the
-                            end.
-                        ErrorsOnly--Show only errors.
-                        WarningsOnly--Show only warnings.
-                        NoItemAndPropertyList--Don't show list of items and
-                            properties at the start of each project build.
-                        ShowCommandLine--Show TaskCommandLineEvent messages
-                        ShowTimestamp--Display the Timestamp as a prefix to any
-                            message.
-                        ShowEventId--Show eventId for started events, finished
-                            events, and messages
-                        ForceNoAlign--Does not align the text to the size of
-                            the console buffer
-                        DisableConsoleColor--Use the default console colors
-                            for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
-                        EnableMPLogging--Enable the multiprocessor logging
-                            style even when running in non-multiprocessor
-                            mode. This logging style is on by default.
-                        ForceConsoleColor--Use ANSI console colors even if
-                            console does not support it
-                        PreferConsoleColor--Use ANSI console colors only if
-                            target console does support it
-                     Verbosity--overrides the -verbosity setting for this
-                            logger.
-                     Example:
+        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
+                     Parâmetros para o logger do console. (forma abreviada: -clp)
+                     Os parâmetros disponíveis são:
+                        PerformanceSummary--Mostra o tempo gasto em tarefas, alvos
+                            e projetos.
+                        Resumo--Mostra o resumo do erro e do aviso no final.
+                        NoSummary--Não mostra o resumo de erros e avisos no
+                            fim.
+                        ErrorOnly--Mostrar apenas erros.
+                        WarningsOnly--Mostra apenas avisos.
+                        NoItemAndPropertyList--Não mostra a lista de itens e
+                            properties no início de cada compilação do projeto.
+                        ShowCommandLine--Mostra mensagens TaskCommandLineEvent
+                        ShowTimestamp--Exibe o timestamp como um prefixo para qualquer
+                            mensagem.
+                        ShowEventId--Mostra eventId para eventos iniciados, concluídos
+                            eventos e mensagens
+                        ForceNoAlign--Não alinha o texto ao tamanho de
+                            o buffer do console
+                        DisableConsoleColor--Use as cores padrão do console
+                            para todas as mensagens de registro.
+                        DisableMPLogging-- Desativa o multiprocessador
+                            estilo de registro de saída ao executar em
+                            modo não multiprocessador.
+                        EnableMPLogging--Habilita o log do multiprocessador
+                            estilo mesmo quando executado em não multiprocessador
+                            modo. Esse estilo de criação de log está ativado por padrão.
+                        ForceConsoleColor--Use as cores do console ANSI mesmo se
+                            o console não suporta isso
+                        PreferConsoleColor--Use as cores do console ANSI somente se
+                            o console de destino suporta isso
+                     Verbosity--substitui a configuração -verbosity para este
+                            registrador.
+                     Exemplo:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
-                                                 Verbosity=minimal
+                                                 Verbosidade=mínimo
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -743,10 +747,10 @@ arquivo de resposta.
                      will read build results from. If -isolateProjects is set
                      to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Semicolon separated list of input cache files that MSBuild
-                     will read build results from. If -isolateProjects is set
-                     to False, this sets it to True. (short form: -irc)
+        <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     Lista separada por ponto-e-vírgula de arquivos de cache de entrada que o MSBuild
+                     irá ler os resultados da compilação. Se -isolateProjects estiver definido
+                     para Falso, isso o define como Verdadeiro. (forma abreviada: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -760,11 +764,11 @@ arquivo de resposta.
                      If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="new">  -outputResultsCache:[cacheFile]
-                     Output cache file where MSBuild will write the contents of
-                     its build result caches at the end of the build.
-                     If -isolateProjects is set to False, this sets it to True.
-                     (short form: -orc)
+        <target state="translated">  -outputResultsCache:[cacheFile]
+                     Arquivo de cache de saída onde o MSBuild gravará o conteúdo de
+                     seu resultado de compilação é armazenado em cache no final da compilação.
+                     Se -isolateProjects for definido como False, isso o definirá como True.
+                     (forma abreviada: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -1387,7 +1391,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="ProjectBuilding_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="new">{0}{1} {2} ({3}s)</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project building.
       {0}: indentation - few spaces to visually indent row
@@ -1398,7 +1402,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="ProjectBuilding_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="new">{0}{1} {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project building including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1410,7 +1414,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="new">{0}{1} {2} ({3}s)</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1421,7 +1425,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
         <source> → {0}</source>
-        <target state="new"> → {0}</target>
+        <target state="translated"> → {0}</target>
         <note>
       Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
       {0}: VT100 coded hyperlink to project output directory
@@ -1429,7 +1433,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="new">{0}{1} {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1488,14 +1492,14 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="new">Restore complete ({0}s)</target>
+        <target state="translated">Restauração concluída ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="new">Restore {0} in {1}s</target>
+        <target state="translated">Restaurar {0} em {1}s</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1563,7 +1567,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="UnsupportedSwitchForSolutionFiles">
         <source>The '{0}' switch is not supported for solution files.</source>
-        <target state="new">The '{0}' switch is not supported for solution files.</target>
+        <target state="translated">A opção '{0}' não é suportada para arquivos de solução.</target>
         <note />
       </trans-unit>
       <trans-unit id="Using35Engine">

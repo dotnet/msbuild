@@ -1,6 +1,0 @@
-﻿  project [31;1mfailed with errors[m (0.0s)
-[31;1m    ❌︎[7D[6C MSBUILD : error : Error![m
-[?25l[1F
-[?25h
-Build [31;1mfailed with errors[m in 5.0s
-]9;4;0;\

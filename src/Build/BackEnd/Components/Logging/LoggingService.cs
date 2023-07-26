@@ -1438,7 +1438,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (ShouldTreatWarningAsMessage(warningEvent))
                 {
-                    loggingEvent = new BuildMessageEventArgs(
+                    buildEventArgs = new BuildMessageEventArgs(
                         warningEvent.Subcategory,
                         warningEvent.Code,
                         warningEvent.File,
@@ -1458,7 +1458,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
                 else if (ShouldTreatWarningAsError(warningEvent))
                 {
-                    loggingEvent = new BuildErrorEventArgs(
+                    buildEventArgs = new BuildErrorEventArgs(
                         warningEvent.Subcategory,
                         warningEvent.Code,
                         warningEvent.File,
@@ -1477,13 +1477,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            if (loggingEvent is BuildErrorEventArgs errorEvent)
+            if (buildEventArgs is BuildErrorEventArgs errorEvent)
             {
                 // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
                 _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
             }
 
-            if (loggingEvent is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
+            if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
             {
                 int key = GetWarningsAsErrorOrMessageKey(projectFinishedEvent);
                 _warningsAsErrorsByProject?.Remove(key);
@@ -1491,12 +1491,18 @@ namespace Microsoft.Build.BackEnd.Logging
                 _warningsAsMessagesByProject?.Remove(key);
             }
 
-            if (loggingEvent is BuildEventArgs loggingEventBuildArgs)
+            if (loggingEvent is BuildEventArgs)
             {
-                RouteBuildEvent(loggingEventBuildArgs);
+                RouteBuildEvent(buildEventArgs);
             }
             else if (loggingEvent is KeyValuePair<int, BuildEventArgs> loggingEventKeyValuePair)
             {
+                if (loggingEventKeyValuePair.Value != buildEventArgs)
+                {
+                    // buildEventArgs has been altered, lets use that new one
+                    loggingEventKeyValuePair = new KeyValuePair<int, BuildEventArgs>(loggingEventKeyValuePair.Key, buildEventArgs);
+                }
+
                 RouteBuildEvent(loggingEventKeyValuePair);
             }
         }
@@ -1651,8 +1657,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 // The null logger has no effect on minimum verbosity.
                 Execution.BuildManager.NullLogger => null,
 
-                // The live logger consumes only high priority messages.
-                _ => innerLogger.GetType().FullName == "Microsoft.Build.Logging.LiveLogger.LiveLogger"
+                // The terminal logger consumes only high priority messages.
+                _ => innerLogger.GetType().FullName == "Microsoft.Build.Logging.TerminalLogger.TerminalLogger"
                     ? MessageImportance.High
                     // If the logger is not on our allow list, there are no importance guarantees. Fall back to "any importance".
                     : MessageImportance.Low,
