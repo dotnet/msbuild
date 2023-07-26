@@ -38,12 +38,7 @@ using FileLogger = Microsoft.Build.Logging.FileLogger;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorLogger;
-using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using TerminalLogger = Microsoft.Build.Logging.TerminalLogger.TerminalLogger;
-using Microsoft.Build.Shared.Debugging;
-using Microsoft.Build.Experimental;
-using Microsoft.Build.Framework.Telemetry;
-using Microsoft.Build.Internal;
 
 #nullable disable
 
