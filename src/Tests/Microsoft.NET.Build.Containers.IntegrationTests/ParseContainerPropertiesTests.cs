@@ -107,7 +107,7 @@ public class ParseContainerPropertiesTests
         var (project, logs, d) = ProjectInitializer.InitProject(new () {
             [ContainerBaseImage] = "mcr.microsoft.com/dotnet/runtime:7.0",
             [ContainerRegistry] = "localhost:5010",
-            [ContainerRepository] = "㓳㓴㓵㓶㓷㓹㓺㓻",
+            [ContainerImageName] = "㓳㓴㓵㓶㓷㓹㓺㓻",
             [ContainerImageTag] = "5.0"
         });
         using var _ = d;
