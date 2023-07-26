@@ -1,4 +1,4 @@
 <StoreArtifacts>
-  <Package Id="Newtonsoft.Json" Version="13.0.1" />
+  <Package Id="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
   <Package Id="Newtonsoft.Json" Version ="9.0.2-beta2"/>
 </StoreArtifacts>

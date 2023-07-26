@@ -407,5 +407,12 @@ namespace Microsoft.NET.TestFramework
             return !File.Exists(extensionsImportAfterPath);
         }
 
+        public static string GetNewtonsoftJsonPackageVersion()
+        {
+            var assembly = Assembly.GetCallingAssembly();
+            var testAssemblyMetadata = assembly.GetCustomAttributes<AssemblyMetadataAttribute>();
+            return testAssemblyMetadata.SingleOrDefault(a => a.Key == "NewtonsoftJsonPackageVersion").Value;
+        }
+
     }
 }
