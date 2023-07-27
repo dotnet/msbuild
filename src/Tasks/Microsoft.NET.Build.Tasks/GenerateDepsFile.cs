@@ -8,10 +8,6 @@ using Newtonsoft.Json;
 using NuGet.Packaging.Core;
 using NuGet.RuntimeModel;
 using NuGet.ProjectModel;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace Microsoft.NET.Build.Tasks
 {

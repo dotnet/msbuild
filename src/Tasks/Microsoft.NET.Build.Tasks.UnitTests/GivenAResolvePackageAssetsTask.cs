@@ -3,10 +3,6 @@
 
 using FluentAssertions;
 using Microsoft.Build.Framework;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using Xunit;
 using static Microsoft.NET.Build.Tasks.ResolvePackageAssets;

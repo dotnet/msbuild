@@ -2,11 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Tools.Internal;
 using Moq;
-using Xunit;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {

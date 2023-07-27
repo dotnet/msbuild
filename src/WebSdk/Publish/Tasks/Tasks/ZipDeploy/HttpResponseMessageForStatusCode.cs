@@ -1,10 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
 {
@@ -17,9 +14,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
 
         public HttpStatusCode StatusCode { get; private set; }
 
-        public Task<Stream> GetResponseBodyAsync()
+        public System.Threading.Tasks.Task<Stream> GetResponseBodyAsync()
         {
-            return Task.FromResult<Stream>(new MemoryStream());
+            return System.Threading.Tasks.Task.FromResult<Stream>(new MemoryStream());
         }
 
         public IEnumerable<string> GetHeader(string name)

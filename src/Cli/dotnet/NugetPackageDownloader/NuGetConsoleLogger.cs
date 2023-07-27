@@ -3,7 +3,6 @@
 
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Common;
-using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 {

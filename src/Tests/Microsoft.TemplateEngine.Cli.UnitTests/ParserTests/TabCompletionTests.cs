@@ -4,7 +4,6 @@
 using System.CommandLine;
 using System.CommandLine.Completions;
 using FakeItEasy;
-using Microsoft.NET.TestFramework;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
 using Microsoft.TemplateEngine.Cli.Commands;

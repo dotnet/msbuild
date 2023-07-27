@@ -2,19 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 extern alias sdkResolver;
-using FluentAssertions;
 using Microsoft.Build.Framework;
 using Microsoft.DotNet.MSBuildSdkResolver;
-using Microsoft.DotNet.Tools.Test.Utilities;
-using System.Collections.Generic;
-using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using Xunit;
-using Xunit.Abstractions;
-using System;
-using Microsoft.NET.TestFramework;
-using System.Linq;
 using Microsoft.DotNet.DotNetSdkResolver;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]

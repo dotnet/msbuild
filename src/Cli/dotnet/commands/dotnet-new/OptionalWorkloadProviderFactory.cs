@@ -3,7 +3,6 @@
 
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
-using System;
 
 namespace Microsoft.DotNet.Tools.New
 {

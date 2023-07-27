@@ -3,10 +3,7 @@
 
 #nullable disable
 
-using System;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
 

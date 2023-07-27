@@ -1,10 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using FluentAssertions;
-using Microsoft.DotNet.Tools.Test;
-using Microsoft.NET.TestFramework;
-using Xunit;
+using TestCommand = Microsoft.DotNet.Tools.Test.TestCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {

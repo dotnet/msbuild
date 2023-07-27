@@ -1,19 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.NET.Sdk.Publish.Tasks.MsDeploy;
 using Microsoft.NET.Sdk.Publish.Tasks.Properties;
-using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
 {
@@ -37,7 +29,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
             _logMessages = logMessages;
         }
 
-        public async Task<DeploymentResponse> PollDeploymentStatusAsync(string deploymentUrl, string userName, string password)
+        public async System.Threading.Tasks.Task<DeploymentResponse> PollDeploymentStatusAsync(string deploymentUrl, string userName, string password)
         {
             var tokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(MaxMinutesToWait));
 
@@ -73,13 +65,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
                     return deploymentResponse;
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(StatusRefreshDelaySeconds));
+                await System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(StatusRefreshDelaySeconds));
             }
 
             return deploymentResponse ?? new() { Status = DeployStatus.Unknown };
         }
 
-        private async Task<T> InvokeGetRequestWithRetryAsync<T>(string url, string userName, string password, int retryCount, TimeSpan retryDelay, CancellationTokenSource cts)
+        private async System.Threading.Tasks.Task<T> InvokeGetRequestWithRetryAsync<T>(string url, string userName, string password, int retryCount, TimeSpan retryDelay, CancellationTokenSource cts)
         {
             IHttpResponse response = null;
             await RetryAsync(async () =>
@@ -101,7 +93,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
             }
         }
 
-        private async Task RetryAsync(Func<Task> func, int retryCount, TimeSpan retryDelay)
+        private async System.Threading.Tasks.Task RetryAsync(Func<System.Threading.Tasks.Task> func, int retryCount, TimeSpan retryDelay)
         {
             while (true)
             {
@@ -119,7 +111,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
                     retryCount--;
                 }
 
-                await Task.Delay(retryDelay);
+                await System.Threading.Tasks.Task.Delay(retryDelay);
             }
         }
 

@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using System.IO;
 using Microsoft.Build.Evaluation;
 using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
 

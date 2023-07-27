@@ -3,7 +3,6 @@
 
 #nullable disable
 
-using System;
 
 namespace Microsoft.Extensions.Tools.Internal
 {

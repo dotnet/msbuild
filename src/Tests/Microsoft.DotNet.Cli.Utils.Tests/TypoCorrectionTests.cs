@@ -3,8 +3,6 @@
 
 #nullable enable
 
-using FluentAssertions;
-using Xunit;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {

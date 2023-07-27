@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.NET.TestFramework.Utilities

@@ -2,13 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using Xunit;
-using System.Linq;
-using System.Xml.Linq;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {

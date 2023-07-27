@@ -3,8 +3,6 @@
 
 using Microsoft.Build.Evaluation;
 using NuGet.Frameworks;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Microsoft.DotNet.Tools.ProjectExtensions
 {

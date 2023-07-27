@@ -1,14 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
 using System.Text.Json;
 using Microsoft.NET.Sdk.WebAssembly;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using FluentAssertions;
-using Xunit;
-using Xunit.Abstractions;
 using ResourceHashesByNameDictionary = System.Collections.Generic.Dictionary<string, string>;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests

@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 
 namespace Microsoft.TemplateEngine.MSBuildEvaluation

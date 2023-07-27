@@ -3,10 +3,7 @@
 
 #nullable enable
 
-using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.DotNet.Cli.Utils

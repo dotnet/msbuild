@@ -17,4 +17,15 @@
   <ItemGroup>
     <PackageReference Include="xunit" Version="2.4.1" />
   </ItemGroup>
+
+  <!-- Global usings removal -->
+  <!-- See: https://learn.microsoft.com/dotnet/core/project-sdk/msbuild-props#using -->
+  <ItemGroup>
+    <Using Remove="FluentAssertions" />
+    <Using Remove="Microsoft.NET.TestFramework" />
+    <Using Remove="Microsoft.NET.TestFramework.Assertions" />
+    <Using Remove="Microsoft.NET.TestFramework.Commands" />
+    <Using Remove="Microsoft.NET.TestFramework.ProjectConstruction" />
+    <Using Remove="Microsoft.NET.TestFramework.Utilities" />
+  </ItemGroup>
 </Project>

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Globalization;
-using Microsoft.NET.TestFramework;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
 

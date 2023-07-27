@@ -3,13 +3,10 @@
 
 #nullable enable
 
-using System.Collections.Generic;
-using System.IO;
 using Microsoft.DotNet.Tools.New.PostActionProcessors;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 
 namespace Microsoft.DotNet.Cli.New.Tests
 {

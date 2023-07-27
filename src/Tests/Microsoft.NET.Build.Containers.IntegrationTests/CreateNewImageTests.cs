@@ -2,18 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Utilities;
-using FluentAssertions;
-using Xunit;
-using Xunit.Abstractions;
 using Microsoft.NET.Build.Containers.IntegrationTests;
 using Microsoft.NET.Build.Containers.UnitTests;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework;
 using FakeItEasy;
 using Microsoft.Build.Framework;
 using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.NET.Build.Containers.Tasks.IntegrationTests;
 

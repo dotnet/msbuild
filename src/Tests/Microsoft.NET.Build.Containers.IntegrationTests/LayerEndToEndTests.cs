@@ -4,8 +4,6 @@
 using System.Formats.Tar;
 using System.IO.Compression;
 using System.Security.Cryptography;
-using Xunit.Abstractions;
-using Xunit;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
 

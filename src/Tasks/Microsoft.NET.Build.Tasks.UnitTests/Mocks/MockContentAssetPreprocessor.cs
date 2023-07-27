@@ -2,10 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using NuGet.Common;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {

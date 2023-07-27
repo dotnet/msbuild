@@ -2,15 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Xunit;
-using FluentAssertions;
-using Microsoft.DotNet.Cli.Utils;
-using System.IO;
-using System;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {

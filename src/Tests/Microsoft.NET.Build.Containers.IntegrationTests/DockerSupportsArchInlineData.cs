@@ -3,9 +3,6 @@
 
 using System.Reflection;
 using System.Text.Json;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Xunit.Abstractions;
 using Xunit.Sdk;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;

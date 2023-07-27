@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.Collections.Generic;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Uninstall.LocalizableStrings;
 using Microsoft.DotNet.Workloads.Workload.Uninstall;
 using Microsoft.DotNet.Workloads.Workload;

@@ -4,9 +4,7 @@
 using Microsoft.DotNet.ApiCompatibility.Runner;
 using Microsoft.DotNet.ApiCompatibility.Tests;
 using Microsoft.DotNet.PackageValidation.Tests;
-using Microsoft.NET.TestFramework;
 using Moq;
-using Xunit;
 
 namespace Microsoft.DotNet.PackageValidation.Validators.Tests
 {

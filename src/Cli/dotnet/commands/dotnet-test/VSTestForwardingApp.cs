@@ -3,10 +3,6 @@
 
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace Microsoft.DotNet.Cli
 {
