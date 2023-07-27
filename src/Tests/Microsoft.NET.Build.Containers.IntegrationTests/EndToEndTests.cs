@@ -11,6 +11,7 @@ using Microsoft.NET.TestFramework.Commands;
 using Microsoft.DotNet.Cli.Utils;
 using System.IO;
 using System.Xml.Linq;
+using Microsoft.NET.Build.Containers.Resources;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
 
@@ -26,13 +27,13 @@ public class EndToEndTests
 
     public static string NewImageName([CallerMemberName] string callerMemberName = "")
     {
-        bool normalized = ContainerHelpers.NormalizeImageName(callerMemberName, out string? normalizedName);
-        if (!normalized)
+        var (normalizedName, warning, error) = ContainerHelpers.NormalizeImageName(callerMemberName);
+        if (error is (var format, var args))
         {
-            return normalizedName!;
+            throw new ArgumentException(String.Format(Strings.ResourceManager.GetString(format)!, args));
         }
 
-        return callerMemberName;
+        return normalizedName!; // non-null if error is null
     }
 
     [DockerDaemonAvailableFact]

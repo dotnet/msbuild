@@ -223,15 +223,6 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER2014: Invalid {0}: {1}..
-        /// </summary>
-        internal static string InvalidContainerImageName {
-            get {
-                return ResourceManager.GetString("InvalidContainerImageName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to CONTAINER2015: {0}: &apos;{1}&apos; was not a valid Environment Variable. Ignoring..
         /// </summary>
         internal static string InvalidEnvVar {
@@ -241,11 +232,20 @@ namespace Microsoft.NET.Build.Containers.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CONTAINER2005: The first character of the image name must be a lowercase letter or a digit..
+        ///   Looks up a localized string similar to CONTAINER2005: The inferred image name &apos;{0}&apos; contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character..
         /// </summary>
-        internal static string InvalidImageName {
+        internal static string InvalidImageName_EntireNameIsInvalidCharacters {
             get {
-                return ResourceManager.GetString("InvalidImageName", resourceCulture);
+                return ResourceManager.GetString("InvalidImageName_EntireNameIsInvalidCharacters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CONTAINER2005: The first character of the image name &apos;{0}&apos; must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _..
+        /// </summary>
+        internal static string InvalidImageName_NonAlphanumericStartCharacter {
+            get {
+                return ResourceManager.GetString("InvalidImageName_NonAlphanumericStartCharacter", resourceCulture);
             }
         }
         

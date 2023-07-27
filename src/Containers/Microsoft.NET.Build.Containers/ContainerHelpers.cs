@@ -277,8 +277,8 @@ public static class ContainerHelpers
             if (!Char.IsLetterOrDigit(containerImageName, 0))
             {
                 // The name did not start with an alphanumeric character, so we should normalize it.
-                var error = (nameof(Strings.InvalidImageName_NonAlphanumericStartCharacter), containerImageName)
-                return (null, null, error)
+                var error = (nameof(Strings.InvalidImageName_NonAlphanumericStartCharacter), new []{ containerImageName });
+                return (null, null, error);
             }
 
             // normalize the name
@@ -289,20 +289,20 @@ public static class ContainerHelpers
             if (potentialNormalizedName.All(c => c == '-'))
             {
                 // The name was normalized to all dashes, so there was nothing recoverable. We should throw.
-                var error = (nameof(Strings.InvalidImageName_EntireNameIsInvalidCharacters), containerImageName)
-                return (null, null, error)
+                var error = (nameof(Strings.InvalidImageName_EntireNameIsInvalidCharacters), new [] { containerImageName });
+                return (null, null, error);
             }
 
             // check for warning/notification that we did indeed perform normalization
             if (potentialNormalizedName != containerImageName)
             {
-                var warning = (nameof(Strings.NormalizedContainerName), new[]{ containerImageName, normalizedImageName })
+                var warning = (nameof(Strings.NormalizedContainerName), new[]{ containerImageName, potentialNormalizedName });
                 return (potentialNormalizedName, warning, null);
             }
             // user value was already normalized, so we don't need to do anything
             else
             {
-                return (potentialNormalizedName, null, null)
+                return (potentialNormalizedName, null, null);
             }
         }
     }

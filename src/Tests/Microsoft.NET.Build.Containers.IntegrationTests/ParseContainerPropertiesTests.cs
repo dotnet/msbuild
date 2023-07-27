@@ -10,9 +10,10 @@ using static Microsoft.NET.Build.Containers.KnownStrings.Properties;
 
 namespace Microsoft.NET.Build.Containers.Tasks.IntegrationTests;
 
+[Collection("Docker tests")]
 public class ParseContainerPropertiesTests
 {
-    [Fact]
+    [DockerDaemonAvailableFact]
     public void Baseline()
     {
         var (project, _, d) = ProjectInitializer.InitProject(new () {
@@ -34,7 +35,7 @@ public class ParseContainerPropertiesTests
         instance.GetItems("ProjectCapability").Select(i => i.EvaluatedInclude).ToArray().Should().BeEquivalentTo(new[] { "NetSdkOCIImageBuild" });
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public void SpacesGetReplacedWithDashes()
     {
          var (project, _, d) = ProjectInitializer.InitProject(new () {
@@ -50,7 +51,7 @@ public class ParseContainerPropertiesTests
         Assert.Equal("7.0", instance.GetPropertyValue(ContainerBaseTag));
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public void RegexCatchesInvalidContainerNames()
     {
          var (project, logs, d) = ProjectInitializer.InitProject(new () {
@@ -62,10 +63,10 @@ public class ParseContainerPropertiesTests
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
         Assert.True(instance.Build(new[]{ComputeContainerConfig}, new [] { logs }, null, out var outputs));
-        Assert.Contains(logs.Messages, m => m.Message?.Contains("'ContainerImageName' was not a valid container image name, it was normalized to 'dotnet-testimage'") == true);
+        Assert.Contains(logs.Messages, m => m.Message?.Contains("'dotnet testimage' was not a valid container image name, it was normalized to 'dotnet-testimage'") == true);
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public void RegexCatchesInvalidContainerTags()
     {
         var (project, logs, d) = ProjectInitializer.InitProject(new () {
@@ -82,7 +83,7 @@ public class ParseContainerPropertiesTests
         Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2007);
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public void CanOnlySupplyOneOfTagAndTags()
     {
         var (project, logs, d) = ProjectInitializer.InitProject(new () {
@@ -100,7 +101,7 @@ public class ParseContainerPropertiesTests
         Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2008);
     }
 
-    [Fact]
+    [DockerDaemonAvailableFact]
     public void FailsOnCompletelyInvalidRepositoryNames()
     {
         var (project, logs, d) = ProjectInitializer.InitProject(new () {
@@ -114,6 +115,6 @@ public class ParseContainerPropertiesTests
         Assert.False(instance.Build(new[]{ComputeContainerConfig},  new [] { logs }, null, out var outputs));
 
         Assert.True(logs.Errors.Count > 0);
-        Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2014);
+        Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2005);
     }
 }
