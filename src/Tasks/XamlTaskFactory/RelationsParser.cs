@@ -216,10 +216,12 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 var xmlDocument = new XmlDocument();
                 XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
-                xmlDocument.Load(reader);
+                using (XmlReader reader = XmlReader.Create(new StringReader(xml), settings))
+                {
+                    xmlDocument.Load(reader);
 
-                return xmlDocument;
+                    return xmlDocument;
+                }
             }
             catch (XmlException e)
             {

@@ -42,7 +42,6 @@ using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Utilities;
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using Microsoft.Win32;
-using System.Windows.Forms;
 #endif
 
 #nullable disable
