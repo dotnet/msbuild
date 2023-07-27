@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
+using Microsoft.IO;
+using File = System.IO.File;
 
 #nullable disable
 
@@ -174,17 +177,21 @@ namespace Microsoft.Build.Tasks.Xaml
         #endregion
 
         /// <summary>
-        /// The method that loads in an XML file
+        /// The method that loads in an XML file.
         /// </summary>
-        /// <param name="fileName">the xml file containing switches and properties</param>
-        private XmlDocument LoadFile(string fileName)
+        /// <param name="filePath">the xml file containing switches and properties.</param>
+        private XmlDocument LoadFile(string filePath)
         {
             try
             {
                 var xmlDocument = new XmlDocument();
-                XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                XmlReader reader = XmlReader.Create(fileName, settings);
-                xmlDocument.Load(reader);
+                XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                FileStream fs = File.OpenRead(filePath);
+                using (XmlReader reader = XmlReader.Create(fs, settings))
+                {
+                    xmlDocument.Load(reader);
+                }
+
                 return xmlDocument;
             }
             catch (FileNotFoundException e)
@@ -211,6 +218,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                 XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
                 xmlDocument.Load(reader);
+
                 return xmlDocument;
             }
             catch (XmlException e)
@@ -221,7 +229,7 @@ namespace Microsoft.Build.Tasks.Xaml
         }
 
         /// <summary>
-        /// Parses the xml file
+        /// Parses the xml file.
         /// </summary>
         public bool ParseXmlDocument(string fileName)
         {
