@@ -31,6 +31,9 @@ public abstract class BuildExceptionBase : Exception
     { }
 
     // This is needed to allow opting back in to BinaryFormatter serialization
+#if NET8_0_OR_GREATER
+    [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
     private protected BuildExceptionBase(SerializationInfo info, StreamingContext context)
         : base(info, context)
     { }

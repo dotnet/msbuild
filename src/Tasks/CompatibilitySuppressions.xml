@@ -2,7 +2,7 @@
 <!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
-    <!-- For ease of logging the "not supported on Core" message, this task is a
+<!-- For ease of logging the "not supported on Core" message, this task is a
          TaskExtension on netstandard/netcore. Since the type is sealed there,
          that shouldn't cause any implementation problems since no one can derive
          from it and try to call TaskExtension.Log. -->
@@ -10,6 +10,15 @@
     <Target>T:Microsoft.Build.Tasks.ResolveComReference</Target>
     <Left>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Left>
     <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
+  </Suppression>
+
+  <!-- We don't have the net7 reference assemblies handy to pass in to compare against the net8 ones -->
+  <Suppression>
+    <DiagnosticId>CP1002</DiagnosticId>
+    <Target>System.Security.Cryptography, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</Target>
+    <Left>ref/net7.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
 
   <!-- PKV004 for netstandard2.0-supporting TFs that we do not have runtime assemblies for.
@@ -65,7 +74,7 @@
     <DiagnosticId>PKV004</DiagnosticId>
     <Target>Xamarin.XboxOne,Version=v0.0</Target>
   </Suppression>
-  <!-- For updating target framework from net 7.0 to net 8.0 in MSBuild 17.8 suppress baseline package validation error PKV006 on net 7.0 -->
+<!-- For updating target framework from net 7.0 to net 8.0 in MSBuild 17.8 suppress baseline package validation error PKV006 on net 7.0 -->
   <Suppression>
     <DiagnosticId>PKV006</DiagnosticId>
     <Target>net7.0</Target>
