@@ -75,11 +75,6 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             EnsureNotDisposed();
 
-            if (_globalProjectCacheDescriptor != null)
-            {
-                _ = GetProjectCachePluginAsync(_globalProjectCacheDescriptor, projectGraph, buildRequestConfiguration: null, cancellationToken);
-            }
-
             Parallel.ForEach(
                 projectGraph.ProjectNodes,
                 s_parallelOptions,

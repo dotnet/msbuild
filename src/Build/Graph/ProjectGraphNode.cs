@@ -32,7 +32,7 @@ namespace Microsoft.Build.Graph
             Metadata = new()
             {
                 { ItemMetadataNames.ProjectReferenceTargetsMetadataName, projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName) },
-                { "SkipNonexistentTargets" , projectReferenceTarget.GetMetadataValue("SkipNonexistentTargets") },
+                { SkipNonexistentTargetsMetadataName , projectReferenceTarget.GetMetadataValue(SkipNonexistentTargetsMetadataName) },
                 { ProjectReferenceTargetIsOuterBuildMetadataName, projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName) },
                 { ItemMetadataNames.PropertiesMetadataName , projectReferenceTarget.GetMetadataValue(ItemMetadataNames.PropertiesMetadataName) },
                 { ItemMetadataNames.AdditionalPropertiesMetadataName , projectReferenceTarget.GetMetadataValue(ItemMetadataNames.AdditionalPropertiesMetadataName) },
@@ -55,8 +55,8 @@ namespace Microsoft.Build.Graph
                 return result;
             }
 
-            return string.Empty;
-            // throw new System.Exception($"Metadata Not Found {metadataName} in {ItemType}::{EvaluatedInclude} snapshot.");
+            // return string.Empty;
+            throw new System.Exception($"Metadata Not Found {metadataName} in {ItemType}::{EvaluatedInclude} snapshot.");
         }
 
         public void SetMetadata(string metadataName, string value)
@@ -86,11 +86,10 @@ namespace Microsoft.Build.Graph
             var innerBuildPropName = instance.GetPropertyValue(PropertyNames.InnerBuildProperty);
             var innerBuildPropValue = instance.GetPropertyValue(innerBuildPropName);
 
-            instance.GetPropertyValue(instance.GetPropertyValue(PropertyNames.InnerBuildPropertyValues));
+            var innerBuildPropValues = instance.GetPropertyValue(PropertyNames.InnerBuildPropertyValues);
+            var innerBuildPropValuesValue = instance.GetPropertyValue(innerBuildPropValues);
 
-            var innerBuildPropValues1 = instance.GetPropertyValue(PropertyNames.InnerBuildPropertyValues);
-            var innerBuildPropValues2 = instance.GetPropertyValue(innerBuildPropValues1);
-            var isOuterBuild = string.IsNullOrWhiteSpace(innerBuildPropValue) && !string.IsNullOrWhiteSpace(innerBuildPropValues2);
+            var isOuterBuild = string.IsNullOrWhiteSpace(innerBuildPropValue) && !string.IsNullOrWhiteSpace(innerBuildPropValuesValue);
             var isInnerBuild = !string.IsNullOrWhiteSpace(innerBuildPropValue);
 
             ProjectType = isOuterBuild
@@ -106,7 +105,7 @@ namespace Microsoft.Build.Graph
                     { EnableDynamicPlatformResolutionPropertyName, instance.GetPropertyValue(EnableDynamicPlatformResolutionPropertyName) },
                     { "TargetFrameworks", instance.GetPropertyValue("TargetFrameworks") },
                     { PropertyNames.InnerBuildProperty, innerBuildPropName },
-                    { PropertyNames.InnerBuildPropertyValues, innerBuildPropValues1 },
+                    { PropertyNames.InnerBuildPropertyValues, innerBuildPropValues },
                     { "UsingMicrosoftNETSdk", instance.GetPropertyValue("UsingMicrosoftNETSdk") },
                     { "DisableTransitiveProjectReferences", instance.GetPropertyValue("DisableTransitiveProjectReferences") },
                     { SolutionProjectGenerator.CurrentSolutionConfigurationContents, instance.GetPropertyValue(SolutionProjectGenerator.CurrentSolutionConfigurationContents) },
@@ -115,8 +114,15 @@ namespace Microsoft.Build.Graph
                     { "PlatformLookupTable", instance.GetPropertyValue("PlatformLookupTable") },
                 };
 
-            Properties[innerBuildPropValue] = innerBuildPropValue;
-            Properties[innerBuildPropValues1] = innerBuildPropValues2;
+            if (!string.IsNullOrEmpty(innerBuildPropValue))
+            {
+                Properties[innerBuildPropValue] = innerBuildPropValue;
+            }
+
+            if (!string.IsNullOrEmpty(innerBuildPropValues))
+            {
+                Properties[innerBuildPropValues] = innerBuildPropValuesValue;
+            }
 
             var projectReferenceTargets = instance.GetItems(ItemTypeNames.ProjectReference).ToList();
 

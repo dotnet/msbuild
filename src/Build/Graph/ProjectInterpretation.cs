@@ -31,6 +31,7 @@ namespace Microsoft.Build.Graph
         private const string InnerBuildReferenceItemName = "_ProjectSelfReference";
         internal static string TransitiveReferenceItemName = "_TransitiveProjectReference";
         internal const string AddTransitiveProjectReferencesInStaticGraphPropertyName = "AddTransitiveProjectReferencesInStaticGraph";
+        internal const string SkipNonexistentTargetsMetadataName = "SkipNonexistentTargets";
         private const string PlatformLookupTableMetadataName = "PlatformLookupTable";
         private const string PlatformMetadataName = "Platform";
         private const string PlatformsMetadataName = "Platforms";
@@ -194,7 +195,6 @@ namespace Microsoft.Build.Graph
                     }
                     else
                     {
-                        // referenceGlobalProperties[PlatformMetadataName] = selectedPlatform;
                         SetProperty(referenceGlobalProperties, PlatformMetadataName, selectedPlatform);
                     }
                 }
@@ -498,7 +498,7 @@ namespace Microsoft.Build.Graph
                         if (projectReferenceTarget.EvaluatedInclude.Equals(entryTarget, StringComparison.OrdinalIgnoreCase))
                         {
                             string targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
-                            bool skipNonexistentTargets = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue("SkipNonexistentTargets"));
+                            bool skipNonexistentTargets = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue(SkipNonexistentTargetsMetadataName));
                             bool targetsAreForOuterBuild = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName));
                             TargetSpecification[] targets = ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue)
                                 .Select(t => new TargetSpecification(t, skipNonexistentTargets)).ToArray();
@@ -563,7 +563,5 @@ namespace Microsoft.Build.Graph
             ConversionUtilities.ConvertStringToBool(msbuildString, nullOrWhitespaceIsFalse: true);
 
         private static bool MSBuildStringIsFalse(string msbuildString) => !MSBuildStringIsTrue(msbuildString);
-
-        internal static ProjectType GetProjectType(ProjectInstanceSnapshot projectInstance) => projectInstance.ProjectType;
     }
 }

@@ -82,25 +82,16 @@ namespace Microsoft.Build.Graph
                 return;
             }
 
-            var gcLatencyMode = System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.SustainedLowLatency;
-            try
-            {
+            var allParsedProjects = FindGraphNodes();
 
-                var allParsedProjects = FindGraphNodes();
+            AddEdges(allParsedProjects);
 
-                AddEdges(allParsedProjects);
+            EntryPointNodes = _entryPointConfigurationMetadata.Select(e => allParsedProjects[e].GraphNode).ToList();
 
-                EntryPointNodes = _entryPointConfigurationMetadata.Select(e => allParsedProjects[e].GraphNode).ToList();
+            DetectCycles(EntryPointNodes, _projectInterpretation, allParsedProjects);
 
-                DetectCycles(EntryPointNodes, _projectInterpretation, allParsedProjects);
-
-                RootNodes = GetGraphRoots(EntryPointNodes);
-                ProjectNodes = allParsedProjects.Values.Select(p => p.GraphNode).ToList();
-            }
-            finally
-            {
-                System.Runtime.GCSettings.LatencyMode = gcLatencyMode;
-            }
+            RootNodes = GetGraphRoots(EntryPointNodes);
+            ProjectNodes = allParsedProjects.Values.Select(p => p.GraphNode).ToList();
         }
 
         private static IReadOnlyCollection<ProjectGraphNode> GetGraphRoots(IReadOnlyCollection<ProjectGraphNode> entryPointNodes)

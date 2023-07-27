@@ -132,17 +132,17 @@ namespace Microsoft.Build.Graph.UnitTests
 
         internal static bool IsOuterBuild(ProjectGraphNode project)
         {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.OuterBuild;
+            return project.ProjectInstance.ProjectType == ProjectInterpretation.ProjectType.OuterBuild;
         }
 
         internal static bool IsInnerBuild(ProjectGraphNode project)
         {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.InnerBuild;
+            return project.ProjectInstance.ProjectType == ProjectInterpretation.ProjectType.InnerBuild;
         }
 
         internal static bool IsNotMultitargeting(ProjectGraphNode project)
         {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.NonMultitargeting;
+            return project.ProjectInstance.ProjectType == ProjectInterpretation.ProjectType.NonMultitargeting;
         }
 
         internal static ProjectGraphNode GetFirstNodeWithProjectNumber(ProjectGraph graph, int projectNum)
