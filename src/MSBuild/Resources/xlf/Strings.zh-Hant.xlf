@@ -12,7 +12,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="new">Build {0} in {1}s</target>
+        <target state="translated">在 {1} 秒內建置 {0}</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -21,37 +21,37 @@
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
         <source>failed</source>
-        <target state="new">failed</target>
+        <target state="translated">失敗</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with errors</source>
-        <target state="new">failed with errors</target>
+        <target state="translated">失敗但有錯誤</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with warnings</source>
-        <target state="new">failed with warnings</target>
+        <target state="translated">失敗但有警告</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_Succeeded">
         <source>succeeded</source>
-        <target state="new">succeeded</target>
+        <target state="translated">成功</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
-        <target state="new">succeeded with warnings</target>
+        <target state="translated">成功但有警告</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="CommandLine">
@@ -80,12 +80,12 @@
                      but isn't up to date.
                      (Short form: -q)
     </source>
-        <target state="new">  -question
-                     (Experimental) Question whether there is any build work.
-                     MSBuild will error out when it detects a target or task
-                     that can be incremental (has inputs and outputs),
-                     but isn't up to date.
-                     (Short form: -q)
+        <target state="translated">  -question
+                     (實驗性) 問題: 是否有任何組建可運作。
+                     MSBuild 偵測到可增量 (有輸入和輸出)
+                     但並非最新的目標或工作時，
+                     它會發生錯誤。
+                     (簡短形式: -q)
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -95,7 +95,7 @@
       </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1064: Low priority value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1064: 低優先順序值無效。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -105,7 +105,7 @@
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
-        <target state="new">MSBuild version {0} for {1}</target>
+        <target state="translated">{1} 的 MSBuild 版本 {0}</target>
         <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</note>
       </trans-unit>
       <trans-unit id="CurrentDirectory">
@@ -225,25 +225,25 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="new">  -isolateProjects[:True|MessageUponIsolationViolation|False]
-                     Causes MSBuild to build each project in isolation.
+        <target state="translated">  -isolateProjects[:True|MessageUponIsolationViolation|False]
+                     導致 MSBuild 在隔離中建置每個專案。
 
-                     When set to "MessageUponIsolationViolation" (or its short
-                     form "Message"), only the results from top-level targets
-                     are serialized if the -outputResultsCache switch is
-                     supplied. This is to mitigate the chances of an
-                     isolation-violating target on a dependency project using
-                     incorrect state due to its dependency on a cached target
-                     whose side effects would not be taken into account.
-                     (For example, the definition of a property.)
+                     設定為 "MessageUponIsolationViolation" 
+                     (或其簡短形式 "Message") 時，如果提供 
+                     -outputResultsCache 切換，則只會序列化來自
+                     頂層目標的結果。這是為了降低相依性專案上，
+                     由於其相依性位於快取目標上 (其副作用
+                     不會納入考量)，而使用不正確狀態
+                     造成違反隔離目標的機會。
+                     (例如，屬性的定義。)
 
-                     This is a more restrictive mode of MSBuild as it requires
-                     that the project graph be statically discoverable at
-                     evaluation time, but can improve scheduling and reduce
-                     memory overhead when building a large set of projects.
-                     (Short form: -isolate)
+                     這是 MSBuild 更具限制的模式，
+                     因為它要求專案圖形在評估階段可靜態探索，
+                     但可能會改善排程，並減少建置大量專案時
+                     的記憶體額外負荷。
+                     (簡短形式: -isolate)
 
-                     This flag is experimental and may not work as intended.
+                     此旗標是實驗性，可能無法如預期運作。
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -358,13 +358,13 @@
                      Example:
                        -warnNotAsError:MSB3026
     </source>
-        <target state="new">  -warnNotAsError[:code[;code2]]
-                     List of warning codes to treats not treat as errors.
-                     Use a semicolon or a comma to separate
-                     multiple warning codes. Has no effect if the -warnaserror
-                     switch is not set.
+        <target state="translated">  -warnNotAsError[:code[;code2]]
+                     要視為不視為錯誤的警告代碼清單。
+                     使用分號或逗號分隔
+                     多個警告代碼。如果未設定 -warnaserror
+                     切換，則沒有作用。
 
-                     Example:
+                     範例:
                        -warnNotAsError:MSB3026
     </target>
         <note>
@@ -555,11 +555,15 @@
                            is set separately by
                            -fileloggerparameters.
 </source>
-        <target state="needs-review-translation">  -verbosity:&lt;層級&gt; 在事件記錄檔中顯示此數量的資訊。
-                     可用的詳細程度層級為: q[uiet]、m[inimal]、
+        <target state="translated">  -verbosity:&lt;level&gt; 在事件記錄中顯示此數量的資訊。
+                    可用的詳細層級為: q[uiet]、m[inimal]、
                      n[ormal]、d[etailed] 和 diag[nostic]。(簡短形式: -v)
-                     範例:
+                    範例:
                        -verbosity:quiet
+
+                     注意: 檔案記錄器的詳細層級
+                           是由 -fileloggerparameters
+                           個別設定。
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -608,40 +612,40 @@
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Parameters to console logger. (Short form: -clp)
-                     The available parameters are:
-                        PerformanceSummary--Show time spent in tasks, targets
-                            and projects.
-                        Summary--Show error and warning summary at the end.
-                        NoSummary--Don't show error and warning summary at the
-                            end.
-                        ErrorsOnly--Show only errors.
-                        WarningsOnly--Show only warnings.
-                        NoItemAndPropertyList--Don't show list of items and
-                            properties at the start of each project build.
-                        ShowCommandLine--Show TaskCommandLineEvent messages
-                        ShowTimestamp--Display the Timestamp as a prefix to any
-                            message.
-                        ShowEventId--Show eventId for started events, finished
-                            events, and messages
-                        ForceNoAlign--Does not align the text to the size of
-                            the console buffer
-                        DisableConsoleColor--Use the default console colors
-                            for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
-                        EnableMPLogging--Enable the multiprocessor logging
-                            style even when running in non-multiprocessor
-                            mode. This logging style is on by default.
-                        ForceConsoleColor--Use ANSI console colors even if
-                            console does not support it
-                        PreferConsoleColor--Use ANSI console colors only if
-                            target console does support it
-                     Verbosity--overrides the -verbosity setting for this
-                            logger.
-                     Example:
+        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
+                     主控台記錄器的參數。(簡短形式: -clp)
+                     可用的參數為:
+                        PerformanceSummary--顯示工作、目標
+                            及專案所花費的時間。
+                        Summary--結束時顯示錯誤與警告摘要。
+                        NoSummary--結束時不顯示錯誤
+                            與警告摘要。
+                        ErrorsOnly--只顯示錯誤。
+                        WarningsOnly--只顯示警告。
+                        NoItemAndPropertyList--不在每個專案開始建置時，
+                            顯示專案與屬性清單。
+                        ShowCommandLine--顯示 TaskCommandLineEvent 訊息
+                        ShowTimestamp--在所有訊息開頭顯示
+                            時間戳記。
+                        ShowEventId--顯示已開始之事件、已完成之事件
+                            以及訊息的事件識別碼
+                        ForceNoAlign--不將文字調整成主控台
+                            緩衝區的大小
+                        DisableConsoleColor--為所有記錄訊息使用預設的
+                            主控台色彩。
+                        DisableMPLogging-- 在非多處理器模式下執行時，
+                            停用輸出的多處理器
+                            記錄樣式。
+                        EnableMPLogging--在非多處理器模式下執行時，
+                            啟用多處理器記錄樣式。
+                            此記錄樣式預設為啟用。
+                        ForceConsoleColor--即使主控台不支援 ANSI 主控台色彩，
+                            也一律使用該色彩
+                        PreferConsoleColor--僅在目標主控台目標確實支援 ANSI 主控台色彩時
+                            才使用它
+                     Verbosity--覆寫此記錄器的 -verbosity
+                             設定。
+                     範例:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
@@ -742,10 +746,10 @@
                      will read build results from. If -isolateProjects is set
                      to False, this sets it to True. (short form: -irc)
    </source>
-        <target state="new">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Semicolon separated list of input cache files that MSBuild
-                     will read build results from. If -isolateProjects is set
-                     to False, this sets it to True. (short form: -irc)
+        <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
+                     MSBuild 會從中讀取建置結果的輸入快取檔案
+                     以分號分隔的清單。如果已將 -isolateProjects
+                     設為 False，則這會將它設為 True。(簡短形式: -irc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -759,11 +763,11 @@
                      If -isolateProjects is set to False, this sets it to True.
                      (short form: -orc)
    </source>
-        <target state="new">  -outputResultsCache:[cacheFile]
-                     Output cache file where MSBuild will write the contents of
-                     its build result caches at the end of the build.
-                     If -isolateProjects is set to False, this sets it to True.
-                     (short form: -orc)
+        <target state="translated">  -outputResultsCache:[cacheFile]
+                     MSBuild 將在建置結束時寫入其建置結果快取內容
+                     所在的輸出快取檔案。
+                     如果已將 -isolateProjects 設為 False，則這會將它設為 True。
+                     (簡短形式: -orc)
    </target>
         <note>
       LOCALIZATION: The following should not be localized: MSBuild, -isolate
@@ -1356,6 +1360,13 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="NameInvalid">
+        <source>MSBUILD: error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
+        <target state="new">MSBUILD: error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB5016: "}
+    </note>
+      </trans-unit>
       <trans-unit id="NotWarnAsErrorWithoutWarnAsError">
         <source>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</source>
         <target state="translated">MSBUILD : error MSB1062: 除非同時指定 -warnaserror 切換參數且保留空白，否則無法指定 -warnnotaserror 切換參數。</target>
@@ -1386,7 +1397,7 @@
       </trans-unit>
       <trans-unit id="ProjectBuilding_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="new">{0}{1} {2} ({3}s)</target>
+        <target state="translated">{0}{1} {2} ({3} 秒)</target>
         <note>
       Project building.
       {0}: indentation - few spaces to visually indent row
@@ -1397,7 +1408,7 @@
       </trans-unit>
       <trans-unit id="ProjectBuilding_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="new">{0}{1} {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} ({4} 秒)</target>
         <note>
       Project building including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1409,7 +1420,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="new">{0}{1} {2} ({3}s)</target>
+        <target state="translated">{0}{1} {2} ({3} 秒)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1420,7 +1431,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
         <source> → {0}</source>
-        <target state="new"> → {0}</target>
+        <target state="translated"> → {0}</target>
         <note>
       Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
       {0}: VT100 coded hyperlink to project output directory
@@ -1428,7 +1439,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="new">{0}{1} {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} ({4} 秒)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1487,14 +1498,14 @@
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="new">Restore complete ({0}s)</target>
+        <target state="translated">還原完成 ({0} 秒)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="new">Restore {0} in {1}s</target>
+        <target state="translated">在 {1} 秒內還原 {0}</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1542,6 +1553,21 @@
         <target state="translated">MSBUILD : error MSB1059: 無法列印目標。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedDisabled">
+        <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
+        <target state="new">Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedNotSupported">
+        <source>Terminal Logger was not used because the output is not supported.</source>
+        <target state="new">Terminal Logger was not used because the output is not supported.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedRedirected">
+        <source>Terminal Logger was not used because the output is being redirected to a file.</source>
+        <target state="new">Terminal Logger was not used because the output is being redirected to a file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
         <target state="translated">MSBUILD : error MSB1002: 這個參數不使用任何參數。</target>
@@ -1562,7 +1588,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedSwitchForSolutionFiles">
         <source>The '{0}' switch is not supported for solution files.</source>
-        <target state="new">The '{0}' switch is not supported for solution files.</target>
+        <target state="translated">解決方案檔案不支援 '{0}' 切換。</target>
         <note />
       </trans-unit>
       <trans-unit id="Using35Engine">

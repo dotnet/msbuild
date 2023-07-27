@@ -320,7 +320,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             string? designTimeBuild = buildRequestConfiguration.GlobalProperties[DesignTimeProperties.DesignTimeBuild]?.EvaluatedValue;
             string? buildingProject = buildRequestConfiguration.GlobalProperties[DesignTimeProperties.BuildingProject]?.EvaluatedValue;
             return ConversionUtilities.ConvertStringToBool(designTimeBuild, nullOrWhitespaceIsFalse: true)
-                || (buildingProject != null && !ConversionUtilities.ConvertStringToBool(designTimeBuild, nullOrWhitespaceIsFalse: true));
+                || (buildingProject != null && !ConversionUtilities.ConvertStringToBool(buildingProject, nullOrWhitespaceIsFalse: true));
         }
 
         public void PostCacheRequest(CacheRequest cacheRequest, CancellationToken cancellationToken)

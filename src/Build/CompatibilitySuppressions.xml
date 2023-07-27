@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <!-- Need to suppress due to AppCompat limitation https://github.com/dotnet/sdk/issues/32922	 -->
+  <!-- Need to suppress due to AppCompat limitation https://github.com/dotnet/sdk/issues/32922 -->
   <Suppression>
     <DiagnosticId>CP0007</DiagnosticId>
     <Target>T:Microsoft.Build.BackEnd.SdkResolution.SdkResolverException</Target>
@@ -23,17 +24,22 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0007</DiagnosticId>
-    <Target>T:Microsoft.Build.Exceptions.InvalidToolsetDefinitionException</Target>
+    <Target>T:Microsoft.Build.Exceptions.InvalidProjectFileException</Target>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0007</DiagnosticId>
-    <Target>T:Microsoft.Build.Exceptions.InvalidProjectFileException</Target>
+    <Target>T:Microsoft.Build.Exceptions.InvalidToolsetDefinitionException</Target>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0007</DiagnosticId>
     <Target>T:Microsoft.Build.Experimental.ProjectCache.ProjectCacheException</Target>
     <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <!-- For updating target framework from net 7.0 to net 8.0 in MSBuild 17.8 suppress baseline package validation error PKV006 on net 7.0 -->
+  <Suppression>
+    <DiagnosticId>PKV006</DiagnosticId>
+    <Target>net7.0</Target>
   </Suppression>
 </Suppressions>

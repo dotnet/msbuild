@@ -55,6 +55,11 @@
       LOCALIZATION: Do not localize the following words: ProjectReference, ProjectReferenceTargets
     </note>
       </trans-unit>
+      <trans-unit id="CannotCopyFromElementOfThatType">
+        <source>MSB4277: Cannot copy from object of that type.</source>
+        <target state="new">MSB4277: Cannot copy from object of that type.</target>
+        <note>{StrBegin="MSB4277: "}</note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: Impossible d'étendre les métadonnées dans l'expression "{0}". {1}</target>
@@ -64,12 +69,12 @@
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
         <source>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="new">MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</target>
+        <target state="translated">MSB4271: la variable d'environnement MSBUILDDISABLEFEATURESFROMVERSION a un format non valide. Activation de toutes les versions des vagues de changements. Valeur entrée : {0}. Vagues de changements actuelles : {1}.</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
         <source>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="new">MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</target>
+        <target state="translated">MSB4272: la variable d'environnement MSBUILDDISABLEFEATURESFROMVERSION a une valeur correspondant à une version hors rotation. Utilisation par défaut de la vague de changements version {0}. Valeur entrée : {1}. Vagues de changements actuelles : {2}.</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -94,7 +99,7 @@
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
-        <target state="new">MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</target>
+        <target state="translated">MSB4276: Le programme de résolution du SDK par défaut n’a pas pu résoudre le SDK «{0}», car le répertoire «{1}» n’existait pas.</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
@@ -109,7 +114,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentDerivedPropertyRead">
         <source>Property '{0}' with value '{1}' expanded from the environment.</source>
-        <target state="new">Property '{0}' with value '{1}' expanded from the environment.</target>
+        <target state="translated">Propriété '{0}' avec la valeur '{1}' développée à partir de l’environnement.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -130,9 +135,14 @@
       <trans-unit id="FailedToResolveSDK">
         <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
   {1}</source>
-        <target state="new">Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+        <target state="translated">Impossible de résoudre le SDK «{0}». Exactement l’un des messages de sondage ci-dessous indique pourquoi nous n’avons pas pu résoudre le Kit de développement logiciel (SDK). Examinez et résolvez ce message pour spécifier correctement le Kit de développement logiciel (SDK).
   {1}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="General.TwoVectorsMustHaveSameLength">
+        <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
+        <target state="new">MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</target>
+        <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -156,7 +166,7 @@
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
         <source>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</source>
-        <target state="new">MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</target>
+        <target state="translated">MSB4120: La définition de l’élément '{0}' dans la cible se référence elle-même via la métadonnée '{1}' (qualifiée ou non qualifiée). Cela peut entraîner l’expansion involontaire et l’application croisée d’éléments préexistants. Plus d’informations : https://aka.ms/msbuild/metadata-self-ref</target>
         <note>{StrBegin="MSB4120: "}</note>
       </trans-unit>
       <trans-unit id="KillingProcessWithPid">
@@ -166,7 +176,7 @@
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
         <source>Loading the following project cache plugin: {0}</source>
-        <target state="new">Loading the following project cache plugin: {0}</target>
+        <target state="translated">Chargement du plug-in de cache de projet suivant :{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -198,7 +208,7 @@
       </trans-unit>
       <trans-unit id="NodeReused">
         <source>Reusing node {0} (PID: {1}).</source>
-        <target state="new">Reusing node {0} (PID: {1}).</target>
+        <target state="translated">Réutilisation du {0} de nœud (PID : {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -352,7 +362,7 @@
       </trans-unit>
       <trans-unit id="PropertyOutsidePropertyGroupInTarget">
         <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
-        <target state="new">MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</target>
+        <target state="translated">MSB4067: L’élément &lt;{0}&gt; sous l’élément &lt;{1}&gt; n’est pas reconnu. Si vous souhaitiez qu’il s’agit d’une propriété, placez-la dans un élément &lt;PropertyGroup&gt;.</target>
         <note>{StrBegin="MSB4067: "}</note>
       </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
@@ -372,7 +382,7 @@
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
-        <target state="new">SDK resolver "{0}" returned null.</target>
+        <target state="translated">Le programme de résolution du Kit de développement logiciel (SDK) «{0}» a retourné null.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -428,7 +438,7 @@
       </trans-unit>
       <trans-unit id="TaskAssemblyLoaded">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
-        <target state="new">Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</target>
+        <target state="translated">Assembly chargé pendant {0}{1}: {2} (emplacement : {3}, MVID : {4}, AppDomain : {5})</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
@@ -455,9 +465,9 @@
     </note>
       </trans-unit>
       <trans-unit id="UnhandledMSBuildError">
-        <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled.
+        <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Il s’agit d’une exception non gérée dans MSBuild -- VOTEZ POUR UN PROBLÈME EXISTANT OU ENTREZ UN NOUVEAU FICHIER À https://aka.ms/msbuild/unhandled.
+        <target state="needs-review-translation">Il s’agit d’une exception non gérée dans MSBuild -- VOTEZ POUR UN PROBLÈME EXISTANT OU ENTREZ UN NOUVEAU FICHIER À https://aka.ms/msbuild/unhandled.
     {0}</target>
         <note />
       </trans-unit>

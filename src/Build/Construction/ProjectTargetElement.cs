@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
@@ -58,22 +56,22 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get an enumerator over any child item groups
         /// </summary>
-        public ICollection<ProjectItemGroupElement> ItemGroups => new ReadOnlyCollection<ProjectItemGroupElement>(Children.OfType<ProjectItemGroupElement>());
+        public ICollection<ProjectItemGroupElement> ItemGroups => GetChildrenOfType<ProjectItemGroupElement>();
 
         /// <summary>
         /// Get an enumerator over any child property groups
         /// </summary>
-        public ICollection<ProjectPropertyGroupElement> PropertyGroups => new ReadOnlyCollection<ProjectPropertyGroupElement>(Children.OfType<ProjectPropertyGroupElement>());
+        public ICollection<ProjectPropertyGroupElement> PropertyGroups => GetChildrenOfType<ProjectPropertyGroupElement>();
 
         /// <summary>
         /// Get an enumerator over any child tasks
         /// </summary>
-        public ICollection<ProjectTaskElement> Tasks => new ReadOnlyCollection<ProjectTaskElement>(Children.OfType<ProjectTaskElement>());
+        public ICollection<ProjectTaskElement> Tasks => GetChildrenOfType<ProjectTaskElement>();
 
         /// <summary>
         /// Get an enumerator over any child onerrors
         /// </summary>
-        public ICollection<ProjectOnErrorElement> OnErrors => new ReadOnlyCollection<ProjectOnErrorElement>(Children.OfType<ProjectOnErrorElement>());
+        public ICollection<ProjectOnErrorElement> OnErrors => GetChildrenOfType<ProjectOnErrorElement>();
 
         #endregion
 

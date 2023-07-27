@@ -63,7 +63,7 @@ namespace Microsoft.Build.Graph
         {
             public TargetSpecification(string target, bool skipIfNonexistent)
             {
-                // Verify that if this target is skippable then it equals neither 
+                // Verify that if this target is skippable then it equals neither
                 // ".default" nor ".projectReferenceTargetsOrDefaultTargets".
                 ErrorUtilities.VerifyThrow(
                     !skipIfNonexistent || (!target.Equals(MSBuildConstants.DefaultTargetsMarker)
@@ -131,6 +131,8 @@ namespace Microsoft.Build.Graph
                     allowCollectionReuse: solutionConfiguration == null && !enableDynamicPlatformResolution,
                     globalPropertiesModifiers);
 
+                bool configurationDefined = false;
+
                 // Match what AssignProjectConfiguration does to resolve project references.
                 if (solutionConfiguration != null)
                 {
@@ -151,6 +153,8 @@ namespace Microsoft.Build.Graph
                         {
                             referenceGlobalProperties.Remove(PlatformMetadataName);
                         }
+
+                        configurationDefined = true;
                     }
                     else
                     {
@@ -161,11 +165,16 @@ namespace Microsoft.Build.Graph
                             referenceGlobalProperties.Remove(ConfigurationMetadataName);
                             referenceGlobalProperties.Remove(PlatformMetadataName);
                         }
+                        else
+                        {
+                            configurationDefined = true;
+                        }
                     }
                 }
 
-                // Note: Dynamic platform resolution is not enabled for sln-based builds.
-                else if (string.IsNullOrEmpty(projectReferenceItem.GetMetadataValue(SetPlatformMetadataName)) && enableDynamicPlatformResolution)
+                // Note: Dynamic platform resolution is not enabled for sln-based builds,
+                // unless the project isn't known to the solution.
+                if (enableDynamicPlatformResolution && !configurationDefined && !projectReferenceItem.HasMetadata(SetPlatformMetadataName))
                 {
                     string requesterPlatform = requesterInstance.GetPropertyValue("Platform");
                     string requesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");

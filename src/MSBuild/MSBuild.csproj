@@ -103,6 +103,9 @@
     <Compile Include="..\Shared\Modifiers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\XMakeElements.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\IKeyed.cs" />
@@ -172,7 +175,7 @@
     <Compile Include="DistributedLoggerRecord.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="LiveLogger\*.cs" />
+    <Compile Include="TerminalLogger\*.cs" />
     <Compile Include="InitializationException.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

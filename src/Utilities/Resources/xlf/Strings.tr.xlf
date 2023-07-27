@@ -27,11 +27,6 @@
         <target state="translated">Komuttan {0} koduyla çıkıldı.</target>
         <note />
       </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="translated">MSB6005: Görev başlatılmadan önce günlüğe yazmaya çalıştı. İleti: {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
-      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: Platform bildirim dosyası, "{0}" konumunda bulunamadı.</target>
@@ -64,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ToolTask.NotUpToDate">
         <source>Unable to skip task because it is not up-to-date.</source>
-        <target state="new">Unable to skip task because it is not up-to-date.</target>
+        <target state="translated">Güncel olmadığı için görev atlanamıyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">

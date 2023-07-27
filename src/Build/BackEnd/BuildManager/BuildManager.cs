@@ -2468,7 +2468,6 @@ namespace Microsoft.Build.Execution
                     // shut down.
                     submission.CompleteLogging();
 
-                    _overallBuildSuccess = _overallBuildSuccess && (submission.BuildResult.OverallResult == BuildResultCode.Success);
                     CheckSubmissionCompletenessAndRemove(submission);
                 }
 
@@ -2482,7 +2481,6 @@ namespace Microsoft.Build.Execution
 
                     submission.CompleteResults(new GraphBuildResult(submission.SubmissionId, new BuildAbortedException()));
 
-                    _overallBuildSuccess &= submission.BuildResult.OverallResult == BuildResultCode.Success;
                     CheckSubmissionCompletenessAndRemove(submission);
                 }
 
@@ -2594,8 +2592,6 @@ namespace Microsoft.Build.Execution
 
                     submission.CompleteResults(result);
 
-                    _overallBuildSuccess = _overallBuildSuccess && (_buildSubmissions[result.SubmissionId].BuildResult.OverallResult == BuildResultCode.Success);
-
                     CheckSubmissionCompletenessAndRemove(submission);
                 }
             }
@@ -2613,8 +2609,6 @@ namespace Microsoft.Build.Execution
                 {
                     submission.CompleteResults(result);
 
-                    _overallBuildSuccess &= submission.BuildResult.OverallResult == BuildResultCode.Success;
-
                     CheckSubmissionCompletenessAndRemove(submission);
                 }
             }
@@ -2630,6 +2624,7 @@ namespace Microsoft.Build.Execution
                 // If the submission has completed or never started, remove it.
                 if (submission.IsCompleted || submission.BuildRequest == null)
                 {
+                    _overallBuildSuccess &= (submission.BuildResult?.OverallResult == BuildResultCode.Success);
                     _buildSubmissions.Remove(submission.SubmissionId);
 
                     // Clear all cached SDKs for the submission
@@ -2650,6 +2645,7 @@ namespace Microsoft.Build.Execution
                 // If the submission has completed or never started, remove it.
                 if (submission.IsCompleted || !submission.IsStarted)
                 {
+                    _overallBuildSuccess &= submission.BuildResult?.OverallResult == BuildResultCode.Success;
                     _graphBuildSubmissions.Remove(submission.SubmissionId);
 
                     // Clear all cached SDKs for the submission

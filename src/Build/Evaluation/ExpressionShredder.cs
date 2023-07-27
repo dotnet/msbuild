@@ -248,7 +248,7 @@ namespace Microsoft.Build.Evaluation
                         subExpressions = new List<ItemExpressionCapture>();
                     }
 
-                    // Create an expression capture that encompases the entire expression between the @( and the )
+                    // Create an expression capture that encompasses the entire expression between the @( and the )
                     // with the item name and any separator contained within it
                     // and each transform expression contained within it (i.e. each ->XYZ)
                     ItemExpressionCapture expressionCapture = new ItemExpressionCapture(startPoint, endPoint - startPoint, Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startPoint, endPoint - startPoint)), itemName, separator, separatorStart, transformExpressions);

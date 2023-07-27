@@ -32,6 +32,11 @@
         <target state="translated">{0} ({1},{2})</target>
         <note>A file location to be embedded in a string.</note>
       </trans-unit>
+      <trans-unit id="LoggingBeforeTaskInitialization">
+        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
+        <target state="new">MSB6005: Task attempted to log before it was initialized. Message was: {0}</target>
+        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
+      </trans-unit>
       <trans-unit id="ModifyingTaskHostEnvironmentHeader">
         <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
         <target state="translated">在套用到工作主機之前，對從父節點接收的環境進行下列修改:</target>
@@ -310,7 +315,7 @@
       </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined.</source>
-        <target state="new">MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined.</target>
+        <target state="translated">MSB5029: 檔案「{3}」元素 &lt;{2}&gt; 中屬性「{1}」的值「{0}」是萬用字元，導致列舉磁碟機上的所有檔案，這很可能不是預期的結果。檢查是否一直定義參考屬性。</target>
         <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>

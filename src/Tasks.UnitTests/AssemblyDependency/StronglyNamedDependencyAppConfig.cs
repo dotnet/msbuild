@@ -38,13 +38,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// - An app.config was passed in that promotes UnifyMe version from 1.0.0.0 to 2.0.0.0
         /// - Version 1.0.0.0 of UnifyMe exists.
         /// - Version 2.0.0.0 of UnifyMe exists.
+        /// - The case is attempted on special unicode characters in path as well.
         /// Expected:
         /// - The resulting UnifyMe returned should be 2.0.0.0.
         /// Rationale:
         /// Strongly named dependencies should unify according to the bindingRedirects in the app.config.
         /// </summary>
-        [Fact]
-        public void Exists()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("\uE025\uE026")]
+        public void Exists(string appConfigNameSuffix)
         {
             // Create the engine.
             MockEngine engine = new MockEngine(_output);
@@ -59,7 +62,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                     "        <dependentAssembly>\n" +
                     "            <assemblyIdentity name='UnifyMe' PublicKeyToken='b77a5c561934e089' culture='neutral' />\n" +
                     "            <bindingRedirect oldVersion='1.0.0.0' newVersion='2.0.0.0' />\n" +
-                    "        </dependentAssembly>\n");
+                    "        </dependentAssembly>\n",
+                    appConfigNameSuffix);
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
             ResolveAssemblyReference t = new ResolveAssemblyReference();
