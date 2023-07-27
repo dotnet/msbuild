@@ -89,7 +89,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [InlineData("1", true)]
         [InlineData("0", false)]
         [InlineData(null, false)]
-        public void Build_WithCustomBuildArgs_Framework(string? envVariableValue, bool isWarningExpected) =>
+        public void Build_WithCustomBuildArgs_Framework(string envVariableValue, bool isWarningExpected) =>
             TestCustomEventWarning(envVariableValue, isWarningExpected);
 
         private void TestCustomEventWarning(string envVariableValue, bool isWarningExpected)
