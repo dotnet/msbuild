@@ -21,11 +21,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string home = CreateTemporaryFolder(folderName: "Home");
             string testDir = CreateTemporaryFolder();
-            string testTemplatesPpackagePath = PackTestNuGetPackage(_log);
+            string testTemplatesPackagePath = PackTestNuGetPackage(_log);
             using var packageManager = new PackageManager();
             string packagePath = await packageManager.GetNuGetPackage(
                 templatePackName: "Microsoft.Azure.WebJobs.ProjectTemplates",
-                downloadDirectory: Path.GetDirectoryName(testTemplatesPpackagePath))
+                downloadDirectory: Path.GetDirectoryName(testTemplatesPackagePath))
                 .ConfigureAwait(false);
 
             _templateDiscoveryTool.Run(
