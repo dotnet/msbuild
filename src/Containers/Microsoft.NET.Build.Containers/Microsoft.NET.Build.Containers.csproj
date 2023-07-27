@@ -64,7 +64,6 @@
     <Compile Remove="net472Definitions.cs" />
     <Compile Remove="VSHostObject.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Update="Resources\Strings.Designer.cs">
       <DesignTime>True</DesignTime>
