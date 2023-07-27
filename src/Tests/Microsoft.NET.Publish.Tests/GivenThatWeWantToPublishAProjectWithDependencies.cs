@@ -126,7 +126,7 @@ namespace Microsoft.NET.Publish.Tests
                     targetFrameworkElement.SetValue(targetFramework);
                 });
 
-            string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("StoreManifests");
+            string filterProjDir = _testAssetsManager.CopyTestAsset("StoreManifests").WithSource().Path;
             string manifestFileName1 = "NewtonsoftFilterProfile.xml";
             string manifestFileName2 = "NewtonsoftMultipleVersions.xml";
             string manifestFile1 = Path.Combine(filterProjDir, manifestFileName1);
@@ -173,7 +173,7 @@ namespace Microsoft.NET.Publish.Tests
                     targetFrameworkElement.SetValue(targetFramework);
                 });
 
-            string filterProjDir = _testAssetsManager.GetAndValidateTestProjectDirectory("StoreManifests");
+            string filterProjDir = _testAssetsManager.CopyTestAsset("StoreManifests").WithSource().Path;
             string manifestFile = Path.Combine(filterProjDir, "NewtonsoftFilterProfile.xml");
 
             // According to https://github.com/dotnet/sdk/issues/1362 publish should throw an error

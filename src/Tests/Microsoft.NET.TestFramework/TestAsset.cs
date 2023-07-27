@@ -136,7 +136,7 @@ namespace Microsoft.NET.TestFramework
                 {
                     var packageReferencesToUpdate =
                         project.Root.Descendants(ns + PropertyName)
-                            .Where(pr => pr.Attribute("Version").Value.Equals($"$({targetName})", StringComparison.OrdinalIgnoreCase));
+                            .Where(p => p.Attribute("Version") != null && p.Attribute("Version").Value.Equals($"$({targetName})", StringComparison.OrdinalIgnoreCase));
                     foreach (var packageReference in packageReferencesToUpdate)
                     {
                         packageReference.Attribute("Version").Value = ToolsetInfo.GetNewtonsoftJsonPackageVersion();
