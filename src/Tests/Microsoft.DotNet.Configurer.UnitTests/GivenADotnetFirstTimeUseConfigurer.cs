@@ -49,7 +49,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     generateAspNetCertificate: true,
                     telemetryOptout: false,
                     addGlobalToolsToPath: true,
-                    nologo: false
+                    nologo: false,
+                    skipWorkloadIntegrityCheck: false
                 ),
                 _reporterMock.Object,
                 _pathAdderMock.Object);
@@ -75,7 +76,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     generateAspNetCertificate: true,
                     telemetryOptout: false,
                     addGlobalToolsToPath: true,
-                    nologo: false
+                    nologo: false,
+                    skipWorkloadIntegrityCheck: false
                 ),
                 _reporterMock.Object,
                 _pathAdderMock.Object);
@@ -101,7 +103,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     generateAspNetCertificate: true,
                     telemetryOptout: false,
                     addGlobalToolsToPath: true,
-                    nologo: false
+                    nologo: false,
+                    skipWorkloadIntegrityCheck: false
                 ),
                 _reporterMock.Object,
                 _pathAdderMock.Object);
@@ -127,7 +130,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     generateAspNetCertificate: true,
                     telemetryOptout: false,
                     addGlobalToolsToPath: true,
-                    nologo: false
+                    nologo: false,
+                    skipWorkloadIntegrityCheck: false
                 ),
                 _reporterMock.Object,
                 _pathAdderMock.Object);
@@ -153,7 +157,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     generateAspNetCertificate: true,
                     telemetryOptout: false,
                     addGlobalToolsToPath: true, 
-                    nologo: false
+                    nologo: false,
+                    skipWorkloadIntegrityCheck: false
                 ),
                 _reporterMock.Object,
                 _pathAdderMock.Object);
@@ -178,7 +183,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     generateAspNetCertificate: false,
                     telemetryOptout: false,
                     addGlobalToolsToPath: true,
-                    nologo: false
+                    nologo: false,
+                    skipWorkloadIntegrityCheck: false
                 ),
                 _reporterMock.Object,
                 _pathAdderMock.Object);
@@ -203,7 +209,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     generateAspNetCertificate: true,
                     telemetryOptout: false,
                     addGlobalToolsToPath: true,
-                    nologo: false
+                    nologo: false,
+                    skipWorkloadIntegrityCheck: false
                 ),
                 _reporterMock.Object,
                 _pathAdderMock.Object);
@@ -227,7 +234,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     generateAspNetCertificate: true,
                     telemetryOptout: false,
                     addGlobalToolsToPath: true,
-                    nologo: false
+                    nologo: false,
+                    skipWorkloadIntegrityCheck: false
                 ),
                 _reporterMock.Object,
                 _pathAdderMock.Object);
@@ -250,7 +258,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     generateAspNetCertificate: true,
                     telemetryOptout: false,
                     addGlobalToolsToPath: false,
-                    nologo: false
+                    nologo: false,
+                    skipWorkloadIntegrityCheck: false
                 ),
                 _reporterMock.Object,
                 _pathAdderMock.Object);
@@ -277,7 +286,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     generateAspNetCertificate: true,
                     telemetryOptout: false,
                     addGlobalToolsToPath: true,
-                    nologo: false
+                    nologo: false,
+                    skipWorkloadIntegrityCheck: false
                 ),
                 _reporterMock.Object,
                 _pathAdderMock.Object,
@@ -316,7 +326,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                     generateAspNetCertificate: false,
                     telemetryOptout: false,
                     addGlobalToolsToPath: false,
-                    nologo: false
+                    nologo: false,
+                    skipWorkloadIntegrityCheck: false
                 ),
                 _reporterMock.Object,
                 _pathAdderMock.Object,

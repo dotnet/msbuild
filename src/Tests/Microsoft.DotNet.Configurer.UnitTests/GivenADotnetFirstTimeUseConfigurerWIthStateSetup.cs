@@ -217,6 +217,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _environmentProviderObject.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", defaultValue: true);
             bool nologo =
                 _environmentProviderObject.GetEnvironmentVariableAsBool("DOTNET_NOLOGO", defaultValue: false);
+            bool skipWorkloadIntegrityCheck =
+                _environmentProviderObject.GetEnvironmentVariableAsBool("DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK", defaultValue: false);
 
             IAspNetCertificateSentinel aspNetCertificateSentinel;
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel;
@@ -242,10 +244,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                  toolPathSentinel: toolPathSentinel,
                  dotnetFirstRunConfiguration: new DotnetFirstRunConfiguration
                  (
-                     generateAspNetCertificate: generateAspNetCertificate,
-                     telemetryOptout: telemetryOptout,
-                     addGlobalToolsToPath: addGlobalToolsToPath,
-                     nologo: nologo
+                    generateAspNetCertificate: generateAspNetCertificate,
+                    telemetryOptout: telemetryOptout,
+                    addGlobalToolsToPath: addGlobalToolsToPath,
+                    nologo: nologo,
+                    skipWorkloadIntegrityCheck: skipWorkloadIntegrityCheck
                  ),
                  reporter: _reporterMock,
                  pathAdder: _pathAdderMock.Object);
