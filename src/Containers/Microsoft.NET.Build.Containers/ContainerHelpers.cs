@@ -265,29 +265,45 @@ public static class ContainerHelpers
     /// <summary>
     /// Checks if a given container image name adheres to the image name spec. If not, and recoverable, then normalizes invalid characters.
     /// </summary>
-    internal static bool NormalizeImageName(string containerImageName,
-                                         [NotNullWhen(false)] out string? normalizedImageName)
+    internal static (string? normalizedImageName, (string, object[])? normalizationWarning, (string, object[])? normalizationError) NormalizeImageName(string containerImageName)
     {
         if (IsValidImageName(containerImageName))
         {
-            normalizedImageName = null;
-            return true;
+            return (containerImageName, null, null);
         }
         else
         {
+            // check for leading alphanumeric character
             if (!Char.IsLetterOrDigit(containerImageName, 0))
             {
-                throw new ArgumentException(Resources.Resource.GetString(nameof(Strings.InvalidImageName)));
+                // The name did not start with an alphanumeric character, so we should normalize it.
+                var error = (nameof(Strings.InvalidImageName_NonAlphanumericStartCharacter), containerImageName)
+                return (null, null, error)
             }
+
+            // normalize the name
             var loweredImageName = containerImageName.ToLowerInvariant();
             var potentialNormalizedName = imageNameCharacters.Replace(loweredImageName, "-");
+
+            // check for normalization to useless name
             if (potentialNormalizedName.All(c => c == '-'))
             {
                 // The name was normalized to all dashes, so there was nothing recoverable. We should throw.
-                throw new ArgumentException(Resources.Resource.GetString(nameof(Strings.InvalidImageName)));
+                var error = (nameof(Strings.InvalidImageName_EntireNameIsInvalidCharacters), containerImageName)
+                return (null, null, error)
             }
-            normalizedImageName = potentialNormalizedName;
-            return false;
+
+            // check for warning/notification that we did indeed perform normalization
+            if (potentialNormalizedName != containerImageName)
+            {
+                var warning = (nameof(Strings.NormalizedContainerName), new[]{ containerImageName, normalizedImageName })
+                return (potentialNormalizedName, warning, null);
+            }
+            // user value was already normalized, so we don't need to do anything
+            else
+            {
+                return (potentialNormalizedName, null, null)
+            }
         }
     }
 }
