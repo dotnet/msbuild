@@ -3,7 +3,7 @@
 
 
 #if MICROSOFT_ENABLE_TELEMETRY
-      [assembly: AssemblyMetadata("TelemetryOptOutDefault", Microsoft.DotNet.Cli.CompileOptions.TelemetryOptOutDefaultString)]
+      [assembly: System.Reflection.AssemblyMetadata("TelemetryOptOutDefault", Microsoft.DotNet.Cli.CompileOptions.TelemetryOptOutDefaultString)]
 #endif
 
 namespace Microsoft.DotNet.Cli
