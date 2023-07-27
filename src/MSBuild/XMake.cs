@@ -3266,6 +3266,14 @@ namespace Microsoft.Build.CommandLine
         /// <returns>List of target names.</returns>
         private static string[] ProcessTargetSwitch(string[] parameters)
         {
+            foreach (string parameter in parameters)
+            {
+                int indexOfSpecialCharacter = parameter.IndexOfAny(XMakeElements.InvalidTargetNameCharacters);
+                if (indexOfSpecialCharacter >= 0)
+                {
+                    CommandLineSwitchException.Throw("NameInvalid", nameof(XMakeElements.target), parameter, parameter[indexOfSpecialCharacter].ToString());
+                }
+            }
             return parameters;
         }
 

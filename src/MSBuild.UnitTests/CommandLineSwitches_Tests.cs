@@ -1370,6 +1370,26 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Verifies that the /target switch is parsed properly with invalid characters.
+        /// </summary>
+        [Fact]
+        public void ProcessInvalidTargetSwitch()
+        {
+            string projectContent = """
+                <Project>
+                </Project>
+                """;
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            string project = testEnvironment.CreateTestProjectWithFiles("project.proj", projectContent).ProjectFile;
+
+#if FEATURE_GET_COMMANDLINE
+            MSBuildApp.Execute(@"msbuild.exe " + project + " /t:foo.bar").ShouldBe(MSBuildApp.ExitType.SwitchError);
+#else
+            MSBuildApp.Execute(new[] { @"msbuild.exe", project, "/t:foo.bar" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
+#endif
+        }
+
+        /// <summary>
         /// Verifies that when the /profileevaluation switch is used with invalid filenames an error is shown.
         /// </summary>
         [MemberData(nameof(GetInvalidFilenames))]
