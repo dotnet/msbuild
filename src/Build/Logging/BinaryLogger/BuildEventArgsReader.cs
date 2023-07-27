@@ -80,6 +80,10 @@ namespace Microsoft.Build.Logging
         /// </summary>
         internal event Action<BinaryLogRecordKind, byte[]> OnBlobRead;
 
+        internal event Func<string, string> CurrateReadString;
+        internal event Action<string> OnStringRead;
+        internal event Action OnStringEncountered;
+
         /// <summary>
         /// Reads the next log record from the <see cref="BinaryReader"/>.
         /// </summary>
@@ -260,9 +264,19 @@ namespace Microsoft.Build.Logging
 
         private void ReadStringRecord()
         {
+            // todo: here - event before the string is read, to get the position
+            // or get it here with binaryReader.BaseStream.Position, and send in event
+            OnStringEncountered?.Invoke();
+
             string text = ReadString();
+            if (CurrateReadString != null)
+            {
+                text = CurrateReadString.Invoke(text);
+            }
+
             object storedString = stringStorage.Add(text);
             stringRecords.Add(storedString);
+            OnStringRead?.Invoke(text);
         }
 
         private BuildEventArgs ReadProjectImportedEventArgs()

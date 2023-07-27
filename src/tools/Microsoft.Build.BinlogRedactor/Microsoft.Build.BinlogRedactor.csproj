@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj" />
+  </ItemGroup>
+
+</Project>

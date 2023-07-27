@@ -37,12 +37,17 @@ namespace Microsoft.Build.Logging
             Replay(sourceFilePath, CancellationToken.None);
         }
 
+        internal event Func<string, string> CurrateReadString;
+        internal event Action<string> OnStringRead;
+        internal event Action OnStringEncountered;
+
         /// <summary>
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
         /// </summary>
         /// <param name="sourceFilePath">The full file path of the binary log file</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
-        public void Replay(string sourceFilePath, CancellationToken cancellationToken)
+        /// <param name="readStreamDecorator"></param>
+        public void Replay(string sourceFilePath, CancellationToken cancellationToken, Func<Stream, Stream> readStreamDecorator = null)
         {
             using (var stream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
@@ -51,7 +56,11 @@ namespace Microsoft.Build.Logging
                 // wrapping the GZipStream in a buffered stream significantly improves performance
                 // and the max throughput is reached with a 32K buffer. See details here:
                 // https://github.com/dotnet/runtime/issues/39233#issuecomment-745598847
-                var bufferedStream = new BufferedStream(gzipStream, 32768);
+                Stream bufferedStream = new BufferedStream(gzipStream, 32768);
+                if (readStreamDecorator != null)
+                {
+                    bufferedStream = readStreamDecorator(bufferedStream);
+                }
                 var binaryReader = new BinaryReader(bufferedStream);
 
                 int fileFormatVersion = binaryReader.ReadInt32();
@@ -65,6 +74,20 @@ namespace Microsoft.Build.Logging
                 }
 
                 using var reader = new BuildEventArgsReader(binaryReader, fileFormatVersion);
+                // Do not even subscribe to the event if no one is listening
+                if (OnStringRead != null)
+                {
+                    reader.OnStringRead += text => OnStringRead?.Invoke(text);
+                }
+                if (OnStringEncountered != null)
+                {
+                    reader.OnStringEncountered += () => OnStringEncountered?.Invoke();
+                }
+                if (CurrateReadString != null)
+                {
+                    reader.CurrateReadString += text => CurrateReadString?.Invoke(text);
+                }
+
                 while (true)
                 {
                     if (cancellationToken.IsCancellationRequested)
