@@ -119,9 +119,6 @@ public static class ContainerBuilder
             imageBuilder.SetUser(user);
         }
 
-        ContainerHelpers.AssignUserFromEnvironment(imageBuilder, logger);
-        ContainerHelpers.AssignPortsFromEnvironment(imageBuilder, logger);
-
         BuiltImage builtImage = imageBuilder.Build();
         cancellationToken.ThrowIfCancellationRequested();
 

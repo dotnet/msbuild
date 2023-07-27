@@ -100,9 +100,6 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
             imageBuilder.SetUser(user);
         }
 
-        ContainerHelpers.AssignUserFromEnvironment(imageBuilder, logger);
-        ContainerHelpers.AssignPortsFromEnvironment(imageBuilder, logger);
-
         // at the end of this step, if any failed then bail out.
         if (Log.HasLoggedErrors)
         {
