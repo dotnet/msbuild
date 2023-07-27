@@ -5,8 +5,16 @@ using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-#nullable disable
-
+/// <summary>
+/// This logger ignores all message-level output, writing errors and warnings to
+/// standard error, colored red and yellow respectively.
+///
+/// It is currently used only when the user requests information about specific
+/// properties, items, or target results. In that case, we write the desired output
+/// to standard out, but we do not want it polluted with any other kinds of information.
+/// Users still might want diagnostic information if something goes wrong, so still
+/// output that as necessary.
+/// </summary>
 namespace Microsoft.Build.Logging.SimpleErrorLogger
 {
     public class SimpleErrorLogger : INodeLogger

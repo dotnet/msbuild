@@ -2562,24 +2562,24 @@ namespace Microsoft.Build.CommandLine
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
 
                     loggers = ProcessLoggingSwitches(
-                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Logger],
-                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DistributedLogger],
-                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
-                    commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
-                    commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
-                    terminallogger,
-                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
-                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
-                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
-                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation],
-                    groupedFileLoggerParameters,
-                    getProperty.Length + getItem.Length + getTargetResult.Length > 0,
-                    out distributedLoggerRecords,
-                    out verbosity,
-                    out originalVerbosity,
-                    cpuCount,
-                    out profilerLogger,
-                    out enableProfiler);
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Logger],
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DistributedLogger],
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
+                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
+                        commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
+                        terminallogger,
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation],
+                        groupedFileLoggerParameters,
+                        getProperty.Length + getItem.Length + getTargetResult.Length > 0,
+                        out distributedLoggerRecords,
+                        out verbosity,
+                        out originalVerbosity,
+                        cpuCount,
+                        out profilerLogger,
+                        out enableProfiler);
 
                     // We're finished with defining individual loggers' verbosity at this point, so we don't need to worry about messing them up.
                     if (Traits.Instance.DebugEngine)

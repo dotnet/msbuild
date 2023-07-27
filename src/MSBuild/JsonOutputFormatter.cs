@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Build.Evaluation;
@@ -52,13 +51,14 @@ namespace Microsoft.Build.CommandLine
                 foreach (ProjectItemInstance item in project.GetItems(itemName))
                 {
                     JsonObject jsonItem = new();
-                    foreach (ProjectMetadataInstance metadatum in item.Metadata)
+                    jsonItem["Identity"] = item.GetMetadataValue("Identity");
+                    foreach (string metadatumName in item.MetadataNames)
                     {
-                        jsonItem[metadatum.Name] = metadatum.EvaluatedValue;
-                    }
+                        if (metadatumName.Equals("Identity"))
+                        {
+                            continue;
+                        }
 
-                    foreach (string metadatumName in FileUtilities.ItemSpecModifiers.All)
-                    {
                         jsonItem[metadatumName] = item.GetMetadataValue(metadatumName);
                     }
 
@@ -85,6 +85,7 @@ namespace Microsoft.Build.CommandLine
                 foreach (ProjectItem item in project.GetItems(itemName))
                 {
                     JsonObject jsonItem = new();
+                    jsonItem["Identity"] = item.GetMetadataValue("Identity");
                     foreach (ProjectMetadata metadatum in item.Metadata)
                     {
                         jsonItem[metadatum.Name] = metadatum.EvaluatedValue;
@@ -92,6 +93,11 @@ namespace Microsoft.Build.CommandLine
 
                     foreach (string metadatumName in FileUtilities.ItemSpecModifiers.All)
                     {
+                        if (metadatumName.Equals("Identity"))
+                        {
+                            continue;
+                        }
+
                         jsonItem[metadatumName] = item.GetMetadataValue(metadatumName);
                     }
 
@@ -121,8 +127,14 @@ namespace Microsoft.Build.CommandLine
                 foreach (ITaskItem item in targetResult.Items)
                 {
                     JsonObject jsonItem = new();
+                    jsonItem["Identity"] = item.GetMetadata("Identity");
                     foreach (string metadatumName in item.MetadataNames)
                     {
+                        if (metadatumName.Equals("Identity"))
+                        {
+                            continue;
+                        }
+
                         jsonItem[metadatumName] = item.GetMetadata(metadatumName);
                     }
 
