@@ -39,6 +39,9 @@ namespace Microsoft.Build.Exceptions
         /// <summary>
         /// Constructor for deserialization.
         /// </summary>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         protected CircularDependencyException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

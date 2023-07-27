@@ -27,11 +27,6 @@
         <target state="translated">La commande s'est arrêtée avec le code {0}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="translated">MSB6005: La tâche a tenté d'ouvrir une session avant d'être initialisée. Le message était le suivant : {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
-      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: Impossible de trouver le fichier manifeste de la plateforme dans "{0}".</target>
