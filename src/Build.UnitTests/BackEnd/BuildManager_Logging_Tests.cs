@@ -83,16 +83,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [InlineData("0", false)]
         [InlineData(null, true)]
         public void Build_WithCustomBuildArgs_NetCore(string envVariableValue, bool isWarningExpected)
-            => TestCustomEventWarning(envVariableValue, isWarningExpected);
+            => TestCustomEventWarning<BuildErrorEventArgs>(envVariableValue, isWarningExpected);
 
         [WindowsFullFrameworkOnlyTheory]
         [InlineData("1", true)]
         [InlineData("0", false)]
         [InlineData(null, false)]
         public void Build_WithCustomBuildArgs_Framework(string envVariableValue, bool isWarningExpected) =>
-            TestCustomEventWarning(envVariableValue, isWarningExpected);
+            TestCustomEventWarning<BuildWarningEventArgs>(envVariableValue, isWarningExpected);
 
-        private void TestCustomEventWarning(string envVariableValue, bool isWarningExpected)
+        private void TestCustomEventWarning<T>(string envVariableValue, bool isWarningExpected) where T : LazyFormattedBuildEventArgs
         {
             var testFiles = _env.CreateTestProjectWithFiles(string.Empty, new[] { "main", "child1" }, string.Empty);
 
@@ -127,14 +127,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
                 if (isWarningExpected)
                 {
-                    allEvents.OfType<BuildWarningEventArgs>().ShouldHaveSingleItem();
-                    allEvents.First(x => x is BuildWarningEventArgs).Message.ShouldContain(
+                    allEvents.OfType<T>().ShouldHaveSingleItem();
+                    allEvents.First(x => x is T).Message.ShouldContain(
                         string.Format(ResourceUtilities.GetResourceString("DeprecatedEventSerialization"),
                         "MyCustomBuildEventArgs"));
                 }
                 else
                 {
-                    allEvents.OfType<BuildWarningEventArgs>().ShouldBeEmpty();
+                    allEvents.OfType<T>().ShouldBeEmpty();
                 }
             }
             finally
