@@ -721,7 +721,7 @@ namespace Microsoft.Build.Graph
                 }
                 else if (targets[i].Equals(MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker, StringComparison.OrdinalIgnoreCase))
                 {
-                    var targetsString = graphEdge.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName); ;
+                    var targetsString = graphEdge.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
 
                     var expandedTargets = string.IsNullOrEmpty(targetsString)
                         ? defaultTargets

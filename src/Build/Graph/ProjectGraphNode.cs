@@ -17,6 +17,7 @@ namespace Microsoft.Build.Graph
 {
     public class ProjectReferenceSnapshot
     {
+        public string FullPath = string.Empty;
         public string EvaluatedInclude = string.Empty;
         public string ItemType = string.Empty;
 
@@ -37,7 +38,6 @@ namespace Microsoft.Build.Graph
                 { ItemMetadataNames.PropertiesMetadataName , projectReferenceTarget.GetMetadataValue(ItemMetadataNames.PropertiesMetadataName) },
                 { ItemMetadataNames.AdditionalPropertiesMetadataName , projectReferenceTarget.GetMetadataValue(ItemMetadataNames.AdditionalPropertiesMetadataName) },
                 { ItemMetadataNames.UndefinePropertiesMetadataName , projectReferenceTarget.GetMetadataValue(ItemMetadataNames.UndefinePropertiesMetadataName) },
-                { FullPathMetadataName , projectReferenceTarget.GetMetadataValue(FullPathMetadataName) },
                 { ProjectMetadataName , projectReferenceTarget.GetMetadataValue(ProjectMetadataName) },
                 { ToolsVersionMetadataName ,projectReferenceTarget.GetMetadataValue(ToolsVersionMetadataName) },
                 { SetPlatformMetadataName , projectReferenceTarget.GetMetadataValue(SetPlatformMetadataName) },
@@ -46,17 +46,25 @@ namespace Microsoft.Build.Graph
                 { SetConfigurationMetadataName , projectReferenceTarget.GetMetadataValue(SetConfigurationMetadataName) },
                 { SetTargetFrameworkMetadataName ,projectReferenceTarget.GetMetadataValue(SetTargetFrameworkMetadataName) },
             };
+
+            FullPath = projectReferenceTarget.GetMetadataValue(FullPathMetadataName);
         }
 
         public string GetMetadataValue(string metadataName)
         {
+            // Note: FullPath is a special metadata that doesn't count towards the DirectMetadataCount.
+            if (FullPathMetadataName == metadataName)
+            {
+                return FullPath;
+            }
+
             if (Metadata.TryGetValue(metadataName, out string result))
             {
                 return result;
             }
 
-            // return string.Empty;
-            throw new System.Exception($"Metadata Not Found {metadataName} in {ItemType}::{EvaluatedInclude} snapshot.");
+            return string.Empty;
+            // throw new System.Exception($"Metadata not found {metadataName} in {ItemType}::{EvaluatedInclude} snapshot.");
         }
 
         public void SetMetadata(string metadataName, string value)
@@ -66,7 +74,7 @@ namespace Microsoft.Build.Graph
 
         public bool HasMetadata(string metadataName)
         {
-            return Metadata.TryGetValue(metadataName, out string _);
+            return Metadata.TryGetValue(metadataName, out string result) && !string.IsNullOrEmpty(result);
         }
 
         public int DirectMetadataCount => Metadata.Count;
@@ -112,11 +120,12 @@ namespace Microsoft.Build.Graph
                     { "Platform", instance.GetPropertyValue("Platform") },
                     { "Configuration", instance.GetPropertyValue("Configuration") },
                     { "PlatformLookupTable", instance.GetPropertyValue("PlatformLookupTable") },
+                    { "ShouldUnsetParentConfigurationAndPlatform", instance.GetPropertyValue("ShouldUnsetParentConfigurationAndPlatform") },
                 };
 
-            if (!string.IsNullOrEmpty(innerBuildPropValue))
+            if (!string.IsNullOrEmpty(innerBuildPropName))
             {
-                Properties[innerBuildPropValue] = innerBuildPropValue;
+                Properties[innerBuildPropName] = innerBuildPropValue;
             }
 
             if (!string.IsNullOrEmpty(innerBuildPropValues))
@@ -172,7 +181,8 @@ namespace Microsoft.Build.Graph
                 return result;
             }
 
-            throw new System.Exception($"Property Not Found {propertyName} in snapshot.");
+            // throw new System.Exception($"Property '{propertyName}' not found in '{FullPath}' project snapshot.");
+            return string.Empty;
         }
     }
 

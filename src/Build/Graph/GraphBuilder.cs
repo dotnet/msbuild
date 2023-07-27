@@ -150,12 +150,12 @@ namespace Microsoft.Build.Graph
                         {
                             var projectRefSnapshot = new ProjectReferenceSnapshot(new Dictionary<string, string>()
                             {
-                                { ProjectInterpretation.FullPathMetadataName, referenceInfo.ReferenceConfiguration.ProjectFullPath },
-                                { ProjectInterpretation.ToolsVersionMetadataName, "" },
+                                // { ProjectInterpretation.ToolsVersionMetadataName, "" },
                             })
                             {
                                 ItemType = ProjectInterpretation.TransitiveReferenceItemName,
                                 EvaluatedInclude = currentNode.ProjectInstance.FullPath,
+                                FullPath = referenceInfo.ReferenceConfiguration.ProjectFullPath,
                             };
 
                             currentNode.AddProjectReference(
@@ -233,12 +233,12 @@ namespace Microsoft.Build.Graph
                     {
                         var projectRefSnapshot = new ProjectReferenceSnapshot(new Dictionary<string, string>()
                         {
-                            { ProjectInterpretation.FullPathMetadataName, referencedNode.ProjectInstance.FullPath },
-                            { ProjectInterpretation.ToolsVersionMetadataName, "" },
+                            // { ProjectInterpretation.ToolsVersionMetadataName, "" },
                         })
                         {
                             ItemType = SolutionItemReference,
-                            EvaluatedInclude = referencedNode.ProjectInstance.FullPath
+                            EvaluatedInclude = referencedNode.ProjectInstance.FullPath,
+                            FullPath = referencedNode.ProjectInstance.FullPath,
                         };
                         referencingNode.AddProjectReference(referencedNode, projectRefSnapshot, edges);
                     }

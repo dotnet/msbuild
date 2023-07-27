@@ -93,7 +93,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             IsNotMultitargeting(node).ShouldBeTrue();
             node.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
-            node.ProjectInstance.GetPropertyValue(InnerBuildPropertyName).ShouldBeNull();
+            node.ProjectInstance.GetPropertyValue(InnerBuildPropertyName).ShouldBeNullOrEmpty();
         }
 
         public static void AssertOuterBuildEvaluation(ProjectGraphNode outerBuild, Dictionary<string, string> additionalGlobalProperties)
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Graph.UnitTests
             IsOuterBuild(outerBuild).ShouldBeTrue();
             IsInnerBuild(outerBuild).ShouldBeFalse();
 
-            outerBuild.ProjectInstance.GetPropertyValue(InnerBuildPropertyName).ShouldBeNull();
+            outerBuild.ProjectInstance.GetPropertyValue(InnerBuildPropertyName).ShouldBeNullOrEmpty();
             outerBuild.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
         }
 

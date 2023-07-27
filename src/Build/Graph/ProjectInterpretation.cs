@@ -281,13 +281,12 @@ namespace Microsoft.Build.Graph
             {
                 var prSnapshot = new ProjectReferenceSnapshot(new Dictionary<string, string>()
                 {
-                    { FullPathMetadataName, outerBuild.FullPath },
                     { ItemMetadataNames.PropertiesMetadataName , $"{globalPropertyName}={globalPropertyValue}" },
-                    { "ToolsVersion", "" },
                 })
                 {
                     ItemType = InnerBuildReferenceItemName,
-                    EvaluatedInclude = outerBuild.FullPath
+                    EvaluatedInclude = outerBuild.FullPath,
+                    FullPath = outerBuild.FullPath,
                 };
 
                 yield return prSnapshot;
