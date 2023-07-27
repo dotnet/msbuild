@@ -243,9 +243,11 @@ internal sealed class ImageBuilder
     internal void AssignPortsFromEnvironment()
     {
         // asp.net images control port bindings via three environment variables. we should check for those variables and ensure that ports are created for them
+
+        // https://learn.microsoft.com/aspnet/core/fundamentals/servers/kestrel/endpoints?view=aspnetcore-8.0#specify-ports-only - new for .NET 8 - allows just changing port(s) easily
         if (_baseImageConfig.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_HTTP_PORTS, out string? httpPorts))
         {
-            _logger.LogTrace("Setting ports from ASPNETCORE_HTTP_PORTS environment variable");
+            _logger.LogTrace("Setting ports from ASPNETCORE_HTTP_PORT environment variable");
             foreach(var port in Split(httpPorts))
             {
                 if (int.TryParse(port, out int parsedPort))
@@ -259,9 +261,10 @@ internal sealed class ImageBuilder
                 }
             }
         }
+
         if (_baseImageConfig.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_HTTPS_PORTS, out string? httpsPorts))
         {
-            _logger.LogTrace("Setting ports from ASPNETCORE_HTTPS_PORTS environment variable");
+            _logger.LogTrace("Setting ports from ASPNETCORE_HTTPS_PORT environment variable");
             foreach(var port in Split(httpsPorts))
             {
                 if (int.TryParse(port, out int parsedPort))
@@ -275,11 +278,13 @@ internal sealed class ImageBuilder
                 }
             }
         }
+
+        // https://learn.microsoft.com//aspnet/core/fundamentals/host/web-host?view=aspnetcore-8.0#server-urls - the format of ASPNETCORE_URLS has been stable for many years now
         if (_baseImageConfig.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_URLS, out string? urls))
         {
             foreach(var url in Split(urls))
             {
-                _logger.LogTrace("Setting ports from ASPNETCORE_HTTPS_PORTS environment variable");
+                _logger.LogTrace("Setting ports from ASPNETCORE_URLS environment variable");
                 var match = aspnetPortRegex.Match(url);
                 if (match.Success && int.TryParse(match.Groups["port"].Value, out int port))
                 {
