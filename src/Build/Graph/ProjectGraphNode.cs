@@ -17,8 +17,8 @@ namespace Microsoft.Build.Graph
 {
     public class ProjectReferenceSnapshot
     {
-        public string EvaluatedInclude = "";
-        public string ItemType = "";
+        public string EvaluatedInclude = string.Empty;
+        public string ItemType = string.Empty;
 
         private Dictionary<string, string> Metadata;
 
@@ -59,10 +59,17 @@ namespace Microsoft.Build.Graph
             // throw new System.Exception($"Metadata Not Found {metadataName} in {ItemType}::{EvaluatedInclude} snapshot.");
         }
 
-        public void SetMetadata(string key, string value)
+        public void SetMetadata(string metadataName, string value)
         {
-            Metadata[key] = value;
+            Metadata[metadataName] = value;
         }
+
+        public bool HasMetadata(string metadataName)
+        {
+            return Metadata.TryGetValue(metadataName, out string _);
+        }
+
+        public int DirectMetadataCount => Metadata.Count;
     }
 
     public class ProjectInstanceSnapshot
@@ -145,7 +152,7 @@ namespace Microsoft.Build.Graph
         public List<string> Targets;
         internal ProjectType ProjectType;
         public List<string> DefaultTargets;
-        public Construction.ElementLocation ProjectFileLocation;
+        public ElementLocation ProjectFileLocation;
         internal Collections.PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary;
         public IDictionary<string, string> GlobalProperties;
         public Dictionary<string, string> Properties;

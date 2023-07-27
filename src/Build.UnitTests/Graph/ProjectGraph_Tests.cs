@@ -132,10 +132,10 @@ namespace Microsoft.Build.Graph.UnitTests
                 var projectInstance = new Project().CreateProjectInstance();
                 var node = new ProjectGraphNode(projectInstance);
                 var reference1 = new ProjectGraphNode(projectInstance);
-                var referenceItem1 = new ProjectItemInstance(projectInstance, "Ref1", "path1", "file1");
+                var referenceItem1 = new ProjectReferenceSnapshot(new ProjectItemInstance(projectInstance, "Ref1", "path1", "file1"));
 
                 var reference2 = new ProjectGraphNode(projectInstance);
-                var referenceItem2 = new ProjectItemInstance(projectInstance, "Ref2", "path2", "file2");
+                var referenceItem2 = new ProjectReferenceSnapshot(new ProjectItemInstance(projectInstance, "Ref2", "path2", "file2"));
 
                 var edges = new GraphBuilder.GraphEdges();
 
@@ -179,8 +179,8 @@ namespace Microsoft.Build.Graph.UnitTests
                 var projectInstance = new Project().CreateProjectInstance();
                 var node = new ProjectGraphNode(projectInstance);
                 var reference1 = new ProjectGraphNode(projectInstance);
-                var referenceItem1 = new ProjectItemInstance(projectInstance, "Ref1", "path1", "file1");
-                var referenceItem2 = new ProjectItemInstance(projectInstance, "Ref2", "path1", "file1");
+                var referenceItem1 = new ProjectReferenceSnapshot(new ProjectItemInstance(projectInstance, "Ref1", "path1", "file1"));
+                var referenceItem2 = new ProjectReferenceSnapshot(new ProjectItemInstance(projectInstance, "Ref2", "path1", "file1"));
 
                 var edges = new GraphBuilder.GraphEdges();
 

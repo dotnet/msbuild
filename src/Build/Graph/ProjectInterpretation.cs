@@ -563,5 +563,7 @@ namespace Microsoft.Build.Graph
             ConversionUtilities.ConvertStringToBool(msbuildString, nullOrWhitespaceIsFalse: true);
 
         private static bool MSBuildStringIsFalse(string msbuildString) => !MSBuildStringIsTrue(msbuildString);
+
+        internal static ProjectType GetProjectType(ProjectInstanceSnapshot projectInstance) => projectInstance.ProjectType;
     }
 }

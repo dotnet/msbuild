@@ -54,11 +54,11 @@ namespace Microsoft.Build.Graph.UnitTests
             {
                 AssertInnerBuildEvaluation(innerBuild, true, additionalGlobalProperties);
 
-                ProjectItemInstance edge = graph.TestOnly_Edges[(outerBuild, innerBuild)];
+                var edge = graph.TestOnly_Edges[(outerBuild, innerBuild)];
                 edge.DirectMetadataCount.ShouldBe(1);
 
                 string expectedPropertiesMetadata = $"{InnerBuildPropertyName}={innerBuild.ProjectInstance.GlobalProperties[InnerBuildPropertyName]}";
-                edge.GetMetadata("Properties").EvaluatedValue.ShouldBe(expectedPropertiesMetadata);
+                edge.GetMetadataValue("Properties").ShouldBe(expectedPropertiesMetadata);
             }
 
             // Ensure edges were added directly to the inner builds
@@ -79,8 +79,8 @@ namespace Microsoft.Build.Graph.UnitTests
 
                     graph.TestOnly_Edges.HasEdge((outerBuild, innerBuild)).ShouldBeTrue();
 
-                    ProjectItemInstance edgeToOuterBuild = graph.TestOnly_Edges[(outerBuildReferencer, outerBuild)];
-                    ProjectItemInstance edgeToInnerBuild = graph.TestOnly_Edges[(outerBuildReferencer, innerBuild)];
+                    var edgeToOuterBuild = graph.TestOnly_Edges[(outerBuildReferencer, outerBuild)];
+                    var edgeToInnerBuild = graph.TestOnly_Edges[(outerBuildReferencer, innerBuild)];
 
                     edgeToOuterBuild.ShouldBe(edgeToInnerBuild);
                 }
@@ -93,7 +93,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             IsNotMultitargeting(node).ShouldBeTrue();
             node.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
-            node.ProjectInstance.GetProperty(InnerBuildPropertyName).ShouldBeNull();
+            node.ProjectInstance.GetPropertyValue(InnerBuildPropertyName).ShouldBeNull();
         }
 
         public static void AssertOuterBuildEvaluation(ProjectGraphNode outerBuild, Dictionary<string, string> additionalGlobalProperties)
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Graph.UnitTests
             IsOuterBuild(outerBuild).ShouldBeTrue();
             IsInnerBuild(outerBuild).ShouldBeFalse();
 
-            outerBuild.ProjectInstance.GetProperty(InnerBuildPropertyName).ShouldBeNull();
+            outerBuild.ProjectInstance.GetPropertyValue(InnerBuildPropertyName).ShouldBeNull();
             outerBuild.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
         }
 
