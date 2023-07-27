@@ -141,7 +141,11 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string outputLocation = CreateTemporaryFolder(testName, "TestNuGetPackage");
 
-            new DotnetPackCommand(log, DotnetNewTestTemplatePackageProjectPath, "-o", outputLocation)
+            CopyFilesRecursively(Path.GetDirectoryName(DotnetNewTestTemplatePackageProjectPath)!, outputLocation);
+
+            string projectName = Path.GetFileName(DotnetNewTestTemplatePackageProjectPath);
+
+            new DotnetPackCommand(log, $"{outputLocation}\\{projectName}", $"-p:BaseIntermediateOutputPath={outputLocation}\\", "-o", outputLocation)
                 .Execute()
                 .Should()
             .Pass();
@@ -183,6 +187,21 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 Assert.False(true, $"The repo root doesn't contain 'sdk.sln'.");
             }
             return repoRoot;
+        }
+
+        private static void CopyFilesRecursively(string sourcePath, string targetPath)
+        {
+            //Now Create all of the directories
+            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+            }
+
+            //Copy all the files & Replaces any files with the same name
+            foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+            {
+                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+            }
         }
 
     }
