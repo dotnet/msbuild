@@ -24,7 +24,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public class BuildManager_Logging_Tests : IDisposable
     {
-        private string mainProject = @"
+        private string _mainProject = @"
 <Project>
 
   <Target Name=`MainTarget`>
@@ -33,7 +33,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
 </Project>";
 
-        private string childProjectWithCustomBuildEvent = $@"
+        private string _childProjectWithCustomBuildEvent = $@"
 <Project>
 
     <UsingTask TaskName=""CustomBuildEventTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
@@ -81,76 +81,25 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [DotNetOnlyTheory]
         [InlineData("1", true)]
         [InlineData("0", false)]
-        [InlineData("", true)]
+        [InlineData(null, true)]
         public void Build_WithCustomBuildArgs_NetCore(string envVariableValue, bool isWarningExpected)
-        {
-            var testFiles = _env.CreateTestProjectWithFiles(string.Empty, new[] { "main", "child1" }, string.Empty);
-
-            ILoggingService service = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.RegisterLogger(_logger);
-
-            if (!string.IsNullOrEmpty(envVariableValue))
-            {
-                _env.SetEnvironmentVariable("MSBUILDCUSTOMBUILDEVENTWARNING", envVariableValue);
-            }
-            _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
-
-            _buildManager.BeginBuild(BuildParameters);
-
-            try
-            {
-                var child1ProjectPath = testFiles.CreatedFiles[1];
-                var cleanedUpChildContents = CleanupFileContents(childProjectWithCustomBuildEvent);
-                File.WriteAllText(child1ProjectPath, cleanedUpChildContents);
-
-                var mainProjectPath = testFiles.CreatedFiles[0];
-                var cleanedUpMainContents = CleanupFileContents(string.Format(mainProject, child1ProjectPath));
-                File.WriteAllText(mainProjectPath, cleanedUpMainContents);
-
-                var buildRequestData = new BuildRequestData(
-                   mainProjectPath,
-                   new Dictionary<string, string>(),
-                   MSBuildConstants.CurrentToolsVersion,
-                   new[] { "MainTarget" },
-                   null);
-
-                var submission = _buildManager.PendBuildRequest(buildRequestData);
-
-                var result = submission.Execute();
-
-                var allEvents = _logger.AllBuildEvents;
-
-                if (isWarningExpected)
-                {
-                    allEvents.OfType<BuildWarningEventArgs>().ShouldHaveSingleItem();
-                    allEvents.First(x => x is BuildWarningEventArgs).Message.ShouldContain("MyCustomBuildEventArgs");
-                }
-                else
-                {
-                    allEvents.OfType<BuildWarningEventArgs>().ShouldBeEmpty();
-                }
-            }
-            finally
-            {
-                _buildManager.EndBuild();
-            }
-        }
+            => TestCustomEventWarning(envVariableValue, isWarningExpected);
 
         [WindowsFullFrameworkOnlyTheory]
         [InlineData("1", true)]
         [InlineData("0", false)]
-        [InlineData("", false)]
-        public void Build_WithCustomBuildArgs_Framework(string envVariableValue, bool isWarningExpected)
+        [InlineData(null, false)]
+        public void Build_WithCustomBuildArgs_Framework(string? envVariableValue, bool isWarningExpected) =>
+            TestCustomEventWarning(envVariableValue, isWarningExpected);
+
+        private void TestCustomEventWarning(string envVariableValue, bool isWarningExpected)
         {
             var testFiles = _env.CreateTestProjectWithFiles(string.Empty, new[] { "main", "child1" }, string.Empty);
 
             ILoggingService service = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(_logger);
 
-            if (!string.IsNullOrEmpty(envVariableValue))
-            {
-                _env.SetEnvironmentVariable("MSBUILDCUSTOMBUILDEVENTWARNING", envVariableValue);
-            }
+            _env.SetEnvironmentVariable("MSBUILDCUSTOMBUILDEVENTWARNING", envVariableValue);
             _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
 
             _buildManager.BeginBuild(BuildParameters);
@@ -158,11 +107,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             try
             {
                 var child1ProjectPath = testFiles.CreatedFiles[1];
-                var cleanedUpChildContents = CleanupFileContents(childProjectWithCustomBuildEvent);
+                var cleanedUpChildContents = CleanupFileContents(_childProjectWithCustomBuildEvent);
                 File.WriteAllText(child1ProjectPath, cleanedUpChildContents);
 
                 var mainProjectPath = testFiles.CreatedFiles[0];
-                var cleanedUpMainContents = CleanupFileContents(string.Format(mainProject, child1ProjectPath));
+                var cleanedUpMainContents = CleanupFileContents(string.Format(_mainProject, child1ProjectPath));
                 File.WriteAllText(mainProjectPath, cleanedUpMainContents);
 
                 var buildRequestData = new BuildRequestData(
@@ -173,15 +122,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                    null);
 
                 var submission = _buildManager.PendBuildRequest(buildRequestData);
-
                 var result = submission.Execute();
-
                 var allEvents = _logger.AllBuildEvents;
 
                 if (isWarningExpected)
                 {
                     allEvents.OfType<BuildWarningEventArgs>().ShouldHaveSingleItem();
-                    allEvents.First(x => x is BuildWarningEventArgs).Message.ShouldContain("MyCustomBuildEventArgs");
+                    allEvents.First(x => x is BuildWarningEventArgs).Message.ShouldContain(
+                        string.Format(ResourceUtilities.GetResourceString("DeprecatedEventSerialization"),
+                        "MyCustomBuildEventArgs"));
                 }
                 else
                 {
