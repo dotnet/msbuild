@@ -35,7 +35,7 @@ namespace Microsoft.NET.Build.Tests
                 //find the platform directory
                 new DirectoryInfo(Path.Combine(testAsset.TestRoot, "CSConsoleApp", "bin")).GetDirectories().Single().FullName,
                 "Debug",
-                ToolsetInfo.CurrentTargetFramework,
+                $"{ToolsetInfo.CurrentTargetFramework}-windows",
                 "CSConsoleApp.exe");
 
             var runCommand = new RunExeCommand(Log, exe);
