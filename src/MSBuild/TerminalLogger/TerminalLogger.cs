@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System.Runtime.InteropServices;
 #if NETFRAMEWORK
 using Microsoft.IO;
 #else
@@ -235,7 +236,10 @@ internal sealed class TerminalLogger : INodeLogger
 
         _buildStartTime = e.Timestamp;
 
-        Terminal.Write(AnsiCodes.SetProgressIndeterminate);
+        if (Terminal.SupportsProgressReporting)
+        {
+            Terminal.Write(AnsiCodes.SetProgressIndeterminate);
+        }
     }
 
     /// <summary>
@@ -270,7 +274,11 @@ internal sealed class TerminalLogger : INodeLogger
         }
         finally
         {
-            Terminal.Write(AnsiCodes.RemoveProgress);
+            if (Terminal.SupportsProgressReporting)
+            {
+                Terminal.Write(AnsiCodes.RemoveProgress);
+            }
+
             Terminal.EndUpdate();
         }
 

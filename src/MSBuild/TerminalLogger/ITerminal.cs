@@ -21,6 +21,11 @@ internal interface ITerminal : IDisposable
     int Height { get; }
 
     /// <summary>
+    /// <see langword="true"/> if the terminal emulator supports progress reporting.
+    /// </summary>
+    bool SupportsProgressReporting { get; }
+
+    /// <summary>
     /// Starts buffering the text passed via the <c>Write*</c> methods.
     /// </summary>
     /// <remarks>

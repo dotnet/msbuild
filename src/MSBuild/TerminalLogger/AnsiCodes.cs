@@ -95,13 +95,23 @@ internal static class AnsiCodes
     public const string ShowCursor = "\x1b[?25h";
 
     /// <summary>
-    /// Set progress state to a busy spinner.
+    /// Set progress state to a busy spinner. <br/>
+    /// Note: this code works only on ConEmu terminals, and conflicts with push a notification code on iTerm2.
     /// </summary>
+    /// <remarks>
+    /// <see href="https://conemu.github.io/en/AnsiEscapeCodes.html#ConEmu_specific_OSC">ConEmu specific OSC codes.</see><br/>
+    /// <see href="https://iterm2.com/documentation-escape-codes.html">iTerm2 proprietary escape codes.</see>
+    /// </remarks>
     public const string SetProgressIndeterminate = "\x1b]9;4;3;\x1b\\";
 
     /// <summary>
-    /// Remove progress state, restoring taskbar status to normal.
+    /// Remove progress state, restoring taskbar status to normal. <br/>
+    /// Note: this code works only on ConEmu terminals, and conflicts with push a notification code on iTerm2.
     /// </summary>
+    /// <remarks>
+    /// <see href="https://conemu.github.io/en/AnsiEscapeCodes.html#ConEmu_specific_OSC">ConEmu specific OSC codes.</see><br/>
+    /// <see href="https://iterm2.com/documentation-escape-codes.html">iTerm2 proprietary escape codes.</see>
+    /// </remarks>
     public const string RemoveProgress = "\x1b]9;4;0;\x1b\\";
 
     public static string Colorize(string? s, TerminalColor color)
