@@ -1,16 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using FluentAssertions;
-using Xunit.Abstractions;
-using System.Xml.Linq;
-using System;
-
 namespace Microsoft.NET.ToolPack.Tests
 {
     public class NupkgOfPackWithShimsFixture : IDisposable

@@ -3,8 +3,6 @@
 
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
-using System.CommandLine;
-using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Tools.Fsi
 {

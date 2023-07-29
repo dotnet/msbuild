@@ -3,7 +3,6 @@
 
 using System.CommandLine;
 using FakeItEasy;
-using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Edge;

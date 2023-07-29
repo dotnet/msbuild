@@ -2,10 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 using Microsoft.DotNet.ApiCompatibility.Tests;
 using Microsoft.DotNet.ApiSymbolExtensions.Tests;
-using Xunit;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules.Tests
 {

@@ -1,12 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using FluentAssertions;
-using System.Linq;
-using Microsoft.DotNet.Tools.Publish;
-using Xunit;
-using Xunit.Abstractions;
-using Microsoft.NET.TestFramework;
+using PublishCommand = Microsoft.DotNet.Tools.Publish.PublishCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {

@@ -3,9 +3,6 @@
 
 using Microsoft.Build.Framework;
 using NuGet.ProjectModel;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.NET.Build.Tasks
 {

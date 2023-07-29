@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
-using System.IO;
-using System.Linq;
 using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
 

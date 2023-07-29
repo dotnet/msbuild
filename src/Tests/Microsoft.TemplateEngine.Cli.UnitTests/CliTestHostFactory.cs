@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Edge;
-using Microsoft.TemplateEngine.TestHelper;
 using Microsoft.TemplateEngine.Utils;
+using TestLoggerFactory = Microsoft.TemplateEngine.TestHelper.TestLoggerFactory;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
 {

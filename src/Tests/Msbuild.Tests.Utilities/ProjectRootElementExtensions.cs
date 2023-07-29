@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Construction;
-using System.Linq;
-using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Msbuild.Tests.Utilities

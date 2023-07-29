@@ -1,17 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using FluentAssertions;
-using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.Tests;
-using Microsoft.DotNet.Tools.Test;
-using Microsoft.Extensions.DependencyModel.Tests;
 using Moq;
-using Xunit;
 
 namespace Microsoft.DotNet.Configurer.UnitTests
 {

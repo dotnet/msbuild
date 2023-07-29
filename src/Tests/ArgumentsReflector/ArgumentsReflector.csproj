@@ -12,4 +12,17 @@
     </Content>
   </ItemGroup>
 
+  <!-- Global usings removal -->
+  <!-- See: https://learn.microsoft.com/dotnet/core/project-sdk/msbuild-props#using -->
+  <ItemGroup>
+    <Using Remove="FluentAssertions" />
+    <Using Remove="Microsoft.NET.TestFramework" />
+    <Using Remove="Microsoft.NET.TestFramework.Assertions" />
+    <Using Remove="Microsoft.NET.TestFramework.Commands" />
+    <Using Remove="Microsoft.NET.TestFramework.ProjectConstruction" />
+    <Using Remove="Microsoft.NET.TestFramework.Utilities" />
+    <Using Remove="Xunit" />
+    <Using Remove="Xunit.Abstractions" />
+  </ItemGroup>
+
 </Project>

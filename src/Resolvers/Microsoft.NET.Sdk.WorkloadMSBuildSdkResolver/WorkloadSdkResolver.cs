@@ -2,14 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.NativeWrapper;
-using System.Collections.Immutable;
 
 #if NET
 using Microsoft.DotNet.Cli;

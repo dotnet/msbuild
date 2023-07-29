@@ -3,16 +3,8 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using FluentAssertions;
 using Microsoft.DotNet.Tools.New;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.Abstractions.Components;
-using Xunit;
 
 namespace Microsoft.DotNet.Cli.New.Tests
 {

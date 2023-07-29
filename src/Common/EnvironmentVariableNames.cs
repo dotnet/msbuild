@@ -5,8 +5,6 @@
 
 #nullable enable
 
-using System.Runtime.InteropServices;
-using System;
 
 namespace Microsoft.DotNet.Cli
 {

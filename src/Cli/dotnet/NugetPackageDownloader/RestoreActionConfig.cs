@@ -1,11 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using Microsoft.Extensions.EnvironmentAbstractions;
-
 namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 {
     /// <param name="Interactive">The flag to enable nuget authentication plugin.

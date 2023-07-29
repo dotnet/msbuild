@@ -3,10 +3,8 @@
 
 using System.Diagnostics;
 using System.Formats.Tar;
-using System.Globalization;
 using System.IO.Compression;
 using System.Security.Cryptography;
-using System.Text;
 using System.IO.Enumeration;
 
 namespace Microsoft.NET.Build.Containers;

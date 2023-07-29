@@ -1,21 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Xml.Linq;
-using FluentAssertions;
 using Microsoft.AspNetCore.StaticWebAssets.Tasks;
-using Microsoft.AspNetCore.Razor.Tasks;
-using Microsoft.NET.TestFramework;
 using Microsoft.NET.Sdk.WebAssembly;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Xunit;
-using Xunit.Abstractions;
-using static NuGet.Client.ManagedCodeConventions;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {

@@ -1,16 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
 using Parser = Microsoft.DotNet.Cli.Parser;
-using System;
 using System.CommandLine;
-using System.CommandLine.Parsing;
-using Microsoft.DotNet.Tools.Publish;
-using System.Linq;
-using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Pack
 {

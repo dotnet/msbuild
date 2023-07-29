@@ -2,12 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using static Microsoft.NET.Build.Containers.KnownStrings.Properties;
-using FluentAssertions;
 using Microsoft.Build.Execution;
-using Xunit;
 using Microsoft.NET.Build.Containers.IntegrationTests;
-using Microsoft.NET.Build.Containers.UnitTests;
-using System.Linq;
 
 namespace Microsoft.NET.Build.Containers.Targets.IntegrationTests;
 

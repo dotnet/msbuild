@@ -3,8 +3,6 @@
 
 #nullable enable
 
-using System;
-using System.Threading;
 
 namespace Microsoft.DotNet.Cli.Utils
 {

@@ -4,11 +4,7 @@
 
 #nullable enable
 
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Extensions.Logging;
-using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace Microsoft.NET.TestFramework
 {

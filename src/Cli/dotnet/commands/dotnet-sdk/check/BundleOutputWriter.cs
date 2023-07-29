@@ -5,7 +5,6 @@
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.NativeWrapper;
-using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Sdk.Check
 {

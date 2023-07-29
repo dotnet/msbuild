@@ -4,10 +4,6 @@
 #nullable enable
 
 using Microsoft.DotNet.Tools.Add.PackageReference;
-using Microsoft.DotNet.Tools;
-using System.Collections.Generic;
-using System.CommandLine;
-using System.Linq;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.Add.ProjectToProjectReference;
 using Microsoft.DotNet.Tools.Restore;

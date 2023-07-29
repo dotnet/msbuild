@@ -1,14 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
+using CLIRuntimeEnvironment = Microsoft.DotNet.Cli.Utils.RuntimeEnvironment;
 
 namespace Microsoft.DotNet.Cli.Telemetry
 {
@@ -146,7 +144,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 config.ConnectionString = ConnectionString;
                 _client = new TelemetryClient(config);
                 _client.Context.Session.Id = CurrentSessionId;
-                _client.Context.Device.OperatingSystem = RuntimeEnvironment.OperatingSystem;
+                _client.Context.Device.OperatingSystem = CLIRuntimeEnvironment.OperatingSystem;
 
                 _commonProperties = new TelemetryCommonProperties().GetTelemetryCommonProperties();
                 _commonMeasurements = new Dictionary<string, double>();

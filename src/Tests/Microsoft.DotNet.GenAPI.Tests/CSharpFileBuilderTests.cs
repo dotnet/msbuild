@@ -1,9 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.ApiSymbolExtensions;
@@ -11,7 +9,6 @@ using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
 using Microsoft.DotNet.ApiSymbolExtensions.Logging;
 using Microsoft.DotNet.ApiSymbolExtensions.Tests;
 using Microsoft.DotNet.GenAPI.Filtering;
-using Xunit;
 
 namespace Microsoft.DotNet.GenAPI.Tests
 {
@@ -1733,7 +1730,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         public partial class foo
                         {
-                            public void Execute(out int i) { throw null; }
+                            public void Execute(scoped out int i) { throw null; }
                         }
                     }
                     """,

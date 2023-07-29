@@ -1,18 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using System.Xml.Linq;
-using NuGet.Frameworks;
-using Xunit.Sdk;
-using System.ComponentModel.DataAnnotations;
-
 namespace Microsoft.NET.TestFramework
 {
     public class OutputPathCalculator

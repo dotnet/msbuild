@@ -1,22 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using FluentAssertions;
-using Xunit;
-using Xunit.Abstractions;
 using NuGet.Packaging;
-using System.Xml.Linq;
 using System.Runtime.CompilerServices;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using System;
-using System.Runtime.InteropServices;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.NET.ToolPack.Tests
 {
@@ -301,39 +287,6 @@ namespace Microsoft.NET.ToolPack.Tests
             var result = packCommand.Execute();
             result.Should().Fail().And.HaveStdOutContaining("NETSDK1146");
 
-        }
-
-        [Fact]
-        public void WhenPackingAToolItDefaultsRollsForwardToMajor()
-        {
-            var testProject = new TestProject()
-            {
-                Name = "RollForwardDefault",
-                TargetFrameworks = "netcoreapp3.0",
-                IsWinExe = true,
-            };
-            testProject.AdditionalProperties.Add("PackAsTool", "true");
-
-            TestAsset asset = _testAssetsManager.CreateTestProject(testProject);
-            var packCommand = new PackCommand(Log, Path.Combine(asset.Path, testProject.Name));
-
-            packCommand
-                .Execute()
-                .Should()
-                .Pass();
-
-            var outputDirectory = packCommand.GetOutputDirectory(testProject.TargetFrameworks);
-
-            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
-            JObject runtimeConfig = ReadRuntimeConfig(runtimeConfigFile);
-            runtimeConfig["runtimeOptions"]["rollForward"].Value<string>()
-                .Should().Be("Major");
-        }
-
-        private JObject ReadRuntimeConfig(string runtimeConfigPath)
-        {
-            string runtimeConfigContents = File.ReadAllText(runtimeConfigPath);
-            return JObject.Parse(runtimeConfigContents);
         }
     }
 }

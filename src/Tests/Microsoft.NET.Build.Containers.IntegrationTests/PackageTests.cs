@@ -3,11 +3,6 @@
 //
 
 using System.IO.Compression;
-using System.Xml.Linq;
-using FluentAssertions;
-using Microsoft.NET.TestFramework;
-using Microsoft.DotNet.Cli.Utils;
-using Xunit;
 
 namespace Microsoft.NET.Build.Containers.IntegrationTests;
 

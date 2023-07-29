@@ -4,12 +4,8 @@
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Common;
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Completions;
-using System.IO;
-using System.Linq;
 
 namespace Microsoft.DotNet.Cli
 {
