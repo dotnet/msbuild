@@ -47,6 +47,11 @@
         <target state="translated">Type d'installation</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadIntegrityCheck">
+        <source>Checking the state of installed workloads...</source>
+        <target state="new">Checking the state of installed workloads...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
         <source>Manifest Version</source>
         <target state="translated">Version de manifeste</target>

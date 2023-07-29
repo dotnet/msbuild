@@ -184,6 +184,14 @@ namespace Microsoft.DotNet.Cli
                         isDotnetBeingInvokedFromNativeInstaller = true;
                     }
 
+                    // Override the workload integrity check if the command being executed is a workload command or the command is being ran in CI.
+                    // A workload command causes issues as the command opens a log and the integrity check will get a "The process cannot access the file because it is being used by another process." error for the log file.
+                    // Basically, they're both trying to write to the same log at the same time.
+                    if (parseResult.CommandResult.Command.Equals(WorkloadCommandParser.GetCommand()) || new CIEnvironmentDetectorForTelemetry().IsCIEnvironment())
+                    {
+                        skipWorkloadIntegrityCheck = true;
+                    }
+
                     var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration(
                         generateAspNetCertificate: generateAspNetCertificate,
                         telemetryOptout: telemetryOptout,
@@ -312,13 +320,14 @@ namespace Microsoft.DotNet.Cli
             var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(isDotnetBeingInvokedFromNativeInstaller, environmentProvider);
             var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
             var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
+            var reporter = Reporter.Output;
             var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
                 firstTimeUseNoticeSentinel,
                 aspNetCertificateSentinel,
                 aspnetCertificateGenerator,
                 toolPathSentinel,
                 dotnetFirstRunConfiguration,
-                Reporter.Output,
+                reporter,
                 environmentPath,
                 performanceMeasurements);
 
@@ -331,7 +340,7 @@ namespace Microsoft.DotNet.Cli
 
             if (isFirstTimeUse && !dotnetFirstRunConfiguration.SkipWorkloadIntegrityCheck)
             {
-                WorkloadIntegrityChecker.RunFirstUseCheck();
+                WorkloadIntegrityChecker.RunFirstUseCheck(reporter);
             }
         }
 

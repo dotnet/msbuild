@@ -153,4 +153,7 @@
   <data name="WorkloadInfoDescription" xml:space="preserve">
     <value>Display information about installed workloads.</value>
   </data>
+  <data name="WorkloadIntegrityCheck" xml:space="preserve">
+    <value>Checking the state of installed workloads...</value>
+  </data>
 </root>
