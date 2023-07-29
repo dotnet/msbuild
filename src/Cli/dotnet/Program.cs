@@ -336,7 +336,14 @@ namespace Microsoft.DotNet.Cli
 
             if (isFirstTimeUse && !dotnetFirstRunConfiguration.SkipWorkloadIntegrityCheck)
             {
-                WorkloadIntegrityChecker.RunFirstUseCheck(reporter);
+                try
+                {
+                    WorkloadIntegrityChecker.RunFirstUseCheck(reporter);
+                }
+                catch (Exception)
+                {
+                    // If the workload check fails for any reason, we want to eat the failure and continue running the command.
+                }
             }
         }
 
