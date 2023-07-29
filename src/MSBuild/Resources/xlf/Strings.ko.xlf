@@ -103,6 +103,16 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="InvalidTerminalLoggerValue">
+        <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
+        <target state="new">MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1065: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
         <target state="translated">msbuild 버전 {0}({1}용)</target>
@@ -1555,17 +1565,17 @@
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
-        <target state="new">Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</target>
+        <target state="translated">빌드가 stdout 스트림에 대한 직접 액세스를 요청하는 프로세스(예: 'dotnet test')의 컨텍스트에서 실행되기 때문에 터미널 로거는 사용되지 않았습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedNotSupported">
         <source>Terminal Logger was not used because the output is not supported.</source>
-        <target state="new">Terminal Logger was not used because the output is not supported.</target>
+        <target state="translated">출력이 지원되지 않아 터미널 로거를 사용하지 않았습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedRedirected">
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
-        <target state="new">Terminal Logger was not used because the output is being redirected to a file.</target>
+        <target state="translated">출력이 파일로 리디렉션되기 때문에 터미널 로거가 사용되지 않았습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
