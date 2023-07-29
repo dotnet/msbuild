@@ -18,7 +18,7 @@
     <!-- While in prerelease, ship the symbols to everyone all the time. -->
     <DebugType>embedded</DebugType>
     <Nullable>enable</Nullable>
-    <NoWarn>($NoWarn);CS8002</NoWarn>
+    <NoWarn>($NoWarn);CS8002;NU1507</NoWarn>
     <StrongNameKeyId>MicrosoftShared</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
@@ -28,15 +28,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="all" ExcludeAssets="runtime" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="$(MicrosoftCodeAnalysisPublicApiAnalyzersVersion)" Condition=" '$(DotNetBuildFromSource)' != 'true' ">
+    <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Condition=" '$(DotNetBuildFromSource)' != 'true' ">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Nuget.Packaging" Version="$(NuGetPackagingPackageVersion)" />
-    <PackageReference Include="Valleysoft.DockerCredsProvider" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingAbstractionsPackageVersion)" />
+    <PackageReference Include="Nuget.Packaging" />
+    <PackageReference Include="Valleysoft.DockerCredsProvider" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
   </ItemGroup>
 
   <!-- net472 builds manually import files to compile -->

@@ -9,9 +9,9 @@ namespace Microsoft.NET.TestFramework
     {
         public List<string> RemainingArgs { get; private set; }
 
-        public bool UseFullFrameworkMSBuild { get; private set; }
+        public bool UseFullFrameworkMSBuild { get; private set; } = true;
 
-        public string FullFrameworkMSBuildPath { get; private set; }
+        public string FullFrameworkMSBuildPath { get; private set; } 
 
         public string DotnetHostPath { get; private set; }
 

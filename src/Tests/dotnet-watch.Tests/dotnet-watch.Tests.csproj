@@ -11,7 +11,7 @@
     <ProjectReference Include="$(RepoRoot)\src\BuiltInTools\DotNetWatchTasks\DotNetWatchTasks.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
-    <PackageReference Include="Xunit.Combinatorial" Version="$(XunitCombinatorialVersion)" PrivateAssets="all" />
+    <PackageReference Include="Moq" />
+    <PackageReference Include="Xunit.Combinatorial" PrivateAssets="all" />
   </ItemGroup>
 </Project>

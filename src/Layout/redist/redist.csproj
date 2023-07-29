@@ -23,26 +23,26 @@
   <Import Project="targets\MSBuildExtensions.targets" />
 
   <ItemGroup>
-    <PackageReference Include="dotnet-format" Version="$(DotnetFormatVersion)" GeneratePathProperty="true" ExcludeAssets="All" />
-    <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />
-    <PackageReference Include="NuGet.Build.Tasks.Console" Version="$(NuGetBuildTasksConsolePackageVersion)" />
-    <PackageReference Include="NuGet.Common" Version="$(NuGetCommonPackageVersion)" /><!-- Keeps this from being bumped by transitive refs (templating) -->
-    <PackageReference Include="Microsoft.Build.NuGetSdkResolver" Version="$(MicrosoftBuildNuGetSdkResolverPackageVersion)" />
-    <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(MicrosoftTestPlatformCLIPackageVersion)" ExcludeAssets="All" />
-    <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(MicrosoftTestPlatformBuildPackageVersion)" />
-    <PackageReference Condition=" '$(DotNetBuildFromSource)' != 'true' " Include="NuGet.Localization" Version="$(NuGetLocalizationPackageVersion)" />
-    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="$(MicrosoftCodeAnalysisNetAnalyzersVersion)" ExcludeAssets="All" GeneratePathProperty="true"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.CodeStyle" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true"/>
-    <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(MicrosoftFSharpCompilerPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.NET.Sdk.Razor.SourceGenerators.Transport" Version="$(MicrosoftNETSdkRazorSourceGeneratorsTransportPackageVersion)" GeneratePathProperty="true" />
+    <PackageReference Include="dotnet-format" GeneratePathProperty="true" ExcludeAssets="All" />
+    <PackageReference Include="NuGet.Build.Tasks" />
+    <PackageReference Include="NuGet.Build.Tasks.Console" />
+    <PackageReference Include="NuGet.Common" /><!-- Keeps this from being bumped by transitive refs (templating) -->
+    <PackageReference Include="Microsoft.Build.NuGetSdkResolver" />
+    <PackageReference Include="Microsoft.TestPlatform.CLI" ExcludeAssets="All" />
+    <PackageReference Include="Microsoft.TestPlatform.Build" />
+    <PackageReference Condition=" '$(DotNetBuildFromSource)' != 'true' " Include="NuGet.Localization" />
+    <PackageReference Include="NuGet.ProjectModel" />
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" ExcludeAssets="All" GeneratePathProperty="true"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" ExcludeAssets="All" GeneratePathProperty="true"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.CodeStyle" ExcludeAssets="All" GeneratePathProperty="true"/>
+    <PackageReference Include="Microsoft.FSharp.Compiler" ExcludeAssets="All" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.NET.Sdk.Razor.SourceGenerators.Transport" GeneratePathProperty="true" />
 
     <!-- Lift up dependencies of dependencies to prevent build tasks from getting pinned to older versions -->
-    <PackageReference Include="System.CodeDom" Version="$(SystemCodeDomPackageVersion)" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="$(SystemTextEncodingCodePagesPackageVersion)" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="$(SystemSecurityCryptographyProtectedDataPackageVersion)" />
-    <PackageReference Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
+    <PackageReference Include="System.CodeDom" />
+    <PackageReference Include="System.Text.Encoding.CodePages" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+    <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>
 
   <ItemGroup>

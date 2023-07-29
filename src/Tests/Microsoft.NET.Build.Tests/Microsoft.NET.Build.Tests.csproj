@@ -21,13 +21,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
-    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.LibraryModel" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.Versioning" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.Configuration" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="NuGet.Common" Version="$(NuGetProjectModelVersion)" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="NuGet.ProjectModel" />
+    <PackageReference Include="NuGet.LibraryModel" />
+    <PackageReference Include="NuGet.Versioning" />
+    <PackageReference Include="NuGet.Configuration" />
+    <PackageReference Include="NuGet.Frameworks" />
+    <PackageReference Include="NuGet.Common" />
   </ItemGroup>
 
   <ItemGroup>

@@ -58,7 +58,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonVersion)" Condition="'$(UseSystemTextJson)'=='True'"/>
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" Condition="'$(UseSystemTextJson)'!='True'"/>
+    <PackageReference Include="System.Text.Json" Condition="'$(UseSystemTextJson)'=='True'"/>
+    <PackageReference Include="Newtonsoft.Json" Condition="'$(UseSystemTextJson)'!='True'"/>
   </ItemGroup>
 </Project>

@@ -14,19 +14,19 @@
     <ProjectReference Include="..\..\Cli\dotnet\dotnet.csproj" />
     <ProjectReference Include="..\..\Cli\dotnet-new3\dotnet-new3.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
-    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
+    <PackageReference Include="Moq" />
     <PackageReference Include="Verify.Xunit" />
     <PackageReference Include="Verify.DiffPlex" />
-    <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
-    <PackageReference Include="Microsoft.TemplateEngine.TestHelper" Version="$(MicrosoftTemplateEngineTestHelperPackageVersion)" />
-    <PackageReference Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="$(MicrosoftTemplateEngineAuthoringTemplateVerifierVersion)" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Microsoft.TemplateEngine.TestHelper" />
+    <PackageReference Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.6.0" Version="6.0.*" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.7.0" Version="7.0.*-*" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.6.0" Version="6.0.*" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.7.0" Version="7.0.*-*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.6.0" VersionOverride="6.0.*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.7.0" VersionOverride="7.0.*-*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.6.0" VersionOverride="6.0.*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.7.0" VersionOverride="7.0.*-*" GeneratePathProperty="true" />
   </ItemGroup>
 
   <PropertyGroup>
