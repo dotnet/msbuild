@@ -117,4 +117,21 @@ public class ParseContainerPropertiesTests
         Assert.True(logs.Errors.Count > 0);
         Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2005);
     }
+
+    [DockerDaemonAvailableFact]
+    public void FailsWhenFirstCharIsAUnicodeLetterButNonLatin()
+    {
+        var (project, logs, d) = ProjectInitializer.InitProject(new () {
+            [ContainerBaseImage] = "mcr.microsoft.com/dotnet/runtime:7.0",
+            [ContainerRegistry] = "localhost:5010",
+            [ContainerImageName] = "㓳but-otherwise-valid",
+            [ContainerImageTag] = "5.0"
+        });
+        using var _ = d;
+        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        Assert.False(instance.Build(new[]{ComputeContainerConfig},  new [] { logs }, null, out var outputs));
+
+        Assert.True(logs.Errors.Count > 0);
+        Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2005);
+    }
 }

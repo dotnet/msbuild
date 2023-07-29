@@ -223,7 +223,7 @@ public class EndToEndTests
             $"/p:ContainerBaseImage={DockerRegistryManager.FullyQualifiedBaseImageDefault}",
             $"/p:ContainerRegistry={DockerRegistryManager.LocalRegistry}",
             $"/p:ContainerImageName={imageName}",
-            $"/p:Version={imageTag}")
+            $"/p:ContainerImageTag={imageTag}")
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
@@ -352,7 +352,7 @@ public class EndToEndTests
             $"/p:ContainerBaseImage={DockerRegistryManager.FullyQualifiedBaseImageDefault}",
             $"/p:ContainerRegistry={DockerRegistryManager.LocalRegistry}",
             $"/p:ContainerImageName={imageName}",
-            $"/p:Version={imageTag}")
+            $"/p:ContainerImageTag={imageTag}")
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()

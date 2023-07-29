@@ -39,13 +39,13 @@ public class TargetsTests
     [Theory]
     public void CanNormalizeInputContainerNames(string projectName, string expectedContainerImageName, bool shouldPass)
     {
-        var (project, _, d) = ProjectInitializer.InitProject(new()
+        var (project, logger, d) = ProjectInitializer.InitProject(new()
         {
             [AssemblyName] = projectName
         }, projectName: $"{nameof(CanNormalizeInputContainerNames)}_{projectName}_{expectedContainerImageName}_{shouldPass}");
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
-        instance.Build(new[] { ComputeContainerConfig }, null, null, out var outputs).Should().Be(shouldPass, "Build should have succeeded");
+        instance.Build(new[] { ComputeContainerConfig }, new[]{ logger }, null, out var outputs).Should().Be(shouldPass, String.Join(Environment.NewLine, logger.AllMessages));
         Assert.Equal(expectedContainerImageName, instance.GetPropertyValue(ContainerImageName));
     }
 
