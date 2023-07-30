@@ -142,7 +142,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 var kvp = satelliteResources.SingleOrDefault(p => p.Key == "ja");
                 kvp.Should().NotBeNull();
 
-                kvp.Value.Should().ContainKey("ja/blazorwasm.resources.wasm");
+                kvp.Value.Should().ContainKey("blazorwasm.resources.wasm");
             }
         }
 
@@ -189,7 +189,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var kvp = satelliteResources.SingleOrDefault(p => p.Key == "ja");
             kvp.Should().NotBeNull();
 
-            kvp.Value.Should().ContainKey("ja/blazorwasm.resources.wasm");
+            kvp.Value.Should().ContainKey("blazorwasm.resources.wasm");
         }
 
         [Fact]
@@ -222,7 +222,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var kvp = satelliteResources.SingleOrDefault(p => p.Key == "ja");
             kvp.Should().NotBeNull();
 
-            kvp.Value.Should().ContainKey("ja/blazorwasm.resources.wasm");
+            kvp.Value.Should().ContainKey("blazorwasm.resources.wasm");
 
 
             File.Delete(Path.Combine(projectDirectory.TestRoot, "blazorwasm", "Resource.ja.resx"));
