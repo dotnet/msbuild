@@ -2499,5 +2499,122 @@ namespace Microsoft.DotNet.GenAPI.Tests
                 }
                 """);
         }
+
+        [Fact]
+        public void TestExplicitInterfaceIndexer()
+        {
+            RunTest(original: """
+                    namespace a
+                    {
+                        public interface IFooList
+                        {
+                             object this[int index] { get; set; }
+                        }
+
+                        public struct Bar : IFooList
+                        {
+                        #pragma warning disable CS8597
+                            public string this[int index] { get { throw null; } set { } }
+                            object IFooList.this[int index] { get { throw null; } set { } }
+                        #pragma warning restore CS8597
+                        }
+                    }
+                    """,
+                expected: """
+                    namespace a
+                    {
+                        public partial struct Bar : IFooList
+                        {
+                            object IFooList.this[int index] { get { throw null; } set { } }
+                            public string this[int index] { get { throw null; } set { } }
+                        }
+
+                        public partial interface IFooList
+                        {
+                            object this[int index] { get; set; }
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false);
+        }
+
+        [Fact]
+        public void TestExplicitInterfaceNonGenericCollections()
+        {
+            RunTest(original: """
+                    #nullable disable
+                    using System;
+                    using System.Collections;
+                    namespace a
+                    {
+                        #pragma warning disable CS8597
+                        
+                        public partial class MyStringCollection : ICollection, IEnumerable, IList
+                        {
+                            public int Count { get { throw null; } }
+                            public string this[int index] { get { throw null; } set { } }
+                            bool ICollection.IsSynchronized { get { throw null; } }
+                            object ICollection.SyncRoot { get { throw null; } }
+                            bool IList.IsFixedSize { get { throw null; } }
+                            bool IList.IsReadOnly { get { throw null; } }
+                            object IList.this[int index] { get { throw null; } set { } }
+                            public int Add(string value) { throw null; }
+                            public void AddRange(string[] value) { }
+                            public void AddRange(MyStringCollection value) { }
+                            public void Clear() { }
+                            public bool Contains(string value) { throw null; }
+                            public void CopyTo(string[] array, int index) { }
+                            public override int GetHashCode() { throw null; }
+                            public int IndexOf(string value) { throw null; }
+                            public void Insert(int index, string value) { }
+                            public void Remove(string value) { }
+                            public void RemoveAt(int index) { }
+                            void ICollection.CopyTo(Array array, int index) { }
+                            IEnumerator IEnumerable.GetEnumerator() { throw null; }
+                            int IList.Add(object value) { throw null; }
+                            bool IList.Contains(object value) { throw null; }                            
+                            int IList.IndexOf(object value) { throw null; }
+                            void IList.Insert(int index, object value) { }
+                            void IList.Remove(object value) { }
+                        }
+
+                        #pragma warning restore CS8597
+                    }
+                    """,
+                expected: """                    
+                    namespace a
+                    {
+                        public partial class MyStringCollection : System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.IList
+                        {
+                            public int Count { get { throw null; } }
+                            public string this[int index] { get { throw null; } set { } }
+                            bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
+                            object System.Collections.ICollection.SyncRoot { get { throw null; } }
+                            bool System.Collections.IList.IsFixedSize { get { throw null; } }
+                            bool System.Collections.IList.IsReadOnly { get { throw null; } }
+                            object System.Collections.IList.this[int index] { get { throw null; } set { } }
+                            public int Add(string value) { throw null; }
+                            public void AddRange(MyStringCollection value) { }
+                            public void AddRange(string[] value) { }
+                            public void Clear() { }
+                            public bool Contains(string value) { throw null; }
+                            public void CopyTo(string[] array, int index) { }
+                            public override int GetHashCode() { throw null; }
+                            public int IndexOf(string value) { throw null; }
+                            public void Insert(int index, string value) { }
+                            public void Remove(string value) { }
+                            public void RemoveAt(int index) { }
+                            void System.Collections.ICollection.CopyTo(System.Array array, int index) { }
+                            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
+                            int System.Collections.IList.Add(object value) { throw null; }
+                            bool System.Collections.IList.Contains(object value) { throw null; }
+                            int System.Collections.IList.IndexOf(object value) { throw null; }
+                            void System.Collections.IList.Insert(int index, object value) { }
+                            void System.Collections.IList.Remove(object value) { }
+                        }
+                    }
+                    """,
+                includeInternalSymbols: false);
+        }
     }
 }

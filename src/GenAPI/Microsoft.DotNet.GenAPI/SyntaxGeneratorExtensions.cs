@@ -89,6 +89,16 @@ namespace Microsoft.DotNet.GenAPI
                 }
             }
 
+            if (symbol is IPropertySymbol propertySymbol)
+            {
+                // Explicitly implemented indexers do not set IsIndexer
+                // https://github.com/dotnet/roslyn/issues/53911
+                if (!propertySymbol.IsIndexer && propertySymbol.ExplicitInterfaceImplementations.Any(i => i.IsIndexer))
+                {
+                    return syntaxGenerator.IndexerDeclaration(propertySymbol);
+                }
+            }
+
             try
             {
                 return syntaxGenerator.Declaration(symbol);
