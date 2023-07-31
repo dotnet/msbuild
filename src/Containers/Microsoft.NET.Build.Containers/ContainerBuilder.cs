@@ -117,7 +117,6 @@ public static class ContainerBuilder
         {
             imageBuilder.SetUser(user);
         }
-
         BuiltImage builtImage = imageBuilder.Build();
         cancellationToken.ThrowIfCancellationRequested();
 

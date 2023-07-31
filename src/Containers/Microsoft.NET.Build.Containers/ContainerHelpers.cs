@@ -18,7 +18,7 @@ public static class ContainerHelpers
     internal const string HostObjectPass = "SDK_CONTAINER_REGISTRY_PWORD";
 
     internal const string DockerRegistryAlias = "docker.io";
-
+    
     /// <summary>
     /// Matches an environment variable name - must start with a letter or underscore, and can only contain letters, numbers, and underscores.
     /// </summary>
@@ -281,5 +281,4 @@ public static class ContainerHelpers
             return false;
         }
     }
-
 }
