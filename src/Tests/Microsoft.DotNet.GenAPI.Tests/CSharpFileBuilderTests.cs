@@ -1730,7 +1730,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     {
                         public partial class foo
                         {
-                            public void Execute(scoped out int i) { throw null; }
+                            public void Execute(out int i) { throw null; }
                         }
                     }
                     """,
@@ -2494,7 +2494,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
 
                     public static partial class E
                     {
-                        public static void M<T>(this object c, System.ReadOnlySpan<T> values) { }
+                        public static void M<T>(this object c, scoped System.ReadOnlySpan<T> values) { }
                     }
                 }
                 """);
