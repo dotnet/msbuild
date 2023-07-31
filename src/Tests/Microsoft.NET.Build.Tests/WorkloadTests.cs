@@ -1,21 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using FluentAssertions;
-using Microsoft.Extensions.DependencyModel;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using Xunit;
-using Xunit.Abstractions;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -170,20 +156,20 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-workloadtestplatform"
+                TargetFrameworks = $"{ToolsetInfo.CurrentTargetFramework}-android"
             };
 
             var testAsset = _testAssetsManager
                 .CreateTestProject(testProject);
 
-            //  NETSDK1139: The target platform identifier workloadtestplatform was not recognized.
+            //  NETSDK1208: The target platform identifier android was not recognized.
             new BuildCommand(testAsset)
                 .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "false")
                 .Execute()
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("NETSDK1139");
+                .HaveStdOutContaining("NETSDK1208");
         }
 
         [Fact]
@@ -276,6 +262,11 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(ToolsetInfo.CurrentTargetFramework, ToolsetInfo.CurrentTargetFramework, "macos")]
         public void Given_multi_target_It_should_get_suggested_workload_by_GetRequiredWorkloads_target(string mainTfm, string referencingTfm, string expected)
         {
+            // Skip Test if SDK is < 6.0.400
+            var sdkVersion = SemanticVersion.Parse(TestContext.Current.ToolsetUnderTest.SdkVersion);
+            if (new SemanticVersion(sdkVersion.Major, sdkVersion.Minor, sdkVersion.Patch) < new SemanticVersion(6, 0, 400))
+                return; // MAUI was removed from earlier versions of the SDK
+
             var mainProject = new TestProject()
             {
                 Name = "MainProject",

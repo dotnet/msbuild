@@ -55,8 +55,8 @@ La valeur par défaut est de publier une application dépendante du framework.</
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to publish for. The default is 'Debug'. Use the `PublishRelease` property to make 'Release' the default for this command.</source>
-        <target state="translated">La configuration pour laquelle publier. La valeur par défaut est 'Débogage'. Utilisez la propriété `PublishRelease` pour faire de 'Release' la valeur par défaut pour cette commande.</target>
+        <source>The configuration to publish for. The default is 'Release' for NET 8.0 projects and above, but 'Debug' for older projects.</source>
+        <target state="needs-review-translation">La configuration pour laquelle publier. La valeur par défaut est 'Débogage'. Utilisez la propriété `PublishRelease` pour faire de 'Release' la valeur par défaut pour cette commande.</target>
         <note />
       </trans-unit>
     </body>

@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using FluentAssertions;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using Xunit;
-using Xunit.Abstractions;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -26,7 +17,7 @@ namespace Microsoft.NET.Publish.Tests
                 Name = "CrossPublish",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                RuntimeIdentifier = "centos.7-x64"
+                RuntimeIdentifier = "centos.8-x64"
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Threading", "4.3.0"));

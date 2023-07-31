@@ -1,16 +1,11 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
-    [Collection("Verify Tests")]
     public partial class DotnetNewHelpTests : BaseIntegrationTest
     {
         [Theory]
@@ -187,7 +182,7 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         {
             string workingDirectory = CreateTemporaryFolder();
 
-            CommandResult commandResult = new DotnetNewCommand(_log, "class", "-h")
+            CommandResult commandResult = new DotnetNewCommand(_log, "classli", "-h")
                 .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
@@ -355,6 +350,82 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .Execute();
 
             commandResult.Should().Pass().And.NotHaveStdErr();
+            return Verify(commandResult.StdOut);
+        }
+
+        [Fact]
+        public Task CanShowHelpForTemplate_RequiredParams()
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateWithRequiredParameters", _log, _fixture.HomeDirectory, workingDirectory);
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithRequiredParameters", "--help")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            return Verify(commandResult.StdOut);
+        }
+
+        [Fact]
+        public Task CanShowHelpForTemplate_ConditionalParams()
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateWithConditionalParameters", _log, _fixture.HomeDirectory, workingDirectory);
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "TestAssets.TemplateWithConditionalParameters", "--help")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            return Verify(commandResult.StdOut);
+        }
+
+        [Fact]
+        public Task CanShowHelpForTemplateWhenRequiredParamIsMissed()
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate($"TemplateResolution/MissedRequiredParameter/BasicTemplate1", _log, _fixture.HomeDirectory, workingDirectory);
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "basic", "--help")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
+            return Verify(commandResult.StdOut);
+        }
+
+        [Fact]
+        public Task CanShowHelpForTemplateWhenRequiredParamIsMissedAndConditionIntroduced()
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            InstallTestTemplate($"TemplateResolution/MissedRequiredParameter/BasicTemplate2", _log, _fixture.HomeDirectory, workingDirectory);
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "basic2", "--help")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr();
+
             return Verify(commandResult.StdOut);
         }
     }

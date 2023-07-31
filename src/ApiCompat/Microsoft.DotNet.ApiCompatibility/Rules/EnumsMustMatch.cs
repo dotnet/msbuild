@@ -1,10 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -13,9 +10,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// </summary>
     public class EnumsMustMatch : IRule
     {
-        private readonly RuleSettings _settings;
+        private readonly IRuleSettings _settings;
 
-        public EnumsMustMatch(RuleSettings settings, IRuleRegistrationContext context)
+        public EnumsMustMatch(IRuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
@@ -42,7 +39,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             }
 
             // Check that the underlying types are equal and if not, emit a diagnostic.
-            if (!_settings.SymbolComparer.Equals(leftType, rightType))
+            if (!_settings.SymbolEqualityComparer.Equals(leftType, rightType))
             {
                 differences.Add(new CompatDifference(
                     leftMetadata,

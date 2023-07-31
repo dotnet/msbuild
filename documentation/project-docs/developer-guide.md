@@ -31,7 +31,17 @@ The build script will output a `dotnet` installation to `artifacts\bin\redist\De
 
 As part of the build, some intermediate files will get generated which may run into long-path issues. If you encounter a build failure with an error message similar to `Resource file [filename].resx cannot be found.`, [enable long paths](https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=cmd#enable-long-paths-in-windows-10-version-1607-and-later) and try again.
 
-To open the solution in Visual Studio, be sure to build with `build.cmd` and run the generated environment for your shell. If you're using `cmd`, then run `artifacts\sdk-build-env.bat`. If you're using powershell, you need to 'dot source' `artifacts/sdk-build-env.ps1`. Finally, open Visual Studio with `devenv sdk.sln`.
+#### Using Visual Studio
+
+The simple way to launch Visual Studio after building via `build.cmd` is to double-click the `VS with sdk.sln` Windows shortcut in the `artifacts` folder. This will load the generated environment automatically and launch Visual Studio with the `sdk.sln` solution.
+
+Alternatively, to open the solution in Visual Studio, be sure to build with `build.cmd` and run the generated environment for your shell. If you're using `cmd`, then run `artifacts\sdk-build-env.bat`. If you're using PowerShell, you need to 'dot source' `artifacts/sdk-build-env.ps1`. Finally, open Visual Studio with `devenv sdk.sln`.
+
+In addition, Visual Studio must have the following option set:
+
+![image](https://user-images.githubusercontent.com/23152278/211684116-923ed37e-6d56-42bf-befe-a5ef66758000.png)
+
+Go to `Tools` -> `Options` to make sure "Use previews of the .NET SDK (requires restart)" is checked and restart VS.
 
 ### Linux and macOS
 
@@ -132,6 +142,8 @@ build.cmd # to have a full build first
 .\artifacts\sdk-build-env.bat
 devenv sdk.sln
 ```
+
+Note again that in Visual studio "Use previews of the .NET SDK (requires restart)" must be checked. See the above comment for how to enable this.
 
 ## A simple test
 

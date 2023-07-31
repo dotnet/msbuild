@@ -26,9 +26,12 @@
 /src/Assets/TestPackages/PackageLibraryTransitiveDependency/ @dotnet/aspnet-blazor-eng
 /src/src/Assets/TestProjects/Razor*/ @dotnet/aspnet-blazor-eng
 
+# Area-Wasm
+/src/WasmSdk @lewing @radical @pavelsavara @maraf
+
 # Area-Format
-/src/Cli/dotnet/commands/dotnet-format @jmarolf @JoeRobich
-/src/Tests/dotnet-format.Tests @jmarolf @JoeRobich
+/src/Cli/dotnet/commands/dotnet-format @sharwell @arkalyanms
+/src/Tests/dotnet-format.Tests @sharwell @arkalyanms
 
 # Area-NuGet
 /src/Cli/dotnet/commands/dotnet-add/dotnet-add-package @dotnet/nuget-team
@@ -56,25 +59,36 @@
 
 # ILLink and ReadyToRun targets and tasks owned by runtime team
 # Area-ILLink Area-ReadyToRun
-/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.ILLink.targets clrappmodel@microsoft.com
+/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.ILLink.targets clrappmodel@microsoft.com @dotnet/illink-contrib
 /src/Tasks/Microsoft.NET.Build.Tasks/PrepareForReadyToRunCompilation.cs @AntonLapounov
 /src/Tasks/Microsoft.NET.Build.Tasks/RunReadyToRunCompiler.cs @AntonLapounov
-/src/Tests/Microsoft.NET.Publish.Tests/GivenThatWeWantToRunILLink.cs clrappmodel@microsoft.com
+/src/Tests/Microsoft.NET.Publish.Tests/GivenThatWeWantToRunILLink.cs clrappmodel@microsoft.com @dotnet/illink-contrib
 /src/Tests/Microsoft.NET.Publish.Tests/GivenThatWeWantToPublishReadyToRun.cs @AntonLapounov
 # Publish.targets related to ILLink and ReadyToRun is own by both runtime and SDK team
-/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.Publish.targets clrappmodel@microsoft.com @AntonLapounov @dotnet/dotnet-cli
+/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.Publish.targets clrappmodel@microsoft.com @dotnet/illink-contrib @AntonLapounov @dotnet/dotnet-cli
 /src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.ClickOnce.targets @sujitnayak
 
 # Area-Watch
-/src/Assets/TestProjects/Watch*/     @tmat @arkalyanms
-/src/Tests/dotnet-watch.Tests/       @tmat @arkalyanms
+/src/Assets/TestProjects/Watch*/     @tmat @arkalyanms @dotnet/roslyn-ide
+/src/Tests/dotnet-watch.Tests/       @tmat @arkalyanms @dotnet/roslyn-ide
 /src/Tests/Microsoft.AspNetCore.Watch.BrowserRefresh.Tests/       @dotnet/aspnet-blazor-eng
-/src/BuiltInTools/*   @tmat @arkalyanms
+/src/BuiltInTools/*   @tmat @arkalyanms @dotnet/roslyn-ide
 /src/BuiltInTools/BrowserRefresh   @dotnet/aspnet-blazor-eng
 
 # ApiCompat tools owned by runtime team
 # Area-ApiCompat
-/src/ApiCompat/ @dotnet/area-infrastructure-libraries
-/src/Tests/Microsoft.DotNet.ApiCompatibility*/ @dotnet/area-infrastructure-libraries
-/src/Tests/Microsoft.DotNet.ApiCompat*/ @dotnet/area-infrastructure-libraries
-/src/Tests/Microsoft.DotNet.PackageValidation*/ @dotnet/area-infrastructure-libraries
+/src/ApiCompat/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
+/src/Tests/Microsoft.DotNet.ApiCompatibility*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
+/src/Tests/Microsoft.DotNet.ApiCompat*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
+/src/Tests/Microsoft.DotNet.PackageValidation*/ @ericstj @dotnet/area-infrastructure-libraries @joperezr 
+
+# Area-GenAPI
+/src/GenAPI/ @andriipatsula @dotnet/area-infrastructure-libraries
+/src/Tests/Microsoft.DotNet.GenAPI/ @andriipatsula @dotnet/area-infrastructure-libraries
+/src/Microsoft.DotNet.ApiSymbolExtensions/ @andriipatsula @dotnet/area-infrastructure-libraries
+
+# Area: dotnet containers
+/src/Cli/Containers @dotnet/sdk-container-builds-maintainers
+/src/Tests/containerize.UnitTests @dotnet/sdk-container-builds-maintainers
+/src/Tests/Microsoft.NET.Build.Containers.IntegrationTests @dotnet/sdk-container-builds-maintainers
+/src/Tests/Microsoft.NET.Build.Containers.UnitTests @dotnet/sdk-container-builds-maintainers

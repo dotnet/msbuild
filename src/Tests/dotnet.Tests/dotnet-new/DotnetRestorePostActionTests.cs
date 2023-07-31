@@ -3,13 +3,10 @@
 
 #nullable enable
 
-using System.Collections.Generic;
-using System.IO;
 using Microsoft.DotNet.Tools.New.PostActionProcessors;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 
 namespace Microsoft.DotNet.Cli.New.Tests
 {
@@ -32,7 +29,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
 
             var args = new Dictionary<string, string>() { { "files", "[\"MyApp.csproj\"]" } };
-            var postAction = new MockPostAction { ActionId = actionProcessor.Id, Args = args };
+            var postAction = new MockPostAction(default, default, default, default, default!) { ActionId = actionProcessor.Id, Args = args };
 
             MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
@@ -57,7 +54,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
 
             var args = new Dictionary<string, string>() { { "files", "MyApp.csproj" } };
-            var postAction = new MockPostAction { ActionId = actionProcessor.Id, Args = args };
+            var postAction = new MockPostAction(default, default, default, default, default!) { ActionId = actionProcessor.Id, Args = args };
 
             MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));

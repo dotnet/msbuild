@@ -1,8 +1,8 @@
-using System.IO;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Xml;
-using System.Xml.Linq;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks
 {
@@ -37,7 +37,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         public string ProjectGuid { get; set; }
         
         /// <summary>
-        /// Flag that determines whether the publish telemtry needs to be disabled. 
+        /// Flag that determines whether the publish telemetry needs to be disabled. 
         /// </summary>
         public bool IgnoreProjectGuid { get; set; }
         /// <summary>
@@ -75,13 +75,17 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 
             // Initialize the publish web.config file with project web.config content if present. Else, clean the existing web.config in the
             // publish folder to make sure we have a consistent web.config update experience.
+            string defaultWebConfigPath = "web.config";
             string projectWebConfigPath = null;
+            string publishWebConfigPath = Path.Combine(PublishDir, defaultWebConfigPath);
+
             if (!string.IsNullOrEmpty(ProjectFullPath))
             {
-                projectWebConfigPath = Path.Combine(Path.GetDirectoryName(ProjectFullPath), "web.config");
+                //Ensure that we load the actual web.config name (case-sensitive on Unix-like systems)
+                projectWebConfigPath = GetWebConfigFileOrDefault(ProjectFullPath, defaultWebConfigPath);
+                publishWebConfigPath = Path.Combine(PublishDir, Path.GetFileName(projectWebConfigPath));
             }
 
-            string publishWebConfigPath = Path.Combine(PublishDir, "web.config");
             publishWebConfigPath = Path.GetFullPath(publishWebConfigPath);
 
             if (File.Exists(publishWebConfigPath))
@@ -138,5 +142,23 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             Log.LogMessage(MessageImportance.Low, "Configuring project completed successfully");
             return true;
         }
+
+        /// <summary>
+        /// Searches for an existing (case-insensitive) `Web.config` file. Otherwise defaults to defaultWebConfigName
+        /// </summary>
+        /// <param name="projectPath">Full path to project file</param>
+        /// <param name="defaultWebConfigName">Web Config file name to search for i.e. `web.config`</param> 
+        /// <returns></returns>
+        public string GetWebConfigFileOrDefault(string projectPath, string defaultWebConfigName)
+        {
+            var projectDirectory = Path.GetDirectoryName(projectPath);
+            var currentWebConfigFileName = Directory.EnumerateFiles(projectDirectory)
+                .FirstOrDefault(file => string.Equals(Path.GetFileName(file), defaultWebConfigName, StringComparison.OrdinalIgnoreCase));
+            var webConfigFileName = currentWebConfigFileName == null ? defaultWebConfigName : Path.GetFileName(currentWebConfigFileName);
+            var projectWebConfigPath = Path.Combine(projectDirectory, webConfigFileName); 
+
+            return projectWebConfigPath; 
+        }
+
     }
 }

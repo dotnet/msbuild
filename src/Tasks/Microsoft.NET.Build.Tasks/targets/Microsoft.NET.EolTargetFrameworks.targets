@@ -12,7 +12,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <!-- Default the check to true, but allow developers to turn the warning off. -->
-    <CheckEolTargetFramework Condition="'$(CheckEolTargetFramework)' == ''">true</CheckEolTargetFramework>
+    <CheckEolTargetFramework Condition="'$(CheckEolTargetFramework)' == '' and '$(OutputType)' != 'Library'">true</CheckEolTargetFramework>
+    <CheckEolWorkloads Condition="'$(CheckEolWorkloads)' == ''">true</CheckEolWorkloads>
   </PropertyGroup>
 
   <!--
@@ -20,12 +21,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     receive servicing updates and security fixes.
   -->
   <ItemGroup>
-    <_EolNetCoreTargetFrameworkVersions Include="1.0;1.1;2.0;2.1;2.2;3.0;5.0" />
+    <_EolNetCoreTargetFrameworkVersions Include="1.0;1.1;2.0;2.1;2.2;3.0;3.1;5.0" />
   </ItemGroup>
 
   <Target Name="_CheckForEolTargetFrameworks" AfterTargets="_CheckForUnsupportedNETCoreVersion"
           Condition="'@(_EolNetCoreTargetFrameworkVersions->AnyHaveMetadataValue('Identity', '$(_TargetFrameworkVersionWithoutV)'))' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(CheckEolTargetFramework)' == 'true'">
     <NETSdkWarning ResourceName="TargetFrameworkIsEol"
                    FormatArguments="$(TargetFramework.ToLowerInvariant());https://aka.ms/dotnet-core-support" />
+  </Target>
+
+  <Target Name="_CheckForEolWorkloads" AfterTargets="_CheckForUnsupportedNETCoreVersion"
+          Condition="'@(EolWorkload)' != '' and '$(CheckEolWorkloads)' == 'true'">
+    <NETSdkWarning ResourceName="WorkloadIsEol"
+                   FormatArguments="%(EolWorkload.Identity);$([MSBuild]::ValueOrDefault('%(EolWorkload.Url)', 'https://aka.ms/dotnet-core-support'))" />
   </Target>
 </Project>

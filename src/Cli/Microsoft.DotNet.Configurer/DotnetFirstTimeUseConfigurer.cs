@@ -1,28 +1,21 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Configurer
 {
     public class DotnetFirstTimeUseConfigurer
     {
-        private IReporter _reporter;
-        private DotnetFirstRunConfiguration _dotnetFirstRunConfiguration;
-        private IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
-        private IAspNetCertificateSentinel _aspNetCertificateSentinel;
-        private IAspNetCoreCertificateGenerator _aspNetCoreCertificateGenerator;
-        private IFileSentinel _toolPathSentinel;
-        private string _cliFallbackFolderPath;
+        private readonly IReporter _reporter;
+        private readonly DotnetFirstRunConfiguration _dotnetFirstRunConfiguration;
+        private readonly IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
+        private readonly IAspNetCertificateSentinel _aspNetCertificateSentinel;
+        private readonly IAspNetCoreCertificateGenerator _aspNetCoreCertificateGenerator;
+        private readonly IFileSentinel _toolPathSentinel;
         private readonly IEnvironmentPath _pathAdder;
-        private Dictionary<string, double> _performanceMeasurements;
+        private readonly Dictionary<string, double> _performanceMeasurements;
 
         public DotnetFirstTimeUseConfigurer(
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
@@ -31,7 +24,6 @@ namespace Microsoft.DotNet.Configurer
             IFileSentinel toolPathSentinel,
             DotnetFirstRunConfiguration dotnetFirstRunConfiguration,
             IReporter reporter,
-            string cliFallbackFolderPath,
             IEnvironmentPath pathAdder,
             Dictionary<string, double> performanceMeasurements = null)
         {
@@ -41,115 +33,83 @@ namespace Microsoft.DotNet.Configurer
             _toolPathSentinel = toolPathSentinel;
             _dotnetFirstRunConfiguration = dotnetFirstRunConfiguration;
             _reporter = reporter;
-            _cliFallbackFolderPath = cliFallbackFolderPath;
             _pathAdder = pathAdder ?? throw new ArgumentNullException(nameof(pathAdder));
             _performanceMeasurements ??= performanceMeasurements;
         }
 
         public void Configure()
         {
-            if (ShouldAddPackageExecutablePath())
+            if (_dotnetFirstRunConfiguration.AddGlobalToolsToPath && !_toolPathSentinel.Exists())
             {
-                Stopwatch beforeAddPackageExecutablePath = Stopwatch.StartNew();
-                AddPackageExecutablePath();
-                _performanceMeasurements?.Add("AddPackageExecutablePath Time", beforeAddPackageExecutablePath.Elapsed.TotalMilliseconds);
+                using (new PerformanceMeasurement(_performanceMeasurements, "AddPackageExecutablePath Time"))
+                {
+                    _pathAdder.AddPackageExecutablePathToUserPath();
+                    _toolPathSentinel.Create();
+                }
             }
 
-            if (ShouldPrintFirstTimeUseNotice())
+            var isFirstTimeUse = !_firstTimeUseNoticeSentinel.Exists();
+            var canShowFirstUseMessages = isFirstTimeUse && !_dotnetFirstRunConfiguration.NoLogo;
+            if (isFirstTimeUse)
             {
-                Stopwatch beforeFirstTimeUseNotice = Stopwatch.StartNew();
-                if (!_dotnetFirstRunConfiguration.NoLogo)
+                using (new PerformanceMeasurement(_performanceMeasurements, "FirstTimeUseNotice Time"))
                 {
-                    PrintFirstTimeMessageWelcome();
-                    if (ShouldPrintTelemetryMessageWhenFirstTimeUseNoticeIsEnabled())
+                    // Migrate the NuGet state from earlier SDKs
+                    NuGet.Common.Migrations.MigrationRunner.Run();
+
+                    if (canShowFirstUseMessages)
                     {
-                        PrintTelemetryMessage();
+                        _reporter.WriteLine();
+                        string productVersion = Product.Version;
+                        _reporter.WriteLine(string.Format(LocalizableStrings.FirstTimeMessageWelcome, ParseDotNetVersion(productVersion), productVersion));
+
+                        if (!_dotnetFirstRunConfiguration.TelemetryOptout)
+                        {
+                            _reporter.WriteLine();
+                            _reporter.WriteLine(LocalizableStrings.TelemetryMessage);
+                        }
                     }
 
-                    PrintFirstTimeMessageMoreInformation();
+                    _firstTimeUseNoticeSentinel.CreateIfNotExists();
                 }
-
-                _firstTimeUseNoticeSentinel.CreateIfNotExists();
-                _performanceMeasurements?.Add("FirstTimeUseNotice Time", beforeFirstTimeUseNotice.Elapsed.TotalMilliseconds);
             }
 
-            if (ShouldGenerateAspNetCertificate())
+            if (CanGenerateAspNetCertificate())
             {
-                Stopwatch beforeGenerateAspNetCertificate = Stopwatch.StartNew();
-                GenerateAspNetCertificate();
-                _performanceMeasurements?.Add("GenerateAspNetCertificate Time", beforeGenerateAspNetCertificate.Elapsed.TotalMilliseconds);
+                using (new PerformanceMeasurement(_performanceMeasurements, "GenerateAspNetCertificate Time"))
+                {
+                    _aspNetCoreCertificateGenerator.GenerateAspNetCoreDevelopmentCertificate();
+                    _aspNetCertificateSentinel.CreateIfNotExists();
+
+                    if (canShowFirstUseMessages)
+                    {
+                        var aspNetCertMessage = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ?
+                            // The instructions in this message only apply to Windows and MacOS.
+                            LocalizableStrings.FirstTimeMessageAspNetCertificate :
+                            // The instructions in this message only apply to Linux (various distros).
+                            // OSPlatform.FreeBSD would also see this message, which is acceptable since we have no specific FreeBSD instructions.
+                            LocalizableStrings.FirstTimeMessageAspNetCertificateLinux;
+                        _reporter.WriteLine();
+                        _reporter.WriteLine(aspNetCertMessage);
+                    }
+                }
+            }
+
+            if (canShowFirstUseMessages)
+            {
+                _reporter.WriteLine();
+                _reporter.WriteLine(LocalizableStrings.FirstTimeMessageMoreInformation);
             }
         }
 
-        private void GenerateAspNetCertificate()
-        {
-            _aspNetCoreCertificateGenerator.GenerateAspNetCoreDevelopmentCertificate();
-
-            _aspNetCertificateSentinel.CreateIfNotExists();
-        }
-
-        private bool ShouldGenerateAspNetCertificate()
-        {
+        private bool CanGenerateAspNetCertificate() =>
 #if EXCLUDE_ASPNETCORE
-            return false;
+            false;
 #else
-            return _dotnetFirstRunConfiguration.GenerateAspNetCertificate &&
-                !_aspNetCertificateSentinel.Exists();
+            _dotnetFirstRunConfiguration.GenerateAspNetCertificate && !_aspNetCertificateSentinel.Exists();
 #endif
-        }
 
-        private bool ShouldAddPackageExecutablePath()
-        {
-            return _dotnetFirstRunConfiguration.AddGlobalToolsToPath &&
-                !_toolPathSentinel.Exists();
-        }
-
-        private void AddPackageExecutablePath()
-        {
-            _pathAdder.AddPackageExecutablePathToUserPath();
-
-            _toolPathSentinel.Create();
-        }
-
-        private bool ShouldPrintFirstTimeUseNotice()
-        {
-            return !_firstTimeUseNoticeSentinel.Exists();
-        }
-
-        private bool ShouldPrintTelemetryMessageWhenFirstTimeUseNoticeIsEnabled()
-        {
-            return !_dotnetFirstRunConfiguration.TelemetryOptout;
-        }
-
-        private void PrintFirstTimeMessageWelcome()
-        {
-            _reporter.WriteLine();
-            string productVersion = Product.Version;
-            _reporter.WriteLine(string.Format(
-                LocalizableStrings.FirstTimeMessageWelcome,
-                DeriveDotnetVersionFromProductVersion(productVersion),
-                productVersion));
-        }
-        private void PrintFirstTimeMessageMoreInformation()
-        {
-            _reporter.WriteLine();
-            _reporter.WriteLine(LocalizableStrings.FirstTimeMessageMoreInformation);
-        }
-
-        private void PrintTelemetryMessage()
-        {
-            _reporter.WriteLine();
-            _reporter.WriteLine(LocalizableStrings.TelemetryMessage);
-        }
-
-        internal static string DeriveDotnetVersionFromProductVersion(string productVersion)
-        {
-            if (!NuGetVersion.TryParse(productVersion, out var parsedVersion))
-            {
-                return string.Empty;
-            }
-
-            return $"{parsedVersion.Major}.{parsedVersion.Minor}";
-        }
+        internal static string ParseDotNetVersion(string productVersion) =>
+            NuGetVersion.TryParse(productVersion, out var parsedVersion) ? $"{parsedVersion.Major}.{parsedVersion.Minor}" : string.Empty;
     }
 }

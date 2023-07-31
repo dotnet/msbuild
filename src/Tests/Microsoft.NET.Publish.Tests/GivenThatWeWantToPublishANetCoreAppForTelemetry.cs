@@ -1,15 +1,8 @@
-﻿using System;
-using System.IO;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Reflection;
-using System.Runtime.InteropServices;
-using FluentAssertions;
 using Microsoft.NET.Build.Tests;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -26,6 +19,7 @@ namespace Microsoft.NET.Publish.Tests
             Type loggerType = typeof(LogTelemetryToStdOutForTest);
             var TelemetryTestLogger = new[]
                 {
+                    "--property:SelfContained=true",
                     $"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}"
                 };
 
@@ -43,6 +37,7 @@ namespace Microsoft.NET.Publish.Tests
             Type loggerType = typeof(LogTelemetryToStdOutForTest);
             var TelemetryTestLogger = new[]
                 {
+                    "--property:SelfContained=true",
                     $"/Logger:{loggerType.FullName},{loggerType.GetTypeInfo().Assembly.Location}"
                 };
 
@@ -109,7 +104,7 @@ namespace Microsoft.NET.Publish.Tests
             // NativeAOT compilation requires PublishTrimmed and will be set to true if not set by the user
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
             var testProject = CreateTestProject(targetFramework, "AotProject", aot: true);
-            testProject.AdditionalProperties["RuntimeIdentifier"] = rid;
+            testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "true";
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
             var publishCommand = new PublishCommand(testProjectInstance);

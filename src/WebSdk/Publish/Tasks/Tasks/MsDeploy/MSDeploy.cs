@@ -1,4 +1,7 @@
-﻿namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 {
     using System;
     using System.Linq;
@@ -517,7 +520,7 @@
             }
         }
 
-        // controling whether a task should be execute.
+        // controlling whether a task should be execute.
         protected override bool SkipTaskExecution()
         {
             if (this.PreviewCommandLineOnly)

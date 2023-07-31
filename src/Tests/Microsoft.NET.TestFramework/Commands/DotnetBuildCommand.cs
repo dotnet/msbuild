@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using Xunit.Abstractions;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.NET.TestFramework.Commands
 {
@@ -16,7 +13,14 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public DotnetBuildCommand(TestAsset testAsset, params string[] args) : this(testAsset.Log, args)
         {
-            WorkingDirectory = Path.Combine(testAsset.TestRoot, testAsset.TestProject.Name);
+            if (testAsset.TestProject != null)
+            {
+                WorkingDirectory = Path.Combine(testAsset.TestRoot, testAsset.TestProject.Name);
+            }
+            else
+            {
+                WorkingDirectory = testAsset.TestRoot;
+            }
         }
     }
 }

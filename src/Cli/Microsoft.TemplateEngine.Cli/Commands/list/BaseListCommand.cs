@@ -1,9 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
 
@@ -29,26 +27,26 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ParentCommand = parentCommand;
             Filters = SetupFilterOptions(SupportedFilters);
 
-            this.AddArgument(NameArgument);
-            this.AddOption(IgnoreConstraintsOption);
-            this.AddOption(SharedOptions.OutputOption);
-            this.AddOption(SharedOptions.ProjectPathOption);
+            this.Arguments.Add(NameArgument);
+            this.Options.Add(IgnoreConstraintsOption);
+            this.Options.Add(SharedOptions.OutputOption);
+            this.Options.Add(SharedOptions.ProjectPathOption);
             SetupTabularOutputOptions(this);
         }
 
-        public virtual Option<bool> ColumnsAllOption { get; } = SharedOptionsFactory.CreateColumnsAllOption();
+        public virtual CliOption<bool> ColumnsAllOption { get; } = SharedOptionsFactory.CreateColumnsAllOption();
 
-        public virtual Option<string[]> ColumnsOption { get; } = SharedOptionsFactory.CreateColumnsOption();
+        public virtual CliOption<string[]> ColumnsOption { get; } = SharedOptionsFactory.CreateColumnsOption();
 
-        public IReadOnlyDictionary<FilterOptionDefinition, Option> Filters { get; protected set; }
+        public IReadOnlyDictionary<FilterOptionDefinition, CliOption> Filters { get; protected set; }
 
-        internal static Option<bool> IgnoreConstraintsOption { get; } = new("--ignore-constraints")
+        internal static CliOption<bool> IgnoreConstraintsOption { get; } = new("--ignore-constraints")
         {
             Description = SymbolStrings.ListCommand_Option_IgnoreConstraints,
             Arity = new ArgumentArity(0, 1)
         };
 
-        internal static Argument<string> NameArgument { get; } = new("template-name")
+        internal static CliArgument<string> NameArgument { get; } = new("template-name")
         {
             Description = SymbolStrings.Command_List_Argument_Name,
             Arity = new ArgumentArity(0, 1)
@@ -60,14 +58,15 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             ListCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
-            InvocationContext context)
+            ParseResult parseResult,
+            CancellationToken cancellationToken)
         {
             TemplateListCoordinator templateListCoordinator = new TemplateListCoordinator(
                 environmentSettings,
                 templatePackageManager,
                 new HostSpecificDataLoader(environmentSettings));
 
-            return templateListCoordinator.DisplayTemplateGroupListAsync(args, default);
+            return templateListCoordinator.DisplayTemplateGroupListAsync(args, cancellationToken);
         }
 
         protected override ListCommandArgs ParseContext(ParseResult parseResult) => new(this, parseResult);

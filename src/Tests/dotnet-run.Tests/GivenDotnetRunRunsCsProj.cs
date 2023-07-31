@@ -1,20 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
-using System.Linq;
-using System.Xml.Linq;
-using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.TemplateEngine.Utils;
-using Xunit;
-using Xunit.Abstractions;
 using LocalizableStrings = Microsoft.DotNet.Tools.Run.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli.Run.Tests
@@ -73,7 +61,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("--framework", "netcoreapp3.1")
+                .Execute("--framework", ToolsetInfo.CurrentTargetFramework)
                 .Should().Pass()
                          .And.HaveStdOutContaining("This string came from the test library!");
         }
@@ -128,7 +116,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                          .And.HaveStdOutContaining("Hello World!");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/19487#issuecomment-898765210")]
+        [Fact]
         public void ItCanRunAMSBuildProjectWhenSpecifyingAFramework()
         {
             var testAppName = "MSBuildTestApp";
@@ -139,7 +127,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework", "netcoreapp3.1")
+                .Execute("--framework", ToolsetInfo.CurrentTargetFramework)
                 .Should().Pass()
                          .And.HaveStdOut("Hello World!");
         }
@@ -234,7 +222,8 @@ namespace Microsoft.DotNet.Cli.Run.Tests
             string[] args = new string[] { "--packages", dir };
 
             string[] newArgs = new string[] { "console", "-o", rootPath, "--no-restore" };
-            new DotnetCommand(Log, "new", "--debug:ephemeral-hive")
+            new DotnetNewCommand(Log)
+                .WithVirtualHive()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
                 .Should()

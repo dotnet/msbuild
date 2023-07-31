@@ -1,9 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
-using System.IO;
 
 namespace Microsoft.DotNet.ApiSymbolExtensions
 {
@@ -21,7 +19,7 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
         void AddReferenceSearchPaths(params string[] paths);
 
         /// <summary>
-        /// Indicates if the <see cref="CSharpCompilation"/> used to resolve binaries has any roslyn diagnostics.
+        /// Indicates if the compilation used to resolve binaries has any roslyn diagnostics.
         /// Might be useful when loading an assembly from source files.
         /// </summary>
         /// <param name="diagnostics">List of diagnostics.</param>
@@ -62,7 +60,7 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
         /// </summary>
         /// <param name="name">The name to use to resolve the assembly.</param>
         /// <param name="stream">The stream to read the metadata from.</param>
-        /// <returns><see cref="IAssemblySymbol"/> respresenting the given <paramref name="stream"/>. If an 
+        /// <returns><see cref="IAssemblySymbol"/> representing the given <paramref name="stream"/>. If an 
         /// assembly with the same <paramref name="name"/> was already loaded, the previously loaded assembly is returned.</returns>
         IAssemblySymbol? LoadAssembly(string name, Stream stream);
 
@@ -84,5 +82,10 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
         /// <param name="warnOnMissingAssemblies">Indicates if a warning should be added to the warning list when a matching assembly is not found.</param>
         /// <returns>The list of matching assemblies represented as <see cref="IAssemblySymbol"/>.</returns>
         IEnumerable<IAssemblySymbol> LoadMatchingAssemblies(IEnumerable<IAssemblySymbol> fromAssemblies, IEnumerable<string> searchPaths, bool validateMatchingIdentity = true, bool warnOnMissingAssemblies = true);
+
+        /// <summary>
+        /// The list of metadata references represented as <see cref="MetadataReference" />.
+        /// </summary>
+        IEnumerable<MetadataReference> MetadataReferences { get; }
     }
 }

@@ -1,10 +1,8 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
 using System.CommandLine.Completions;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge;
@@ -16,23 +14,23 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         private static readonly TimeSpan ConstraintEvaluationTimeout = TimeSpan.FromMilliseconds(1000);
 
-        internal static IEnumerable<CompletionItem> GetTemplateNameCompletions(string? tempalteName, IEnumerable<TemplateGroup> templateGroups, IEngineEnvironmentSettings environmentSettings)
+        internal static IEnumerable<CompletionItem> GetTemplateNameCompletions(string? templateName, IEnumerable<TemplateGroup> templateGroups, IEngineEnvironmentSettings environmentSettings)
         {
             TemplateConstraintManager constraintManager = new(environmentSettings);
-            if (string.IsNullOrWhiteSpace(tempalteName))
+            if (string.IsNullOrWhiteSpace(templateName))
             {
                 return GetAllowedTemplateGroups(constraintManager, templateGroups)
-                    .SelectMany(g => g.ShortNames, (g, shortName) => new CompletionItem(shortName, documentation: g.Description))
+                    .Select(g => new CompletionItem(g.ShortNames[0], documentation: g.Description))
                     .Distinct()
                     .OrderBy(c => c.Label, StringComparer.OrdinalIgnoreCase)
                     .ToArray();
             }
 
-            IEnumerable<TemplateGroup> matchingTemplateGroups = templateGroups.Where(t => t.ShortNames.Any(sn => sn.StartsWith(tempalteName, StringComparison.OrdinalIgnoreCase)));
+            IEnumerable<TemplateGroup> matchingTemplateGroups =
+                templateGroups.Where(t => t.ShortNames.Any(sn => sn.StartsWith(templateName, StringComparison.OrdinalIgnoreCase)));
 
             return GetAllowedTemplateGroups(constraintManager, matchingTemplateGroups)
-                .SelectMany(g => g.ShortNames, (g, shortName) => new CompletionItem(shortName, documentation: g.Description))
-                .Where(c => c.Label.StartsWith(tempalteName))
+                .Select(g => new CompletionItem(g.ShortNames.First(sn => sn.StartsWith(templateName, StringComparison.OrdinalIgnoreCase)), documentation: g.Description))
                 .Distinct()
                 .OrderBy(c => c.Label, StringComparer.OrdinalIgnoreCase)
                 .ToArray();
@@ -62,7 +60,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                                 templateGroup,
                                 template);
 
-                            Parser parser = ParserFactory.CreateParser(command);
+                            CliConfiguration parser = ParserFactory.CreateParser(command);
 
                             //it is important to pass raw text to get the completion
                             //completions for args passed as array are not supported

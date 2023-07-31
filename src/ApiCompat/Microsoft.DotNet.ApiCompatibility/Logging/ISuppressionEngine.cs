@@ -4,38 +4,25 @@
 namespace Microsoft.DotNet.ApiCompatibility.Logging
 {
     /// <summary>
-    /// Collection of Suppressions which is able to add suppressions, check if a specific error is suppressed, and write all suppressions
-    /// down to a file. The engine is thread-safe.
+    /// Suppression engine that contains a collection of <see cref="Suppression"/> items. It provides API to add a suppression, check if a passed-in suppression is already suppressed
+    /// and serialize all suppressions down into a file.
     /// </summary>
     public interface ISuppressionEngine
     {
+        /// <summary>
+        /// If true, adds the suppression to the collection when passed into <see cref="IsErrorSuppressed(Suppression)"/>. 
+        /// </summary>
         bool BaselineAllErrors { get; }
 
         /// <summary>
-        /// Checks if the passed in error is suppressed or not.
+        /// The baseline suppressions from the passed-in suppression files.
         /// </summary>
-        /// <param name="diagnosticId">The diagnostic ID of the error to check.</param>
-        /// <param name="target">The target of where the <paramref name="diagnosticId"/> should be applied.</param>
-        /// <param name="left">Optional. The left operand in a APICompat error.</param>
-        /// <param name="right">Optional. The right operand in a APICompat error.</param>
-        /// <returns><see langword="true"/> if the error is already suppressed. <see langword="false"/> otherwise.</returns>
-        bool IsErrorSuppressed(string diagnosticId, string? target, string? left = null, string? right = null, bool isBaselineSuppression = false);
+        IReadOnlyCollection<Suppression> BaselineSuppressions { get; }
 
         /// <summary>
-        /// Checks if the passed in error is suppressed or not.
+        /// The current suppressions for api compatibility differences.
         /// </summary>
-        /// <param name="error">The <see cref="Suppression"/> error to check.</param>
-        /// <returns><see langword="true"/> if the error is already suppressed. <see langword="false"/> otherwise.</returns>
-        bool IsErrorSuppressed(Suppression error);
-
-        /// <summary>
-        /// Adds a suppression to the collection.
-        /// </summary>
-        /// <param name="diagnosticId">The diagnostic ID of the error to add.</param>
-        /// <param name="target">The target of where the <paramref name="diagnosticId"/> should be applied.</param>
-        /// <param name="left">Optional. The left operand in a APICompat error.</param>
-        /// <param name="right">Optional. The right operand in a APICompat error.</param>
-        void AddSuppression(string diagnosticId, string? target, string? left = null, string? right = null, bool isBaselineSuppression = false);
+        IReadOnlyCollection<Suppression> Suppressions { get; }
 
         /// <summary>
         /// Adds a suppression to the collection.
@@ -44,10 +31,30 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
         void AddSuppression(Suppression suppression);
 
         /// <summary>
-        /// Writes all suppressions in collection down to a file, if empty it doesn't write anything.
+        /// Retrieves unnecessary suppressions stored in the suppression file.
         /// </summary>
-        /// <param name="supressionFile">The path to the file to be written.</param>
-        /// <returns>Whether it wrote the file.</returns>
-        bool WriteSuppressionsToFile(string suppressionOutputFile);
+        /// <returns>Returns unnecessary suppressions.</returns>
+        IReadOnlyCollection<Suppression> GetUnnecessarySuppressions();
+
+        /// <summary>
+        /// Checks if the passed in error is suppressed.
+        /// </summary>
+        /// <param name="error">The <see cref="Suppression"/> error to check.</param>
+        /// <returns><see langword="true"/> if the error is already suppressed. <see langword="false"/> otherwise.</returns>
+        bool IsErrorSuppressed(Suppression error);
+
+        /// <summary>
+        /// Load suppressions from suppression files.
+        /// </summary>
+        /// <param name="suppressionFiles">Suppression files to read from.</param>
+        void LoadSuppressions(params string[] suppressionFiles);
+
+        /// <summary>
+        /// Writes the suppressions into the provided suppression file path and if empty, skips the operation.
+        /// </summary>
+        /// <param name="suppressionOutputFile">The path to the file to be written.</param>
+        /// <param name="preserveUnnecessarySuppressions">If <see langword="true"/>, preserves unnecessary suppressions.</param>
+        /// <returns>Returns the set of suppressions written.</returns>
+        IReadOnlyCollection<Suppression> WriteSuppressionsToFile(string suppressionOutputFile, bool preserveUnnecessarySuppressions = false);
     }
 }

@@ -123,6 +123,9 @@
   <data name="InvalidRexegStringTransformationPattern" xml:space="preserve">
     <value>Invalid transformation pattern provided: '{0} - {1}'.</value>
   </data>
+  <data name="NoBreakingChangesFound" xml:space="preserve">
+    <value>APICompat ran successfully without finding any breaking changes.</value>
+  </data>
   <data name="SuppressionsFileNotSpecified" xml:space="preserve">
     <value>A file path must be passed in to successfully generate a compatibility suppression file.</value>
   </data>

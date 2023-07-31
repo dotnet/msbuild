@@ -55,8 +55,8 @@ Domyślnie publikowana jest aplikacja zależna od struktury.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to publish for. The default is 'Debug'. Use the `PublishRelease` property to make 'Release' the default for this command.</source>
-        <target state="translated">Konfiguracja do opublikowania. Wartość domyślna to „Debug”. Użyj właściwości „PublishRelease”, aby ustawienie „Release” było ustawieniem domyślnym dla tego polecenia.</target>
+        <source>The configuration to publish for. The default is 'Release' for NET 8.0 projects and above, but 'Debug' for older projects.</source>
+        <target state="needs-review-translation">Konfiguracja do opublikowania. Wartość domyślna to „Debug”. Użyj właściwości „PublishRelease”, aby ustawienie „Release” było ustawieniem domyślnym dla tego polecenia.</target>
         <note />
       </trans-unit>
     </body>

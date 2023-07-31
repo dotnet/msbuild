@@ -11,7 +11,7 @@
     <!-- Default to all packages generating a corresponding symbol package -->
     <IncludeSymbols>true</IncludeSymbols>
     <IsShippingPackage>false</IsShippingPackage>
-    <SdkTargetFramework>net7.0</SdkTargetFramework>
+    <SdkTargetFramework>net8.0</SdkTargetFramework>
     <ToolsetTargetFramework>$(SdkTargetFramework)</ToolsetTargetFramework>
     
     <!-- VS for Mac may run on a lower version of .NET than the SDK is targeting, but needs to load the resolvers.  So the resolvers and dependencies
@@ -20,9 +20,12 @@
     <!-- Source build does not need to worry about running on VS for Mac -->
     <ResolverTargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'">$(SdkTargetFramework)</ResolverTargetFramework>
 
-    <!-- Disable implict package target fallback, and disable warning for when we explicitly add it (currently needed for
+    <!-- Disable implicit package target fallback, and disable warning for when we explicitly add it (currently needed for
          Microsoft.ApplicationInsights) -->
     <NoWarn>$(NoWarn);NU1701</NoWarn>
+    <!-- Temporarily NoWarn to avoid regression in preview 1.
+         https://github.com/dotnet/roslyn-analyzers/pull/6236/files -->
+    <NoWarn>$(NoWarn);CA2009</NoWarn>
     <!-- do not enable analyzers on source build-->
     <EnforceCodeStyleInBuild Condition="'$(DotNetBuildFromSource)' != 'true'">true</EnforceCodeStyleInBuild>
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
@@ -41,8 +44,16 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <AssemblyInformationCachePaths Condition="Exists('$(NetCoreRoot)sdk\$(NetCoreSdkVersion)\SdkPrecomputedAssemblyReferences.cache')">$(AssemblyInformationCachePaths);$(NetCoreRoot)sdk\$(NetCoreSdkVersion)\SDKPrecomputedAssemblyReferences.cache</AssemblyInformationCachePaths>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+
+  <!-- Global usings -->
+  <!-- See: https://learn.microsoft.com/dotnet/core/project-sdk/msbuild-props#using -->
+  <ItemGroup>
+    <Using Include="System.Runtime.InteropServices" />
+    <Using Include="System.Text" />
+    <Using Include="System.Xml.Linq" />
+  </ItemGroup>
 
   <Import Project="build/GenerateResxSource.targets" />
 </Project>

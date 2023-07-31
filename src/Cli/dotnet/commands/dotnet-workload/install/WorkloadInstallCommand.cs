@@ -1,27 +1,16 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Parsing;
-using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
-using Product = Microsoft.DotNet.Cli.Utils.Product;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.DotNet.ToolPackage;
 using NuGet.Versioning;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using NuGet.Common;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
-using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -55,14 +44,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                      workloadResolver ?? _workloadResolver, Verbosity, _userProfileDir, VerifySignatures, PackageDownloader, _dotnetPath, TempDirectoryPath,
                                      _packageSourceLocation, RestoreActionConfiguration, elevationRequired: !_printDownloadLinkOnly && string.IsNullOrWhiteSpace(_downloadToCacheOption));
 
-            bool displayManifestUpdates = false;
-            if (Verbosity.IsDetailedOrDiagnostic())
-            {
-                displayManifestUpdates = true;
-            }
             _workloadManifestUpdater = _workloadManifestUpdaterFromConstructor ?? new WorkloadManifestUpdater(Reporter, workloadResolver ?? _workloadResolver, PackageDownloader, _userProfileDir, TempDirectoryPath,
-                _workloadInstaller.GetWorkloadInstallationRecordRepository(), (IWorkloadManifestInstaller)_workloadInstaller, _packageSourceLocation, displayManifestUpdates: displayManifestUpdates);
-
+                _workloadInstaller.GetWorkloadInstallationRecordRepository(), _workloadInstaller, _packageSourceLocation, displayManifestUpdates: Verbosity.IsDetailedOrDiagnostic());
 
             ValidateWorkloadIdsInput();
         }
@@ -74,14 +57,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 if (!availableWorkloads.Select(workload => workload.Id.ToString()).Contains(workloadId))
                 {
-                    if (_workloadResolver.IsPlatformIncompatibleWorkload(new WorkloadId(workloadId)))
-                    {
-                        throw new GracefulException(string.Format(LocalizableStrings.WorkloadNotSupportedOnPlatform, workloadId), isUserError: false);
-                    }
-                    else
-                    {
-                        throw new GracefulException(string.Format(LocalizableStrings.WorkloadNotRecognized, workloadId), isUserError: false);
-                    }
+                    var exceptionMessage = _workloadResolver.IsPlatformIncompatibleWorkload(new WorkloadId(workloadId)) ?
+                        LocalizableStrings.WorkloadNotSupportedOnPlatform : LocalizableStrings.WorkloadNotRecognized;
+
+                    throw new GracefulException(string.Format(exceptionMessage, workloadId), isUserError: false);
                 }
             }
         }
@@ -208,16 +187,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IEnumerable<PackInfo> workloadPackToInstall = new List<PackInfo>();
             IEnumerable<WorkloadId> newWorkloadInstallRecords = new List<WorkloadId>();
 
-            var transaction = new CliTransaction();
-
-            transaction.RollbackStarted = () =>
+            var transaction = new CliTransaction
             {
-                Reporter.WriteLine(LocalizableStrings.RollingBackInstall);
-            };
-            // Don't hide the original error if roll back fails, but do log the rollback failure
-            transaction.RollbackFailed = ex =>
-            {
-                Reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message));
+                RollbackStarted = () => Reporter.WriteLine(LocalizableStrings.RollingBackInstall),
+                // Don't hide the original error if roll back fails, but do log the rollback failure
+                RollbackFailed = ex => Reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, ex.Message))
             };
 
             transaction.Run(

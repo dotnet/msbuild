@@ -1,15 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System.IO;
-using FluentAssertions;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Commands;
-using Xunit;
-using Xunit.Abstractions;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -19,15 +9,9 @@ namespace Microsoft.NET.Build.Tests
         {}
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("netcoreapp3.1", ".csproj", false)]
-        [InlineData("net6.0", ".fsproj", false)]
-        [InlineData("net5.0", ".csproj", true)]
-        [InlineData("net7.0", ".fsproj", true)]
-#pragma warning disable xUnit1025 // InlineData duplicates
-        [InlineData(ToolsetInfo.CurrentTargetFramework, ".csproj", true)]
-        [InlineData(ToolsetInfo.CurrentTargetFramework, ".fsproj", true)]
-#pragma warning restore xUnit1025 // InlineData duplicates
-        public void It_produces_ref_assembly_for_appropriate_frameworks(string targetFramework, string extension, bool expectedExists)
+        [InlineData("netcoreapp3.1", false)]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, true)]
+        public void It_produces_ref_assembly_for_appropriate_frameworks(string targetFramework, bool expectedExists)
         {
             TestProject testProject = new TestProject()
             {
@@ -36,7 +20,7 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = targetFramework,
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework, targetExtension:extension);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()

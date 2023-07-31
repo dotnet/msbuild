@@ -1,23 +1,10 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Build.Tasks;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using System.Linq;
-using System.Xml.Linq;
 using NuGet.Frameworks;
-using Xunit;
-using Xunit.Abstractions;
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
-using System.Collections.Generic;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -794,7 +781,7 @@ class C
             var singleFilePath = Path.Combine(GetPublishDirectory(publishCommand, ToolsetInfo.CurrentTargetFramework).FullName, $"SingleFileTest{Constants.ExeSuffix}");
 
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeNative, "/p:EnableCompressionInSingleFile=false")
+                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeNative, "/p:SelfContained=true", "/p:EnableCompressionInSingleFile=false")
                 .Should()
                 .Pass();
             var uncompressedSize = new FileInfo(singleFilePath).Length;
@@ -802,7 +789,7 @@ class C
             WaitForUtcNowToAdvance();
 
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeNative, "/p:EnableCompressionInSingleFile=true")
+                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeNative, "/p:SelfContained=true", "/p:EnableCompressionInSingleFile=true")
                 .Should()
                 .Pass();
             var compressedSize = new FileInfo(singleFilePath).Length;

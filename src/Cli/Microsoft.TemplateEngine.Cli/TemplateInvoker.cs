@@ -1,6 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text.RegularExpressions;
 using Microsoft.DotNet.Cli.Utils;
@@ -47,6 +46,12 @@ namespace Microsoft.TemplateEngine.Cli
             string? framework = isMicrosoftAuthored ? TelemetryHelper.PrepareHashedChoiceValue(templateToRun, templateParameters, "Framework") : null;
             string? auth = isMicrosoftAuthored ? TelemetryHelper.PrepareHashedChoiceValue(templateToRun, templateParameters, "auth") : null;
             string? templateName = Sha256Hasher.HashWithNormalizedCasing(templateToRun.Identity);
+            string? templateShortNames = templateToRun.ShortNameList.Any() ? Sha256Hasher.HashWithNormalizedCasing(string.Join(',', templateToRun.ShortNameList)) : null;
+
+            using TemplatePackageManager templatePackageManager = new(_environmentSettings);
+            var templatePackage = await templateArgs.Template.GetManagedTemplatePackageAsync(templatePackageManager, cancellationToken).ConfigureAwait(false);
+            string? packageName = string.IsNullOrEmpty(templatePackage?.Identifier) ? null : Sha256Hasher.HashWithNormalizedCasing(templatePackage.Identifier);
+            string? packageVersion = string.IsNullOrEmpty(templatePackage?.Version) ? null : Sha256Hasher.HashWithNormalizedCasing(templatePackage.Version);
 
             bool success = true;
 
@@ -80,6 +85,9 @@ namespace Microsoft.TemplateEngine.Cli
                         { TelemetryConstants.ArgError, "False" },
                         { TelemetryConstants.Framework, framework },
                         { TelemetryConstants.TemplateName, templateName },
+                        { TelemetryConstants.TemplateShortName, templateShortNames },
+                        { TelemetryConstants.PackageName, packageName },
+                        { TelemetryConstants.PackageVersion, packageVersion },
                         { TelemetryConstants.IsTemplateThirdParty, (!isMicrosoftAuthored).ToString() },
                         { TelemetryConstants.CreationResult, success.ToString() },
                         { TelemetryConstants.Auth, auth }
@@ -207,17 +215,18 @@ namespace Microsoft.TemplateEngine.Cli
 
                     return HandlePostActions(instantiateResult, templateArgs);
                 case CreationResultStatus.CreateFailed:
+                case CreationResultStatus.CondtionsEvaluationMismatch:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.ErrorMessage).Bold().Red());
                     return NewCommandStatus.CreateFailed;
-                //this is unlikely case as these errors are caught on parse level now
                 //TODO: discuss if we need better handling here, then enhance core to return canonical names as array and not parse them from error message
+                //https://github.com/dotnet/templating/issues/4225
                 case CreationResultStatus.MissingMandatoryParam:
                     if (!string.IsNullOrWhiteSpace(instantiateResult.ErrorMessage))
                     {
-                        IReadOnlyList<string> missingParamNamesCanonical = instantiateResult.ErrorMessage.Split(new[] { ',' })
+                        IReadOnlyList<string> missingParamNamesCanonical = instantiateResult.ErrorMessage.Split(new[] { ',' }, StringSplitOptions.TrimEntries)
                             .Select(x => templateArgs.TryGetAliasForCanonicalName(x, out string? alias) ? alias! : x)
                             .ToList();
-                        string fixedMessage = string.Join(", ", missingParamNamesCanonical);
+                        string fixedMessage = string.Join(", ", missingParamNamesCanonical.Select(n => $"'{n}'"));
                         Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, fixedMessage, resultTemplateName).Bold().Red());
                     }
                     return NewCommandStatus.MissingRequiredOption;
@@ -275,7 +284,7 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                     Reporter.Error.WriteLine(
                         string.Format(
-                            LocalizableStrings.RerunCommandAndPassForceToCreateAnyway, SharedOptions.ForceOption.Aliases.First()).Bold().Red()
+                            LocalizableStrings.RerunCommandAndPassForceToCreateAnyway, SharedOptions.ForceOption.Name).Bold().Red()
                         );
                     Reporter.Error.WriteCommand(Example.FromExistingTokens(templateArgs.ParseResult).WithOption(SharedOptions.ForceOption));
                     return NewCommandStatus.CannotCreateOutputFile;
@@ -285,7 +294,11 @@ namespace Microsoft.TemplateEngine.Cli
                         Reporter.Error.WriteLine(instantiateResult.ErrorMessage.Bold().Red());
                     }
                     return NewCommandStatus.TemplateIssueDetected;
+                case CreationResultStatus.Cancelled:
+                    Reporter.Error.WriteLine(LocalizableStrings.OperationCancelled.Bold().Red());
+                    return NewCommandStatus.Cancelled;
                 default:
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.UnexpectedResult, Enum.GetName(typeof(CreationResultStatus), instantiateResult.Status), instantiateResult.ErrorMessage).Bold().Red());
                     return NewCommandStatus.Unexpected;
             }
         }

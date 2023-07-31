@@ -1,15 +1,9 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization.Json;
-using System.Text;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using ResourceHashesByNameDictionary = System.Collections.Generic.Dictionary<string, string>;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly
@@ -62,24 +56,24 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         // Internal for tests
         public void WriteBootJson(Stream output, string entryAssemblyName)
         {
-            var icuDataMode = ICUDataMode.Sharded;
+            var icuDataMode = ICUDataMode50.Sharded;
 
             if (string.Equals(InvariantGlobalization, "true", StringComparison.OrdinalIgnoreCase))
             {
-                icuDataMode = ICUDataMode.Invariant;
+                icuDataMode = ICUDataMode50.Invariant;
             }
             else if (LoadAllICUData)
             {
-                icuDataMode = ICUDataMode.All;
+                icuDataMode = ICUDataMode50.All;
             }
 
-            var result = new BootJsonData
+            var result = new BootJsonData50
             {
                 entryAssembly = entryAssemblyName,
                 cacheBootResources = CacheBootResources,
                 debugBuild = DebugBuild,
                 linkerEnabled = LinkerEnabled,
-                resources = new ResourcesData(),
+                resources = new ResourcesData50(),
                 config = new List<string>(),
                 icuDataMode = icuDataMode,
             };
@@ -159,7 +153,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 }
             }
 
-            var serializer = new DataContractJsonSerializer(typeof(BootJsonData), new DataContractJsonSerializerSettings
+            var serializer = new DataContractJsonSerializer(typeof(BootJsonData50), new DataContractJsonSerializerSettings
             {
                 UseSimpleDictionaryFormat = true
             });

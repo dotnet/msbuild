@@ -22,8 +22,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <_NoneAnalysisLevel>4.0</_NoneAnalysisLevel>
     <!-- When the base TFM of the platform bumps, these must be bumped as well. Preview should always be the 'next' TFM. -->
-    <_LatestAnalysisLevel>7.0</_LatestAnalysisLevel>
-    <_PreviewAnalysisLevel>8.0</_PreviewAnalysisLevel>
+    <_LatestAnalysisLevel>8.0</_LatestAnalysisLevel>
+    <_PreviewAnalysisLevel>9.0</_PreviewAnalysisLevel>
 
     <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
                               '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
@@ -74,14 +74,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Intermediate step to enable ILLink.Analyzers so ILLink, Blazor, Xamarin, AOT, etc. can enable the same flags -->
     <EnableSingleFileAnalyzer Condition="'$(EnableSingleFileAnalyzer)' == '' And
-                                         ('$(PublishSingleFile)' == 'true' Or '$(PublishAot)' == 'true')">true</EnableSingleFileAnalyzer>
+                                         ('$(PublishSingleFile)' == 'true' Or '$(PublishAot)' == 'true' Or '$(IsAotCompatible)' == 'true')">true</EnableSingleFileAnalyzer>
 
     <!-- Enable the trim analyzer when any trimming settings are enabled. Warnings may suppressed based on other settings. -->
-    <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == '' And 
+    <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == '' And
                                    ('$(PublishTrimmed)' == 'true' Or '$(IsTrimmable)' == 'true' Or '$(PublishAot)' == 'true')">true</EnableTrimAnalyzer>
 
     <!-- Enable the AOT analyzer when AOT is enabled. Warnings may suppressed based on other settings. -->
-    <EnableAotAnalyzer Condition="'$(EnableAotAnalyzer)' == '' And '$(PublishAot)' == 'true'">true</EnableAotAnalyzer>
+    <EnableAotAnalyzer Condition="'$(EnableAotAnalyzer)' == '' And ('$(PublishAot)' == 'true' or '$(IsAotCompatible)' == 'true')">true</EnableAotAnalyzer>
 
     <!-- EnforceCodeStyleInBuild Allows code style analyzers to be disabled in bulk via msbuild if the user wants to -->
     <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
@@ -101,8 +101,6 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(Language)' == 'C#' Or '$(Language)' == 'VB'" />
   <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
           Condition="$(EnableNETAnalyzers)" />
-  <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.NET.ILLink.Analyzers.props"
-          Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true' Or '$(EnableAotAnalyzer)' == 'true'" />
 
   <Import Project="$(MSBuildThisFileDirectory)..\codestyle\cs\build\Microsoft.CodeAnalysis.CSharp.CodeStyle.targets"
           Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'C#'" />
@@ -124,18 +122,17 @@ Copyright (c) .NET Foundation. All rights reserved.
       IsImplicitlyDefined="true" />
   </ItemGroup>
 
-  <!-- ILLinker Analyzers -->
-  <ItemGroup Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true' Or '$(EnableAotAnalyzer)' == 'true'">
-    <Analyzer
-      Include="$(MSBuildThisFileDirectory)..\analyzers\ILLink.*.dll"
-      IsImplicitlyDefined="true" />
-  </ItemGroup>
-
   <!-- CompilerVisibleProperties for .NET -->
   <ItemGroup Condition="'$(Language)' == 'C#' Or '$(Language)' == 'VB'">
     <!-- Used for analyzer to match namespace to folder structure -->
     <CompilerVisibleProperty Include="RootNamespace" />
     <CompilerVisibleProperty Include="ProjectDir" />
+    <!--
+      Used by the analyzers in the Microsoft.Interop.ComInterfaceGenerator to detect combinations
+      of built-in and source generated COM interop
+    -->
+    <CompilerVisibleProperty Include="EnableComHosting" />
+    <CompilerVisibleProperty Include="EnableGeneratedComInterfaceComImportInterop" />
   </ItemGroup>
 
   <!-- C# Code Style Analyzers -->

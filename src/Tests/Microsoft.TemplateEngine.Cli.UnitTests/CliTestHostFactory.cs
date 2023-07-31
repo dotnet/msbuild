@@ -1,14 +1,13 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Edge;
-using Microsoft.TemplateEngine.TestHelper;
 using Microsoft.TemplateEngine.Utils;
+using TestLoggerFactory = Microsoft.TemplateEngine.TestHelper.TestLoggerFactory;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
@@ -114,62 +113,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             #region Obsolete methods
 #pragma warning disable CA1041 // Provide ObsoleteAttribute message
             [Obsolete]
-            void ITemplateEngineHost.OnSymbolUsed(string symbol, object value)
-            {
-                //do nothing
-            }
-
-            [Obsolete]
-            bool ITemplateEngineHost.OnParameterError(ITemplateParameter parameter, string receivedValue, string message, out string newValue)
-            {
-                //do nothing
-                newValue = receivedValue;
-                return false;
-            }
-
-            [Obsolete]
-            bool ITemplateEngineHost.OnNonCriticalError(string code, string message, string currentFile, long currentPosition)
-            {
-                //do nothing
-                return false;
-            }
-
-            [Obsolete]
-            void ITemplateEngineHost.OnCriticalError(string code, string message, string currentFile, long currentPosition)
-            {
-                //do nothing
-            }
-
-            [Obsolete]
-            void ITemplateEngineHost.LogMessage(string message)
-            {
-                //do nothing
-            }
-
-            [Obsolete]
             bool ITemplateEngineHost.OnPotentiallyDestructiveChangesDetected(IReadOnlyList<IFileChange> changes, IReadOnlyList<IFileChange> destructiveChanges)
             {
                 //do nothing
                 return false;
-            }
-
-            [Obsolete]
-            bool ITemplateEngineHost.OnConfirmPartialMatch(string name)
-            {
-                //do nothing
-                return false;
-            }
-
-            [Obsolete]
-            void ITemplateEngineHost.LogDiagnosticMessage(string message, string category, params string[] details)
-            {
-                //do nothing
-            }
-
-            [Obsolete]
-            void ITemplateEngineHost.LogTiming(string label, TimeSpan duration, int depth)
-            {
-                //do nothing
             }
 #pragma warning restore CA1041 // Provide ObsoleteAttribute message
             #endregion

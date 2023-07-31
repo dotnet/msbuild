@@ -1,9 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.BuildServer.Shutdown;
 using LocalizableStrings = Microsoft.DotNet.Tools.BuildServer.Shutdown.LocalizableStrings;
 
@@ -11,26 +9,26 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ServerShutdownCommandParser
     {
-        public static readonly Option<bool> MSBuildOption = new Option<bool>("--msbuild", LocalizableStrings.MSBuildOptionDescription);
-        public static readonly Option<bool> VbcsOption = new Option<bool>("--vbcscompiler", LocalizableStrings.VBCSCompilerOptionDescription);
-        public static readonly Option<bool> RazorOption = new Option<bool>("--razor", LocalizableStrings.RazorOptionDescription);
+        public static readonly CliOption<bool> MSBuildOption = new CliOption<bool>("--msbuild") { Description = LocalizableStrings.MSBuildOptionDescription };
+        public static readonly CliOption<bool> VbcsOption = new CliOption<bool>("--vbcscompiler") { Description = LocalizableStrings.VBCSCompilerOptionDescription };
+        public static readonly CliOption<bool> RazorOption = new CliOption<bool>("--razor") { Description = LocalizableStrings.RazorOptionDescription};
 
-        private static readonly Command Command = ConstructCommand();
+        private static readonly CliCommand Command = ConstructCommand();
 
-        public static Command GetCommand()
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            var command = new Command("shutdown", LocalizableStrings.CommandDescription);
+            CliCommand command = new ("shutdown", LocalizableStrings.CommandDescription);
 
-            command.AddOption(MSBuildOption);
-            command.AddOption(VbcsOption);
-            command.AddOption(RazorOption);
+            command.Options.Add(MSBuildOption);
+            command.Options.Add(VbcsOption);
+            command.Options.Add(RazorOption);
 
-            command.SetHandler((parseResult) => new BuildServerShutdownCommand(parseResult).Execute());
+            command.SetAction((parseResult) => new BuildServerShutdownCommand(parseResult).Execute());
 
             return command;
         }

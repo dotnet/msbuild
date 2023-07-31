@@ -10,16 +10,17 @@
   "symbols": {
     "paramA": {
       "type": "parameter",
-      "datatype": "string",
+      "datatype": "bool",
+      "description": "parameter A description",
       "isEnabled": "A_enabled",
       "isRequired": true,
       "replaces": "placeholderA"
     },
     "paramB": {
       "type": "parameter",
-      "datatype": "string",
+      "datatype": "bool",
       "isEnabled": "B_enabled",
-      "isRequired": true,
+      "description": "parameter B description",
       "replaces": "placeholderB"
     },
     "A_enabled": {

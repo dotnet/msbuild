@@ -15,7 +15,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-tool-install" "1" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-tool-install" "1" "2022-10-10" "" ".NET Documentation"
 .hy
 .SH dotnet tool install
 .PP
@@ -30,19 +30,22 @@ dotnet-tool-install - Installs the specified .NET tool on your machine.
 dotnet tool install <PACKAGE_NAME> -g|--global
     [--add-source <SOURCE>] [--configfile <FILE>] [--disable-parallel]
     [--framework <FRAMEWORK>] [--ignore-failed-sources] [--interactive]
-    [--no-cache] [--tool-manifest <PATH>] [-v|--verbosity <LEVEL>]
+    [--no-cache] [--prerelease]
+    [--tool-manifest <PATH>] [-v|--verbosity <LEVEL>]
     [--version <VERSION_NUMBER>]
 
 dotnet tool install <PACKAGE_NAME> --tool-path <PATH>
     [--add-source <SOURCE>] [--configfile <FILE>] [--disable-parallel]
     [--framework <FRAMEWORK>] [--ignore-failed-sources] [--interactive]
-    [--no-cache] [--tool-manifest <PATH>] [-v|--verbosity <LEVEL>]
+    [--no-cache] [--prerelease]
+    [--tool-manifest <PATH>] [-v|--verbosity <LEVEL>]
     [--version <VERSION_NUMBER>]
 
 dotnet tool install <PACKAGE_NAME> [--local]
     [--add-source <SOURCE>] [--configfile <FILE>] [--disable-parallel]
     [--framework <FRAMEWORK>] [--ignore-failed-sources] [--interactive]
-    [--no-cache] [--tool-manifest <PATH>] [-v|--verbosity <LEVEL>]
+    [--no-cache] [--prerelease]
+    [--tool-manifest <PATH>] [-v|--verbosity <LEVEL>]
     [--version <VERSION_NUMBER>]
 
 dotnet tool install -h|--help
@@ -170,6 +173,12 @@ Can\[cq]t be combined with the \f[V]--global\f[R] option or the \f[V]--tool-path
 .RS 2
 .PP
 Do not cache packages and HTTP requests.
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]--prerelease\f[B]\f[R]
+.RS 2
+.PP
+Include prerelease packages.
 .RE
 .IP \[bu] 2
 \f[B]\f[VB]--tool-manifest <PATH>\f[B]\f[R]

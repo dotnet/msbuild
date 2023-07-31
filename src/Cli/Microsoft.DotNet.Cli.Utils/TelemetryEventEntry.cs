@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -42,6 +43,28 @@ namespace Microsoft.DotNet.Cli.Utils
 
             EntryPosted += Handler;
         }
+    }
+
+    public sealed class PerformanceMeasurement : IDisposable
+    {
+        private readonly Stopwatch _timer;
+        private readonly Dictionary<string, double> _data;
+        private readonly string _name;
+
+        public PerformanceMeasurement(Dictionary<string, double> data, string name)
+        {
+            // Measurement is a no-op if we don't have a dictionary to store the entry.
+            if (data == null)
+            {
+                return;
+            }
+
+            _data = data;
+            _name = name;
+            _timer = Stopwatch.StartNew();
+        }
+
+        public void Dispose() => _data?.Add(_name, _timer.Elapsed.TotalMilliseconds);
     }
 
     public class BlockFilter : ITelemetryFilter

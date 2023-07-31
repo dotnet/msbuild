@@ -1,18 +1,10 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Security.Principal;
 using System.Text.Json;
-using FluentAssertions;
-using Microsoft.AspNetCore.Razor.Tasks;
+using Microsoft.AspNetCore.StaticWebAssets.Tasks;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.NET.TestFramework;
 using Moq;
-using Xunit;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
@@ -275,10 +267,10 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var discoveryPattern = task.DiscoveryPatterns[0];
 
             discoveryPattern.ItemSpec.Should().BeEquivalentTo(Path.Combine("AnotherClassLib", "wwwroot"));
-            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.Source)).Should().BeEquivalentTo("AnotherClassLib");
-            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.ContentRoot)).Should().BeEquivalentTo($"{contentRoot}");
-            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.BasePath)).Should().BeEquivalentTo("_content/AnotherClassLib");
-            discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.Pattern)).Should().BeEquivalentTo("**");
+            discoveryPattern.GetMetadata(nameof(StaticWebAssetsDiscoveryPattern.Source)).Should().BeEquivalentTo("AnotherClassLib");
+            discoveryPattern.GetMetadata(nameof(StaticWebAssetsDiscoveryPattern.ContentRoot)).Should().BeEquivalentTo($"{contentRoot}");
+            discoveryPattern.GetMetadata(nameof(StaticWebAssetsDiscoveryPattern.BasePath)).Should().BeEquivalentTo("_content/AnotherClassLib");
+            discoveryPattern.GetMetadata(nameof(StaticWebAssetsDiscoveryPattern.Pattern)).Should().BeEquivalentTo("**");
         }
 
         [Fact]

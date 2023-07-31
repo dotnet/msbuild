@@ -1,29 +1,17 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using FluentAssertions;
 using ManifestReaderTests;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Utilities;
-using Xunit;
-using Xunit.Abstractions;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
-using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.DotNet.Cli.Workload.Install.Tests;
 using Microsoft.DotNet.Workloads.Workload.Update;
 using Microsoft.DotNet.Cli.Utils;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
-using System;
 
 namespace Microsoft.DotNet.Cli.Workload.Update.Tests
 {
@@ -340,7 +328,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
 
             updateCommand.Execute();
             _reporter.Lines.Count().Should().Be(3);
-            string.Join("", _reporter.Lines).Should().Contain("SampleManifest");
+            string.Join("", _reporter.Lines).Should().Contain("samplemanifest");
         }
 
         [Theory]
@@ -454,7 +442,13 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var installer = includeInstalledPacks ?
                 new MockPackWorkloadInstaller(failingWorkload, failingPack, installedWorkloads: installedWorkloads, installedPacks: installedPacks) :
                 new MockPackWorkloadInstaller(failingWorkload, failingPack, installedWorkloads: installedWorkloads);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), dotnetRoot);
+
+            var copiedManifestFolder = Path.Combine(dotnetRoot, "sdk-manifests", new SdkFeatureBand(sdkVersion).ToString(), "SampleManifest");
+            Directory.CreateDirectory(copiedManifestFolder);
+            var copiedManifestFile = Path.Combine(copiedManifestFolder, "WorkloadManifest.json");
+            File.Copy(_manifestPath, copiedManifestFile);
+
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { copiedManifestFile }), dotnetRoot);
             installer.WorkloadResolver = workloadResolver;
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater(manifestUpdates, _manifestPath);

@@ -17,6 +17,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Trimmer defaults that depend on user-definable settings.
         This must be configured before it's initialized in the .NET SDK targets (which are imported by the Razor SDK). -->
     <SuppressTrimAnalysisWarnings Condition="'$(SuppressTrimAnalysisWarnings)' == '' And '$(TrimmerDefaultAction)' != 'link'">true</SuppressTrimAnalysisWarnings>
+
+    <!-- Similarly these feature switches must be configured before they are initialized in imported SDKs -->
+    <JsonSerializerIsReflectionEnabledByDefault Condition="'$(JsonSerializerIsReflectionEnabledByDefault)' == ''">true</JsonSerializerIsReflectionEnabledByDefault>
+
+    <!-- EnableConfigurationBindingGenerator is enabled by default for trimmed apps, but Blazor WASM disables it by default -->
+    <EnableConfigurationBindingGenerator Condition="'$(EnableConfigurationBindingGenerator)' == ''">false</EnableConfigurationBindingGenerator>
   </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.targets" />
@@ -35,7 +41,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(CustomBeforeBlazorWebAssemblySdkTargets)" Condition="'$(CustomBeforeBlazorWebAssemblySdkTargets)' != '' and Exists('$(CustomBeforeBlazorWebAssemblySdkTargets)')"/>
 
   <PropertyGroup>
-    <_BlazorWebAssemblyVersionedTargetsFile Condition="'$(_BlazorWebAssemblyVersionedTargetsFile)' == '' And '$(UseStaticWebAssetsV2)' == 'true'">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.BlazorWebAssembly.6_0.targets</_BlazorWebAssemblyVersionedTargetsFile>
+    <_BlazorTargetingNET60OrLater Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '6.0')) ">true</_BlazorTargetingNET60OrLater>
+    <_BlazorWebAssemblyVersionedTargetsFile Condition="'$(_BlazorWebAssemblyVersionedTargetsFile)' == '' And '$(_BlazorTargetingNET60OrLater)' == 'true'">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.BlazorWebAssembly.6_0.targets</_BlazorWebAssemblyVersionedTargetsFile>
     <_BlazorWebAssemblyVersionedTargetsFile Condition="'$(_BlazorWebAssemblyVersionedTargetsFile)' == ''">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.BlazorWebAssembly.5_0.targets</_BlazorWebAssemblyVersionedTargetsFile>
   </PropertyGroup>
 

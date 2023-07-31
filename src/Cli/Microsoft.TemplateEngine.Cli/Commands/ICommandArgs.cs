@@ -1,6 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
 
@@ -15,9 +14,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
         internal NewCommand RootCommand { get; }
 
         /// <summary>
-        /// Gets the executing <see cref="System.CommandLine.Command"/>.
+        /// Gets the executing <see cref="System.CommandLine.CliCommand"/>.
         /// </summary>
-        internal Command Command { get; }
+        internal CliCommand Command { get; }
 
         /// <summary>
         /// Gets the <see cref="System.CommandLine.ParseResult"/> for the command to be executed.

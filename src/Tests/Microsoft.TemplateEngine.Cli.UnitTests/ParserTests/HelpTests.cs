@@ -1,10 +1,8 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
 using System.CommandLine.Help;
-using System.CommandLine.Parsing;
 using FakeItEasy;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
@@ -72,7 +70,7 @@ Author: Me
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(), myCommand, sw);
 
             InstantiateCommand.ShowUsage(myCommand, new[] { "short-name" }, helpContext);
             Assert.Equal($"Usage:{Environment.NewLine}  new short-name [options] [template options]{Environment.NewLine}{Environment.NewLine}", sw.ToString());
@@ -85,7 +83,7 @@ Author: Me
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(), myCommand, sw);
 
             InstantiateCommand.ShowUsage(myCommand, new[] { "short-name1", "short-name2" }, helpContext);
             Assert.Equal($"Usage:{Environment.NewLine}  new short-name1 [options] [template options]{Environment.NewLine}  new short-name2 [options] [template options]{Environment.NewLine}{Environment.NewLine}", sw.ToString());
@@ -108,7 +106,7 @@ Author: Me
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(), myCommand, sw);
 
             InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
@@ -131,7 +129,7 @@ Author: Me
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(), myCommand, sw);
 
             InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
@@ -154,7 +152,7 @@ Author: Me
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(), myCommand, sw);
 
             InstantiateCommand.ShowCommandOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
@@ -177,7 +175,7 @@ Author: Me
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             Assert.Equal($"Template options:{Environment.NewLine}   (No options){Environment.NewLine}", sw.ToString());
@@ -201,7 +199,7 @@ Author: Me
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
@@ -228,7 +226,7 @@ Author: Me
             TemplateCommand templateCommand2 = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
 
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand2, templateCommand1 }, helpContext);
             return Verify(sw.ToString());
@@ -252,7 +250,7 @@ Author: Me
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
@@ -281,7 +279,7 @@ Author: Me
             TemplateCommand templateCommand2 = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
 
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand2, templateCommand1 }, helpContext);
             return Verify(sw.ToString());
@@ -305,7 +303,7 @@ Author: Me
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
@@ -329,7 +327,7 @@ Author: Me
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             Assert.DoesNotContain("(REQUIRED)", sw.ToString());
@@ -375,7 +373,7 @@ Author: Me
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance, maxWidth: 100), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(maxWidth: 100), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
@@ -399,7 +397,7 @@ Author: Me
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
 
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance, maxWidth: 50), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(maxWidth: 50), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
             return Verify(sw.ToString());
@@ -442,10 +440,34 @@ Author: Me
             TemplateCommand templateCommand2 = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates[1]);
 
             StringWriter sw = new();
-            HelpContext helpContext = new(new HelpBuilder(LocalizationResources.Instance, maxWidth: 50), myCommand, sw);
+            HelpContext helpContext = new(new HelpBuilder(maxWidth: 50), myCommand, sw);
 
             InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand1, templateCommand2 }, helpContext);
             return Verifier.Verify(sw.ToString());
+        }
+
+        [Fact]
+        public Task CanShowTemplateOptions_RequiredParam()
+        {
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+                .WithChoiceParameter("choice", new[] { "val1", "val2", "val3", "val4", "val5", "val6" }, description: "my description", isRequired: true);
+            TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
+               CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
+               .Single();
+
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+
+            TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
+
+            StringWriter sw = new();
+            HelpContext helpContext = new(new HelpBuilder(maxWidth: 50), myCommand, sw);
+
+            InstantiateCommand.ShowTemplateSpecificOptions(new[] { templateCommand }, helpContext);
+            return Verify(sw.ToString());
         }
     }
 }

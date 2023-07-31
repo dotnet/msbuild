@@ -1,15 +1,15 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
 
 #nullable enable
 
 namespace Microsoft.DotNet.Cli.Utils;
 
+/// <summary>
+/// Parses property key value pairs that have already been forwarded through the PropertiesOption class.
+/// Does not parse -p and etc. formats, (this is done by PropertiesOption) but does parse property values separated by =, ;, and using quotes.
+/// </summary>
 public static class MSBuildPropertyParser {
     public static IEnumerable<(string key, string value)> ParseProperties(string input) {
         var currentPos = 0;

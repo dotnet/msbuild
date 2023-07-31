@@ -1,10 +1,6 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Microsoft.DotNet.DotNetSdkResolver;
 using Microsoft.DotNet.NativeWrapper;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
@@ -56,7 +52,12 @@ namespace Microsoft.DotNet.TemplateLocator
                     nameof(dotnetRootPath));
             }
 
-            _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion, userProfileDir);
+            //  Will the current directory correspond to the folder we are creating a project in?  If we need
+            //  to honor global.json workload version selection for template creation in Visual Studio, we may
+            //  need to update this interface to pass a folder where we should start the search for global.json
+            string? globalJsonPath = SdkDirectoryWorkloadManifestProvider.GetGlobalJsonPath(Environment.CurrentDirectory);
+
+            _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion, userProfileDir, globalJsonPath);
             _workloadResolver ??= WorkloadResolver.Create(_workloadManifestProvider, dotnetRootPath, sdkVersion, userProfileDir);
 
             return _workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template)

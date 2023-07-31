@@ -1,9 +1,6 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -34,13 +31,34 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            ImplicitPackageReferences = 
-                PreprocessPackageDependenciesDesignTime.GetImplicitPackageReferences(DefaultImplicitPackages);
+            ImplicitPackageReferences = GetImplicitPackageReferences(DefaultImplicitPackages);
             
             var sdkDesignTimeList = new List<ITaskItem>(SdkReferences);
             sdkDesignTimeList.AddRange(GetImplicitPackageReferences());
 
             SDKReferencesDesignTime = sdkDesignTimeList.ToArray();
+        }
+
+        internal static HashSet<string> GetImplicitPackageReferences(string defaultImplicitPackages)
+        {
+            var implicitPackageReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (string.IsNullOrEmpty(defaultImplicitPackages))
+            {
+                return implicitPackageReferences;
+            }
+
+            var packageNames = defaultImplicitPackages.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (packageNames.Length == 0)
+            {
+                return implicitPackageReferences;
+            }
+
+            foreach (var packageReference in packageNames)
+            {
+                implicitPackageReferences.Add(packageReference);
+            }
+
+            return implicitPackageReferences;
         }
 
         private IEnumerable<ITaskItem> GetImplicitPackageReferences()

@@ -130,8 +130,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     When https://github.com/Microsoft/visualfsharp/issues/3207 is fixed,
     remove the block below and move it into the shared .targets file.
   -->
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '7.0'))">
-    <WarningsAsErrors Condition="'$(EnableUnsafeBinaryFormatterSerialization)' != 'true'">$(WarningsAsErrors);SYSLIB0011</WarningsAsErrors>
+  <PropertyGroup>
+    <WarningsAsErrors Condition="'$(_BinaryFormatterObsoleteAsError)' == 'true'">$(WarningsAsErrors);SYSLIB0011</WarningsAsErrors>
   </PropertyGroup>
 
   <!--

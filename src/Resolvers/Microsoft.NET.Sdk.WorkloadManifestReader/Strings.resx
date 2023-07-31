@@ -189,4 +189,22 @@
   <data name="InvalidManifestVersion" xml:space="preserve">
     <value>Invalid version: {0}</value>
   </data>
+  <data name="ManifestFromWorkloadSetNotFound" xml:space="preserve">
+    <value>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</value>
+    <comment>{Locked="dotnet workload repair"}</comment>
+  </data>
+  <data name="ManifestFromInstallStateNotFound" xml:space="preserve">
+    <value>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</value>
+    <comment>{Locked="dotnet workload repair"}</comment>
+  </data>
+  <data name="WorkloadVersionFromGlobalJsonNotFound" xml:space="preserve">
+    <value>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</value>
+    <comment>{Locked="dotnet workload restore"}</comment>
+  </data>
+  <data name="WorkloadVersionFromInstallStateNotFound" xml:space="preserve">
+    <value>Workload version {0}, which was specified in {1}, was not found.</value>
+  </data>
+  <data name="InvalidVersionForWorkload" xml:space="preserve">
+    <value>Error parsing version '{1}' for workload manifest ID '{0}'</value>
+  </data>
 </root>

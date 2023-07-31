@@ -1,6 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
 using Microsoft.TemplateEngine.Abstractions;
@@ -597,7 +596,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         private static ListCommandArgs GetListCommandArgsFor(string commandInput)
         {
             ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
-            RootCommand rootCommand = new();
+            CliRootCommand rootCommand = new();
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             rootCommand.Add(myCommand);
 

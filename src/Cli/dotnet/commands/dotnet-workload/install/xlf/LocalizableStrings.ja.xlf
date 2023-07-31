@@ -28,8 +28,8 @@
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
-        <source>Uninstalling workload pack {0} version {1}…</source>
-        <target state="translated">ワークロード パック {0} バージョン {1} をアンインストールしています...</target>
+        <source>Uninstalling workload pack {0} version {1}...</source>
+        <target state="needs-review-translation">ワークロード パック {0} バージョン {1} をアンインストールしています...</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -43,8 +43,8 @@
         <note />
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
-        <source>Downloading pack {0} version {1} to offline cache {2}…</source>
-        <target state="translated">パック {0} のバージョン {1} をオフライン キャッシュ {2} にダウンロードしています...</target>
+        <source>Downloading pack {0} version {1} to offline cache {2}...</source>
+        <target state="needs-review-translation">パック {0} のバージョン {1} をオフライン キャッシュ {2} にダウンロードしています...</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedSingleManifest">
@@ -118,8 +118,8 @@
         <note />
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
-        <source>Installing workload manifest {0} version {1}…</source>
-        <target state="translated">ワークロード マニフェスト {0} のバージョン {1} をインストールしています...</target>
+        <source>Installing workload manifest {0} version {1}...</source>
+        <target state="needs-review-translation">ワークロード マニフェスト {0} のバージョン {1} をインストールしています...</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
@@ -198,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">コンピューターの再起動が保留中です。インストールは続行されますが、再起動が必要になる場合があります。</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">コンピューターの再起動が保留中です。インストールは続行されますが、再起動が必要になる場合があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">

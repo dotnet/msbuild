@@ -1,16 +1,11 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
-    [Collection("Verify Tests")]
     public class WebProjectsTests : BaseIntegrationTest, IClassFixture<WebProjectsFixture>
     {
         private readonly WebProjectsFixture _fixture;
@@ -23,14 +18,18 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         }
 
         [Theory]
-        [InlineData("emptyweb_cs-50", "web")]
-        [InlineData("mvc_cs-50", "mvc")]
-        [InlineData("mvc_fs-50", "mvc", "-lang", "F#")]
-        [InlineData("api_cs-50", "webapi")]
-        [InlineData("emptyweb_cs-31", "web", "-f", "netcoreapp3.1")]
-        [InlineData("mvc_cs-31", "mvc", "-f", "netcoreapp3.1")]
-        [InlineData("mvc_fs-31", "mvc", "-lang", "F#", "-f", "netcoreapp3.1")]
-        [InlineData("api_cs-31", "webapi", "-f", "netcoreapp3.1")]
+        [InlineData("emptyweb_cs-latest", "web")]
+        [InlineData("mvc_cs-latest", "mvc")]
+        [InlineData("mvc_fs-latest", "mvc", "-lang", "F#")]
+        [InlineData("api_cs-latest", "webapi")]
+        [InlineData("emptyweb_cs-60", "web", "-f", "net6.0")]
+        [InlineData("mvc_cs-60", "mvc", "-f", "net6.0")]
+        [InlineData("mvc_fs-60", "mvc", "-lang", "F#", "-f", "net6.0")]
+        [InlineData("api_cs-60", "webapi", "-f", "net6.0")]
+        [InlineData("emptyweb_cs-70", "web", "-f", "net7.0")]
+        [InlineData("mvc_cs-70", "mvc", "-f", "net7.0")]
+        [InlineData("mvc_fs-70", "mvc", "-lang", "F#", "-f", "net7.0")]
+        [InlineData("api_cs-70", "webapi", "-f", "net7.0")]
         public void AllWebProjectsRestoreAndBuild(string testName, params string[] args)
         {
             string workingDir = Path.Combine(_fixture.BaseWorkingDirectory, testName);
@@ -127,8 +126,9 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         public WebProjectsFixture(IMessageSink messageSink) : base(messageSink)
         {
             BaseWorkingDirectory = Utilities.CreateTemporaryFolder(nameof(WebProjectsTests));
-            InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates31Path, BaseWorkingDirectory);
-            InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates50Path, BaseWorkingDirectory);
+
+            InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates60Path, BaseWorkingDirectory);
+            InstallPackage(TemplatePackagesPaths.MicrosoftDotNetWebProjectTemplates70Path, BaseWorkingDirectory);
         }
 
         internal string BaseWorkingDirectory { get; private set; }

@@ -1,6 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
@@ -11,11 +10,14 @@ using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Cli.NuGet;
 using Microsoft.TemplateEngine.Cli.TabularOutput;
+using Microsoft.TemplateEngine.Cli.TemplateSearch;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
+using NuGet.Configuration;
 using NuGet.Credentials;
 using NuGet.Versioning;
+using static Microsoft.TemplateEngine.Cli.NuGet.NugetApiManager;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -24,10 +26,14 @@ namespace Microsoft.TemplateEngine.Cli
     /// </summary>
     internal class TemplatePackageCoordinator
     {
+        private const string SourceFeedKey = "NuGetSource";
+        private const string NugetOrgFeed = "https://api.nuget.org/v3/index.json";
+
         private readonly IEngineEnvironmentSettings _engineEnvironmentSettings;
         private readonly TemplatePackageManager _templatePackageManager;
         private readonly TemplateConstraintManager _constraintsManager;
         private readonly HostSpecificDataLoader _hostSpecificDataLoader;
+        private readonly TemplatePackageDisplay _templatePackageDisplay;
 
         internal TemplatePackageCoordinator(
             IEngineEnvironmentSettings environmentSettings,
@@ -37,6 +43,7 @@ namespace Microsoft.TemplateEngine.Cli
             _templatePackageManager = templatePackageManager ?? throw new ArgumentNullException(nameof(templatePackageManager));
             _constraintsManager = new TemplateConstraintManager(_engineEnvironmentSettings);
             _hostSpecificDataLoader = new HostSpecificDataLoader(_engineEnvironmentSettings);
+            _templatePackageDisplay = new TemplatePackageDisplay(Reporter.Output, Reporter.Error);
         }
 
         /// <summary>
@@ -116,8 +123,8 @@ namespace Microsoft.TemplateEngine.Cli
                 return default;
             }
 
-            NuGetVersion managedPackageVersion;
-            NuGetVersion unmanagedPackageVersion;
+            NuGetVersion? managedPackageVersion;
+            NuGetVersion? unmanagedPackageVersion;
 
             if (NuGetVersion.TryParse(managedTemplatePackage.Version, out managedPackageVersion) && NuGetVersion.TryParse(matchingTemplatePackage.Version, out unmanagedPackageVersion))
             {
@@ -243,7 +250,15 @@ namespace Microsoft.TemplateEngine.Cli
             IReadOnlyList<InstallResult> installResults = await managedSourceProvider.InstallAsync(installRequests, cancellationToken).ConfigureAwait(false);
             foreach (InstallResult result in installResults)
             {
-                await DisplayInstallResultAsync(result.InstallRequest.DisplayName, result, args.ParseResult, cancellationToken).ConfigureAwait(false);
+                await _templatePackageDisplay.DisplayInstallResultAsync(
+                    result.InstallRequest.DisplayName,
+                    result,
+                    args.ParseResult,
+                    args.Force,
+                    _templatePackageManager,
+                    _engineEnvironmentSettings,
+                    _constraintsManager,
+                    cancellationToken).ConfigureAwait(false);
                 if (!result.Success)
                 {
                     resultStatus = result.Error == InstallerErrorCode.PackageNotFound ? NewCommandStatus.NotFound : NewCommandStatus.InstallFailed;
@@ -270,7 +285,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 var provider = packagesGrouping.Key;
                 IReadOnlyList<CheckUpdateResult> checkUpdateResults = await provider.GetLatestVersionsAsync(packagesGrouping, cancellationToken).ConfigureAwait(false);
-                DisplayUpdateCheckResults(checkUpdateResults, commandArgs, showUpdates: !applyUpdates);
+                _templatePackageDisplay.DisplayUpdateCheckResults(_engineEnvironmentSettings, checkUpdateResults, commandArgs, showUpdates: !applyUpdates);
                 if (checkUpdateResults.Any(result => !result.Success))
                 {
                     success = NewCommandStatus.InstallFailed;
@@ -303,7 +318,17 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             success = NewCommandStatus.InstallFailed;
                         }
-                        await DisplayInstallResultAsync(updateResult.UpdateRequest.TemplatePackage.DisplayName, updateResult, commandArgs.ParseResult, cancellationToken).ConfigureAwait(false);
+
+                        await _templatePackageDisplay.DisplayInstallResultAsync(
+                           updateResult.UpdateRequest.TemplatePackage.DisplayName,
+                           updateResult,
+                           commandArgs.ParseResult,
+                           // force is not supported by update flow
+                           force: false,
+                           _templatePackageManager,
+                           _engineEnvironmentSettings,
+                           _constraintsManager,
+                           cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
@@ -328,7 +353,7 @@ namespace Microsoft.TemplateEngine.Cli
             if (args.TemplatePackages == null || args.TemplatePackages.Count <= 0)
             {
                 //display all installed template packages
-                await DisplayInstalledTemplatePackagesAsync(args, cancellationToken).ConfigureAwait(false);
+                await _templatePackageDisplay.DisplayInstalledTemplatePackagesAsync(_templatePackageManager, args, cancellationToken).ConfigureAwait(false);
                 return result;
             }
 
@@ -356,6 +381,202 @@ namespace Microsoft.TemplateEngine.Cli
             return result;
         }
 
+        /// <summary>
+        /// Searches and displays a package metadata.
+        /// </summary>
+        internal async Task<NewCommandStatus> DisplayTemplatePackageMetadata(
+            string packageIdentity,
+            string? packageVersion,
+            bool interactiveAuth,
+            IReadOnlyList<string>? additionalSources,
+            NugetApiManager nugetApiManager,
+            CancellationToken cancellationToken = default)
+        {
+            NugetPackageMetadata? nuGetPackageMetadata;
+            IEnumerable<ITemplateInfo>? packageTemplates;
+            IManagedTemplatePackage? localPackage;
+
+            InitializeNuGetCredentialService(interactiveAuth);
+
+            try
+            {
+                (localPackage, packageTemplates) = await _templatePackageManager
+                    .GetManagedTemplatePackageAsync(packageIdentity, packageVersion, cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                localPackage = null;
+                packageTemplates = null;
+            }
+
+            // The package was found locally
+            if (localPackage != null && packageTemplates != null)
+            {
+                string? packageSource = string.Empty;
+                PackageSource? sourceFeed = null;
+                if (localPackage.GetDetails().TryGetValue(SourceFeedKey, out packageSource))
+                {
+                    sourceFeed = new PackageSource(packageSource);
+                }
+
+                nuGetPackageMetadata = await nugetApiManager.GetPackageMetadataAsync(
+                    packageIdentity,
+                    packageVersion,
+                    sourceFeed,
+                    cancellationToken).ConfigureAwait(false);
+
+                if (nuGetPackageMetadata == null)
+                {
+                    DisplayLocalPackageMetadata(localPackage, Reporter.Output);
+
+                    var templatesToDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(packageTemplates, null, null, _engineEnvironmentSettings.Environment);
+                    DisplayPackageTemplateList(templatesToDisplay, Reporter.Output);
+                    return NewCommandStatus.Success;
+                }
+            }
+            else
+            {
+                IEnumerable<PackageSource> packageSources = LoadNuGetSources(additionalSources, true);
+
+                nuGetPackageMetadata = await GetPackageMetadataFromMultipleFeedsAsync(packageSources, nugetApiManager, packageIdentity, packageVersion, cancellationToken).ConfigureAwait(false);
+                if (nuGetPackageMetadata != null && nuGetPackageMetadata.Source.Source.Equals(NugetOrgFeed))
+                {
+                    packageTemplates = await CliTemplateSearchCoordinator.SearchForPackageTemplatesAsync(
+                        _engineEnvironmentSettings,
+                        packageIdentity,
+                        packageVersion,
+                        cancellationToken).ConfigureAwait(false);
+                }
+
+            }
+
+            if (nuGetPackageMetadata != null)
+            {
+                DisplayNuGetPackageMetadata(nuGetPackageMetadata, Reporter.Output);
+                if (packageTemplates != null && packageTemplates.Any())
+                {
+                    var templatesToDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(packageTemplates, null, null, _engineEnvironmentSettings.Environment);
+                    DisplayPackageTemplateList(templatesToDisplay, Reporter.Output);
+                }
+                return NewCommandStatus.Success;
+            }
+
+            Reporter.Output.WriteLine(
+                LocalizableStrings.Generic_Info_NoMatchingTemplatePackage.Bold().Red(),
+                $"{packageIdentity}{(string.IsNullOrWhiteSpace(packageVersion) ? string.Empty : $"::{packageVersion}")}");
+
+            return NewCommandStatus.NotFound;
+        }
+
+        internal void DisplayNuGetPackageMetadata(NugetPackageMetadata packageMetadata, IReporter reporter)
+        {
+            reporter.WriteLine($"{packageMetadata.Identity.Id}");
+            WriteIfNotNull(LocalizableStrings.DetailsCommand_Property_Version, packageMetadata.PackageVersion.ToString(), reporter, 1);
+            if (packageMetadata.PrefixReserved != null && packageMetadata.Source.Source.Equals(NugetOrgFeed))
+            {
+                WriteIfNotNull(LocalizableStrings.DetailsCommand_Property_PrefixReserved, packageMetadata.PrefixReserved.ToString(), reporter, 1);
+            }
+            WriteIfNotNull(LocalizableStrings.DetailsCommand_Property_Description, packageMetadata.Description, reporter, 1);
+
+            string sourceFeed = packageMetadata.Source.Source == packageMetadata.Source.Name ? packageMetadata.Source.Source : $"{packageMetadata.Source.Name} [{packageMetadata.Source.Source}]";
+            reporter.WriteLine($"{LocalizableStrings.DetailsCommand_Property_SourceFeed}: {sourceFeed}".Indent(1));
+
+            if (!string.IsNullOrEmpty(packageMetadata.Authors))
+            {
+                reporter.WriteLine($"{LocalizableStrings.DetailsCommand_Property_Authors}:".Indent(1));
+
+                var packageAuthors = packageMetadata.Authors.Split(",");
+                foreach (var author in packageAuthors)
+                {
+                    reporter.WriteLine(author.Trim().Indent(2));
+                }
+            }
+
+            if (!string.IsNullOrEmpty(packageMetadata.Owners))
+            {
+                reporter.WriteLine($"{LocalizableStrings.DetailsCommand_Property_Owners}:".Indent(1));
+
+                var packageOwners = packageMetadata.Owners.Split(",");
+                foreach (var owner in packageOwners)
+                {
+                    reporter.WriteLine(AnsiExtensions.Url($"https://nuget.org/profiles/{owner.Trim()}", owner).Indent(2));
+                }
+            }
+
+            reporter.WriteLine($"{LocalizableStrings.DetailsCommand_Property_LicenseMetadata}:".Indent(1));
+            WriteIfNotNull(LocalizableStrings.DetailsCommand_Property_License, packageMetadata.License, reporter, 2);
+
+            if (!string.IsNullOrEmpty(packageMetadata.LicenseExpression))
+            {
+                var licenseExpressionUrl = "https://licenses.nuget.org/" + packageMetadata.LicenseExpression;
+                reporter.WriteLine(
+                    $"{LocalizableStrings.DetailsCommand_Property_LicenseExpression}: ".Indent(1) +
+                    $"{AnsiExtensions.Url(licenseExpressionUrl, packageMetadata.LicenseExpression)}");
+            }
+
+            var licenseUrl = packageMetadata.LicenseUrl?.ToString();
+            if (!string.IsNullOrEmpty(licenseUrl))
+            {
+                reporter.WriteLine(
+                    $"{LocalizableStrings.DetailsCommand_Property_LicenseUrl}: ".Indent(2) +
+                    $"{AnsiExtensions.Url(licenseUrl, licenseUrl)}");
+            }
+
+            var projectUrl = packageMetadata.ProjectUrl?.ToString();
+            if (!string.IsNullOrEmpty(projectUrl))
+            {
+                reporter.WriteLine(
+                    $"{LocalizableStrings.DetailsCommand_Property_RepoUrl}: {projectUrl}".Indent(2));
+            }
+        }
+
+        internal void DisplayLocalPackageMetadata(IManagedTemplatePackage package, IReporter reporter)
+        {
+            reporter.WriteLine($"{package.Identifier}");
+
+            var packageDetails = package.GetDetails();
+
+            string? authors;
+            packageDetails.TryGetValue("Author", out authors);
+            if (!string.IsNullOrEmpty(authors))
+            {
+                reporter.WriteLine($"{LocalizableStrings.DetailsCommand_Property_Authors}:".Indent(1));
+
+                var packageAuthors = authors.Split(",");
+                foreach (var author in packageAuthors)
+                {
+                    reporter.WriteLine(author.Trim().Indent(2));
+                }
+            }
+
+            string? nuGetSource;
+            packageDetails.TryGetValue("NuGetSource", out nuGetSource);
+
+            if (!string.IsNullOrEmpty(nuGetSource))
+            {
+                reporter.WriteLine(
+                    $"{LocalizableStrings.DetailsCommand_Property_RepoUrl}: {nuGetSource}".Indent(1));
+            }
+        }
+
+        internal void DisplayPackageTemplateList(IReadOnlyList<TemplateGroupTableRow> templatesToDisplay, IReporter reporter)
+        {
+            reporter.WriteLine($"{LocalizableStrings.DetailsCommand_Property_Templates}:".Indent(1));
+
+            TabularOutput<TemplateGroupTableRow> formatter =
+                TabularOutput.TabularOutput
+                    .For(
+                        new TabularOutputSettings(_engineEnvironmentSettings.Environment),
+                        templatesToDisplay)
+                    .DefineColumn(t => t.Name, LocalizableStrings.ColumnNameTemplateName, minWidth: 15, showAlways: true, shrinkIfNeeded: true)
+                    .DefineColumn(t => t.ShortNames, LocalizableStrings.ColumnNameShortName, minWidth: 15, showAlways: true)
+                    .DefineColumn(t => t.Type, LocalizableStrings.ColumnNameType, minWidth: 15, showAlways: true)
+                    .DefineColumn(t => t.Classifications, LocalizableStrings.ColumnNameTags, minWidth: 15, showAlways: true, shrinkIfNeeded: true)
+                    .DefineColumn(t => t.Languages, LocalizableStrings.ColumnNameLanguage, minWidth: 15, showAlways: true);
+
+            reporter.WriteLine(formatter.Layout(2));
+        }
+
         private static void InitializeNuGetCredentialService(bool interactive)
         {
             try
@@ -365,6 +586,14 @@ namespace Microsoft.TemplateEngine.Cli
             catch (Exception ex)
             {
                 Reporter.Verbose.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError, ex.ToString());
+            }
+        }
+
+        private void WriteIfNotNull(string metadataName, string? metadataEntry, IReporter reporter, int indent = 0)
+        {
+            if (!string.IsNullOrEmpty(metadataEntry))
+            {
+                reporter.WriteLine($"{metadataName}: {metadataEntry}".Indent(indent));
             }
         }
 
@@ -402,7 +631,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (!args.Force)
                 {
-                    reporter.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_UseForceToOverride, SharedOptions.ForceOption.Aliases.First());
+                    reporter.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_UseForceToOverride, SharedOptions.ForceOption.Name);
                     reporter.WriteCommand(
                         Example
                             .For<InstallCommand>(args.ParseResult)
@@ -667,7 +896,7 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_DetailsHeader.Indent(level: 2));
                     foreach (KeyValuePair<string, string> detail in displayDetails)
                     {
-                        Reporter.Output.WriteLine($"{detail.Key}: {detail.Value}".Indent(level: 3));
+                        Reporter.Output.WriteLine($"{detail.Key}: {GetFormattedValue(detail.Value)}".Indent(level: 3));
                     }
                 }
 
@@ -692,6 +921,16 @@ namespace Microsoft.TemplateEngine.Cli
 
                 Reporter.Output.WriteLine();
             }
+        }
+
+        private string GetFormattedValue(string rawValue)
+        {
+            if (bool.TryParse(rawValue, out bool value))
+            {
+                return value ? "✔" : "✘";
+            }
+
+            return rawValue;
         }
 
         private async Task DisplayInstallResultAsync(string packageToInstall, InstallerOperationResult result, ParseResult parseResult, CancellationToken cancellationToken)
@@ -843,6 +1082,98 @@ namespace Microsoft.TemplateEngine.Cli
                             result.ErrorMessage).Bold().Red());
                     break;
             }
+        }
+
+        private IEnumerable<PackageSource> LoadNuGetSources(IEnumerable<string>? additionalSources, bool includeNuGetFeed)
+        {
+            IEnumerable<PackageSource> defaultSources;
+            string currentDirectory = string.Empty;
+            try
+            {
+                currentDirectory = Directory.GetCurrentDirectory();
+                ISettings settings = global::NuGet.Configuration.Settings.LoadDefaultSettings(currentDirectory);
+                PackageSourceProvider packageSourceProvider = new PackageSourceProvider(settings);
+                defaultSources = packageSourceProvider.LoadPackageSources().Where(source => source.IsEnabled);
+                if (includeNuGetFeed)
+                {
+                    var nuGetFeed = new PackageSource(NugetOrgFeed, "NuGet.org");
+                    defaultSources = defaultSources.Append(nuGetFeed);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(string.Format(LocalizableStrings.DetailsCommand_UnableToLoadResorces, currentDirectory), ex);
+            }
+
+            if (additionalSources == null || !additionalSources.Any())
+            {
+                if (!defaultSources.Any())
+                {
+                    throw new Exception(LocalizableStrings.DetailsCommand_NoNuGetSources);
+                }
+                return defaultSources;
+            }
+
+            List<PackageSource> customSources = new List<PackageSource>();
+            foreach (string source in additionalSources)
+            {
+                if (string.IsNullOrWhiteSpace(source))
+                {
+                    continue;
+                }
+                if (defaultSources.Any(s => s.Source.Equals(source, StringComparison.OrdinalIgnoreCase)))
+                {
+                    Reporter.Verbose.WriteLine($"Custom source {source} is already loaded from default configuration.");
+                    continue;
+                }
+                PackageSource packageSource = new PackageSource(source);
+                if (packageSource.TrySourceAsUri == null)
+                {
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.DetailsCommand_UnableToLoadResorce, source));
+                    continue;
+                }
+                customSources.Add(packageSource);
+            }
+
+            IEnumerable<PackageSource> retrievedSources = customSources.Concat(defaultSources);
+            if (!retrievedSources.Any())
+            {
+                throw new Exception(LocalizableStrings.DetailsCommand_NoNuGetSources);
+            }
+            return retrievedSources;
+        }
+
+        private async Task<NugetPackageMetadata?> GetPackageMetadataFromMultipleFeedsAsync(
+            IEnumerable<PackageSource> sources,
+            NugetApiManager apiManager,
+            string packageIdentifier,
+            string? packageVersion = null,
+            CancellationToken cancellationToken = default)
+        {
+            IEnumerable<NugetPackageMetadata?> foundPackages =
+            await Task.WhenAll(
+                sources.Select(source => apiManager.GetPackageMetadataAsync(packageIdentifier, packageVersion, source, cancellationToken)))
+                        .ConfigureAwait(false);
+
+            var accumulativeSearchResults = foundPackages
+                .Where(result => result is not null);
+
+            if (accumulativeSearchResults == null || !accumulativeSearchResults.Any())
+            {
+                return null;
+            }
+
+            var floatRange = new FloatRange(NuGetVersionFloatBehavior.AbsoluteLatest);
+
+            NugetPackageMetadata? latestVersion = accumulativeSearchResults.Aggregate(
+                (NugetPackageMetadata?)null,
+                (max, current) =>
+                    (max == null || current!.Identity.Version > max.Identity.Version)
+                    &&
+                    floatRange.Satisfies(current!.Identity.Version) ?
+                        current : max);
+
+            return latestVersion;
         }
     }
 }

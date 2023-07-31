@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Xunit;
@@ -163,6 +162,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 TargetFrameworkVersion = "5.0",
                 TargetPlatformIdentifier = "Windows",
                 TargetPlatformVersion = "10.0.18362",
+                EnableRuntimePackDownload = true,
                 RuntimeGraphPath =
                     runtimeGraphPathPath,
                 FrameworkReferences =
@@ -172,7 +172,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     new MockTaskItem("Microsoft.Windows.SDK.NET.Ref",
                         new Dictionary<string, string>
                         {
-                            {"TargetFramework", "net5.0-windows10.0.17760"},
+                            {"TargetFramework", $"net5.0-windows10.0.17760"},
                             {"RuntimeFrameworkName", "Microsoft.Windows.SDK.NET.Ref"},
                             {"DefaultRuntimeFrameworkVersion", "10.0.17760.1-preview"},
                             {"LatestRuntimeFrameworkVersion", "10.0.17760.1-preview"},
@@ -241,6 +241,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 SelfContained = true,
                 TargetLatestRuntimePatch = true,
                 TargetLatestRuntimePatchIsDefault = true,
+                EnableRuntimePackDownload = true,
                 FrameworkReferences =
                     new[]
                     {
@@ -288,6 +289,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     runtimeGraphPathPath,
                 TargetLatestRuntimePatch = true,
                 TargetLatestRuntimePatchIsDefault = true,
+                EnableRuntimePackDownload = true,
                 FrameworkReferences =
                     new[]
                     {

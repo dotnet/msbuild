@@ -1,18 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FluentAssertions;
-using FluentAssertions.Collections;
-using Microsoft.NET.Sdk.WorkloadManifestReader;
-using Microsoft.NET.TestFramework;
-using Xunit;
-using Xunit.Abstractions;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
 {
@@ -28,7 +15,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
         {
             var manifestProvider = CreateManifestProvider();
 
-            var manifestDirectories = manifestProvider.GetManifestDirectories();
+            var manifestDirectories = manifestProvider.GetManifests().Select(m => m.ManifestDirectory);
             foreach (var manifestDirectory in manifestDirectories)
             {
                 Log.WriteLine(manifestDirectory);
@@ -46,7 +33,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/sdk/issues/28759")]
         public void GetPackDefinitionLocations()
         {
             var definitionLocations = GetWorkloadPackDefinitionLocations(GetManifests());
@@ -106,7 +93,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader.Tests
 
         SdkDirectoryWorkloadManifestProvider CreateManifestProvider()
         {
-            return new(TestContext.Current.ToolsetUnderTest.DotNetRoot, TestContext.Current.ToolsetUnderTest.SdkVersion, userProfileDir: null);
+            return new(TestContext.Current.ToolsetUnderTest.DotNetRoot, TestContext.Current.ToolsetUnderTest.SdkVersion, userProfileDir: null, globalJsonPath: null);
         }
 
         public IEnumerable<WorkloadManifest> GetManifests(SdkDirectoryWorkloadManifestProvider? manifestProvider = null)

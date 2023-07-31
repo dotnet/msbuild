@@ -1,17 +1,12 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
+
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.WebSockets;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
@@ -24,22 +19,27 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public class BrowserRefreshServer : IAsyncDisposable
+    /// <summary>
+    /// Communicates with aspnetcore-browser-refresh.js loaded in the browser.
+    /// </summary>
+    internal sealed class BrowserRefreshServer : IAsyncDisposable
     {
         private readonly byte[] ReloadMessage = Encoding.UTF8.GetBytes("Reload");
         private readonly byte[] WaitMessage = Encoding.UTF8.GetBytes("Wait");
         private readonly JsonSerializerOptions _jsonSerializerOptions = new(JsonSerializerDefaults.Web);
-        private readonly List<(WebSocket clientSocket, string sharedSecret)> _clientSockets = new();
+        private readonly List<(WebSocket clientSocket, string? sharedSecret)> _clientSockets = new();
         private readonly RSA _rsa;
+        private readonly DotNetWatchOptions _options;
         private readonly IReporter _reporter;
         private readonly string _muxerPath;
         private readonly TaskCompletionSource _terminateWebSocket;
         private readonly TaskCompletionSource _clientConnected;
-        private IHost _refreshServer;
+        private IHost? _refreshServer;
 
-        public BrowserRefreshServer(IReporter reporter, string muxerPath)
+        public BrowserRefreshServer(DotNetWatchOptions options, IReporter reporter, string muxerPath)
         {
             _rsa = RSA.Create(2048);
+            _options = options;
             _reporter = reporter;
             _muxerPath = muxerPath;
             _terminateWebSocket = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -81,8 +81,10 @@ namespace Microsoft.DotNet.Watcher.Tools
             var serverUrls = _refreshServer.Services
                 .GetRequiredService<IServer>()
                 .Features
-                .Get<IServerAddressesFeature>()
+                .Get<IServerAddressesFeature>()?
                 .Addresses;
+
+            Debug.Assert(serverUrls != null);
 
             if (envHostName is null)
             {
@@ -108,8 +110,8 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return;
             }
 
-            var subProtocol = (string)null;
-            string sharedSecret = null;
+            string? subProtocol = null;
+            string? sharedSecret = null;
             if (context.WebSockets.WebSocketRequestedProtocols.Count == 1)
             {
                 subProtocol = context.WebSockets.WebSocketRequestedProtocols[0];
@@ -125,7 +127,25 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public async Task WaitForClientConnectionAsync(CancellationToken cancellationToken)
         {
-            await _clientConnected.Task.WaitAsync(cancellationToken);
+            using var progressCancellationSource = new CancellationTokenSource();
+
+            var progressReportingTask = Task.Run(async () =>
+            {
+                while (!progressCancellationSource.Token.IsCancellationRequested)
+                {
+                    await Task.Delay(_options.TestFlags != TestFlags.None ? TimeSpan.MaxValue : TimeSpan.FromSeconds(5), progressCancellationSource.Token);
+                    _reporter.Warn("Connecting to the browser is taking longer than expected ...");
+                }
+            }, progressCancellationSource.Token);
+
+            try
+            {
+                await _clientConnected.Task.WaitAsync(cancellationToken);
+            }
+            finally
+            {
+                progressCancellationSource.Cancel();
+            }
         }
 
         public ValueTask SendJsonSerlialized<TValue>(TValue value, CancellationToken cancellationToken = default)
@@ -134,7 +154,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             return SendMessage(jsonSerialized, cancellationToken);
         }
 
-        public async ValueTask SendJsonWithSecret<TValue>(Func<string, TValue> valueFactory, CancellationToken cancellationToken = default)
+        public async ValueTask SendJsonWithSecret<TValue>(Func<string?, TValue> valueFactory, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -197,10 +217,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 clientSocket.Dispose();
             }
 
-            if (_refreshServer != null)
-            {
-                _refreshServer.Dispose();
-            }
+            _refreshServer?.Dispose();
 
             _terminateWebSocket.TrySetResult();
         }
@@ -211,7 +228,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             {
                 var (clientSocket, _) = _clientSockets[i];
 
-                if (clientSocket.State is not WebSocketState.Open)
+                if (clientSocket.State != WebSocketState.Open)
                 {
                     continue;
                 }
@@ -219,6 +236,12 @@ namespace Microsoft.DotNet.Watcher.Tools
                 try
                 {
                     var result = await clientSocket.ReceiveAsync(buffer, cancellationToken);
+
+                    if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        continue;
+                    }
+
                     return result;
                 }
                 catch (Exception ex)

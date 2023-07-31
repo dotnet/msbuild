@@ -1,4 +1,7 @@
-﻿///--------------------------------------------------------------------------------------------
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+///--------------------------------------------------------------------------------------------
 /// KuduDeploy.cs
 ///
 /// Support for WAWS deployment using Kudu API.
@@ -8,10 +11,6 @@
 
 using Framework = Microsoft.Build.Framework;
 using Utilities = Microsoft.Build.Utilities;
-using System.Threading.Tasks;
-using System;
-using System.IO;
-using System.Collections.Generic;
 using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
@@ -60,7 +59,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
             set;
         }
 
-
         internal KuduConnectionInfo GetConnectionInfo()
         {
             KuduConnectionInfo connectionInfo = new KuduConnectionInfo();
@@ -103,7 +101,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
         }
 
         internal bool DeployFiles(KuduConnectionInfo connectionInfo)
-        {          
+        {
             KuduVfsDeploy fileDeploy = new KuduVfsDeploy(connectionInfo, Log);
 
             bool success; 
@@ -114,7 +112,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
             }
 
             // Deploy the files.
-            Task deployTask = fileDeploy.DeployAsync(PublishIntermediateOutputPath);
+            System.Threading.Tasks.Task deployTask = fileDeploy.DeployAsync(PublishIntermediateOutputPath);
             try
             {
                 success = deployTask.Wait(TimeoutMilliseconds);
@@ -140,7 +138,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
             KuduZipDeploy zipDeploy = new KuduZipDeploy(connectionInfo, Log);
             
             string zipFileFullPath = CreateZipFile(PublishIntermediateOutputPath);
-            Task<bool> zipTask = zipDeploy.DeployAsync(zipFileFullPath);
+            System.Threading.Tasks.Task<bool> zipTask = zipDeploy.DeployAsync(zipFileFullPath);
             try
             {
                 success = zipTask.Wait(TimeoutMilliseconds);
@@ -183,9 +181,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
             return zipFileFullPath;
         }
 
-        internal Task DeleteTempZipFile(string tempFilePath)
+        internal System.Threading.Tasks.Task DeleteTempZipFile(string tempFilePath)
         {
-             return Task.Factory.StartNew(
+             return System.Threading.Tasks.Task.Factory.StartNew(
                 () =>
                 {
                     if (File.Exists(tempFilePath))
@@ -196,7 +194,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Kudu
                         }
                         catch
                         {
-                            // We dont need to do any thing if we are unable to delete the temp file.
+                            // We don't need to do any thing if we are unable to delete the temp file.
                         }
                     }
                 });

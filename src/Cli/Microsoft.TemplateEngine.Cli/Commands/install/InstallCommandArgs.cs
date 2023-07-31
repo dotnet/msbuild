@@ -1,6 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
 
@@ -10,13 +9,18 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         public InstallCommandArgs(BaseInstallCommand installCommand, ParseResult parseResult) : base(installCommand, parseResult)
         {
-            TemplatePackages = parseResult.GetValue(InstallCommand.NameArgument)
-                ?? throw new ArgumentException($"{nameof(parseResult)} should contain at least one argument for {nameof(InstallCommand.NameArgument)}", nameof(parseResult));
+            var nameResult = parseResult.GetResult(InstallCommand.NameArgument);
+            if (nameResult is null || nameResult.Errors.Any())
+            {
+                throw new ArgumentException($"{nameof(parseResult)} should contain at least one argument for {nameof(InstallCommand.NameArgument)}", nameof(parseResult));
+            }
+
+            TemplatePackages = parseResult.GetValue(InstallCommand.NameArgument)!;
 
             //workaround for --install source1 --install source2 case
-            if (installCommand is LegacyInstallCommand && installCommand.Aliases.Any(alias => TemplatePackages.Contains(alias)))
+            if (installCommand is LegacyInstallCommand && (TemplatePackages.Contains(installCommand.Name) || installCommand.Aliases.Any(alias => TemplatePackages.Contains(alias))))
             {
-                TemplatePackages = TemplatePackages.Where(package => !installCommand.Aliases.Contains(package)).ToList();
+                TemplatePackages = TemplatePackages.Where(package => installCommand.Name != package && !installCommand.Aliases.Contains(package)).ToList();
             }
 
             if (!TemplatePackages.Any())

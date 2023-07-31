@@ -1,4 +1,4 @@
-<!--
+﻿<!--
 ***********************************************************************************************
 Microsoft.NET.Sdk.FrameworkReferenceResolution.targets
 
@@ -30,7 +30,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <KnownFrameworkReference Remove="Microsoft.Windows.SDK.NET.Ref" />
     </ItemGroup>
-    
+
     <!-- Generate KnownFrameworkReference items for the Windows SDK pack -->
     <CreateWindowsSdkKnownFrameworkReferences
       UseWindowsSDKPreview="$(UseWindowsSDKPreview)"
@@ -42,7 +42,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       WindowsSdkSupportedTargetPlatformVersions="@(WindowsSdkSupportedTargetPlatformVersion)">
 
       <Output TaskParameter="KnownFrameworkReferences" ItemName="KnownFrameworkReference" />
-      
+
     </CreateWindowsSdkKnownFrameworkReferences>
   </Target>
 
@@ -99,7 +99,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 SelfContained="$(SelfContained)"
                                 ReadyToRunEnabled="$(PublishReadyToRun)"
                                 ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
+                                RequiresILLinkPack="$(_RequiresILLinkPack)"
                                 AotEnabled="$(PublishAot)"
+                                AotUseKnownRuntimePackForTarget="$(PublishAotUsingRuntimePack)"
                                 RuntimeIdentifier="$(RuntimeIdentifier)"
                                 RuntimeIdentifiers="$(RuntimeIdentifiers)"
                                 RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
@@ -111,6 +113,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 DisableTransitiveFrameworkReferenceDownloads="$(DisableTransitiveFrameworkReferenceDownloads)"
                                 KnownCrossgen2Packs="@(KnownCrossgen2Pack)"
                                 KnownILCompilerPacks="@(KnownILCompilerPack)"
+                                KnownILLinkPacks="@(KnownILLinkPack)"
+                                KnownWebAssemblySdkPacks="@(KnownWebAssemblySdkPack)"
+                                UsingMicrosoftNETSdkWebAssembly="$(UsingMicrosoftNETSdkWebAssembly)"
                                 NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
                                 NetCoreRoot="$(NetCoreRoot)"
                                 NETCoreSdkVersion="$(NETCoreSdkVersion)">
@@ -124,6 +129,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="TargetILCompilerPacks" ItemName="TargetILCompilerPack" />
       <Output TaskParameter="UnavailableRuntimePacks" ItemName="UnavailableRuntimePack" />
       <Output TaskParameter="ImplicitPackageReferences" ItemName="_ImplicitPackageReference" />
+      <Output TaskParameter="KnownRuntimeIdentifierPlatforms" ItemName="_KnownRuntimeIdentifierPlatformsForTargetFramework" />
 
     </ProcessFrameworkReferences>
 
@@ -147,6 +153,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
                      KnownAppHostPacks="@(KnownAppHostPack)"
                      NuGetRestoreSupported="$(_NuGetRestoreSupported)"
+                     EnableAppHostPackDownload="$(EnableAppHostPackDownload)"
                      NetCoreTargetingPackRoot="$(NetCoreTargetingPackRoot)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
@@ -415,6 +422,22 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
+  <Target Name="ResolveOffByDefaultAnalyzers" AfterTargets="ResolveTargetingPackAssets"
+          Condition="'@(FrameworkReference)' != ''">
+    <ItemGroup>
+      <OffByDefaultAnalyzer Include="Microsoft.AspNetCore.Http.RequestDelegateGenerator.dll"
+                            IsEnabled="$(EnableRequestDelegateGenerator)"/>
+      <OffByDefaultAnalyzer Include="Microsoft.Extensions.Configuration.Binder.SourceGeneration.dll"
+                            IsEnabled="$(EnableConfigurationBindingGenerator)"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Analyzer Remove="@(OffByDefaultAnalyzer)"
+                Condition="'%(OffByDefaultAnalyzer.IsEnabled)' != 'true'"
+                MatchOnMetadata="FileName" />
+    </ItemGroup>
+  </Target>
+
   <UsingTask TaskName="ResolveRuntimePackAssets" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!--
@@ -435,12 +458,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="FullFrameworkReferenceAssemblyPaths" PropertyName="_FullFrameworkReferenceAssemblyPaths"/>
     </GetReferenceAssemblyPaths>
 
-
     <ItemGroup>
       <_ExistingReferenceAssembliesPackageReference Include="@(PackageReference)" Condition="'%(PackageReference.Identity)' == 'Microsoft.NETFramework.ReferenceAssemblies'"/>
 
       <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="$(MicrosoftNETFrameworkReferenceAssembliesLatestPackageVersion)" IsImplicitlyDefined="true" PrivateAssets="All"
-                        Condition="'$(_FullFrameworkReferenceAssemblyPaths)' == '' and '@(_ExistingReferenceAssembliesPackageReference)' == ''"/>
+                        Condition="('$(_FullFrameworkReferenceAssemblyPaths)' == '' or $(_FullFrameworkReferenceAssemblyPaths.Contains('microsoft.netframework.referenceassemblies'))) and '@(_ExistingReferenceAssembliesPackageReference)' == ''"/>
     </ItemGroup>
   </Target>
 

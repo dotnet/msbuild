@@ -40,20 +40,24 @@ Copyright (c) .NET Foundation. All rights reserved.
       PackageTargetPath="@(_PackageTargetPath)"
       RuntimeGraph="$(RuntimeIdentifierGraphPath)"
       NoWarn="$(NoWarn)"
+      RespectInternals="$(ApiCompatRespectInternals)"
       EnableRuleAttributesMustMatch="$(ApiCompatEnableRuleAttributesMustMatch)"
       ExcludeAttributesFiles="@(ApiCompatExcludeAttributesFile)"
       EnableRuleCannotChangeParameterName="$(ApiCompatEnableRuleCannotChangeParameterName)"
       RunApiCompat="$(RunApiCompat)"
-      EnableStrictModeForCompatibleTfms="$([MSBuild]::ValueOrDefault('$(EnableStrictModeForCompatibleTfms)', 'true'))"
+      EnableStrictModeForCompatibleTfms="$(EnableStrictModeForCompatibleTfms)"
       EnableStrictModeForCompatibleFrameworksInPackage="$(EnableStrictModeForCompatibleFrameworksInPackage)"
       EnableStrictModeForBaselineValidation="$(EnableStrictModeForBaselineValidation)"
       GenerateSuppressionFile="$(ApiCompatGenerateSuppressionFile)"
+      PreserveUnnecessarySuppressions="$(ApiCompatPreserveUnnecessarySuppressions)"
+      PermitUnnecessarySuppressions="$(ApiCompatPermitUnnecessarySuppressions)"
       SuppressionFiles="@(ApiCompatSuppressionFile)"
       SuppressionOutputFile="$(ApiCompatSuppressionOutputFile)"
       BaselinePackageTargetPath="$(_packageValidationBaselinePath)"
       RoslynAssembliesPath="$(RoslynAssembliesPath)"
       PackageAssemblyReferences="@(PackageValidationReferencePath)" />
 
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(ApiCompatValidatePackageSemaphoreFile)'))" />
     <Touch Files="$(ApiCompatValidatePackageSemaphoreFile)" AlwaysCreate="true" />
   </Target>
 
@@ -62,7 +66,10 @@ Copyright (c) .NET Foundation. All rights reserved.
           Returns="@(ApiCompatAssemblyReferencesWithTargetFramework)">
     <ItemGroup>
       <ApiCompatAssemblyReferencesWithTargetFramework Include="$(TargetFramework)"
-                                                      ReferencePath="@(ReferencePathWithRefAssemblies, ',')" />
+                                                      TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
+                                                      ReferencePath="@(ReferencePathWithRefAssemblies, ',')">
+          <TargetPlatformMoniker Condition="'$(ApiCompatIgnoreTargetPlatformMoniker)' != 'true'">$(TargetPlatformMoniker)</TargetPlatformMoniker>
+        </ApiCompatAssemblyReferencesWithTargetFramework>
     </ItemGroup>
   </Target>
 

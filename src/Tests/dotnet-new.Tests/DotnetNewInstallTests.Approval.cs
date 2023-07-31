@@ -1,15 +1,11 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
-    [Collection("Verify Tests")]
     public partial class DotnetNewInstallTests : BaseIntegrationTest
     {
         [Fact]
@@ -243,5 +239,28 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .AddScrubber(output => output.ScrubAndReplace(templateToInstall, "%TEMPLATE FOLDER%"));
         }
 
+        [Fact]
+        public Task CanShowError_WhenGlobalSettingsFileIsCorrupted()
+        {
+            string homeDirectory = CreateTemporaryFolder();
+            InstallTestTemplate("TemplateWithRequiredParameters", _log, homeDirectory);
+
+            var globalSettingsFile = Path.Combine(homeDirectory, "packages.json");
+            File.WriteAllText(globalSettingsFile, string.Empty);
+
+            string templateToInstall = GetTestTemplateLocation("TemplateWithTags");
+            CommandResult commandResult = new DotnetNewCommand(_log, "install", templateToInstall)
+                .WithCustomHive(homeDirectory)
+                .Execute();
+
+            return Verify(commandResult.StdOut)
+                .AddScrubber(
+                output =>
+                {
+                    output.ScrubAndReplace(templateToInstall, "%TEMPLATE FOLDER%");
+                    output.ScrubAndReplace(globalSettingsFile, "%GLOBAL SETTINGS FILE%");
+                }
+                );
+        }
     }
 }

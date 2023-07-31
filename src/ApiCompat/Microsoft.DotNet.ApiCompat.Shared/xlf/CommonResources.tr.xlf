@@ -12,6 +12,11 @@
         <target state="translated">Geçersiz dönüştürme deseni sağlandı: '{0} - {1}'.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoBreakingChangesFound">
+        <source>APICompat ran successfully without finding any breaking changes.</source>
+        <target state="new">APICompat ran successfully without finding any breaking changes.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SuppressionsFileNotSpecified">
         <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
         <target state="translated">Bir uyumluluk gizleme dosyasını başarıyla oluşturmak için bir dosya yolu geçirilmelidir.</target>

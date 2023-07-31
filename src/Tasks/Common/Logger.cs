@@ -1,12 +1,11 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 //Microsoft.NET.Build.Extensions.Tasks (net7.0) has nullables disabled
 #pragma warning disable IDE0240 // Remove redundant nullable directive
 #nullable disable
 #pragma warning restore IDE0240 // Remove redundant nullable directive
 
-using System;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -45,8 +44,8 @@ namespace Microsoft.NET.Build.Tasks
     /// Results in LogCore getting a Message instance with Code="NETSDK1234"
     /// and Text="Something is wrong."
     ///
-    /// Pattern inspired by <se cref="TaskLoggingHelper.LogErrorWithCodeFromResources"/>,
-    /// but retains completion via generated <see cref="Strings"/> instead of
+    /// Pattern inspired by TaskLoggingHelper.LogErrorWithCodeFromResources,
+    /// but retains completion via generated Strings instead of
     /// passing resource keys by name.
     ///
     /// All actual logging is deferred to subclass in <see cref="LogCore"/>,

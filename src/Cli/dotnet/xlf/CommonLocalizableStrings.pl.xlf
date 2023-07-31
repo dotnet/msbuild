@@ -2,9 +2,24 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="ArchArgumentName">
+        <source>ARCH</source>
+        <target state="new">ARCH</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ArchitectureOptionDescription">
         <source>The target architecture.</source>
         <target state="translated">Architektura docelowa.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArtifactsPathArgumentName">
+        <source>ARTIFACTS_DIR</source>
+        <target state="new">ARTIFACTS_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArtifactsPathOptionDescription">
+        <source>The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</source>
+        <target state="new">The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotResolveRuntimeIdentifier">
@@ -32,14 +47,19 @@
         <target state="translated">Zezwala na instalowanie pakietów wersji wstępnych.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CorruptSolutionProjectFolderStructure">
+        <source>The solution file '{0}' is missing EndProject tags or has invalid child-parent project folder mappings around project GUID: '{1}'. Manually repair the solution or try to open and save it in Visual Studio."</source>
+        <target state="translated">W pliku rozwiązania „{0}” brakuje tagów EndProject lub ma nieprawidłowe mapowania folderu projektu podrzędnego nadrzędnego wokół identyfikatora GUID projektu: „{1}”. Napraw ręcznie rozwiązanie lub spróbuj otworzyć je i zapisać w programie Visual Studio.”</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">Nie można odnaleźć żadnego projektu w lokalizacji „{0}”.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CustomConfigurationDisablesPublishAndPackReleaseProperties">
-        <source>A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</source>
-        <target state="translated">Wykryto konfigurację niestandardową w projekcie „{0}”, więc właściwość „{1}” nie zacznie obowiązywać.</target>
+      <trans-unit id="DidYouMean">
+        <source>Did you mean the following command?</source>
+        <target state="new">Did you mean the following command?</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
@@ -110,9 +130,19 @@ export PATH="$PATH:{0}"
         <target state="translated">Opublikuj aplikację jako aplikację zależną od frameworku. Aby można było uruchomić aplikację, na maszynie docelowej musi być zainstalowane zgodne środowisko uruchomieniowe platformy .NET.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildAdditionalOptionTitle">
+        <source>.NET Cli Options:</source>
+        <target state="new">.NET Cli Options:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">Znaleziono więcej niż jeden projekt w lokalizacji „{0}”. Określ, który ma zostać użyty.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OSArgumentName">
+        <source>OS</source>
+        <target state="new">OS</target>
         <note />
       </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
@@ -183,12 +213,12 @@ export PATH="$PATH:{0}"
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
         <target state="translated">Opcji „--self-contained” i „--no-self-contained” nie można używać razem.</target>
-        <note />
+        <note>{Locked="--self-contained"}{Locked="--no-self-contained"}</note>
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Opublikuj środowisko uruchomieniowe platformy .NET ze swoją aplikacją, aby nie trzeba było go instalować na maszynie docelowej.
+The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">Opublikuj środowisko uruchomieniowe platformy .NET ze swoją aplikacją, aby nie trzeba było go instalować na maszynie docelowej.
 Jeśli określony jest identyfikator środowiska uruchomieniowego, wartość domyślna to „true”.</target>
         <note />
       </trans-unit>
@@ -197,11 +227,9 @@ Jeśli określony jest identyfikator środowiska uruchomieniowego, wartość dom
         <target state="translated">Rozwiązanie</target>
         <note />
       </trans-unit>
-      <trans-unit id="SolutionExecutableConfigurationMismatchError">
-        <source>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
-{1}.</source>
-        <target state="translated">Wiele projektów wykonywalnych w rozwiązaniu zawiera powodujące konflikt wartości „{0}”. Upewnij się, że wartości są zgodne. Rozważ użycie pliku Directory.build.props, aby ustawić wszystkie konfiguracje projektu. Projekty powodujące konflikt:
-{1}.</target>
+      <trans-unit id="SolutionArgumentMisplaced">
+        <source>Solution argument '{0}' is misplaced.</source>
+        <target state="new">Solution argument '{0}' is misplaced.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">
@@ -247,6 +275,11 @@ Jeśli określony jest identyfikator środowiska uruchomieniowego, wartość dom
       <trans-unit id="Delete">
         <source>Delete</source>
         <target state="translated">Usuń</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFolderAlreadyContainsProject">
+        <source>Solution {0} already contains project {1} in solution folder {2}.</source>
+        <target state="new">Solution {0} already contains project {1} in solution folder {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">

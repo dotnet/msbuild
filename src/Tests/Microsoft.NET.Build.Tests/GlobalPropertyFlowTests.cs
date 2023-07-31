@@ -1,21 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Xml.Linq;
-using FluentAssertions;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -84,9 +70,9 @@ namespace Microsoft.NET.Build.Tests
         {
             var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: passSelfContained.ToString() + "_" + passRuntimeIdentifier);
 
-            bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
+            bool appIsSelfContainedOrRuntimeSpecific = passSelfContained || passRuntimeIdentifier;
 
-            ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained);
+            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: appIsSelfContainedOrRuntimeSpecific);
             ValidateProperties(testAsset, _referencedProject, expectSelfContained: false, expectRuntimeIdentifier: false);
         }
 
@@ -101,10 +87,10 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: passSelfContained.ToString() + "_" + passRuntimeIdentifier);
 
-            bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
+            bool appIsSelfContainedOrRuntimeSpecific = passSelfContained || passRuntimeIdentifier;
 
-            ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained);
-            ValidateProperties(testAsset, _referencedProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained);
+            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: appIsSelfContainedOrRuntimeSpecific);
+            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: appIsSelfContainedOrRuntimeSpecific);
         }
 
 
@@ -116,34 +102,18 @@ namespace Microsoft.NET.Build.Tests
         public void TestGlobalPropertyFlowToExeWithSelfContainedFalse(bool passSelfContained, bool passRuntimeIdentifier)
         {
             _referencedProject.IsExe = true;
-            _referencedProject.AdditionalProperties["SelfContained"] = "false";
+            _referencedProject.SelfContained = "false";
 
             string identifier = passSelfContained.ToString() + "_" + passRuntimeIdentifier;
 
-            if (!passSelfContained && passRuntimeIdentifier)
-            {
-                //  This combination results in a build error because it ends up being a self-contained Exe referencing a framework dependent one
-                var testAsset = _testAssetsManager.CreateTestProject(_testProject, identifier: identifier);
+            var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: identifier);
 
-                new DotnetBuildCommand(testAsset, "-r", EnvironmentInfo.GetCompatibleRid())
-                    .Execute()
-                    .Should()
-                    .Fail()
-                    .And
-                    .HaveStdOutContaining("NETSDK1150");
-            }
-            else
-            {
+            bool appIsSelfContainedOrRuntimeSpecific = passSelfContained || passRuntimeIdentifier;
 
-                var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: identifier);
-
-                bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
-
-                ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained);
-                //  SelfContained will only flow to referenced project if it's explicitly passed in this case
-                ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: buildingSelfContained);
-            }
+            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: appIsSelfContainedOrRuntimeSpecific);
+            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: appIsSelfContainedOrRuntimeSpecific);
         }
+
 
         [RequiresMSBuildVersionTheory("17.4.0.41702")]
         [InlineData(true, true)]
@@ -153,17 +123,16 @@ namespace Microsoft.NET.Build.Tests
         public void TestGlobalPropertyFlowToLibraryWithRuntimeIdentifier(bool passSelfContained, bool passRuntimeIdentifier)
         {
             //  Set a RuntimeIdentifier in the referenced project that is different from what is passed in on the command line
-            _referencedProject.RuntimeIdentifier = "win7-x64";
+            _referencedProject.RuntimeIdentifier = $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64";
 
             var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: passSelfContained.ToString() + "_" + passRuntimeIdentifier);
 
-            bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
+            bool appIsSelfContainedOrRuntimeSpecific = passSelfContained || passRuntimeIdentifier;
 
-            ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained);
-            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: buildingSelfContained,
-                //  Right now passing "--self-contained" also causes the RuntimeIdentifier to be passed as a global property.
-                //  That should change with https://github.com/dotnet/sdk/pull/26143, which will likely require updating this and other tests in this class
-                expectedRuntimeIdentifier: buildingSelfContained ? "" : _referencedProject.RuntimeIdentifier);
+            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: appIsSelfContainedOrRuntimeSpecific);
+            // We added a rid to the referenced project so it should have one always.
+            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: true,
+                expectedRuntimeIdentifier: passRuntimeIdentifier ? EnvironmentInfo.GetCompatibleRid() : _referencedProject.RuntimeIdentifier);
         }
 
         [RequiresMSBuildVersionTheory("17.4.0.41702")]
@@ -173,30 +142,33 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(false, false)]
         public void TestGlobalPropertyFlowToMultitargetedProject(bool passSelfContained, bool passRuntimeIdentifier)
         {
-            _testProject.TargetFrameworks = "net6.0;net7.0";
+            _testProject.TargetFrameworks = $"net6.0;{ToolsetInfo.CurrentTargetFramework}";
 
-            _referencedProject.TargetFrameworks = "net6.0;net7.0";
+            _referencedProject.TargetFrameworks = $"net6.0;{ToolsetInfo.CurrentTargetFramework}";
             _referencedProject.IsExe = true;
             _referencedProject.ProjectChanges.Add(project =>
             {
                 project.Root.Element("PropertyGroup").Add(XElement.Parse(@"<OutputType Condition=""'$(TargetFramework)' == 'net6.0'"">Library</OutputType>"));
             });
 
-            var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: passSelfContained.ToString() + "_" + passRuntimeIdentifier);
+            string identifier = passSelfContained.ToString() + "_" + passRuntimeIdentifier;
 
-            bool buildingSelfContained = passSelfContained || passRuntimeIdentifier;
+            // in net 7 or below this means to build self contained but not in net8 as the properties are independent.
+            bool appIsSelfContainedOrRuntimeSpecific = passSelfContained || passRuntimeIdentifier;
 
-            ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained,
-                targetFramework: "net6.0");
-            ValidateProperties(testAsset, _testProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained,
-                targetFramework: "net7.0");
+            var testAsset = Build(passSelfContained, passRuntimeIdentifier, identifier: identifier);
+
+            ValidateProperties(testAsset, _testProject, expectSelfContained: appIsSelfContainedOrRuntimeSpecific, expectRuntimeIdentifier: appIsSelfContainedOrRuntimeSpecific,
+                thisTargetFramework: "net6.0");
+            ValidateProperties(testAsset, _testProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: appIsSelfContainedOrRuntimeSpecific,
+                thisTargetFramework: ToolsetInfo.CurrentTargetFramework); ;
             ValidateProperties(testAsset, _referencedProject, expectSelfContained: false, expectRuntimeIdentifier: false,
-                targetFramework: "net6.0");
-            ValidateProperties(testAsset, _referencedProject, expectSelfContained: buildingSelfContained, expectRuntimeIdentifier: buildingSelfContained,
-                targetFramework: "net7.0");
+                thisTargetFramework: "net6.0");
+            ValidateProperties(testAsset, _referencedProject, expectSelfContained: passSelfContained, expectRuntimeIdentifier: appIsSelfContainedOrRuntimeSpecific,
+                thisTargetFramework: ToolsetInfo.CurrentTargetFramework);
         }
 
-        [RequiresMSBuildVersionTheory("17.4.0.41702")]
+        [RequiresMSBuildVersionTheory("17.4.0.41702", Skip = "https://github.com/dotnet/msbuild/issues/8154")]
         [InlineData(true, true)]
         [InlineData(true, false)]
         [InlineData(false, true)]
@@ -248,19 +220,13 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        private static void ValidateProperties(TestAsset testAsset, TestProject testProject, bool expectSelfContained, bool expectRuntimeIdentifier, string targetFramework = null, string expectedRuntimeIdentifier = "")
+        private static void ValidateProperties(TestAsset testAsset, TestProject testProject, bool expectSelfContained, bool expectRuntimeIdentifier, string thisTargetFramework = null, string expectedRuntimeIdentifier = "")
         {
-            targetFramework = targetFramework ?? testProject.TargetFrameworks;
+            thisTargetFramework = thisTargetFramework ?? testProject.TargetFrameworks;
+
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: thisTargetFramework);
 
 
-            if (string.IsNullOrEmpty(expectedRuntimeIdentifier) && (expectSelfContained || expectRuntimeIdentifier))
-            {
-                //  RuntimeIdentifier might be inferred, so look at the output path to figure out what the actual value used was
-                string dir = (Path.Combine(testAsset.TestRoot, testProject.Name, "bin", "Debug", targetFramework));
-                expectedRuntimeIdentifier = Path.GetFileName(Directory.GetDirectories(dir).Single());
-            }
-
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
             if (expectSelfContained)
             {
                 properties["SelfContained"].ToLowerInvariant().Should().Be("true");
@@ -270,7 +236,23 @@ namespace Microsoft.NET.Build.Tests
                 properties["SelfContained"].ToLowerInvariant().Should().BeOneOf("false", "");
             }
 
-            properties["RuntimeIdentifier"].Should().Be(expectedRuntimeIdentifier);
+
+            if (expectRuntimeIdentifier)
+            {
+                if (!string.IsNullOrEmpty(expectedRuntimeIdentifier))
+                {
+                    properties["RuntimeIdentifier"].Should().Be(expectedRuntimeIdentifier);
+                }
+                else
+                {
+                    properties["RuntimeIdentifier"].Should().NotBeEmpty();
+                }
+            }
+            else
+            {
+                properties["RuntimeIdentifier"].Should().BeEmpty();
+            }
+
         }
 
     }

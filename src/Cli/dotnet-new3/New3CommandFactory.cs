@@ -1,6 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
 using Microsoft.TemplateEngine.Cli;
@@ -12,19 +11,21 @@ namespace Dotnet_new3
     {
         private const string CommandName = "new3";
 
-        private static readonly Option<bool> _debugEmitTelemetryOption = new("--debug:emit-telemetry", "Enable telemetry")
+        private static readonly CliOption<bool> _debugEmitTelemetryOption = new("--debug:emit-telemetry", "Enable telemetry")
         {
-            IsHidden = true
+            Hidden = true,
+            Recursive = true,
         };
 
-        private static readonly Option<bool> _debugDisableBuiltInTemplatesOption = new("--debug:disable-sdk-templates", "Disable built-in templates")
+        private static readonly CliOption<bool> _debugDisableBuiltInTemplatesOption = new("--debug:disable-sdk-templates", "Disable built-in templates")
         {
-            IsHidden = true
+            Hidden = true,
+            Recursive = true
         };
 
-        internal static Command Create()
+        internal static CliCommand Create()
         {
-            Command newCommand = NewCommandFactory.Create(
+            CliCommand newCommand = NewCommandFactory.Create(
                 CommandName,
                 (ParseResult parseResult) =>
                 {
@@ -32,9 +33,9 @@ namespace Dotnet_new3
                     return HostFactory.CreateHost(parseResult.GetValue(_debugDisableBuiltInTemplatesOption), outputPath?.FullName);
                 });
 
-            newCommand.AddGlobalOption(_debugEmitTelemetryOption);
-            newCommand.AddGlobalOption(_debugDisableBuiltInTemplatesOption);
-            newCommand.AddCommand(new CompleteCommand());
+            newCommand.Options.Add(_debugEmitTelemetryOption);
+            newCommand.Options.Add(_debugDisableBuiltInTemplatesOption);
+            newCommand.Subcommands.Add(new CompleteCommand());
             return newCommand;
         }
     }

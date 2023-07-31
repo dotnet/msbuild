@@ -1,5 +1,19 @@
 ﻿[
   {
+    Label: buildprops,
+    Kind: Value,
+    SortText: buildprops,
+    InsertText: buildprops,
+    Documentation: An empty Directory.Build.props file which can be used to specify MSBuild properties for an entire folder
+  },
+  {
+    Label: buildtargets,
+    Kind: Value,
+    SortText: buildtargets,
+    InsertText: buildtargets,
+    Documentation: An empty Directory.Build.targets file which can be used to specify MSBuild tasks and targets for an entire folder
+  },
+  {
     Label: classlib,
     Kind: Value,
     SortText: classlib,
@@ -46,13 +60,6 @@
     Kind: Value,
     SortText: sln,
     InsertText: sln,
-    Documentation: Create an empty solution containing no projects
-  },
-  {
-    Label: solution,
-    Kind: Value,
-    SortText: solution,
-    InsertText: solution,
     Documentation: Create an empty solution containing no projects
   },
   {
@@ -166,6 +173,15 @@
     SortText: create,
     InsertText: create,
     Detail: Instantiates a template with given short name. An alias of 'dotnet new <template name>'.
+  },
+  {
+    Label: details,
+    Kind: Keyword,
+    SortText: details,
+    InsertText: details,
+    Detail:
+      Provides the details for specified template package.
+      The command checks if the package is installed locally, if it was not found, it searches the configured NuGet feeds.
   },
   {
     Label: install,

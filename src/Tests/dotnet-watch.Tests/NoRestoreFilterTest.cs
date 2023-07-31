@@ -1,9 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-using System.Threading.Tasks;
-using Microsoft.NET.TestFramework;
-using Xunit;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
@@ -19,6 +15,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 ProcessSpec = new ProcessSpec
                 {
                     Arguments = _arguments,
@@ -40,6 +37,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
@@ -67,6 +65,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
@@ -94,6 +93,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
@@ -120,6 +120,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
@@ -146,6 +147,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {
@@ -173,6 +175,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 ProcessSpec = new ProcessSpec
                 {

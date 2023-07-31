@@ -1,8 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
-using System.Collections.Generic;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -17,6 +14,8 @@ namespace Microsoft.DotNet.Cli.Utils
         string GetCommandPathFromRootPath(string rootPath, string commandName, IEnumerable<string> extensions);
 
         bool GetEnvironmentVariableAsBool(string name, bool defaultValue);
+
+        int? GetEnvironmentVariableAsNullableInt(string name);
 
         string GetEnvironmentVariable(string name);
 

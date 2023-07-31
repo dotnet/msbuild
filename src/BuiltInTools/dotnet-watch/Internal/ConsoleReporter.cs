@@ -1,11 +1,8 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
+#nullable disable
+
 
 namespace Microsoft.Extensions.Tools.Internal
 {
@@ -13,7 +10,7 @@ namespace Microsoft.Extensions.Tools.Internal
     /// This API supports infrastructure and is not intended to be used
     /// directly from your code. This API may change or be removed in future releases.
     /// </summary>
-    public class ConsoleReporter : IReporter
+    internal sealed class ConsoleReporter : IReporter
     {
         private readonly object _writeLock = new object();
 
@@ -31,7 +28,7 @@ namespace Microsoft.Extensions.Tools.Internal
             SuppressEmojis = suppressEmojis;
         }
 
-        protected IConsole Console { get; }
+        private IConsole Console { get; }
         public bool IsVerbose { get; set; }
         public bool IsQuiet { get; set; }
         public bool SuppressEmojis { get; set; }
@@ -58,17 +55,17 @@ namespace Microsoft.Extensions.Tools.Internal
             }
         }
 
-        public virtual void Error(string message, string emoji = "❌")
+        public void Error(string message, string emoji = "❌")
         {
             WriteLine(Console.Error, message, ConsoleColor.Red, emoji);
         }
 
-        public virtual void Warn(string message, string emoji = "⌚")
+        public void Warn(string message, string emoji = "⌚")
         {
             WriteLine(Console.Out, message, ConsoleColor.Yellow, emoji);
         }
 
-        public virtual void Output(string message, string emoji = "⌚")
+        public void Output(string message, string emoji = "⌚")
         {
             if (IsQuiet)
             {
@@ -78,7 +75,7 @@ namespace Microsoft.Extensions.Tools.Internal
             WriteLine(Console.Out, message, color: null, emoji);
         }
 
-        public virtual void Verbose(string message, string emoji = "⌚")
+        public void Verbose(string message, string emoji = "⌚")
         {
             if (!IsVerbose)
             {

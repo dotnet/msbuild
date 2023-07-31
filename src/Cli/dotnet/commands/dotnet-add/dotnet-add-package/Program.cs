@@ -1,12 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.IO;
-using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
@@ -19,8 +14,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
         private readonly string _packageId;
         private readonly string _fileOrDirectory;
 
-        public AddPackageReferenceCommand(
-            ParseResult parseResult) : base(parseResult)
+        public AddPackageReferenceCommand(ParseResult parseResult) : base(parseResult)
         {
             _fileOrDirectory = parseResult.GetValue(AddCommandParser.ProjectArgument);
             _packageId = parseResult.GetValue(AddPackageParser.CmdPackageArgument);
@@ -41,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
             var tempDgFilePath = string.Empty;
 
-            if (!_parseResult.HasOption(AddPackageParser.NoRestoreOption))
+            if (_parseResult.GetResult(AddPackageParser.NoRestoreOption) is null)
             {
                 
                 try
@@ -122,7 +116,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
                 .OptionValuesToBeForwarded(AddPackageParser.GetCommand())
                 .SelectMany(a => a.Split(' ', 2)));
 
-            if (_parseResult.HasOption(AddPackageParser.NoRestoreOption))
+            if (_parseResult.GetResult(AddPackageParser.NoRestoreOption) is not null)
             {
                 args.Add("--no-restore");
             }

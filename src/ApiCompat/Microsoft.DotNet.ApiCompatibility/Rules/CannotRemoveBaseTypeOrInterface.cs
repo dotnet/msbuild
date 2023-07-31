@@ -1,18 +1,20 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiSymbolExtensions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
+    /// <summary>
+    /// This rule validates that base types and interfaces aren't removed from the right.
+    /// In strict mode, it also validates that the right doesn't add base types and interfaces.
+    /// </summary>
     public class CannotRemoveBaseTypeOrInterface : IRule
     {
-        private readonly RuleSettings _settings;
+        private readonly IRuleSettings _settings;
 
-        public CannotRemoveBaseTypeOrInterface(RuleSettings settings, IRuleRegistrationContext context)
+        public CannotRemoveBaseTypeOrInterface(IRuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
@@ -56,7 +58,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 // If we found the immediate left base type on right we can assume
                 // that any removal of a base type up on the hierarchy will be handled
                 // when validating the type which it's base type was actually removed.
-                if (_settings.SymbolComparer.Equals(leftBaseType, rightBaseType))
+                if (_settings.SymbolEqualityComparer.Equals(leftBaseType, rightBaseType))
                     return;
 
                 if (rightBaseType.TypeKind == TypeKind.Error && _settings.WithReferences)
@@ -78,7 +80,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
         private void ValidateInterfaceNotRemoved(ITypeSymbol left, ITypeSymbol right, string leftName, string rightName, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
-            HashSet<ITypeSymbol> rightInterfaces = new(right.GetAllBaseInterfaces(), _settings.SymbolComparer);
+            HashSet<ITypeSymbol> rightInterfaces = new(right.GetAllBaseInterfaces(), _settings.SymbolEqualityComparer);
 
             foreach (ITypeSymbol leftInterface in left.GetAllBaseInterfaces())
             {
@@ -89,7 +91,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
                 // Ignore non visible interfaces based on the run Settings
                 // If TypeKind == Error it means the Roslyn couldn't resolve it,
-                // so we are running with a missing assembly reference to where that typeref is defined.
+                // so we are running with a missing assembly reference to where that type ef is defined.
                 // However we still want to consider it as Roslyn does resolve it's name correctly.
                 if (!leftInterface.IsVisibleOutsideOfAssembly(_settings.IncludeInternalSymbols) && leftInterface.TypeKind != TypeKind.Error)
                     return;

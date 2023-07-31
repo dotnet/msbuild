@@ -1,79 +1,98 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Xml;
 using System.Xml.Serialization;
 
 namespace Microsoft.DotNet.ApiCompatibility.Logging
 {
     /// <summary>
-    /// Collection of Suppressions which is able to add suppressions, check if a specific error is suppressed, and write all suppressions
-    /// down to a file. The engine is thread-safe.
+    /// Suppression engine that contains a collection of <see cref="Suppression"/> items. It provides API to add a suppression, check if a passed-in suppression is already suppressed
+    /// and serialize all suppressions down into a file.
     /// </summary>
     public class SuppressionEngine : ISuppressionEngine
     {
-        public const string DiagnosticIdDocumentationComment = " https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids ";
-        protected HashSet<Suppression> _validationSuppressions;
-        private readonly ReaderWriterLockSlim _readerWriterLock = new();
-        private readonly XmlSerializer _serializer = new(typeof(Suppression[]), new XmlRootAttribute("Suppressions"));
+        protected const string DiagnosticIdDocumentationComment = " https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids ";
+        private readonly HashSet<Suppression> _baselineSuppressions = new();
+        private readonly HashSet<Suppression> _suppressions = new();
         private readonly HashSet<string> _noWarn;
 
+        /// <inheritdoc/>
         public bool BaselineAllErrors { get; }
 
         /// <inheritdoc/>
-        public SuppressionEngine(string[]? suppressionFiles = null,
-            string? noWarn = null,
-            bool baselineAllErrors = false)
+        public IReadOnlyCollection<Suppression> BaselineSuppressions => _baselineSuppressions;
+
+        /// <inheritdoc/>
+        public IReadOnlyCollection<Suppression> Suppressions => _suppressions;
+
+        /// <summary>
+        /// Creates a SuppressionEngine instance with the provided NoWarn string and a boolean that determines if errors should be baselined.
+        /// </summary>
+        /// <param name="noWarn">A string that contains warning and error codes to ignore suppressions with the corresponding diagnostic id.</param>
+        /// <param name="baselineAllErrors">If true, baselines all errors.</param>
+        public SuppressionEngine(string? noWarn = null, bool baselineAllErrors = false)
         {
             BaselineAllErrors = baselineAllErrors;
             _noWarn = string.IsNullOrEmpty(noWarn) ? new HashSet<string>() : new HashSet<string>(noWarn!.Split(';'));
-            _validationSuppressions = ParseSuppressionFiles(suppressionFiles);
         }
 
         /// <inheritdoc/>
-        public bool IsErrorSuppressed(string diagnosticId, string? target, string? left = null, string? right = null, bool isBaselineSuppression = false)
+        public void LoadSuppressions(params string[] suppressionFiles)
         {
-            return IsErrorSuppressed(new Suppression(diagnosticId)
+            XmlSerializer serializer = CreateXmlSerializer();
+            foreach (string suppressionFile in suppressionFiles)
             {
-                Target = target,
-                Left = left,
-                Right = right,
-                IsBaselineSuppression = isBaselineSuppression
-            });
+                try
+                {
+                    using Stream reader = GetReadableStream(suppressionFile);
+                    if (serializer.Deserialize(reader) is Suppression[] deserializedSuppressions)
+                    {
+                        _baselineSuppressions.UnionWith(deserializedSuppressions);
+                    }
+                }
+                catch (FileNotFoundException) when (BaselineAllErrors)
+                {
+                    // Throw if the passed in suppression file doesn't exist and errors aren't baselined.
+                }
+            }
         }
 
         /// <inheritdoc/>
         public bool IsErrorSuppressed(Suppression error)
         {
-            if (_noWarn.Contains(error.DiagnosticId))
+            if (_noWarn.Contains(error.DiagnosticId) || _suppressions.Contains(error))
             {
                 return true;
             }
 
-            _readerWriterLock.EnterReadLock();
-            try
+            if (_baselineSuppressions.Contains(error))
             {
-                if (_validationSuppressions.Contains(error))
-                {
-                    return true;
-                }
-                else if (error.DiagnosticId.StartsWith("cp", StringComparison.InvariantCultureIgnoreCase) &&
-                         (_validationSuppressions.Contains(new Suppression(error.DiagnosticId) { Target = error.Target, IsBaselineSuppression = error.IsBaselineSuppression }) ||
-                          _validationSuppressions.Contains(new Suppression(error.DiagnosticId) { Left = error.Left, Right = error.Right, IsBaselineSuppression = error.IsBaselineSuppression })))
-                {
-                    // See if the error is globally suppressed by checking if the same diagnosticid and target or with the same left and right
-                    return true;
-                }
+                AddSuppression(error);
+                return true;
             }
-            finally
+
+            // Only CP errors can have "global suppressions". Global suppressions are ones that could apply to more than just one compatibility difference.
+            if (error.DiagnosticId.StartsWith("cp", StringComparison.InvariantCultureIgnoreCase))
             {
-                _readerWriterLock.ExitReadLock();
+                // - DiagnosticId, Target, IsBaselineSuppression
+                Suppression globalTargetSuppression = new(error.DiagnosticId, error.Target, isBaselineSuppression: error.IsBaselineSuppression);
+
+                // - DiagnosticId, Left, Right, IsBaselineSuppression
+                Suppression globalLeftRightSuppression = new(error.DiagnosticId, left: error.Left, right: error.Right, isBaselineSuppression: error.IsBaselineSuppression);
+
+                if (_suppressions.Contains(globalTargetSuppression) ||
+                    _suppressions.Contains(globalLeftRightSuppression))
+                {
+                    return true;
+                }
+
+                if (_baselineSuppressions.TryGetValue(globalTargetSuppression, out Suppression? globalSuppression) ||
+                    _baselineSuppressions.TryGetValue(globalLeftRightSuppression, out globalSuppression))
+                {
+                    AddSuppression(globalSuppression);
+                    return true;
+                }
             }
 
             if (BaselineAllErrors)
@@ -86,114 +105,56 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
         }
 
         /// <inheritdoc/>
-        public void AddSuppression(string diagnosticId, string? target, string? left = null, string? right = null, bool isBaselineSuppression = false)
-        {
-            AddSuppression(new Suppression(diagnosticId)
-            {
-                Target = target,
-                Left = left,
-                Right = right,
-                IsBaselineSuppression = isBaselineSuppression
-            });
-        }
+        public void AddSuppression(Suppression suppression) => _suppressions.Add(suppression);
 
         /// <inheritdoc/>
-        public void AddSuppression(Suppression suppression)
+        public IReadOnlyCollection<Suppression> WriteSuppressionsToFile(string suppressionOutputFile, bool preserveUnnecessarySuppressions = false)
         {
-            _readerWriterLock.EnterUpgradeableReadLock();
-            try
+            // If unnecessary suppressions should be preserved in the suppression file, union the
+            // baseline suppressions with the set of actual suppressions. Duplicates are ignored.
+            HashSet<Suppression> suppressionsToSerialize = new(_suppressions);
+            if (preserveUnnecessarySuppressions)
             {
-                if (!_validationSuppressions.Contains(suppression))
-                {
-                    _readerWriterLock.EnterWriteLock();
-                    try
-                    {
-                        _validationSuppressions.Add(suppression);
-                    }
-                    finally
-                    {
-                        _readerWriterLock.ExitWriteLock();
-                    }
-                }
+                suppressionsToSerialize.UnionWith(_baselineSuppressions);
             }
-            finally
+
+            if (suppressionsToSerialize.Count == 0)
             {
-                _readerWriterLock.ExitUpgradeableReadLock();
+                return Array.Empty<Suppression>();
             }
-        }
 
-        /// <inheritdoc/>
-        public bool WriteSuppressionsToFile(string suppressionOutputFile)
-        {
-            if (_validationSuppressions.Count == 0)
-                return false;
-
-            Suppression[] orderedSuppressions = _validationSuppressions
-                .OrderBy(sup => sup.DiagnosticId)
-                .ThenBy(sup => sup.Left)
-                .ThenBy(sup => sup.Right)
-                .ThenBy(sup => sup.Target)
+            Suppression[] orderedSuppressions = suppressionsToSerialize
+                .OrderBy(suppression => suppression.DiagnosticId)
+                .ThenBy(suppression => suppression.Left)
+                .ThenBy(suppression => suppression.Right)
+                .ThenBy(suppression => suppression.Target)
                 .ToArray();
 
-            using (Stream writer = GetWritableStream(suppressionOutputFile))
+            using Stream stream = GetWritableStream(suppressionOutputFile);
+            XmlWriter xmlWriter = XmlWriter.Create(stream, new XmlWriterSettings()
             {
-                _readerWriterLock.EnterReadLock();
-                try
-                {
-                    XmlWriter xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings()
-                    {
-                        Encoding = Encoding.UTF8,
-                        ConformanceLevel = ConformanceLevel.Document,
-                        Indent = true
-                    });
+                Encoding = Encoding.UTF8,
+                ConformanceLevel = ConformanceLevel.Document,
+                Indent = true
+            });
 
-                    xmlWriter.WriteComment(DiagnosticIdDocumentationComment);
-                    _serializer.Serialize(xmlWriter, orderedSuppressions);
-                    AfterWrittingSuppressionsCallback(writer);
-                }
-                finally
-                {
-                    _readerWriterLock.ExitReadLock();
-                }
-            }
+            xmlWriter.WriteComment(DiagnosticIdDocumentationComment);
+            CreateXmlSerializer().Serialize(xmlWriter, orderedSuppressions);
+            AfterWritingSuppressionsCallback(stream);
 
-            return true;
+            return orderedSuppressions;
         }
 
-        protected virtual void AfterWrittingSuppressionsCallback(Stream stream)
-        {
-            // Do nothing. Used for tests.
-        }
+        /// <inheritdoc/>
+        public IReadOnlyCollection<Suppression> GetUnnecessarySuppressions() => _baselineSuppressions.Except(_suppressions).ToArray();
 
-        private HashSet<Suppression> ParseSuppressionFiles(string[]? suppressionFiles)
-        {
-            HashSet<Suppression> suppressions = new();
-
-            if (suppressionFiles != null)
-            {
-                foreach (string suppressionFile in suppressionFiles)
-                {
-                    try
-                    {
-                        using Stream reader = GetReadableStream(suppressionFile);
-                        if (_serializer.Deserialize(reader) is Suppression[] deserializedSuppressions)
-                        {
-                            suppressions.UnionWith(deserializedSuppressions);
-                        }
-                    }
-                    catch (FileNotFoundException) when (BaselineAllErrors)
-                    {
-                        // Throw if the passed in suppression file doesn't exist and errors aren't baselined.
-                    }
-                }
-            }
-
-            return suppressions;
-        }
+        protected virtual void AfterWritingSuppressionsCallback(Stream stream) { /* Do nothing. Used for tests. */ }
 
         // FileAccess.Read and FileShare.Read are specified to allow multiple processes to concurrently read from the suppression file.
         protected virtual Stream GetReadableStream(string suppressionFile) => new FileStream(suppressionFile, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         protected virtual Stream GetWritableStream(string suppressionFile) => new FileStream(suppressionFile, FileMode.Create);
+
+        private static XmlSerializer CreateXmlSerializer() => new(typeof(Suppression[]), new XmlRootAttribute("Suppressions"));
     }
 }

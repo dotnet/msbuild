@@ -258,6 +258,11 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <target state="translated">Balíček</target>
         <note />
       </trans-unit>
+      <trans-unit id="ColumnNamePackageNameAndOwners">
+        <source>Package Name / Owners</source>
+        <target state="new">Package Name / Owners</target>
+        <note>information about NuGet package: its name and owner</note>
+      </trans-unit>
       <trans-unit id="ColumnNamePrecedence">
         <source>Precedence</source>
         <target state="translated">Priorita</target>
@@ -282,6 +287,11 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <source>Downloads</source>
         <target state="translated">Soubory ke stažení</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ColumnNameTrusted">
+        <source>Trusted</source>
+        <target state="new">Trusted</target>
+        <note>information about NuGet package origin; if a package has PrefixReserved indicator </note>
       </trans-unit>
       <trans-unit id="ColumnNameType">
         <source>Type</source>
@@ -370,6 +380,106 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <target state="translated">Pokud vytvoříte tuto šablonu, provedou se změny v existujících souborech:</target>
         <note />
       </trans-unit>
+      <trans-unit id="DetailsCommand_Argument_PackageIdentifier">
+        <source>Package identifier</source>
+        <target state="new">Package identifier</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_NoNuGetSources">
+        <source>No NuGet sources are defined or enabled</source>
+        <target state="new">No NuGet sources are defined or enabled</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Option_Version">
+        <source>Specifies a concrete version for displaying details. If not specified the last is taken.</source>
+        <target state="new">Specifies a concrete version for displaying details. If not specified the last is taken.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_Authors">
+        <source>Authors</source>
+        <target state="new">Authors</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_Description">
+        <source>Details</source>
+        <target state="new">Details</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_Languages">
+        <source>Languages</source>
+        <target state="new">Languages</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_License">
+        <source>License</source>
+        <target state="new">License</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_LicenseExpression">
+        <source>License Expression</source>
+        <target state="new">License Expression</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_LicenseMetadata">
+        <source>License Metadata</source>
+        <target state="new">License Metadata</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_LicenseUrl">
+        <source>License Url</source>
+        <target state="new">License Url</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_Owners">
+        <source>Owners</source>
+        <target state="new">Owners</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_PrefixReserved">
+        <source>Reserved</source>
+        <target state="new">Reserved</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_RepoUrl">
+        <source>Repository Url</source>
+        <target state="new">Repository Url</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_ShortNames">
+        <source>Short Names</source>
+        <target state="new">Short Names</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_SourceFeed">
+        <source>Source Feed</source>
+        <target state="new">Source Feed</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_Tags">
+        <source>Tags</source>
+        <target state="new">Tags</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_Templates">
+        <source>Templates</source>
+        <target state="new">Templates</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_Property_Version">
+        <source>Package version</source>
+        <target state="new">Package version</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_UnableToLoadResorce">
+        <source>Could not parse NuGet source '{0}', so it was discarded</source>
+        <target state="new">Could not parse NuGet source '{0}', so it was discarded</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DetailsCommand_UnableToLoadResorces">
+        <source>Failed to load NuGet sources configured for the folder {0}</source>
+        <target state="new">Failed to load NuGet sources configured for the folder {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DisplaysHelp">
         <source>Displays help for this command.</source>
         <target state="translated">Zobrazí nápovědu k tomuto příkazu.</target>
@@ -441,6 +551,25 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="Generic_ExamplesHeader">
         <source>Examples:</source>
         <target state="translated">Příklady:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_Info_NoMatchingTemplatePackage">
+        <source>
+      No template packages found matching: {0}.
+      
+      To list installed template packages, run:
+        dotnet new uninstall
+      To search for the template packages on NuGet.org, run:
+        dotnet new search --package {0}
+    </source>
+        <target state="new">
+      No template packages found matching: {0}.
+      
+      To list installed template packages, run:
+        dotnet new uninstall
+      To search for the template packages on NuGet.org, run:
+        dotnet new search --package {0}
+    </target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Info_NoMatchingTemplates">
@@ -524,9 +653,9 @@ The header is followed by the list of parameters and their errors (might be seve
         <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
-        <source>Mandatory option '{0}' is missing for the template '{1}'.</source>
-        <target state="translated">U šablony {1} chybí povinná možnost {0}.</target>
-        <note />
+        <source>Missing mandatory option(s) for the template '{1}': {0}.</source>
+        <target state="translated">Pro šablonu {1} chybí povinné možnosti: {0}.</target>
+        <note>{0} - comma-separated list of missing options, each option is quoted.</note>
       </trans-unit>
       <trans-unit id="MountPointFactories">
         <source>Mount Point Factories</source>
@@ -546,6 +675,11 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="NoTemplatesFound">
         <source>No templates installed.</source>
         <target state="translated">Nejsou nainstalované žádné šablony.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperationCancelled">
+        <source>The operation was cancelled.</source>
+        <target state="translated">Operace se zrušila.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
@@ -691,6 +825,31 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Chcete tuto akci spustit? [{0}(ano)|{1}(ne)]</target>
         <note />
       </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_ArgumentNotConfigured">
+        <source>Post action argument '{0}' is mandatory, but not configured.</source>
+        <target state="new">Post action argument '{0}' is mandatory, but not configured.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_MultipleJsonFiles">
+        <source>More than one file found that matches '{0}'.</source>
+        <target state="new">More than one file found that matches '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_NoJsonFile">
+        <source>Unable to find the json file in the solution</source>
+        <target state="new">Unable to find the json file in the solution</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Error_ParentPropertyPathInvalid">
+        <source>Parent property path '{0}' could not be traversed.</source>
+        <target state="new">Parent property path '{0}' could not be traversed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ModifyJson_Succeeded">
+        <source>Successfully modified {0}.</source>
+        <target state="new">Successfully modified {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
         <source>Failed to run the command: argument 'executable' is missing in post action configuration.</source>
         <target state="translated">Příkaz se nepodařilo spustit. V konfiguraci akce publikování chybí argument executable.</target>
@@ -822,6 +981,16 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Pokud chcete použít integrovaný balíček šablon, odinstalujte ručně nainstalovaný balíček šablon pomocí:</target>
         <note>followed by command to uninstall package</note>
       </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Download_Error_VulnerablePackage">
+        <source>Failed to install {0}, due to detected vulnerabilities:</source>
+        <target state="new">Failed to install {0}, due to detected vulnerabilities:</target>
+        <note>{0} - template package name.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Download_VulnerablePackage">
+        <source>Installed package has the following vulnerabilities:</source>
+        <target state="new">Installed package has the following vulnerabilities:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
         <target state="translated">Nepovedlo se najít balíček šablony obsahující šablonu {0}.</target>
@@ -855,6 +1024,11 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="TemplatePackageCoordinator_Install_Error_SameInstallRequests">
         <source>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</source>
         <target state="translated">Příkaz se pokouší nainstalovat balíček šablony {0} dvakrát, zkontrolujte argumenty a zkuste to znovu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Install_Error_VulnerablePackageTip">
+        <source>In order to install this package, run:</source>
+        <target state="new">In order to install this package, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_OverrideNotice">
@@ -912,6 +1086,11 @@ The header is followed by the list of parameters and their errors (might be seve
         <target state="translated">Příkaz odinstalace:</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage">
+        <source>The package {0} contains vulnerabilities:</source>
+        <target state="new">The package {0} contains vulnerabilities:</target>
+        <note>{0} - template package name.</note>
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_GenericError">
         <source>Failed to check update for {0}: {1}.</source>
         <target state="translated">Nepovedlo se vyhledat aktualizaci pro {0}: {1}</target>
@@ -930,6 +1109,16 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="TemplatePackageCoordinator_Update_Error_PackageNotSupported">
         <source>Failed to check update for {0}: the package is not supported.</source>
         <target state="translated">Nepovedlo se vyhledat aktualizaci pro {0}: balíček se nepodporuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackage">
+        <source>The package {0} was not updated due to detected vulnerabilities:</source>
+        <target state="new">The package {0} was not updated due to detected vulnerabilities:</target>
+        <note>{0} - template package name.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_Update_Error_VulnerablePackageTip">
+        <source>In order to update this package, run:</source>
+        <target state="new">In order to update this package, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate">
@@ -966,6 +1155,26 @@ The header is followed by the list of parameters and their errors (might be seve
         <source>Failed to initialize NuGet credential service, details: {0}.</source>
         <target state="translated">Nepovedlo se inicializovat službu přihlašovacích údajů NuGet, podrobnosti: {0}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Critical">
+        <source>Critical</source>
+        <target state="new">Critical</target>
+        <note>represents nuget api severity of level 3.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_High">
+        <source>High</source>
+        <target state="new">High</target>
+        <note>represents nuget api severity of level 2.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Low">
+        <source>Low</source>
+        <target state="new">Low</target>
+        <note>represents nuget api severity of level 0.</note>
+      </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_VulnerabilitySeverity_Moderate">
+        <source>Moderate</source>
+        <target state="new">Moderate</target>
+        <note>represents nuget api severity of level 1.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled">
         <source>{0} is already installed.</source>
@@ -1055,6 +1264,11 @@ The header is followed by the list of parameters and their errors (might be seve
       <trans-unit id="UnableToSetPermissions">
         <source>Unable to apply permissions {0} to "{1}".</source>
         <target state="translated">Nedá se zavést oprávnění {0} do {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedResult">
+        <source>Template generation ended with unexpected result: '{0}'. Details: {1}</source>
+        <target state="translated">Generování šablony skončilo s neočekávaným výsledkem: {0}. Podrobnosti: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownChangeKind">

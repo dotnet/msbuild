@@ -1,10 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Remove.PackageReference;
 using LocalizableStrings = Microsoft.DotNet.Tools.Remove.PackageReference.LocalizableStrings;
@@ -13,30 +10,32 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class RemovePackageParser
     {
-        public static readonly Argument<IEnumerable<string>> CmdPackageArgument = new Argument<IEnumerable<string>>(Tools.Add.PackageReference.LocalizableStrings.CmdPackage)
+        public static readonly CliArgument<IEnumerable<string>> CmdPackageArgument = new CliArgument<IEnumerable<string>>(Tools.Add.PackageReference.LocalizableStrings.CmdPackage)
         {
             Description = LocalizableStrings.AppHelpText,
             Arity = ArgumentArity.OneOrMore,
         };
 
-        public static readonly Option<bool> InteractiveOption = new ForwardedOption<bool>("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
-            .ForwardAs("--interactive");
+        public static readonly CliOption<bool> InteractiveOption = new ForwardedOption<bool>("--interactive")
+        {
+            Description = CommonLocalizableStrings.CommandInteractiveOptionDescription
+        }.ForwardAs("--interactive");
 
-        private static readonly Command Command = ConstructCommand();
+        private static readonly CliCommand Command = ConstructCommand();
 
-        public static Command GetCommand()
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            var command = new Command("package", LocalizableStrings.AppFullName);
+            var command = new CliCommand("package", LocalizableStrings.AppFullName);
 
-            command.AddArgument(CmdPackageArgument);
-            command.AddOption(InteractiveOption);
+            command.Arguments.Add(CmdPackageArgument);
+            command.Options.Add(InteractiveOption);
 
-            command.SetHandler((parseResult) => new RemovePackageReferenceCommand(parseResult).Execute());
+            command.SetAction((parseResult) => new RemovePackageReferenceCommand(parseResult).Execute());
 
             return command;
         }

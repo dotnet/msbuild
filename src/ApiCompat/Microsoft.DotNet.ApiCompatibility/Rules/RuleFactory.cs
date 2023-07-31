@@ -1,7 +1,6 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
@@ -11,24 +10,21 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// </summary>
     public class RuleFactory : IRuleFactory
     {
-        private readonly ICompatibilityLogger _log;
+        private readonly ISuppressableLog _log;
         private readonly bool _enableRuleAttributesMustMatch;
-        private readonly IReadOnlyCollection<string>? _excludeAttributesFiles;
         private readonly bool _enableRuleCannotChangeParameterName;
 
-        public RuleFactory(ICompatibilityLogger log,
+        public RuleFactory(ISuppressableLog log,
             bool enableRuleAttributesMustMatch = false,
-            IReadOnlyCollection<string>? excludeAttributesFiles = null,
             bool enableRuleCannotChangeParameterName = false)
         {
             _log = log;
             _enableRuleAttributesMustMatch = enableRuleAttributesMustMatch;
-            _excludeAttributesFiles = excludeAttributesFiles;
             _enableRuleCannotChangeParameterName = enableRuleCannotChangeParameterName;
         }
 
         /// <inheritdoc />
-        public IRule[] CreateRules(RuleSettings settings, IRuleRegistrationContext context)
+        public IRule[] CreateRules(IRuleSettings settings, IRuleRegistrationContext context)
         {
             List<IRule> rules = new()
             {
@@ -45,7 +41,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
             if (_enableRuleAttributesMustMatch)
             {
-                rules.Add(new AttributesMustMatch(settings, context, _excludeAttributesFiles));
+                rules.Add(new AttributesMustMatch(settings, context));
             }
 
             if (_enableRuleCannotChangeParameterName)

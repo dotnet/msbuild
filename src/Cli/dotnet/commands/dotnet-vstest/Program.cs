@@ -1,11 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools.Test;
 
@@ -48,9 +44,10 @@ namespace Microsoft.DotNet.Tools.VSTest
             if (parseResult.HasOption(CommonOptions.TestLoggerOption))
             {
                 // System command line might have mutated the options, reformat test logger option so vstest recognizes it
-                string loggerValue = parseResult.GetValue(CommonOptions.TestLoggerOption);
-                args = args.Where(a => !a.Equals(loggerValue) && !CommonOptions.TestLoggerOption.Aliases.Contains(a));
-                args = args.Prepend($"{CommonOptions.TestLoggerOption.Aliases.First()}:{loggerValue}");
+                var loggerValues = parseResult.GetValue(CommonOptions.TestLoggerOption);
+                var loggerArgs = loggerValues.Select(loggerValue => $"{CommonOptions.TestLoggerOption.Name}:{loggerValue}");
+                args = args.Where(a => !loggerValues.Contains(a) && !CommonOptions.TestLoggerOption.Name.Equals(a) && !CommonOptions.TestLoggerOption.Aliases.Contains(a));
+                args = loggerArgs.Concat(args);
             }
 
             return args.ToArray();

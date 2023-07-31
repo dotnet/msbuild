@@ -1,16 +1,8 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using FluentAssertions;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.Utilities;
-using Xunit;
-using Xunit.Abstractions;
+using Microsoft.NET.Sdk.WebAssembly;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
@@ -55,15 +47,27 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAsset = "BlazorWasmWithLibrary";
-            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset).WithProjectChanges((path, document) =>
+            {
+                if (Path.GetFileNameWithoutExtension(path) == "blazorwasm")
+                {
+                    // Since blazor.boot.json gets modified on each build, we explicitly exclude it from compression so
+                    // its compressed asset doesn't fail the thumb print check.
+                    document.Root.Add(XElement.Parse("""
+                        <PropertyGroup>
+                          <CompressionExcludePatterns>$(CompressionExcludePatterns);_framework\blazor.boot.json</CompressionExcludePatterns>
+                        </PropertyGroup>
+                        """));
+                }
+            });
 
             var build = new BuildCommand(projectDirectory, "blazorwasm");
             build.WithWorkingDirectory(projectDirectory.TestRoot);
-            build.Execute("/bl")
+            build.Execute()
                 .Should()
                 .Pass();
 
-            var gzipCompressionDirectory = Path.Combine(projectDirectory.TestRoot, "blazorwasm", "obj", "Debug", DefaultTfm, "build-gz");
+            var gzipCompressionDirectory = Path.Combine(projectDirectory.TestRoot, "blazorwasm", "obj", "Debug", DefaultTfm, "compressed");
             new DirectoryInfo(gzipCompressionDirectory).Should().Exist();
 
             // Act
@@ -100,7 +104,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 .Should()
                 .Pass();
 
-            var satelliteAssemblyFile = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "ja", "blazorwasm.resources.dll");
+            var satelliteAssemblyFile = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "ja", "blazorwasm.resources.wasm");
             var bootJson = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "blazor.boot.json");
 
             // Assert
@@ -138,7 +142,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 var kvp = satelliteResources.SingleOrDefault(p => p.Key == "ja");
                 kvp.Should().NotBeNull();
 
-                kvp.Value.Should().ContainKey("ja/blazorwasm.resources.dll");
+                kvp.Value.Should().ContainKey("blazorwasm.resources.wasm");
             }
         }
 
@@ -155,7 +159,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 .Should()
                 .Pass();
 
-            var satelliteAssemblyFile = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "ja", "blazorwasm.resources.dll");
+            var satelliteAssemblyFile = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "ja", "blazorwasm.resources.wasm");
             var bootJson = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "blazor.boot.json");
 
             build = new BuildCommand(projectDirectory, "blazorwasm");
@@ -185,7 +189,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var kvp = satelliteResources.SingleOrDefault(p => p.Key == "ja");
             kvp.Should().NotBeNull();
 
-            kvp.Value.Should().ContainKey("ja/blazorwasm.resources.dll");
+            kvp.Value.Should().ContainKey("blazorwasm.resources.wasm");
         }
 
         [Fact]
@@ -201,7 +205,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 .Should()
                 .Pass();
 
-            var satelliteAssemblyFile = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "ja", "blazorwasm.resources.dll");
+            var satelliteAssemblyFile = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "ja", "blazorwasm.resources.wasm");
             var bootJson = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "blazor.boot.json");
 
             build = new BuildCommand(projectDirectory, "blazorwasm");
@@ -218,7 +222,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var kvp = satelliteResources.SingleOrDefault(p => p.Key == "ja");
             kvp.Should().NotBeNull();
 
-            kvp.Value.Should().ContainKey("ja/blazorwasm.resources.dll");
+            kvp.Value.Should().ContainKey("blazorwasm.resources.wasm");
 
 
             File.Delete(Path.Combine(projectDirectory.TestRoot, "blazorwasm", "Resource.ja.resx"));

@@ -2,9 +2,24 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="ArchArgumentName">
+        <source>ARCH</source>
+        <target state="new">ARCH</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ArchitectureOptionDescription">
         <source>The target architecture.</source>
         <target state="translated">대상 아키텍처입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArtifactsPathArgumentName">
+        <source>ARTIFACTS_DIR</source>
+        <target state="new">ARTIFACTS_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArtifactsPathOptionDescription">
+        <source>The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</source>
+        <target state="new">The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotResolveRuntimeIdentifier">
@@ -32,14 +47,19 @@
         <target state="translated">시험판 패키지를 설치할 수 있습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CorruptSolutionProjectFolderStructure">
+        <source>The solution file '{0}' is missing EndProject tags or has invalid child-parent project folder mappings around project GUID: '{1}'. Manually repair the solution or try to open and save it in Visual Studio."</source>
+        <target state="translated">솔루션 파일 '{0}'에 EndProject 태그가 없거나 프로젝트 GUID '{1}' 주위에 잘못된 하위-상위 프로젝트 폴더 매핑이 있습니다. 솔루션을 수동으로 복구하거나 Visual Studio에서 열어서 저장해 보세요.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">'{0}'에서 프로젝트를 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CustomConfigurationDisablesPublishAndPackReleaseProperties">
-        <source>A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</source>
-        <target state="translated">'{0}' 프로젝트에서 사용자 지정 구성이 검색되었으므로 '{1}' 속성이 적용되지 않습니다.</target>
+      <trans-unit id="DidYouMean">
+        <source>Did you mean the following command?</source>
+        <target state="new">Did you mean the following command?</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
@@ -110,9 +130,19 @@ export PATH="$PATH:{0}"
         <target state="translated">애플리케이션을 프레임워크 종속 애플리케이션으로 게시합니다. 애플리케이션을 실행하려면 호환되는 .NET 런타임이 대상 시스템에 설치되어 있어야 합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildAdditionalOptionTitle">
+        <source>.NET Cli Options:</source>
+        <target state="new">.NET Cli Options:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">'{0}'에서 프로젝트를 두 개 이상 찾았습니다. 사용할 프로젝트를 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OSArgumentName">
+        <source>OS</source>
+        <target state="new">OS</target>
         <note />
       </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
@@ -183,12 +213,12 @@ export PATH="$PATH:{0}"
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
         <target state="translated">'--self-contained' 및 '--no-self-contained' 옵션은 함께 사용할 수 없습니다.</target>
-        <note />
+        <note>{Locked="--self-contained"}{Locked="--no-self-contained"}</note>
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">대상 머신에 런타임을 설치할 필요가 없도록 애플리케이션과 함께 .NET 런타임을 게시합니다.
+The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">대상 머신에 런타임을 설치할 필요가 없도록 애플리케이션과 함께 .NET 런타임을 게시합니다.
 런타임 식별자를 지정한 경우 기본값은 'true'입니다.</target>
         <note />
       </trans-unit>
@@ -197,11 +227,9 @@ The default is 'true' if a runtime identifier is specified.</source>
         <target state="translated">솔루션</target>
         <note />
       </trans-unit>
-      <trans-unit id="SolutionExecutableConfigurationMismatchError">
-        <source>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
-{1}.</source>
-        <target state="translated">솔루션의 여러 실행 가능한 프로젝트에 충돌하는 '{0}' 값이 포함되어 있습니다. 값이 일치하는지 확인하세요. Directory.build.props 파일을 사용하여 모든 프로젝트 구성을 설정하는 것이 좋습니다. 충돌하는 프로젝트:
-{1}.</target>
+      <trans-unit id="SolutionArgumentMisplaced">
+        <source>Solution argument '{0}' is misplaced.</source>
+        <target state="new">Solution argument '{0}' is misplaced.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">
@@ -247,6 +275,11 @@ The default is 'true' if a runtime identifier is specified.</source>
       <trans-unit id="Delete">
         <source>Delete</source>
         <target state="translated">삭제</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFolderAlreadyContainsProject">
+        <source>Solution {0} already contains project {1} in solution folder {2}.</source>
+        <target state="new">Solution {0} already contains project {1} in solution folder {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">

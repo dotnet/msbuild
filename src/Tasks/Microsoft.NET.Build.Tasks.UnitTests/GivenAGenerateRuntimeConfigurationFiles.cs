@@ -1,9 +1,6 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Xunit;
@@ -40,7 +37,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var task = new TestableGenerateRuntimeConfigurationFiles
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
-                TargetFrameworkMoniker = ".NETCoreApp,Version=v6.0",
+                TargetFrameworkMoniker = $".NETCoreApp,Version=v{ToolsetInfo.CurrentTargetFrameworkVersion}",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]
@@ -49,7 +46,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         "Microsoft.NETCore.App",
                         new Dictionary<string, string>
                         {
-                            {"FrameworkName", "Microsoft.NETCore.App"}, {"Version", "6.0.0"}
+                            {"FrameworkName", "Microsoft.NETCore.App"}, {"Version", $"{ToolsetInfo.CurrentTargetFrameworkVersion}.0"}
                         }
                     )
                 },
@@ -67,7 +64,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
     ""rollForward"": ""LatestMinor"",
     ""framework"": {{
       ""name"": ""Microsoft.NETCore.App"",
-      ""version"": ""6.0.0""
+      ""version"": ""{ToolsetInfo.CurrentTargetFrameworkVersion}.0""
     }}
   }}
 }}");
@@ -81,7 +78,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var task = new TestableGenerateRuntimeConfigurationFiles
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
-                TargetFrameworkMoniker = ".NETCoreApp,Version=v6.0",
+                TargetFrameworkMoniker = $".NETCoreApp,Version=v{ToolsetInfo.CurrentTargetFrameworkVersion}",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]
@@ -90,21 +87,21 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         "Microsoft.NETCore.App",
                         new Dictionary<string, string>
                         {
-                            {"FrameworkName", "Microsoft.NETCore.App"}, {"Version", "6.0.0"}
+                            {"FrameworkName", "Microsoft.NETCore.App"}, {"Version", $"{ToolsetInfo.CurrentTargetFrameworkVersion}.0"}
                         }
                     ),
                     new MockTaskItem(
                         "Microsoft.WindowsDesktop.App",
                         new Dictionary<string, string>
                         {
-                            {"FrameworkName", "Microsoft.WindowsDesktop.App"}, {"Version", "6.0.0"}
+                            {"FrameworkName", "Microsoft.WindowsDesktop.App"}, {"Version", $"{ToolsetInfo.CurrentTargetFrameworkVersion}.0"}
                         }
                     ),
                     new MockTaskItem(
                         "Microsoft.AspNetCore.App",
                         new Dictionary<string, string>
                         {
-                            {"FrameworkName", "Microsoft.AspNetCore.App"}, {"Version", "6.0.0"}
+                            {"FrameworkName", "Microsoft.AspNetCore.App"}, {"Version", $"{ToolsetInfo.CurrentTargetFrameworkVersion}.0"}
                         }
                     )
                 },
@@ -123,11 +120,11 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
     ""frameworks"": [
       {{
         ""name"": ""Microsoft.WindowsDesktop.App"",
-        ""version"": ""6.0.0""
+        ""version"": ""{ToolsetInfo.CurrentTargetFrameworkVersion}.0""
       }},
       {{
         ""name"": ""Microsoft.AspNetCore.App"",
-        ""version"": ""6.0.0""
+        ""version"": ""{ToolsetInfo.CurrentTargetFrameworkVersion}.0""
       }}
     ]
   }}
@@ -141,7 +138,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var task = new TestableGenerateRuntimeConfigurationFiles
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
-                TargetFrameworkMoniker = ".NETCoreApp,Version=v6.0",
+                TargetFrameworkMoniker = $".NETCoreApp,Version=v{ToolsetInfo.CurrentTargetFrameworkVersion}",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]
@@ -150,14 +147,14 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         "Microsoft.NETCore.App",
                         new Dictionary<string, string>
                         {
-                            {"FrameworkName", "Microsoft.NETCore.App"}, {"Version", "6.0.0"}
+                            {"FrameworkName", "Microsoft.NETCore.App"}, {"Version", $"{ToolsetInfo.CurrentTargetFrameworkVersion}.0"}
                         }
                     ),
                     new MockTaskItem(
                         "Microsoft.WindowsDesktop.App",
                         new Dictionary<string, string>
                         {
-                            {"FrameworkName", "Microsoft.WindowsDesktop.App"}, {"Version", "6.0.0"}
+                            {"FrameworkName", "Microsoft.WindowsDesktop.App"}, {"Version", $"{ToolsetInfo.CurrentTargetFrameworkVersion}.0"}
                         }
                     )
                 },
@@ -175,7 +172,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
     ""rollForward"": ""LatestMinor"",
     ""framework"": {{
       ""name"": ""Microsoft.WindowsDesktop.App"",
-      ""version"": ""6.0.0""
+      ""version"": ""{ToolsetInfo.CurrentTargetFrameworkVersion}.0""
     }}
   }}
 }}",
@@ -188,7 +185,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             var task = new TestableGenerateRuntimeConfigurationFiles
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
-                TargetFrameworkMoniker = ".NETCoreApp,Version=v6.0",
+                TargetFrameworkMoniker = $".NETCoreApp,Version=v{ToolsetInfo.CurrentTargetFrameworkVersion}",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]
@@ -197,7 +194,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         "Microsoft.NETCore.App",
                         new Dictionary<string, string>
                         {
-                            {"FrameworkName", "Microsoft.NETCore.App"}, {"Version", "6.0.0"}
+                            {"FrameworkName", "Microsoft.NETCore.App"}, {"Version", $"{ToolsetInfo.CurrentTargetFrameworkVersion}.0"}
                         }
                     )
                 },
@@ -215,7 +212,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
     ""rollForward"": ""LatestMinor"",
     ""framework"": {{
       ""name"": ""Microsoft.NETCore.App"",
-      ""version"": ""6.0.0""
+      ""version"": ""{ToolsetInfo.CurrentTargetFrameworkVersion}.0""
     }}
   }}
 }}");

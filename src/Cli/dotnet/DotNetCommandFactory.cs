@@ -1,11 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.CommandLine.Invocation;
 using System.Diagnostics;
-using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.CommandFactory;
 using NuGet.Frameworks;
@@ -41,9 +37,9 @@ namespace Microsoft.DotNet.Cli
         private bool TryGetBuiltInCommand(string commandName, out Func<string[], int> commandFunc)
         {
             var command = Parser.GetBuiltInCommand(commandName);
-            if (command != null && command.Handler != null)
+            if (command != null && command.Action != null)
             {
-                commandFunc = (args) => command.Handler.InvokeAsync(new InvocationContext(Parser.Instance.Parse(args))).Result;
+                commandFunc = (args) => command.Action.InvokeAsync(Parser.Instance.Parse(args)).Result;
                 return true;
             }
             commandFunc = null;

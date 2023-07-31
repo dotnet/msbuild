@@ -1,0 +1,105 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(DotNetBuildFromSource)' == 'true' ">$(SdkTargetFramework)</TargetFrameworks>
+    <ImplicitUsings Condition="'$(TargetFramework)' != 'net472'">enable</ImplicitUsings>
+
+    <TargetsForTfmSpecificBuildOutput>
+      $(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage
+    </TargetsForTfmSpecificBuildOutput>
+
+    <!-- Tell the SDK to generate a deps.json file -->
+    <GenerateDependencyFile>true</GenerateDependencyFile>
+
+    <!-- Allow the packaging project to use the name `Microsoft.NET.Build.Containers` for the nuget package -->
+    <Packageid>.</Packageid>
+
+    <!-- While in prerelease, ship the symbols to everyone all the time. -->
+    <DebugType>embedded</DebugType>
+    <Nullable>enable</Nullable>
+    <NoWarn>($NoWarn);CS8002</NoWarn>
+    <StrongNameKeyId>MicrosoftShared</StrongNameKeyId>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="all" ExcludeAssets="runtime" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="$(MicrosoftCodeAnalysisPublicApiAnalyzersVersion)" Condition=" '$(DotNetBuildFromSource)' != 'true' ">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Nuget.Packaging" Version="$(NuGetPackagingPackageVersion)" />
+    <PackageReference Include="Valleysoft.DockerCredsProvider" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingAbstractionsPackageVersion)" />
+  </ItemGroup>
+
+  <!-- net472 builds manually import files to compile -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+    <Compile Remove="**/*.*" />
+    <Compile Include="ReferenceParser.cs" />
+    <Compile Include="KnownStrings.cs" />
+    <Compile Include="Tasks/ParseContainerProperties.cs" />
+    <Compile Include="Tasks/CreateNewImage.Interface.cs" />
+    <Compile Include="Tasks/CreateNewImageToolTask.cs" />
+    <Compile Include="Tasks/ComputeDotnetBaseImageTag.cs" />
+    <Compile Include="ContainerHelpers.cs" />
+    <Compile Include="net472Definitions.cs" />
+    <Compile Include="VSHostObject.cs" />
+    <Compile Include="Port.cs" />
+    <Compile Include="Resources\Resource.cs" />
+    <Compile Include="Resources\Strings.Designer.cs" />
+    <Compile Include="Globals.cs" />
+    <Compile Include="DiagnosticMessage.cs" />
+  </ItemGroup>
+
+  <!-- core remove files specific to net472 workarounds -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'net472'">
+    <Compile Remove="Tasks/CreateNewImageToolTask.cs" />
+    <Compile Remove="net472Definitions.cs" />
+    <Compile Remove="VSHostObject.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Resources\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
+  <!-- This target adds all of our PackageReference and ProjectReference's runtime assets to our package output. -->
+  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" TargetPath="%(ReferenceCopyLocalPaths.DestinationSubPath)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- This target adds the generated deps.json file to our package output -->
+  <Target Name="AddBuildDependencyFileToBuiltProjectOutputGroupOutput" BeforeTargets="BuiltProjectOutputGroup" Condition=" '$(GenerateDependencyFile)' == 'true'">
+    <ItemGroup>
+      <BuiltProjectOutputGroupOutput Include="$(ProjectDepsFilePath)" TargetPath="$(ProjectDepsFileName)" FinalOutputPath="$(ProjectDepsFilePath)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Copy to *.csproj for using in sanity checks integration tests. -->
+  <Target Name="CopyCsprojToTestExecutionDirectory" AfterTargets="Build">
+    <Copy SourceFiles="$(MSBuildThisFileFullPath)" DestinationFiles="$(ArtifactsTmpDir)Container\ProjectFiles\$(MSBuildThisFileName).csproj" />
+  </Target>
+
+</Project>

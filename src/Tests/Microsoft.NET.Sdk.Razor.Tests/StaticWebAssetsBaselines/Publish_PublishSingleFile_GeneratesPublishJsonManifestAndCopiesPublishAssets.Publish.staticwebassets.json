@@ -9,38 +9,42 @@
   "DiscoveryPatterns": [],
   "Assets": [
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\ComponentApp.styles.css",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\${Rid}\\scopedcss\\bundle\\ComponentApp.styles.css",
       "SourceId": "ComponentApp",
       "SourceType": "Computed",
-      "ContentRoot": "${ProjectPath}\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\",
+      "ContentRoot": "${ProjectPath}\\obj\\Debug\\${Tfm}\\${Rid}\\scopedcss\\bundle\\",
       "BasePath": "_content/ComponentApp",
       "RelativePath": "ComponentApp.styles.css",
       "AssetKind": "All",
       "AssetMode": "CurrentProject",
       "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
       "RelatedAsset": "",
       "AssetTraitName": "ScopedCss",
       "AssetTraitValue": "ApplicationBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\scopedcss\\bundle\\ComponentApp.styles.css"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\${Rid}\\scopedcss\\bundle\\ComponentApp.styles.css"
     },
     {
-      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css",
+      "Identity": "${ProjectPath}\\obj\\Debug\\${Tfm}\\${Rid}\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css",
       "SourceId": "ComponentApp",
       "SourceType": "Computed",
-      "ContentRoot": "${ProjectPath}\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\",
+      "ContentRoot": "${ProjectPath}\\obj\\Debug\\${Tfm}\\${Rid}\\scopedcss\\projectbundle\\",
       "BasePath": "_content/ComponentApp",
       "RelativePath": "ComponentApp.bundle.scp.css",
       "AssetKind": "All",
       "AssetMode": "Reference",
       "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
       "RelatedAsset": "",
       "AssetTraitName": "ScopedCss",
       "AssetTraitValue": "ProjectBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css"
+      "OriginalItemSpec": "${ProjectPath}\\obj\\Debug\\${Tfm}\\${Rid}\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css"
     }
   ]
 }

@@ -1,11 +1,6 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 // After the server pipe is connected, it forks off a thread to handle the connection, and creates
 // a new instance of the pipe to listen for new clients. When it gets a request, it validates
@@ -23,7 +18,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
     ///
     /// Field Name       Field Type          Size (bytes)
     /// -------------------------------------------------
-    /// responseLength   int (positive)      4  
+    /// responseLength   int (positive)      4
     /// responseType     enum ResponseType   4
     /// responseBody     Response subclass   variable
     /// </summary>
@@ -35,14 +30,14 @@ namespace Microsoft.NET.Sdk.Razor.Tool
             MismatchedVersion,
 
             // The build request completed on the server and the results are contained
-            // in the message. 
+            // in the message.
             Completed,
 
-            // The shutdown request completed and the server process information is 
-            // contained in the message. 
+            // The shutdown request completed and the server process information is
+            // contained in the message.
             Shutdown,
 
-            // The request was rejected by the server.  
+            // The request was rejected by the server.
             Rejected,
         }
 

@@ -1,11 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
 using NuGet.Client;
 using NuGet.ContentModel;
 using NuGet.Frameworks;
@@ -16,7 +12,7 @@ using NuGet.RuntimeModel;
 namespace Microsoft.DotNet.PackageValidation
 {
     /// <summary>
-    /// This class represents a nuget package.
+    /// This class represents a NuGet package.
     /// </summary>
     public class Package
     {
@@ -82,7 +78,7 @@ namespace Microsoft.DotNet.PackageValidation
         /// <summary>
         /// List of assembly references grouped by target framework.
         /// </summary>
-        public Dictionary<string, string[]>? AssemblyReferences { get; }
+        public Dictionary<NuGetFramework, IEnumerable<string>>? AssemblyReferences { get; }
 
         /// <summary>
         /// List of the frameworks in the package.
@@ -94,7 +90,7 @@ namespace Microsoft.DotNet.PackageValidation
             string version,
             IEnumerable<string> packageAssets,
             Dictionary<NuGetFramework, IEnumerable<PackageDependency>> packageDependencies,
-            Dictionary<string, string[]>? assemblyReferences = null)
+            Dictionary<NuGetFramework, IEnumerable<string>>? assemblyReferences = null)
         {
             PackagePath = packagePath;
             PackageId = packageId;
@@ -130,8 +126,8 @@ namespace Microsoft.DotNet.PackageValidation
         /// Creates a package object from a given package path and optional assembly references.
         /// </summary>
         /// <param name="packagePath">The path to the package path.</param>
-        /// <param name="packageAssemblyReferences">Optional assembly references grouped per target framework.</param>
-        public static Package Create(string? packagePath, Dictionary<string, string[]>? packageAssemblyReferences = null)
+        /// <param name="packageAssemblyReferences">Optional assembly references with target framework information.</param>
+        public static Package Create(string? packagePath, Dictionary<NuGetFramework, IEnumerable<string>>? packageAssemblyReferences = null)
         {
             if (string.IsNullOrEmpty(packagePath))
             {
@@ -208,7 +204,7 @@ namespace Microsoft.DotNet.PackageValidation
         }
 
         /// <summary>
-        /// Finds the best compile time assset for a specific framework.
+        /// Finds the best compile time asset for a specific framework.
         /// </summary>
         /// <param name="framework">The framework where the package needs to be installed.</param>
         /// <returns>A ContentItem representing the best compile time asset.</returns>

@@ -62,6 +62,11 @@
         <target state="translated">Недопустимая версия: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">Ошибка при анализе версии \"{1}\" идентификатора манифеста рабочей нагрузки \"{0}\"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">Не найдена зависимость манифеста рабочей нагрузки "{0}", необходимая для манифеста "{1}" [{2}]</target>
@@ -71,6 +76,16 @@
         <source>Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</source>
         <target state="translated">Зависимость манифеста рабочей нагрузки "{0}" версии "{1}" ниже версии "{2}", необходимой для манифеста "{3}" [{4}]</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ManifestFromInstallStateNotFound">
+        <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
+        <target state="translated">Не найден манифест рабочей нагрузки {0}, указанный в {1}. Выполнение команды "dotnet workload repair" может устранить эту проблему.</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
+      <trans-unit id="ManifestFromWorkloadSetNotFound">
+        <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
+        <target state="translated">Манифест рабочей нагрузки {0} из версии рабочей нагрузки {1} не установлен. Выполнение команды "dotnet workload repair" может устранить эту проблему.</target>
+        <note>{Locked="dotnet workload repair"}</note>
       </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
@@ -120,6 +135,16 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Неразрешенный целевой объект "{0}" для перенаправления рабочей нагрузки "{1}" в манифесте "{2}" [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="translated">Версия рабочей нагрузки {0}, указанная в {1}, не найдена. Запустите команду "dotnet workload restore", чтобы установить эту версию рабочей нагрузки.</target>
+        <note>{Locked="dotnet workload restore"}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromInstallStateNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found.</source>
+        <target state="translated">Не найдена версия рабочей нагрузки {0}, указанная в {1}.</target>
         <note />
       </trans-unit>
     </body>

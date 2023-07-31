@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/eng/dependabot"
+    open-pull-requests-limit: 10
+    schedule:
+      interval: "weekly"
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "dependabot: main"
+
+  - package-ecosystem: "nuget"
+    directory: "/eng/dependabot"
+    open-pull-requests-limit: 10
+    schedule:
+      interval: "weekly"
+    target-branch: "release/7.0.4xx"
+    labels:
+      - "dependencies"
+      - "dependabot: 7.0.4xx"

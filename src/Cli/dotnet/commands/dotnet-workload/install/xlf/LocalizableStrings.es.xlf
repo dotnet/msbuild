@@ -28,8 +28,8 @@
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
-        <source>Uninstalling workload pack {0} version {1}…</source>
-        <target state="translated">Desinstalando el paquete de carga de trabajo {0} versión{1}...</target>
+        <source>Uninstalling workload pack {0} version {1}...</source>
+        <target state="needs-review-translation">Desinstalando el paquete de carga de trabajo {0} versión{1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionArgumentName">
@@ -43,8 +43,8 @@
         <note />
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
-        <source>Downloading pack {0} version {1} to offline cache {2}…</source>
-        <target state="translated">Descargando el paquete {0}, versión {1} a la caché sin conexión {2}...</target>
+        <source>Downloading pack {0} version {1} to offline cache {2}...</source>
+        <target state="needs-review-translation">Descargando el paquete {0}, versión {1} a la caché sin conexión {2}...</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedSingleManifest">
@@ -118,8 +118,8 @@
         <note />
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
-        <source>Installing workload manifest {0} version {1}…</source>
-        <target state="translated">Instalando el manifiesto de la carga de trabajo {0}, versión {1}...</target>
+        <source>Installing workload manifest {0} version {1}...</source>
+        <target state="needs-review-translation">Instalando el manifiesto de la carga de trabajo {0}, versión {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
@@ -198,8 +198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PendingReboot">
-        <source>The machine has a pending reboot. Installation will continue, but you may need to restart.</source>
-        <target state="translated">El equipo tiene un reinicio pendiente. La instalación continuará, pero es posible que tenga que reiniciar.</target>
+        <source>The machine has a pending reboot. The workload operation will continue, but you may need to restart.</source>
+        <target state="needs-review-translation">El equipo tiene un reinicio pendiente. La instalación continuará, pero es posible que tenga que reiniciar.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">

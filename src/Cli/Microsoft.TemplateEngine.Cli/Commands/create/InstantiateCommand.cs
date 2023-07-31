@@ -1,10 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
@@ -22,38 +19,38 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             Func<ParseResult, ITemplateEngineHost> hostBuilder)
             : base(hostBuilder, "create", SymbolStrings.Command_Instantiate_Description)
         {
-            this.AddArgument(ShortNameArgument);
-            this.AddArgument(RemainingArguments);
+            this.Arguments.Add(ShortNameArgument);
+            this.Arguments.Add(RemainingArguments);
 
-            this.AddOption(SharedOptions.OutputOption);
-            this.AddOption(SharedOptions.NameOption);
-            this.AddOption(SharedOptions.DryRunOption);
-            this.AddOption(SharedOptions.ForceOption);
-            this.AddOption(SharedOptions.NoUpdateCheckOption);
-            this.AddOption(SharedOptions.ProjectPathOption);
+            this.Options.Add(SharedOptions.OutputOption);
+            this.Options.Add(SharedOptions.NameOption);
+            this.Options.Add(SharedOptions.DryRunOption);
+            this.Options.Add(SharedOptions.ForceOption);
+            this.Options.Add(SharedOptions.NoUpdateCheckOption);
+            this.Options.Add(SharedOptions.ProjectPathOption);
 
             parentCommand.AddNoLegacyUsageValidators(this);
-            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.OutputOption));
-            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.NameOption));
-            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.DryRunOption));
-            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.ForceOption));
-            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.NoUpdateCheckOption));
-            this.AddValidator(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.ProjectPathOption));
+            this.Validators.Add(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.OutputOption));
+            this.Validators.Add(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.NameOption));
+            this.Validators.Add(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.DryRunOption));
+            this.Validators.Add(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.ForceOption));
+            this.Validators.Add(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.NoUpdateCheckOption));
+            this.Validators.Add(symbolResult => parentCommand.ValidateOptionUsage(symbolResult, SharedOptions.ProjectPathOption));
         }
 
-        internal static Argument<string> ShortNameArgument { get; } = new Argument<string>("template-short-name")
+        internal static CliArgument<string> ShortNameArgument { get; } = new CliArgument<string>("template-short-name")
         {
             Description = SymbolStrings.Command_Instantiate_Argument_ShortName,
             Arity = new ArgumentArity(0, 1)
         };
 
-        internal Argument<string[]> RemainingArguments { get; } = new Argument<string[]>("template-args")
+        internal CliArgument<string[]> RemainingArguments { get; } = new CliArgument<string[]>("template-args")
         {
             Description = SymbolStrings.Command_Instantiate_Argument_TemplateOptions,
             Arity = new ArgumentArity(0, 999)
         };
 
-        internal IReadOnlyList<Option> PassByOptions { get; } = new Option[]
+        internal IReadOnlyList<CliOption> PassByOptions { get; } = new CliOption[]
         {
             SharedOptions.ForceOption,
             SharedOptions.NameOption,
@@ -65,9 +62,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             NewCommandArgs newCommandArgs,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
-            InvocationContext context)
+            ParseResult parseResult,
+            CancellationToken cancellationToken)
         {
-            return ExecuteIntAsync(InstantiateCommandArgs.FromNewCommandArgs(newCommandArgs), environmentSettings, templatePackageManager, context);
+            return ExecuteIntAsync(InstantiateCommandArgs.FromNewCommandArgs(newCommandArgs), environmentSettings, templatePackageManager, parseResult, cancellationToken);
         }
 
         internal static async Task<IEnumerable<TemplateGroup>> GetTemplateGroupsAsync(
@@ -178,10 +176,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             InstantiateCommandArgs instantiateArgs,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
-            InvocationContext context)
+            ParseResult parseResult,
+            CancellationToken cancellationToken)
         {
-            NewCommandStatus status = await ExecuteIntAsync(instantiateArgs, environmentSettings, templatePackageManager, context).ConfigureAwait(false);
-            await CheckTemplatesWithSubCommandName(instantiateArgs, templatePackageManager, context.GetCancellationToken()).ConfigureAwait(false);
+            NewCommandStatus status = await ExecuteIntAsync(instantiateArgs, environmentSettings, templatePackageManager, parseResult, cancellationToken).ConfigureAwait(false);
+            await CheckTemplatesWithSubCommandName(instantiateArgs, templatePackageManager, cancellationToken).ConfigureAwait(false);
             return status;
         }
 
@@ -191,9 +190,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             InstantiateCommandArgs instantiateArgs,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
-            InvocationContext context)
+            ParseResult parseResult,
+            CancellationToken cancellationToken)
         {
-            CancellationToken cancellationToken = context.GetCancellationToken();
             HostSpecificDataLoader hostSpecificDataLoader = new(environmentSettings);
             if (string.IsNullOrWhiteSpace(instantiateArgs.ShortName))
             {
@@ -221,7 +220,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             {
                 return HandleAmbiguousTemplateGroup(environmentSettings, templatePackageManager, selectedTemplateGroups, Reporter.Error, cancellationToken);
             }
-            return await HandleTemplateInstantationAsync(
+            return await HandleTemplateInstantiationAsync(
                 instantiateArgs,
                 environmentSettings,
                 templatePackageManager,
@@ -261,7 +260,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return NewCommandStatus.NotFound;
         }
 
-        private static async Task<NewCommandStatus> HandleTemplateInstantationAsync(
+        private static async Task<NewCommandStatus> HandleTemplateInstantiationAsync(
             InstantiateCommandArgs args,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
@@ -272,9 +271,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             if (candidates.Count == 1)
             {
                 TemplateCommand templateCommandToRun = candidates.Single();
-                args.Command.AddCommand(templateCommandToRun);
+                args.Command.Subcommands.Add(templateCommandToRun);
 
-                ParseResult updatedParseResult = args.ParseResult.Parser.Parse(args.ParseResult.Tokens.Select(t => t.Value).ToList());
+                ParseResult updatedParseResult = args.ParseResult.RootCommandResult.Command.Parse(
+                    args.ParseResult.Tokens.Select(t => t.Value).ToArray(),
+                    args.ParseResult.Configuration);
                 return await candidates.Single().InvokeAsync(updatedParseResult, cancellationToken).ConfigureAwait(false);
             }
             else if (candidates.Any())
@@ -326,11 +327,11 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                         .DefineColumn(t => t.Name, LocalizableStrings.ColumnNameTemplateName, shrinkIfNeeded: true, minWidth: 15, showAlways: true)
                         .DefineColumn(t => string.Join(",", t.ShortNameList), LocalizableStrings.ColumnNameShortName, showAlways: true)
                         .DefineColumn(t => t.GetLanguage() ?? string.Empty, LocalizableStrings.ColumnNameLanguage, showAlways: true)
-                        .DefineColumn(t => t.Precedence.ToString(), out object? prcedenceColumn, LocalizableStrings.ColumnNamePrecedence, showAlways: true)
+                        .DefineColumn(t => t.Precedence.ToString(), out object? precedenceColumn, LocalizableStrings.ColumnNamePrecedence, showAlways: true)
                         .DefineColumn(t => t.Author ?? string.Empty, LocalizableStrings.ColumnNameAuthor, showAlways: true, shrinkIfNeeded: true, minWidth: 10)
                         .DefineColumn(t => Task.Run(() => GetTemplatePackage(t)).GetAwaiter().GetResult(), LocalizableStrings.ColumnNamePackage, showAlways: true)
                         .OrderBy(identityColumn, StringComparer.CurrentCultureIgnoreCase)
-                        .OrderByDescending(prcedenceColumn, new NullOrEmptyIsLastStringComparer());
+                        .OrderByDescending(precedenceColumn, new NullOrEmptyIsLastStringComparer());
             reporter.WriteLine(formatter.Layout().Bold().Red());
 
             reporter.WriteLine(LocalizableStrings.AmbiguousTemplatesMultiplePackagesHint.Bold().Red());
@@ -376,7 +377,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 if (ReparseForTemplate(args, environmentSettings, templatePackageManager, templateGroup, template) is (TemplateCommand command, ParseResult parseResult))
                 {
                     languageOptionSpecified = command.LanguageOption != null
-                        && parseResult.FindResultFor(command.LanguageOption) != null;
+                        && parseResult.GetResult(command.LanguageOption) != null;
                     if (!parseResult.Errors.Any())
                     {
                         candidates.Add(command);
@@ -433,7 +434,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     template,
                     validateDefaultLanguage);
 
-                Parser parser = ParserFactory.CreateParser(command);
+                CliConfiguration parser = ParserFactory.CreateParser(command);
                 ParseResult parseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
                 return (command, parseResult);
             }
@@ -482,8 +483,8 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             IEnumerable<string> possibleSubcommands =
                 instantiateArgs.Command.Subcommands
-                    .Where(sc => !sc.IsHidden)
-                    .SelectMany(sc => sc.Aliases);
+                    .Where(sc => !sc.Hidden)
+                    .SelectMany(sc => new[] { sc.Name }.Concat(sc.Aliases));
 
             IEnumerable<string> possibleSubcommandsMatches = TypoCorrection.GetSimilarTokens(possibleSubcommands, instantiateArgs.ShortName);
             if (possibleSubcommandsMatches.Any())

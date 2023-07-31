@@ -1,13 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using FluentAssertions;
-using Microsoft.AspNetCore.Razor.Tasks;
+using Microsoft.AspNetCore.StaticWebAssets.Tasks;
 
 namespace Microsoft.NET.Sdk.Razor.Tests;
 
@@ -15,13 +9,12 @@ public class StaticWebAssetsBaselineComparer
 {
     private static readonly string BaselineGenerationInstructions =
     @"If the difference in baselines is expected, please re-generate the baselines.
-Note, baseline generation must be done on a Windows device.
 Start by ensuring you're dogfooding the SDK from the current branch (dotnet --version should be '*.0.0-dev').
     If you're not on the dogfood sdk, from the root of the repository run:
         1. dotnet clean
-        2. .\restore.cmd
-        3. .\build.cmd
-        4. .\eng\dogfood.cmd
+        2. .\restore.cmd or ./restore.sh
+        3. .\build.cmd ./build.sh
+        4. .\eng\dogfood.cmd or . ./eng/dogfood.sh
 
 Then, using the dogfood SDK run the .\src\RazorSdk\update-test-baselines.ps1 script.";
 

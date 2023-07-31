@@ -1,16 +1,9 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools.NuGet;
 using Moq;
-using Xunit;
-using Microsoft.NET.TestFramework;
-using Xunit.Abstractions;
-using Microsoft.NET.TestFramework.Commands;
-
-using Microsoft.NET.TestFramework.Assertions;
 
 namespace Microsoft.DotNet.Tools.Run.Tests
 {
@@ -101,7 +94,7 @@ namespace Microsoft.DotNet.Tools.Run.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("Missing value for option 'symbol-source'");
+                .HaveStdErrContaining("Required argument missing for option: '-ss'.");
         }
     }
 }

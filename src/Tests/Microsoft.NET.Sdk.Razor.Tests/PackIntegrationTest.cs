@@ -1,21 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using FluentAssertions;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.Utilities;
-using Moq;
-using Xunit;
-using Xunit.Abstractions;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
@@ -33,7 +17,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var build = new BuildCommand(projectDirectory);
             build.Execute().Should().Pass();
 
-            var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
+            var pack = new MSBuildCommand(projectDirectory, "Pack");
             var result = pack.Execute("/p:NoBuild=true");
 
             result.Should().Pass();
@@ -45,17 +29,17 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             result.Should().NuSpecContain(
                 Path.Combine(projectDirectory.Path, "obj", "Debug", "ClassLibrary.1.0.0.nuspec"),
-                $"<file src=\"{Path.Combine(projectDirectory.Path, "bin", "Debug", DefaultTfm, "ClassLibrary.dll")}\" " +
+                $"<file src=\"{Path.Combine(outputPath, "ClassLibrary.dll")}\" " +
                 $"target=\"{Path.Combine("lib", DefaultTfm, "ClassLibrary.dll")}\" />");
 
             result.Should().NuSpecDoesNotContain(
                 Path.Combine(projectDirectory.Path, "obj", "Debug", "ClassLibrary.1.0.0.nuspec"),
-                $"<file src=\"{Path.Combine(projectDirectory.Path, "bin", "Debug", DefaultTfm, "ClassLibrary.Views.dll")}\" " +
+                $"<file src=\"{Path.Combine(outputPath, "ClassLibrary.Views.dll")}\" " +
                 $"target=\"{Path.Combine("lib", DefaultTfm, "ClassLibrary.Views.dll")}\" />");
 
             result.Should().NuSpecDoesNotContain(
                 Path.Combine(projectDirectory.Path, "obj", "Debug", "ClassLibrary.1.0.0.nuspec"),
-                $"<file src=\"{Path.Combine(projectDirectory.Path, "bin", "Debug", DefaultTfm, "ClassLibrary.Views.pdb")}\" " +
+                $"<file src=\"{Path.Combine(outputPath, "ClassLibrary.Views.pdb")}\" " +
                 $"target=\"{Path.Combine("lib", DefaultTfm, "ClassLibrary.Views.pdb")}\" />");
 
             result.Should().NuSpecDoesNotContain(
@@ -63,7 +47,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 $@"<files include=""any/{DefaultTfm}/Views/Shared/_Layout.cshtml"" buildAction=""Content"" />");
 
             result.Should().NuPkgContain(
-                Path.Combine(projectDirectory.Path, "bin", "Debug", "ClassLibrary.1.0.0.nupkg"),
+                Path.Combine(build.GetPackageDirectory().FullName, "ClassLibrary.1.0.0.nupkg"),
                 Path.Combine("lib", DefaultTfm, "ClassLibrary.dll"));
         }
     }

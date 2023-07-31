@@ -1,16 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
-using System.Linq;
-using System.Xml.Linq;
-using FluentAssertions;
 using Microsoft.NET.Build.Tasks;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -74,10 +65,10 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WinformsErrorPresentFailTest",
                 TargetFrameworks = targetFramework,
-                IsWinExe = true
+                IsWinExe = true,
+                SelfContained = "true"
             };
             testProject.AdditionalProperties["UseWindowsForms"] = "true";
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -98,10 +89,10 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WinformsErrorSuppressedPassTest",
                 TargetFrameworks = targetFramework,
-                IsWinExe = true
+                IsWinExe = true,
+                SelfContained = "true"
             };
             testProject.AdditionalProperties["UseWindowsForms"] = "true";
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
             testProject.AdditionalProperties["_SuppressWinFormsTrimError"] = "true";
@@ -171,10 +162,10 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WpfErrorPresentPassTest",
                 TargetFrameworks = targetFramework,
-                IsWinExe = true
+                IsWinExe = true,
+                SelfContained = "true"
             };
             testProject.AdditionalProperties["UseWPF"] = "true";
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -195,10 +186,10 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WpfPassTest",
                 TargetFrameworks = targetFramework,
-                IsWinExe = true
+                IsWinExe = true,
+                SelfContained = "true"
             };
             testProject.AdditionalProperties["UseWPF"] = "true";
-            testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             testProject.AdditionalProperties["_SuppressWpfTrimError"] = "true";
             testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";

@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.DotNet.Cli.Utils;
-using System.Linq;
-using System.IO;
-using FluentAssertions;
-using Microsoft.NET.TestFramework.Assertions;
-using Xunit.Abstractions;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.NET.TestFramework.Commands
 {
@@ -53,9 +46,7 @@ namespace Microsoft.NET.TestFramework.Commands
             string targetFramework = null)
             : base(testAsset, "WriteValuesToFile", relativePathToProject: null)
         {
-
-            _targetFramework = targetFramework ?? testAsset.TestProject?.TargetFrameworks;
-            _targetFramework = _targetFramework.Contains(";") ? "" : _targetFramework;
+            _targetFramework = targetFramework ?? OutputPathCalculator.FromProject(ProjectFile, testAsset).TargetFramework;
 
             _valueName = valueName;
             _valueType = valueType;
@@ -119,7 +110,7 @@ $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/ms
 
             File.WriteAllText(injectTargetPath, injectTargetContents);
 
-            var outputDirectory = GetOutputDirectory(_targetFramework);
+            var outputDirectory = GetValuesOutputDirectory(_targetFramework);
             outputDirectory.Create();
 
             return TestContext.Current.ToolsetUnderTest.CreateCommandForTarget(TargetName, newArgs);
@@ -133,7 +124,7 @@ $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/ms
         public List<(string value, Dictionary<string, string> metadata)> GetValuesWithMetadata()
         {
             string outputFilename = $"{_valueName}Values.txt";
-            var outputDirectory = GetOutputDirectory(_targetFramework, Configuration ?? "Debug");
+            var outputDirectory = GetValuesOutputDirectory(_targetFramework, Configuration ?? "Debug");
             string fullFileName = Path.Combine(outputDirectory.FullName, outputFilename);
 
             if (File.Exists(fullFileName))
@@ -165,6 +156,18 @@ $@"<Project ToolsVersion=`14.0` xmlns=`http://schemas.microsoft.com/developer/ms
             {
                 return new List<(string value, Dictionary<string, string> metadata)>();
             }
+        }
+
+        DirectoryInfo GetValuesOutputDirectory(string targetFramework = "", string configuration = "Debug")
+        {
+            //  Use a consistent directory format to put the values text file in, so we don't have to worry about
+            //  whether the project uses the standard output path format or not
+
+            targetFramework = targetFramework ?? string.Empty;
+            configuration = configuration ?? string.Empty;
+
+            string output = Path.Combine(ProjectRootPath, "bin", configuration, targetFramework);
+            return new DirectoryInfo(output);
         }
     }
 }

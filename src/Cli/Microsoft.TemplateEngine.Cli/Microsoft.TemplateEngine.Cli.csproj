@@ -17,12 +17,13 @@
     <PackageReference Include="Microsoft.TemplateEngine.Edge" Version="$(MicrosoftTemplateEngineEdgePackageVersion)" />
     <PackageReference Include="Microsoft.TemplateSearch.Common" Version="$(MicrosoftTemplateSearchCommonPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsLoggingConsoleVersion)" />
-    <PackageReference Include="Wcwidth.Sources" Version="0.6.0" ExcludeAssets="all" GeneratePathProperty="true" />
+    <PackageReference Include="Wcwidth.Sources" ExcludeAssets="all" GeneratePathProperty="true" />
     <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../Microsoft.DotNet.Cli.Utils/Microsoft.DotNet.Cli.Utils.csproj" />
+    <ProjectReference Include="../Microsoft.DotNet.Configurer/Microsoft.DotNet.Configurer.csproj" />
   </ItemGroup>
   
   <ItemGroup>
@@ -60,7 +61,7 @@
 
   <Target Name="CopyExternalSourceFilesIntoProject" BeforeTargets="BeforeBuild">
     <ItemGroup>
-      <WcwidthFiles Include="$(PkgWcwidth_Sources)\contentFiles\cs\net5.0\External\**\*" />
+      <WcwidthFiles Include="$(PkgWcwidth_Sources)\contentFiles\cs\net6.0\External\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(WcwidthFiles)" DestinationFolder="$(BaseIntermediateOutputPath)/External/%(RecursiveDir)" />
     <ItemGroup>

@@ -1,7 +1,6 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.DotNet.Cli.Utils;
 
@@ -25,21 +24,21 @@ namespace Microsoft.NET.TestFramework.Commands
             return ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(Arguments);
         }
 
-        public Command ToCommand()
+        public Command ToCommand(bool doNotEscapeArguments = false)
         {
             var process = new Process()
             {
-                StartInfo = ToProcessStartInfo()
+                StartInfo = ToProcessStartInfo(doNotEscapeArguments)
             };
             var ret = new Command(process, trimtrailingNewlines: true);
             return ret;
         }
 
-        public ProcessStartInfo ToProcessStartInfo()
+        public ProcessStartInfo ToProcessStartInfo(bool doNotEscapeArguments = false)
         {
             var ret = new ProcessStartInfo();
             ret.FileName = FileName;
-            ret.Arguments = EscapeArgs();
+            ret.Arguments = doNotEscapeArguments ? string.Join(" ", Arguments) : EscapeArgs();
             ret.UseShellExecute = false;
             foreach (var kvp in Environment)
             {

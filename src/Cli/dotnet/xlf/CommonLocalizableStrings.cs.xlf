@@ -2,9 +2,24 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="ArchArgumentName">
+        <source>ARCH</source>
+        <target state="new">ARCH</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ArchitectureOptionDescription">
         <source>The target architecture.</source>
         <target state="translated">Cílová architektura</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArtifactsPathArgumentName">
+        <source>ARTIFACTS_DIR</source>
+        <target state="new">ARTIFACTS_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArtifactsPathOptionDescription">
+        <source>The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</source>
+        <target state="new">The artifacts path. All output from the project, including build, publish, and pack output, will go in subfolders under the specified path.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotResolveRuntimeIdentifier">
@@ -32,14 +47,19 @@
         <target state="translated">Umožňuje instalaci předběžných verzí balíčků.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CorruptSolutionProjectFolderStructure">
+        <source>The solution file '{0}' is missing EndProject tags or has invalid child-parent project folder mappings around project GUID: '{1}'. Manually repair the solution or try to open and save it in Visual Studio."</source>
+        <target state="translated">V souboru řešení {0} chybí značky EndProject nebo obsahuje neplatná mapování složky nadřazeného/podřízeného projektu kolem projektu GUID: {1}. Opravte řešení ručně nebo se ho pokuste otevřít a uložit v sadě Visual Studio.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">V {0} se nenašel žádný projekt.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CustomConfigurationDisablesPublishAndPackReleaseProperties">
-        <source>A custom configuration was detected in the project '{0}', so the property '{1}' will not take effect.</source>
-        <target state="translated">U projektu {0} byla zjištěna vlastní konfigurace, takže vlastnost {1} se neprojeví.</target>
+      <trans-unit id="DidYouMean">
+        <source>Did you mean the following command?</source>
+        <target state="new">Did you mean the following command?</target>
         <note />
       </trans-unit>
       <trans-unit id="DisableBuildServersOptionDescription">
@@ -110,9 +130,19 @@ export PATH="$PATH:{0}"
         <target state="translated">Publikujte svoji aplikaci jako aplikaci závislou na architektuře. Aby bylo možné vaši aplikaci spustit, musí být na cílovém počítači nainstalovaný kompatibilní modul runtime .NET.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildAdditionalOptionTitle">
+        <source>.NET Cli Options:</source>
+        <target state="new">.NET Cli Options:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">V {0} se našlo několik projektů. Vyberte, který z nich chcete použít.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OSArgumentName">
+        <source>OS</source>
+        <target state="new">OS</target>
         <note />
       </trans-unit>
       <trans-unit id="OperatingSystemOptionDescription">
@@ -183,12 +213,12 @@ export PATH="$PATH:{0}"
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
         <target state="translated">Možnosti --self-contained a --no-self-contained nelze použít společně.</target>
-        <note />
+        <note>{Locked="--self-contained"}{Locked="--no-self-contained"}</note>
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Publikujte se svou aplikací modul runtime pro .NET, aby ho nebylo nutné instalovat na cílovém počítači.
+The default is 'false.' However, when targeting .NET 7 or lower, the default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">Publikujte se svou aplikací modul runtime pro .NET, aby ho nebylo nutné instalovat na cílovém počítači.
 Pokud se zadá identifikátor modulu runtime, výchozí hodnota je true.</target>
         <note />
       </trans-unit>
@@ -197,11 +227,9 @@ Pokud se zadá identifikátor modulu runtime, výchozí hodnota je true.</target
         <target state="translated">Řešení</target>
         <note />
       </trans-unit>
-      <trans-unit id="SolutionExecutableConfigurationMismatchError">
-        <source>Multiple executable projects in the solution contain conflicting '{0}' values. Ensure the values match. Consider using a Directory.build.props file to set all project configurations. Conflicting projects:
-{1}.</source>
-        <target state="translated">Několik spustitelných projektů v řešení obsahuje konfliktní hodnoty {0}. Ujistěte se, že se hodnoty shodují. Zvažte použití souboru Directory.build.props k nastavení všech konfigurací projektu. Konfliktní projekty:
-{1}.</target>
+      <trans-unit id="SolutionArgumentMisplaced">
+        <source>Solution argument '{0}' is misplaced.</source>
+        <target state="new">Solution argument '{0}' is misplaced.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionFile">
@@ -247,6 +275,11 @@ Pokud se zadá identifikátor modulu runtime, výchozí hodnota je true.</target
       <trans-unit id="Delete">
         <source>Delete</source>
         <target state="translated">Odstranit</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFolderAlreadyContainsProject">
+        <source>Solution {0} already contains project {1} in solution folder {2}.</source>
+        <target state="new">Solution {0} already contains project {1} in solution folder {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">

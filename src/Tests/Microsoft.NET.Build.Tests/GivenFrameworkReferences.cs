@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Runtime.CompilerServices;
-using System.Xml.Linq;
-using FluentAssertions;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
 using Newtonsoft.Json.Linq;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -84,10 +75,10 @@ namespace FrameworkReferenceTest
             {
                 Name = "MultipleFrameworkReferenceTest",
                 TargetFrameworks = tfm,
-                IsExe = true
+                IsExe = true,
+                SelfContained = "true"
             };
 
-            // Specifying RID makes the produced app self-contained.
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 
             if (tfm == ToolsetInfo.CurrentTargetFramework)
@@ -107,9 +98,9 @@ namespace FrameworkReferenceTest
                 .Should()
                 .Pass();
 
-            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
+            DirectoryInfo outputDirectory = buildCommand.GetOutputDirectory(runtimeIdentifier: testProject.RuntimeIdentifier);
 
-            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.RuntimeIdentifier, testProject.Name + ".runtimeconfig.json");
+            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
             List<string> includedFrameworkNames = GetIncludedFrameworks(runtimeConfigFile);
             if (shouldHaveIncludedFrameworks)
             {
@@ -430,7 +421,8 @@ namespace FrameworkReferenceTest
                 Name = "RuntimePackNotAvailable",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                RuntimeIdentifier = "linux-x64"
+                RuntimeIdentifier = "linux-x64",
+                SelfContained = "true"
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
@@ -467,7 +459,8 @@ namespace FrameworkReferenceTest
                 Name = "RuntimePackNotAvailable",
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
                 IsExe = true,
-                RuntimeIdentifier = "invalid-rid"
+                RuntimeIdentifier = "invalid-rid",
+                SelfContained = "true"
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -534,6 +527,7 @@ namespace FrameworkReferenceTest
             string targetingPackVersion = "3.0.0-targetingpackversion";
 
             testProject.AdditionalProperties["RuntimeFrameworkVersion"] = "3.0.0-runtimeframeworkversion-property";
+            testProject.SelfContained = "true";
 
             var resolvedVersions = GetResolvedVersions(testProject,
                 project =>
@@ -566,6 +560,7 @@ namespace FrameworkReferenceTest
             string targetingPackVersion = "3.0.0-targetingpackversion";
 
             testProject.AdditionalProperties["RuntimeFrameworkVersion"] = runtimeFrameworkVersion;
+            testProject.SelfContained = "true";
 
             var resolvedVersions = GetResolvedVersions(testProject);
 
@@ -590,6 +585,7 @@ namespace FrameworkReferenceTest
             string targetingPackVersion = "3.0.0-targetingpackversion";
 
             testProject.AdditionalProperties["TargetLatestRuntimePatch"] = (!attributeValue).ToString();
+            testProject.SelfContained = "true";
 
             var resolvedVersions = GetResolvedVersions(testProject,
                 project =>
@@ -626,6 +622,7 @@ namespace FrameworkReferenceTest
             string targetingPackVersion = "3.0.0-targetingpackversion";
 
             testProject.AdditionalProperties["TargetLatestRuntimePatch"] = propertyValue.ToString();
+            testProject.SelfContained = "true";
 
             var resolvedVersions = GetResolvedVersions(testProject, identifier: propertyValue.ToString());
 
@@ -648,6 +645,7 @@ namespace FrameworkReferenceTest
             var testProject = new TestProject();
 
             string targetingPackVersion = "3.0.0-tpversionfromframeworkreference";
+            testProject.SelfContained = "true";
 
             var resolvedVersions = GetResolvedVersions(testProject,
                 project =>
@@ -724,13 +722,13 @@ namespace FrameworkReferenceTest
 
             var packageAsset = _testAssetsManager.CreateTestProject(referencedPackage);
 
-            var packCommand = new PackCommand(Log, packageAsset.TestRoot, referencedPackage.Name);
+            var packCommand = new PackCommand(packageAsset);
 
             packCommand.Execute()
                 .Should()
                 .Pass();
 
-            var nupkgFolder = packCommand.GetOutputDirectory(null);
+            var nupkgFolder = packCommand.GetPackageDirectory();
 
             var testProject = new TestProject()
             {
@@ -817,8 +815,9 @@ namespace FrameworkReferenceTest
             {
                 Name = "ResolvedFrameworkReferenceTest",
                 IsExe = true,
-                TargetFrameworks = "netcoreapp3.0",
-                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework,
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(),
+                SelfContained = "true"
             };
 
             testProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
@@ -974,6 +973,7 @@ namespace FrameworkReferenceTest
             if (selfContained)
             {
                 testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
+                testProject.SelfContained = "true";
             }
 
             string identifier = selfContained ? "_selfcontained" : string.Empty;
@@ -1110,7 +1110,7 @@ namespace FrameworkReferenceTest
                 testAsset = testAsset.WithProjectChanges(projectChanges);
             }
 
-            var command = new MSBuildCommand(Log, "WriteResolvedVersions", Path.Combine(testAsset.TestRoot, testProject.Name));
+            var command = new MSBuildCommand(testAsset, "WriteResolvedVersions");
 
             command.ExecuteWithoutRestore()
                 .Should()
@@ -1133,6 +1133,7 @@ namespace FrameworkReferenceTest
             testProject.TargetFrameworks = targetFramework;;
             testProject.IsExe = true;
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
+            testProject.SelfContained = "true";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier);
             if (projectChanges != null)

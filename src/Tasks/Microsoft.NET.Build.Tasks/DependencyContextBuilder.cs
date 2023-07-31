@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.DependencyModel;
 using NuGet.Packaging;
@@ -47,13 +45,11 @@ namespace Microsoft.NET.Build.Tasks
 
         private const string NetCorePlatformLibrary = "Microsoft.NETCore.App";
 
-        public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, bool includeRuntimeFileVersions, RuntimeGraph runtimeGraph, ProjectContext projectContext)
+        public DependencyContextBuilder(SingleProjectInfo mainProjectInfo, bool includeRuntimeFileVersions, RuntimeGraph runtimeGraph, ProjectContext projectContext, LockFileLookup libraryLookup)
         {
             _mainProjectInfo = mainProjectInfo;
             _includeRuntimeFileVersions = includeRuntimeFileVersions;
             _runtimeGraph = runtimeGraph;
-
-            var libraryLookup = new LockFileLookup(projectContext.LockFile);
 
             _dependencyLibraries = projectContext.LockFileTarget.Libraries
                 .Select(lockFileTargetLibrary =>

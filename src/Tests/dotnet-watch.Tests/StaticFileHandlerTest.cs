@@ -1,13 +1,9 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Tools.Internal;
 using Moq;
-using Xunit;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
@@ -25,14 +21,11 @@ namespace Microsoft.DotNet.Watcher.Tools
                     writtenBytes = bytes;
                 });
             var fileContentHandler = new StaticFileHandler(NullReporter.Singleton);
-            var context = new DotNetWatchContext
-            {
-                BrowserRefreshServer = server.Object,
-            };
+
             var file = new FileItem { FilePath = "Test.css", IsStaticFile = true, StaticWebAssetPath = "content/Test.css" };
 
             // Act
-            var result = await fileContentHandler.TryHandleFileChange(context, file, default);
+            var result = await fileContentHandler.TryHandleFileChange(server.Object, file, default);
 
             // Assert
             Assert.True(result);
@@ -53,15 +46,12 @@ namespace Microsoft.DotNet.Watcher.Tools
                 {
                     writtenBytes = bytes;
                 });
+
             var fileContentHandler = new StaticFileHandler(NullReporter.Singleton);
-            var context = new DotNetWatchContext
-            {
-                BrowserRefreshServer = server.Object,
-            };
             var file = new FileItem { FilePath = "Test.js", IsStaticFile = true, StaticWebAssetPath = "Test.js" };
 
             // Act
-            var result = await fileContentHandler.TryHandleFileChange(context, file, default);
+            var result = await fileContentHandler.TryHandleFileChange(server.Object, file, default);
 
             // Assert
             Assert.True(result);

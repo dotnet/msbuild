@@ -1,9 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools.Tool.Search;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Search.LocalizableStrings;
 
@@ -11,44 +9,53 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ToolSearchCommandParser
     {
-        public static readonly Argument<string> SearchTermArgument = new Argument<string>(LocalizableStrings.SearchTermArgumentName)
+        public static readonly CliArgument<string> SearchTermArgument = new("searchTerm")
         {
+            HelpName = LocalizableStrings.SearchTermArgumentName,
             Description = LocalizableStrings.SearchTermDescription
         };
 
-        public static readonly Option<bool> DetailOption = new Option<bool>("--detail", LocalizableStrings.DetailDescription);
-
-        public static readonly Option<string> SkipOption = new Option<string>("--skip", LocalizableStrings.SkipDescription)
+        public static readonly CliOption<bool> DetailOption = new("--detail")
         {
-            ArgumentHelpName = LocalizableStrings.SkipArgumentName
+            Description = LocalizableStrings.DetailDescription
         };
 
-        public static readonly Option<string> TakeOption = new Option<string>($"--take", LocalizableStrings.TakeDescription)
+        public static readonly CliOption<string> SkipOption = new("--skip")
         {
-            ArgumentHelpName = LocalizableStrings.TakeArgumentName
+            Description = LocalizableStrings.SkipDescription,
+            HelpName = LocalizableStrings.SkipArgumentName
         };
 
-        public static readonly Option<bool> PrereleaseOption = new Option<bool>($"--prerelease", LocalizableStrings.PrereleaseDescription);
+        public static readonly CliOption<string> TakeOption = new("--take")
+        {
+            Description = LocalizableStrings.TakeDescription,
+            HelpName = LocalizableStrings.TakeArgumentName
+        };
 
-        private static readonly Command Command = ConstructCommand();
+        public static readonly CliOption<bool> PrereleaseOption = new("--prerelease")
+        {
+            Description = LocalizableStrings.PrereleaseDescription
+        };
 
-        public static Command GetCommand()
+        private static readonly CliCommand Command = ConstructCommand();
+
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            var command = new Command("search", LocalizableStrings.CommandDescription);
+            CliCommand command = new("search", LocalizableStrings.CommandDescription);
 
-            command.AddArgument(SearchTermArgument);
+            command.Arguments.Add(SearchTermArgument);
 
-            command.AddOption(DetailOption);
-            command.AddOption(SkipOption);
-            command.AddOption(TakeOption);
-            command.AddOption(PrereleaseOption);
+            command.Options.Add(DetailOption);
+            command.Options.Add(SkipOption);
+            command.Options.Add(TakeOption);
+            command.Options.Add(PrereleaseOption);
 
-            command.SetHandler((parseResult) => new ToolSearchCommand(parseResult).Execute());
+            command.SetAction((parseResult) => new ToolSearchCommand(parseResult).Execute());
 
             return command;
         }

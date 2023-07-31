@@ -1,28 +1,20 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
 using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public class LaunchSettingsProfile
+    internal sealed class LaunchSettingsProfile
     {
-        public string? ApplicationUrl { get; set; }
-
-        public string? CommandName { get; set; }
-
-        public bool LaunchBrowser { get; set; }
-
-        public string? LaunchUrl { get; set; }
-
-        public IDictionary<string, string>? EnvironmentVariables { get; set; }
+        public string? ApplicationUrl { get; init; }
+        public string? CommandName { get; init; }
+        public bool LaunchBrowser { get; init; }
+        public string? LaunchUrl { get; init; }
+        public string? CommandLineArgs { get; init; }
+        public IReadOnlyDictionary<string, string>? EnvironmentVariables { get; init; }
 
         internal static LaunchSettingsProfile? ReadLaunchProfile(string projectDirectory, string? launchProfileName, IReporter reporter)
         {

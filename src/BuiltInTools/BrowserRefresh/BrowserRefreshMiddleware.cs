@@ -1,11 +1,6 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
@@ -28,10 +23,10 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             // We only need to support this for requests that could be initiated by a browser.
             if (IsBrowserDocumentRequest(context))
             {
-                // Use a custom stream to buffer the response body for rewriting.
-                using var memoryStream = new MemoryStream();
+                // Use a custom StreamWrapper to rewrite output on Write/WriteAsync
+                using var responseStreamWrapper = new ResponseStreamWrapper(context, _logger);
                 var originalBodyFeature = context.Features.Get<IHttpResponseBodyFeature>();
-                context.Features.Set<IHttpResponseBodyFeature>(new StreamResponseBodyFeature(memoryStream));
+                context.Features.Set<IHttpResponseBodyFeature>(new StreamResponseBodyFeature(responseStreamWrapper));
 
                 try
                 {
@@ -42,35 +37,19 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
                     context.Features.Set(originalBodyFeature);
                 }
 
-                if (memoryStream.TryGetBuffer(out var buffer) && buffer.Count > 0)
+                if (responseStreamWrapper.IsHtmlResponse)
                 {
-                    var response = context.Response;
-                    var baseStream = response.Body;
-
-                    if (IsHtmlResponse(response))
+                    if (responseStreamWrapper.ScriptInjectionPerformed)
                     {
-                        Log.SetupResponseForBrowserRefresh(_logger);
-
-                        // Since we're changing the markup content, reset the content-length
-                        response.Headers.ContentLength = null;
-
-                        var scriptInjectionPerformed = await WebSocketScriptInjection.TryInjectLiveReloadScriptAsync(baseStream, buffer);
-                        if (scriptInjectionPerformed)
-                        {
-                            Log.BrowserConfiguredForRefreshes(_logger);
-                        }
-                        else if (response.Headers.TryGetValue(HeaderNames.ContentEncoding, out var contentEncodings))
-                        {
-                            Log.ResponseCompressionDetected(_logger, contentEncodings);
-                        }
-                        else
-                        {
-                            Log.FailedToConfiguredForRefreshes(_logger);
-                        }
+                        Log.BrowserConfiguredForRefreshes(_logger);
+                    }
+                    else if (context.Response.Headers.TryGetValue(HeaderNames.ContentEncoding, out var contentEncodings))
+                    {
+                        Log.ResponseCompressionDetected(_logger, contentEncodings);
                     }
                     else
                     {
-                        await baseStream.WriteAsync(buffer);
+                        Log.FailedToConfiguredForRefreshes(_logger);
                     }
                 }
             }
@@ -113,12 +92,6 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
 
             return false;
         }
-
-        private bool IsHtmlResponse(HttpResponse response)
-            => (response.StatusCode == StatusCodes.Status200OK || response.StatusCode == StatusCodes.Status500InternalServerError) &&
-                MediaTypeHeaderValue.TryParse(response.ContentType, out var mediaType) &&
-                mediaType.IsSubsetOf(_textHtmlMediaType) &&
-                (!mediaType.Charset.HasValue || mediaType.Charset.Equals("utf-8", StringComparison.OrdinalIgnoreCase));
 
         internal static class Log
         {

@@ -16,20 +16,23 @@ Options:
   --type <project>        Specifies the template type to instantiate.
 
 Template options:
-  -f, --framework <net5.0|net7.0|netcoreapp3.1>  The target framework for the project.
-                                                 Type: choice
-                                                   net7.0         Target net7.0
-                                                   net5.0         Target net5.0
-                                                   netcoreapp3.1  Target netcoreapp3.1
-                                                 Default: net7.0
-  --langVersion <langVersion>                    Sets the LangVersion property in the created project file
-                                                 Type: text
-  --no-restore                                   If specified, skips the automatic restore of the project on create.
-                                                 Type: bool
-                                                 Default: false
-  --use-program-main                             Whether to generate an explicit Program class and Main method instead of top-level statements.
-                                                 Type: bool
-                                                 Default: false
+  -f, --framework <net6.0|net7.0|net8.0>  The target framework for the project.
+                                          Type: choice
+                                            net8.0  Target net8.0
+                                            net7.0  Target net7.0
+                                            net6.0  Target net6.0
+                                          Default: net8.0
+  --langVersion <langVersion>             Sets the LangVersion property in the created project file
+                                          Type: text
+  --no-restore                            If specified, skips the automatic restore of the project on create.
+                                          Type: bool
+                                          Default: false
+  --use-program-main                      Whether to generate an explicit Program class and Main method instead of top-level statements.
+                                          Type: bool
+                                          Default: false
+  --aot                                   Whether to enable the project for publishing as native AOT.
+                                          Type: bool
+                                          Default: false
 
 To see help for other template languages (F#, VB), use --language option:
    dotnet new console -h --language F#

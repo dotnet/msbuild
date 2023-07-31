@@ -1,11 +1,8 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Mapping;
 using Microsoft.DotNet.ApiCompatibility.Rules;
 
 namespace Microsoft.DotNet.ApiCompatibility
@@ -33,9 +30,9 @@ namespace Microsoft.DotNet.ApiCompatibility
 
             _differenceVisitorFactory = differenceVisitorFactory ?? new DifferenceVisitorFactory();
             _elementMapperFactory = elementMapperFactory?.Invoke(ruleRunner) ?? new ElementMapperFactory(ruleRunner);
-            Settings = settings ?? new ApiComparerSettings();
+            Settings = settings ?? new();
 
-            ruleRunner.InitializeRules(Settings.ToRuleSettings());
+            ruleRunner.InitializeRules(Settings);
         }
 
         /// <inheritdoc />
@@ -50,7 +47,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         public IEnumerable<CompatDifference> GetDifferences(ElementContainer<IAssemblySymbol> left,
             ElementContainer<IAssemblySymbol> right)
         {
-            IAssemblyMapper assemblyMapper = _elementMapperFactory.CreateAssemblyMapper(Settings.ToMapperSettings(), rightCount: 1);
+            IAssemblyMapper assemblyMapper = _elementMapperFactory.CreateAssemblyMapper(Settings, rightCount: 1);
             assemblyMapper.AddElement(left, ElementSide.Left);
             assemblyMapper.AddElement(right, ElementSide.Right);
 
@@ -64,7 +61,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         public IEnumerable<CompatDifference> GetDifferences(IEnumerable<ElementContainer<IAssemblySymbol>> left,
             IEnumerable<ElementContainer<IAssemblySymbol>> right)
         {
-            IAssemblySetMapper assemblySetMapper = _elementMapperFactory.CreateAssemblySetMapper(Settings.ToMapperSettings(), rightCount: 1);
+            IAssemblySetMapper assemblySetMapper = _elementMapperFactory.CreateAssemblySetMapper(Settings, rightCount: 1);
             assemblySetMapper.AddElement(left, ElementSide.Left);
             assemblySetMapper.AddElement(right, ElementSide.Right);
 
@@ -98,7 +95,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             IReadOnlyList<ElementContainer<IAssemblySymbol>> right)
         {
             int rightCount = right.Count;
-            IAssemblyMapper assemblyMapper = _elementMapperFactory.CreateAssemblyMapper(Settings.ToMapperSettings(), rightCount);
+            IAssemblyMapper assemblyMapper = _elementMapperFactory.CreateAssemblyMapper(Settings, rightCount);
             assemblyMapper.AddElement(left, ElementSide.Left);
             for (int i = 0; i < rightCount; i++)
             {
@@ -115,7 +112,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         public IEnumerable<CompatDifference> GetDifferences(IEnumerable<ElementContainer<IAssemblySymbol>> left,
             IReadOnlyList<IEnumerable<ElementContainer<IAssemblySymbol>>> right)
         {
-            IAssemblySetMapper assemblySetMapper = _elementMapperFactory.CreateAssemblySetMapper(Settings.ToMapperSettings(), right.Count);
+            IAssemblySetMapper assemblySetMapper = _elementMapperFactory.CreateAssemblySetMapper(Settings, right.Count);
             assemblySetMapper.AddElement(left, ElementSide.Left);
             for (int rightIndex = 0; rightIndex < right.Count; rightIndex++)
             {

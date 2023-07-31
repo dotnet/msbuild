@@ -1,19 +1,12 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using System.Linq;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.DotNet.ToolPackage;
-using System.Threading.Tasks;
-using Microsoft.DotNet.Cli.NuGetPackageDownloader;
-using NuGet.Versioning;
-using System.IO;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -21,7 +14,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
     {
         public IList<PackInfo> InstalledPacks;
         public List<PackInfo> RolledBackPacks = new List<PackInfo>();
-        public IList<(ManifestVersionUpdate manifestUpdate, DirectoryPath? offlineCache)> InstalledManifests = 
+        public IList<(ManifestVersionUpdate manifestUpdate, DirectoryPath? offlineCache)> InstalledManifests =
             new List<(ManifestVersionUpdate manifestUpdate, DirectoryPath?)>();
         public string CachePath;
         public bool GarbageCollectionCalled = false;
@@ -34,7 +27,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
         public int ExitCode => 0;
 
-        public MockPackWorkloadInstaller(string failingWorkload = null, string failingPack = null, bool failingRollback = false, IList<WorkloadId> installedWorkloads = null, 
+        public MockPackWorkloadInstaller(string failingWorkload = null, string failingPack = null, bool failingRollback = false, IList<WorkloadId> installedWorkloads = null,
             IList<PackInfo> installedPacks = null, bool failingGarbageCollection = false)
         {
             InstallationRecordRepository = new MockInstallationRecordRepository(failingWorkload, installedWorkloads);
@@ -92,7 +85,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
         public void RepairWorkloads(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null) => throw new NotImplementedException();
 
-        public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null)
+        public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null, bool cleanAllPacks = false)
         {
             if (FailingGarbageCollection)
             {

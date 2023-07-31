@@ -1,21 +1,27 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+#nullable disable
+
 
 namespace Microsoft.Extensions.HotReload
 {
     internal readonly struct UpdatePayload
     {
+        public const byte ApplySuccessValue = 0;
+
         private static readonly byte Version = 1;
 
-        public IReadOnlyList<UpdateDelta> Deltas { get; init; }
+        public IReadOnlyList<UpdateDelta> Deltas { get; }
 
+        public UpdatePayload(IReadOnlyList<UpdateDelta> deltas)
+        {
+            Deltas = deltas;
+        }
+
+        /// <summary>
+        /// Called by the dotnet-watch.
+        /// </summary>
         public async ValueTask WriteAsync(Stream stream, CancellationToken cancellationToken)
         {
             await using var binaryWriter = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
@@ -54,6 +60,9 @@ namespace Microsoft.Extensions.HotReload
             }
         }
 
+        /// <summary>
+        /// Called by delta applier.
+        /// </summary>
         public static async ValueTask<UpdatePayload> ReadAsync(Stream stream, CancellationToken cancellationToken)
         {
             using var binaryReader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
@@ -68,21 +77,15 @@ namespace Microsoft.Extensions.HotReload
             var deltas = new UpdateDelta[count];
             for (var i = 0; i < count; i++)
             {
-                var delta = new UpdateDelta
-                {
-                    ModuleId = Guid.Parse(binaryReader.ReadString()),
-                    MetadataDelta = await ReadBytesAsync(binaryReader, cancellationToken),
-                    ILDelta = await ReadBytesAsync(binaryReader, cancellationToken),
-                    UpdatedTypes = ReadIntArray(binaryReader),
-                };
+                var moduleId = Guid.Parse(binaryReader.ReadString());
+                var metadataDelta = await ReadBytesAsync(binaryReader, cancellationToken);
+                var ilDelta = await ReadBytesAsync(binaryReader, cancellationToken);
+                var updatedTypes = ReadIntArray(binaryReader);
 
-                deltas[i] = delta;
+                deltas[i] = new UpdateDelta(moduleId, metadataDelta: metadataDelta, ilDelta: ilDelta, updatedTypes);
             }
 
-            return new UpdatePayload
-            {
-                Deltas = deltas,
-            };
+            return new UpdatePayload(deltas);
 
             static async ValueTask<byte[]> ReadBytesAsync(BinaryReader binaryReader, CancellationToken cancellationToken)
             {
@@ -121,24 +124,34 @@ namespace Microsoft.Extensions.HotReload
 
     internal readonly struct UpdateDelta
     {
-        public Guid ModuleId { get; init; }
-        public byte[] MetadataDelta { get; init; }
-        public byte[] ILDelta { get; init; }
-        public int[] UpdatedTypes { get; init; }
-    }
+        public Guid ModuleId { get; }
+        public byte[] MetadataDelta { get; }
+        public byte[] ILDelta { get; }
+        public int[] UpdatedTypes { get; }
 
-    internal enum ApplyResult
-    {
-        Failed = -1,
-        Success = 0,
+        public UpdateDelta(Guid moduleId, byte[] metadataDelta, byte[] ilDelta, int[] updatedTypes)
+        {
+            ModuleId = moduleId;
+            MetadataDelta = metadataDelta;
+            ILDelta = ilDelta;
+            UpdatedTypes = updatedTypes;
+        }
     }
 
     internal readonly struct ClientInitializationPayload
     {
         private const byte Version = 0;
 
-        public string Capabilities { get; init; }
+        public string Capabilities { get; }
 
+        public ClientInitializationPayload(string capabilities)
+        {
+            Capabilities = capabilities;
+        }
+
+        /// <summary>
+        /// Called by delta applier.
+        /// </summary>
         public void Write(Stream stream)
         {
             using var binaryWriter = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
@@ -147,6 +160,9 @@ namespace Microsoft.Extensions.HotReload
             binaryWriter.Flush();
         }
 
+        /// <summary>
+        /// Called by dotnet-watch.
+        /// </summary>
         public static ClientInitializationPayload Read(Stream stream)
         {
             using var binaryReader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
@@ -157,7 +173,7 @@ namespace Microsoft.Extensions.HotReload
             }
 
             var capabilities = binaryReader.ReadString();
-            return new ClientInitializationPayload { Capabilities = capabilities };
+            return new ClientInitializationPayload(capabilities);
         }
     }
 }

@@ -1,13 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Xunit;
-using Xunit.Abstractions;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -26,11 +18,11 @@ namespace Microsoft.NET.Build.Tests
 
             var buildCommand = new BuildCommand(testAsset, "x64SolutionBuild.sln");
             buildCommand
-                .Execute("/p:ProduceReferenceAssembly=false")
+                .Execute("/p:ProduceReferenceAssembly=false", "/p:UseStandardOutputPaths=false")
                 .Should()
                 .Pass();
 
-            buildCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework, Path.Combine("x64", "Debug"))
+            new DirectoryInfo(Path.Combine(testAsset.TestRoot, "bin", "x64", "Debug", ToolsetInfo.CurrentTargetFramework))
                 .Should()
                 .OnlyHaveFiles(new[] {
                     "x64SolutionBuild.runtimeconfig.json",

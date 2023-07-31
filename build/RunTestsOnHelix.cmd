@@ -25,10 +25,31 @@ set DOTNET_CLI_HOME=%TestExecutionDirectory%\.dotnet
 mkdir %TestExecutionDirectory%
 robocopy %HELIX_CORRELATION_PAYLOAD%\t\TestExecutionDirectoryFiles %TestExecutionDirectory% /s
 
+set DOTNET_SDK_TEST_EXECUTION_DIRECTORY=%TestExecutionDirectory%
+set DOTNET_SDK_TEST_MSBUILDSDKRESOLVER_FOLDER=%HELIX_CORRELATION_PAYLOAD%\r
+set DOTNET_SDK_TEST_ASSETS_DIRECTORY=%TestExecutionDirectory%\assets
+
 REM call dotnet new so the first run message doesn't interfere with the first test
 dotnet new --debug:ephemeral-hive
-REM avoid potetial concurrency issues when nuget is creating nuget.config
-dotnet nuget list source
+
 REM We downloaded a special zip of files to the .nuget folder so add that as a source
-dotnet new nugetconfig
-dotnet nuget add source %DOTNET_ROOT%\.nuget --configfile nuget.config
+dotnet nuget list source --configfile %TestExecutionDirectory%\nuget.config
+PowerShell -ExecutionPolicy ByPass "dotnet nuget locals all -l | ForEach-Object { $_.Split(' ')[1]} | Where-Object{$_ -like '*cache'} | Get-ChildItem -Recurse -File -Filter '*.dat' | Measure"
+dotnet nuget add source %DOTNET_ROOT%\.nuget --configfile %TestExecutionDirectory%\nuget.config
+
+dotnet nuget remove source dotnet6-transport --configfile %TestExecutionDirectory%\nuget.config
+dotnet nuget remove source dotnet6-internal-transport --configfile %TestExecutionDirectory%\nuget.config
+dotnet nuget remove source dotnet7-transport --configfile %TestExecutionDirectory%\nuget.config
+dotnet nuget remove source dotnet7-internal-transport --configfile %TestExecutionDirectory%\nuget.config
+dotnet nuget remove source richnav --configfile %TestExecutionDirectory%\nuget.config
+dotnet nuget remove source vs-impl --configfile %TestExecutionDirectory%\nuget.config
+dotnet nuget remove source dotnet-libraries-transport --configfile %TestExecutionDirectory%\nuget.config
+dotnet nuget remove source dotnet-tools-transport --configfile %TestExecutionDirectory%\nuget.config
+dotnet nuget remove source dotnet-libraries --configfile %TestExecutionDirectory%\nuget.config
+dotnet nuget remove source dotnet-eng --configfile %TestExecutionDirectory%\nuget.config
+dotnet nuget list source --configfile %TestExecutionDirectory%\nuget.config
+
+robocopy %HELIX_CORRELATION_PAYLOAD%\t\TestExecutionDirectoryFiles\ .\ testAsset.props
+set TestPackagesRoot=%CD%\assets\testpackages\
+dotnet build assets\testpackages\Microsoft.NET.TestPackages.csproj /t:Build -p:VersionPropsIsImported=false
+robocopy .\assets\testpackages\testpackages %TestExecutionDirectory%\TestPackages /s

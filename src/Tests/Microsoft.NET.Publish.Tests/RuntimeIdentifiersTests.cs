@@ -1,23 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
-using System.Xml.Linq;
-using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using Xunit;
-using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -102,6 +87,8 @@ namespace Microsoft.NET.Publish.Tests
             //  Use a test-specific packages folder
             testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\..\pkg";
 
+            testProject.RecordProperties("RuntimeIdentifier");
+
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var buildCommand = new BuildCommand(testAsset);
 
@@ -110,12 +97,11 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            string targetFrameworkOutputDirectory = Path.Combine(buildCommand.GetNonSDKOutputDirectory().FullName, testProject.TargetFrameworks);
-            string outputDirectoryWithRuntimeIdentifier = Directory.EnumerateDirectories(targetFrameworkOutputDirectory, "*", SearchOption.AllDirectories).FirstOrDefault();
-            outputDirectoryWithRuntimeIdentifier.Should().NotBeNullOrWhiteSpace();
+            var runtimeIdentifier = testProject.GetPropertyValues(testAsset.TestRoot)["RuntimeIdentifier"];
+            runtimeIdentifier.Should().NotBeNullOrWhiteSpace();
 
             var selfContainedExecutable = $"{testProject.Name}{Constants.ExeSuffix}";
-            string selfContainedExecutableFullPath = Path.Combine(outputDirectoryWithRuntimeIdentifier, selfContainedExecutable);
+            string selfContainedExecutableFullPath = Path.Combine(buildCommand.GetOutputDirectory(runtimeIdentifier: runtimeIdentifier).FullName, selfContainedExecutable);
 
             new RunExeCommand(Log, selfContainedExecutableFullPath)
                 .Execute()
@@ -232,7 +218,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass();
 
             string expectedRid = runtimeIdentifierIsGlobal ? runtimeIdentifier : publishRuntimeIdentifier;
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, configuration: "Release", targetFramework: tfm);
             var finalRid = properties["RuntimeIdentifier"];
 
             Assert.True(finalRid == expectedRid);
@@ -262,12 +248,64 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, configuration: "Release", targetFramework: tfm);
             var finalRid = properties["RuntimeIdentifier"];
             var ucrRid = properties["NETCoreSdkPortableRuntimeIdentifier"];
 
             Assert.True(finalRid == publishRid);
             Assert.True(ucrRid != finalRid);
+        }
+
+        [Theory]
+        [InlineData("PublishReadyToRun", true)]
+        [InlineData("PublishSingleFile", true)]
+        [InlineData("PublishTrimmed", true)]
+        [InlineData("PublishAot", true)]
+        [InlineData("PublishReadyToRun", false)]
+        [InlineData("PublishSingleFile", false)]
+        [InlineData("PublishTrimmed", false)]
+        public void SomePublishPropertiesInferSelfContained(string property, bool useFrameworkDependentDefaultTargetFramework)
+        {
+            // Note: there is a bug with PublishAot I think where this test will fail for Aot if the testname is too long. Do not make it longer.
+            var tfm = useFrameworkDependentDefaultTargetFramework ? ToolsetInfo.CurrentTargetFramework : "net7.0"; // net 7 is the last non FDD default TFM at the time of this PR.
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = tfm,
+            };
+            testProject.AdditionalProperties[property] = "true";
+
+            testProject.RecordProperties("SelfContained");
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: $"{property}-{useFrameworkDependentDefaultTargetFramework}");
+
+            var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            if (property == "PublishTrimmed" && !useFrameworkDependentDefaultTargetFramework)
+            {
+                publishCommand
+                   .Execute()
+                   .Should()
+                   .Fail();
+            }
+            else
+            {
+                publishCommand
+                    .Execute()
+                    .Should()
+                    .Pass();
+            }
+
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: tfm, configuration: useFrameworkDependentDefaultTargetFramework ? "Release" : "Debug");
+
+            var expectedSelfContainedValue = "true";
+            if (
+                (property == "PublishReadyToRun" && useFrameworkDependentDefaultTargetFramework) || // This property should no longer infer SelfContained in net 8
+                (property == "PublishTrimmed" && !useFrameworkDependentDefaultTargetFramework) // This property did not infer SelfContained until net 8
+               )
+            {
+                expectedSelfContainedValue = "false";
+            }
+
+            properties["SelfContained"].Should().Be(expectedSelfContainedValue);
         }
 
         [Fact]
@@ -278,14 +316,15 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 IsExe = true,
-                TargetFrameworks = targetFramework
+                TargetFrameworks = targetFramework,
+                SelfContained = "true"
             };
-            testProject.AdditionalProperties["SelfContained"] = "true";
+
             testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "false";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(testAsset);
+            var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand
                 .Execute()
                 .Should()
@@ -335,7 +374,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties["PublishReadyToRun"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(testAsset);
+            var publishCommand = new DotnetPublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand
                 .Execute()
                 .Should()

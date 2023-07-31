@@ -1,10 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
 using FakeItEasy;
-using FluentAssertions;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.Edge;
@@ -147,6 +145,27 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             result.SelectMany(p => p.Aliases).HasDuplicates().Should()
                 .BeFalse("Duplicate option aliases should not be generated.");
+        }
+
+        [Fact]
+        public void ShortNameSkippedAfter4Reps()
+        {
+            List<CliTemplateParameter> paramList = new List<CliTemplateParameter>();
+            for (int i = 0; i < 8; i++)
+            {
+                paramList.Add(new CliTemplateParameter("par" + i));
+            }
+
+            var result = AliasAssignmentCoordinator.AssignAliasesForParameter(paramList, InitiallyTakenAliases);
+
+            result[0].Aliases.Should().BeEquivalentTo(new[] { "-p", "--par0" });
+            result[1].Aliases.Should().BeEquivalentTo(new[] { "-pa", "--par1" });
+            result[2].Aliases.Should().BeEquivalentTo(new[] { "-p:p", "--par2" });
+            result[3].Aliases.Should().BeEquivalentTo(new[] { "-p:pa", "--par3" });
+            result[4].Aliases.Should().BeEquivalentTo(new[] { "--par4" });
+            result[5].Aliases.Should().BeEquivalentTo(new[] { "--par5" });
+            result[6].Aliases.Should().BeEquivalentTo(new[] { "--par6" });
+            result[7].Aliases.Should().BeEquivalentTo(new[] { "--par7" });
         }
 
         // This reflects the MVC 2.0 tempalte as of May 24, 2017
@@ -292,7 +311,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Assert.True(templateOption.Aliases.Count > 0);
                 var longAlias = templateOption.Aliases.ElementAt(0);
                 var shortAlias = templateOption.Aliases.Count > 1 ? templateOption.Aliases.ElementAt(1) : null;
-                var isHidden = templateOption.Option.IsHidden;
+                var isHidden = templateOption.Option.Hidden;
                 Assert.Equal(expectedLongAlias, longAlias);
                 Assert.Equal(expectedShortAlias, shortAlias);
                 Assert.Equal(expectedIsHidden, isHidden);

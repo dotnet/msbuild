@@ -1,14 +1,10 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -16,11 +12,11 @@ namespace Microsoft.NET.Build.Tasks
     /// Raises Nuget LockFile representation to MSBuild items and resolves
     /// assets specified in the lock file.
     /// </summary>
+    /// <remarks>
+    /// Only called for backwards compatability, when <c>ResolvePackageDependencies</c> is true.
+    /// </remarks>
     public sealed class ResolvePackageDependencies : TaskBase
     {
-        /// <summary>
-        /// Only used if <see cref="EmitLegacyAssetsFileItems"/> is <see langword="true"/>.
-        /// </summary>
         private readonly Dictionary<string, string> _fileTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         private HashSet<string> _projectFileDependencies;
@@ -37,7 +33,6 @@ namespace Microsoft.NET.Build.Tasks
 
         /// <summary>
         /// All the targets in the lock file.
-        /// Only populated if <see cref="EmitLegacyAssetsFileItems"/> is <see langword="true"/>.
         /// </summary>
         [Output]
         public ITaskItem[] TargetDefinitions
@@ -56,7 +51,6 @@ namespace Microsoft.NET.Build.Tasks
 
         /// <summary>
         /// All the files in the lock file.
-        /// Only populated if <see cref="EmitLegacyAssetsFileItems"/> is <see langword="true"/>.
         /// </summary>
         [Output]
         public ITaskItem[] FileDefinitions
@@ -77,7 +71,6 @@ namespace Microsoft.NET.Build.Tasks
         /// <summary>
         /// All the dependencies between files and packages, labeled by the group containing
         /// the file (e.g. CompileTimeAssembly, RuntimeAssembly, etc.).
-        /// Only populated if <see cref="EmitLegacyAssetsFileItems"/> is <see langword="true"/>.
         /// </summary>
         [Output]
         public ITaskItem[] FileDependencies
@@ -113,12 +106,6 @@ namespace Microsoft.NET.Build.Tasks
         {
             get; set;
         }
-
-        /// <summary>
-        /// Setting this property restores pre-16.7 behaviour of populating <see cref="TargetDefinitions"/>,
-        /// <see cref="FileDefinitions"/> and <see cref="FileDependencies"/> outputs.
-        /// </summary>
-        public bool EmitLegacyAssetsFileItems { get; set; } = false;
 
         public string TargetFramework { get; set; }
 
@@ -194,11 +181,6 @@ namespace Microsoft.NET.Build.Tasks
                 item.SetMetadata(MetadataKeys.DiagnosticLevel, GetPackageDiagnosticLevel(package));
 
                 _packageDefinitions.Add(item);
-
-                if (!EmitLegacyAssetsFileItems)
-                {
-                    continue;
-                }
 
                 foreach (var file in package.Files)
                 {
@@ -276,18 +258,15 @@ namespace Microsoft.NET.Build.Tasks
         {
             foreach (var target in LockFile.Targets)
             {
-                if (EmitLegacyAssetsFileItems)
-                {
-                    TaskItem item = new TaskItem(target.Name);
-                    item.SetMetadata(MetadataKeys.RuntimeIdentifier, target.RuntimeIdentifier ?? string.Empty);
-                    item.SetMetadata(MetadataKeys.TargetFramework, TargetFramework);
-                    item.SetMetadata(MetadataKeys.TargetFrameworkMoniker, target.TargetFramework.DotNetFrameworkName);
-                    item.SetMetadata(MetadataKeys.FrameworkName, target.TargetFramework.Framework);
-                    item.SetMetadata(MetadataKeys.FrameworkVersion, target.TargetFramework.Version.ToString());
-                    item.SetMetadata(MetadataKeys.Type, "target");
+                TaskItem item = new TaskItem(target.Name);
+                item.SetMetadata(MetadataKeys.RuntimeIdentifier, target.RuntimeIdentifier ?? string.Empty);
+                item.SetMetadata(MetadataKeys.TargetFramework, TargetFramework);
+                item.SetMetadata(MetadataKeys.TargetFrameworkMoniker, target.TargetFramework.DotNetFrameworkName);
+                item.SetMetadata(MetadataKeys.FrameworkName, target.TargetFramework.Framework);
+                item.SetMetadata(MetadataKeys.FrameworkVersion, target.TargetFramework.Version.ToString());
+                item.SetMetadata(MetadataKeys.Type, "target");
 
-                    _targetDefinitions.Add(item);
-                }
+                _targetDefinitions.Add(item);
 
                 // raise each library in the target
                 GetPackageAndFileDependencies(target);
@@ -323,11 +302,8 @@ namespace Microsoft.NET.Build.Tasks
                 // get sub package dependencies
                 GetPackageDependencies(package, target.Name, resolvedPackageVersions, transitiveProjectRefs);
 
-                if (EmitLegacyAssetsFileItems)
-                {
-                    // get file dependencies on this package
-                    GetFileDependencies(package, target.Name);
-                }
+                // get file dependencies on this package
+                GetFileDependencies(package, target.Name);
             }
         }
 
@@ -375,7 +351,7 @@ namespace Microsoft.NET.Build.Tasks
                     string filePath = entry.Item1;
                     IDictionary<string, string> properties = entry.Item2;
 
-                    if (NuGetUtils.IsPlaceholderFile(filePath) || !EmitLegacyAssetsFileItems)
+                    if (NuGetUtils.IsPlaceholderFile(filePath))
                     {
                         continue;
                     }

@@ -1,15 +1,9 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
 using Microsoft.Build.Framework;
 using Microsoft.NET.TestFramework;
-
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -34,7 +28,15 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             task.Execute().Should().BeTrue();
 
-            task.ReferencesToAdd[0].ItemSpec.Should().Be(Path.Combine(mockPackageDirectory, "lib/Microsoft.Windows.SDK.NET.dll"));
+            var reference = task.ReferencesToAdd[0];
+            reference.ItemSpec.Should().Be(Path.Combine(mockPackageDirectory, "lib/Microsoft.Windows.SDK.NET.dll"));
+            reference.GetMetadata("AssemblyName").Should().Be("Microsoft.Windows.SDK.NET");
+            reference.GetMetadata("AssemblyVersion").Should().Be("10.0.18362.3");
+            reference.GetMetadata("FileVersion").Should().Be("10.0.18362.3");
+            reference.GetMetadata("PublicKeyToken").Should().Be("null");
+            reference.GetMetadata("FrameworkReferenceName").Should().Be("Microsoft.Windows.SDK.NET.Ref");
+            reference.GetMetadata("FrameworkReferenceVersion").Should().Be("5.0.0-preview1");
+
             task.PlatformManifests[0].ItemSpec.Should().Be(Path.Combine(mockPackageDirectory, $"data{Path.DirectorySeparatorChar}PlatformManifest.txt"));
             task.AnalyzersToAdd.Length.Should().Be(2);
             task.AnalyzersToAdd[0].ItemSpec.Should().Be(Path.Combine(mockPackageDirectory, "analyzers/dotnet/anyAnalyzer.dll"));

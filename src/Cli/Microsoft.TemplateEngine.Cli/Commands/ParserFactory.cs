@@ -1,29 +1,43 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Parsing;
+using System.CommandLine.Help;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal static class ParserFactory
     {
-        internal static Parser CreateParser(Command command, bool disableHelp = false)
+        internal static CliConfiguration CreateParser(CliCommand command, bool disableHelp = false)
         {
-            var builder = new CommandLineBuilder(command)
-                .UseParseErrorReporting()
-                //TODO: decide if it's needed to implement it; and implement if needed
-                //.UseParseDirective()
-                //.UseSuggestDirective()
-                .EnablePosixBundling(false);
+            CliConfiguration config = new(command)
+            //TODO: decide if it's needed to implement it; and implement if needed
+            //.UseParseDirective()
+            //.UseSuggestDirective()
+            {
+                EnableParseErrorReporting = true,
+                EnablePosixBundling = false
+            };
+
+            for (int i = 0; i < command.Options.Count; i++)
+            {
+                if (command.Options[i] is HelpOption)
+                {
+                    if (disableHelp)
+                    {
+                        command.Options.RemoveAt(i);
+                    }
+
+                    return config;
+                }
+            }
 
             if (!disableHelp)
             {
-                builder = builder.UseHelp();
+                command.Options.Add(new HelpOption());
             }
-            return builder.Build();
-        }
 
+            return config;
+        }
     }
 }

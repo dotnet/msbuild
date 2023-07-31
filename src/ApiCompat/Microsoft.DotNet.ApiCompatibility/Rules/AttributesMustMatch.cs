@@ -1,14 +1,10 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiSymbolExtensions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
@@ -18,76 +14,50 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// </summary>
     public class AttributesMustMatch : IRule
     {
-        private readonly RuleSettings _settings;
-        private readonly HashSet<string>? _attributesToExclude;
+        private readonly IRuleSettings _settings;
 
-        public AttributesMustMatch(RuleSettings settings, IRuleRegistrationContext context, IReadOnlyCollection<string>? excludeAttributesFiles)
+        public AttributesMustMatch(IRuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
-            if (excludeAttributesFiles != null)
-            {
-                IEnumerable<string> attributesToExclude = ReadExclusions(excludeAttributesFiles);
-                _attributesToExclude = new HashSet<string>(attributesToExclude);
-            }
-
             context.RegisterOnMemberSymbolAction(RunOnMemberSymbol);
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
         }
 
-        private static IEnumerable<string> ReadExclusions(IEnumerable<string> excludeAttributesFiles)
+        private void AddDifference(IList<CompatDifference> differences,
+            DifferenceType dt,
+            MetadataInformation leftMetadata,
+            MetadataInformation rightMetadata,
+            ISymbol containing,
+            string itemRef,
+            AttributeData attributeData)
         {
-            foreach (string filePath in excludeAttributesFiles)
-            {
-                foreach (string id in File.ReadAllLines(filePath))
-                {
-                    if (!string.IsNullOrWhiteSpace(id) && !id.StartsWith("#") && !id.StartsWith("//"))
-                    {
-                        yield return id.Trim();
-                    }
-                }
-            }
-        }
-
-        private void AddDifference(IList<CompatDifference> differences, DifferenceType dt, MetadataInformation leftMetadata, MetadataInformation rightMetadata, ISymbol containing, string itemRef, AttributeData attr)
-        {
-            string? docId = attr.AttributeClass?.GetDocumentationCommentId();
-
-            if (docId != null && _attributesToExclude != null && _attributesToExclude.Contains(docId))
-            {
-                return;
-            }
-
-            if (attr.AttributeClass != null && !attr.AttributeClass.IsVisibleOutsideOfAssembly(_settings.IncludeInternalSymbols))
-            {
-                return;
-            }
-
             if (!_settings.StrictMode && dt == DifferenceType.Added)
             {
                 return;
             }
 
+            string? docId = attributeData.AttributeClass?.GetDocumentationCommentId();
             CompatDifference difference = dt switch
             {
                 DifferenceType.Changed => new CompatDifference(
                     leftMetadata,
                     rightMetadata,
                     DiagnosticIds.CannotChangeAttribute,
-                    string.Format(Resources.CannotChangeAttribute, attr.AttributeClass, containing),
+                    string.Format(Resources.CannotChangeAttribute, attributeData.AttributeClass, containing),
                     DifferenceType.Changed,
                     $"{itemRef}:[{docId}]"),
                 DifferenceType.Added => new CompatDifference(
                     leftMetadata,
                     rightMetadata,
                     DiagnosticIds.CannotAddAttribute,
-                    string.Format(Resources.CannotAddAttribute, attr, containing),
+                    string.Format(Resources.CannotAddAttribute, attributeData, containing),
                     DifferenceType.Added,
                     $"{itemRef}:[{docId}]"),
                 DifferenceType.Removed => new CompatDifference(
                     leftMetadata,
                     rightMetadata,
                     DiagnosticIds.CannotRemoveAttribute,
-                    string.Format(Resources.CannotRemoveAttribute, attr, containing),
+                    string.Format(Resources.CannotRemoveAttribute, attributeData, containing),
                     DifferenceType.Removed,
                     $"{itemRef}:[{docId}]"),
                 _ => throw new InvalidOperationException($"Unreachable DifferenceType '{dt}' encountered."),
@@ -96,38 +66,20 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             differences.Add(difference);
         }
 
-        private bool AttributeEquals(AttributeData? left, AttributeData? right)
-        {
-            if (left != null && right != null)
-            {
-                if (!_settings.SymbolComparer.Equals(left.AttributeClass!, right.AttributeClass!))
-                {
-                    return false;
-                }
-
-                ConstantComparer constantComparer = new(_settings);
-
-                if (!Enumerable.SequenceEqual(left.ConstructorArguments, right.ConstructorArguments, constantComparer))
-                {
-                    return false;
-                }
-
-                return Enumerable.SequenceEqual(left.NamedArguments, right.NamedArguments, new NamedArgumentComparer(constantComparer));
-            }
-
-            return left == right;
-        }
-
         private void ReportAttributeDifferences(ISymbol containing,
-                                                MetadataInformation leftMetadata,
-                                                MetadataInformation rightMetadata,
-                                                string itemRef,
-                                                IList<AttributeData> left,
-                                                IList<AttributeData> right,
-                                                IList<CompatDifference> differences)
+            MetadataInformation leftMetadata,
+            MetadataInformation rightMetadata,
+            string itemRef,
+            ImmutableArray<AttributeData> left,
+            ImmutableArray<AttributeData> right,
+            IList<CompatDifference> differences)
         {
+            // See discussion in https://github.com/dotnet/sdk/pull/27774. ApiCompat intentionally considers non excluded attribute arguments.
+            left = left.ExcludeNonVisibleOutsideOfAssembly(_settings.SymbolFilter, excludeWithTypeArgumentsNotVisibleOutsideOfAssembly: false);
+            right = right.ExcludeNonVisibleOutsideOfAssembly(_settings.SymbolFilter, excludeWithTypeArgumentsNotVisibleOutsideOfAssembly: false);
+
             // No attributes, nothing to do. Exit early.
-            if (left.Count == 0 && right.Count == 0)
+            if (left.Length == 0 && right.Length == 0)
             {
                 return;
             }
@@ -140,8 +92,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             //   public void F() {}
             // would give you a set like
             //   { { Foo("a"), Foo("b") }, { Bar } }
-            AttributeSet leftAttributeSet = new(_settings, left);
-            AttributeSet rightAttributeSet = new(_settings, right);
+            AttributeSet leftAttributeSet = new(_settings.SymbolEqualityComparer, left);
+            AttributeSet rightAttributeSet = new(_settings.SymbolEqualityComparer, right);
 
             foreach (AttributeGroup leftGroup in leftAttributeSet)
             {
@@ -154,7 +106,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                         for (int j = 0; j < rightGroup.Attributes.Count; j++)
                         {
                             AttributeData rightAttribute = rightGroup.Attributes[j];
-                            if (AttributeEquals(leftAttribute, rightAttribute))
+                            if (_settings.AttributeDataEqualityComparer.Equals(leftAttribute, rightAttribute))
                             {
                                 rightGroup.Seen[j] = true;
                                 seen = true;
@@ -214,8 +166,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             }
         }
 
-        private void RunOnTypeSymbol(
-            ITypeSymbol? left,
+        private void RunOnTypeSymbol(ITypeSymbol? left,
             ITypeSymbol? right,
             MetadataInformation leftMetadata,
             MetadataInformation rightMetadata,
@@ -233,8 +184,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 {
                     for (int i = 0; i < leftNamed.TypeParameters.Length; i++)
                     {
-                        ReportAttributeDifferences(
-                            left,
+                        ReportAttributeDifferences(left,
                             leftMetadata,
                             rightMetadata,
                             left.GetDocumentationCommentId() + $"<{i}>",
@@ -245,8 +195,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 }
             }
 
-            ReportAttributeDifferences(
-                left,
+            ReportAttributeDifferences(left,
                 leftMetadata,
                 rightMetadata,
                 left.GetDocumentationCommentId() ?? "",
@@ -255,8 +204,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 differences);
         }
 
-        private void RunOnMemberSymbol(
-            ISymbol? left,
+        private void RunOnMemberSymbol(ISymbol? left,
             ISymbol? right,
             ITypeSymbol leftContainingType,
             ITypeSymbol rightContainingType,
@@ -273,8 +221,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             {
                 // If member is a method,
                 // compare return type attributes,
-                ReportAttributeDifferences(
-                    left,
+                ReportAttributeDifferences(left,
                     leftMetadata,
                     rightMetadata,
                     left.GetDocumentationCommentId() + "->" + leftMethod.ReturnType,
@@ -287,8 +234,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 {
                     for (int i = 0; i < leftMethod.Parameters.Length; i++)
                     {
-                        ReportAttributeDifferences(
-                            left,
+                        ReportAttributeDifferences(left,
                             leftMetadata,
                             rightMetadata,
                             left.GetDocumentationCommentId() + $"${i}",
@@ -303,8 +249,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 {
                     for (int i = 0; i < leftMethod.TypeParameters.Length; i++)
                     {
-                        ReportAttributeDifferences(
-                            left,
+                        ReportAttributeDifferences(left,
                             leftMetadata,
                             rightMetadata,
                             left.GetDocumentationCommentId() + $"<{i}>",
@@ -315,8 +260,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 }
             }
 
-            ReportAttributeDifferences(
-                left,
+            ReportAttributeDifferences(left,
                 leftMetadata,
                 rightMetadata,
                 left.GetDocumentationCommentId() ?? "",
@@ -325,66 +269,21 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 differences);
         }
 
-        private class NamedArgumentComparer : IEqualityComparer<KeyValuePair<string, TypedConstant>>
-        {
-            private readonly ConstantComparer _constantComparer;
-
-            public NamedArgumentComparer(ConstantComparer constantComparer) => _constantComparer = constantComparer;
-
-            public bool Equals(KeyValuePair<string, TypedConstant> x, KeyValuePair<string, TypedConstant> y) =>
-                x.Key.Equals(y.Key) && _constantComparer.Equals(x.Value, y.Value);
-
-            public int GetHashCode([DisallowNull] KeyValuePair<string, TypedConstant> obj) => throw new NotImplementedException();
-        }
-
-        private class ConstantComparer : IEqualityComparer<TypedConstant>
-        {
-            private readonly RuleSettings _settings;
-
-            public ConstantComparer(RuleSettings settings) => _settings = settings;
-
-            public bool Equals(TypedConstant x, TypedConstant y)
-            {
-                if (x.Kind != y.Kind)
-                    return false;
-
-                switch (x.Kind)
-                {
-                    case TypedConstantKind.Array:
-                        if (!x.Values.SequenceEqual(y.Values, this))
-                            return false;
-                        break;
-                    case TypedConstantKind.Type:
-                        if (!_settings.SymbolComparer.Equals((x.Value as INamedTypeSymbol)!, (y.Value as INamedTypeSymbol)!))
-                            return false;
-                        break;
-                    default:
-                        if (!Equals(x.Value, y.Value))
-                            return false;
-                        break;
-                }
-
-                return _settings.SymbolComparer.Equals(x.Type!, y.Type!);
-            }
-
-            public int GetHashCode([DisallowNull] TypedConstant obj) => throw new NotImplementedException();
-        }
-
         private class AttributeGroup
         {
             public readonly AttributeData Representative;
             public readonly List<AttributeData> Attributes = new();
             public readonly List<bool> Seen = new();
 
-            public AttributeGroup(AttributeData attr)
+            public AttributeGroup(AttributeData attributeData)
             {
-                Representative = attr;
-                Add(attr);
+                Representative = attributeData;
+                Add(attributeData);
             }
 
-            public void Add(AttributeData attr)
+            public void Add(AttributeData attributeData)
             {
-                Attributes.Add(attr);
+                Attributes.Add(attributeData);
                 Seen.Add(false);
             }
         }
@@ -395,43 +294,44 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             // We use a List instead of a HashSet because in practice, the number of attributes
             // on a declaration is going to be extremely small (on the order of 1-3).
             private readonly List<AttributeGroup> _set = new();
-            private readonly RuleSettings _settings;
+            private readonly IEqualityComparer<ISymbol> _symbolEqualityComparer;
 
-            public AttributeSet(RuleSettings settings, IList<AttributeData> attributes)
+            public AttributeSet(IEqualityComparer<ISymbol> symbolEqualityComparer,
+                IList<AttributeData> attributes)
             {
-                _settings = settings;
+                _symbolEqualityComparer = symbolEqualityComparer;
                 for (int i = 0; i < attributes.Count; i++)
                 {
                     Add(attributes[i]);
                 }
             }
 
-            public void Add(AttributeData attr)
+            private void Add(AttributeData attributeData)
             {
                 foreach (AttributeGroup group in _set)
                 {
-                    if (_settings.SymbolComparer.Equals(group.Representative.AttributeClass!, attr.AttributeClass!))
+                    if (_symbolEqualityComparer.Equals(group.Representative.AttributeClass!, attributeData.AttributeClass!))
                     {
-                        group.Add(attr);
+                        group.Add(attributeData);
                         return;
                     }
                 }
 
-                _set.Add(new AttributeGroup(attr));
+                _set.Add(new AttributeGroup(attributeData));
             }
 
-            public bool TryGetValue(AttributeData attr, [MaybeNullWhen(false)] out AttributeGroup attributeGroup)
+            public bool TryGetValue(AttributeData attributeData, [MaybeNullWhen(false)] out AttributeGroup attributeGroup)
             {
                 foreach (AttributeGroup group in _set)
                 {
-                    if (_settings.SymbolComparer.Equals(group.Representative.AttributeClass!, attr.AttributeClass!))
+                    if (_symbolEqualityComparer.Equals(group.Representative.AttributeClass!, attributeData.AttributeClass!))
                     {
                         attributeGroup = group;
                         return true;
                     }
                 }
 
-                attributeGroup = null;
+                attributeGroup = null!;
                 return false;
             }
 

@@ -1,30 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using System.Xml.Linq;
-using System.Reflection;
-using Xunit.Abstractions;
-using Microsoft.Build.Utilities;
-using NuGet.Versioning;
 
 namespace Microsoft.NET.TestFramework
 {
     public class ToolsetInfo
     {
-        public const string CurrentTargetFramework = "net7.0";
-        public const string CurrentTargetFrameworkVersion = "7.0";
-        public const string NextTargetFramework = "net8.0";
-        public const string NextTargetFrameworkVersion = "8.0";
+        public const string CurrentTargetFramework = "net8.0";
+        public const string CurrentTargetFrameworkVersion = "8.0";
+        public const string NextTargetFramework = "net9.0";
+        public const string NextTargetFrameworkVersion = "9.0";
 
         public const string LatestWinRuntimeIdentifier = "win10";
         public const string LatestLinuxRuntimeIdentifier = "ubuntu.22.04";
-        public const string LatestMacRuntimeIdentifier = "osx.10.15";
+        public const string LatestMacRuntimeIdentifier = "osx.13";
         public const string LatestRuntimeIdentifiers = $"{LatestWinRuntimeIdentifier}-x64;{LatestWinRuntimeIdentifier}-x86;osx.10.10-x64;osx.10.11-x64;osx.10.12-x64;osx.10.14-x64;{LatestMacRuntimeIdentifier}-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;ubuntu.16.10-x64;ubuntu.18.04-x64;ubuntu.20.04-x64;{LatestLinuxRuntimeIdentifier}-x64;centos.9-x64;rhel.9-x64;debian.9-x64;fedora.37-x64;opensuse.42.3-x64;linux-musl-x64";
 
         public string DotNetRoot { get; }
@@ -154,29 +144,29 @@ namespace Microsoft.NET.TestFramework
             }
         }
 
-        public void AddTestEnvironmentVariables(SdkCommandSpec command)
+        public void AddTestEnvironmentVariables(IDictionary<string, string> environment)
         {
             if (ShouldUseFullFrameworkMSBuild)
             {
                 string sdksPath = Path.Combine(DotNetRoot, "sdk", SdkVersion, "Sdks");
 
                 //  Use stage 2 MSBuild SDK resolver
-                command.Environment["MSBUILDADDITIONALSDKRESOLVERSFOLDER"] = SdkResolverPath;
+                environment["MSBUILDADDITIONALSDKRESOLVERSFOLDER"] = SdkResolverPath;
 
                 //  Avoid using stage 0 dotnet install dir
-                command.Environment["DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR"] = "";
+                environment["DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR"] = "";
 
                 //  Put stage 2 on the Path (this is how the MSBuild SDK resolver finds dotnet)
-                command.Environment["Path"] = DotNetRoot + ";" + Environment.GetEnvironmentVariable("Path");
+                environment["Path"] = DotNetRoot + ";" + Environment.GetEnvironmentVariable("Path");
 
                 if (!string.IsNullOrEmpty(MicrosoftNETBuildExtensionsPathOverride))
                 {
                     var microsoftNETBuildExtensionsPath = GetMicrosoftNETBuildExtensionsPath();
-                    command.Environment["MicrosoftNETBuildExtensionsTargets"] = Path.Combine(microsoftNETBuildExtensionsPath, "Microsoft.NET.Build.Extensions.targets");
+                    environment["MicrosoftNETBuildExtensionsTargets"] = Path.Combine(microsoftNETBuildExtensionsPath, "Microsoft.NET.Build.Extensions.targets");
 
                     if (UsingFullMSBuildWithoutExtensionsTargets())
                     {
-                        command.Environment["CustomAfterMicrosoftCommonTargets"] = Path.Combine(sdksPath, "Microsoft.NET.Build.Extensions",
+                        environment["CustomAfterMicrosoftCommonTargets"] = Path.Combine(sdksPath, "Microsoft.NET.Build.Extensions",
                             "msbuildExtensions-ver", "Microsoft.Common.targets", "ImportAfter", "Microsoft.NET.Build.Extensions.targets");
                     }
                 }
@@ -185,21 +175,21 @@ namespace Microsoft.NET.TestFramework
 
             if (Environment.Is64BitProcess)
             {
-                command.Environment.Add("DOTNET_ROOT", DotNetRoot);
+                environment.Add("DOTNET_ROOT", DotNetRoot);
             }
             else
             {
-                command.Environment.Add("DOTNET_ROOT(x86)", DotNetRoot);
+                environment.Add("DOTNET_ROOT(x86)", DotNetRoot);
             }
 
             if (!string.IsNullOrEmpty(CliHomePath))
             {
-                command.Environment.Add("DOTNET_CLI_HOME", CliHomePath);
+                environment.Add("DOTNET_CLI_HOME", CliHomePath);
             }
 
             //  We set this environment variable for in-process tests, but we don't want it to flow to out of process tests
             //  (especially if we're trying to run on full Framework MSBuild)
-            command.Environment[DotNet.Cli.Utils.Constants.MSBUILD_EXE_PATH] = "";
+            environment[DotNet.Cli.Utils.Constants.MSBUILD_EXE_PATH] = "";
 
         }
 
@@ -236,7 +226,7 @@ namespace Microsoft.NET.TestFramework
                 ret.Arguments = newArgs;
             }
 
-            TestContext.Current.AddTestEnvironmentVariables(ret);
+            TestContext.Current.AddTestEnvironmentVariables(ret.Environment);
 
             return ret;
         }
@@ -271,7 +261,14 @@ namespace Microsoft.NET.TestFramework
             }
             else
             {
-                dotnetRoot = Path.GetDirectoryName(ResolveCommand("dotnet"));
+                if (TryResolveCommand("dotnet", out string pathToDotnet))
+                {
+                    dotnetRoot = Path.GetDirectoryName(pathToDotnet);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Could not resolve path to dotnet");
+                }
                 hostNotFoundReason = "";
             }
 
@@ -289,7 +286,14 @@ namespace Microsoft.NET.TestFramework
             }
             else if (commandLine.UseFullFrameworkMSBuild)
             {
-                ret.FullFrameworkMSBuildPath = ResolveCommand("MSBuild");
+                if (TryResolveCommand("MSBuild", out string pathToMSBuild))
+                {
+                    ret.FullFrameworkMSBuildPath = Path.GetDirectoryName(pathToMSBuild);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Could not resolve path to MSBuild");
+                }
             }
 
             var microsoftNETBuildExtensionsTargetsFromEnvironment = Environment.GetEnvironmentVariable("MicrosoftNETBuildExtensionsTargets");
@@ -334,8 +338,15 @@ namespace Microsoft.NET.TestFramework
             return ret;
         }
 
-        private static string ResolveCommand(string command)
+        /// <summary>
+        /// Attempts to resolve full path to command from PATH/PATHEXT environment variable.
+        /// </summary>
+        /// <param name="command">The command to resolve.</param>
+        /// <param name="fullExePath">The full path to the command</param>
+        /// <returns><see langword="true"/> when command can be resolved, <see langword="false"/> otherwise.</returns>
+        public static bool TryResolveCommand(string command, out string fullExePath)
         {
+            fullExePath = null;
             char pathSplitChar;
             string[] extensions = new string[] { string.Empty };
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -356,10 +367,11 @@ namespace Microsoft.NET.TestFramework
 
             if (result == null)
             {
-                throw new InvalidOperationException("Could not resolve path to " + command);
+                return false;
             }
 
-            return result;
+            fullExePath = result;
+            return true;
         }
 
         private static string FindFileInTree(string relativePath, string startPath, bool throwIfNotFound = true)

@@ -1,11 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
-using System.Linq;
 using Microsoft.DotNet.Tools.Store;
 using LocalizableStrings = Microsoft.DotNet.Tools.Store.LocalizableStrings;
 
@@ -15,15 +11,15 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-store";
 
-        public static readonly Argument<IEnumerable<string>> Argument = new Argument<IEnumerable<string>>()
+        public static readonly CliArgument<IEnumerable<string>> Argument = new("argument")
         {
             Arity = ArgumentArity.ZeroOrMore,
         };
 
-        public static readonly Option<IEnumerable<string>> ManifestOption = new ForwardedOption<IEnumerable<string>>(new string[] { "-m", "--manifest" },
-                    LocalizableStrings.ProjectManifestDescription)
+        public static readonly CliOption<IEnumerable<string>> ManifestOption = new ForwardedOption<IEnumerable<string>>("--manifest", "-m")
         {
-            ArgumentHelpName = LocalizableStrings.ProjectManifest
+            Description = LocalizableStrings.ProjectManifestDescription,
+            HelpName = LocalizableStrings.ProjectManifest
         }.ForwardAsMany(o => {
             // the first path doesn't need to go through CommandDirectoryContext.ExpandPath
             // since it is a direct argument to MSBuild, not a property
@@ -46,51 +42,59 @@ namespace Microsoft.DotNet.Cli
             }
         }).AllowSingleArgPerToken();
 
-        public static readonly Option<string> FrameworkVersionOption = new ForwardedOption<string>("--framework-version", LocalizableStrings.FrameworkVersionOptionDescription)
+        public static readonly CliOption<string> FrameworkVersionOption = new ForwardedOption<string>("--framework-version")
         {
-            ArgumentHelpName = LocalizableStrings.FrameworkVersionOption
+            Description = LocalizableStrings.FrameworkVersionOptionDescription,
+            HelpName = LocalizableStrings.FrameworkVersionOption
         }.ForwardAsSingle(o => $"-property:RuntimeFrameworkVersion={o}");
 
-        public static readonly Option<string> OutputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
+        public static readonly CliOption<string> OutputOption = new ForwardedOption<string>("--output", "-o")
         {
-            ArgumentHelpName = LocalizableStrings.OutputOption
-        }.ForwardAsSingle(o => $"-property:ComposeDir={CommandDirectoryContext.GetFullPath(o)}");
+            Description = LocalizableStrings.OutputOptionDescription,
+            HelpName = LocalizableStrings.OutputOption
+        }.ForwardAsOutputPath("ComposeDir");
 
-        public static readonly Option<string> WorkingDirOption = new ForwardedOption<string>(new string[] { "-w", "--working-dir" }, LocalizableStrings.IntermediateWorkingDirOptionDescription)
+        public static readonly CliOption<string> WorkingDirOption = new ForwardedOption<string>("--working-dir", "-w")
         {
-            ArgumentHelpName = LocalizableStrings.IntermediateWorkingDirOption
+            Description = LocalizableStrings.IntermediateWorkingDirOptionDescription,
+            HelpName = LocalizableStrings.IntermediateWorkingDirOption
         }.ForwardAsSingle(o => $"-property:ComposeWorkingDir={CommandDirectoryContext.GetFullPath(o)}");
 
-        public static readonly Option<bool> SkipOptimizationOption = new ForwardedOption<bool>("--skip-optimization", LocalizableStrings.SkipOptimizationOptionDescription)
-            .ForwardAs("-property:SkipOptimization=true");
+        public static readonly CliOption<bool> SkipOptimizationOption = new ForwardedOption<bool>("--skip-optimization")
+        {
+            Description = LocalizableStrings.SkipOptimizationOptionDescription
+        }.ForwardAs("-property:SkipOptimization=true");
 
-        public static readonly Option<bool> SkipSymbolsOption = new ForwardedOption<bool>("--skip-symbols", LocalizableStrings.SkipSymbolsOptionDescription)
-            .ForwardAs("-property:CreateProfilingSymbols=false");
+        public static readonly CliOption<bool> SkipSymbolsOption = new ForwardedOption<bool>("--skip-symbols")
+        {
+            Description = LocalizableStrings.SkipSymbolsOptionDescription
+        }.ForwardAs("-property:CreateProfilingSymbols=false");
 
-        private static readonly Command Command = ConstructCommand();
+        private static readonly CliCommand Command = ConstructCommand();
 
-        public static Command GetCommand()
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            var command = new DocumentedCommand("store", DocsLink, LocalizableStrings.AppDescription);
+            DocumentedCommand command = new("store", DocsLink, LocalizableStrings.AppDescription);
 
-            command.AddArgument(Argument);
-            command.AddOption(ManifestOption);
-            command.AddOption(FrameworkVersionOption);
-            command.AddOption(OutputOption);
-            command.AddOption(WorkingDirOption);
-            command.AddOption(SkipOptimizationOption);
-            command.AddOption(SkipSymbolsOption);
-            command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
-            command.AddOption(CommonOptions.RuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
-            command.AddOption(CommonOptions.VerbosityOption);
-			command.AddOption(CommonOptions.CurrentRuntimeOption(LocalizableStrings.CurrentRuntimeOptionDescription));
+            command.Arguments.Add(Argument);
+            command.Options.Add(ManifestOption);
+            command.Options.Add(FrameworkVersionOption);
+            command.Options.Add(OutputOption);
+            command.Options.Add(WorkingDirOption);
+            command.Options.Add(SkipOptimizationOption);
+            command.Options.Add(SkipSymbolsOption);
+            command.Options.Add(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
+            command.Options.Add(CommonOptions.RuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
+            command.Options.Add(CommonOptions.VerbosityOption);
+            command.Options.Add(CommonOptions.CurrentRuntimeOption(LocalizableStrings.CurrentRuntimeOptionDescription));
+            command.Options.Add(CommonOptions.DisableBuildServersOption);
 
-            command.SetHandler(StoreCommand.Run);
+            command.SetAction(StoreCommand.Run);
 
             return command;
         }

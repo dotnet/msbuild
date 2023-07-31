@@ -1,9 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.Help
@@ -12,26 +10,26 @@ namespace Microsoft.DotNet.Tools.Help
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-help";
 
-        public static readonly Argument<string> Argument = new Argument<string>(LocalizableStrings.CommandArgumentName)
+        public static readonly CliArgument<string> Argument = new(LocalizableStrings.CommandArgumentName)
         {
             Description = LocalizableStrings.CommandArgumentDescription,
             Arity = ArgumentArity.ZeroOrOne
         };
 
-        private static readonly Command Command = ConstructCommand();
+        private static readonly CliCommand Command = ConstructCommand();
 
-        public static Command GetCommand()
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            var command = new DocumentedCommand("help", DocsLink, LocalizableStrings.AppFullName);
+            DocumentedCommand command = new("help", DocsLink, LocalizableStrings.AppFullName);
 
-            command.AddArgument(Argument);
+            command.Arguments.Add(Argument);
 
-            command.SetHandler(HelpCommand.Run);
+            command.SetAction(HelpCommand.Run);
 
             return command;
         }

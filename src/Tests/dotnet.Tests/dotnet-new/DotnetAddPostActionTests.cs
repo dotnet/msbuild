@@ -3,14 +3,10 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using Microsoft.DotNet.Tools.New.PostActionProcessors;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 
 namespace Microsoft.DotNet.Cli.New.Tests
 {
@@ -164,9 +160,9 @@ namespace Microsoft.DotNet.Cli.New.Tests
             string targetBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
             string referencedProjFileFullPath = Path.Combine(targetBasePath, "NewName.csproj");
-            
+
             var args = new Dictionary<string, string>() { { "targetFiles", "[\"MyApp.csproj\"]" }, { "referenceType", "project" }, { "reference", "./OldName.csproj" } };
-            var postAction = new MockPostAction { ActionId = DotnetAddPostActionProcessor.ActionProcessorId, Args = args };
+            var postAction = new MockPostAction(default, default, default, default, default!) { ActionId = DotnetAddPostActionProcessor.ActionProcessorId, Args = args };
 
             MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./OldName.csproj", "./NewName.csproj", ChangeKind.Create))
@@ -194,7 +190,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             string referencedProjFileFullPath = Path.Combine(targetBasePath, "Reference.csproj");
 
             var args = new Dictionary<string, string>() { { "targetFiles", "[\"MyApp.csproj\"]" }, { "referenceType", "project" }, { "reference", "./Reference.csproj" } };
-            var postAction = new MockPostAction { ActionId = DotnetAddPostActionProcessor.ActionProcessorId, Args = args };
+            var postAction = new MockPostAction(default, default, default, default, default!) { ActionId = DotnetAddPostActionProcessor.ActionProcessorId, Args = args };
 
             MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
@@ -220,7 +216,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
 
             var args = new Dictionary<string, string>() { { "targetFiles", "[\"MyApp.csproj\"]" }, { "referenceType", "package" }, { "reference", "System.Net.Json" } };
-            var postAction = new MockPostAction { ActionId = DotnetAddPostActionProcessor.ActionProcessorId, Args = args };
+            var postAction = new MockPostAction(default, default, default, default, default!) { ActionId = DotnetAddPostActionProcessor.ActionProcessorId, Args = args };
 
             MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
@@ -246,7 +242,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             string projFileFullPath = Path.Combine(targetBasePath, "MyApp.csproj");
 
             var args = new Dictionary<string, string>() { { "targetFiles", "MyApp.csproj" }, { "referenceType", "package" }, { "reference", "System.Net.Json" } };
-            var postAction = new MockPostAction { ActionId = DotnetAddPostActionProcessor.ActionProcessorId, Args = args };
+            var postAction = new MockPostAction(default, default, default, default, default!) { ActionId = DotnetAddPostActionProcessor.ActionProcessorId, Args = args };
 
             MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Frameworks;
@@ -54,6 +52,8 @@ namespace Microsoft.NET.Build.Tasks
         public bool NuGetRestoreSupported { get; set; } = true;
 
         public string NetCoreTargetingPackRoot { get; set; }
+        
+        public bool EnableAppHostPackDownload { get; set; } = true;
 
         [Output]
         public ITaskItem[] PackagesToDownload { get; set; }
@@ -276,7 +276,6 @@ namespace Microsoft.NET.Build.Tasks
                 string hostRelativePathInPackage = Path.Combine("runtimes", bestAppHostRuntimeIdentifier, "native",
                     hostNameWithoutExtension + (isExecutable ? ExecutableExtension.ForRuntimeIdentifier(bestAppHostRuntimeIdentifier) : ".dll"));
 
-
                 TaskItem appHostItem = new TaskItem(itemName);
                 string appHostPackPath = null;
                 if (!string.IsNullOrEmpty(TargetingPackRoot))
@@ -289,7 +288,7 @@ namespace Microsoft.NET.Build.Tasks
                     appHostItem.SetMetadata(MetadataKeys.PackageDirectory, appHostPackPath);
                     appHostItem.SetMetadata(MetadataKeys.Path, Path.Combine(appHostPackPath, hostRelativePathInPackage));
                 }
-                else
+                else if (EnableAppHostPackDownload)
                 {
                     // C++/CLI does not support package download && dedup error
                     if (!NuGetRestoreSupported && !packagesToDownload.ContainsKey(hostPackName))

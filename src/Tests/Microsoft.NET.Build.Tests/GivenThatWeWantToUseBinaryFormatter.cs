@@ -1,14 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
-using FluentAssertions;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using Xunit;
-using Xunit.Abstractions;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -88,7 +79,7 @@ namespace BinaryFormatterTests
         [InlineData("net472")]
         [InlineData("net5.0")]
         [InlineData("net6.0")]
-        [InlineData("net7.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_does_not_warn_on_any_framework_when_using_pragma_suppressions(string targetFramework)
         {
             var testProject = new TestProject()
@@ -141,7 +132,7 @@ namespace BinaryFormatterTests
         }
 
         [Theory]
-        [InlineData("net7.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_errors_when_targeting_certain_frameworks_and_not_using_pragma_suppressions(string targetFramework)
         {
             var testProject = new TestProject()
@@ -167,7 +158,7 @@ namespace BinaryFormatterTests
         }
 
         [Theory]
-        [InlineData("net7.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void It_allows_downgrading_errors_to_warnings_via_project_config(string targetFramework)
         {
             var testProject = new TestProject()

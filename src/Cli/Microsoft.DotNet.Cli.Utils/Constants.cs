@@ -1,7 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System.Runtime.InteropServices;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -10,12 +8,14 @@ namespace Microsoft.DotNet.Cli.Utils
         public const string DefaultConfiguration = "Debug";
 
         public static readonly string ProjectFileName = "project.json";
+        public static readonly string ToolManifestFileName = "dotnet-tools.json";
         public static readonly string DotConfigDirectoryName = ".config";
         public static readonly string ExeSuffix =
             RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
 
         public static readonly string BinDirectoryName = "bin";
         public static readonly string ObjDirectoryName = "obj";
+        public static readonly string GitDirectoryName = ".git";
 
         public static readonly string MSBUILD_EXE_PATH = "MSBUILD_EXE_PATH";
         public static readonly string MSBuildExtensionsPath = "MSBuildExtensionsPath";

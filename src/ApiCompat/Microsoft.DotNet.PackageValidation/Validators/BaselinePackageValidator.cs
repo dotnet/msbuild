@@ -1,9 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiCompatibility.Runner;
 using NuGet.ContentModel;
@@ -17,10 +14,10 @@ namespace Microsoft.DotNet.PackageValidation.Validators
     /// </summary>
     public class BaselinePackageValidator : IPackageValidator
     {
-        private readonly ICompatibilityLogger _log;
+        private readonly ISuppressableLog _log;
         private readonly IApiCompatRunner _apiCompatRunner;
 
-        public BaselinePackageValidator(ICompatibilityLogger log,
+        public BaselinePackageValidator(ISuppressableLog log,
             IApiCompatRunner apiCompatRunner)
         {
             _log = log;
@@ -28,9 +25,9 @@ namespace Microsoft.DotNet.PackageValidation.Validators
         }
 
         /// <summary>
-        /// Validates the latest nuget package doesnot drop any target framework/rid and does not introduce any breaking changes.
+        /// Validates the latest NuGet package doesn't drop any target framework/rid and does not introduce any breaking changes.
         /// </summary>
-        /// <param name="package">Nuget Package that needs to be validated.</param>
+        /// <param name="options"><see cref="PackageValidatorOption"/> to configure the baseline package validation.</param>
         public void Validate(PackageValidatorOption options)
         {
             if (options.BaselinePackage is null)
@@ -49,11 +46,10 @@ namespace Microsoft.DotNet.PackageValidation.Validators
                     IReadOnlyList<ContentItem>? latestCompileAssets = options.Package.FindBestCompileAssetForFramework(baselineTargetFramework);
                     if (latestCompileAssets == null)
                     {
-                        _log.LogError(
-                            new Suppression(DiagnosticIds.TargetFrameworkDropped) { Target = baselineTargetFramework.ToString() },
+                        _log.LogError(new Suppression(DiagnosticIds.TargetFrameworkDropped) { Target = baselineTargetFramework.ToString() },
                             DiagnosticIds.TargetFrameworkDropped,
-                            Resources.MissingTargetFramework,
-                            baselineTargetFramework.ToString());
+                            string.Format(Resources.MissingTargetFramework,
+                                baselineTargetFramework));
                     }
                     else if (options.EnqueueApiCompatWorkItems)
                     {
@@ -74,11 +70,10 @@ namespace Microsoft.DotNet.PackageValidation.Validators
                     IReadOnlyList<ContentItem>? latestRuntimeAssets = options.Package.FindBestRuntimeAssetForFramework(baselineTargetFramework);
                     if (latestRuntimeAssets == null)
                     {
-                        _log.LogError(
-                            new Suppression(DiagnosticIds.TargetFrameworkDropped) { Target = baselineTargetFramework.ToString() },
+                        _log.LogError(new Suppression(DiagnosticIds.TargetFrameworkDropped) { Target = baselineTargetFramework.ToString() },
                             DiagnosticIds.TargetFrameworkDropped,
-                            Resources.MissingTargetFramework,
-                            baselineTargetFramework.ToString());
+                            string.Format(Resources.MissingTargetFramework,
+                                baselineTargetFramework));
                     }
                     else if (options.EnqueueApiCompatWorkItems)
                     {
@@ -104,12 +99,11 @@ namespace Microsoft.DotNet.PackageValidation.Validators
                         IReadOnlyList<ContentItem>? latestRuntimeSpecificAssets = options.Package.FindBestRuntimeAssetForFrameworkAndRuntime(baselineTargetFramework, baselineRuntimeSpecificAssetsRidGroup.Key);
                         if (latestRuntimeSpecificAssets == null)
                         {
-                            _log.LogError(
-                                new Suppression(DiagnosticIds.TargetFrameworkAndRidPairDropped) { Target = baselineTargetFramework.ToString() + "-" + baselineRuntimeSpecificAssetsRidGroup.Key },
+                            _log.LogError(new Suppression(DiagnosticIds.TargetFrameworkAndRidPairDropped) { Target = baselineTargetFramework.ToString() + "-" + baselineRuntimeSpecificAssetsRidGroup.Key },
                                 DiagnosticIds.TargetFrameworkAndRidPairDropped,
-                                Resources.MissingTargetFrameworkAndRid,
-                                baselineTargetFramework.ToString(),
-                                baselineRuntimeSpecificAssetsRidGroup.Key);
+                                string.Format(Resources.MissingTargetFrameworkAndRid,
+                                    baselineTargetFramework,
+                                    baselineRuntimeSpecificAssetsRidGroup.Key));
                         }
                         else if (options.EnqueueApiCompatWorkItems)
                         {

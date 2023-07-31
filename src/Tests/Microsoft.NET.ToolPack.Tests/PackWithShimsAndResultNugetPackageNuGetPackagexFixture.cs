@@ -1,15 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using FluentAssertions;
-using Xunit.Abstractions;
-using System.Xml.Linq;
-using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.NET.ToolPack.Tests
 {
@@ -60,7 +50,7 @@ namespace Microsoft.NET.ToolPack.Tests
                 nameof(NupkgOfPackWithShimsFixture) + multiTarget + targetFramework,
                 targetFramework);
 
-            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+            var packCommand = new PackCommand(helloWorldAsset);
             packCommand.Execute().Should().Pass();
 
             return packCommand.GetNuGetPackage(packageVersion: _packageVersion);

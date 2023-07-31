@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(ResolverTargetFramework);net472;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>$(ResolverTargetFramework);net472</TargetFrameworks>
     <TargetFrameworks Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' ">$(ResolverTargetFramework)</TargetFrameworks>
 
     <PlatformTarget>AnyCPU</PlatformTarget>

@@ -1,17 +1,13 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Deployment.DotNet.Releases;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using Microsoft.DotNet.Workloads.Workload.List;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.VisualStudio.Setup.Configuration;
 
-namespace Microsoft.DotNet.Workloads.Workload.List
+namespace Microsoft.DotNet.Workloads.Workload
 {
     /// <summary>
     /// Provides functionality to query the status of .NET workloads in Visual Studio.    
@@ -53,10 +49,12 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         /// SDK installed by an instance matches the feature band of the currently executing SDK.
         /// </summary>
         /// <param name="workloadResolver">The workload resolver used to obtain available workloads.</param>
-        /// <param name="sdkFeatureBand">The feature band of the executing SDK.</param>
         /// <param name="installedWorkloads">The collection of installed workloads to update.</param>
-        internal static void GetInstalledWorkloads(IWorkloadResolver workloadResolver, SdkFeatureBand sdkFeatureBand,
-            InstalledWorkloadsCollection installedWorkloads)
+        /// <param name="sdkFeatureBand">The feature band of the executing SDK.
+        /// If null, then workloads from all feature bands in VS will be returned.
+        /// </param>
+        internal static void GetInstalledWorkloads(IWorkloadResolver workloadResolver,
+            InstalledWorkloadsCollection installedWorkloads, SdkFeatureBand? sdkFeatureBand = null)
         {
             IEnumerable<string> visualStudioWorkloadIds = GetAvailableVisualStudioWorkloads(workloadResolver);
             HashSet<string> installedWorkloadComponents = new();
@@ -81,7 +79,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                         continue;
                     }
 
-                    if (packageId.StartsWith(s_visualStudioSdkPackageIdPrefix))
+                    if (packageId.StartsWith(s_visualStudioSdkPackageIdPrefix)) // Check if the package owning SDK is installed via VS. Note: if a user checks to add a workload in VS but does not install the SDK, this will cause those workloads to be ignored.
                     {
                         // After trimming the package prefix we should be left with a valid semantic version. If we can't
                         // parse the version we'll skip this instance.
@@ -94,7 +92,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                         SdkFeatureBand visualStudioSdkFeatureBand = new SdkFeatureBand(visualStudioSdkVersion);
 
                         // The feature band of the SDK in VS must match that of the SDK on which we're running.
-                        if (!visualStudioSdkFeatureBand.Equals(sdkFeatureBand))
+                        if (sdkFeatureBand != null && !visualStudioSdkFeatureBand.Equals(sdkFeatureBand))
                         {
                             break;
                         }
@@ -140,8 +138,8 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 do
                 {
                     setupInstances.Next(1, instances, out fetched);
-                    
-                    if (fetched > 0) 
+
+                    if (fetched > 0)
                     {
                         ISetupInstance2 instance = (ISetupInstance2)instances[0];
 

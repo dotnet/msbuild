@@ -23,7 +23,7 @@
     }
   ],
   "identity": "Microsoft.Standard.QuickStarts.EditorConfigFile",
-  "shortName": "editorconfig",
+  "shortName": [ "editorconfig", ".editorconfig" ],
   "symbols": {
     "Empty": {
       "type": "parameter",

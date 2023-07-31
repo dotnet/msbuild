@@ -23,9 +23,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsVersion)" />
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
     <PackageReference Include="xunit" Version="$(XUnitVersion)" />
     <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)"  />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsLoggingConsoleVersion)"  />
   </ItemGroup>
 
   <!-- Packages that are in-box for .NET Core, so we only need to reference them for .NET Framework -->
@@ -47,12 +49,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="BuildTestPackages.targets" />
     <None Include="SetupTestRoot.targets" />
   </ItemGroup>
 
   <Import Project="SetupTestRoot.targets" />
-  <Import Project="BuildTestPackages.targets" />
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 

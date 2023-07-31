@@ -36,14 +36,14 @@
         <source>There are several launch profiles with case-sensitive names, which isn't permitted:
 {0}
 Make the profile names distinct.</source>
-        <target state="new">There are several launch profiles with case-sensitive names, which isn't permitted:
+        <target state="translated">Existuje několik spouštěcích profilů s názvy rozlišujícími malá a velká písmena, což není povoleno:
 {0}
-Make the profile names distinct.</target>
+Nastavte odlišné názvy profilů.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileDoesNotExist">
         <source>A launch profile with the name '{0}' doesn't exist.</source>
-        <target state="new">A launch profile with the name '{0}' doesn't exist.</target>
+        <target state="translated">Profil spuštění s názvem {0} neexistuje.</target>
         <note />
       </trans-unit>
       <trans-unit id="OnlyOneProjectAllowed">
@@ -79,10 +79,8 @@ Make the profile names distinct.</target>
       <trans-unit id="RunCommandExceptionUnableToRunSpecifyFramework">
         <source>Unable to run your project
 Your project targets multiple frameworks. Specify which framework to run using '{0}'.</source>
-        <target state="needs-review-translation">
-                    Projekt nelze spustit.
-                    Cílem projektu je více architektur. Pomocí parametru {0} určete, která architektura se má spustit.
-                </target>
+        <target state="translated">Projekt nelze spustit.
+Cílem projektu je více architektur. Pomocí parametru {0} určete, která architektura se má spustit.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionUnableToRun">
@@ -90,12 +88,10 @@ Your project targets multiple frameworks. Specify which framework to run using '
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, net5.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">
-                    Projekt se nedá spustit.
-                    Ověřte prosím, že máte spustitelný typ projektu, a zajistěte, aby tento projekt podporoval {0}.
-                    Cílem spustitelného projektu by mělo být TFM (například net5.0) a jeho OutputType by měl být Exe.
-                    Aktuální {1} je {2}.
-                </target>
+        <target state="translated">Projekt se nedá spustit.
+Ověřte prosím, že máte spustitelný typ projektu, a zajistěte, aby tento projekt podporoval {0}.
+Cílem spustitelného projektu by mělo být TFM (například net5.0) a jeho OutputType by měl být Exe.
+Aktuální {1} je {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionNoProjects">
@@ -120,16 +116,14 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotLocateALaunchSettingsFile">
         <source>The specified launch profile '{0}' could not be located.</source>
-        <target state="new">The specified launch profile '{0}' could not be located.</target>
+        <target state="translated">Zadaný profil spuštění {0} se nenašel.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandExceptionCouldNotApplyLaunchSettings">
         <source>The launch profile "{0}" could not be applied.
 {1}</source>
-        <target state="needs-review-translation">
-                    Profil spuštění {0} se nedá použít.
-                    {1}
-                </target>
+        <target state="translated">Profil spuštění {0} se nedá použít.
+{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultLaunchProfileDisplayName">
@@ -149,7 +143,7 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="LaunchProfileIsNotAJsonObject">
         <source>A profile with the specified name isn't a valid JSON object.</source>
-        <target state="needs-review-translation">Profil se zadaným názvem se nenašel nebo nepředstavuje platný objekt JSON.</target>
+        <target state="translated">Profil se zadaným názvem není platný objekt JSON.</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfileHandlerCannotBeLocated">
@@ -165,10 +159,8 @@ The current {1} is '{2}'.</source>
       <trans-unit id="UnexpectedExceptionProcessingLaunchSettings">
         <source>An unexpected exception occurred while processing launch settings:
 {0}</source>
-        <target state="needs-review-translation">
-                    Při zpracování nastavení spuštění došlo k neočekávané výjimce:
-                    {0}
-                </target>
+        <target state="translated">Při zpracování nastavení spuštění došlo k neočekávané výjimce:
+{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LaunchProfilesCollectionIsNotAJsonObject">
@@ -179,10 +171,8 @@ The current {1} is '{2}'.</source>
       <trans-unit id="DeserializationExceptionMessage">
         <source>An error was encountered when reading launchSettings.json.
 {0}</source>
-        <target state="needs-review-translation">
-                    Při načítání launchSettings.json došlo k chybě.
-                    {0}
-                </target>
+        <target state="translated">Při načítání launchSettings.json došlo k chybě.
+{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandSpecifiecFileIsNotAValidProject">

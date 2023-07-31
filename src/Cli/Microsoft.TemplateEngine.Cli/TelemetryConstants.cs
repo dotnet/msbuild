@@ -1,6 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -19,6 +18,9 @@ namespace Microsoft.TemplateEngine.Cli
         internal const string ArgError = "argument-error";
         internal const string Framework = "framework";
         internal const string TemplateName = "template-name";
+        internal const string TemplateShortName = "template-short-name";
+        internal const string PackageName = "package-name";
+        internal const string PackageVersion = "package-version";
         internal const string IsTemplateThirdParty = "is-template-3rd-party";
         internal const string Auth = "auth";
         internal const string CreationResult = "create-success";

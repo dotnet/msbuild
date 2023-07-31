@@ -1,6 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
@@ -81,27 +80,6 @@ namespace Microsoft.TemplateEngine.Cli
                 default:
                     return base.TryGetHostParamDefault(paramName, out value);
             }
-        }
-
-        [Obsolete("Use " + nameof(Logger) + " instead")]
-        void ITemplateEngineHost.LogDiagnosticMessage(string message, string category, params string[] details)
-        {
-            //do nothing if used
-            //DefaultTemplateEngineHost may log these messages to Console
-        }
-
-        [Obsolete("Use " + nameof(Logger) + " instead")]
-        void ITemplateEngineHost.LogTiming(string label, TimeSpan duration, int depth)
-        {
-            //do nothing if used
-            //DefaultTemplateEngineHost may log these messages to Console
-        }
-
-        [Obsolete("Use " + nameof(Logger) + " instead")]
-        void ITemplateEngineHost.LogMessage(string message)
-        {
-            //do nothing if used
-            //DefaultTemplateEngineHost may log these messages to Console
         }
 
         [Obsolete("Use CreationStatusResult instead")]

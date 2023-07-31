@@ -1,16 +1,14 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.NET.Build.Tasks;
 using Microsoft.DotNet.ApiCompatibility.Logging;
+using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.DotNet.ApiCompat.Task
 {
     /// <summary>
-    /// ApiCompat's ValidateAssemblies msbuild frontend.
+    /// ApiCompat's ValidateAssemblies MSBuild frontend.
     /// </summary>
     public class ValidateAssembliesTask : TaskBase
     {
@@ -40,12 +38,22 @@ namespace Microsoft.DotNet.ApiCompat.Task
         public bool GenerateSuppressionFile { get; set; }
 
         /// <summary>
+        /// If true, preserves unnecessary suppressions when re-generating the suppression file.
+        /// </summary>
+        public bool PreserveUnnecessarySuppressions { get; set; }
+
+        /// <summary>
+        /// If true, permits unnecessary suppressions in the suppression file.
+        /// </summary>
+        public bool PermitUnnecessarySuppressions { get; set; }
+
+        /// <summary>
         /// The path to suppression files. If provided, the suppressions are read and stored.
         /// </summary>
         public string[]? SuppressionFiles { get; set; }
 
         /// <summary>
-        /// The path to the suppression output file that is written to, when <see cref="GenerateCompatibilitySuppressionFile"/> is true.
+        /// The path to the suppression output file that is written to, when <see cref="GenerateSuppressionFile"/> is true.
         /// </summary>
         public string? SuppressionOutputFile { get; set; }
 
@@ -53,6 +61,11 @@ namespace Microsoft.DotNet.ApiCompat.Task
         /// A NoWarn string contains the error codes that should be ignored.
         /// </summary>
         public string? NoWarn { get; set; }
+
+        /// <summary>
+        /// If true, includes both internal and public API.
+        /// </summary>
+        public bool RespectInternals { get; set; }
 
         /// <summary>
         /// Enables rule to check that attributes match.
@@ -119,12 +132,15 @@ namespace Microsoft.DotNet.ApiCompat.Task
 
         protected override void ExecuteCore()
         {
-            Func<ISuppressionEngine, MSBuildCompatibilityLogger> logFactory = (suppressionEngine) => new(Log, suppressionEngine);
+            Func<ISuppressionEngine, SuppressableMSBuildLog> logFactory = (suppressionEngine) => new(Log, suppressionEngine);
             ValidateAssemblies.Run(logFactory,
                 GenerateSuppressionFile,
+                PreserveUnnecessarySuppressions,
+                PermitUnnecessarySuppressions,
                 SuppressionFiles,
                 SuppressionOutputFile,
                 NoWarn,
+                RespectInternals,
                 EnableRuleAttributesMustMatch,
                 ExcludeAttributesFiles,
                 EnableRuleCannotChangeParameterName,
@@ -183,7 +199,9 @@ namespace Microsoft.DotNet.ApiCompat.Task
 
                 if (string.IsNullOrWhiteSpace(replacementString))
                 {
-                    throw new ArgumentException(string.Format(CommonResources.InvalidRexegStringTransformationPattern, captureGroupPattern, replacementString));
+                    throw new ArgumentException(string.Format(CommonResources.InvalidRexegStringTransformationPattern,
+                        captureGroupPattern,
+                        replacementString));
                 }
 
                 patterns[i] = (captureGroupPattern, replacementString);

@@ -1,20 +1,8 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using FluentAssertions;
-using Xunit;
-using Xunit.Abstractions;
 using NuGet.Packaging;
-using System.Xml.Linq;
 using System.Runtime.CompilerServices;
-using System;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.ToolPack.Tests
 {
@@ -42,7 +30,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             _testRoot = helloWorldAsset.TestRoot;
 
-            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+            var packCommand = new PackCommand(helloWorldAsset);
 
             var result = packCommand.Execute();
             result.Should().Pass();
@@ -193,7 +181,10 @@ namespace Microsoft.NET.ToolPack.Tests
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                getValuesCommand.Execute();
+                //  If multi-targeted, we need to specify which target framework to get the value for
+                string[] args = multiTarget ? new[] { $"/p:TargetFramework={_targetFrameworkOrFrameworks}" } : Array.Empty<string>();
+                getValuesCommand.Execute(args)
+                    .Should().Pass();
                 string runCommandPath = getValuesCommand.GetValues().Single();
                 Path.GetExtension(runCommandPath)
                     .Should().Be(extension);

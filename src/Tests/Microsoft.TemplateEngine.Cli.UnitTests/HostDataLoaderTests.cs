@@ -1,6 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using FakeItEasy;
 using Microsoft.TemplateEngine.Abstractions;
@@ -8,7 +7,6 @@ using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.TestHelper;
 using Microsoft.TemplateEngine.Utils;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
@@ -52,19 +50,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal("no-restore", data.DisplayNameForParameter("skipRestore"));
         }
 
-        //This is duplicated from JExtensions, problem is that we are referencing
-        //Cli and Edge assembly both have JExtensions referenced, hence ambigous reference error
-        //having copy here solves that...
-        private static JObject ReadJObjectFromIFile(IFile file)
-        {
-            using (Stream s = file.OpenRead())
-            using (TextReader tr = new StreamReader(s, System.Text.Encoding.UTF8, true))
-            using (JsonReader r = new JsonTextReader(tr))
-            {
-                return JObject.Load(r);
-            }
-        }
-
         [Fact]
         public void CanReadHostDataFromITemplateInfo()
         {
@@ -74,8 +59,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.NotNull(mountPoint);
             IFile? dataFile = mountPoint!.FileInfo("/Resources/dotnetcli.host.json");
             Assert.NotNull(dataFile);
-            JObject json = ReadJObjectFromIFile(dataFile!);
+            using Stream s = dataFile.OpenRead();
+            using TextReader tr = new StreamReader(s, System.Text.Encoding.UTF8, true);
 
+            string json = tr.ReadToEnd();
             ITemplateInfo template = A.Fake<ITemplateInfo>(builder => builder.Implements<ITemplateInfoHostJsonCache>().Implements<ITemplateInfo>());
             A.CallTo(() => ((ITemplateInfoHostJsonCache)template).HostData).Returns(json);
 

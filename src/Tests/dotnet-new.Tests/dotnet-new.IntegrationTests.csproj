@@ -15,18 +15,18 @@
     <ProjectReference Include="..\..\Cli\dotnet-new3\dotnet-new3.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
-    <PackageReference Include="Verify.Xunit" Version="17.1.4" />
-    <PackageReference Include="Verify.DiffPlex" Version="1.3.0" />
+    <PackageReference Include="Verify.Xunit" />
+    <PackageReference Include="Verify.DiffPlex" />
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.TestHelper" Version="$(MicrosoftTemplateEngineTestHelperPackageVersion)" />
+    <PackageReference Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="$(MicrosoftTemplateEngineAuthoringTemplateVerifierVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.2.1" Version="5.0" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.3.1" Version="5.0" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.5.0" Version="5.0" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.3.1" Version="3.1.*" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.5.0" Version="5.0.*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.6.0" Version="6.0.*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Common.ProjectTemplates.7.0" Version="7.0.*-*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.6.0" Version="6.0.*" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.DotNet.Web.ProjectTemplates.7.0" Version="7.0.*-*" GeneratePathProperty="true" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -36,11 +36,15 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
   internal class TemplatePackagesPaths
   {
-      public const string MicrosoftDotNetCommonProjectTemplates21Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_2_1)"%3B
-      public const string MicrosoftDotNetCommonProjectTemplates31Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_3_1)"%3B
-      public const string MicrosoftDotNetCommonProjectTemplates50Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_5_0)"%3B
-      public const string MicrosoftDotNetWebProjectTemplates31Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_3_1)"%3B
-      public const string MicrosoftDotNetWebProjectTemplates50Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_5_0)"%3B
+      public const string MicrosoftDotNetCommonProjectTemplates60Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_6_0)"%3B
+      public const string MicrosoftDotNetCommonProjectTemplates70Path = @"$(PkgMicrosoft_DotNet_Common_ProjectTemplates_7_0)"%3B
+      public const string MicrosoftDotNetWebProjectTemplates60Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_6_0)"%3B
+      public const string MicrosoftDotNetWebProjectTemplates70Path = @"$(PkgMicrosoft_DotNet_Web_ProjectTemplates_7_0)"%3B
+  }
+
+  internal class TemplatePackageVersion
+  {
+      public const string MicrosoftTemplateSearchTemplateDiscoveryPackageVersion = "$(MicrosoftTemplateEngineAbstractionsPackageVersion)"%3B
   }
 }
       ]]>
@@ -65,5 +69,10 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
   <ItemGroup>
     <Content Include="TestTemplates\**\*" Exclude="TestTemplates\**\bin\**;TestTemplates\**\obj\**" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Approvals\**\*" />
+    <None Include="Approvals\**\*" CopyToOutputDirectory="Never" />
   </ItemGroup>
 </Project>

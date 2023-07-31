@@ -1,10 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using FluentAssertions;
-using Xunit;
 using Microsoft.DotNet.Tools.Run;
-using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -22,8 +19,9 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "-p", "prop1=true", "-p", "prop2=false" }, new string[] { "-p:prop1=true", "-p:prop2=false" })]
         [InlineData(new string[] { "-p:prop1=true;prop2=false" }, new string[] { "-p:prop1=true;prop2=false" })]
         [InlineData(new string[] { "-p", "MyProject.csproj", "-p:prop1=true" }, new string[] { "-p:prop1=true" })]
-        [InlineData(new string[] { "--property", "MyProject.csproj", "-p:prop1=true" }, // The longhand --property option should never be treated as a project
-            new string[] { "-p:MyProject.csproj", "-p:prop1=true" })]
+        // The longhand --property option should never be treated as a project
+        [InlineData(new string[] { "--property", "MyProject.csproj", "-p:prop1=true" }, new string[] { "-p:MyProject.csproj", "-p:prop1=true" })]
+        [InlineData(new string[] { "--disable-build-servers" }, new string[] { "-p:UseRazorBuildServer=false", "-p:UseSharedCompilation=false", "/nodeReuse:false" })]
         public void MsbuildInvocationIsCorrect(string[] args, string[] expectedArgs)
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>

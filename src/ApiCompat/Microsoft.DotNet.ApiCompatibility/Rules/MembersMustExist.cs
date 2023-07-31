@@ -1,10 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using System.IO;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.ApiCompatibility.Mapping;
 using Microsoft.DotNet.ApiSymbolExtensions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
@@ -15,9 +13,14 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     /// </summary>
     public class MembersMustExist : IRule
     {
-        private readonly RuleSettings _settings;
+        private readonly IRuleSettings _settings;
 
-        public MembersMustExist(RuleSettings settings, IRuleRegistrationContext context)
+        /// <summary>
+        /// Instantiates the 'MemberMustExist' rule with <see cref="IRuleSettings"/> and an <see cref="IRuleRegistrationContext"/>.
+        /// </summary>
+        /// <param name="settings">The <see cref="IRuleSettings"/> that is used for comparison.</param>
+        /// <param name="context">The <see cref="IRuleRegistrationContext"/> that provides callback registration for comparing elements.</param>
+        public MembersMustExist(IRuleSettings settings, IRuleRegistrationContext context)
         {
             _settings = settings;
             context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
@@ -25,10 +28,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         }
 
         /// <summary>
-        /// Evaluates whether a type exists on both sides of the <see cref="TypeMapper"/>.
+        /// Evaluates whether a type exists on both sides of the <see cref="ITypeMapper"/>.
         /// </summary>
-        /// <param name="mapper">The <see cref="TypeMapper"/> to evaluate.</param>
-        /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
         private void RunOnTypeSymbol(ITypeSymbol? left, ITypeSymbol? right, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             if (left != null && right == null)
@@ -54,10 +55,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         }
 
         /// <summary>
-        /// Evaluates whether member (Field, Property, Method, Constructor, Event) exists on both sides of the <see cref="MemberMapper"/>.
+        /// Evaluates whether member (Field, Property, Method, Constructor, Event) exists on both sides of the <see cref="IMemberMapper"/>.
         /// </summary>
-        /// <param name="mapper">The <see cref="MemberMapper"/> to evaluate.</param>
-        /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
         private void RunOnMemberSymbol(ISymbol? left, ISymbol? right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, MetadataInformation leftMetadata, MetadataInformation rightMetadata, IList<CompatDifference> differences)
         {
             if (left != null && right == null)
@@ -144,7 +143,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         }
 
         private bool ReturnTypesMatch(IMethodSymbol method, IMethodSymbol candidate) =>
-            _settings.SymbolComparer.Equals(method.ReturnType, candidate.ReturnType);
+            _settings.SymbolEqualityComparer.Equals(method.ReturnType, candidate.ReturnType);
 
         private bool ParametersMatch(IMethodSymbol method, IMethodSymbol candidate)
         {
@@ -153,7 +152,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
             for (int i = 0; i < method.Parameters.Length; i++)
             {
-                if (!_settings.SymbolComparer.Equals(method.Parameters[i].Type, method.Parameters[i].Type))
+                if (!_settings.SymbolEqualityComparer.Equals(method.Parameters[i].Type, method.Parameters[i].Type))
                     return false;
             }
 

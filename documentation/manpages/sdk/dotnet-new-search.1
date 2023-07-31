@@ -14,49 +14,49 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-new-search" "1" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-new-search" "1" "2022-11-08" "" ".NET Documentation"
 .hy
 .SH dotnet new search
 .PP
 \f[B]This article applies to:\f[R] \[u2714]\[uFE0F] .NET Core 5.0.300 SDK and later versions
 .SH NAME
 .PP
-dotnet-new---search - searches for the templates supported by dotnet-new on NuGet.org.
+dotnet-new-search - searches for the templates supported by dotnet-new on NuGet.org.
 .SH SYNOPSIS
 .IP
 .nf
 \f[C]
-dotnet new <TEMPLATE_NAME> --search
+dotnet new search <TEMPLATE_NAME>
 
-dotnet new [<TEMPLATE_NAME>] --search [--author <AUTHOR>] [-lang|--language {\[dq]C#\[dq]|\[dq]F#\[dq]|VB}]
+dotnet new search [<TEMPLATE_NAME>] [--author <AUTHOR>] [-lang|--language {\[dq]C#\[dq]|\[dq]F#\[dq]|VB}]
     [--package <PACKAGE>] [--tag <TAG>] [--type <TYPE>]
     [--columns <COLUMNS>] [--columns-all]
+    [-d|--diagnostics] [--verbosity <LEVEL>] [-h|--help]
 \f[R]
 .fi
 .SH DESCRIPTION
 .PP
-The \f[V]dotnet new --search\f[R] option searches for templates supported by \f[V]dotnet new\f[R] on NuGet.org.
+The \f[V]dotnet new search\f[R] command searches for templates supported by \f[V]dotnet new\f[R] on NuGet.org.
 When the is specified, searches for templates containing the specified name.
 .RS
 .PP
 .RE
 .PP
-Starting with .NET SDK 7.0.100 Preview 2, the \f[V]dotnet new\f[R] syntax has changed:
+Starting with the .NET 7 SDK, the \f[V]dotnet new\f[R] syntax has changed:
 .IP \[bu] 2
 The \f[V]--list\f[R], \f[V]--search\f[R], \f[V]--install\f[R], and \f[V]--uninstall\f[R] options became \f[V]list\f[R], \f[V]search\f[R], \f[V]install\f[R] and \f[V]uninstall\f[R] subcommands.
 .IP \[bu] 2
 The \f[V]--update-apply\f[R] option became the \f[V]update\f[R] subcommand.
 .IP \[bu] 2
-to use \f[V]--update-check\f[R], use the \f[V]update\f[R] subcommand with the \f[V]--check\f[R] option.
+To use \f[V]--update-check\f[R], use the \f[V]update\f[R] subcommand with the \f[V]--check-only\f[R] option.
 .PP
 Other options that were available before are still available to use with their respective subcommands.
 Separate help for each subcommand is available via the \f[V]-h\f[R] or \f[V]--help\f[R] option: \f[V]dotnet new <subcommand> --help\f[R] lists all supported options for the subcommand.
 .PP
 Additionally, tab completion is now available for \f[V]dotnet new\f[R].
-It supports completion for installed template names, as well as completion for the options a selected template provides.
+It supports completion for installed template names and for the options a selected template provides.
 To activate tab completion for the .NET SDK, see Enable tab completion.
-> > Examples of the new syntax: > > - Show help for the \f[V]search\f[R] subcommand.
-> > \f[V]dotnetcli >   dotnet new search --help >\f[R] > > - Search for all templates available on NuGet.org matching the \[lq]we\[rq] substring and supporting the F# language > > \f[V]dotnetcli >   dotnet new search we --language \[dq]F#\[dq] >\f[R]
+> > Examples of the old syntax: > > - Search for all templates available on NuGet.org matching the \[lq]we\[rq] substring and supporting the F# language > > \f[V]dotnetcli >   dotnet new we --search --language \[dq]F#\[dq] >\f[R]
 .SH ARGUMENTS
 .IP \[bu] 2
 \f[B]\f[VB]TEMPLATE_NAME\f[B]\f[R]
@@ -105,6 +105,20 @@ This list is equivalent to specifying \f[V]--columns=author,language\f[R].
 Displays all columns in the output.
 .RE
 .IP \[bu] 2
+\f[B]\f[VB]-d|--diagnostics\f[B]\f[R]
+.RS 2
+.PP
+Enables diagnostic output.
+Available since .NET SDK 7.0.100.
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]-h|--help\f[B]\f[R]
+.RS 2
+.PP
+Prints out help for the search command.
+Available since .NET SDK 7.0.100.
+.RE
+.IP \[bu] 2
 \f[B]\f[VB]-lang|--language {C#|F#|VB}\f[B]\f[R]
 .RS 2
 .PP
@@ -138,49 +152,37 @@ To be selected, a template must have at least one tag that exactly matches the c
 .PP
 Filters templates based on template type.
 Predefined values are \f[V]project\f[R], \f[V]item\f[R], and \f[V]solution\f[R].
+.RE
+.IP \[bu] 2
+\f[B]\f[VB]-v|--verbosity <LEVEL>\f[B]\f[R]
+.RS 2
+.PP
+Sets the verbosity level of the command.
+Allowed values are \f[V]q[uiet]\f[R], \f[V]m[inimal]\f[R], \f[V]n[ormal]\f[R], and \f[V]diag[nostic]\f[R].
+Available since .NET SDK 7.0.100.
+.RE
 .RS
 .PP
 To ensure that the template package appears in \f[V]dotnet new --search\f[R] result, set the NuGet package type to \f[V]Template\f[R].
-.RE
 .RE
 .SH EXAMPLES
 .IP \[bu] 2
 Search for all templates available on NuGet.org matching the \f[I]spa\f[R] substring.
 .RS 2
-.IP \[bu] 2
-since .NET SDK 6.0.100
 .IP
 .nf
 \f[C]
-dotnet new --search spa
-\f[R]
-.fi
-.IP \[bu] 2
-before .NET SDK 6.0.100
-.IP
-.nf
-\f[C]
-dotnet new spa --search
+dotnet new search spa
 \f[R]
 .fi
 .RE
 .IP \[bu] 2
 Search for all templates available on NuGet.org matching the \f[I]we\f[R] substring and supporting the F# language.
 .RS 2
-.IP \[bu] 2
-since .NET SDK 6.0.100
 .IP
 .nf
 \f[C]
-dotnet new --search we --language \[dq]F#\[dq]
-\f[R]
-.fi
-.IP \[bu] 2
-before .NET SDK 6.0.100
-.IP
-.nf
-\f[C]
-dotnet new we --search --language \[dq]F#\[dq]
+dotnet new search we --language \[dq]F#\[dq]
 \f[R]
 .fi
 .RE
@@ -190,7 +192,7 @@ Search for item templates.
 .IP
 .nf
 \f[C]
-dotnet new --search --type item
+dotnet new search --type item
 \f[R]
 .fi
 .RE
@@ -200,7 +202,7 @@ Search for all C# templates, showing the type and tags in the output.
 .IP
 .nf
 \f[C]
-dotnet new --search --language \[dq]C#\[dq] --columns \[dq]type,tags\[dq]
+dotnet new search --language \[dq]C#\[dq] --columns \[dq]type,tags\[dq]
 \f[R]
 .fi
 .RE
@@ -208,6 +210,6 @@ dotnet new --search --language \[dq]C#\[dq] --columns \[dq]type,tags\[dq]
 .IP \[bu] 2
 dotnet new command
 .IP \[bu] 2
-dotnet new \[en]list option
+dotnet new list command
 .IP \[bu] 2
 Custom templates for dotnet new

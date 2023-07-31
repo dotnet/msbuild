@@ -1,27 +1,14 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Transactions;
-using System.Xml.Linq;
-using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Xunit;
-using Xunit.Abstractions;
 using NuGet.Frameworks;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 
@@ -495,9 +482,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputDirectory = new DirectoryInfo(Path.Combine(testInstance.Path, "bin", configuration))
-                .EnumerateDirectories()
-                .Single();
+            var outputDirectory = new DirectoryInfo(OutputPathCalculator.FromProject(testInstance.Path, testInstance).GetOutputDirectory(configuration: configuration));
 
             return new FilePath(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"));
         }

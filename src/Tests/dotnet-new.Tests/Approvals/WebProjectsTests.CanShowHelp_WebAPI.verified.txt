@@ -59,12 +59,12 @@ Template options:
   -minimal, --use-minimal-apis                        Whether to use minimal APIs instead of controllers.
                                                       Type: bool
                                                       Default: false
-  -f, --framework <net5.0|net7.0|netcoreapp3.1>       The target framework for the project.
+  -f, --framework <net6.0|net7.0|net8.0>              The target framework for the project.
                                                       Type: choice
-                                                        net7.0         Target net7.0
-                                                        net5.0         Target net5.0
-                                                        netcoreapp3.1  Target netcoreapp3.1
-                                                      Default: net7.0
+                                                        net8.0  Target net8.0
+                                                        net7.0  Target net7.0
+                                                        net6.0  Target net6.0
+                                                      Default: net8.0
   --no-restore                                        If specified, skips the automatic restore of the project on create.
                                                       Type: bool
                                                       Default: false

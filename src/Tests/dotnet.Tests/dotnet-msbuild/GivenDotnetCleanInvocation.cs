@@ -1,13 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.DotNet.Tools.Clean;
-using FluentAssertions;
-using Xunit;
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
-using Microsoft.NET.TestFramework;
+using CleanCommand = Microsoft.DotNet.Tools.Clean.CleanCommand;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -29,14 +23,17 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
         [Theory]
         [InlineData(new string[] { }, "")]
-        [InlineData(new string[] { "-o", "<output>" }, "-property:OutputPath=<cwd><output>")]
-        [InlineData(new string[] { "--output", "<output>" }, "-property:OutputPath=<cwd><output>")]
+        [InlineData(new string[] { "-o", "<output>" }, "-property:OutputPath=<cwd><output> -property:_CommandLineDefinedOutputPath=true")]
+        [InlineData(new string[] { "--output", "<output>" }, "-property:OutputPath=<cwd><output> -property:_CommandLineDefinedOutputPath=true")]
+        [InlineData(new string[] { "--artifacts-path", "foo" }, "-property:ArtifactsPath=<cwd>foo")]
         [InlineData(new string[] { "-f", "<framework>" }, "-property:TargetFramework=<framework>")]
         [InlineData(new string[] { "--framework", "<framework>" }, "-property:TargetFramework=<framework>")]
         [InlineData(new string[] { "-c", "<configuration>" }, "-property:Configuration=<configuration>")]
         [InlineData(new string[] { "--configuration", "<configuration>" }, "-property:Configuration=<configuration>")]
         [InlineData(new string[] { "-v", "diag" }, "-verbosity:diag")]
         [InlineData(new string[] { "--verbosity", "diag" }, "-verbosity:diag")]
+        [InlineData(new string[] { "--disable-build-servers" }, "-p:UseRazorBuildServer=false -p:UseSharedCompilation=false /nodeReuse:false")]
+
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>

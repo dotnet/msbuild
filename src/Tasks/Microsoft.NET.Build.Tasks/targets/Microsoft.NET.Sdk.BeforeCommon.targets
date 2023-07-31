@@ -31,8 +31,15 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultAssemblyInfo.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
 
-  <!-- Set default intermediate and output paths -->
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
+  <!--
+    Apply these defaults from Microsoft.Common.CurrentVersion.targets now since we're running before them,
+    but need to adjust them and/or make decisions in terms of them.
+   -->
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
+    <Platform Condition="'$(Platform)'==''">AnyCPU</Platform>
+    <PlatformName Condition="'$(PlatformName)' == ''">$(Platform)</PlatformName>
+  </PropertyGroup>
 
   <!-- Before any additional SDK targets are imported, import the publish profile.
        This allows the publish profile to set properties like RuntimeIdentifier and them be
@@ -46,6 +53,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.TargetFrameworkInference.targets" />
 
+  <!-- Set default intermediate and output paths -->
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
+
   <!-- Related issue: https://github.com/dotnet/sdk/issues/12324-->
   <PropertyGroup>
     <!-- Import winfx targets when we're targeting .NETFramework and not importing the newer WindowsDesktop targets via `UseWPF`. -->
@@ -53,10 +63,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Otherwise, don't import. -->
     <ImportFrameworkWinFXTargets Condition="'$(ImportFrameworkWinFXTargets)' == ''">false</ImportFrameworkWinFXTargets>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <_TargetFrameworkVersionWithoutV>$(TargetFrameworkVersion.TrimStart('vV'))</_TargetFrameworkVersionWithoutV>
   </PropertyGroup>
 
   <!--
@@ -115,8 +121,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateDependencyFile Condition="'$(GenerateDependencyFile)' == ''">$(PreserveCompilationContext)</GenerateDependencyFile>
   </PropertyGroup>
 
-  <!-- Set PublishDir here, before Microsoft.Common.targets, to avoid a competing default there. -->
-  <PropertyGroup>
+  <!-- Set PublishDir here, before Microsoft.Common.targets, to avoid a competing default there.
+       If using artifacts output path format, PublishDir is already set in Microsoft.NET.DefaultOutputPaths.targets -->
+  <PropertyGroup Condition="'$(UseArtifactsOutput)' != 'true'">
     <PublishDirName Condition="'$(PublishDirName)' == ''">publish</PublishDirName>
     <!-- ensure the PublishDir is RID specific-->
     <PublishDir Condition="'$(PublishDir)' == '' and
@@ -225,14 +232,29 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) " >
     <ItemGroup>
       <_SupportedPlatformCompatibleVersions Include="@(SdkSupportedTargetPlatformVersion)" Condition=" %(Identity) != '' and $([MSBuild]::VersionLessThanOrEquals(%(Identity), $(TargetPlatformVersion))) " />
-      <_ImplicitDefineConstant Include="@(_SupportedPlatformCompatibleVersions->'$(TargetPlatformIdentifier.ToUpper())%(Identity)_OR_GREATER'->Replace('.', '_'))" />
+      <_ImplicitDefineConstant Include="@(_SupportedPlatformCompatibleVersions->Distinct()->'$(TargetPlatformIdentifier.ToUpper())%(Identity)_OR_GREATER'->Replace('.', '_'))" />
     </ItemGroup>
+  </Target>
+
+  <!-- Remove TRACE when DisableDiagnosticTracing is true -->
+  <Target Name="_DisableDiagnosticTracing"
+          Condition="'$(DisableDiagnosticTracing)' == 'true'"
+          DependsOnTargets="GenerateTargetPlatformDefineConstants;GenerateNETCompatibleDefineConstants;GeneratePlatformCompatibleDefineConstants"
+          BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <_DefineConstantsWithoutTrace Include="$(DefineConstants)" />
+      <_DefineConstantsWithoutTrace Remove="TRACE"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+      <DefineConstants>@(_DefineConstantsWithoutTrace)</DefineConstants>
+    </PropertyGroup>
   </Target>
 
   <!-- Add implicitly defined preprocessor symbols to DefineConstants -->
   <Target Name="AddImplicitDefineConstants"
           Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' "
-          DependsOnTargets="GenerateTargetPlatformDefineConstants;GenerateNETCompatibleDefineConstants;GeneratePlatformCompatibleDefineConstants"
+          DependsOnTargets="GenerateTargetPlatformDefineConstants;GenerateNETCompatibleDefineConstants;GeneratePlatformCompatibleDefineConstants;_DisableDiagnosticTracing"
           BeforeTargets="CoreCompile" >
     <PropertyGroup>
       <DefineConstants Condition=" '@(_ImplicitDefineConstant)' != '' " >$(DefineConstants);@(_ImplicitDefineConstant)</DefineConstants>

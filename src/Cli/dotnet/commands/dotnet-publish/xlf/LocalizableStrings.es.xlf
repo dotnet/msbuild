@@ -55,8 +55,8 @@ El valor predeterminado es publicar una aplicación dependiente del marco.</targ
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to publish for. The default is 'Debug'. Use the `PublishRelease` property to make 'Release' the default for this command.</source>
-        <target state="translated">Configuración para la que se va a publicar. El valor predeterminado es "Debug". Use la propiedad "PublishRelease" para que "Release" sea el valor predeterminado para este comando.</target>
+        <source>The configuration to publish for. The default is 'Release' for NET 8.0 projects and above, but 'Debug' for older projects.</source>
+        <target state="needs-review-translation">Configuración para la que se va a publicar. El valor predeterminado es "Debug". Use la propiedad "PublishRelease" para que "Release" sea el valor predeterminado para este comando.</target>
         <note />
       </trans-unit>
     </body>

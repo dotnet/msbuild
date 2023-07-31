@@ -1,9 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.CommandLine.Parsing;
 using FakeItEasy;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.Commands;
@@ -253,13 +251,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            RootCommand rootCommand = new();
+            CliRootCommand rootCommand = new();
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
-            rootCommand.AddCommand(myCommand);
+            rootCommand.Subcommands.Add(myCommand);
             ParseResult parseResult = rootCommand.Parse(command);
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            Parser parser = ParserFactory.CreateParser(templateCommand);
+            CliConfiguration parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.TokensToInvoke ?? Array.Empty<string>());
             var templateArgs = new TemplateCommandArgs(templateCommand, myCommand, templateParseResult);
 
@@ -323,11 +321,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
-            Parser parser = ParserFactory.CreateParser(myCommand);
+            CliConfiguration parser = ParserFactory.CreateParser(myCommand);
             ParseResult parseResult = parser.Parse($" new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            Parser templateCommandParser = ParserFactory.CreateParser(templateCommand);
+            CliConfiguration templateCommandParser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = templateCommandParser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             var templateArgs = new TemplateCommandArgs(templateCommand, myCommand, templateParseResult);
 
@@ -372,7 +370,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ParseResult parseResult = myCommand.Parse($" new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            Parser parser = ParserFactory.CreateParser(templateCommand);
+            CliConfiguration parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             var templateArgs = new TemplateCommandArgs(templateCommand, myCommand, templateParseResult);
 
@@ -418,7 +416,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ParseResult parseResult = myCommand.Parse($" new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            Parser parser = ParserFactory.CreateParser(templateCommand);
+            CliConfiguration parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             var templateArgs = new TemplateCommandArgs(templateCommand, myCommand, templateParseResult);
 
@@ -437,27 +435,27 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             new object?[][]
             {
                 //bool
-                new object?[] { "foo", "bool", "bool", true, null, null, "Option '--bool' is required." },
+                //new object?[] { "foo", "bool", "bool", true, null, null, "Option '--bool' is required." },
                 new object?[] { "foo -b text", "bool", "bool", true, null, null, "Unrecognized command or argument 'text'." },
                 new object?[] { "foo --bool 0", "bool", "bool", true, null, null, "Unrecognized command or argument '0'." },
                 //text
                 new object?[] { "foo --text", "text", "string", false, null, null, "Required argument missing for option: '--text'." },
-                new object?[] { "foo", "text", "string", true, null, null, "Option '--text' is required." },
+                //new object?[] { "foo", "text", "string", true, null, null, "Option '--text' is required." },
                 //int
                 new object?[] { "foo --int text", "int", "int", false, null, null, "Cannot parse argument 'text' for option '--int' as expected type 'Int64'." },
                 new object?[] { "foo --int", "int", "int", false, null, null, "Required argument missing for option: '--int'." },
-                new object?[] { "foo", "int", "int", true, null, null, "Option '--int' is required." },
+                //new object?[] { "foo", "int", "int", true, null, null, "Option '--int' is required." },
                 new object?[] { "foo --int", "int", "int", true, null, "not-int", "Cannot parse default if option without value 'not-int' for option '--int' as expected type 'Int64'." },
                 //float
                 new object?[] { "foo --float text", "float", "float", false, null, null, "Cannot parse argument 'text' for option '--float' as expected type 'Double'." },
                 new object?[] { "foo --float", "float", "float", false, null, null, "Required argument missing for option: '--float'." },
-                new object?[] { "foo", "float", "float", true, null, null, "Option '--float' is required." },
+                //new object?[] { "foo", "float", "float", true, null, null, "Option '--float' is required." },
                 new object?[] { "foo --float", "float", "float", true, null, "not-float", "Cannot parse default if option without value 'not-float' for option '--float' as expected type 'Double'." },
 
                 //hex
                 new object?[] { "foo --hex text", "hex", "hex", false, null, null, "Cannot parse argument 'text' for option '--hex' as expected type 'Int64'." },
                 new object?[] { "foo --hex", "hex", "hex", false, null, null, "Required argument missing for option: '--hex'." },
-                new object?[] { "foo", "hex", "hex", true, null, null, "Option '--hex' is required." },
+               // new object?[] { "foo", "hex", "hex", true, null, null, "Option '--hex' is required." },
                 new object?[] { "foo --hex", "hex", "hex", true, null, "not-hex", "Cannot parse default if option without value 'not-hex' for option '--hex' as expected type 'Int64'." },
 
             };
@@ -491,7 +489,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            Parser parser = ParserFactory.CreateParser(templateCommand);
+            CliConfiguration parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             Assert.True(templateParseResult.Errors.Any());
             Assert.Equal(expectedError, templateParseResult.Errors.Single().Message);
@@ -503,8 +501,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 new object?[] { "foo --framework netcoreapp3.1", "framework", "net5.0|net6.0", false, null, null, "Argument(s) 'netcoreapp3.1' are not recognized. Must be one of: 'net5.0', 'net6.0'." },
                 //https://github.com/dotnet/command-line-api/issues/1609
                 //new object?[] { "foo --framework", "framework", "net5.0|net6.0", false, null, null, "Required argument missing for option: '--framework'." },
-                new object?[] { "foo", "framework", "net5.0|net6.0", true, null, null, "Option '--framework' is required." },
-                new object?[] { "foo --framework", "framework", "net5.0|net6.0", true, null, "netcoreapp2.1", $"Cannot parse default if option without value 'netcoreapp2.1' for option '--framework' as expected type 'choice': value 'netcoreapp2.1' is not allowed, allowed values are: 'net5.0','net6.0'. Did you mean one of the following?{Environment.NewLine}net5.0{Environment.NewLine}net6.0" }
+                //requireness is no longer set on parser level
+                //new object?[] { "foo", "framework", "net5.0|net6.0", true, null, null, "Option '--framework' is required." },
+                new object?[] { "foo --framework", "framework", "net5.0|net6.0", true, null, "netcoreapp2.1", $"Cannot parse default if option without value 'netcoreapp2.1' for option '--framework' as expected type 'choice': value 'netcoreapp2.1' is not allowed, allowed values are: 'net5.0','net6.0'." }
             };
 
         [Theory]
@@ -532,12 +531,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
-            Parser parser = ParserFactory.CreateParser(myCommand);
+            CliConfiguration parser = ParserFactory.CreateParser(myCommand);
             ParseResult parseResult = parser.Parse($" new {command}");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            Parser templateCommandParser = ParserFactory.CreateParser(templateCommand);
+            CliConfiguration templateCommandParser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = templateCommandParser.Parse(args.RemainingArguments ?? Array.Empty<string>());
             Assert.True(templateParseResult.Errors.Any());
             Assert.Equal(expectedError, templateParseResult.Errors.Single().Message);
@@ -561,7 +560,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            Parser parser = ParserFactory.CreateParser(templateCommand);
+            CliConfiguration parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
 
             TemplateCommandArgs templateArgs = new(templateCommand, myCommand, templateParseResult);
@@ -594,7 +593,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
 
             TemplateCommand templateCommand = new(myCommand, settings, packageManager, templateGroup, templateGroup.Templates.Single());
-            Parser parser = ParserFactory.CreateParser(templateCommand);
+            CliConfiguration parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.RemainingArguments ?? Array.Empty<string>());
 
             TemplateCommandArgs templateArgs = new(templateCommand, myCommand, templateParseResult);
@@ -747,9 +746,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
 
-            RootCommand rootCommand = new();
+            CliRootCommand rootCommand = new();
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
-            rootCommand.AddCommand(myCommand);
+            rootCommand.Subcommands.Add(myCommand);
             ParseResult parseResult = rootCommand.Parse(command);
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
             TemplateCommand templateCommand = new(
@@ -758,11 +757,33 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
                 templatePackageManager: packageManager,
                 templateGroup: templateGroup,
                 template: templateGroup.Templates.Single());
-            Parser parser = ParserFactory.CreateParser(templateCommand);
+            CliConfiguration parser = ParserFactory.CreateParser(templateCommand);
             ParseResult templateParseResult = parser.Parse(args.TokensToInvoke ?? Array.Empty<string>());
             var templateArgs = new TemplateCommandArgs(templateCommand, myCommand, templateParseResult);
 
             Assert.True(expectedAction(templateArgs));
+        }
+
+        [Fact]
+        internal void CanParse_WithoutRequiredParameter()
+        {
+            MockTemplateInfo template = new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group")
+            .WithChoiceParameter("param", new[] { "val1", "val2" }, isRequired: true);
+            TemplateGroup templateGroup = TemplateGroup.FromTemplateList(
+                CliTemplateInfo.FromTemplateInfo(new[] { template }, A.Fake<IHostSpecificDataLoader>()))
+                .Single();
+
+            ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost();
+            IEngineEnvironmentSettings settings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+            TemplatePackageManager packageManager = A.Fake<TemplatePackageManager>();
+
+            CliRootCommand rootCommand = new();
+            NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
+            rootCommand.Subcommands.Add(myCommand);
+            ParseResult parseResult = rootCommand.Parse("new foo");
+            InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
+            HashSet<TemplateCommand> templateCommands = InstantiateCommand.GetTemplateCommand(args, settings, A.Fake<TemplatePackageManager>(), templateGroup);
+            Assert.Single(templateCommands);
         }
     }
 }

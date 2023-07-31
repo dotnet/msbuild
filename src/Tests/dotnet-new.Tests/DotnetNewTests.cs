@@ -1,17 +1,11 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
     [UsesVerify]
-    [Collection("Verify Tests")]
     public class DotnetNewTests : BaseIntegrationTest, IClassFixture<SharedHomeDirectory>
     {
         private readonly SharedHomeDirectory _sharedHome;
@@ -127,6 +121,45 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             commandResult.Should()
                  .ExitWith(103)
                  .And.HaveStdOutContaining("[Debug] [Template Engine] => [Execute]: Execute started");
+        }
+
+        [Fact]
+        public void CanUseDebugPathWhenEnvVarIsSet_Instantiate()
+        {
+            string cliHomePath = CreateTemporaryFolder(folderName: "CLI_HOME_TEST_FOLDER");
+            string home = CreateTemporaryFolder(folderName: "Home");
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--dry-run")
+                .WithDebug()
+                .WithCustomHive(home)
+                .WithEnvironmentVariable("DOTNET_CLI_HOME", cliHomePath)
+                .Execute();
+
+            commandResult
+                .Should()
+                .HaveStdOutContaining($"Settings Location: {home}")
+                .And
+                .NotHaveStdOutContaining($"Settings Location: {cliHomePath}")
+                .And
+                .Pass();
+        }
+
+        [Fact]
+        public void CanUseEnvVarPathWhenDebugPathIsNotSet_Instantiate()
+        {
+            string cliHomePath = CreateTemporaryFolder(folderName: "CLI_HOME_TEST_FOLDER");
+
+            CommandResult commandResult = new DotnetNewCommand(_log, "console", "--dry-run")
+                .WithDebug()
+                .WithoutCustomHive()
+                .WithEnvironmentVariable("DOTNET_CLI_HOME", cliHomePath)
+                .Execute();
+
+            commandResult
+                .Should()
+                .HaveStdOutContaining($"Settings Location: {cliHomePath}")
+                .And
+                .Pass();
         }
     }
 }

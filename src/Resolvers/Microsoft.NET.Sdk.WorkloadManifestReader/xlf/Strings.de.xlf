@@ -62,6 +62,11 @@
         <target state="translated">Ungültige Version: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">Fehler beim Analysieren der Version \"{1}\" für die Workloadmanifest-ID \"{0}\"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">Die Workloadmanifestabhängigkeit „{0}“, die vom Manifest „{1}“ [{2}] benötigt wird, wurde nicht gefunden.</target>
@@ -71,6 +76,16 @@
         <source>Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</source>
         <target state="translated">Die Workloadmanifestabhängigkeit „{0}“, Version „{1}“, ist niedriger als die Version „{2}“, die vom Manifest „{3}“ [{4}] benötigt wird.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ManifestFromInstallStateNotFound">
+        <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
+        <target state="translated">Das Arbeitsauslastungsmanifest {0}, das in {1} angegeben wurde, wurde nicht gefunden. Die Ausführung von "dotnet workload repair" kann dies beheben.</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
+      <trans-unit id="ManifestFromWorkloadSetNotFound">
+        <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
+        <target state="translated">Das Workloadmanifest {0} aus der Workloadversion {1} wurde nicht installiert. Die Ausführung von "dotnet workload repair" kann dies beheben.</target>
+        <note>{Locked="dotnet workload repair"}</note>
       </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
@@ -120,6 +135,16 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">Nicht aufgelöstes Ziel „{0}“ für die Workloadumleitung „{1}“ im Manifest „{2}“ [{3}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="translated">Die Arbeitsauslastungsversion {0}, die in {1} angegeben wurde, wurde nicht gefunden. Führen Sie „dotnet workload restore“ aus, um diese Workloadversion zu installieren.</target>
+        <note>{Locked="dotnet workload restore"}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromInstallStateNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found.</source>
+        <target state="translated">Die Arbeitsauslastungsversion {0}, die in {1} angegeben wurde, wurde nicht gefunden.</target>
         <note />
       </trans-unit>
     </body>

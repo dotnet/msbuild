@@ -1,14 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Xunit;
-using Xunit.Abstractions;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -31,7 +22,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(ToolsetInfo.CurrentTargetFramework);
-            var outputDirectory = publishDirectory.Parent;
+            var outputDirectory = new BuildCommand(testAsset).GetOutputDirectory();
 
             var filesPublished = new[] {
                 "ComServer.dll",

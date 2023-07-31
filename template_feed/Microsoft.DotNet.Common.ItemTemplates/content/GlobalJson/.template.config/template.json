@@ -13,7 +13,7 @@
   "groupIdentity": "GlobalJsonFile",
   "precedence": "100",
   "identity": "Microsoft.Standard.QuickStarts.GlobalJsonFile",
-  "shortName": "globaljson",
+  "shortName": [ "globaljson", "global.json" ],
   "sourceName": "unused",
   "primaryOutputs": [
     {

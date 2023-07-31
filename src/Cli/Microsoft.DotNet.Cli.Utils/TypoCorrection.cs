@@ -1,19 +1,20 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
     public static class TypoCorrection
     {
         /// <summary>
-        /// Gets the list of tokens similar to <paramref name="currentToken"/>.
+        /// Gets the list of tokens similar to <paramref name="currentToken"/>
+        /// based on priority search:
+        /// 1. Starts with
+        /// 2. Contains - the call is restricted with <paramref name="currentToken"/> length check, minLength:3 and <param name="maxLevenshteinDistance">
+        /// 3. Levenshtein algorithm with <param name="maxLevenshteinDistance"> restriction
+        /// max number of suggestion is restricted to 10 entries
         /// </summary>
         /// <param name="possibleTokens">List of tokens to select from.</param>
         /// <param name="currentToken">The token that is being compared.</param>
@@ -21,26 +22,84 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <returns>The enumerator to tokens similar to <paramref name="currentToken"/>.</returns>
         public static IEnumerable<string> GetSimilarTokens(IEnumerable<string> possibleTokens, string currentToken, int maxLevenshteinDistance = 3)
         {
-            int? bestDistance = null;
-            return possibleTokens
-                .Select(possibleMatch => (possibleMatch, distance: GetDistance(currentToken, possibleMatch)))
-                .Where(tuple => tuple.distance <= maxLevenshteinDistance)
-                .OrderBy(tuple => tuple.distance)
-                .ThenByDescending(tuple => GetStartsWithDistance(currentToken, tuple.possibleMatch))
-                .TakeWhile(tuple =>
+            var minCurrentTokenLength = 3;
+            var maxNumberOfSuggestions = 10;
+
+            var numberOfSuggestions = 0;
+            var currentTokenLength = currentToken.Length;
+            var possibleSuggestions = possibleTokens.Select((string possibleMatch) => new Suggestion(possibleMatch, possibleMatch.Length)).ToArray();
+
+            var matchByStartsWith = possibleSuggestions
+               .Where(s => s.PossibleMatch.StartsWith(currentToken))
+               .Select(SetSelection)
+               .Take(maxNumberOfSuggestions)
+               .OrderBy(s => s.Distance)
+               .ToList();
+
+            numberOfSuggestions += matchByStartsWith.Count;
+            if (numberOfSuggestions >= maxNumberOfSuggestions)
+            {
+                return matchByStartsWith.Select(s => s.PossibleMatch);
+            }
+
+            var matchByContains = new List<Suggestion>();
+            if (currentToken.Length >= minCurrentTokenLength)
+            {
+                matchByContains = possibleSuggestions
+                    .Where(s =>
+                        !s.IsSelected
+                        && s.PossibleMatch.Contains(currentToken)
+                        && s.Distance - currentTokenLength <= maxLevenshteinDistance)
+                    .OrderBy(s => s.Distance)
+                    .Take(maxNumberOfSuggestions - numberOfSuggestions)
+                    .Select(SetSelection)
+                    .ToList();
+
+                numberOfSuggestions += matchByContains.Count;
+                if (numberOfSuggestions >= maxNumberOfSuggestions)
                 {
-                    (string _, int distance) = tuple;
-                    bestDistance ??= distance;
-                    return distance == bestDistance;
-                })
-                .Select(tuple => tuple.possibleMatch);
+                    return matchByStartsWith
+                        .Concat(matchByContains)
+                        .Select(s => s.PossibleMatch);
+                }
+            }
+
+            var matchByLevenshteinDistance = possibleSuggestions
+                .Where(s => !s.IsSelected)
+                .Select(s => new Suggestion(s.PossibleMatch, GetDistance(s.PossibleMatch, currentToken)))
+                .Where(s => s.Distance <= maxLevenshteinDistance)
+                .OrderBy(s => s.Distance)
+                .ThenByDescending(s => GetStartsWithDistance(currentToken, s.PossibleMatch))
+                .FilterByShortestDistance()
+                .Take(maxNumberOfSuggestions - numberOfSuggestions);
+
+            return matchByStartsWith
+                .Concat(matchByContains
+                .Concat(matchByLevenshteinDistance))
+                .Select(s => s.PossibleMatch);
         }
 
+        // The method takes the matches with the shortest distance
+        // e.g. (razor, 2), (pazor, 2), (pazors, 3) => (razor, 2), (pazor, 2)
+        private static IEnumerable<Suggestion> FilterByShortestDistance(this IEnumerable<Suggestion> possibleMatches)
+        {
+            int? bestDistance = null;
+
+            return possibleMatches.TakeWhile(s =>
+            {
+                int distance = s.Distance;
+                bestDistance ??= distance;
+                return distance == bestDistance;
+            });
+        }
+
+        // The method finds the distance to the first mismatch between two strings
+        // e.g. (cat, cap) => 2
         private static int GetStartsWithDistance(string first, string second)
         {
             int i;
-            for (i = 0; i < first.Length && i < second.Length && first[i] == second[i]; i++)
-            { }
+            for (i = 0; i < first.Length && i < second.Length && first[i] == second[i]; i++) ;
+
             return i;
         }
 
@@ -58,7 +117,6 @@ namespace Microsoft.DotNet.Cli.Utils
                 throw new ArgumentNullException(nameof(second));
             }
 
-
             // Get the length of both.  If either is 0, return
             // the length of the other, since that number of insertions
             // would be required.
@@ -66,7 +124,6 @@ namespace Microsoft.DotNet.Cli.Utils
             int n = first.Length, m = second.Length;
             if (n == 0) return m;
             if (m == 0) return n;
-
 
             // Rather than maintain an entire matrix (which would require O(n*m) space),
             // just store the current row and the next row, each of which has a length m+1,
@@ -94,7 +151,6 @@ namespace Microsoft.DotNet.Cli.Utils
                     rows[nextRow][j] = Math.Min(dist1, Math.Min(dist2, dist3));
                 }
 
-
                 // Swap the current and next rows
                 if (curRow == 0)
                 {
@@ -110,7 +166,30 @@ namespace Microsoft.DotNet.Cli.Utils
 
             // Return the computed edit distance
             return rows[curRow][m];
+        }
 
+        private static Suggestion SetSelection(Suggestion s)
+        {
+            s.IsSelected = true;
+
+            return s;
+        }
+
+        // The class describes properties of a possible match token
+        // and based on these the decision for the token selection is made
+        internal sealed class Suggestion
+        {
+            public Suggestion(string possibleMatch, int distance)
+            {
+                PossibleMatch = possibleMatch;
+                Distance = distance;
+            }
+
+            public bool IsSelected { get; set; }
+
+            public string PossibleMatch { get; }
+
+            public int Distance { get; set; }
         }
     }
 }

@@ -62,6 +62,11 @@
         <target state="translated">無效的版本: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">剖析工作負載資訊清單識別碼 '{1}' 的版本 '{0}' 時發生錯誤</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">找不到資訊清單 '{1}' [{2}] 所需的工作負載資訊清單相依性 '{0}'</target>
@@ -71,6 +76,16 @@
         <source>Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</source>
         <target state="translated">工作負載資訊清單相依性 '{0}' 版本 ' {1} ' 低於資訊清單 '{3}' [{4}] 所需的版本 '{2}'</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ManifestFromInstallStateNotFound">
+        <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
+        <target state="translated">找不到 {1} 中指定的工作負載資訊清單 {0}。執行 "dotnet workload repair" 可能會解決這個問題。</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
+      <trans-unit id="ManifestFromWorkloadSetNotFound">
+        <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
+        <target state="translated">未安裝工作負載版本 {1} 中的工作負載資訊清單 {0}。執行 "dotnet workload repair" 可能會解決這個問題。</target>
+        <note>{Locked="dotnet workload repair"}</note>
       </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
@@ -120,6 +135,16 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">資訊清單 '{2}' [{3}] 中工作負載重新導向 '{1}' 的未解析目標 '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="translated">找不到 {1} 中指定的工作負載版本 {0}。執行 "dotnet workload restore" 以安裝此工作負載版本。</target>
+        <note>{Locked="dotnet workload restore"}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromInstallStateNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found.</source>
+        <target state="translated">找不到 {1} 中指定的工作負載版本 {0}。</target>
         <note />
       </trans-unit>
     </body>

@@ -1,19 +1,16 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using Moq;
-using Xunit;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
     public class MSBuildEvaluationFilterTest
     {
+        private static readonly FileSet s_emptyFileSet = new(projectInfo: null!, Array.Empty<FileItem>());
+
         private readonly IFileSetFactory _fileSetFactory = Mock.Of<IFileSetFactory>(
-            f => f.CreateAsync(It.IsAny<CancellationToken>()) == Task.FromResult<FileSet>(FileSet.Empty));
+            f => f.CreateAsync(It.IsAny<CancellationToken>()) == Task.FromResult(s_emptyFileSet));
 
         [Fact]
         public async Task ProcessAsync_EvaluatesFileSetIfProjFileChanges()
@@ -22,6 +19,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var filter = new MSBuildEvaluationFilter(_fileSetFactory);
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
             };
 
@@ -45,6 +43,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var filter = new MSBuildEvaluationFilter(_fileSetFactory);
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
             };
 
@@ -69,6 +68,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var filter = new MSBuildEvaluationFilter(_fileSetFactory);
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
                 SuppressMSBuildIncrementalism = true,
             };
@@ -107,6 +107,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             };
             var context = new DotNetWatchContext
             {
+                HotReloadEnabled = false,
                 Iteration = 0,
             };
 
@@ -123,7 +124,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             Assert.True(context.RequiresMSBuildRevaluation);
         }
 
-        public class TestableMSBuildEvaluationFilter : MSBuildEvaluationFilter
+        private class TestableMSBuildEvaluationFilter : MSBuildEvaluationFilter
         {
             public TestableMSBuildEvaluationFilter(IFileSetFactory factory)
                 : base(factory)
@@ -132,7 +133,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             public Dictionary<string, DateTime> Timestamps { get; } = new Dictionary<string, DateTime>();
 
-            protected override DateTime GetLastWriteTimeUtcSafely(string file) => Timestamps[file];
+            private protected override DateTime GetLastWriteTimeUtcSafely(string file) => Timestamps[file];
         }
     }
 }

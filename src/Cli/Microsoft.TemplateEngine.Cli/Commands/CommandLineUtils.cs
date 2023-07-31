@@ -1,9 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.Text;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -11,7 +9,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
     {
         // This code is from System.CommandLine, HelpBuilder class.
         // Ideally those methods are exposed, we may switch to use them.
-        internal static string FormatArgumentUsage(IReadOnlyList<Argument> arguments)
+        internal static string FormatArgumentUsage(IReadOnlyList<CliArgument> arguments)
         {
             var sb = new StringBuilder();
             var end = default(Stack<char>);
@@ -19,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             for (var i = 0; i < arguments.Count; i++)
             {
                 var argument = arguments[i];
-                if (argument.IsHidden)
+                if (argument.Hidden)
                 {
                     continue;
                 }
@@ -58,20 +56,20 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
 
             return sb.ToString();
-            bool IsMultiParented(Argument argument) =>
+            bool IsMultiParented(CliArgument argument) =>
                 argument.Parents.Count() > 1;
 
-            bool IsOptional(Argument argument) =>
+            bool IsOptional(CliArgument argument) =>
                 IsMultiParented(argument) ||
                 argument.Arity.MinimumNumberOfValues == 0;
         }
 
-        internal static string FormatArgumentUsage(Argument argument) => FormatArgumentUsage(new[] { argument });
+        internal static string FormatArgumentUsage(CliArgument argument) => FormatArgumentUsage(new[] { argument });
 
-        internal static string FormatArgumentUsage(Option option) => FormatArgumentUsage(new[] { option });
+        internal static string FormatArgumentUsage(CliOption option) => FormatArgumentUsage(new[] { option });
 
         // separate instance as Option.Argument is internal.
-        internal static string FormatArgumentUsage(IReadOnlyList<Option> options)
+        internal static string FormatArgumentUsage(IReadOnlyList<CliOption> options)
         {
             var sb = new StringBuilder();
             var end = default(Stack<char>);
@@ -79,7 +77,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             for (var i = 0; i < options.Count; i++)
             {
                 var option = options[i];
-                if (option.IsHidden)
+                if (option.Hidden)
                 {
                     continue;
                 }
@@ -118,10 +116,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             }
 
             return sb.ToString();
-            bool IsMultiParented(Option option) =>
+            bool IsMultiParented(CliOption option) =>
                 option.Parents.Count() > 1;
 
-            bool IsOptional(Option option) =>
+            bool IsOptional(CliOption option) =>
                 IsMultiParented(option) ||
                 option.Arity.MinimumNumberOfValues == 0;
         }

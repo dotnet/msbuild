@@ -1,8 +1,6 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.ApiSymbolExtensions
@@ -53,16 +51,25 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
             }
         }
 
-        public static bool IsEffectivelySealed(this ITypeSymbol type, bool includeInternals) =>
-            type.IsSealed || !HasVisibleConstructor(type, includeInternals);
+        public static bool IsEffectivelySealed(this ITypeSymbol type, bool includeInternalSymbols) =>
+            type.IsSealed || !HasVisibleConstructor(type, includeInternalSymbols);
 
-        private static bool HasVisibleConstructor(ITypeSymbol type, bool includeInternals)
+        /// <summary>
+        /// Determines where the symbol is the explicit interface implementation method or property.
+        /// </summary>
+        /// <param name="symbol"><see cref="ISymbol"/>  Represents a symbol (namespace, class, method, parameter, etc.) exposed by the compiler.</param>
+        /// <returns>true if the symbol is the explicit interface implementation method</returns>
+        public static bool IsExplicitInterfaceImplementation(this ISymbol symbol) =>
+            symbol is IMethodSymbol method && method.MethodKind == MethodKind.ExplicitInterfaceImplementation ||
+            symbol is IPropertySymbol property && !property.ExplicitInterfaceImplementations.IsEmpty;
+
+        private static bool HasVisibleConstructor(ITypeSymbol type, bool includeInternalSymbols)
         {
             if (type is INamedTypeSymbol namedType)
             {
                 foreach (IMethodSymbol constructor in namedType.Constructors)
                 {
-                    if (!constructor.IsStatic && constructor.IsVisibleOutsideOfAssembly(includeInternals, includeEffectivelyPrivateSymbols: true))
+                    if (!constructor.IsStatic && constructor.IsVisibleOutsideOfAssembly(includeInternalSymbols, includeEffectivelyPrivateSymbols: true))
                         return true;
                 }
             }
@@ -84,14 +91,18 @@ namespace Microsoft.DotNet.ApiSymbolExtensions
                     yield return baseInterface;
         }
 
-        public static bool IsVisibleOutsideOfAssembly(this ISymbol symbol, bool includeInternals, bool includeEffectivelyPrivateSymbols = false) =>
+        public static bool IsVisibleOutsideOfAssembly(this ISymbol symbol,
+            bool includeInternalSymbols,
+            bool includeEffectivelyPrivateSymbols = false,
+            bool includeExplicitInterfaceImplementationSymbols = false) =>
             symbol.DeclaredAccessibility switch
             {
                 Accessibility.Public => true,
-                Accessibility.Protected => includeEffectivelyPrivateSymbols || symbol.ContainingType == null || !IsEffectivelySealed(symbol.ContainingType, includeInternals),
-                Accessibility.ProtectedOrInternal => includeEffectivelyPrivateSymbols || includeInternals || symbol.ContainingType == null || !IsEffectivelySealed(symbol.ContainingType, includeInternals),
-                Accessibility.ProtectedAndInternal => includeInternals && (includeEffectivelyPrivateSymbols || symbol.ContainingType == null || !IsEffectivelySealed(symbol.ContainingType, includeInternals)),
-                _ => includeInternals && symbol.DeclaredAccessibility != Accessibility.Private,
+                Accessibility.Protected => includeEffectivelyPrivateSymbols || symbol.ContainingType == null || !IsEffectivelySealed(symbol.ContainingType, includeInternalSymbols),
+                Accessibility.ProtectedOrInternal => includeEffectivelyPrivateSymbols || includeInternalSymbols || symbol.ContainingType == null || !IsEffectivelySealed(symbol.ContainingType, includeInternalSymbols),
+                Accessibility.ProtectedAndInternal => includeInternalSymbols && (includeEffectivelyPrivateSymbols || symbol.ContainingType == null || !IsEffectivelySealed(symbol.ContainingType, includeInternalSymbols)),
+                Accessibility.Private => includeExplicitInterfaceImplementationSymbols && IsExplicitInterfaceImplementation(symbol),
+                _ => includeInternalSymbols,
             };
 
         public static bool IsEventAdderOrRemover(this IMethodSymbol method) =>

@@ -1,15 +1,9 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO.Compression;
-using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
-using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {
@@ -339,6 +333,29 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             testFile = Path.Combine(workingDirectory, fileName);
             Assert.True(File.Exists(testFile));
             Assert.Equal($"{string.Format(expectedCommandFormat, "bar")}{expectedEol}bar{expectedEol}baz{expectedEol}", File.ReadAllText(testFile));
+        }
+
+        [Theory]
+        [InlineData("", "theDefaultName.cs")]
+        [InlineData("newName", "newName.cs")]
+        public void CanInstantiateTemplate_WithDefaultName(string name, string expectedFileName)
+        {
+            string workingDirectory = CreateTemporaryFolder();
+            string home = CreateTemporaryFolder(folderName: "Home");
+            InstallTestTemplate("TemplateWithPreferDefaultName", _log, home, workingDirectory);
+
+            workingDirectory = CreateTemporaryFolder();
+            new DotnetNewCommand(_log, "TestAssets.TemplateWithPreferDefaultName", "-n", name)
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The template \"TemplateWithPreferDefaultName\" was created successfully.");
+
+            string testFile = Path.Combine(workingDirectory, expectedFileName);
+            Assert.True(File.Exists(testFile));
         }
 
         [Fact]

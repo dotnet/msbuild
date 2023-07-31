@@ -1,0 +1,23 @@
+﻿[
+  {
+    Label: --add-source,
+    Kind: Keyword,
+    SortText: --add-source,
+    InsertText: --add-source,
+    Detail: Specifies a NuGet source to use.
+  },
+  {
+    Label: --interactive,
+    Kind: Keyword,
+    SortText: --interactive,
+    InsertText: --interactive,
+    Detail: Allows the command to stop and wait for user input or action (for example to complete authentication).
+  },
+  {
+    Label: --nuget-source,
+    Kind: Keyword,
+    SortText: --nuget-source,
+    InsertText: --nuget-source,
+    Detail: Specifies a NuGet source to use.
+  }
+]

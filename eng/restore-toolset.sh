@@ -21,15 +21,12 @@ function InitializeCustomSDKToolset {
 
   InitializeDotNetCli true
   
-  if [[ "$DISTRO" != "ubuntu" || "$MAJOR_VERSION" -le 16 ]]; then
-    InstallDotNetSharedFramework "1.0.5"
-    InstallDotNetSharedFramework "1.1.2"
-  fi
   InstallDotNetSharedFramework "2.1.0"
   InstallDotNetSharedFramework "2.2.8"
   InstallDotNetSharedFramework "3.1.0"
   InstallDotNetSharedFramework "5.0.0"
   InstallDotNetSharedFramework "6.0.0"
+  InstallDotNetSharedFramework "7.0.0"
 
   CreateBuildEnvScript
 }

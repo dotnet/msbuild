@@ -59,20 +59,42 @@ Copyright (c) .NET Foundation. All rights reserved.
         <PackagePath>%(_ResolvedFileToPublishWithPackagePath.PackagePath)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
-
-    <!-- Enable warning for trying to use PackRelease with a solution if env-var is not set.-->
-    <NETSdkWarning Condition="'$(PackRelease)' != '' and '$(SolutionExt)' == '.sln' and '$(DOTNET_CLI_ENABLE_PACK_RELEASE_FOR_SOLUTIONS)' == ''"
-                   ResourceName="PReleaseRequiresEnvVarOnSln"
-                   FormatArguments="PackRelease;DOTNET_CLI_ENABLE_PACK_RELEASE_FOR_SOLUTIONS"
-    />
   </Target>
 
   <PropertyGroup>
     <ToolCommandName Condition=" '$(ToolCommandName)' == '' ">$(TargetName)</ToolCommandName>
     <ToolEntryPoint Condition=" '$(ToolEntryPoint)' == '' ">$(TargetFileName)</ToolEntryPoint>
+    <_GenerateToolsSettingsFileCacheFile Condition="'$(_GenerateToolsSettingsFileCacheFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectName).toolssettingsinput.cache</_GenerateToolsSettingsFileCacheFile>
+    <_GenerateToolsSettingsFileCacheFile>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(_GenerateToolsSettingsFileCacheFile)))</_GenerateToolsSettingsFileCacheFile>
   </PropertyGroup>
 
-  <Target Name="GenerateToolsSettingsFileFromBuildProperty" >
+  <Target Name="_GenerateToolsSettingsFileInputCache">
+    <ItemGroup>
+      <_GenerateToolsSettingsFileInputCacheToHash Include="$(ToolEntryPoint)" />
+      <_GenerateToolsSettingsFileInputCacheToHash Include="$(ToolCommandName)" />
+    </ItemGroup>
+
+    <Hash ItemsToHash="@(_GenerateToolsSettingsFileInputCacheToHash)">
+      <Output TaskParameter="HashResult" PropertyName="_GenerateToolsSettingsFileInputCacheHash" />
+    </Hash>
+
+    <WriteLinesToFile
+      Lines="$(_GenerateToolsSettingsFileInputCacheHash)"
+      File="$(_GenerateToolsSettingsFileCacheFile)"
+      Overwrite="true"
+      WriteOnlyWhenDifferent="true" />
+
+    <!-- Don't include the cache file in FileWrites, because there is no support for cleaning
+         intermediate outputs during PackAsTool. Adding it to FileWrites doesn't work because
+         IncrementalClean during PackAsTool would add it to the clean file, but then IncrementalBuild
+         during the Build target on a subsequent run would consider it to be orphaned (because this target
+         which would add it to FileWrites hasn't run yet), and delete it. -->
+  </Target>
+
+  <Target Name="GenerateToolsSettingsFileFromBuildProperty"
+          DependsOnTargets="_GenerateToolsSettingsFileInputCache"
+          Inputs="$(_GenerateToolsSettingsFileCacheFile)"
+          Outputs="$(_ToolsSettingsFilePath)">
     <GenerateToolsSettingsFile
        EntryPointRelativePath="$(ToolEntryPoint)"
        CommandName="$(ToolCommandName)"

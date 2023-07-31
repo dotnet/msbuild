@@ -1,9 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-
 namespace Microsoft.DotNet.ApiCompatibility.Logging
 {
     /// <summary>
@@ -36,15 +33,23 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
         /// </summary>
         public bool IsBaselineSuppression { get; set; }
 
-        // Neccessary for XmlSerializer to instantiate an object of this class.
+        // Necessary for XmlSerializer to instantiate an object of this class.
         private Suppression()
         {
             DiagnosticId = string.Empty;
         }
 
-        public Suppression(string diagnosticId)
+        public Suppression(string diagnosticId,
+            string? target = null,
+            string? left = null,
+            string? right = null,
+            bool isBaselineSuppression = false)
         {
             DiagnosticId = diagnosticId;
+            Target = target;
+            Left = left;
+            Right = right;
+            IsBaselineSuppression = isBaselineSuppression;
         }
 
         /// <summary>
@@ -54,6 +59,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
         /// </summary>
         /// <returns>Returns true if IsBaselineSuppression should be serialized</returns>
         public bool ShouldSerializeIsBaselineSuppression() => IsBaselineSuppression;
+
+        /// <inheritdoc/>
+        public override bool Equals(object? obj) => Equals(obj as Suppression);
 
         /// <inheritdoc/>
         public bool Equals(Suppression? other)
@@ -78,6 +86,52 @@ namespace Microsoft.DotNet.ApiCompatibility.Logging
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Left?.ToLowerInvariant() ?? string.Empty);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Right?.ToLowerInvariant() ?? string.Empty);
             return hashCode;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            StringBuilder stringBuilder = new();
+            if (IsBaselineSuppression)
+            {
+                stringBuilder.Append("[Baseline] ");
+            }
+
+            stringBuilder.Append(DiagnosticId);
+            stringBuilder.Append(" (");
+
+            bool requiresDelimiter = false;
+
+            if (Target is not null)
+            {
+                stringBuilder.AppendFormat("Target: '{0}'", Target);
+                requiresDelimiter = true;
+            }
+
+            if (Left is not null)
+            {
+                if (requiresDelimiter)
+                {
+                    stringBuilder.Append(", ");
+                }
+
+                stringBuilder.AppendFormat("Left: '{0}'", Left);
+                requiresDelimiter = true;
+            }
+
+            if (Right is not null)
+            {
+                if (requiresDelimiter)
+                {
+                    stringBuilder.Append(", ");
+                }
+
+                stringBuilder.AppendFormat("Right: '{0}'", Right);
+            }
+
+            stringBuilder.Append(')');
+
+            return stringBuilder.ToString();
         }
     }
 }

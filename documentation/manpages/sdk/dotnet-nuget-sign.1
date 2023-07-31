@@ -14,7 +14,7 @@
 . ftr VB CB
 . ftr VBI CBI
 .\}
-.TH "dotnet-nuget-sign" "1" "2022-06-03" "" ".NET Documentation"
+.TH "dotnet-nuget-sign" "1" "2022-11-08" "" ".NET Documentation"
 .hy
 .SH dotnet nuget sign
 .PP
@@ -47,6 +47,11 @@ dotnet nuget sign -h|--help
 .PP
 The \f[V]dotnet nuget sign\f[R] command signs all the packages matching the first argument with a certificate.
 The certificate with the private key can be obtained from a file or from a certificate installed in a certificate store by providing a subject name or a SHA-1 fingerprint.
+.RS
+.PP
+This command requires a certificate root store that\[cq]s valid for both code signing and timestamping.
+For more information, see NuGet signed package verification.
+.RE
 .SH ARGUMENTS
 .IP \[bu] 2
 \f[B]\f[VB]package-path(s)\f[B]\f[R]

@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(RepoRoot)\src\Layout\redist\targets\PublishDotnetWatch.targets" />
 
   <PropertyGroup>
     <TargetFramework>$(SdkTargetFramework)</TargetFramework>
@@ -8,6 +9,7 @@
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <UseAppHost>false</UseAppHost>
     <RuntimeIdentifier />
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,6 +29,13 @@
     <PackageReference Include="Microsoft.Build.Locator" Version="$(MicrosoftBuildLocatorPackageVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(MicrosoftCodeAnalysisCSharpFeaturesPackageVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion)" />
+
+    <!--
+      Explicit System.Text.Json package reference is required for source-build to pick up the live package.
+      Avoids picking up an old version via transitive dependency from Microsoft.Build or Microsoft.CodeAnalysis.Workspaces.MSBuild.
+    -->
+    <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
+
     <Compile Include="$(RepoRoot)src\Common\PathUtilities.cs" LinkBase="Common" />
   </ItemGroup>
 
@@ -56,8 +65,14 @@
                       UndefineProperties="TargetFramework;TargetFrameworks"
                       OutputItemType="Content"
                       CopyToOutputDirectory="PreserveNewest"/>
-
-    
   </ItemGroup>
 
+  <!--
+    Publish the dotnet-watch binaries to the redist directory (artifacts\bin\redist\{config}\dotnet\sdk\{version}\DotnetTools).
+    These files are used for layout generation in redist project.
+    Tests are also running dotnet.exe from redist artifacts.
+  -->
+  <Target Name="PublishToRedist"
+          DependsOnTargets="PublishDotnetWatchToRedist"
+          BeforeTargets="AfterBuild" />
 </Project>

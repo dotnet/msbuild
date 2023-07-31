@@ -1,17 +1,10 @@
-using System.IO;
-using System.Linq;
-using System.Xml.Linq;
-using FluentAssertions;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using Microsoft.Build.Utilities;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
 using NuGet.Common;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.NET.Restore.Tests
 {
@@ -149,7 +142,7 @@ namespace Microsoft.NET.Restore.Tests
                 var itemGroup = project.Root.Elements(ns + "ItemGroup").FirstOrDefault();
                 itemGroup.Add(new XElement(ns + "PackageReference",
                     new XAttribute("Include", $"Newtonsoft.Json"),
-                    new XAttribute("Version", $"11.0.2")));
+                    new XAttribute("Version", $"13.0.1")));
                 itemGroup.Add(new XElement(ns + "PackageReference",
                     new XAttribute("Include", $"sqlite"),
                     new XAttribute("Version", $"3.13.0")));

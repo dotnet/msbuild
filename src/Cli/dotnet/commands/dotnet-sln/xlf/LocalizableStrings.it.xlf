@@ -32,6 +32,11 @@
         <target state="translated">Inserisce il progetto nella radice della soluzione invece di creare una cartella soluzione.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ListSolutionFoldersArgumentDescription">
+        <source>Display solution folder paths.</source>
+        <target state="new">Display solution folder paths.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>Remove one or more projects from a solution file.</source>
         <target state="translated">Consente di rimuovere uno o più progetti da un file di soluzione.</target>
@@ -90,6 +95,11 @@
       <trans-unit id="SolutionFolderAndInRootMutuallyExclusive">
         <source>The --solution-folder and --in-root options cannot be used together; use only one of the options.</source>
         <target state="translated">Non è possibile usare contemporaneamente le opzioni --solution-folder e --in-root. Usare una sola delle opzioni.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SolutionFolderHeader">
+        <source>Solution Folder(s)</source>
+        <target state="new">Solution Folder(s)</target>
         <note />
       </trans-unit>
     </body>

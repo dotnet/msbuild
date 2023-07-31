@@ -1,18 +1,20 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+#if !NET
+using System.Text.RegularExpressions;
+#endif
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiSymbolExtensions;
+using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
+using Microsoft.DotNet.ApiSymbolExtensions.Logging;
+using Microsoft.DotNet.GenAPI.Filtering;
 
 namespace Microsoft.DotNet.GenAPI
 {
     /// <summary>
-    /// Class to standertize initilization and running of GenAPI tool.
-    ///     Shared between CLI and MSBuild tasks frontends.
+    /// Class to standardize initialization and running of GenAPI tool.
+    /// Shared between CLI and MSBuild tasks frontends.
     /// </summary>
     public static class GenAPIApp
     {
@@ -24,16 +26,20 @@ namespace Microsoft.DotNet.GenAPI
                 string? outputPath,
                 string? headerFile,
                 string? exceptionMessage,
+                string[]? excludeApiFiles,
                 string[]? excludeAttributesFiles,
-                bool includeVisibleOutsideOfAssembly)
+                bool respectInternals,
+                bool includeAssemblyAttributes)
             {
                 Assemblies = assemblies;
                 AssemblyReferences = assemblyReferences;
                 OutputPath = outputPath;
                 HeaderFile = headerFile;
                 ExceptionMessage = exceptionMessage;
+                ExcludeApiFiles = excludeApiFiles;
                 ExcludeAttributesFiles = excludeAttributesFiles;
-                IncludeVisibleOutsideOfAssembly = includeVisibleOutsideOfAssembly;
+                RespectInternals = respectInternals;
+                IncludeAssemblyAttributes = includeAssemblyAttributes;
             }
 
             /// <summary>
@@ -63,53 +69,91 @@ namespace Microsoft.DotNet.GenAPI
             public string? ExceptionMessage { get; }
 
             /// <summary>
+            /// The path to one or more api exclusion files with types in DocId format.
+            /// </summary>
+            public string[]? ExcludeApiFiles { get; }
+
+            /// <summary>
             /// The path to one or more attribute exclusion files with types in DocId format.
             /// </summary>
             public string[]? ExcludeAttributesFiles { get; }
 
             /// <summary>
-            /// Include all API's not just public APIs. Default is public only.
+            /// If true, includes both internal and public API.
             /// </summary>
-            public bool IncludeVisibleOutsideOfAssembly { get; }
+            public bool RespectInternals { get; }
+
+            /// <summary>
+            /// Includes assembly attributes which are values that provide information about an assembly.
+            /// </summary>
+            public bool IncludeAssemblyAttributes { get; }
         }
 
         /// <summary>
         /// Initialize and run Roslyn-based GenAPI tool.
         /// </summary>
-        public static void Run(Context context)
+        public static void Run(ILog logger, Context context)
         {
             bool resolveAssemblyReferences = context.AssemblyReferences?.Length > 0;
 
-            IAssemblySymbolLoader loader = new AssemblySymbolLoader(resolveAssemblyReferences);
+            IAssemblySymbolLoader loader = new AssemblySymbolLoader(resolveAssemblyReferences, context.RespectInternals);
 
             if (context.AssemblyReferences is not null)
             {
                 loader.AddReferenceSearchPaths(context.AssemblyReferences);
             }
 
-            var compositeFilter = new CompositeFilter()
-                .Add<ImplicitSymbolsFilter>()
-                .Add(new SymbolAccessibilityBasedFilter(context.IncludeVisibleOutsideOfAssembly));
+            CompositeSymbolFilter compositeSymbolFilter = new CompositeSymbolFilter()
+                .Add(new ImplicitSymbolFilter())
+                .Add(new AccessibilitySymbolFilter(
+                    context.RespectInternals,
+                    includeEffectivelyPrivateSymbols: true,
+                    includeExplicitInterfaceImplementationSymbols: true));
 
-            if (context.ExcludeAttributesFiles != null)
+            if (context.ExcludeAttributesFiles is not null)
             {
-                compositeFilter.Add(new AttributeSymbolFilter(context.ExcludeAttributesFiles));
+                compositeSymbolFilter.Add(new DocIdSymbolFilter(context.ExcludeAttributesFiles));
+            }
+
+            if (context.ExcludeApiFiles is not null)
+            {
+                compositeSymbolFilter.Add(new DocIdSymbolFilter(context.ExcludeApiFiles));
             }
 
             IReadOnlyList<IAssemblySymbol?> assemblySymbols = loader.LoadAssemblies(context.Assemblies);
             foreach (IAssemblySymbol? assemblySymbol in assemblySymbols)
             {
-                if (assemblySymbol == null) continue;
+                if (assemblySymbol == null)
+                    continue;
 
-                using CSharpFileBuilder fileBuilder = new(
-                    compositeFilter,
-                    GetTextWriter(context.OutputPath, assemblySymbol.Name),
-                    new CSharpSyntaxWriter(context.ExceptionMessage));
+                using TextWriter textWriter = GetTextWriter(context.OutputPath, assemblySymbol.Name);
+                textWriter.Write(ReadHeaderFile(context.HeaderFile));
+
+                using CSharpFileBuilder fileBuilder = new(logger,
+                    compositeSymbolFilter,
+                    textWriter,
+                    context.ExceptionMessage,
+                    context.IncludeAssemblyAttributes,
+                    loader.MetadataReferences);
 
                 fileBuilder.WriteAssembly(assemblySymbol);
             }
 
-            // TODO: Add logging for the assembly symbol loading failure".
+            if (loader.HasRoslynDiagnostics(out IReadOnlyList<Diagnostic> roslynDiagnostics))
+            {
+                foreach (Diagnostic warning in roslynDiagnostics)
+                {
+                    logger.LogWarning(warning.Id, warning.ToString());
+                }
+            }
+
+            if (loader.HasLoadWarnings(out IReadOnlyList<AssemblyLoadWarning> loadWarnings))
+            {
+                foreach (AssemblyLoadWarning warning in loadWarnings)
+                {
+                    logger.LogWarning(warning.DiagnosticId, warning.Message);
+                }
+            }
         }
 
         /// <summary>
@@ -121,7 +165,7 @@ namespace Microsoft.DotNet.GenAPI
         /// <returns></returns>
         private static TextWriter GetTextWriter(string? outputDirPath, string assemblyName)
         {
-            if (outputDirPath == null)
+            if (outputDirPath is null)
             {
                 return Console.Out;
             }
@@ -142,7 +186,7 @@ namespace Microsoft.DotNet.GenAPI
         /// <returns></returns>
         private static string ReadHeaderFile(string? headerFile)
         {
-            const string defaultFileHeader = @"
+            const string defaultFileHeader = """
             //------------------------------------------------------------------------------
             // <auto-generated>
             //     This code was generated by a tool.
@@ -151,13 +195,20 @@ namespace Microsoft.DotNet.GenAPI
             //     the code is regenerated.
             // </auto-generated>
             //------------------------------------------------------------------------------
-            ";
 
-            if (!string.IsNullOrEmpty(headerFile))
-            {
-                return File.ReadAllText(headerFile);
-            }
-            return defaultFileHeader;
+            """;
+
+            string header = !string.IsNullOrEmpty(headerFile) ?
+                File.ReadAllText(headerFile) :
+                defaultFileHeader;
+
+#if NET
+            header = header.ReplaceLineEndings();
+#else
+            header = Regex.Replace(header, @"\r\n|\n\r|\n|\r", Environment.NewLine);
+#endif
+
+            return header;
         }
     }
 }

@@ -1,12 +1,8 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Microsoft.DotNet.ApiCompat.IntegrationTests;
 using Microsoft.DotNet.ApiCompatibility;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiCompatibility.Rules;
 using Microsoft.DotNet.ApiCompatibility.Runner;
@@ -14,11 +10,7 @@ using Microsoft.DotNet.ApiCompatibility.Tests;
 using Microsoft.DotNet.PackageValidation;
 using Microsoft.DotNet.PackageValidation.Validators;
 using Microsoft.DotNet.ApiSymbolExtensions;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using Xunit;
-using Xunit.Abstractions;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.ApiCompat.Task.IntegrationTests
 {
@@ -28,9 +20,9 @@ namespace Microsoft.DotNet.ApiCompat.Task.IntegrationTests
         {
         }
 
-        private (TestLogger, CompatibleFrameworkInPackageValidator) CreateLoggerAndValidator()
+        private (SuppressableTestLog, CompatibleFrameworkInPackageValidator) CreateLoggerAndValidator()
         {
-            TestLogger log = new();
+            SuppressableTestLog log = new();
             CompatibleFrameworkInPackageValidator validator = new(log,
                 new ApiCompatRunner(log,
                     new SuppressionEngine(),
@@ -170,7 +162,7 @@ namespace Microsoft.DotNet.ApiCompat.Task.IntegrationTests
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
             Package package = Package.Create(packCommand.GetNuGetPackage());
-            (TestLogger log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
 
             // First we run without references. Without references, ApiCompat should not be able to see that class First
             // removed an interface due to it's base class removing that implementation. We validate that APICompat doesn't
@@ -180,10 +172,10 @@ namespace Microsoft.DotNet.ApiCompat.Task.IntegrationTests
 
             // Now we do pass in references. With references, ApiCompat should now detect that an interface was removed in a
             // dependent assembly, causing one of our types to stop implementing that assembly. We validate that a CP0008 is logged.
-            Dictionary<string, string[]> references = new()
+            Dictionary<NuGetFramework, IEnumerable<string>> references = new()
             {
-                { "netstandard2.0", new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
-                { ToolsetInfo.CurrentTargetFramework, new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework) } }
+                { NuGetFramework.ParseFolder("netstandard2.0"), new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
+                { NuGetFramework.ParseFolder(ToolsetInfo.CurrentTargetFramework), new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework) } }
             };
             package = Package.Create(packCommand.GetNuGetPackage(), references);
             validator.Validate(new PackageValidatorOption(package));
@@ -212,15 +204,15 @@ namespace Microsoft.DotNet.ApiCompat.Task.IntegrationTests
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
 
-            Dictionary<string, string[]> references = new()
+            Dictionary<NuGetFramework, IEnumerable<string>> references = new()
             {
-                { "netstandard2.0", new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
-                { ToolsetInfo.CurrentTargetFramework, new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework) } }
+                { NuGetFramework.ParseFolder("netstandard2.0"), new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
+                { NuGetFramework.ParseFolder(ToolsetInfo.CurrentTargetFramework), new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework) } }
             };
             Package package = Package.Create(packCommand.GetNuGetPackage(), packageAssemblyReferences: useReferences ? references : null);
 
             File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, $"{testDummyDependency.Name}.dll"));
-            (TestLogger log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
 
             // First we run without references. Without references, ApiCompat should not be able to see that class First
             // removed an interface due to it's base class removing that implementation. We validate that APICompat doesn't
@@ -257,17 +249,17 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
 
-            Dictionary<string, string[]> references = new()
+            Dictionary<NuGetFramework, IEnumerable<string>> references = new()
             {
-                { "netstandard2.0", new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
-                { ToolsetInfo.CurrentTargetFramework, new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework) } }
+                { NuGetFramework.ParseFolder("netstandard2.0"), new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
+                { NuGetFramework.ParseFolder(ToolsetInfo.CurrentTargetFramework), new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework) } }
             };
             Package package = Package.Create(packCommand.GetNuGetPackage(), packageAssemblyReferences: useReferences ? references : null);
 
             if (deleteFile)
                 File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, $"{dependency.Name}.dll"));
 
-            (TestLogger log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
 
             validator.Validate(new PackageValidatorOption(package));
 
@@ -303,15 +295,15 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
 
-            Dictionary<string, string[]> references = new()
+            Dictionary<NuGetFramework, IEnumerable<string>> references = new()
             {
-                { "netstandard2.0", new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
-                { ToolsetInfo.CurrentTargetFramework, new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework) } }
+                { NuGetFramework.ParseFolder("netstandard2.0"), new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
+                { NuGetFramework.ParseFolder(ToolsetInfo.CurrentTargetFramework), new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework) } }
             };
             Package package = Package.Create(packCommand.GetNuGetPackage(), references);
 
             File.Delete(Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", ToolsetInfo.CurrentTargetFramework, $"{dependency.Name}.dll"));
-            (TestLogger log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
 
             validator.Validate(new PackageValidatorOption(package));
 
@@ -329,19 +321,41 @@ namespace PackageValidationTests { public class MyForwardedType : ISomeInterface
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
 
-            Dictionary<string, string[]> references = new()
+            Dictionary<NuGetFramework, IEnumerable<string>> references = new()
             {
-                { "netstandard2.0", new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } }
+                { NuGetFramework.ParseFolder("netstandard2.0"), new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } }
             };
             Package package = Package.Create(packCommand.GetNuGetPackage(), useReferences ? references : null);
-            (TestLogger log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
 
             validator.Validate(new PackageValidatorOption(package));
 
             if (!useReferences)
-                Assert.Empty(log.errors.Where(e => e.Contains("CP1003")));
+                Assert.Empty(log.warnings.Where(e => e.Contains("CP1003")));
             else
-                Assert.NotEmpty(log.errors.Where(e => e.Contains("CP1003")));
+                Assert.NotEmpty(log.warnings.Where(e => e.Contains("CP1003")));
+        }
+
+        [RequiresMSBuildVersionFact("17.0.0.32901", Skip = "https://github.com/dotnet/sdk/issues/23533")]
+        public void ValidateReferencesAreRespectedForPlatformSpecificTFMs()
+        {
+            TestProject testProject = CreateTestProject("public class MyType { }", $"netstandard2.0;{ToolsetInfo.CurrentTargetFramework}-windows");
+            TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            PackCommand packCommand = new(Log, Path.Combine(asset.TestRoot, testProject.Name));
+            var result = packCommand.Execute();
+            Assert.Empty(result.StdErr);
+
+            Dictionary<NuGetFramework, IEnumerable<string>> references = new()
+            {
+                { NuGetFramework.Parse("netstandard2.0"), new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", "netstandard2.0") } },
+                { NuGetFramework.ParseComponents($".NETCoreApp,Version=v{ToolsetInfo.CurrentTargetFrameworkVersion}", "Windows,Version=7.0"), new string[] { Path.Combine(asset.TestRoot, asset.TestProject.Name, "bin", "Debug", $"net{ToolsetInfo.CurrentTargetFrameworkVersion}-windows") } }
+            };
+            Package package = Package.Create(packCommand.GetNuGetPackage(), references);
+            (SuppressableTestLog log, CompatibleFrameworkInPackageValidator validator) = CreateLoggerAndValidator();
+
+            validator.Validate(new PackageValidatorOption(package));
+
+            Assert.Empty(log.warnings.Where(e => e.Contains("CP1003")));
         }
 
         [RequiresMSBuildVersionFact("17.0.0.32901", Skip = "https://github.com/dotnet/sdk/issues/23533")]

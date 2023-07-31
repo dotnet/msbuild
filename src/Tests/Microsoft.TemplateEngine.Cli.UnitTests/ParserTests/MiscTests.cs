@@ -1,9 +1,9 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
 using System.CommandLine.Completions;
+using System.CommandLine.Help;
 using System.CommandLine.Parsing;
 using Microsoft.TemplateEngine.Cli.Commands;
 using Microsoft.TemplateEngine.TestHelper;
@@ -18,18 +18,17 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         [Fact]
         public void KnownHelpAliasesAreCorrect()
         {
-            ParseResult result = new CommandLineBuilder()
-                .UseDefaults()
-                .Build()
+            ParseResult result = new CliConfiguration(new CliRootCommand())
                 .Parse(Constants.KnownHelpAliases[0]);
 
-            IReadOnlyCollection<string> aliases = result.CommandResult
+            CliOption helpOption = result.CommandResult
                 .Children
                 .OfType<OptionResult>()
                 .Select(r => r.Option)
-                .Where(o => o.HasAlias(Constants.KnownHelpAliases[0]))
-                .Single()
-                .Aliases;
+                .Where(o => o is HelpOption)
+                .Single();
+
+            var aliases = new[] { helpOption.Name }.Concat(helpOption.Aliases);
 
             Assert.Equal(aliases.OrderBy(a => a), TemplateCommand.KnownHelpAliases.OrderBy(a => a));
         }
@@ -152,8 +151,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
             ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
 
-            var customOption = new Option<string>("--newOption");
-            myCommand.AddGlobalOption(customOption);
+            var customOption = new CliOption<string>("--newOption")
+            {
+                Recursive = true
+            };
+            myCommand.Options.Add(customOption);
 
             ParseResult parseResult = myCommand.Parse("new console --newOption val");
             InstantiateCommandArgs args = InstantiateCommandArgs.FromNewCommandArgs(new NewCommandArgs(myCommand, parseResult));
@@ -175,7 +177,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         {
             ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
 
-            RootCommand rootCommand = new();
+            CliRootCommand rootCommand = new();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             rootCommand.Add(myCommand);
@@ -185,18 +187,23 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.ParserTests
         }
 
         [Theory]
-        [InlineData("new --project test console", "test")]
-        [InlineData("new console --project test", "test")]
-        [InlineData("new console --framework net6.0 --project test", "test")]
-        [InlineData("--project test new console", null)]
+        [InlineData("new --project $filePath console", "$filePath")]
+        [InlineData("new console --project $filePath", "$filePath")]
+        [InlineData("new console --framework net6.0 --project $filePath", "$filePath")]
+        [InlineData("--project $filePath new console", null)]
         public void CanParseProjectOption(string command, string? expected)
         {
             ICliTemplateEngineHost host = CliTestHostFactory.GetVirtualHost(additionalComponents: BuiltInTemplatePackagesProviderFactory.GetComponents(RepoTemplatePackages));
 
-            RootCommand rootCommand = new();
+            CliRootCommand rootCommand = new();
 
             NewCommand myCommand = (NewCommand)NewCommandFactory.Create("new", _ => host);
             rootCommand.Add(myCommand);
+
+            // ProjectPathOption uses AcceptExistingOnly validator, so the provided file has to exist!
+            string existingFilePath = typeof(object).Assembly.Location;
+            command = command.Replace("$filePath", $"\"{existingFilePath}\"");
+            expected = expected?.Replace("$filePath", Path.GetFileName(existingFilePath));
 
             ParseResult parseResult = rootCommand.Parse(command);
             Assert.Equal(expected, parseResult.GetValue(SharedOptions.ProjectPathOption)?.Name);

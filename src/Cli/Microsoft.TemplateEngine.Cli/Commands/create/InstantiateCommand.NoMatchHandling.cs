@@ -1,13 +1,11 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
-using System.Text;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Settings;
-using Command = System.CommandLine.Command;
+using Command = System.CommandLine.CliCommand;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
 {
@@ -169,16 +167,16 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
         private static void HandleNoMatchOnTemplateBaseOptions(IEnumerable<TemplateResult> matchInfos, InstantiateCommandArgs args, TemplateGroup templateGroup)
         {
-            Option<string> languageOption = SharedOptionsFactory.CreateLanguageOption();
-            Option<string> typeOption = SharedOptionsFactory.CreateTypeOption();
-            Option<string> baselineOption = SharedOptionsFactory.CreateBaselineOption();
+            CliOption<string> languageOption = SharedOptionsFactory.CreateLanguageOption();
+            CliOption<string> typeOption = SharedOptionsFactory.CreateTypeOption();
+            CliOption<string> baselineOption = SharedOptionsFactory.CreateBaselineOption();
 
             Command reparseCommand = new("reparse-only")
             {
                 languageOption,
                 typeOption,
                 baselineOption,
-                new Argument<string[]>("rem-args")
+                new CliArgument<string[]>("rem-args")
                 {
                     Arity = new ArgumentArity(0, 999)
                 }
@@ -186,9 +184,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 
             ParseResult result = ParserFactory.CreateParser(reparseCommand).Parse(args.RemainingArguments ?? Array.Empty<string>());
             string baseInputParameters = $"'{args.ShortName}'";
-            foreach (Option<string> option in new[] { languageOption, typeOption, baselineOption })
+            foreach (CliOption<string> option in new[] { languageOption, typeOption, baselineOption })
             {
-                if (result.FindResultFor(option) is { } optionResult && optionResult.Token is { } token)
+                if (result.GetResult(option) is { } optionResult && optionResult.IdentifierToken is { } token)
                 {
                     baseInputParameters += $", {token.Value}='{optionResult.GetValueOrDefault<string>()}'";
                 }
@@ -202,7 +200,7 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                     new { Option = baselineOption, Condition = matchInfos.All(mi => !mi.IsBaselineMatch), AllowedValues = (IReadOnlyList<string?>)templateGroup.Baselines },
                 })
             {
-                if (option.Condition && result.FindResultFor(option.Option) is { } optionResult && optionResult.Token is { } token)
+                if (option.Condition && result.GetResult(option.Option) is { } optionResult && optionResult.IdentifierToken is { } token)
                 {
                     string allowedValues = string.Join(", ", option.AllowedValues.Select(l => $"'{l}'").OrderBy(l => l, StringComparer.OrdinalIgnoreCase));
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplateOptions_Error_AllowedValuesForOptionList, token.Value, allowedValues));

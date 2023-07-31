@@ -1,25 +1,23 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using Microsoft.DotNet.ApiCompatibility.Rules;
 
 namespace Microsoft.DotNet.ApiCompatibility.Tests
 {
     internal class TestRuleFactory : IRuleFactory
     {
-        private readonly HashSet<Func<RuleSettings, IRuleRegistrationContext, IRule>> _ruleFactories;
+        private readonly HashSet<Func<IRuleSettings, IRuleRegistrationContext, IRule>> _ruleFactories;
 
-        public TestRuleFactory(params Func<RuleSettings, IRuleRegistrationContext, IRule>[] ruleFactories)
+        public TestRuleFactory(params Func<IRuleSettings, IRuleRegistrationContext, IRule>[] ruleFactories)
         {
-            _ruleFactories = new HashSet<Func<RuleSettings, IRuleRegistrationContext, IRule>>(ruleFactories);
+            _ruleFactories = new HashSet<Func<IRuleSettings, IRuleRegistrationContext, IRule>>(ruleFactories);
         }
 
-        public IRule[] CreateRules(RuleSettings settings, IRuleRegistrationContext context)
+        public IRule[] CreateRules(IRuleSettings settings, IRuleRegistrationContext context)
         {
             List<IRule> rules = new();
-            foreach (Func<RuleSettings, IRuleRegistrationContext, IRule> ruleFactory in _ruleFactories)
+            foreach (Func<IRuleSettings, IRuleRegistrationContext, IRule> ruleFactory in _ruleFactories)
             {
                 rules.Add(ruleFactory(settings, context));
             }
@@ -27,9 +25,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             return rules.ToArray();
         }
 
-        public TestRuleFactory WithRule(Func<RuleSettings, IRuleRegistrationContext, IRule> ruleFactory)
+        public TestRuleFactory WithRule(Func<IRuleSettings, IRuleRegistrationContext, IRule> ruleFactory)
         {
-            var rules = new Func<RuleSettings, IRuleRegistrationContext, IRule>[_ruleFactories.Count + 1];
+            var rules = new Func<IRuleSettings, IRuleRegistrationContext, IRule>[_ruleFactories.Count + 1];
             _ruleFactories.CopyTo(rules);
             rules[rules.Length - 1] = ruleFactory;
 

@@ -29,6 +29,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateAssemblyDescriptionAttribute Condition="'$(GenerateAssemblyDescriptionAttribute)' == ''">true</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyFileVersionAttribute Condition="'$(GenerateAssemblyFileVersionAttribute)' == ''">true</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute Condition="'$(GenerateAssemblyInformationalVersionAttribute)' == ''">true</GenerateAssemblyInformationalVersionAttribute>
+    <GenerateAssemblyTrademarkAttribute Condition="'$(GenerateAssemblyTrademarkAttribute)' == ''">true</GenerateAssemblyTrademarkAttribute>
     <GenerateAssemblyProductAttribute Condition="'$(GenerateAssemblyProductAttribute)' == ''">true</GenerateAssemblyProductAttribute>
     <GenerateAssemblyTitleAttribute Condition="'$(GenerateAssemblyTitleAttribute)' == ''">true</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyVersionAttribute Condition="'$(GenerateAssemblyVersionAttribute)' == ''">true</GenerateAssemblyVersionAttribute>
@@ -38,6 +39,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <IncludeSourceRevisionInInformationalVersion Condition="'$(IncludeSourceRevisionInInformationalVersion)' == ''">true</IncludeSourceRevisionInInformationalVersion>
     <GenerateInternalsVisibleToAttributes Condition="'$(GenerateInternalsVisibleToAttributes)' == ''">true</GenerateInternalsVisibleToAttributes>
     <GenerateRequiresPreviewFeaturesAttribute Condition="'$(GenerateRequiresPreviewFeaturesAttribute)' == '' and '$(IsNetCoreAppTargetingLatestTFM)' == 'true'">true</GenerateRequiresPreviewFeaturesAttribute>
+    <GenerateTargetPlatformAttribute Condition="'$(GenerateTargetPlatformAttribute)' == ''">true</GenerateTargetPlatformAttribute>
+    <GenerateSupportedOSPlatformAttribute Condition="'$(GenerateSupportedOSPlatformAttribute)' == ''">true</GenerateSupportedOSPlatformAttribute>
   </PropertyGroup>
 
   <!--
@@ -92,6 +95,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AssemblyAttribute Include="System.Reflection.AssemblyProductAttribute" Condition="'$(Product)' != '' and '$(GenerateAssemblyProductAttribute)' == 'true'">
         <_Parameter1>$(Product)</_Parameter1>
       </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Reflection.AssemblyTrademarkAttribute" Condition="'$(Trademark)' != '' and '$(GenerateAssemblyTrademarkAttribute)' == 'true'">
+        <_Parameter1>$(Trademark)</_Parameter1>
+      </AssemblyAttribute>
       <AssemblyAttribute Include="System.Reflection.AssemblyTitleAttribute" Condition="'$(AssemblyTitle)' != '' and '$(GenerateAssemblyTitleAttribute)' == 'true'">
         <_Parameter1>$(AssemblyTitle)</_Parameter1>
       </AssemblyAttribute>
@@ -122,7 +128,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       </AssemblyAttribute>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(TargetPlatformIdentifier)' != ''
+    <ItemGroup Condition="'$(GenerateTargetPlatformAttribute)' == 'true'
+                         and '$(TargetPlatformIdentifier)' != ''
                          and '$(TargetPlatformVersion)' != ''
                          and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                          and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">
@@ -131,7 +138,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       </AssemblyAttribute>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(TargetPlatformIdentifier)' != ''
+    <ItemGroup Condition="'$(GenerateSupportedOSPlatformAttribute)' == 'true'
+                         and '$(TargetPlatformIdentifier)' != ''
                          and '$(SupportedOSPlatformVersion)' != ''
                          and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                          and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">

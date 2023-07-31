@@ -1,8 +1,6 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using System.Linq;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
@@ -22,12 +20,18 @@ namespace Microsoft.DotNet.Cli.Telemetry
         public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult, Dictionary<string, double> measurements = null)
         {
             var result = new List<ApplicationInsightsEntryFormat>();
-            var topLevelCommandNameFromParse = parseResult.RootCommandResult.Children.FirstOrDefault()?.Symbol.Name;
+            var topLevelCommandNameFromParse = parseResult.RootCommandResult.Children.FirstOrDefault() switch
+            {
+                System.CommandLine.Parsing.CommandResult commandResult => commandResult.Command.Name,
+                OptionResult optionResult => optionResult.Option.Name,
+                ArgumentResult argumentResult => argumentResult.Argument.Name,
+                _ => null
+            };
             if (topLevelCommandNameFromParse != null)
             {
                 if (_topLevelCommandNameAllowList.Contains(topLevelCommandNameFromParse))
                 {
-                    var firstArgument = parseResult.RootCommandResult.Children.FirstOrDefault()?.Tokens.Where(t => t.Type.Equals(TokenType.Argument)).FirstOrDefault()?.Value ?? null;
+                    var firstArgument = parseResult.RootCommandResult.Children.FirstOrDefault()?.Tokens.Where(t => t.Type.Equals(CliTokenType.Argument)).FirstOrDefault()?.Value ?? null;
                     if (firstArgument != null)
                     {
                         result.Add(new ApplicationInsightsEntryFormat(

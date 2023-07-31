@@ -1,21 +1,9 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using FluentAssertions;
-using Xunit;
-using Xunit.Abstractions;
 using NuGet.Packaging;
-using System.Xml.Linq;
 using System.Runtime.CompilerServices;
-using System;
 using NuGet.Frameworks;
-using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.ToolPack.Tests
 {
@@ -47,7 +35,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             _testRoot = helloWorldAsset.TestRoot;
 
-            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+            var packCommand = new PackCommand(helloWorldAsset);
             packCommand.Execute().Should().Pass();
             _packageId = Path.GetFileNameWithoutExtension(packCommand.ProjectFile);
 
@@ -191,7 +179,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             _testRoot = helloWorldAsset.TestRoot;
 
-            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+            var packCommand = new PackCommand(helloWorldAsset);
             var outputDirectory = packCommand.GetOutputDirectory(targetFramework);
             packCommand.Execute().Should().Pass();
 
@@ -273,7 +261,7 @@ namespace Microsoft.NET.ToolPack.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
-            var packCommand = new PackCommand(Log, testAsset.TestRoot);
+            var packCommand = new PackCommand(testAsset);
 
             packCommand.Execute("/p:NoBuild=true").Should().Pass();
             var nugetPackage = packCommand.GetNuGetPackage();
@@ -336,7 +324,7 @@ namespace Microsoft.NET.ToolPack.Tests
             var buildCommand = new BuildCommand(helloWorldAsset);
             buildCommand.Execute("/p:PackageId=wrongpackagefirstbuild");
 
-            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+            var packCommand = new PackCommand(helloWorldAsset);
 
             packCommand.Execute().Should().Pass();
             var nugetPackage = packCommand.GetNuGetPackage();

@@ -1,14 +1,10 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiSymbolExtensions;
 using Moq;
-using Xunit;
 
 namespace Microsoft.DotNet.ApiCompatibility.Runner.Tests
 {
@@ -27,7 +23,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner.Tests
                 });
             Mock<IApiComparerFactory> apiComparerFactoryMock = new();
             apiComparerFactoryMock
-                .Setup(x => x.Create(null))
+                .Setup(x => x.Create())
                 .Returns(apiComparerMock.Object);
 
             // Mock the suppression engine
@@ -50,7 +46,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Runner.Tests
                 .Setup(m => m.Create(It.IsAny<bool>()))
                 .Returns(assemblySymbolLoaderMock.Object);
 
-            return new(Mock.Of<ICompatibilityLogger>(),
+            return new(Mock.Of<ISuppressableLog>(),
                 suppressionEngineMock.Object,
                 apiComparerFactoryMock.Object,
                 assemblyLoaderFactoryMock.Object);

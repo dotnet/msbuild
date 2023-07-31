@@ -55,8 +55,8 @@ The default is to publish a framework-dependent application.</source>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
-        <source>The configuration to publish for. The default is 'Debug'. Use the `PublishRelease` property to make 'Release' the default for this command.</source>
-        <target state="translated">公開する構成。既定値は 'Debug' です。'Release' をこのコマンドの既定値にするには、'PublishRelease' プロパティを使用します。</target>
+        <source>The configuration to publish for. The default is 'Release' for NET 8.0 projects and above, but 'Debug' for older projects.</source>
+        <target state="needs-review-translation">公開する構成。既定値は 'Debug' です。'Release' をこのコマンドの既定値にするには、'PublishRelease' プロパティを使用します。</target>
         <note />
       </trans-unit>
     </body>

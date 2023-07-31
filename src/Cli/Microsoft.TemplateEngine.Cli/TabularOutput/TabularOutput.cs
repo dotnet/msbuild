@@ -1,8 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
-
-using System.Text;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.TemplateEngine.Cli.TabularOutput
 {
@@ -27,24 +24,56 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             _settings = settings;
         }
 
-        internal TabularOutput<T> DefineColumn(Func<T, string> binder, string? header = null, string? columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
+        internal TabularOutput<T> DefineColumn(
+            Func<T, string> binder,
+            string? header = null,
+            string? columnName = null,
+            bool shrinkIfNeeded = false,
+            int minWidth = 2,
+            bool showAlways = false,
+            bool defaultColumn = true,
+            TextAlign textAlign = TextAlign.Left)
         {
-            return DefineColumn(binder, out object? c, header, columnName, shrinkIfNeeded, minWidth, showAlways, defaultColumn, rightAlign);
+            return DefineColumn(
+                binder,
+                out object? c,
+                header,
+                columnName,
+                shrinkIfNeeded,
+                minWidth,
+                showAlways,
+                defaultColumn,
+                textAlign);
         }
 
-        internal TabularOutput<T> DefineColumn(Func<T, string> binder, out object? column, string? header = null, string? columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
+        internal TabularOutput<T> DefineColumn(
+            Func<T, string> binder,
+            out object? column,
+            string? header = null,
+            string? columnName = null,
+            bool shrinkIfNeeded = false,
+            int minWidth = 2,
+            bool showAlways = false,
+            bool defaultColumn = true,
+            TextAlign textAlign = TextAlign.Left)
         {
             column = null;
             if ((_settings.ColumnsToDisplay.Count == 0 && defaultColumn) || showAlways || (!string.IsNullOrWhiteSpace(columnName) && _settings.ColumnsToDisplay.Contains(columnName)) || _settings.DisplayAllColumns)
             {
-                ColumnDefinition c = new ColumnDefinition(_settings, header, binder, shrinkIfNeeded: shrinkIfNeeded, minWidth: minWidth, rightAlign: rightAlign);
+                ColumnDefinition c = new ColumnDefinition(
+                    _settings,
+                    header,
+                    binder,
+                    minWidth: minWidth,
+                    shrinkIfNeeded: shrinkIfNeeded,
+                    textAlign: textAlign);
                 _columns.Add(c);
                 column = c;
             }
             return this;
         }
 
-        internal string Layout()
+        internal string Layout(int indent = 0)
         {
             Dictionary<int, int> columnWidthLookup = new Dictionary<int, int>();
             List<TextWrapper[]> grid = new List<TextWrapper[]>();
@@ -84,13 +113,13 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
                 {
                     for (int i = 0; i < _columns.Count; ++i)
                     {
-                        header[i].AppendTextWithPadding(b, j, _columns[i].CalculatedWidth, _columns[i].RightAlign);
+                        header[i].AppendTextWithPadding(b, j, _columns[i].CalculatedWidth, _columns[i].TextAlign);
                         if (i != _columns.Count - 1)
                         {
                             b.Append(' ', _settings.ColumnPadding);
                         }
                     }
-                    b.AppendLine();
+                    b.AppendLine().Indent(indent);
                 }
             }
 
@@ -106,8 +135,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
                         b.Append(new string(' ', _settings.ColumnPadding));
                     }
                 }
-
-                b.AppendLine();
+                b.AppendLine().Indent(indent);
             }
 
             IEnumerable<TextWrapper[]> rows = grid;
@@ -150,13 +178,13 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
                     // Render all columns
                     for (int columnIndex = 0; columnIndex < _columns.Count; ++columnIndex)
                     {
-                        rowToRender[columnIndex].AppendTextWithPadding(b, lineWithinRow, _columns[columnIndex].CalculatedWidth, _columns[columnIndex].RightAlign);
+                        rowToRender[columnIndex].AppendTextWithPadding(b, lineWithinRow, _columns[columnIndex].CalculatedWidth, _columns[columnIndex].TextAlign);
                         if (columnIndex != _columns.Count - 1)
                         {
                             b.Append(' ', _settings.ColumnPadding);
                         }
                     }
-                    b.AppendLine();
+                    b.AppendLine().Indent(indent);
                 }
 
                 if (_settings.BlankLineBetweenRows)
@@ -167,7 +195,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
                 ++currentRowIndex;
             }
 
-            return b.ToString();
+            return b.ToString().Indent(indent);
         }
 
         internal TabularOutput<T> OrderBy(object? columnToken, IComparer<string>? comparer = null)
@@ -289,7 +317,14 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             private readonly Func<T, string> _binder;
             private readonly TabularOutputSettings _settings;
 
-            internal ColumnDefinition(TabularOutputSettings settings, string? header, Func<T, string> binder, int minWidth = 2, int maxWidth = -1, bool shrinkIfNeeded = false, bool rightAlign = false)
+            internal ColumnDefinition(
+                TabularOutputSettings settings,
+                string? header,
+                Func<T, string> binder,
+                int minWidth = 2,
+                int maxWidth = -1,
+                bool shrinkIfNeeded = false,
+                TextAlign textAlign = TextAlign.Left)
             {
                 Header = header;
                 MaxWidth = maxWidth > 0 ? maxWidth : int.MaxValue;
@@ -297,7 +332,7 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
                 ShrinkIfNeeded = shrinkIfNeeded;
                 _settings = settings;
                 MinWidth = minWidth + _settings.ShrinkReplacement.Length; //we need to add required width for shrink replacement
-                RightAlign = rightAlign;
+                TextAlign = textAlign;
             }
 
             internal string? Header { get; }
@@ -309,6 +344,10 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
             internal int MaxWidth { get; }
 
             internal bool ShrinkIfNeeded { get; }
+
+            internal TextAlign TextAlign { get; }
+
+            internal bool LeftAlign { get; }
 
             internal bool RightAlign { get; }
 
@@ -322,6 +361,20 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
         {
             private readonly IReadOnlyList<string> _lines;
             private readonly string _shrinkReplacement;
+            private readonly IDictionary<TextAlign, Func<string, int, StringBuilder, StringBuilder>> _alignRules = new Dictionary<TextAlign, Func<string, int, StringBuilder, StringBuilder>>()
+            {
+                { TextAlign.Left, (string abbreviatedText, int maxColumnWidth, StringBuilder b) => b.Append(abbreviatedText).Append(' ', maxColumnWidth - abbreviatedText.GetUnicodeLength()) },
+                {
+                    TextAlign.Center, (string abbreviatedText, int maxColumnWidth, StringBuilder b) =>
+                    {
+                        var centralPoint = (maxColumnWidth + abbreviatedText.GetUnicodeLength()) / 2;
+                        var leftOffset = maxColumnWidth - centralPoint;
+                        var rightOffset = maxColumnWidth - (leftOffset + abbreviatedText.GetUnicodeLength());
+                        return b.Append(' ', leftOffset).Append(abbreviatedText).Append(' ', rightOffset);
+                    }
+                },
+                { TextAlign.Right, (string abbreviatedText, int maxColumnWidth, StringBuilder b) => b.Append(' ', maxColumnWidth - abbreviatedText.GetUnicodeLength()).Append(abbreviatedText) }
+            };
 
             internal TextWrapper(string text, int maxWidth, string newLine, string shrinkReplacement)
             {
@@ -368,19 +421,12 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
 
             internal string RawText { get; }
 
-            internal void AppendTextWithPadding(StringBuilder b, int line, int maxColumnWidth, bool rightAlign = false)
+            internal void AppendTextWithPadding(StringBuilder b, int line, int maxColumnWidth, TextAlign textAlign = TextAlign.Left)
             {
                 var text = _lines.Count > line ? _lines[line] : string.Empty;
                 var abbreviatedText = ShrinkTextToLength(text, maxColumnWidth);
 
-                if (rightAlign)
-                {
-                    b.Append(' ', maxColumnWidth - abbreviatedText.GetUnicodeLength()).Append(abbreviatedText);
-                }
-                else
-                {
-                    b.Append(abbreviatedText).Append(' ', maxColumnWidth - abbreviatedText.GetUnicodeLength());
-                }
+                AlignText(textAlign, abbreviatedText, maxColumnWidth, b);
             }
 
             private static void GetLineText(string text, List<string> lines, int maxLength, int end, ref int position)
@@ -411,6 +457,8 @@ namespace Microsoft.TemplateEngine.Cli.TabularOutput
                     position += properMax;
                 }
             }
+
+            private StringBuilder AlignText(TextAlign textAlign, string text, int maxColumnWidth, StringBuilder b) => _alignRules[textAlign](text, maxColumnWidth, b);
 
             private string ShrinkTextToLength(string text, int maxLength)
             {

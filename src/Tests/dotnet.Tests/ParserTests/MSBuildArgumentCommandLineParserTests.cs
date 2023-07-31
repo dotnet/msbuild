@@ -1,15 +1,11 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Build;
-using Microsoft.DotNet.Tools.Publish;
 using System.CommandLine;
-using System.Linq;
-using Xunit;
-using Xunit.Abstractions;
+using BuildCommand = Microsoft.DotNet.Tools.Build.BuildCommand;
+using PublishCommand = Microsoft.DotNet.Tools.Publish.PublishCommand;
 
 namespace Microsoft.DotNet.Tests.CommandLineParserTests
 {
@@ -55,7 +51,7 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
         [InlineData(new string[] { "-p:RuntimeIdentifiers=linux-x64;linux-arm64" }, new string[]{ "--property:RuntimeIdentifiers=linux-x64;linux-arm64"})]
         public void Can_pass_msbuild_properties_safely(string[] tokens, string[] forwardedTokens) {
             var forwardingFunction = (CommonOptions.PropertiesOption as ForwardedOption<string[]>).GetForwardingFunction();
-            var result = CommonOptions.PropertiesOption.Parse(tokens);
+            var result = new CliRootCommand() { CommonOptions.PropertiesOption }.Parse(tokens);
             var parsedTokens = forwardingFunction(result);
             parsedTokens.Should().BeEquivalentTo(forwardedTokens);
         }

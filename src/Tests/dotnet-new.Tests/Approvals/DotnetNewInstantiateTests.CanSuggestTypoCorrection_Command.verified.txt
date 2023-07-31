@@ -1,6 +1,7 @@
 ﻿No templates or subcommands found matching: 'uninstal'.
 Did you mean one of the following subcommands?
    dotnet new uninstall
+   dotnet new install
 
 To list installed templates similar to 'uninstal', run:
    dotnet new list uninstal

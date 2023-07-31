@@ -1,12 +1,9 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
+using Task = Microsoft.Build.Utilities.Task;
 
 namespace Microsoft.AspNetCore.Razor.Tasks
 {
@@ -45,7 +42,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
             var targetAssemblyNames = TargetAssemblyNames.Select(s => s.ItemSpec).ToList();
 
-            var provider = new ReferenceResolver(targetAssemblyNames, referenceItems);
+            var provider = new ReferenceResolver((IReadOnlyList<string>)targetAssemblyNames, referenceItems);
             try
             {
                 var assemblyNames = provider.ResolveAssemblies();

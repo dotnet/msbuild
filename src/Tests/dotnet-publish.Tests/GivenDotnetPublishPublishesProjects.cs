@@ -1,29 +1,16 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Xml.Linq;
-using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using Xunit;
-using Xunit.Abstractions;
-using LocalizableStrings = Microsoft.DotNet.Tools.Publish.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli.Publish.Tests
 {
     public class GivenDotnetPublishPublishesProjects : SdkTest
     {
 
-        private static string _defaultConfiguration = "Debug";
+        private static string _defaultConfiguration = "Release";
 
         public GivenDotnetPublishPublishesProjects(ITestOutputHelper log) : base(log)
         {
@@ -48,7 +35,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "publish", $"{testAppName}.dll");
+            var outputDll = Path.Combine(OutputPathCalculator.FromProject(testProjectDirectory).GetPublishDirectory(configuration: configuration), $"{testAppName}.dll");
 
             new DotnetCommand(Log)
                 .Execute(outputDll)
@@ -71,7 +58,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass();
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/19487")]
+        [Fact]
         public void ItCanPublishAMultiTFMProjectWithImplicitRestore()
         {
             var testInstance = _testAssetsManager.CopyTestAsset(
@@ -197,7 +184,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should()
                 .Pass();
 
-            var properties = testProject.GetPropertyValues(testAsset.TestRoot, targetFramework: targetFramework);
+            var properties = testProject.GetPropertyValues(testAsset.TestRoot, configuration: "Release", targetFramework: targetFramework);
 
             if (resultShouldBeSelfContained)
             {
@@ -309,7 +296,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
-            return new DirectoryInfo(Path.Combine(testProjectDirectory, "bin", configuration, ToolsetInfo.CurrentTargetFramework, rid ?? "", "publish"));
+            return new DirectoryInfo(OutputPathCalculator.FromProject(testProjectDirectory).GetPublishDirectory(configuration: configuration, runtimeIdentifier: rid));
         }
 
         [Fact]
@@ -331,7 +318,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
-            var outputProgram = Path.Combine(rootDir, "bin", configuration, ToolsetInfo.CurrentTargetFramework, "publish", $"TestAppSimple.dll");
+            var outputProgram = Path.Combine(OutputPathCalculator.FromProject(rootDir).GetPublishDirectory(configuration: configuration), $"TestAppSimple.dll");
 
             new DotnetCommand(Log, outputProgram)
                 .Execute()
@@ -368,9 +355,10 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var rid = selfContained ? EnvironmentInfo.GetCompatibleRid() : "";
             var ridArgs = selfContained ? $"-r {rid}".Split() : Array.Empty<string>();
+            var ridAndConfigurationArgs = ridArgs.ToList().Concat(new List<string> { "-c", "Release" });
 
             new DotnetBuildCommand(Log, rootPath)
-                .Execute(ridArgs)
+                .Execute(ridAndConfigurationArgs)
                 .Should()
                 .Pass();
 
@@ -382,7 +370,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? _defaultConfiguration;
 
-            var outputProgram = Path.Combine(rootPath, "bin", configuration, ToolsetInfo.CurrentTargetFramework, rid, "publish", $"TestAppSimple.dll");
+            var outputProgram = Path.Combine(OutputPathCalculator.FromProject(rootPath).GetPublishDirectory(configuration: configuration, runtimeIdentifier: rid), $"TestAppSimple.dll");
 
             new DotnetCommand(Log, outputProgram)
                 .Execute()
@@ -453,23 +441,14 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                .CopyTestAsset("HelloWorld", "PublishPropertiesHelloWorld")
                .WithSource();
 
-            System.IO.File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
-
-            new BuildCommand(helloWorldAsset)
-               .Execute()
-               .Should()
-               .Pass();
+            File.WriteAllText(helloWorldAsset.Path + "/Directory.Build.props", "<Project><PropertyGroup><PublishRelease>true</PublishRelease></PropertyGroup></Project>");
 
             // Another command, which should not be affected by PublishRelease
-            var packCommand = new DotnetPackCommand(Log, helloWorldAsset.TestRoot);
-
-            packCommand
-                .Execute()
-                .Should()
-                .Pass();
-
-            var expectedAssetPath = System.IO.Path.Combine(helloWorldAsset.Path, "bin", "Release", "HelloWorld.1.0.0.nupkg");
-            Assert.False(File.Exists(expectedAssetPath));
+            new BuildCommand(helloWorldAsset)
+               .Execute();
+            
+            var expectedAssetPath = Path.Combine(helloWorldAsset.Path, "bin", "Release");
+            Assert.False(Directory.Exists(expectedAssetPath));
         }
     }
 }

@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="Info_TemplateThirdPartyNotice">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="translated">このテンプレートには、Microsoft 以外のパーティのテクノロジが含まれています。詳しくは、{0} をご覧ください。</target>
+        <target state="translated">このテンプレートには、Microsoft 以外のパーティのテクノロジーが含まれています。詳しくは、{0} をご覧ください。</target>
         <note />
       </trans-unit>
       <trans-unit id="RowHeader_AllowMultiValue">
@@ -86,6 +86,11 @@
         <source>(No options)</source>
         <target state="translated">(オプションなし)</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Text_Required">
+        <source>Required: *true*</source>
+        <target state="translated">必須: *true*</target>
+        <note>Indication that parameter is always required, do not translate "true".</note>
       </trans-unit>
       <trans-unit id="Text_RequiredCondition">
         <source>Required if: {0}</source>

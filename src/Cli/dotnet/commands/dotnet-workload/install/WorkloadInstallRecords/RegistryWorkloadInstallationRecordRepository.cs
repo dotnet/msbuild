@@ -1,9 +1,6 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.DotNet.Installer.Windows;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
@@ -83,8 +80,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
         {
             using RegistryKey wrk = _baseKey.OpenSubKey(Path.Combine(BasePath, $"{sdkFeatureBand}"));
 
+            return GetWorkloadInstallationRecordsFromRegistry(wrk);
+        }
+
+        private IEnumerable<WorkloadId> GetWorkloadInstallationRecordsFromRegistry(RegistryKey sdkFeatureBandWorkloadRegistry)
+        {
             // ToList() is needed to ensure deferred execution does not reference closed registry keys.
-            return wrk?.GetSubKeyNames().Select(id => new WorkloadId(id)).ToList() ?? Enumerable.Empty<WorkloadId>();
+            return sdkFeatureBandWorkloadRegistry?.GetSubKeyNames().Select(id => new WorkloadId(id)).ToList() ?? Enumerable.Empty<WorkloadId>();
         }
 
         public void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand)

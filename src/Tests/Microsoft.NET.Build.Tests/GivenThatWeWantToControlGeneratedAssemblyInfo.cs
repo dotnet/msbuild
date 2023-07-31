@@ -1,17 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Xml.Linq;
-using FluentAssertions;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using Xunit;
-using Xunit.Abstractions;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -30,6 +18,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("AssemblyCopyrightAttribute")]
         [InlineData("AssemblyDescriptionAttribute")]
         [InlineData("AssemblyTitleAttribute")]
+        [InlineData("AssemblyTrademarkAttribute")]
         [InlineData("NeutralResourcesLanguageAttribute")]
         [InlineData("All")]
         public void It_respects_opt_outs(string attributeToOptOut)
@@ -50,6 +39,7 @@ namespace Microsoft.NET.Build.Tests
                     "/p:Description=TestDescription",
                     "/p:Product=TestProduct",
                     "/p:AssemblyTitle=TestTitle",
+                    "/p:Trademark=TestTrademark",
                     "/p:NeutralLanguage=fr",
                     attributeToOptOut == "All" ?
                         "/p:GenerateAssemblyInfo=false" :
@@ -69,6 +59,7 @@ namespace Microsoft.NET.Build.Tests
                 { "AssemblyDescriptionAttribute", "TestDescription" },
                 { "AssemblyProductAttribute", "TestProduct" },
                 { "AssemblyTitleAttribute", "TestTitle" },
+                { "AssemblyTrademarkAttribute", "TestTrademark" },
                 { "NeutralResourcesLanguageAttribute", "fr" },
             };
 
@@ -617,7 +608,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "UserSecretTest",
-                TargetFrameworks = "netcoreapp3.0"
+                TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
             testProject.AdditionalProperties["UserSecretsId"] = "SecretsIdValue";
@@ -740,7 +731,7 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
                 .Should()
                 .Pass();
@@ -761,7 +752,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netcoreapp3.1", ".NET Core 3.1")]
         [InlineData("netcoreapp2.1", ".NET Core 2.1")]
         [InlineData("netstandard2.1", ".NET Standard 2.1")]
-        [InlineData("net5.0", ".NET 5.0")]
+        [InlineData(ToolsetInfo.CurrentTargetFramework, $".NET {ToolsetInfo.CurrentTargetFrameworkVersion}")]
         public void CheckTargetFrameworkDisplayName(string targetFrameworkVersion, string expectedFrameworkDisplayName)
         {
             TestProject libraryProject = new TestProject()

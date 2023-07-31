@@ -1,11 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Configurer;
@@ -29,7 +26,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             bool elevationRequired = true)
         {
             dotnetDir = string.IsNullOrWhiteSpace(dotnetDir) ? Path.GetDirectoryName(Environment.ProcessPath) : dotnetDir;
-            var installType = GetWorkloadInstallType(sdkFeatureBand, dotnetDir);
+            var installType = WorkloadInstallType.GetWorkloadInstallType(sdkFeatureBand, dotnetDir);
 
             if (installType == InstallType.Msi)
             {
@@ -49,7 +46,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
 
-            return new FileBasedInstaller(reporter,
+            return new FileBasedInstaller(
+                reporter,
                 sdkFeatureBand,
                 workloadResolver,
                 userProfileDir,
@@ -59,24 +57,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 verbosity: verbosity,
                 packageSourceLocation: packageSourceLocation,
                 restoreActionConfig: restoreActionConfig);
-        }
-
-        /// <summary>
-        /// Determines the <see cref="InstallType"/> associated with a specific SDK version.
-        /// </summary>
-        /// <param name="sdkFeatureBand">The SDK version to check.</param>
-        /// <returns>The <see cref="InstallType"/> associated with the SDK.</returns>
-        public static InstallType GetWorkloadInstallType(SdkFeatureBand sdkFeatureBand, string dotnetDir)
-        {
-            string installerTypePath = Path.Combine(dotnetDir, "metadata",
-                "workloads", $"{sdkFeatureBand.ToStringWithoutPrerelease()}", "installertype");
-
-            if (File.Exists(Path.Combine(installerTypePath, "msi")))
-            {
-                return InstallType.Msi;
-            }
-
-            return InstallType.FileBased;
         }
 
         private static bool CanWriteToDotnetRoot(string dotnetDir = null)

@@ -1,19 +1,9 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using FluentAssertions;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Common;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using System;
-using System.IO;
-using System.Linq;
-using System.Text;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Sln.Remove.Tests
 {
@@ -619,13 +609,13 @@ EndGlobal
 
             var reasonString = "should be built in release mode, otherwise it means build configurations are missing from the sln file";
 
-            var releaseDirectory = Directory.EnumerateDirectories(
-                Path.Combine(projectDirectory, "App", "bin"),
-                "Release",
-                SearchOption.AllDirectories);
-            releaseDirectory.Count().Should().Be(1, $"App {reasonString}");
-            Directory.EnumerateFiles(releaseDirectory.Single(), "App.dll", SearchOption.AllDirectories)
-                .Count().Should().Be(1, $"App {reasonString}");
+            var outputCalculator = OutputPathCalculator.FromProject(Path.Combine(projectDirectory, "App"));
+
+            new DirectoryInfo(outputCalculator.GetOutputDirectory(configuration: "Debug")).Should().NotExist(reasonString);
+
+            var outputDirectory = new DirectoryInfo(outputCalculator.GetOutputDirectory(configuration: "Release"));
+            outputDirectory.Should().Exist();
+            outputDirectory.Should().HaveFile("App.dll");
         }
 
         [Fact]
@@ -734,6 +724,27 @@ EndGlobal
 
             File.ReadAllText(solutionPath)
                 .Should().BeVisuallyEquivalentTo(ExpectedSlnContentsAfterRemoveProjectWithDependencies);
+        }
+
+        [Fact]
+        public void WhenSolutionIsPassedAsProjectItPrintsSuggestionAndUsage()
+        {
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles")
+                .WithSource()
+                .Path;
+
+            var projectArg = Path.Combine("Lib", "Lib.csproj");
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("sln", "remove", "App.sln", projectArg);
+            cmd.Should().Fail();
+            cmd.StdErr.Should().BeVisuallyEquivalentTo(
+                string.Format(CommonLocalizableStrings.SolutionArgumentMisplaced, "App.sln") + Environment.NewLine
+                + CommonLocalizableStrings.DidYouMean + Environment.NewLine
+                 + $"  dotnet sln App.sln remove {projectArg}"
+            );
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized("");
         }
     }
 }

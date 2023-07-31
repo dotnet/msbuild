@@ -1,16 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
-using System.Linq;
-using FluentAssertions;
 using Microsoft.NET.Build.Tasks;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using NuGet.Frameworks;
-using NuGet.ProjectModel;
-using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -20,7 +11,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/3785")]
+        [FullMSBuildOnlyFact]
         public void When_referenced_by_csharp_project_it_publishes_and_runs()
         {
             var testAsset = _testAssetsManager
@@ -28,14 +19,14 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource();
 
             new PublishCommand(Log, Path.Combine(testAsset.TestRoot, "CSConsoleApp"))
-                .Execute(new string[] { "-p:Platform=x64" })
+                .Execute(new string[] { "-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true" })
                 .Should()
                 .Pass();
 
             var exe = Path.Combine( //find the platform directory
                 new DirectoryInfo(Path.Combine(testAsset.TestRoot, "CSConsoleApp", "bin")).GetDirectories().Single().FullName,
                 "Debug",
-                "netcoreapp3.1",
+                $"{ToolsetInfo.CurrentTargetFramework}-windows",
                 "publish",
                 "CSConsoleApp.exe");
 
@@ -48,7 +39,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("Hello, World!");
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/3785")]
+        [FullMSBuildOnlyFact(Skip = "There is no publish error when using PackageReference support which is required for testing")]
         public void When_not_referenced_by_csharp_project_it_fails_to_publish()
         {
             var testAsset = _testAssetsManager
@@ -56,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource();
 
             new PublishCommand(Log, Path.Combine(testAsset.TestRoot, "NETCoreCppCliTest"))
-                .Execute(new string[] { "-p:Platform=x64" })
+                .Execute(new string[] { "-p:Platform=x64", "-p:EnableManagedpackageReferenceSupport=true"})
                 .Should()
                 .Fail()
                 .And.HaveStdOutContaining(Strings.NoSupportCppPublishDotnetCore);

@@ -1,10 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.New;
@@ -16,11 +14,9 @@ using Microsoft.TemplateEngine.Abstractions.Components;
 using LocalizableStrings = Microsoft.DotNet.Tools.New.LocalizableStrings;
 using Microsoft.TemplateEngine.MSBuildEvaluation;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
-using System.IO;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.DotNet.Tools.New.PostActionProcessors;
 using Microsoft.TemplateEngine.Cli.Commands;
-using Command = System.CommandLine.Command;
 using Microsoft.Extensions.Logging;
 using Microsoft.DotNet.Tools;
 using System.CommandLine.Parsing;
@@ -38,38 +34,43 @@ namespace Microsoft.DotNet.Cli
 
         private const VerbosityOptions DefaultVerbosity = VerbosityOptions.normal;
 
-        private static readonly Option<bool> s_disableSdkTemplatesOption = new Option<bool>(
-            "--debug:disable-sdk-templates",
-            () => false,
-            LocalizableStrings.DisableSdkTemplates_OptionDescription).Hide();
-
-        private static readonly Option<bool> s_disableProjectContextEvaluationOption = new Option<bool>(
-            "--debug:disable-project-context",
-            () => false,
-            LocalizableStrings.DisableProjectContextEval_OptionDescription).Hide();
-
-        private static readonly Option<VerbosityOptions> s_verbosityOption = new(
-            new string[] { "-v", "--verbosity" },
-            () => DefaultVerbosity,
-            LocalizableStrings.Verbosity_OptionDescription)
+        private static readonly CliOption<bool> s_disableSdkTemplatesOption = new CliOption<bool>("--debug:disable-sdk-templates")
         {
-            ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
+            DefaultValueFactory = static _ => false,
+            Description = LocalizableStrings.DisableSdkTemplates_OptionDescription,
+            Recursive = true
+        }.Hide();
+
+        private static readonly CliOption<bool> s_disableProjectContextEvaluationOption = new CliOption<bool>(
+            "--debug:disable-project-context")
+        {
+            DefaultValueFactory = static _ => false,
+            Description = LocalizableStrings.DisableProjectContextEval_OptionDescription,
+            Recursive = true
+        }.Hide();
+
+        private static readonly CliOption<VerbosityOptions> s_verbosityOption = new("--verbosity", "-v")
+        {
+            DefaultValueFactory = _ => DefaultVerbosity,
+            Description = LocalizableStrings.Verbosity_OptionDescription,
+            HelpName = CommonLocalizableStrings.LevelArgumentName,
+            Recursive = true
         };
 
-        private static readonly Option<bool> s_diagnosticOption =
+        private static readonly CliOption<bool> s_diagnosticOption =
             CommonOptionsFactory
-                .CreateDiagnosticsOption()
+                .CreateDiagnosticsOption(recursive: true)
                 .WithDescription(LocalizableStrings.Diagnostics_OptionDescription);
 
-        internal static readonly Command s_command = GetCommand();
+        internal static readonly CliCommand s_command = GetCommand();
 
-        public static Command GetCommand()
+        public static CliCommand GetCommand()
         {
-            Command command = NewCommandFactory.Create(CommandName, (Func<ParseResult, CliTemplateEngineHost>)GetEngineHost);
-            command.AddGlobalOption(s_disableSdkTemplatesOption);
-            command.AddGlobalOption(s_disableProjectContextEvaluationOption);
-            command.AddGlobalOption(s_verbosityOption);
-            command.AddGlobalOption(s_diagnosticOption);
+            CliCommand command = NewCommandFactory.Create(CommandName, (Func<ParseResult, CliTemplateEngineHost>)GetEngineHost);
+            command.Options.Add(s_disableSdkTemplatesOption);
+            command.Options.Add(s_disableProjectContextEvaluationOption);
+            command.Options.Add(s_verbosityOption);
+            command.Options.Add(s_diagnosticOption);
             return command;
 
             static CliTemplateEngineHost GetEngineHost(ParseResult parseResult)
@@ -81,7 +82,7 @@ namespace Microsoft.DotNet.Cli
                 FileInfo? projectPath = parseResult.GetValue(SharedOptions.ProjectPathOption);
                 FileInfo? outputPath = parseResult.GetValue(SharedOptions.OutputOption);
 
-                OptionResult? verbosityOptionResult = parseResult.FindResultFor(s_verbosityOption);
+                OptionResult? verbosityOptionResult = parseResult.GetResult(s_verbosityOption);
                 VerbosityOptions verbosity = DefaultVerbosity;
 
                 if (diagnosticMode || CommandLoggingContext.IsVerbose)
@@ -91,7 +92,11 @@ namespace Microsoft.DotNet.Cli
                     CommandLoggingContext.SetVerbose(true);
                     verbosity = VerbosityOptions.diagnostic;
                 }
-                else if (verbosityOptionResult != null && !verbosityOptionResult.IsImplicit)
+                else if (verbosityOptionResult != null
+                    && !verbosityOptionResult.Implicit
+                    // if verbosityOptionResult contains an error, ArgumentConverter.GetValueOrDefault throws an exception
+                    // and callstack is pushed to process output 
+                    && !parseResult.Errors.Any(error => error.SymbolResult == verbosityOptionResult))
                 {
                     VerbosityOptions userSetVerbosity = verbosityOptionResult.GetValueOrDefault<VerbosityOptions>();
                     if (userSetVerbosity.IsQuiet())
@@ -115,11 +120,17 @@ namespace Microsoft.DotNet.Cli
                     verbosity = userSetVerbosity;
                 }
                 Reporter.Reset();
-                return CreateHost(disableSdkTemplates, disableProjectContext, projectPath, outputPath, verbosity.ToLogLevel());
+                return CreateHost(disableSdkTemplates, disableProjectContext, projectPath, outputPath, parseResult, verbosity.ToLogLevel());
             }
         }
 
-        private static CliTemplateEngineHost CreateHost(bool disableSdkTemplates, bool disableProjectContext, FileInfo? projectPath, FileInfo? outputPath, LogLevel logLevel)
+        private static CliTemplateEngineHost CreateHost(
+            bool disableSdkTemplates,
+            bool disableProjectContext,
+            FileInfo? projectPath,
+            FileInfo? outputPath,
+            ParseResult parseResult,
+            LogLevel logLevel)
         {
             var builtIns = new List<(Type InterfaceType, IIdentifiedComponent Instance)>();
             builtIns.AddRange(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Components.AllComponents);
@@ -132,7 +143,7 @@ namespace Microsoft.DotNet.Cli
             {
                 (typeof(IPostActionProcessor), new DotnetAddPostActionProcessor()),
                 (typeof(IPostActionProcessor), new DotnetSlnPostActionProcessor()),
-                (typeof(IPostActionProcessor), new DotnetRestorePostActionProcessor()),
+                (typeof(IPostActionProcessor), new DotnetRestorePostActionProcessor())
             });
             if (!disableSdkTemplates)
             {
@@ -147,7 +158,7 @@ namespace Microsoft.DotNet.Cli
             }
 
             builtIns.Add((typeof(IWorkloadsInfoProvider), new WorkloadsInfoProvider(
-                    new Lazy<IWorkloadsRepositoryEnumerator>(() => new WorkloadInfoHelper())))
+                    new Lazy<IWorkloadsRepositoryEnumerator>(() => new WorkloadInfoHelper(parseResult.HasOption(SharedOptions.InteractiveOption)))))
             );
             builtIns.Add((typeof(ISdkInfoProvider), new SdkInfoProvider()));
 

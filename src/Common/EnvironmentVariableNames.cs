@@ -1,11 +1,10 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #pragma warning disable IDE0240 // Nullable directive is redundant (when file is included to a project that already enables nullable
+
 #nullable enable
 
-using System.Runtime.InteropServices;
-using System;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -14,13 +13,19 @@ namespace Microsoft.DotNet.Cli
         public static readonly string ALLOW_TARGETING_PACK_CACHING = "DOTNETSDK_ALLOW_TARGETING_PACK_CACHING";
         public static readonly string WORKLOAD_PACK_ROOTS = "DOTNETSDK_WORKLOAD_PACK_ROOTS";
         public static readonly string WORKLOAD_MANIFEST_ROOTS = "DOTNETSDK_WORKLOAD_MANIFEST_ROOTS";
+        public static readonly string WORKLOAD_MANIFEST_IGNORE_DEFAULT_ROOTS = "DOTNETSDK_WORKLOAD_MANIFEST_IGNORE_DEFAULT_ROOTS";
         public static readonly string WORKLOAD_UPDATE_NOTIFY_DISABLE = "DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE";
         public static readonly string WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS = "DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS";
         public static readonly string WORKLOAD_DISABLE_PACK_GROUPS = "DOTNET_CLI_WORKLOAD_DISABLE_PACK_GROUPS";
+        public static readonly string DISABLE_PUBLISH_AND_PACK_RELEASE = "DOTNET_CLI_DISABLE_PUBLISH_AND_PACK_RELEASE";
+        public static readonly string DOTNET_CLI_LAZY_PUBLISH_AND_PACK_RELEASE_FOR_SOLUTIONS = "DOTNET_CLI_LAZY_PUBLISH_AND_PACK_RELEASE_FOR_SOLUTIONS";
+        public static readonly string DOTNET_CLI_FORCE_UTF8_ENCODING = nameof(DOTNET_CLI_FORCE_UTF8_ENCODING);
         public static readonly string TELEMETRY_OPTOUT = "DOTNET_CLI_TELEMETRY_OPTOUT";
-        public static readonly string ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS = "DOTNET_CLI_ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS";
-        public static readonly string ENABLE_PACK_RELEASE_FOR_SOLUTIONS = "DOTNET_CLI_ENABLE_PACK_RELEASE_FOR_SOLUTIONS";
         public static readonly string DOTNET_ROOT = "DOTNET_ROOT";
+        public static readonly string DOTNET_MSBUILD_SDK_RESOLVER_ENABLE_LOG = "DOTNET_MSBUILD_SDK_RESOLVER_ENABLE_LOG";
+        public static readonly string DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR = "DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR";
+        public static readonly string DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER = "DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER";
+        public static readonly string DOTNET_TOOLS_ALLOW_MANIFEST_IN_ROOT = "DOTNET_TOOLS_ALLOW_MANIFEST_IN_ROOT";
 
 #if NET7_0_OR_GREATER
         private static readonly Version s_version6_0 = new(6, 0);

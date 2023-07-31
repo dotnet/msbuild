@@ -1,11 +1,9 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
+
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
@@ -23,16 +21,16 @@ namespace Microsoft.DotNet.Watcher.Tools
             _reporter = reporter;
         }
 
-        public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem file, CancellationToken cancellationToken)
+        public async ValueTask<bool> TryHandleFileChange(BrowserRefreshServer? server, FileItem file, CancellationToken cancellationToken)
         {
             HotReloadEventSource.Log.HotReloadStart(HotReloadEventSource.StartType.StaticHandler);
-            if (!file.IsStaticFile || context.BrowserRefreshServer is null)
+            if (!file.IsStaticFile || server is null)
             {
                 HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.StaticHandler);
                 return false;
             }
             _reporter.Verbose($"Handling file change event for static content {file.FilePath}.");
-            await HandleBrowserRefresh(context.BrowserRefreshServer, file, cancellationToken);
+            await HandleBrowserRefresh(server, file, cancellationToken);
             HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.StaticHandler);
             _reporter.Output("Hot reload of static file succeeded.", emoji: "🔥");
             return true;

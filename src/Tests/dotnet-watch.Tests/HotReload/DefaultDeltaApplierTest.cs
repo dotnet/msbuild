@@ -1,17 +1,15 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Threading.Tasks;
 using Microsoft.Extensions.Tools.Internal;
 using Moq;
-using Xunit;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
     public class DefaultDeltaApplierTest
     {
         [Fact]
-        public async Task InitializeAsync_ConfiguresEnvironmentVariables()
+        public void Initialize_ConfiguresEnvironmentVariables()
         {
             // Arrange
             var applier = new DefaultDeltaApplier(Mock.Of<IReporter>()) { SuppressNamedPipeForTests = true };
@@ -20,10 +18,17 @@ namespace Microsoft.DotNet.Watcher.Tools
             {
                 new FileItem {  FilePath = "Test.cs" },
             });
-            var context = new DotNetWatchContext { ProcessSpec = process, FileSet = fileSet, Iteration = 0 };
+
+            var context = new DotNetWatchContext
+            {
+                HotReloadEnabled = true,
+                ProcessSpec = process,
+                FileSet = fileSet,
+                Iteration = 0
+            };
 
             // Act
-            await applier.InitializeAsync(context, default);
+            applier.Initialize(context, default);
 
             // Assert
             Assert.Equal("debug", process.EnvironmentVariables["DOTNET_MODIFIABLE_ASSEMBLIES"]);

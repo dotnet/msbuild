@@ -1,12 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.Collections.Immutable;
 
@@ -37,12 +32,15 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
     //  For SDK or workload installation actions, we expect to be running under a new process since Visual Studio will have been restarted.
     //  For global.json changes, the Resolve method takes parameters for the dotnet root and the SDK version.  If those values have changed
     //  from the previous call, the cached state will be thrown out and recreated.
+    //  We don't currently handle the case where a global.json file is edited to change the workload version.  It may be necessary
+    //  to kill running MSBuild processes to get that change to take effect.
     class CachingWorkloadResolver
     {
         private sealed record CachedState
         {            
             public string DotnetRootPath { get; init; }
             public string SdkVersion { get; init; }
+            public string GlobalJsonPath { get; init; }
             public IWorkloadManifestProvider ManifestProvider { get; init; }
             public IWorkloadResolver WorkloadResolver { get; init; }
             public ImmutableDictionary<string, ResolutionResult> CachedResults { get; init; }
@@ -136,7 +134,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             else if (sdkReferenceName.Equals("Microsoft.NET.SDK.WorkloadManifestTargetsLocator", StringComparison.OrdinalIgnoreCase))
             {
                 List<string> workloadManifestPaths = new List<string>();
-                foreach (var manifestDirectory in manifestProvider.GetManifestDirectories())
+                foreach (var manifestDirectory in manifestProvider.GetManifests().Select(m => m.ManifestDirectory))
                 {
                     var workloadManifestTargetPath = Path.Combine(manifestDirectory, "WorkloadManifest.targets");
                     if (File.Exists(workloadManifestTargetPath))
@@ -173,7 +171,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             return new NullResolutionResult();
         }
 
-        public ResolutionResult Resolve(string sdkReferenceName, string dotnetRootPath, string sdkVersion, string userProfileDir)
+        public ResolutionResult Resolve(string sdkReferenceName, string dotnetRootPath, string sdkVersion, string userProfileDir, string globalJsonPath)
         {
             if (!_enabled)
             {
@@ -186,15 +184,17 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             {
                 if (_cachedState == null ||
                     _cachedState.DotnetRootPath != dotnetRootPath ||
-                    _cachedState.SdkVersion != sdkVersion)
+                    _cachedState.SdkVersion != sdkVersion ||
+                    _cachedState.GlobalJsonPath != globalJsonPath)
                 {
-                    var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion, userProfileDir);
+                    var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion, userProfileDir, globalJsonPath);
                     var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetRootPath, sdkVersion, userProfileDir);
 
                     _cachedState = new CachedState()
                     {
                         DotnetRootPath = dotnetRootPath,
                         SdkVersion = sdkVersion,
+                        GlobalJsonPath = globalJsonPath,
                         ManifestProvider = workloadManifestProvider,
                         WorkloadResolver = workloadResolver
                     };
@@ -215,12 +215,3 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
         }
     }
 }
-
-
-//  Add attribute to support init-only properties on .NET Framework
-#if !NET
-namespace System.Runtime.CompilerServices
-{
-    public class IsExternalInit { }
-}
-#endif

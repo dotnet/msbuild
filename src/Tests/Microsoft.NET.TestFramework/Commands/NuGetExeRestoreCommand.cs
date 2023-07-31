@@ -1,14 +1,5 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.DotNet.Cli.Utils;
-using NuGet.Configuration;
-using Xunit.Abstractions;
-using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 namespace Microsoft.NET.TestFramework.Commands
 {
@@ -81,7 +72,7 @@ namespace Microsoft.NET.TestFramework.Commands
                 Arguments = newArgs
             };
 
-            TestContext.Current.AddTestEnvironmentVariables(ret);
+            TestContext.Current.AddTestEnvironmentVariables(ret.Environment);
 
             return ret;
         }

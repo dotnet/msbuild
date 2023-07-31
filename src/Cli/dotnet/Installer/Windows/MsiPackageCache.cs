@@ -1,12 +1,7 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.IO.Pipes;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
 using System.Security.AccessControl;
@@ -79,16 +74,6 @@ namespace Microsoft.DotNet.Installer.Windows
         /// </summary>
         public readonly string PackageCacheRoot;
 
-        /// <summary>
-        /// SDDL string for files inside the package cache. The owner is set to built-in administrators (O:BA), the group is domain users (G:DU).
-        /// DACL is auto-inherit with the following ACE definitions: Full control for NT AUTHORITY\SYSTEM (A;ID;FA;;;SY),
-        /// full control for BUILTIN\Administators (A;ID;FA;;;BA), read and execute for BUILTIN\Users (A;ID;0x1200a9;;;BU) and
-        /// and Everyone (A;ID;0x1200a9;;;WD).
-        /// </summary>
-        /// <remarks>See <see href="https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language">SDDL</see>
-        /// documentation for details.</remarks>
-        private const string FileSecurityDescriptor = "O:BAG:DUD:AI(A;ID;FA;;;SY)(A;ID;FA;;;BA)(A;ID;0x1200a9;;;BU)(A;ID;0x1200a9;;;WD)";
-
         public MsiPackageCache(InstallElevationContextBase elevationContext, ISetupLogger logger,
             bool verifySignatures, string packageCacheRoot = null) : base(elevationContext, logger, verifySignatures)
         {
@@ -98,31 +83,17 @@ namespace Microsoft.DotNet.Installer.Windows
         }
 
         /// <summary>
-        /// Creates the root package cache directory if it does not exist and configures the directory's ACLs. ACLs are still configured
-        /// if the directory exists.
-        /// </summary>
-        private void CreateRootDirectory()
-        {
-            CreateSecureDirectory(PackageCacheRoot);
-        }
-
-        /// <summary>
-        /// Creates the specified directory and secures it by configuring access rules (ACLs). If the parent
-        /// of the directory does not exist, it recursively walks the path back to ensure each parent directory
-        /// is created with the proper ACLs and inheritance settings.
+        /// Creates the specified directory and secures it by configuring access rules (ACLs) that allow sub-directories
+        /// and files to inherit access control entries. 
         /// </summary>
         /// <param name="path">The path of the directory to create.</param>
-        private void CreateSecureDirectory(string path)
+        public static void CreateSecureDirectory(string path)
         {
             if (!Directory.Exists(path))
             {
-                CreateSecureDirectory(Directory.GetParent(path).FullName);
-
-                DirectorySecurity directorySecurity = new();
-                directorySecurity.SetAccessRule(s_AdministratorRule);
-                directorySecurity.SetGroup(s_LocalSystemSid);
-                directorySecurity.CreateDirectory(path);
-                SecureDirectory(path);
+                DirectorySecurity ds = new();
+                SetDirectoryAccessRules(ds);
+                ds.CreateDirectory(path);
             }
         }
 
@@ -143,12 +114,10 @@ namespace Microsoft.DotNet.Installer.Windows
 
             if (IsElevated)
             {
-                CreateRootDirectory();
-
                 string packageDirectory = GetPackageDirectory(packageId, packageVersion);
 
-                // Delete the directory and create a new one that's secure. If the files were properly
-                // cached, the client won't request this action.
+                // Delete the package directory and create a new one that's secure. If all the files were properly
+                // cached, the client would not request this action.
                 if (Directory.Exists(packageDirectory))
                 {
                     Directory.Delete(packageDirectory, recursive: true);
@@ -165,8 +134,8 @@ namespace Microsoft.DotNet.Installer.Windows
                 string cachedMsiPath = Path.Combine(packageDirectory, Path.GetFileName(msiPath));
                 string cachedManifestPath = Path.Combine(packageDirectory, Path.GetFileName(manifestPath));
 
-                MoveAndSecureFile(manifestPath, cachedManifestPath);
-                MoveAndSecureFile(msiPath, cachedMsiPath);
+                MoveAndSecureFile(manifestPath, cachedManifestPath, Log);
+                MoveAndSecureFile(msiPath, cachedMsiPath, Log);
             }
             else if (IsClient)
             {
@@ -191,17 +160,27 @@ namespace Microsoft.DotNet.Installer.Windows
         /// </summary>
         /// <param name="sourceFile">The source file to move.</param>
         /// <param name="destinationFile">The destination where the source file will be moved.</param>
-        private void MoveAndSecureFile(string sourceFile, string destinationFile)
+        /// <param name="log">The underlying setup log to use.</param>
+        public static void MoveAndSecureFile(string sourceFile, string destinationFile, ISetupLogger log = null)
         {
             if (!File.Exists(destinationFile))
             {
-                // See https://github.com/dotnet/sdk/issues/28450
-                FileAccessRetrier.RetryOnMoveAccessFailure(() => File.Move(sourceFile, destinationFile));
-                Log?.LogMessage($"Moved '{sourceFile}' to '{destinationFile}'");
+                FileAccessRetrier.RetryOnMoveAccessFailure(() =>
+                {
+                    // Moving the file preserves the owner SID and fails to inherit the WD ACE.
+                    File.Copy(sourceFile, destinationFile, overwrite: true);
+                    File.Delete(sourceFile);
+                });
+                log?.LogMessage($"Moved '{sourceFile}' to '{destinationFile}'");
 
                 FileInfo fi = new(destinationFile);
                 FileSecurity fs = new();
-                fs.SetSecurityDescriptorSddlForm(FileSecurityDescriptor);
+
+                // Set the owner and group to built-in administrators (BA). All other ACE values are inherited from
+                // the parent directory. See https://github.com/dotnet/sdk/issues/28450. If the directory's descriptor
+                // is correctly configured, we should end up with an inherited ACE for Everyone: (A;ID;0x1200a9;;;WD)
+                fs.SetOwner(s_AdministratorsSid);
+                fs.SetGroup(s_AdministratorsSid);
                 fi.SetAccessControl(fs);
             }
         }
@@ -218,8 +197,7 @@ namespace Microsoft.DotNet.Installer.Windows
             string packageCacheDirectory = GetPackageDirectory(packageId, packageVersion);
             payload = default;
 
-            string msiPath;
-            if (!TryGetMsiPathFromPackageData(packageCacheDirectory, out msiPath, out string manifestPath))
+            if (!TryGetMsiPathFromPackageData(packageCacheDirectory, out string msiPath, out string manifestPath))
             {
                 return false;
             }
@@ -257,6 +235,22 @@ namespace Microsoft.DotNet.Installer.Windows
 
             msiPath = possibleMsiPath;
             return true;
+        }
+
+        /// <summary>
+        /// Apply a standard set of access rules to the directory security descriptor. The owner and group will
+        /// be set to built-in Administrators. Full access is granted to built-in administators and SYSTEM with
+        /// read, execute, synchronize permssions for built-in users and Everyone.
+        /// </summary>
+        /// <param name="ds">The security descriptor to update.</param>
+        private static void SetDirectoryAccessRules(DirectorySecurity ds)
+        {
+            ds.SetOwner(s_AdministratorsSid);
+            ds.SetGroup(s_AdministratorsSid);
+            ds.SetAccessRule(s_AdministratorRule);
+            ds.SetAccessRule(s_LocalSystemRule);
+            ds.SetAccessRule(s_UsersRule);
+            ds.SetAccessRule(s_EveryoneRule);
         }
 
         /// <summary>
@@ -317,22 +311,6 @@ namespace Microsoft.DotNet.Installer.Windows
             {
                 Log?.LogMessage($"Skipping signature verification for {msiPath}.");
             }
-        }
-
-        /// <summary>
-        /// Secures the target directory by applying multiple ACLs. Administrators and local SYSTEM
-        /// receive full control. Users and Everyone receive read and execute permissions.
-        /// </summary>
-        /// <param name="path">The directory to secure.</param>
-        private void SecureDirectory(string path)
-        {
-            DirectoryInfo directoryInfo = new DirectoryInfo(path);
-            DirectorySecurity directorySecurity = directoryInfo.GetAccessControl();
-            directorySecurity.SetAccessRule(s_AdministratorRule);
-            directorySecurity.SetAccessRule(s_EveryoneRule);
-            directorySecurity.SetAccessRule(s_LocalSystemRule);
-            directorySecurity.SetAccessRule(s_UsersRule);
-            directoryInfo.SetAccessControl(directorySecurity);
         }
     }
 }

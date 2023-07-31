@@ -167,7 +167,8 @@
     <value>Language</value>
   </data>
   <data name="MissingRequiredParameter" xml:space="preserve">
-    <value>Mandatory option '{0}' is missing for the template '{1}'.</value>
+    <value>Missing mandatory option(s) for the template '{1}': {0}.</value>
+    <comment>{0} - comma-separated list of missing options, each option is quoted.</comment>
   </data>
   <data name="MountPointFactories" xml:space="preserve">
     <value>Mount Point Factories</value>
@@ -180,6 +181,16 @@
   </data>
   <data name="Generic_Info_NoMatchingTemplates" xml:space="preserve">
     <value>No templates found matching: {0}.</value>
+  </data>
+  <data name="Generic_Info_NoMatchingTemplatePackage" xml:space="preserve">
+    <value>
+      No template packages found matching: {0}.
+      
+      To list installed template packages, run:
+        dotnet new uninstall
+      To search for the template packages on NuGet.org, run:
+        dotnet new search --package {0}
+    </value>
   </data>
   <data name="OptionalWorkloadsSyncFailed" xml:space="preserve">
     <value>Error during synchronization with the Optional SDK Workloads.</value>
@@ -268,6 +279,43 @@
   </data>
   <data name="TemplatePackageCoordinator_Uninstall_Error_GenericError" xml:space="preserve">
     <value>Failed to uninstall {0}, reason: {1}.</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Error_VulnerablePackage" xml:space="preserve">
+    <value>The package {0} was not updated due to detected vulnerabilities:</value>
+    <comment>{0} - template package name.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Error_VulnerablePackageTip" xml:space="preserve">
+    <value>In order to update this package, run:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Install_Error_VulnerablePackageTip" xml:space="preserve">
+    <value>In order to install this package, run:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage" xml:space="preserve">
+    <value>The package {0} contains vulnerabilities:</value>
+    <comment>{0} - template package name.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_Download_VulnerablePackage" xml:space="preserve">
+    <value>Installed package has the following vulnerabilities:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Download_Error_VulnerablePackage" xml:space="preserve">
+    <value>Failed to install {0}, due to detected vulnerabilities:</value>
+    <comment>{0} - template package name.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_VulnerabilitySeverity_Low" xml:space="preserve">
+    <value>Low</value>
+    <comment>represents nuget api severity of level 0.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_VulnerabilitySeverity_Moderate" xml:space="preserve">
+    <value>Moderate</value>
+    <comment>represents nuget api severity of level 1.</comment>   
+  </data>
+  <data name="TemplatePackageCoordinator_VulnerabilitySeverity_High" xml:space="preserve">
+    <value>High</value>
+    <comment>represents nuget api severity of level 2.</comment>
+  </data>
+  <data name="TemplatePackageCoordinator_VulnerabilitySeverity_Critical" xml:space="preserve">
+    <value>Critical</value>
+    <comment>represents nuget api severity of level 3.</comment>
   </data>
   <data name="InvalidParameterDefault" xml:space="preserve">
     <value>The default value '{1}' is not a valid value for {0}.</value>
@@ -391,6 +439,10 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   </data>
   <data name="ColumnNameAuthor" xml:space="preserve">
     <value>Author</value>
+  </data>
+  <data name="ColumnNamePackageNameAndOwners" xml:space="preserve">
+    <value>Package Name / Owners</value>
+    <comment>information about NuGet package: its name and owner</comment>
   </data>
   <data name="ColumnNamesAreNotSupported" xml:space="preserve">
     <value>The column {0} is/are not supported, the supported columns are: {1}.</value>
@@ -806,5 +858,93 @@ The header is followed by the list of parameters and their errors (might be seve
   </data>
   <data name="Generic_CommandHints_List" xml:space="preserve">
     <value>To list installed templates, run:</value>
+  </data>
+  <data name="DetailsCommand_Argument_PackageIdentifier">
+    <value>Package identifier</value>
+  </data>
+  <data name="DetailsCommand_Option_Version">
+    <value>Specifies a concrete version for displaying details. If not specified the last is taken.</value>
+  </data>
+  <data name="DetailsCommand_Property_Authors">
+    <value>Authors</value>
+  </data>
+  <data name="DetailsCommand_Property_Description">
+    <value>Details</value>
+  </data>
+  <data name="DetailsCommand_Property_SourceFeed">
+    <value>Source Feed</value>
+  </data>
+  <data name="DetailsCommand_Property_Version">
+    <value>Package version</value>
+  </data>
+  <data name="DetailsCommand_Property_PrefixReserved">
+    <value>Reserved</value>
+  </data>
+  <data name="DetailsCommand_Property_Languages">
+    <value>Languages</value>
+    <comment></comment>
+  </data>
+  <data name="DetailsCommand_Property_LicenseMetadata">
+    <value>License Metadata</value>
+  </data>
+  <data name="DetailsCommand_Property_LicenseExpression">
+    <value>License Expression</value>
+  </data>
+  <data name="DetailsCommand_Property_License">
+    <value>License</value>
+  </data>
+  <data name="DetailsCommand_Property_LicenseUrl">
+    <value>License Url</value>
+  </data>
+  <data name="DetailsCommand_Property_Owners">
+    <value>Owners</value>
+  </data>
+  <data name="DetailsCommand_Property_RepoUrl">
+    <value>Repository Url</value>
+  </data>
+  <data name="DetailsCommand_Property_ShortNames">
+    <value>Short Names</value>
+    <comment></comment>
+  </data>
+  <data name="DetailsCommand_Property_Tags">
+    <value>Tags</value>
+    <comment></comment>
+  </data>
+  <data name="DetailsCommand_Property_Templates">
+    <value>Templates</value>
+  </data>
+  <data name="DetailsCommand_NoNuGetSources">
+    <value>No NuGet sources are defined or enabled</value>
+  </data>
+  <data name="DetailsCommand_UnableToLoadResorces">
+    <value>Failed to load NuGet sources configured for the folder {0}</value>
+  </data>
+  <data name="DetailsCommand_UnableToLoadResorce">
+    <value>Could not parse NuGet source '{0}', so it was discarded</value>
+  </data>
+  <data name="OperationCancelled" xml:space="preserve">
+    <value>The operation was cancelled.</value>
+  </data>
+  <data name="UnexpectedResult" xml:space="preserve">
+    <value>Template generation ended with unexpected result: '{0}'. Details: {1}</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_ArgumentNotConfigured" xml:space="preserve">
+    <value>Post action argument '{0}' is mandatory, but not configured.</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_MultipleJsonFiles" xml:space="preserve">
+    <value>More than one file found that matches '{0}'.</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_NoJsonFile" xml:space="preserve">
+    <value>Unable to find the json file in the solution</value>
+  </data>
+  <data name="PostAction_ModifyJson_Error_ParentPropertyPathInvalid" xml:space="preserve">
+    <value>Parent property path '{0}' could not be traversed.</value>
+  </data>
+  <data name="PostAction_ModifyJson_Succeeded" xml:space="preserve">
+    <value>Successfully modified {0}.</value>
+  </data>
+  <data name="ColumnNameTrusted" xml:space="preserve">
+    <value>Trusted</value>
+    <comment>information about NuGet package origin; if a package has PrefixReserved indicator </comment>
   </data>
 </root>

@@ -16,7 +16,7 @@
   <ItemGroup>
     <AdditionalContent Include="$(WebRoot)\Targets\**\*.*">
       <Pack>true</Pack>
-      <PackagePath>targets</PackagePath>
+      <PackagePath>Targets</PackagePath>
     </AdditionalContent>
 
     <AdditionalContent Include="$(WebRoot)\Sdk\**\*.*">

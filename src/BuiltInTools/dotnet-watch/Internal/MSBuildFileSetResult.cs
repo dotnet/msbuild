@@ -1,41 +1,55 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Microsoft.DotNet.Watcher.Internal
 {
-    public class MSBuildFileSetResult
+    [DataContract]
+    internal sealed class MSBuildFileSetResult
     {
-        public string RunCommand { get; set; }
+        [DataMember]
+        public required string RunCommand { get; init; }
 
-        public string RunArguments { get; set; }
+        [DataMember]
+        public required string RunArguments { get; init; }
 
-        public string RunWorkingDirectory { get; set; }
+        [DataMember]
+        public required string RunWorkingDirectory { get; init; }
 
-        public bool IsNetCoreApp { get; set; }
+        [DataMember]
+        public required bool IsNetCoreApp { get; init; }
 
-        public string TargetFrameworkVersion { get; set; }
+        [DataMember]
+        public required string TargetFrameworkVersion { get; init; }
 
-        public string RuntimeIdentifier { get; set; }
+        [DataMember]
+        public required string RuntimeIdentifier { get; init; }
 
-        public string DefaultAppHostRuntimeIdentifier { get; set; }
+        [DataMember]
+        public required string DefaultAppHostRuntimeIdentifier { get; init; }
 
-        public Dictionary<string, ProjectItems> Projects { get; set; }
+        [DataMember]
+        public required Dictionary<string, ProjectItems> Projects { get; init; }
     }
 
-    public class ProjectItems
+    [DataContract]
+    internal sealed class ProjectItems
     {
-        public List<string> Files { get; set; } = new();
+        [DataMember]
+        public List<string> Files { get; init; } = new();
 
-        public List<StaticFileItem> StaticFiles { get; set; } = new();
+        [DataMember]
+        public List<StaticFileItem> StaticFiles { get; init; } = new();
     }
 
-    public class StaticFileItem
+    [DataContract]
+    internal sealed class StaticFileItem
     {
-        public string FilePath { get; set; }
+        [DataMember]
+        public required string FilePath { get; init; }
 
-        public string StaticWebAssetPath { get; set; }
+        [DataMember]
+        public required string StaticWebAssetPath { get; init; }
     }
 }

@@ -1,9 +1,9 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Constraints;
 using Microsoft.TemplateEngine.Edge;
@@ -12,47 +12,38 @@ namespace Microsoft.TemplateEngine.Cli.Commands
 {
     internal static class Extensions
     {
-        internal static string? GetValueForOptionOrNull(this ParseResult parseResult, Option option)
+        internal static string? GetValueForOptionOrNull(this ParseResult parseResult, CliOption option)
         {
-            OptionResult? result = parseResult.FindResultFor(option);
+            OptionResult? result = parseResult.GetResult(option);
             if (result == null)
             {
                 return null;
             }
-            return result.GetValueOrDefault()?.ToString();
+            return result.GetValueOrDefault<object>()?.ToString();
         }
 
         /// <summary>
         /// Checks if <paramref name="parseResult"/> contains an error for <paramref name="option"/>.
         /// </summary>
-        internal static bool HasErrorFor(this ParseResult parseResult, Option option)
+        internal static bool HasErrorFor(this ParseResult parseResult, CliOption option, [NotNullWhen(true)] out ParseError? error)
         {
-            if (!parseResult.Errors.Any())
-            {
-                return false;
-            }
+            error = parseResult.Errors.FirstOrDefault(e => IsOptionResult(e.SymbolResult, option)
+                || IsOptionResult(e.SymbolResult?.Parent, option));
 
-            if (parseResult.Errors.Any(e => e.SymbolResult?.Symbol == option))
-            {
-                return true;
-            }
+            return error is not null;
 
-            if (parseResult.Errors.Any(e => e.SymbolResult?.Parent?.Symbol == option))
-            {
-                return true;
-            }
-
-            return false;
+            static bool IsOptionResult(SymbolResult? symbolResult, CliOption option)
+                => symbolResult is OptionResult optionResult && optionResult.Option == option;
         }
 
         /// <summary>
-        /// Case insensitive version for <see cref="System.CommandLine.Option{TOption}.AcceptOnlyFromAmong(string[])"/>.
+        /// Case insensitive version for <see cref="System.CommandLine.CliOption{TOption}.AcceptOnlyFromAmong(string[])"/>.
         /// </summary>
-        internal static void FromAmongCaseInsensitive(this Option<string> option, string[]? allowedValues = null, string? allowedHiddenValue = null)
+        internal static void FromAmongCaseInsensitive(this CliOption<string> option, string[]? allowedValues = null, string? allowedHiddenValue = null)
         {
             allowedValues ??= Array.Empty<string>();
-            option.AddValidator(optionResult => ValidateAllowedValues(optionResult, allowedValues, allowedHiddenValue));
-            option.AddCompletions(allowedValues);
+            option.Validators.Add(optionResult => ValidateAllowedValues(optionResult, allowedValues, allowedHiddenValue));
+            option.CompletionSources.Add(allowedValues);
         }
 
         /// <summary>
@@ -80,10 +71,10 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             var invalidArguments = optionResult.Tokens.Where(token => !allowedValues.Append(allowedHiddenValue).Contains(token.Value, StringComparer.OrdinalIgnoreCase)).ToList();
             if (invalidArguments.Any())
             {
-                optionResult.ErrorMessage = string.Format(
+                optionResult.AddError(string.Format(
                     LocalizableStrings.Commands_Validator_WrongArgumentValue,
                     string.Join(", ", invalidArguments.Select(arg => $"'{arg.Value}'")),
-                    string.Join(", ", allowedValues.Select(allowedValue => $"'{allowedValue}'")));
+                    string.Join(", ", allowedValues.Select(allowedValue => $"'{allowedValue}'"))));
             }
         }
     }

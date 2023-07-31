@@ -1,0 +1,9 @@
+﻿{
+  "author": "Microsoft",
+  "name": "MSBuild Directory.Build.props ファイル",
+  "description": "フォルダー全体の MSBuild プロパティを指定するために使用できる空の Directory.Build.props ファイル",
+  "symbols/inherit/displayName": "継承する",
+  "symbols/inherit/description": "true の場合、ファイル システム ディレクトリ階層内の最も近い Directory.Build.props のインポートを追加します。Directory.Build.props は既定では継承されないため、これを行うと、フォルダーごとにカスタマイズのセットをビルドできます。",
+  "symbols/useArtifacts/displayName": "Use Artifacts Output Layout",
+  "symbols/useArtifacts/description": "If true, adds a property to enable the artifacts output layout. This is a common pattern for projects that produce build artifacts, such as NuGet packages, that are placed in a common folder."
+}

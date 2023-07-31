@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>$(CurrentTargetFramework)</TargetFramework>
     <OutputType>exe</OutputType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Dependency\Dependency.csproj" />
+    <ProjectReference Include="..\FSharp\Lib.fsproj" />
   </ItemGroup>
 
 </Project>

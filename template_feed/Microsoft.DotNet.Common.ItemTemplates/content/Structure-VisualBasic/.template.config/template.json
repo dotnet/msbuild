@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Microsoft",
+  "classifications": [
+    "Common"
+  ],
+  "name": "Structure",
+  "generatorVersions": "[1.0.0.0-*)",
+  "description": "Creates a new Visual Basic structure",
+  "tags": {
+    "language": "VB",
+    "type": "item"
+  },
+  "groupIdentity": "DotNet.Common.Struct",
+  "precedence": "0",
+  "identity": "DotNet.Common.Struct.VisualBasic",
+  "shortName": [
+    "struct",
+    "structure"
+  ],
+  "sourceName": "Structure1",
+  "preferDefaultName": true,
+  "defaultName": "Structure1",
+  "primaryOutputs": [
+    {
+      "path": "Structure1.vb"
+    }
+  ],
+  "constraints": {
+    "visualbasic-only": {
+      "type": "project-capability",
+      "args": "VB"
+    }
+  }
+}

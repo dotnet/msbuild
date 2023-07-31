@@ -12,6 +12,11 @@
         <target state="translated">Lista os pacotes que foram preteridos. Não pode ser combinado com a opção '--vulnerable' nem com a opção '--outdated'.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdFormatDescription">
+        <source>Specifies the output format type for the list packages command.</source>
+        <target state="translated">Especifica o tipo de formato de saída para o comando list packages.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
         <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>
@@ -25,6 +30,11 @@
       <trans-unit id="CmdOutdatedDescription">
         <source>Lists packages that have newer versions. Cannot be combined with '--deprecated' or '--vulnerable' options.</source>
         <target state="translated">Lista os pacotes que têm versões mais recentes. Não pode ser combinado com a opção '--deprecated' nem com a opção '--vulnerable'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutputVersionDescription">
+        <source>Specifies the version of machine-readable output. Requires the '--format json' option.</source>
+        <target state="translated">Especifica a versão da saída legível pelo computador. Requer a opção '--format json'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">

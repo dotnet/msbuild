@@ -1,17 +1,13 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Common;
+using NuGet.Frameworks;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
 
@@ -27,6 +23,8 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     public sealed class ResolvePackageAssets : TaskBase
     {
+        #region Input Items
+
         /// <summary>
         /// Path to assets.json.
         /// </summary>
@@ -161,6 +159,15 @@ namespace Microsoft.NET.Build.Tasks
         public bool DesignTimeBuild { get; set; }
 
         /// <summary>
+        /// Eg: "Microsoft.NETCore.App;NETStandard.Library"
+        /// </summary>
+        [Required]
+        public string DefaultImplicitPackages { get; set; }
+
+        #endregion
+
+        #region Output Items
+        /// <summary>
         /// Full paths to assemblies from packages to pass to compiler as analyzers.
         /// </summary>
         [Output]
@@ -234,6 +241,17 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] PackageDependencies { get; private set; }
 
         /// <summary>
+        /// Filters and projects items produced by <see cref="ResolvePackageDependencies"/> for consumption by
+        /// the dependencies tree, via design-time builds.
+        /// </summary>
+        /// <remarks>
+        /// Changes to the implementation of output must be coordinated with <c>PackageRuleHandler</c>
+        /// in the dotnet/project-system repo.
+        /// </remarks>
+        [Output]
+        public ITaskItem[] PackageDependenciesDesignTime { get; private set; }
+
+        /// <summary>
         /// List of symbol files (.pdb) related to NuGet packages.
         /// </summary>
         /// <remarks>
@@ -250,6 +268,8 @@ namespace Microsoft.NET.Build.Tasks
         /// </remarks>
         [Output]
         public ITaskItem[] ReferenceDocumentationFiles { get; private set; }
+
+        #endregion
 
         /// <summary>
         /// Messages from the assets file.
@@ -304,7 +324,7 @@ namespace Microsoft.NET.Build.Tasks
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private const int CacheFormatSignature = ('P' << 0) | ('K' << 8) | ('G' << 16) | ('A' << 24);
-        private const int CacheFormatVersion = 11;
+        private const int CacheFormatVersion = 12;
         private static readonly Encoding TextEncoding = Encoding.UTF8;
         private const int SettingsHashLength = 256 / 8;
         private HashAlgorithm CreateSettingsHash() => SHA256.Create();
@@ -336,6 +356,7 @@ namespace Microsoft.NET.Build.Tasks
                 FrameworkReferences = reader.ReadItemGroup();
                 NativeLibraries = reader.ReadItemGroup();
                 PackageDependencies = reader.ReadItemGroup();
+                PackageDependenciesDesignTime = reader.ReadItemGroup();
                 PackageFolders = reader.ReadItemGroup();
                 ReferenceDocumentationFiles = reader.ReadItemGroup();
                 ResourceAssemblies = reader.ReadItemGroup();
@@ -465,6 +486,7 @@ namespace Microsoft.NET.Build.Tasks
                     }
                     writer.Write(TargetFramework);
                     writer.Write(VerifyMatchingImplicitPackageVersion);
+                    writer.Write(DefaultImplicitPackages ?? "");
                 }
 
                 stream.Position = 0;
@@ -694,7 +716,6 @@ namespace Microsoft.NET.Build.Tasks
                 _lockFile = new LockFileCache(task).GetLockFile(task.ProjectAssetsFile);
                 _packageResolver = NuGetPackageResolver.CreateResolver(_lockFile);
 
-
                 //  If we are doing a design-time build, we do not want to fail the build if we can't find the
                 //  target framework and/or runtime identifier in the assets file.  This is because the design-time
                 //  build needs to succeed in order to get the right information in order to run a restore in order
@@ -816,6 +837,7 @@ namespace Microsoft.NET.Build.Tasks
                 WriteItemGroup(WriteFrameworkReferences);
                 WriteItemGroup(WriteNativeLibraries);
                 WriteItemGroup(WritePackageDependencies);
+                WriteItemGroup(WritePackageDependenciesDesignTime);
                 WriteItemGroup(WritePackageFolders);
                 WriteItemGroup(WriteReferenceDocumentationFiles);
                 WriteItemGroup(WriteResourceAssemblies);
@@ -1166,16 +1188,12 @@ namespace Microsoft.NET.Build.Tasks
 
                         foreach (string fileExtension in relatedExtensions.Split(RelatedPropertySeparator))
                         {
-                            if (fileExtension.ToLower() == extension)
+                            if (StringComparer.InvariantCulture.Equals(fileExtension, extension))
                             {
                                 string xmlFilePath = Path.ChangeExtension(itemSpec, fileExtension);
                                 if (File.Exists(xmlFilePath))
                                 {
                                     WriteItem(xmlFilePath, library);
-                                }
-                                else
-                                {
-                                    _task.Log.LogWarning(Strings.AssetsFileNotFound, xmlFilePath);
                                 }
                             }
                         }
@@ -1411,6 +1429,111 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         WriteItem(library.Name);
                     }
+                }
+            }
+
+            private void WritePackageDependenciesDesignTime()
+            {
+                var implicitPackageReferences = CollectSDKReferencesDesignTime.GetImplicitPackageReferences(_task.DefaultImplicitPackages);
+
+                // Scan PackageDependencies to build the set of packages in our target.
+                var allowItemSpecs = GetPackageDependencies();
+
+                foreach (var package in _lockFile.Libraries)
+                {
+                    var packageVersion = package.Version.ToNormalizedString();
+                    string packageId = $"{package.Name}/{packageVersion}";
+
+                    // Find PackageDefinitions that match our allowed item specs
+                    if (string.IsNullOrEmpty(package.Name) || !allowItemSpecs.Contains(packageId))
+                    {
+                        // Only include packages from the allow list.
+                        // This excludes transitive packages and those from other targets.
+                        continue;
+                    }
+
+                    var dependencyType = GetDependencyType(package.Type);
+
+                    if (dependencyType == DependencyType.Package ||
+                        dependencyType == DependencyType.Unresolved)
+                    {
+                        WriteItem(packageId);
+                        WriteMetadata(MetadataKeys.Name, package.Name);
+
+                        var version = packageVersion ?? string.Empty;
+                        WriteMetadata(MetadataKeys.Version, version);
+
+                        var isImplicitlyDefined = implicitPackageReferences.Contains(package.Name);
+                        WriteMetadata(MetadataKeys.IsImplicitlyDefined, isImplicitlyDefined.ToString());
+
+                        string resolvedPackagePath = _packageResolver.GetPackageDirectory(package.Name, package.Version);
+                        var resolvedPath = resolvedPackagePath ?? string.Empty;
+                        var resolved = !string.IsNullOrEmpty(resolvedPath);
+                        WriteMetadata(MetadataKeys.Resolved, resolved.ToString());
+
+                        string itemPath = package.Path ?? string.Empty;
+                        var path = (resolved
+                            ? resolvedPath
+                            : itemPath) ?? string.Empty;
+                        WriteMetadata(MetadataKeys.Path, path);
+
+                        string itemDiagnosticLevel = GetPackageDiagnosticLevel(package);
+                        var diagnosticLevel = itemDiagnosticLevel ?? string.Empty;
+                        WriteMetadata(MetadataKeys.DiagnosticLevel, diagnosticLevel);
+                    }
+                }
+
+                HashSet<string> GetPackageDependencies()
+                {
+                    HashSet<string> projectFileDependencies = _lockFile.GetProjectFileDependencySet(_compileTimeTarget.Name);
+
+                    HashSet<string> results = new(StringComparer.OrdinalIgnoreCase);
+
+                    foreach (var package in _compileTimeTarget.Libraries)
+                    {
+                        if (projectFileDependencies.Contains(package.Name))
+                        {
+                            string itemSpec = GetPackageId(package);
+
+                            bool added = results.Add(itemSpec);
+
+                            Debug.Assert(added);
+                        }
+                    }
+
+                    return results;
+                }
+
+                static string GetPackageId(LockFileTargetLibrary package) => $"{package.Name}/{package.Version.ToNormalizedString()}";
+
+                string GetPackageDiagnosticLevel(LockFileLibrary package)
+                {
+                    string target = _task.TargetFramework ?? "";
+
+                    var messages = _lockFile.LogMessages.Where(log =>
+                        log.LibraryId == package.Name &&
+                        log.TargetGraphs.Any(tg =>
+                        {
+                            var parts = tg.Split(LockFile.DirectorySeparatorChar);
+                            var parsedTargetGraph = NuGetFramework.Parse(parts[0]);
+                            var alias = _lockFile.PackageSpec.TargetFrameworks
+                                .FirstOrDefault(tf => tf.FrameworkName == parsedTargetGraph)
+                                ?.TargetAlias ?? tg;
+                            return alias == target;
+                        }));
+
+                    if (!messages.Any())
+                    {
+                        return string.Empty;
+                    }
+
+                    return messages.Max(log => log.Level).ToString();
+                }
+
+                static DependencyType GetDependencyType(string dependencyTypeString)
+                {
+                    Enum.TryParse(dependencyTypeString, ignoreCase: true, out DependencyType dependencyType);
+                    return dependencyType;
                 }
             }
 
@@ -1747,7 +1870,7 @@ namespace Microsoft.NET.Build.Tasks
                         {
                             //  Libraries explicitly marked as exclude from publish should be excluded from
                             //  publish even if there are other transitive dependencies to them
-                            if (publishPackageExclusions.Contains(library.Name))
+                            if (excludeFromPublishPackageIds.Contains(library.Name))
                             {
                                 publishPackageExclusions.Add(library.Name);
                             }

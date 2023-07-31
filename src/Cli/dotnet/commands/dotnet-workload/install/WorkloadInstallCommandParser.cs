@@ -1,10 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Workloads.Workload;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings;
@@ -13,52 +10,57 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadInstallCommandParser
     {
-        public static readonly Argument<IEnumerable<string>> WorkloadIdArgument =
-            new Argument<IEnumerable<string>>(LocalizableStrings.WorkloadIdArgumentName)
-            {
-                Arity = ArgumentArity.OneOrMore,
-                Description = LocalizableStrings.WorkloadIdArgumentDescription
-            };
+        public static readonly CliArgument<IEnumerable<string>> WorkloadIdArgument = new("workloadId")
+        {
+            HelpName = LocalizableStrings.WorkloadIdArgumentName,
+            Arity = ArgumentArity.OneOrMore,
+            Description = LocalizableStrings.WorkloadIdArgumentDescription
+        };
 
-        public static readonly Option<bool> SkipSignCheckOption =
-            new Option<bool>("--skip-sign-check", LocalizableStrings.SkipSignCheckOptionDescription)
-            {
-                IsHidden = true
-            };
+        public static readonly CliOption<bool> SkipSignCheckOption = new("--skip-sign-check")
+        {
+            Description = LocalizableStrings.SkipSignCheckOptionDescription,
+            Hidden = true
+        };
 
-        public static readonly Option<bool> SkipManifestUpdateOption = new Option<bool>("--skip-manifest-update", LocalizableStrings.SkipManifestUpdateOptionDescription);
+        public static readonly CliOption<bool> SkipManifestUpdateOption = new("--skip-manifest-update")
+        {
+            Description = LocalizableStrings.SkipManifestUpdateOptionDescription
+        };
 
-        public static readonly Option<string> TempDirOption = new Option<string>("--temp-dir", LocalizableStrings.TempDirOptionDescription);
+        public static readonly CliOption<string> TempDirOption = new("--temp-dir")
+        {
+            Description = LocalizableStrings.TempDirOptionDescription
+        };
 
+        private static readonly CliCommand Command = ConstructCommand();
 
-        private static readonly Command Command = ConstructCommand();
-
-        public static Command GetCommand()
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
-            var command = new Command("install", LocalizableStrings.CommandDescription);
+            CliCommand command = new("install", LocalizableStrings.CommandDescription);
 
-            command.AddArgument(WorkloadIdArgument);
+            command.Arguments.Add(WorkloadIdArgument);
             AddWorkloadInstallCommandOptions(command);
 
-            command.SetHandler((parseResult) => new WorkloadInstallCommand(parseResult).Execute());
+            command.SetAction((parseResult) => new WorkloadInstallCommand(parseResult).Execute());
 
             return command;
         }
 
-        internal static void AddWorkloadInstallCommandOptions(Command command)
+        internal static void AddWorkloadInstallCommandOptions(CliCommand command)
         {
             InstallingWorkloadCommandParser.AddWorkloadInstallCommandOptions(command);
 
-            command.AddOption(SkipManifestUpdateOption);
-            command.AddOption(TempDirOption);
+            command.Options.Add(SkipManifestUpdateOption);
+            command.Options.Add(TempDirOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
-            command.AddOption(CommonOptions.VerbosityOption);
-            command.AddOption(SkipSignCheckOption);
+            command.Options.Add(CommonOptions.VerbosityOption);
+            command.Options.Add(SkipSignCheckOption);
         }
     }
 }

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Xml.Linq;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -358,12 +352,15 @@ namespace Microsoft.NET.Build.Tasks
                 string itemType = fileElement.Attribute("Type")?.Value;
                 bool isAnalyzer = itemType?.Equals("Analyzer", StringComparison.OrdinalIgnoreCase) ?? false;
 
+                string assemblyName = fileElement.Attribute("AssemblyName").Value;
+
                 string dllPath = usePathElementsInFrameworkListAsFallBack || isAnalyzer ?
                     Path.Combine(definition.TargetingPackRoot, fileElement.Attribute("Path").Value) :
-                    GetDllPathViaAssemblyName(definition.TargetingPackDllFolder, fileElement);
+                    GetDllPathViaAssemblyName(definition.TargetingPackDllFolder, assemblyName);
 
                 var item = CreateItem(dllPath, definition.FrameworkReferenceName, definition.NuGetPackageId, definition.NuGetPackageVersion);
 
+                item.SetMetadata("AssemblyName", assemblyName);
                 item.SetMetadata("AssemblyVersion", fileElement.Attribute("AssemblyVersion").Value);
                 item.SetMetadata("FileVersion", fileElement.Attribute("FileVersion").Value);
                 item.SetMetadata("PublicKeyToken", fileElement.Attribute("PublicKeyToken").Value);
@@ -433,6 +430,11 @@ namespace Microsoft.NET.Build.Tasks
         private static string GetDllPathViaAssemblyName(string targetingPackDllFolder, XElement fileElement)
         {
             string assemblyName = fileElement.Attribute("AssemblyName").Value;
+            return GetDllPathViaAssemblyName(targetingPackDllFolder, assemblyName);
+        }
+
+        private static string GetDllPathViaAssemblyName(string targetingPackDllFolder, string assemblyName)
+        {
             var dllPath = Path.Combine(targetingPackDllFolder, assemblyName + ".dll");
             return dllPath;
         }

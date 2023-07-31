@@ -513,6 +513,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Package Name / Owners.
+        /// </summary>
+        internal static string ColumnNamePackageNameAndOwners {
+            get {
+                return ResourceManager.GetString("ColumnNamePackageNameAndOwners", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Precedence.
         /// </summary>
         internal static string ColumnNamePrecedence {
@@ -563,6 +572,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string ColumnNameTotalDownloads {
             get {
                 return ResourceManager.GetString("ColumnNameTotalDownloads", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trusted.
+        /// </summary>
+        internal static string ColumnNameTrusted {
+            get {
+                return ResourceManager.GetString("ColumnNameTrusted", resourceCulture);
             }
         }
         
@@ -712,6 +730,186 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Package identifier.
+        /// </summary>
+        internal static string DetailsCommand_Argument_PackageIdentifier {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Argument_PackageIdentifier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No NuGet sources are defined or enabled.
+        /// </summary>
+        internal static string DetailsCommand_NoNuGetSources {
+            get {
+                return ResourceManager.GetString("DetailsCommand_NoNuGetSources", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specifies a concrete version for displaying details. If not specified the last is taken..
+        /// </summary>
+        internal static string DetailsCommand_Option_Version {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Option_Version", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Authors.
+        /// </summary>
+        internal static string DetailsCommand_Property_Authors {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_Authors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Details.
+        /// </summary>
+        internal static string DetailsCommand_Property_Description {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Languages.
+        /// </summary>
+        internal static string DetailsCommand_Property_Languages {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_Languages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to License.
+        /// </summary>
+        internal static string DetailsCommand_Property_License {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_License", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to License Expression.
+        /// </summary>
+        internal static string DetailsCommand_Property_LicenseExpression {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_LicenseExpression", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to License Metadata.
+        /// </summary>
+        internal static string DetailsCommand_Property_LicenseMetadata {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_LicenseMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to License Url.
+        /// </summary>
+        internal static string DetailsCommand_Property_LicenseUrl {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_LicenseUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Owners.
+        /// </summary>
+        internal static string DetailsCommand_Property_Owners {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_Owners", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reserved.
+        /// </summary>
+        internal static string DetailsCommand_Property_PrefixReserved {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_PrefixReserved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Repository Url.
+        /// </summary>
+        internal static string DetailsCommand_Property_RepoUrl {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_RepoUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Short Names.
+        /// </summary>
+        internal static string DetailsCommand_Property_ShortNames {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_ShortNames", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Source Feed.
+        /// </summary>
+        internal static string DetailsCommand_Property_SourceFeed {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_SourceFeed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tags.
+        /// </summary>
+        internal static string DetailsCommand_Property_Tags {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_Tags", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Templates.
+        /// </summary>
+        internal static string DetailsCommand_Property_Templates {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_Templates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package version.
+        /// </summary>
+        internal static string DetailsCommand_Property_Version {
+            get {
+                return ResourceManager.GetString("DetailsCommand_Property_Version", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not parse NuGet source &apos;{0}&apos;, so it was discarded.
+        /// </summary>
+        internal static string DetailsCommand_UnableToLoadResorce {
+            get {
+                return ResourceManager.GetString("DetailsCommand_UnableToLoadResorce", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to load NuGet sources configured for the folder {0}.
+        /// </summary>
+        internal static string DetailsCommand_UnableToLoadResorces {
+            get {
+                return ResourceManager.GetString("DetailsCommand_UnableToLoadResorces", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Displays help for this command..
         /// </summary>
         internal static string DisplaysHelp {
@@ -817,6 +1015,22 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string Generic_ExamplesHeader {
             get {
                 return ResourceManager.GetString("Generic_ExamplesHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///      No template packages found matching: {0}.
+        ///      
+        ///      To list installed template packages, run:
+        ///        dotnet new uninstall
+        ///      To search for the template packages on NuGet.org, run:
+        ///        dotnet new search --package {0}
+        ///    .
+        /// </summary>
+        internal static string Generic_Info_NoMatchingTemplatePackage {
+            get {
+                return ResourceManager.GetString("Generic_Info_NoMatchingTemplatePackage", resourceCulture);
             }
         }
         
@@ -983,7 +1197,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Mandatory option &apos;{0}&apos; is missing for the template &apos;{1}&apos;..
+        ///   Looks up a localized string similar to Missing mandatory option(s) for the template &apos;{1}&apos;: {0}..
         /// </summary>
         internal static string MissingRequiredParameter {
             get {
@@ -1024,6 +1238,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string NoTemplatesFound {
             get {
                 return ResourceManager.GetString("NoTemplatesFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The operation was cancelled..
+        /// </summary>
+        internal static string OperationCancelled {
+            get {
+                return ResourceManager.GetString("OperationCancelled", resourceCulture);
             }
         }
         
@@ -1168,6 +1391,51 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string PossibleValuesHeader {
             get {
                 return ResourceManager.GetString("PossibleValuesHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Post action argument &apos;{0}&apos; is mandatory, but not configured..
+        /// </summary>
+        internal static string PostAction_ModifyJson_Error_ArgumentNotConfigured {
+            get {
+                return ResourceManager.GetString("PostAction_ModifyJson_Error_ArgumentNotConfigured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to More than one file found that matches &apos;{0}&apos;..
+        /// </summary>
+        internal static string PostAction_ModifyJson_Error_MultipleJsonFiles {
+            get {
+                return ResourceManager.GetString("PostAction_ModifyJson_Error_MultipleJsonFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to find the json file in the solution.
+        /// </summary>
+        internal static string PostAction_ModifyJson_Error_NoJsonFile {
+            get {
+                return ResourceManager.GetString("PostAction_ModifyJson_Error_NoJsonFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parent property path &apos;{0}&apos; could not be traversed..
+        /// </summary>
+        internal static string PostAction_ModifyJson_Error_ParentPropertyPathInvalid {
+            get {
+                return ResourceManager.GetString("PostAction_ModifyJson_Error_ParentPropertyPathInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully modified {0}..
+        /// </summary>
+        internal static string PostAction_ModifyJson_Succeeded {
+            get {
+                return ResourceManager.GetString("PostAction_ModifyJson_Succeeded", resourceCulture);
             }
         }
         
@@ -1487,6 +1755,24 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to install {0}, due to detected vulnerabilities:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Download_Error_VulnerablePackage {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Download_Error_VulnerablePackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Installed package has the following vulnerabilities:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Download_VulnerablePackage {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Download_VulnerablePackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not find the template package containing template &apos;{0}&apos;.
         /// </summary>
         internal static string TemplatePackageCoordinator_Error_PackageForTemplateNotFound {
@@ -1546,6 +1832,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string TemplatePackageCoordinator_Install_Error_SameInstallRequests {
             get {
                 return ResourceManager.GetString("TemplatePackageCoordinator_Install_Error_SameInstallRequests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In order to install this package, run:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Install_Error_VulnerablePackageTip {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Install_Error_VulnerablePackageTip", resourceCulture);
             }
         }
         
@@ -1784,6 +2079,24 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The package {0} was not updated due to detected vulnerabilities:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Update_Error_VulnerablePackage {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Update_Error_VulnerablePackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In order to update this package, run:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Update_Error_VulnerablePackageTip {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Update_Error_VulnerablePackageTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to All template packages are up-to-date..
         /// </summary>
         internal static string TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate {
@@ -1838,11 +2151,56 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The package {0} contains vulnerabilities:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_UpdateCheck_Error_VulnerablePackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to initialize NuGet credential service, details: {0}..
         /// </summary>
         internal static string TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError {
             get {
                 return ResourceManager.GetString("TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Critical.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_VulnerabilitySeverity_Critical {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_VulnerabilitySeverity_Critical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to High.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_VulnerabilitySeverity_High {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_VulnerabilitySeverity_High", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Low.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_VulnerabilitySeverity_Low {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_VulnerabilitySeverity_Low", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Moderate.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_VulnerabilitySeverity_Moderate {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_VulnerabilitySeverity_Moderate", resourceCulture);
             }
         }
         
@@ -1906,6 +2264,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string UnableToSetPermissions {
             get {
                 return ResourceManager.GetString("UnableToSetPermissions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template generation ended with unexpected result: &apos;{0}&apos;. Details: {1}.
+        /// </summary>
+        internal static string UnexpectedResult {
+            get {
+                return ResourceManager.GetString("UnexpectedResult", resourceCulture);
             }
         }
         

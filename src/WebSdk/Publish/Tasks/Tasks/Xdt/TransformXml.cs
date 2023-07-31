@@ -1,10 +1,10 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.NET.Sdk.Publish.Tasks.MsDeploy;
 using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 using Microsoft.Web.XmlTransform;
-using System;
-using System.Diagnostics;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
 {

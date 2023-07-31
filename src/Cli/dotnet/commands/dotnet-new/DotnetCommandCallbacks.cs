@@ -1,14 +1,9 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable enable
 
 using Microsoft.DotNet.Tools.Add.PackageReference;
-using Microsoft.DotNet.Tools;
-using System.Collections.Generic;
-using System.CommandLine;
-using System.Linq;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.Add.ProjectToProjectReference;
 using Microsoft.DotNet.Tools.Restore;
@@ -25,7 +20,7 @@ namespace Microsoft.DotNet.Tools.New
             IEnumerable<string> commandArgs = new[] { "add", projectPath, "package", packageName };
             if (!string.IsNullOrWhiteSpace(version))
             {
-                commandArgs = commandArgs.Append(AddPackageParser.VersionOption.Aliases.First()).Append(version);
+                commandArgs = commandArgs.Append(AddPackageParser.VersionOption.Name).Append(version);
             }
             var addPackageReferenceCommand = new AddPackageReferenceCommand(AddCommandParser.GetCommand().Parse(commandArgs.ToArray()));
             return addPackageReferenceCommand.Execute() == 0;
@@ -53,12 +48,12 @@ namespace Microsoft.DotNet.Tools.New
             IEnumerable<string> commandArgs = new[] { "sln", solutionPath, "add" }.Concat(projectsToAdd);
             if (!string.IsNullOrWhiteSpace(solutionFolder))
             {
-                commandArgs = commandArgs.Append(SlnAddParser.SolutionFolderOption.Aliases.First()).Append(solutionFolder);
+                commandArgs = commandArgs.Append(SlnAddParser.SolutionFolderOption.Name).Append(solutionFolder);
             }
 
             if (inRoot is true)
             {
-                commandArgs = commandArgs.Append(SlnAddParser.InRootOption.Aliases.First());
+                commandArgs = commandArgs.Append(SlnAddParser.InRootOption.Name);
             }
             var addProjectToSolutionCommand = new AddProjectToSolutionCommand(SlnCommandParser.GetCommand().Parse(commandArgs.ToArray()));
             return addProjectToSolutionCommand.Execute() == 0;

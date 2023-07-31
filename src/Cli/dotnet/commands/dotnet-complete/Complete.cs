@@ -1,79 +1,68 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.CommandLine.Completions;
-using System.IO;
-using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using static System.Array;
-using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class Complete
     {
+        private static CompletionItem ToCompletionItem(string s) => new CompletionItem(s);
 
-        private static CompletionItem ToCompletionItem (string s) => new CompletionItem(s);
-
-        public static Func<CompletionContext, IEnumerable<CompletionItem>> TargetFrameworksFromProjectFile =>
-            (_context) =>
+        public static IEnumerable<CompletionItem> TargetFrameworksFromProjectFile(CompletionContext _)
+        {
+            try
             {
-                try
-                {
-                    return GetMSBuildProject()?.GetTargetFrameworks().Select(tf => tf.GetShortFolderName()).Select(ToCompletionItem) ?? Empty<CompletionItem>();
-                }
-                catch (Exception)
-                {
-                    return Empty<CompletionItem>();
-                }
-            };
+                return GetMSBuildProject()?.GetTargetFrameworks().Select(tf => tf.GetShortFolderName()).Select(ToCompletionItem) ?? Empty<CompletionItem>();
+            }
+            catch (Exception)
+            {
+                return Empty<CompletionItem>();
+            }
+        }
 
         private static void Report(Exception e) =>
             Reporter.Verbose.WriteLine($"Exception occurred while getting completions: {e}");
 
-        public static Func<CompletionContext, IEnumerable<CompletionItem>> RunTimesFromProjectFile =>
-            (_context) =>
+        public static IEnumerable<CompletionItem> RunTimesFromProjectFile(CompletionContext _)
+        {
+            try
             {
-                try
-                {
-                    return GetMSBuildProject()?.GetRuntimeIdentifiers().Select(ToCompletionItem) ?? Empty<CompletionItem>();
-                }
-                catch (Exception)
-                {
-                    return Empty<CompletionItem>();
-                }
-            };
+                return GetMSBuildProject()?.GetRuntimeIdentifiers().Select(ToCompletionItem) ?? Empty<CompletionItem>();
+            }
+            catch (Exception)
+            {
+                return Empty<CompletionItem>();
+            }
+        }
 
-        public static Func<CompletionContext, IEnumerable<CompletionItem>> ProjectReferencesFromProjectFile =>
-            (_context) =>
+        public static IEnumerable<CompletionItem> ProjectReferencesFromProjectFile(CompletionContext _)
+        {
+            try
             {
-                try
-                {
-                    return GetMSBuildProject()?.GetProjectToProjectReferences().Select(r => ToCompletionItem(r.Include)) ?? Empty<CompletionItem>();
-                }
-                catch (Exception)
-                {
-                    return Empty<CompletionItem>();
-                }
-            };
+                return GetMSBuildProject()?.GetProjectToProjectReferences().Select(r => ToCompletionItem(r.Include)) ?? Empty<CompletionItem>();
+            }
+            catch (Exception)
+            {
+                return Empty<CompletionItem>();
+            }
+        }
 
-        public static Func<CompletionContext, IEnumerable<CompletionItem>> ConfigurationsFromProjectFileOrDefaults => 
-            (_context) =>
+        public static IEnumerable<CompletionItem> ConfigurationsFromProjectFileOrDefaults(CompletionContext _)
+        {
+            try
             {
-                try
-                {
-                    return (GetMSBuildProject()?.GetConfigurations() ?? new[] { "Debug", "Release" }).Select(ToCompletionItem);
-                }
-                catch (Exception)
-                {
-                    return Empty<CompletionItem>();
-                }
-            };
+                return (GetMSBuildProject()?.GetConfigurations() ?? new[] { "Debug", "Release" }).Select(ToCompletionItem);
+            }
+            catch (Exception)
+            {
+                return Empty<CompletionItem>();
+            }
+        }
 
         private static MsbuildProject GetMSBuildProject()
         {

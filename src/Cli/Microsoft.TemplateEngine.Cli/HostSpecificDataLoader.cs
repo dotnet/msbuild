@@ -1,6 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
@@ -34,11 +33,15 @@ namespace Microsoft.TemplateEngine.Cli
         {
             IMountPoint? mountPoint = null;
 
-            if (templateInfo is ITemplateInfoHostJsonCache { HostData: JObject hostData })
+            if (templateInfo is ITemplateInfoHostJsonCache { HostData: string hostData })
             {
                 try
                 {
-                    return new HostSpecificTemplateData(hostData);
+                    if (!string.IsNullOrWhiteSpace(hostData))
+                    {
+                        JObject jObject = JObject.Parse(hostData);
+                        return new HostSpecificTemplateData(jObject);
+                    }
                 }
                 catch (Exception e)
                 {

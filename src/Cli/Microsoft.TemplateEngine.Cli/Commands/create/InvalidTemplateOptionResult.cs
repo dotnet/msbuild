@@ -1,10 +1,8 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.Commands
@@ -83,14 +81,9 @@ namespace Microsoft.TemplateEngine.Cli.Commands
             return this.Equals(other as object);
         }
 
-        internal static new InvalidTemplateOptionResult FromParseResult(TemplateOption option, ParseResult parseResult)
+        internal static InvalidTemplateOptionResult FromParseError(TemplateOption option, ParseResult parseResult, ParseError error)
         {
-            if (!parseResult.HasErrorFor(option.Option))
-            {
-                throw new ArgumentException($"{nameof(option)} does not have an error in {nameof(parseResult)}");
-            }
-
-            OptionResult? optionResult = parseResult.FindResultFor(option.Option);
+            OptionResult? optionResult = parseResult.GetResult(option.Option);
             if (optionResult == null)
             {
                 //option is not specified
@@ -103,30 +96,12 @@ namespace Microsoft.TemplateEngine.Cli.Commands
                 optionValue = string.Join(", ", optionResult.Tokens.Select(t => t.Value));
             }
 
-            string? errorMessage = null;
-            if (!string.IsNullOrWhiteSpace(optionResult.ErrorMessage))
-            {
-                errorMessage = optionResult.ErrorMessage;
-            }
-            else
-            {
-                foreach (var result in optionResult.Children)
-                {
-                    if (string.IsNullOrWhiteSpace(result.ErrorMessage))
-                    {
-                        continue;
-                    }
-                    errorMessage = result.ErrorMessage;
-                    break;
-                }
-            }
-
             return new InvalidTemplateOptionResult(
                     option,
                     Kind.InvalidValue,
-                    optionResult.Token?.Value ?? string.Empty,
+                    optionResult.IdentifierToken?.Value ?? string.Empty,
                     optionValue,
-                    errorMessage);
+                    error.Message);
         }
 
         /// <summary>

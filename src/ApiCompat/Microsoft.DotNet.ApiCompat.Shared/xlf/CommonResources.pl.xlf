@@ -12,6 +12,11 @@
         <target state="translated">Podano nieprawidłowy wzorzec transformacji: „{0} — {1}„.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoBreakingChangesFound">
+        <source>APICompat ran successfully without finding any breaking changes.</source>
+        <target state="new">APICompat ran successfully without finding any breaking changes.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SuppressionsFileNotSpecified">
         <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
         <target state="translated">Aby pomyślnie wygenerować plik pomijania zgodności, należy przekazać ścieżkę pliku.</target>

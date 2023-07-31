@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Runtime.CompilerServices;
-using System.Xml.Linq;
 using Microsoft.Build.Utilities;
 using NuGet.Frameworks;
-using Xunit.Sdk;
 
 namespace Microsoft.NET.TestFramework.ProjectConstruction
 {
@@ -35,19 +32,28 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
         /// </summary>
         public bool IsWinExe { get; set; }
 
+
         public string ProjectSdk { get; set; }
 
-        //  Applies to SDK Projects
-        public string TargetFrameworks { get; set; }
+        /// <summary>
+        /// Applies to SDK-style projects. If the value has only one target framework (ie no semicolons), the value will be used
+        /// for the MSBuild TargetFramework (singular) property.  Otherwise, the value will be used for the TargetFrameworks property.
+        /// </summary>
+        public string TargetFrameworks { get; set; } = ToolsetInfo.CurrentTargetFramework;
 
         public string RuntimeFrameworkVersion { get; set; }
 
         public string RuntimeIdentifier { get; set; }
 
+        // Set to either true, false, or empty string "". The empty string does not undefine SelfContained, it just doesn't specify it.
+        public string SelfContained { get; set; } = "";
+
         //  TargetFrameworkVersion applies to non-SDK projects
         public string TargetFrameworkVersion { get; set; }
 
         public string TargetFrameworkProfile { get; set; }
+
+        public bool UseArtifactsOutput { get; set; }
 
         public List<TestProject> ReferencedProjects { get; } = new List<TestProject>();
 
@@ -187,6 +193,10 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 {
                     packageReferenceElement.Add(new XAttribute("Aliases", packageReference.Aliases));
                 }
+                if (packageReference.Publish != null)
+                {
+                    packageReferenceElement.Add(new XAttribute("Publish", packageReference.Publish));
+                }
                 packageReferenceItemGroup.Add(packageReferenceElement);
             }
 
@@ -264,6 +274,11 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
             else if (this.IsWinExe)
             {
                 propertyGroup.Element(ns + "OutputType").SetValue("WinExe");
+            }
+
+            if(this.SelfContained != "")
+            {
+                propertyGroup.Add(new XElement(ns + "SelfContained", String.Equals(this.SelfContained, "true", StringComparison.OrdinalIgnoreCase) ? "true" : "false"));
             }
 
             if (this.ReferencedProjects.Any())
@@ -470,7 +485,7 @@ namespace {safeThisName}
         /// A dictionary of property keys to property value strings, case sensitive.
         /// Only properties added to the <see cref="PropertiesToRecord"/> member will be observed.
         /// </returns>
-        public Dictionary<string, string> GetPropertyValues(string testRoot, string configuration = "Debug", string targetFramework = null)
+        public Dictionary<string, string> GetPropertyValues(string testRoot, string targetFramework = null, string configuration = "Debug")
         {
             var propertyValues = new Dictionary<string, string>();
 
@@ -494,6 +509,17 @@ namespace {safeThisName}
         {
             var referenceAssemblies = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(targetFrameworkVersion);
             return referenceAssemblies != null;
+        }
+
+        private OutputPathCalculator GetOutputPathCalculator(string testRoot)
+        {
+            return OutputPathCalculator.FromProject(Path.Combine(testRoot, Name, Name + ".csproj"), this);
+        }
+
+        public string GetOutputDirectory(string testRoot, string targetFramework = null, string configuration = "Debug", string runtimeIdentifier = "")
+        {
+            return GetOutputPathCalculator(testRoot)
+                .GetOutputDirectory(targetFramework, configuration, runtimeIdentifier);
         }
     }
 }

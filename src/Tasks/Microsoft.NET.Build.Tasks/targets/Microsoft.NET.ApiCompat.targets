@@ -12,7 +12,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project>
   <PropertyGroup Condition="'$(UseApiCompatPackage)' != 'true'">
     <DotNetApiCompatTaskAssembly Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)..\tools\net472\Microsoft.DotNet.ApiCompat.Task.dll</DotNetApiCompatTaskAssembly>
-    <DotNetApiCompatTaskAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)..\tools\net7.0\Microsoft.DotNet.ApiCompat.Task.dll</DotNetApiCompatTaskAssembly>
+    <DotNetApiCompatTaskAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)..\tools\net8.0\Microsoft.DotNet.ApiCompat.Task.dll</DotNetApiCompatTaskAssembly>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(EnablePackageValidation)' == 'true' and

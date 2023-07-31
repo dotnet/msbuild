@@ -3,14 +3,10 @@
 
 #nullable enable
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Microsoft.DotNet.Tools.New.PostActionProcessors;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
-using Xunit;
 
 namespace Microsoft.DotNet.Cli.New.Tests
 {
@@ -39,7 +35,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         public void AddProjectToSolutionPostActionFindsOneProjectToAdd()
         {
             string outputBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
-            IPostAction postAction = new MockPostAction()
+            IPostAction postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = DotnetSlnPostActionProcessor.ActionProcessorId,
                 Args = new Dictionary<string, string>()
@@ -50,7 +46,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
 
             ICreationResult creationResult = new MockCreationResult(primaryOutputs: new[] { new MockCreationPath(Path.GetFullPath("outputProj1.csproj")) });
 
-            Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
+            Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd(postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
             Assert.Equal(1, foundProjectFiles?.Count);
             Assert.Equal(creationResult.PrimaryOutputs[0].Path, foundProjectFiles?[0]);
         }
@@ -59,7 +55,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         public void AddProjectToSolutionPostActionFindsMultipleProjectsToAdd()
         {
             string outputBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
-            IPostAction postAction = new MockPostAction()
+            IPostAction postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = DotnetSlnPostActionProcessor.ActionProcessorId,
                 Args = new Dictionary<string, string>()
@@ -76,7 +72,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
                     new MockCreationPath(Path.GetFullPath("outputProj2.csproj"))
                 });
 
-            Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
+            Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd(postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
             Assert.NotNull(foundProjectFiles);
             Assert.Equal(2, foundProjectFiles.Count);
             Assert.Contains(creationResult.PrimaryOutputs[0].Path, foundProjectFiles.ToList());
@@ -88,7 +84,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         [Fact(DisplayName = nameof(AddProjectToSolutionPostActionDoesntFindProjectOutOfRange))]
         public void AddProjectToSolutionPostActionDoesntFindProjectOutOfRange()
         {
-            IPostAction postAction = new MockPostAction()
+            IPostAction postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = DotnetSlnPostActionProcessor.ActionProcessorId,
                 Args = new Dictionary<string, string>()
@@ -99,7 +95,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
 
             ICreationResult creationResult = new MockCreationResult(primaryOutputs: new[] { new MockCreationPath("outputProj1.csproj") });
 
-            Assert.False(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd( postAction, creationResult, string.Empty, out IReadOnlyList<string>? foundProjectFiles));
+            Assert.False(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd(postAction, creationResult, string.Empty, out IReadOnlyList<string>? foundProjectFiles));
             Assert.Null(foundProjectFiles);
         }
 
@@ -108,7 +104,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
         {
             string outputBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
 
-            IPostAction postAction = new MockPostAction()
+            IPostAction postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = DotnetSlnPostActionProcessor.ActionProcessorId,
                 Args = new Dictionary<string, string>()
@@ -128,7 +124,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             string dontFindMeFullPath1 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[1].Path);
             string outputFileFullPath2 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[2].Path);
 
-            Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
+            Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd(postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
             Assert.NotNull(foundProjectFiles);
             Assert.Equal(2, foundProjectFiles.Count);
             Assert.Contains(outputFileFullPath0, foundProjectFiles.ToList());
@@ -142,14 +138,14 @@ namespace Microsoft.DotNet.Cli.New.Tests
         {
             string outputBasePath = _engineEnvironmentSettings.GetTempVirtualizedPath();
 
-            IPostAction postAction = new MockPostAction()
+            IPostAction postAction = new MockPostAction(default, default, default, default, default!)
             {
                 ActionId = DotnetSlnPostActionProcessor.ActionProcessorId,
                 Args = new Dictionary<string, string>()
             };
 
             ICreationResult creationResult = new MockCreationResult(
-                primaryOutputs: new []
+                primaryOutputs: new[]
                 {
                     new MockCreationPath("outputProj1.csproj"),
                     new MockCreationPath("outputProj2.csproj"),
@@ -157,7 +153,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             string outputFileFullPath0 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[0].Path);
             string outputFileFullPath1 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[1].Path);
 
-            Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd( postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
+            Assert.True(DotnetSlnPostActionProcessor.TryGetProjectFilesToAdd(postAction, creationResult, outputBasePath, out IReadOnlyList<string>? foundProjectFiles));
             Assert.NotNull(foundProjectFiles);
             Assert.Equal(2, foundProjectFiles.Count);
             Assert.Contains(outputFileFullPath0, foundProjectFiles.ToList());
@@ -177,7 +173,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             _engineEnvironmentSettings.Host.FileSystem.WriteAllText(slnFileFullPath, "");
 
             var args = new Dictionary<string, string>() { { "projectFiles", "[\"MyApp.csproj\"]" } };
-            var postAction = new MockPostAction { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
+            var postAction = new MockPostAction(default, default, default, default, default!) { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
 
             MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
@@ -189,7 +185,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
                 new MockCreationResult(),
                 targetBasePath);
 
-            Assert.Equal(new [] { projFileFullPath }, callback.Projects);
+            Assert.Equal(new[] { projFileFullPath }, callback.Projects);
             Assert.Equal(slnFileFullPath, callback.Solution);
         }
 
@@ -206,7 +202,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
             _engineEnvironmentSettings.Host.FileSystem.WriteAllText(slnFileFullPath, "");
 
             var args = new Dictionary<string, string>() { { "projectFiles", "MyApp.csproj" } };
-            var postAction = new MockPostAction { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
+            var postAction = new MockPostAction(default, default, default, default, default!) { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
 
             MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
@@ -238,7 +234,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
                 { "projectFiles", "MyApp.csproj" },
                 { "inRoot", "true" }
             };
-            var postAction = new MockPostAction { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
+            var postAction = new MockPostAction(default, default, default, default, default!) { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
 
             MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
@@ -270,7 +266,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
                 { "projectFiles", "MyApp.csproj" },
                 { "solutionFolder", "src" }
             };
-            var postAction = new MockPostAction { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
+            var postAction = new MockPostAction(default, default, default, default, default!) { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
 
             MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));
@@ -303,7 +299,7 @@ namespace Microsoft.DotNet.Cli.New.Tests
                 { "inRoot", "true" },
                 { "solutionFolder", "src" }
             };
-            var postAction = new MockPostAction { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
+            var postAction = new MockPostAction(default, default, default, default, default!) { ActionId = DotnetSlnPostActionProcessor.ActionProcessorId, Args = args };
 
             MockCreationEffects creationEffects = new MockCreationEffects()
                 .WithFileChange(new MockFileChange("./MyApp.csproj", "./MyApp.csproj", ChangeKind.Create));

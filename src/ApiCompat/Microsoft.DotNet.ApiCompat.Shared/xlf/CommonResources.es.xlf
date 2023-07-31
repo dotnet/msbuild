@@ -12,6 +12,11 @@
         <target state="translated">Se proporcionó un patrón de transformación no válido: '{0} - {1}'.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoBreakingChangesFound">
+        <source>APICompat ran successfully without finding any breaking changes.</source>
+        <target state="new">APICompat ran successfully without finding any breaking changes.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SuppressionsFileNotSpecified">
         <source>A file path must be passed in to successfully generate a compatibility suppression file.</source>
         <target state="translated">Se debe pasar una ruta de acceso de archivo para generar correctamente un archivo de supresión de compatibilidad.</target>

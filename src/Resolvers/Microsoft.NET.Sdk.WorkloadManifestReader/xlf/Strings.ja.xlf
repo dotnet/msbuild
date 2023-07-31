@@ -62,6 +62,11 @@
         <target state="translated">無効なバージョン: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidVersionForWorkload">
+        <source>Error parsing version '{1}' for workload manifest ID '{0}'</source>
+        <target state="translated">ワークロード マニフェスト ID '{0}' のバージョン '{1}' の解析でエラーが発生しました</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="translated">マニフェスト '{1}' [{2}] で必要なワークロード マニフェストの依存関係 '{0}' が見つかりません</target>
@@ -71,6 +76,16 @@
         <source>Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</source>
         <target state="translated">ワークロード マニフェストの依存関係 '{0}' のバージョン '{1}' は、マニフェスト '{3}' [{4}] で必要とされるバージョン '{2}' 以前のものです</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ManifestFromInstallStateNotFound">
+        <source>Workload manifest {0}, which was specified in {1}, was not found. Running "dotnet workload repair" may resolve this.</source>
+        <target state="translated">{1} で指定されたワークロード マニフェスト {0} が見つかりませんでした。"dotnet workload repair" を実行すると、これを解決できる場合があります。</target>
+        <note>{Locked="dotnet workload repair"}</note>
+      </trans-unit>
+      <trans-unit id="ManifestFromWorkloadSetNotFound">
+        <source>Workload manifest {0} from workload version {1} was not installed. Running "dotnet workload repair" may resolve this.</source>
+        <target state="translated">ワークロード バージョン {1} のワークロード マニフェスト {0} がインストールされませんでした。"dotnet workload repair" を実行すると、これを解決できる場合があります。</target>
+        <note>{Locked="dotnet workload repair"}</note>
       </trans-unit>
       <trans-unit id="MissingBaseWorkload">
         <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
@@ -120,6 +135,16 @@
       <trans-unit id="UnresolvedWorkloadRedirect">
         <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
         <target state="translated">マニフェスト '{2}' [{3}] 内のワークロード リダイレクト '{1}' に対する未解決のターゲット '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromGlobalJsonNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found. Run "dotnet workload restore" to install this workload version.</source>
+        <target state="translated">{1} で指定されたワークロード バージョン {0} が見つかりませんでした。"dotnet workload restore" を実行して、このワークロード バージョンをインストールします。</target>
+        <note>{Locked="dotnet workload restore"}</note>
+      </trans-unit>
+      <trans-unit id="WorkloadVersionFromInstallStateNotFound">
+        <source>Workload version {0}, which was specified in {1}, was not found.</source>
+        <target state="translated">{1} で指定されたワークロード バージョン {0} が見つかりませんでした。</target>
         <note />
       </trans-unit>
     </body>

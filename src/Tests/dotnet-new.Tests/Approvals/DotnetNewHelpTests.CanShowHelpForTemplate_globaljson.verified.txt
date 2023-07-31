@@ -4,6 +4,7 @@ Description: A file for selecting the .NET SDK version.
 
 Usage:
   dotnet new globaljson [options] [template options]
+  dotnet new global.json [options] [template options]
 
 Options:
   -n, --name <name>      The name for the output being created. If no name is specified, the name of the output directory is used.

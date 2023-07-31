@@ -1,11 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
-using System.Linq;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Publish;
 using LocalizableStrings = Microsoft.DotNet.Tools.Publish.LocalizableStrings;
@@ -16,72 +12,80 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly string DocsLink = "https://aka.ms/dotnet-publish";
 
-        public static readonly Argument<IEnumerable<string>> SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
+        public static readonly CliArgument<IEnumerable<string>> SlnOrProjectArgument = new(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
             Arity = ArgumentArity.ZeroOrMore
         };
 
-        public static readonly Option<string> OuputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
+        public static readonly CliOption<string> OuputOption = new ForwardedOption<string>("--output", "-o")
         {
-            ArgumentHelpName = LocalizableStrings.OutputOption
-        }.ForwardAsSingle(o => $"-property:PublishDir={CommandDirectoryContext.GetFullPath(o)}");
+            Description = LocalizableStrings.OutputOptionDescription,
+            HelpName = LocalizableStrings.OutputOption
+        }.ForwardAsOutputPath("PublishDir");
 
-        public static readonly Option<IEnumerable<string>> ManifestOption = new ForwardedOption<IEnumerable<string>>("--manifest", LocalizableStrings.ManifestOptionDescription)
+        public static readonly CliOption<IEnumerable<string>> ManifestOption = new ForwardedOption<IEnumerable<string>>("--manifest")
         {
-            ArgumentHelpName = LocalizableStrings.ManifestOption
+            Description = LocalizableStrings.ManifestOptionDescription,
+            HelpName = LocalizableStrings.ManifestOption
         }.ForwardAsSingle(o => $"-property:TargetManifestFiles={string.Join("%3B", o.Select(CommandDirectoryContext.GetFullPath))}")
         .AllowSingleArgPerToken();
 
-        public static readonly Option<bool> NoBuildOption = new ForwardedOption<bool>("--no-build", LocalizableStrings.NoBuildOptionDescription)
-            .ForwardAs("-property:NoBuild=true");
+        public static readonly CliOption<bool> NoBuildOption = new ForwardedOption<bool>("--no-build")
+        {
+            Description = LocalizableStrings.NoBuildOptionDescription
+        }.ForwardAs("-property:NoBuild=true");
 
-        public static readonly Option<bool> NoLogoOption = new ForwardedOption<bool>("--nologo", LocalizableStrings.CmdNoLogo)
-            .ForwardAs("-nologo");
+        public static readonly CliOption<bool> NoLogoOption = new ForwardedOption<bool>("--nologo")
+        {
+            Description = LocalizableStrings.CmdNoLogo
+        }.ForwardAs("-nologo");
 
-        public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption;
+        public static readonly CliOption<bool> NoRestoreOption = CommonOptions.NoRestoreOption;
 
-        public static readonly Option<bool> SelfContainedOption = CommonOptions.SelfContainedOption;
+        public static readonly CliOption<bool> SelfContainedOption = CommonOptions.SelfContainedOption;
 
-        public static readonly Option<bool> NoSelfContainedOption = CommonOptions.NoSelfContainedOption;
+        public static readonly CliOption<bool> NoSelfContainedOption = CommonOptions.NoSelfContainedOption;
 
-        public static readonly Option<string> RuntimeOption = CommonOptions.RuntimeOption;
+        public static readonly CliOption<string> RuntimeOption = CommonOptions.RuntimeOption;
 
-        public static readonly Option<string> FrameworkOption = CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription);
+        public static readonly CliOption<string> FrameworkOption = CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription);
 
-        public static readonly Option<string> ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
+        public static readonly CliOption<string> ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
 
-        private static readonly Command Command = ConstructCommand();
+        private static readonly CliCommand Command = ConstructCommand();
 
-        public static Command GetCommand()
+        public static CliCommand GetCommand()
         {
             return Command;
         }
 
-        private static Command ConstructCommand()
+        private static CliCommand ConstructCommand()
         {
             var command = new DocumentedCommand("publish", DocsLink, LocalizableStrings.AppDescription);
 
-            command.AddArgument(SlnOrProjectArgument);
+            command.Arguments.Add(SlnOrProjectArgument);
             RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: false, includeNoDependenciesOption: true);
-            command.AddOption(OuputOption);
-            command.AddOption(ManifestOption);
-            command.AddOption(NoBuildOption);
-            command.AddOption(SelfContainedOption);
-            command.AddOption(NoSelfContainedOption);
-            command.AddOption(NoLogoOption);
-            command.AddOption(FrameworkOption);
-            command.AddOption(RuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
-            command.AddOption(ConfigurationOption);
-            command.AddOption(CommonOptions.VersionSuffixOption);
-            command.AddOption(CommonOptions.InteractiveMsBuildForwardOption);
-            command.AddOption(NoRestoreOption);
-            command.AddOption(CommonOptions.VerbosityOption);
-            command.AddOption(CommonOptions.ArchitectureOption);
-            command.AddOption(CommonOptions.OperatingSystemOption);
-            command.AddOption(CommonOptions.DisableBuildServersOption);
 
-            command.SetHandler(PublishCommand.Run);
+            command.Options.Add(OuputOption);
+            command.Options.Add(CommonOptions.ArtifactsPathOption);
+            command.Options.Add(ManifestOption);
+            command.Options.Add(NoBuildOption);
+            command.Options.Add(SelfContainedOption);
+            command.Options.Add(NoSelfContainedOption);
+            command.Options.Add(NoLogoOption);
+            command.Options.Add(FrameworkOption);
+            command.Options.Add(RuntimeOption.WithHelpDescription(command, LocalizableStrings.RuntimeOptionDescription));
+            command.Options.Add(ConfigurationOption);
+            command.Options.Add(CommonOptions.VersionSuffixOption);
+            command.Options.Add(CommonOptions.InteractiveMsBuildForwardOption);
+            command.Options.Add(NoRestoreOption);
+            command.Options.Add(CommonOptions.VerbosityOption);
+            command.Options.Add(CommonOptions.ArchitectureOption);
+            command.Options.Add(CommonOptions.OperatingSystemOption);
+            command.Options.Add(CommonOptions.DisableBuildServersOption);
+
+            command.SetAction(PublishCommand.Run);
 
             return command;
         }

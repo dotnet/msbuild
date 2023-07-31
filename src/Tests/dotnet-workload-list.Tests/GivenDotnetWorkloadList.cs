@@ -1,22 +1,11 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using FluentAssertions;
-using Microsoft.NET.TestFramework;
-using Xunit;
-using Xunit.Abstractions;
-using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.DotNet.Workloads.Workload.List;
 using System.CommandLine;
-using System.CommandLine.Parsing;
-using Microsoft.NET.TestFramework.Utilities;
-using System.Collections.Generic;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using ManifestReaderTests;
-using System.IO;
-using System.Linq;
 using ListStrings = Microsoft.DotNet.Workloads.Workload.List.LocalizableStrings;
-using Microsoft.DotNet.Workloads.Workload;
 
 namespace Microsoft.DotNet.Cli.Workload.List.Tests
 {
@@ -66,13 +55,13 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             _reporter.Clear();
             var expectedWorkloads = new List<WorkloadId>() { new WorkloadId("mock-workload-1"), new WorkloadId("mock-workload-2"), new WorkloadId("mock-workload-3") };
             var workloadInstaller = new MockWorkloadRecordRepo(expectedWorkloads);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), Directory.GetCurrentDirectory());
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(("SampleManifest", _manifestPath, "6.0.100")), Directory.GetCurrentDirectory());
             var command = new WorkloadListCommand(_parseResult, _reporter, workloadInstaller, "6.0.100", workloadResolver: workloadResolver);
             command.Execute();
 
             foreach (var workload in expectedWorkloads)
             {
-                _reporter.Lines.Select(line => line.Trim()).Should().Contain($"{workload}            5.0.0/TestProjects      SDK 6.0.100");
+                _reporter.Lines.Select(line => line.Trim()).Should().Contain($"{workload}            5.0.0/6.0.100         SDK 6.0.100");
             }
         }
 
