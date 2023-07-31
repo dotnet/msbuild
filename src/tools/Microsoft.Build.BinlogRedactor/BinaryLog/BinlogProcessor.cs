@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BinlogRedactor.Reporting;
 using Microsoft.Build.Logging;
 
-namespace Microsoft.Build.BinlogRedactor
+namespace Microsoft.Build.BinlogRedactor.BinaryLog
 {
     internal interface ISensitiveDataProcessor
     {
@@ -18,20 +18,47 @@ namespace Microsoft.Build.BinlogRedactor
         bool IsSensitiveData(string text);
     }
 
+    internal class SimpleSensitiveDataProcessor : ISensitiveDataProcessor
+    {
+        private readonly string[] _passwordsToRedact;
+
+        public SimpleSensitiveDataProcessor(string[] passwordsToRedact)
+        {
+            _passwordsToRedact = passwordsToRedact;
+        }
+
+        public string ReplaceSensitiveData(string text)
+        {
+            foreach (string pwd in _passwordsToRedact)
+            {
+                text = text.Replace(pwd, "*******", StringComparison.CurrentCulture);
+            }
+
+            return text;
+        }
+
+        public bool IsSensitiveData(string text)
+        {
+            return _passwordsToRedact.Any(pwd => text.Contains(pwd, StringComparison.CurrentCulture));
+        }
+    }
+
     internal interface IBinlogProcessor
     {
-        BinlogRedactorErrorCode ProcessBinlog(
+        Task<BinlogRedactorErrorCode> ProcessBinlog(
             string inputFileName,
             string outputFileName,
-            ISensitiveDataProcessor sensitiveDataProcessor);
+            ISensitiveDataProcessor sensitiveDataProcessor,
+            CancellationToken cancellationToken);
     }
 
     internal class SimpleBinlogProcessor : IBinlogProcessor
     {
-        public BinlogRedactorErrorCode ProcessBinlog(
+        public Task<BinlogRedactorErrorCode> ProcessBinlog(
             string inputFileName,
             string outputFileName,
-            ISensitiveDataProcessor sensitiveDataProcessor)
+            ISensitiveDataProcessor sensitiveDataProcessor,
+            CancellationToken cancellationToken)
         {
             // Quick way:
             //
@@ -42,12 +69,13 @@ namespace Microsoft.Build.BinlogRedactor
             };
             bl.Initialize(originalEventsSource);
             originalEventsSource.CurrateReadString += sensitiveDataProcessor.ReplaceSensitiveData;
-            originalEventsSource.Replay(inputFileName, CancellationToken.None);
+            originalEventsSource.Replay(inputFileName, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             bl.Shutdown();
 
             // TODO: error handling
 
-            return BinlogRedactorErrorCode.Success;
+            return Task.FromResult(BinlogRedactorErrorCode.Success);
         }
     }
 
@@ -83,7 +111,7 @@ namespace Microsoft.Build.BinlogRedactor
             private long _stringStartPosition = -1;
             public void HandleStringStart()
             {
-                _stringStartPosition = this.Position;
+                _stringStartPosition = Position;
             }
 
             private bool _isRewritingOutput = false;
@@ -170,10 +198,11 @@ namespace Microsoft.Build.BinlogRedactor
         //
         // other thing is embedded files - but we might possibly disregard them initialy
 
-        public BinlogRedactorErrorCode ProcessBinlog(
+        public Task<BinlogRedactorErrorCode> ProcessBinlog(
             string inputFileName,
             string outputFileName,
-            ISensitiveDataProcessor sensitiveDataProcessor)
+            ISensitiveDataProcessor sensitiveDataProcessor,
+            CancellationToken token)
         {
             BinaryLogReplayEventSource eventSource = new BinaryLogReplayEventSource();
             eventSource.OnStringRead += MyStreamProxy.Instance.HandleStringRead;
@@ -182,7 +211,7 @@ namespace Microsoft.Build.BinlogRedactor
 
             // TODO: error handling
 
-            return BinlogRedactorErrorCode.Success;
+            return Task.FromResult(BinlogRedactorErrorCode.Success);
         }
     }
 }

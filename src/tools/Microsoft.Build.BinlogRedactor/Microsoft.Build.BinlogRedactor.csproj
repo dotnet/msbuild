@@ -5,6 +5,22 @@
     <TargetFrameworks>$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <!-- tool packing properties -->
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>redact-binlog</ToolCommandName>
+    <!-- packaging properties -->
+    <Version>0.0.1-alpha</Version>
+    <PackageVersion>17.8.0-dev-alpha-05</PackageVersion>
+    <Title>BinlogRedactor dotnet tool</Title>
+    <PackageId>JanK.BinlogRedactor</PackageId>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <!-- SourceLink properties -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <!--<SymbolPackageFormat>snupkg</SymbolPackageFormat>-->
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +40,10 @@
     <PackageReference Include="System.CommandLine.NamingConventionBinder" />
     <PackageReference Include="Microsoft.Extensions.Configuration" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\documentation\binlog-redactor\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>

@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Builder;
+using System.CommandLine.Hosting;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Build.BinlogRedactor.BinaryLog;
+using Microsoft.Build.BinlogRedactor.Commands;
 using Microsoft.Build.BinlogRedactor.Reporting;
 using Microsoft.Build.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -16,14 +23,6 @@ namespace Microsoft.Build.BinlogRedactor
 {
     internal sealed class Program
     {
-
-
-        //private static void Main(string[] args)
-        //{
-        //    string binlogPath = "msbuild.binlog"; // args[0];
-
-        //}
-
         static Task<int> Main(string[] args)
         {
             return BuildCommandLine()
@@ -33,13 +32,16 @@ namespace Microsoft.Build.BinlogRedactor
                 {
                     host.ConfigureServices(services =>
                     {
-                        // services.AddSingleton<SomeCommandHandler>();
+                        services.AddSingleton<RedactBinlogCommandHandler>();
                         services.AddSingleton<IBinlogProcessor, SimpleBinlogProcessor>();
+                        services.AddSingleton<IStderrWriter, DefaultStderrWriter>();
+                        services.AddSingleton<IStdoutWriter, DefaultStdoutWriter>();
+                        services.AddSingleton<IO.IFileSystem, IO.PhysicalFileSystem>();
                     })
                     .AddCancellationTokenProvider()
                     .ConfigureLogging(logging =>
                     {
-                        logging.ConfigureBuildLinkLogging(host);
+                        logging.ConfigureBinlogRedactorLogging(host);
                     });
                 })
                 .UseExceptionHandler(ExceptionHandler)
@@ -54,15 +56,10 @@ namespace Microsoft.Build.BinlogRedactor
 
         private static CommandLineBuilder BuildCommandLine()
         {
-            var root = new RootCommand("binlog-redactor - provides ability to redact sensitive data from MSBuild binlogs.");
+            var command = new RedactBinlogCommand();
+            command.AddGlobalOption(CommonOptionsExtensions.s_consoleVerbosityOption);
 
-            root.AddCommand(new GetSourcesCommand());
-            root.AddCommand(new AddBuildMetadataCommand());
-            root.AddCommand(new SourcePackageCommand());
-            root.AddGlobalOption(CommonOptionsExtension.s_consoleVerbosityOption);
-            root.AddGlobalOption(CommonOptionsExtension.s_fileVerbosityOption);
-
-            return new CommandLineBuilder(root);
+            return new CommandLineBuilder(command);
         }
 
         private static void ExceptionHandler(Exception exception, InvocationContext context)
