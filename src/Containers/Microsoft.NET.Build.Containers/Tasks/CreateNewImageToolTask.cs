@@ -91,14 +91,6 @@ public partial class CreateNewImage : ToolTask, ICancelableTask
         {
             throw new InvalidOperationException(Resource.FormatString(nameof(Strings.RequiredPropertyNotSetOrEmpty), nameof(WorkingDirectory)));
         }
-        if (Entrypoint.Length == 0)
-        {
-            throw new InvalidOperationException(Resource.FormatString(nameof(Strings.RequiredItemsNotSet), nameof(Entrypoint)));
-        }
-        if (Entrypoint.Any(e => string.IsNullOrWhiteSpace(e.ItemSpec)))
-        {
-            throw new InvalidOperationException(Resource.FormatString(nameof(Strings.RequiredItemsContainsEmptyItems), nameof(Entrypoint)));
-        }
 
         CommandLineBuilder builder = new();
 
