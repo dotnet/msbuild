@@ -22,12 +22,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- PublishAot depends on PublishTrimmed. This must be set early enough for the KnownILLinkPack to be restored. -->
     <PublishTrimmed Condition="'$(PublishTrimmed)' == '' And '$(PublishAot)' == 'true'">true</PublishTrimmed>
     <IsTrimmable Condition="'$(IsTrimmable)' == '' and '$(IsAotCompatible)' == 'true'">true</IsTrimmable>
+    <!-- Keep this in sync with requiresILLinkPack in ProcessFrameworkReferences.cs. -->
     <_RequiresILLinkPack Condition="'$(_RequiresILLinkPack)' == '' And (
+        '$(PublishAot)' == 'true' Or
+        '$(IsAotCompatible)' == 'true' Or '$(EnableAotAnalyzer)' == 'true' Or
         '$(PublishTrimmed)' == 'true' Or
-        '$(PublishSingleFile)' == 'true' Or
-        '$(IsTrimmable)' == 'true' Or
-        '$(EnableAotAnalyzer)' == 'true' Or
-        '$(EnableTrimAnalyzer)' == 'true' Or
+        '$(IsTrimmable)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true' Or
         '$(EnableSingleFileAnalyzer)' == 'true')">true</_RequiresILLinkPack>
     <_RequiresILLinkPack Condition="'$(_RequiresILLinkPack)' == ''">false</_RequiresILLinkPack>
   </PropertyGroup>
