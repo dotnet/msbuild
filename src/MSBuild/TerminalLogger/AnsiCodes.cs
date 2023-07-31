@@ -16,10 +16,18 @@ internal static class AnsiCodes
     /// <summary>
     /// Select graphic rendition.
     /// </summary>
-    /// <remarks>\
+    /// <remarks>
     /// Print <see cref="CSI"/>color-code<see cref="SetColor"/> to change text color.
     /// </remarks>
     public const string SetColor = ";1m";
+
+    /// <summary>
+    /// Select graphic rendition - set bold mode.
+    /// </summary>
+    /// <remarks>
+    /// Print <see cref="CSI"/><see cref="SetBold"/> to change text to bold.
+    /// </remarks>
+    public const string SetBold = "1m";
 
     /// <summary>
     /// A shortcut to reset color back to normal.
@@ -122,5 +130,15 @@ internal static class AnsiCodes
         }
 
         return $"{CSI}{(int)color}{SetColor}{s}{SetDefaultColor}";
+    }
+
+    public static string MakeBold(string? s)
+    {
+        if (string.IsNullOrWhiteSpace(s))
+        {
+            return s ?? "";
+        }
+
+        return $"{CSI}{SetBold}{s}{SetDefaultColor}";
     }
 }

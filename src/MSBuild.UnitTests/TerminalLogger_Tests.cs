@@ -170,7 +170,7 @@ namespace Microsoft.Build.UnitTests
 
         private BuildWarningEventArgs MakeWarningEventArgs(string warning)
         {
-            return new BuildWarningEventArgs("", "", "", 0, 0, 0, 0, warning, null, null)
+            return new BuildWarningEventArgs("", "AA0000", "directory/file", 1, 2, 3, 4, warning, null, null)
             {
                 BuildEventContext = MakeBuildEventContext(),
             };
@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests
 
         private BuildErrorEventArgs MakeErrorEventArgs(string error)
         {
-            return new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, error, null, null)
+            return new BuildErrorEventArgs("", "AA0000", "directory/file", 1, 2, 3, 4, error, null, null)
             {
                 BuildEventContext = MakeBuildEventContext(),
             };
