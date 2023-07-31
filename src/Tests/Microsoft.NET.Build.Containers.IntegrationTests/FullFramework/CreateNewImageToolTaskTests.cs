@@ -49,11 +49,6 @@ public class CreateNewImageToolTaskTests
 
         task.WorkingDirectory = "MyWorkingDirectory";
 
-        e = Assert.Throws<InvalidOperationException>(() => task.GenerateCommandLineCommandsInt());
-        Assert.Equal("CONTAINER4002: Required 'Entrypoint' items were not set.", e.Message);
-
-        task.Entrypoint = new[] { new TaskItem("MyEntryPoint") };
-
         string args = task.GenerateCommandLineCommandsInt();
         string workDir = GetPathToContainerize();
 
@@ -376,12 +371,10 @@ public class CreateNewImageToolTaskTests
     [InlineData("")]
     [InlineData("  ")]
     [Theory]
-    public void GenerateCommandLineCommands_EntryPointCannotHaveEmptyItems(string itemValue)
+    public void GenerateCommandLineCommands_EntryPointCanHaveEmptyItems(string itemValue)
     {
         CreateNewImage task = new();
-        List<string?> warnings = new();
         IBuildEngine buildEngine = A.Fake<IBuildEngine>();
-        A.CallTo(() => buildEngine.LogWarningEvent(A<BuildWarningEventArgs>.Ignored)).Invokes((BuildWarningEventArgs e) => warnings.Add(e.Message));
 
         task.BuildEngine = buildEngine;
 
@@ -393,8 +386,7 @@ public class CreateNewImageToolTaskTests
         task.WorkingDirectory = "MyWorkingDirectory";
         task.Entrypoint = new[] { new TaskItem(itemValue) };
 
-        Exception e = Assert.Throws<InvalidOperationException>(() => task.GenerateCommandLineCommandsInt());
-        Assert.Equal("CONTAINER4003: Required 'Entrypoint' items contain empty items.", e.Message);
+        task.GenerateCommandLineCommandsInt();
     }
 
     [Theory]
@@ -411,7 +403,6 @@ public class CreateNewImageToolTaskTests
         task.BaseImageName = "MyBaseImageName";
         task.Repository = "MyImageName";
         task.WorkingDirectory = "MyWorkingDirectory";
-        task.Entrypoint = new[] { new TaskItem("MyEntryPoint") };
 
         task.AppCommandInstruction = value;
 

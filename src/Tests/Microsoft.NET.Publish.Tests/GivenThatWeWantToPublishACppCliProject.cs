@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
             var exe = Path.Combine( //find the platform directory
                 new DirectoryInfo(Path.Combine(testAsset.TestRoot, "CSConsoleApp", "bin")).GetDirectories().Single().FullName,
                 "Debug",
-                ToolsetInfo.CurrentTargetFramework,
+                $"{ToolsetInfo.CurrentTargetFramework}-windows",
                 "publish",
                 "CSConsoleApp.exe");
 
