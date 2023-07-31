@@ -6,7 +6,6 @@ using System;
 #endif
 #if NET
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Extensions.Logging;
 #endif
 using System.Text.RegularExpressions;
 using Microsoft.NET.Build.Containers.Resources;

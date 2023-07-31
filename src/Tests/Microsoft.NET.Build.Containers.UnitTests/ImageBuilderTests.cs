@@ -400,7 +400,7 @@ public class ImageBuilderTests
                       "User": "",
                       "Env": [
                         "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-                        "{{KnownStrings.EnvironmentVariables.APP_UID}}={{expectedUid}}"
+                        "{{ImageBuilder.EnvironmentVariables.APP_UID}}={{expectedUid}}"
                       ],
                       "Cmd": ["bash"],
                       "Image": "sha256:d772d27ebeec80393349a4770dc37f977be2c776a01c88b624d43f93fa369d69",
@@ -462,7 +462,7 @@ public class ImageBuilderTests
                 }
                 """);
 
-        builder.AddEnvironmentVariable(KnownStrings.EnvironmentVariables.APP_UID, "12345");
+        builder.AddEnvironmentVariable(ImageBuilder.EnvironmentVariables.APP_UID, "12345");
         var builtImage = builder.Build();
 
         JsonNode? result = JsonNode.Parse(builtImage.Config);

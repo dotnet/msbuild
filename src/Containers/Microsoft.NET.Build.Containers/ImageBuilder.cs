@@ -18,6 +18,12 @@ internal sealed class ImageBuilder
     private readonly ImageConfig _baseImageConfig;
     private readonly ILogger _logger;
 
+    /// <summary>
+    /// This is a parser for ASPNETCORE_URLS based on https://github.com/dotnet/aspnetcore/blob/main/src/Http/Http/src/BindingAddress.cs
+    /// We can cut corners a bit here because we really only care about ports, if they exist.
+    /// </summary>
+    internal static Regex aspnetPortRegex = new(@"(?<scheme>\w+)://(?<domain>([*+]|).+):(?<port>\d+)");
+
     public ImageConfig BaseImageConfig => _baseImageConfig;
 
     internal ImageBuilder(ManifestV2 manifest, ImageConfig baseImageConfig, ILogger logger)
@@ -218,23 +224,12 @@ internal sealed class ImageBuilder
     internal void AssignUserFromEnvironment()
     {
         // it's a common convention to apply custom users with the APP_UID convention - we check and apply that here
-        if (_baseImageConfig.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.APP_UID, out string? appUid))
+        if (_baseImageConfig.EnvironmentVariables.TryGetValue(EnvironmentVariables.APP_UID, out string? appUid))
         {
             _logger.LogTrace("Setting user from APP_UID environment variable");
             SetUser(appUid);
         }
     }
-
-    internal static string[] Split(string input)
-    {
-        return input.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-    }
-
-    /// <summary>
-    /// This is a parser for ASPNETCORE_URLS based on https://github.com/dotnet/aspnetcore/blob/main/src/Http/Http/src/BindingAddress.cs
-    /// We can cut corners a bit here because we really only care about ports, if they exist.
-    /// </summary>
-    internal static Regex aspnetPortRegex = new(@"(?<scheme>\w+)://(?<domain>([*+]|).+):(?<port>\d+)");
 
     /// <summary>
     /// ASP.NET can have urls/ports set via three environment variables - if we see any of them we should create ExposedPorts for them
@@ -245,9 +240,9 @@ internal sealed class ImageBuilder
         // asp.net images control port bindings via three environment variables. we should check for those variables and ensure that ports are created for them
 
         // https://learn.microsoft.com/aspnet/core/fundamentals/servers/kestrel/endpoints?view=aspnetcore-8.0#specify-ports-only - new for .NET 8 - allows just changing port(s) easily
-        if (_baseImageConfig.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_HTTP_PORTS, out string? httpPorts))
+        if (_baseImageConfig.EnvironmentVariables.TryGetValue(EnvironmentVariables.ASPNETCORE_HTTP_PORTS, out string? httpPorts))
         {
-            _logger.LogTrace("Setting ports from ASPNETCORE_HTTP_PORT environment variable");
+            _logger.LogTrace("Setting ports from ASPNETCORE_HTTP_PORTS environment variable");
             foreach(var port in Split(httpPorts))
             {
                 if (int.TryParse(port, out int parsedPort))
@@ -262,9 +257,9 @@ internal sealed class ImageBuilder
             }
         }
 
-        if (_baseImageConfig.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_HTTPS_PORTS, out string? httpsPorts))
+        if (_baseImageConfig.EnvironmentVariables.TryGetValue(EnvironmentVariables.ASPNETCORE_HTTPS_PORTS, out string? httpsPorts))
         {
-            _logger.LogTrace("Setting ports from ASPNETCORE_HTTPS_PORT environment variable");
+            _logger.LogTrace("Setting ports from ASPNETCORE_HTTPS_PORTS environment variable");
             foreach(var port in Split(httpsPorts))
             {
                 if (int.TryParse(port, out int parsedPort))
@@ -280,7 +275,7 @@ internal sealed class ImageBuilder
         }
 
         // https://learn.microsoft.com//aspnet/core/fundamentals/host/web-host?view=aspnetcore-8.0#server-urls - the format of ASPNETCORE_URLS has been stable for many years now
-        if (_baseImageConfig.EnvironmentVariables.TryGetValue(KnownStrings.EnvironmentVariables.ASPNETCORE_URLS, out string? urls))
+        if (_baseImageConfig.EnvironmentVariables.TryGetValue(EnvironmentVariables.ASPNETCORE_URLS, out string? urls))
         {
             foreach(var url in Split(urls))
             {
@@ -293,6 +288,19 @@ internal sealed class ImageBuilder
                 }
             }
         }
+
+        static string[] Split(string input)
+        {
+            return input.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        }
+    }
+
+    internal static class EnvironmentVariables
+    {
+        public static readonly string APP_UID = nameof(APP_UID);
+        public static readonly string ASPNETCORE_URLS = nameof(ASPNETCORE_URLS);
+        public static readonly string ASPNETCORE_HTTP_PORTS = nameof(ASPNETCORE_HTTP_PORTS);
+        public static readonly string ASPNETCORE_HTTPS_PORTS = nameof(ASPNETCORE_HTTPS_PORTS);
     }
 
 }
