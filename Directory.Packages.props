@@ -44,10 +44,6 @@
       <PackageVersion Include="Microsoft.TemplateSearch.Common" Version="$(MicrosoftTemplateSearchCommonPackageVersion)" />
       <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
       <PackageVersion Include="Xunit.Combinatorial" Version="$(XunitCombinatorialVersion)" />
-      <PackageVersion Include="Microsoft.AspNetCore.Analyzers" Version="$(MicrosoftAspNetCoreAnalyzersPackageVersion)" />
-      <PackageVersion Include="Microsoft.AspNetCore.Components.SdkAnalyzers" Version="$(MicrosoftAspNetCoreComponentsSdkAnalyzersPackageVersion)" />
-      <PackageVersion Include="Microsoft.AspNetCore.Mvc.Analyzers" Version="$(MicrosoftAspNetCoreMvcAnalyzersPackageVersion)" />
-      <PackageVersion Include="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="$(MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion)" />
       <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="$(SystemSecurityCryptographyProtectedDataPackageVersion)" />
       <PackageVersion Include="Microsoft.Web.Xdt" Version="$(MicrosoftWebXdtPackageVersion)" />
       <PackageVersion Include="System.Collections.Specialized" Version="$(SystemCollectionsSpecializedPackageVersion)" />
