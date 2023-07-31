@@ -18,7 +18,7 @@
     <!-- While in prerelease, ship the symbols to everyone all the time. -->
     <DebugType>embedded</DebugType>
     <Nullable>enable</Nullable>
-    <NoWarn>($NoWarn);CS8002;NU1507</NoWarn>
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
     <StrongNameKeyId>MicrosoftShared</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
