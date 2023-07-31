@@ -1384,8 +1384,8 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
     </note>
       </trans-unit>
       <trans-unit id="NameInvalid">
-        <source>MSBUILD: error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
-        <target state="new">MSBUILD: error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
+        <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
+        <target state="new">MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
         <note>
       {StrBegin="MSBUILD : error MSB5016: "}
     </note>
