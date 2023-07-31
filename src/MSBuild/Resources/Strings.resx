@@ -1391,7 +1391,7 @@
   <data name="NameInvalid" Visibility="Public">
     <value>MSBUILD: error MSB5016: The name "{0}" contains an invalid character "{1}".</value>
     <comment>
-      {StrBegin="MSBUILD : error MSB5016: "}
+      {StrBegin="MSBUILD: error MSB5016: "}
     </comment>
   </data>
   <!-- **** TerminalLogger strings begin **** -->
