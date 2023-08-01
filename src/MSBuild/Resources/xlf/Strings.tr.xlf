@@ -105,7 +105,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="new">MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</target>
+        <target state="translated">MSBUILD : error MSB1065: Terminal günlükçüsü değeri geçerli değil. Değer şunlardan biri olmalıdır: 'otomatik', 'doğru' veya 'yanlış'. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -846,9 +846,10 @@
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreProjectExtensions:&lt;uzantılar&gt;
-                     Hangi proje dosyasının oluşturulacağı belirlenirken
-                     yoksayılacak uzantıların listesi. Birden çok uzantıyı
-                     birbirinden ayırmak için noktalı virgül veya virgül kullanın.
+                     Hangi proje dosyasının oluşturulacağı belirlenirken 
+                     yoksayılacak uzantıların listesi. Birden çok uzantıyı 
+                     birbirinden ayırmak için noktalı virgül veya 
+                     virgül kullanın.
                      (Kısa biçim: -ignore)
                      Örnek:
                        -ignoreProjectExtensions:.sln
@@ -938,6 +939,7 @@
                      Dosyaların konumu ve fileLogger'ın diğer parametreleri 
                      "/fileLoggerParameters" anahtarının eklenmesi yoluyla
                      belirtilebilir.
+
                      Günlük dosyası adı fileLoggerParameters anahtarı
                      aracılığıyla ayarlanırsa dağıtılmış günlükçü fileName 
                      değerini şablon olarak kullanıp her düğümün günlük dosyasını
@@ -984,31 +986,32 @@
     </source>
         <target state="translated">  -fileLoggerParameters[n]:&lt;parametreler&gt;
                      Dosya günlükçüleri için ek parametreler sağlar.
-                     Bu anahtarın olması karşılık gelen -fileLogger[n]
+                     Bu anahtarın olması karşılık gelen -fileLogger[n] 
                      anahtarının olduğu anlamına gelir.
                      "n" varsa, 1-9 arasında bir rakam olabilir.
-                     Dağıtılmış dosya günlükçüleri varsa -fileLoggerParameters
-                     bunlar tarafından da kullanılır; -distributedFileLogger açıklamasına bakın.
+                     Dağıtılmış dosya günlükçüleri varsa -fileLoggerParameters 
+                     bunlar tarafından da kullanılır; -distributedFileLogger 
+                     açıklamasına bakın.
                      (Kısa biçim: -flp[n])
-                     Konsol günlükçüsü için listelenenlerle aynı parametreler
+                     Konsol günlükçüsü için listelenenlerle aynı parametreler 
                      kullanılabilir. Kullanılabilecek bazı ek parametreler:
-                        LogFile--Oluşturma günlüğünün yazılacağı günlük
+                        LogFile--Oluşturma günlüğünün yazılacağı günlük 
                             dosyasının yolu.
-                        Append--Derleme günlüğünün gün dosyasının sonuna mı
-                            ekleneceğini yoksa üzerine mi yazılacağını
-                            belirler. Anahtar ayarlandığında oluşturma günlüğü
-                            dosyanın sonuna eklenir. Anahtar ayarlanmadığında
-                            varolan günlük dosyasının üzerine yazılır.
+                        Append--Derleme günlüğünün gün dosyasının sonuna mı 
+                            ekleneceğini yoksa üzerine mi yazılacağını 
+                            belirler. Anahtar ayarlandığında oluşturma günlüğü 
+                            dosyanın sonuna eklenir. Anahtar ayarlanmadığında 
+                            varolan günlük dosyasının üzerine yazılır. 
                             Varsayılan: günlük dosyasının sonuna eklenmez.
-                        Encoding--Dosyanın kodlamasını belirtir; örneğin,
+                        Encoding--Dosyanın kodlamasını belirtir; örneğin, 
                             UTF-8, Unicode veya ASCII
                      Varsayılan ayrıntı düzeyi ayarı Detailed'dır.
                      Örnekler:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+                       -flp1:warningsonly;logfile=msbuild.wrn 
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1032,7 +1035,8 @@
                        -nr:true
     </source>
         <target state="translated">  -nodeReuse:&lt;parametreler&gt;
-                     MSBuild düğümlerinin yeniden kullanımını etkinleştirir veya devre dışı bırakır.
+                     MSBuild düğümlerinin yeniden kullanımını etkinleştirir
+                     veya devre dışı bırakır.
                      Parametreler:
                      True --Derleme tamamlandıktan sonra düğümler kalır ve
                             izleyen derlemelerde yeniden kullanılır (varsayılan)
@@ -1565,17 +1569,17 @@
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
-        <target state="new">Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</target>
+        <target state="translated">Derleme StdOut akışına doğrudan erişim isteyen bir işlem (ör. 'dotnet test') bağlamında çalıştığı için Terminal Günlükçüsü kullanılmadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedNotSupported">
         <source>Terminal Logger was not used because the output is not supported.</source>
-        <target state="new">Terminal Logger was not used because the output is not supported.</target>
+        <target state="translated">Çıkış desteklenmediğinden Terminal Günlükçüsü kullanılmadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedRedirected">
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
-        <target state="new">Terminal Logger was not used because the output is being redirected to a file.</target>
+        <target state="translated">Çıkış bir dosyaya yeniden yönlendirildiği için Terminal Günlükçüsü kullanılmadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">

@@ -105,7 +105,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="new">MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</target>
+        <target state="translated">MSBUILD : error MSB1065: La valeur du journal du terminal n’est pas valide. Il doit s’agir de 'auto', 'true' ou 'false'. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1565,17 +1565,17 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
-        <target state="new">Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</target>
+        <target state="translated">L’enregistreur d’événements de terminal n’a pas été utilisé, car la build est exécutée dans le contexte d’un processus (par exemple, 'dotnet test') qui demande un accès direct au flux stdout.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedNotSupported">
         <source>Terminal Logger was not used because the output is not supported.</source>
-        <target state="new">Terminal Logger was not used because the output is not supported.</target>
+        <target state="translated">L’enregistreur d’événements de terminal n’a pas été utilisé, car la sortie n’est pas prise en charge.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedRedirected">
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
-        <target state="new">Terminal Logger was not used because the output is being redirected to a file.</target>
+        <target state="translated">L’enregistreur d’événements du terminal n’a pas été utilisé car la sortie est redirigée vers un fichier.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
