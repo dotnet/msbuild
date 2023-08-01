@@ -138,7 +138,7 @@ internal sealed class Registry
         JsonNode configDoc = await _registryAPI.Blob.GetJsonAsync(repositoryName, configSha, cancellationToken).ConfigureAwait(false);
 
         cancellationToken.ThrowIfCancellationRequested();
-        return new ImageBuilder(manifest, new ImageConfig(configDoc));
+        return new ImageBuilder(manifest, new ImageConfig(configDoc), _logger);
     }
 
     private async Task<ImageBuilder> PickBestImageFromManifestListAsync(

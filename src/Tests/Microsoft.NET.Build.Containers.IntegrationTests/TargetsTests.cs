@@ -181,11 +181,11 @@ public class TargetsTests
         computedTag.Should().Be(expectedTag);
     }
 
-    [InlineData("v8.0", "linux-x64", "64198")]
+    [InlineData("v8.0", "linux-x64", null)]
     [InlineData("v8.0", "win-x64", "ContainerUser")]
     [InlineData("v7.0", "linux-x64", null)]
     [InlineData("v7.0", "win-x64", null)]
-    [InlineData("v9.0", "linux-x64", "64198")]
+    [InlineData("v9.0", "linux-x64", null)]
     [InlineData("v9.0", "win-x64", "ContainerUser")]
     [Theory]
     public void CanComputeContainerUser(string tfm, string rid, string expectedUser)
