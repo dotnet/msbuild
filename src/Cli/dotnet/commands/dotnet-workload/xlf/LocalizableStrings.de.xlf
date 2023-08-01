@@ -52,6 +52,11 @@
         <target state="new">Checking the state of installed workloads...</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadIntegrityCheckError">
+        <source>An issue was encountered when verifying workloads. For more information, run "dotnet workload update".</source>
+        <target state="new">An issue was encountered when verifying workloads. For more information, run "dotnet workload update".</target>
+        <note>Do not translate "dotnet workload update" as it is a CLI command.</note>
+      </trans-unit>
       <trans-unit id="WorkloadManfiestVersionColumn">
         <source>Manifest Version</source>
         <target state="translated">Manifestversion</target>

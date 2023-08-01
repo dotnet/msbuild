@@ -7,7 +7,6 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
 using Microsoft.DotNet.CommandFactory;
 using NuGet.Frameworks;
 using CommandResult = System.CommandLine.Parsing.CommandResult;
@@ -298,7 +297,7 @@ namespace Microsoft.DotNet.Cli
 
             Reporter.Verbose.WriteLine(
                 string.Format(
-                    LocalizableStrings.DotnetCliHomeUsed,
+                    Utils.LocalizableStrings.DotnetCliHomeUsed,
                     home,
                     CliFolderPathCalculator.DotnetHomeVariableName));
         }
@@ -343,6 +342,7 @@ namespace Microsoft.DotNet.Cli
                 catch (Exception)
                 {
                     // If the workload check fails for any reason, we want to eat the failure and continue running the command.
+                    reporter.WriteLine(Workloads.Workload.LocalizableStrings.WorkloadIntegrityCheckError.Yellow());
                 }
             }
         }
