@@ -1371,7 +1371,7 @@
       </trans-unit>
       <trans-unit id="NameInvalid">
         <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
-        <target state="new">MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
+        <target state="translated">MSBUILD : error MSB5016: Имя "{0}" содержит недопустимый символ "{1}".</target>
         <note>
       {StrBegin="MSBUILD : error MSB5016: "}
     </note>
@@ -1564,17 +1564,17 @@
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
-        <target state="new">Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</target>
+        <target state="translated">Средство ведения журнала терминалов не используется, так как сборка выполняется в контексте процесса (например, "dotnet test"), который запрашивает прямой доступ к потоку stdout.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedNotSupported">
         <source>Terminal Logger was not used because the output is not supported.</source>
-        <target state="new">Terminal Logger was not used because the output is not supported.</target>
+        <target state="translated">Средство ведения журнала терминалов не используется, так как выходные данные не поддерживаются.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedRedirected">
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
-        <target state="new">Terminal Logger was not used because the output is being redirected to a file.</target>
+        <target state="translated">Средство ведения журнала терминалов не используется, так как выходные данные перенаправляются в файл.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">

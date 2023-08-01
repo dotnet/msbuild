@@ -105,7 +105,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="new">MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</target>
+        <target state="translated">MSBUILD : error MSB1065: El valor del registrador de terminales no es válido. Debe ser uno de "auto", "true", o "false".{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1572,17 +1572,17 @@
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
-        <target state="new">Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</target>
+        <target state="translated">No se usó el terminal de Logger porque la compilación se ejecuta en el contexto de un proceso (por ejemplo, "dotnet test") que solicita acceso directo a la secuencia stdout.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedNotSupported">
         <source>Terminal Logger was not used because the output is not supported.</source>
-        <target state="new">Terminal Logger was not used because the output is not supported.</target>
+        <target state="translated">No se usó el terminal de Logger porque no se admite la salida.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedRedirected">
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
-        <target state="new">Terminal Logger was not used because the output is being redirected to a file.</target>
+        <target state="translated">No se usó el terminal de Logger porque la salida se está redirigiendo a un archivo.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
