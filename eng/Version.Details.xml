@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23378.3">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.23381.3">
       <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
-      <Sha>b5368f118ae0b04a7ea1c08c41ba5df3494ff7c6</Sha>
+      <Sha>5a1492557c8717b428b69fd4b7ca8c91d5d18cd3</Sha>
       <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
     </Dependency>
     <!-- Necessary for source-build due to being a transitive dependency of System.Reflection.MetadataLoadContext.
