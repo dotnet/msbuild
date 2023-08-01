@@ -1029,6 +1029,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("MSB4036");
         }
 
+        /// <summary>
+        /// https://github.com/dotnet/msbuild/issues/8864
+        /// </summary>
+        [Fact]
+        public void TestTaskDictionaryOutputItems()
+        {
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+            MockLogger ml = ObjectModelHelpers.BuildProjectExpectSuccess($"""
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                        <UsingTask TaskName=`TaskThatReturnsDictionaryTaskItem` AssemblyFile=`{customTaskPath}`/>
+                        <Target Name=`Build`>
+                           <TaskThatReturnsDictionaryTaskItem Key="a" Value="b">
+                                <Output TaskParameter="DictionaryTaskItemOutput" ItemName="Outputs"/>
+                            </TaskThatReturnsDictionaryTaskItem>
+                        </Target>
+                    </Project>
+                """);
+            ml.AssertLogContains("a=b");
+        }
         #endregion
 
         #region ITestTaskHost Members
@@ -1423,11 +1442,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Target Name='Skip' Inputs='testProject.proj' Outputs='testProject.proj' />
 
                     <Target Name='Error' >
-                        <ErrorTask1 ContinueOnError='True'/>                    
-                        <ErrorTask2 ContinueOnError='False'/>  
-                        <ErrorTask3 /> 
-                        <OnError ExecuteTargets='Foo'/>                  
-                        <OnError ExecuteTargets='Bar'/>                  
+                        <ErrorTask1 ContinueOnError='True'/>
+                        <ErrorTask2 ContinueOnError='False'/>
+                        <ErrorTask3 />
+                        <OnError ExecuteTargets='Foo'/>
+                        <OnError ExecuteTargets='Bar'/>
                     </Target>
 
                     <Target Name='Foo' Inputs='foo.cpp' Outputs='foo.o'>

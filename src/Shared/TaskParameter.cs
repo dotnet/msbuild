@@ -856,6 +856,14 @@ namespace Microsoft.Build.BackEnd
                     yield return unescaped;
                 }
             }
+
+            public void ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata)
+            {
+                foreach (KeyValuePair<string, string> kvp in metadata)
+                {
+                    SetMetadata(kvp.Key, kvp.Value);
+                }
+            }
         }
     }
 }

@@ -25,7 +25,7 @@
           src/Framework/README.md
           src/Utilities/README.md
      -->
-    <LatestDotNetCoreForMSBuild>net7.0</LatestDotNetCoreForMSBuild>
+    <LatestDotNetCoreForMSBuild>$(NetCurrent)</LatestDotNetCoreForMSBuild>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -42,6 +42,14 @@
 
   <PropertyGroup>
     <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
+
+    <!--
+      Serialization/Deserialization of BinaryFormatter throws out System.NotSupportedException with latest .NET.
+      To work around temporarily add this property. The issues below are tracking this problem.
+      https://github.com/dotnet/msbuild/issues/9051
+      https://github.com/dotnet/msbuild/issues/8823
+    -->
+    <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
 
     <!--
         NU1507: ManagePackageVersionsCentrally implies source mapping, which we should consider turning on but it's nontrivial

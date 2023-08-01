@@ -27,11 +27,6 @@
         <target state="translated">명령이 종료되었습니다(코드: {0}).</target>
         <note />
       </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="translated">MSB6005: 작업을 초기화하기 전에 로깅하려고 했습니다. 메시지: {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
-      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: "{0}"에서 플랫폼 매니페스트 파일을 찾을 수 없습니다.</target>
@@ -64,7 +59,7 @@
       </trans-unit>
       <trans-unit id="ToolTask.NotUpToDate">
         <source>Unable to skip task because it is not up-to-date.</source>
-        <target state="new">Unable to skip task because it is not up-to-date.</target>
+        <target state="translated">작업이 최신 상태가 아니므로 건너뛸 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">

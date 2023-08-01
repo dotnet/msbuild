@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
+using Xunit;
 
 #nullable disable
 
@@ -40,7 +41,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         internal static ITranslator GetReadTranslator()
         {
             s_serializationStream.Seek(0, SeekOrigin.Begin);
-            return BinaryTranslator.GetReadTranslator(s_serializationStream, null);
+            return BinaryTranslator.GetReadTranslator(s_serializationStream, InterningBinaryReader.PoolingBuffer);
         }
 
         /// <summary>
@@ -85,8 +86,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Compares two exceptions.
         /// </summary>
-        internal static bool CompareExceptions(Exception left, Exception right)
+        internal static bool CompareExceptions(Exception left, Exception right, out string diffReason, bool detailed = false)
         {
+            diffReason = null;
             if (ReferenceEquals(left, right))
             {
                 return true;
@@ -94,20 +96,74 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             if ((left == null) ^ (right == null))
             {
+                diffReason = "One exception is null and the other is not.";
                 return false;
             }
 
             if (left.Message != right.Message)
             {
+                diffReason = $"Exception messages are different ({left.Message} vs {right.Message}).";
                 return false;
             }
 
             if (left.StackTrace != right.StackTrace)
             {
+                diffReason = $"Exception stack traces are different ({left.StackTrace} vs {right.StackTrace}).";
                 return false;
             }
 
-            return CompareExceptions(left.InnerException, right.InnerException);
+            if (!CompareExceptions(left.InnerException, right.InnerException, out diffReason, detailed))
+            {
+                diffReason = "Inner exceptions are different: " + diffReason;
+                return false;
+            }
+
+            if (detailed)
+            {
+                if (left.GetType() != right.GetType())
+                {
+                    diffReason = $"Exception types are different ({left.GetType().FullName} vs {right.GetType().FullName}).";
+                    return false;
+                }
+
+                foreach (var prop in left.GetType().GetProperties())
+                {
+                    if (!IsSimpleType(prop.PropertyType))
+                    {
+                        continue;
+                    }
+
+                    object leftProp = prop.GetValue(left, null);
+                    object rightProp = prop.GetValue(right, null);
+
+                    if (leftProp == null && rightProp != null)
+                    {
+                        diffReason = $"Property {prop.Name} is null on left but not on right.";
+                        return false;
+                    }
+
+                    if (leftProp != null && !prop.GetValue(left, null).Equals(prop.GetValue(right, null)))
+                    {
+                        diffReason = $"Property {prop.Name} is different ({prop.GetValue(left, null)} vs {prop.GetValue(rightProp, null)}).";
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        internal static bool IsSimpleType(Type type)
+        {
+            // Nullables
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                return IsSimpleType(type.GetGenericArguments()[0]);
+            }
+            return type.IsPrimitive
+                   || type.IsEnum
+                   || type == typeof(string)
+                   || type == typeof(decimal);
         }
 
         internal static string GetPropertiesString(IEnumerable properties)
