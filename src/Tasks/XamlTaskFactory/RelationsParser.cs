@@ -188,6 +188,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
                 FileStream fs = File.OpenRead(filePath);
                 using XmlReader reader = XmlReader.Create(fs, settings);
+                xmlDocument.Load(reader);
 
                 return xmlDocument;
             }
