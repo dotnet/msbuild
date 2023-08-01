@@ -11,7 +11,7 @@
   </PropertyGroup>
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionPrefix>7.0.400</VersionPrefix>
+    <VersionPrefix>7.0.401</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <PreReleaseVersionIteration>
     </PreReleaseVersionIteration>
