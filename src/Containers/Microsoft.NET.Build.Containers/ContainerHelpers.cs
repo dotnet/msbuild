@@ -3,10 +3,12 @@
 
 #if NETFRAMEWORK
 using System;
+using System.Linq;
 #endif
 #if NET
 using System.Diagnostics.CodeAnalysis;
 #endif
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.NET.Build.Containers.Resources;
 
@@ -30,13 +32,6 @@ public static class ContainerHelpers
     /// See <see href="https://github.com/distribution/distribution/blob/78b9c98c5c31c30d74f9acb7d96f98552f2cf78f/reference/normalize.go">normalize.go</see>.
     /// </summary>
     internal const string DefaultRegistry = "docker.io";
-
-    /// <summary>
-    /// Matches if the string is not lowercase or numeric, or ., _, or -.
-    /// </summary>
-    /// <remarks>Technically the period should be allowed as well, but due to inconsistent support between cloud providers we're removing it.</remarks>
-    private static Regex imageNameCharacters = new Regex(@"[^a-z0-9_\-/]");
-
 
     /// <summary>
     /// The enum contains possible error reasons during port parsing using <see cref="TryParsePort(string, out Port?, out ParsePortError?)"/> or <see cref="TryParsePort(string?, string?, out Port?, out ParsePortError?)"/>.
@@ -261,26 +256,81 @@ public static class ContainerHelpers
         return true;
     }
 
+
+
     /// <summary>
     /// Checks if a given container image name adheres to the image name spec. If not, and recoverable, then normalizes invalid characters.
     /// </summary>
-    internal static bool NormalizeImageName(string containerImageName,
-                                         [NotNullWhen(false)] out string? normalizedImageName)
+    internal static (string? normalizedImageName, (string, object[])? normalizationWarning, (string, object[])? normalizationError) NormalizeImageName(string containerImageName)
     {
         if (IsValidImageName(containerImageName))
         {
-            normalizedImageName = null;
-            return true;
+            return (containerImageName, null, null);
         }
         else
         {
-            if (!Char.IsLetterOrDigit(containerImageName, 0))
+            // check for leading alphanumeric character
+            char firstChar = containerImageName[0];
+            if (!IsAlpha(firstChar) && !IsNumeric(firstChar))
             {
-                throw new ArgumentException(Resources.Resource.GetString(nameof(Strings.InvalidImageName)));
+                // The name did not start with an alphanumeric character, so we can't normalize it.
+                var error = (nameof(Strings.InvalidImageName_NonAlphanumericStartCharacter), new []{ containerImageName });
+                return (null, null, error);
             }
-            var loweredImageName = containerImageName.ToLowerInvariant();
-            normalizedImageName = imageNameCharacters.Replace(loweredImageName, "-");
-            return false;
+
+
+            // normalize the name. a little more complex, but this does all of our checks in a single pass and doesn't require coming back
+            // after the normalization to check if our invariants hold
+            var normalizedAllChars = true;
+            var normalizationOccurred = false;
+            var builder = new StringBuilder(containerImageName);
+            for (int i = 0; i < containerImageName.Length; i++)
+            {
+                var current = containerImageName[i];
+                if (IsLowerAlpha(current) || IsNumeric(current) || IsAllowedPunctuation(current))
+                {
+                    // no need to set the builder's char here, since we preloaded
+                    normalizedAllChars = false;
+                }
+                else if (IsUpperAlpha(current))
+                {
+                    builder[i] = char.ToLowerInvariant(current);
+                    normalizationOccurred = true;
+                }
+                else
+                {
+                    builder[i] = '-';
+                    normalizationOccurred = true;
+                }
+            }
+            var normalizedImageName = builder.ToString();
+
+            // check for normalization to useless name
+            if (normalizedAllChars)
+            {
+                // The name was normalized to all dashes, so there was nothing recoverable. We should throw.
+                var error = (nameof(Strings.InvalidImageName_EntireNameIsInvalidCharacters), new string[] { containerImageName });
+                return (null, null, error);
+            }
+
+            // check for warning/notification that we did indeed perform normalization
+            if (normalizationOccurred)
+            {
+                var warning = (nameof(Strings.NormalizedContainerName), new string[]{ containerImageName, normalizedImageName });
+                return (normalizedImageName, warning, null);
+            }
+
+            // user value was already normalized, so we don't need to do anything
+            else
+            {
+                return (containerImageName, null, null);
+            }
         }
+
+        static bool IsUpperAlpha(char c) => c >= 'A' && c <= 'Z';
+        static bool IsLowerAlpha(char c) => c >= 'a' && c <= 'z';
+        static bool IsAlpha(char c) => IsLowerAlpha(c) || IsUpperAlpha(c);
+        static bool IsNumeric(char c) => c >= '0' && c <= '9';
+        static bool IsAllowedPunctuation(char c) => (c == '_') || (c == '-') || (c == '/');
     }
 }

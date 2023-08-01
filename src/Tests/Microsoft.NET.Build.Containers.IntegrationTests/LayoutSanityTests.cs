@@ -20,7 +20,7 @@ namespace Microsoft.NET.Build.Containers.IntegrationTests
             string dotnetDirectory = Path.GetDirectoryName(dotnetPath) ?? throw new InvalidOperationException("dotnet is in unexpected location.");
             string expectedWedSdkPropsPath = Path.Combine(dotnetDirectory, "sdk", TestContext.Current.ToolsetUnderTest.SdkVersion, "Sdks", "Microsoft.NET.Sdk.Web", "Sdk", "Sdk.props");
 
-            Assert.True(File.Exists(expectedWedSdkPropsPath));
+            Assert.True(File.Exists(expectedWedSdkPropsPath), "Expected to see the Web SDK props in the redist directory");
 
             string projectFileContent = File.ReadAllText(expectedWedSdkPropsPath);
             XDocument projectXml = XDocument.Parse(projectFileContent);

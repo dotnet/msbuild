@@ -141,22 +141,19 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
             return !Log.HasLoggedErrors;
         }
 
-        try
+        var (normalizedImageName, normalizationWarning, normalizationError) = ContainerHelpers.NormalizeImageName(ContainerImageName);
+        if (normalizedImageName is not null)
         {
-            if (!ContainerHelpers.NormalizeImageName(ContainerImageName, out var normalizedImageName))
-            {
-                Log.LogMessageFromResources(nameof(Strings.NormalizedContainerName), nameof(ContainerImageName), normalizedImageName);
-                NewContainerImageName = normalizedImageName!; // known to be not null due to output of NormalizeImageName
-            }
-            else
-            {
-                // name was valid already
-                NewContainerImageName = ContainerImageName;
-            }
+            NewContainerImageName = normalizedImageName;
         }
-        catch (ArgumentException)
+        if (normalizationWarning is (string warningMessageKey, object[] warningParams))
         {
-            Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidContainerImageName), nameof(ContainerImageName), ContainerImageName);
+            Log.LogMessageFromResources(warningMessageKey, warningParams);
+        }
+
+        if (normalizationError is (string errorMessageKey, object[] errorParams))
+        {
+            Log.LogErrorWithCodeFromResources(errorMessageKey, errorParams);
             return !Log.HasLoggedErrors;
         }
 

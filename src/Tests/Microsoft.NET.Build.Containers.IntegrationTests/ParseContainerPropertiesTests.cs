@@ -63,7 +63,7 @@ public class ParseContainerPropertiesTests
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
         Assert.True(instance.Build(new[]{ComputeContainerConfig}, new [] { logs }, null, out var outputs));
-        Assert.Contains(logs.Messages, m => m.Message?.Contains("'ContainerImageName' was not a valid container image name, it was normalized to 'dotnet-testimage'") == true);
+        Assert.Contains(logs.Messages, m => m.Message?.Contains("'dotnet testimage' was not a valid container image name, it was normalized to 'dotnet-testimage'") == true);
     }
 
     [DockerDaemonAvailableFact]
@@ -99,5 +99,39 @@ public class ParseContainerPropertiesTests
 
         Assert.True(logs.Errors.Count > 0);
         Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2008);
+    }
+
+    [DockerDaemonAvailableFact]
+    public void FailsOnCompletelyInvalidRepositoryNames()
+    {
+        var (project, logs, d) = ProjectInitializer.InitProject(new () {
+            [ContainerBaseImage] = "mcr.microsoft.com/dotnet/runtime:7.0",
+            [ContainerRegistry] = "localhost:5010",
+            [ContainerImageName] = "㓳㓴㓵㓶㓷㓹㓺㓻",
+            [ContainerImageTag] = "5.0"
+        });
+        using var _ = d;
+        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        Assert.False(instance.Build(new[]{ComputeContainerConfig},  new [] { logs }, null, out var outputs));
+
+        Assert.True(logs.Errors.Count > 0);
+        Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2005);
+    }
+
+    [DockerDaemonAvailableFact]
+    public void FailsWhenFirstCharIsAUnicodeLetterButNonLatin()
+    {
+        var (project, logs, d) = ProjectInitializer.InitProject(new () {
+            [ContainerBaseImage] = "mcr.microsoft.com/dotnet/runtime:7.0",
+            [ContainerRegistry] = "localhost:5010",
+            [ContainerImageName] = "㓳but-otherwise-valid",
+            [ContainerImageTag] = "5.0"
+        });
+        using var _ = d;
+        var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
+        Assert.False(instance.Build(new[]{ComputeContainerConfig},  new [] { logs }, null, out var outputs));
+
+        Assert.True(logs.Errors.Count > 0);
+        Assert.Equal(logs.Errors[0].Code, ErrorCodes.CONTAINER2005);
     }
 }
