@@ -18,6 +18,8 @@ namespace Microsoft.Build.BinlogRedactor.IO
             File.Move(source, destination);
         }
 
+        public long GetFileSizeInBytes(string path) => new FileInfo(path).Length;
+
         public void DeleteDirectory(string path) => Directory.Delete(path);
         public IEnumerable<string> EnumerateDirectories(string dir) => Directory.EnumerateDirectories(dir);
         public IEnumerable<string> EnumerateDirectories(string path, string searchPattern, EnumerationOptions enumerationOptions)

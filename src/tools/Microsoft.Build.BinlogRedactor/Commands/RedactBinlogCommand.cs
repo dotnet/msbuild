@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -128,7 +129,7 @@ internal class RedactBinlogCommandHandler : ICommandExecutor<RedactBinlogCommand
         string inputFile = GetInputFile(args.InputFileName);
         string outputFile = args.OutputFileName ?? inputFile;
 
-        _logger.LogInformation("Redacting binlog {0} to {1}", inputFile, outputFile);
+        _logger.LogInformation("Redacting binlog {inputFile} to {outputFile} ({size} KB)", inputFile, outputFile, _fileSystem.GetFileSizeInBytes(inputFile) / 1024);
 
         bool replaceInPlace = inputFile.Equals(outputFile, StringComparison.CurrentCulture);
         if (replaceInPlace)
@@ -143,10 +144,13 @@ internal class RedactBinlogCommandHandler : ICommandExecutor<RedactBinlogCommand
                 BinlogRedactorErrorCode.FileSystemWriteFailed);
         }
 
-        // TODO: add duration tracing
+        Stopwatch stopwatch = Stopwatch.StartNew();
 
         var result = await _binlogProcessor.ProcessBinlog(inputFile, outputFile,
             new SimpleSensitiveDataProcessor(args.PasswordsToRedact), cancellationToken);
+
+        stopwatch.Stop();
+        _logger.LogInformation("Redacting done. Duration: {duration}", stopwatch.Elapsed);
 
         if (replaceInPlace)
         {
@@ -160,6 +164,12 @@ internal class RedactBinlogCommandHandler : ICommandExecutor<RedactBinlogCommand
     {
         if (!string.IsNullOrEmpty(inputFileName))
         {
+            if (!_fileSystem.FileExists(inputFileName))
+            {
+                throw new BinlogRedactorException($"Input file [{inputFileName}] does not exist.",
+                    BinlogRedactorErrorCode.InvalidData);
+            }
+
             return inputFileName;
         }
 

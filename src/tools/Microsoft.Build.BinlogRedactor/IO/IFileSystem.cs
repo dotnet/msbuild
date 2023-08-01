@@ -10,6 +10,7 @@ internal interface IFileSystem
 
     void RenameFile(string original, string @new);
     void ReplaceFile(string source, string destination);
+    long GetFileSizeInBytes(string path);
 
     void DeleteDirectory(string path);
 
