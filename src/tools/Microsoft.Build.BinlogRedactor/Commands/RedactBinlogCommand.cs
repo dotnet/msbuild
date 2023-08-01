@@ -17,7 +17,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Build.BinlogRedactor.Commands;
 
-internal class RedactBinlogCommand : ExecutableCommand<RedactBinlogCommandArgs, RedactBinlogCommandHandler>
+internal sealed class RedactBinlogCommand : ExecutableCommand<RedactBinlogCommandArgs, RedactBinlogCommandHandler>
 {
     private const string CommandName = "redact-binlog";
 
@@ -74,13 +74,12 @@ internal class RedactBinlogCommand : ExecutableCommand<RedactBinlogCommandArgs, 
             parseResult.GetValueForOption(_outputFileOption),
             parseResult.GetValueForOption(_dryRunOption),
             parseResult.GetValueForOption(_overWriteOption),
-            parseResult.GetValueForOption(_logSecretsOption)
-        );
+            parseResult.GetValueForOption(_logSecretsOption));
     }
 }
 
 
-internal class RedactBinlogCommandHandler : ICommandExecutor<RedactBinlogCommandArgs>
+internal sealed class RedactBinlogCommandHandler : ICommandExecutor<RedactBinlogCommandArgs>
 {
     private readonly ILogger<RedactBinlogCommandHandler> _logger;
     private readonly IFileSystem _fileSystem;

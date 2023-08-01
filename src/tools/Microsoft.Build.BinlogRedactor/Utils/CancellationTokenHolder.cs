@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.BinlogRedactor.Utils
 {
-    internal class CancellationTokenHolder
+    internal sealed class CancellationTokenHolder
     {
         public CancellationTokenHolder(CancellationToken cancellationToken) => CancellationToken = cancellationToken;
 

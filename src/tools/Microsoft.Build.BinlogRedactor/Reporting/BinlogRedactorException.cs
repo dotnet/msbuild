@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.BinlogRedactor.Reporting
 {
-    internal class BinlogRedactorException : Exception
+    internal sealed class BinlogRedactorException : Exception
     {
         public BinlogRedactorException(string message, BinlogRedactorErrorCode binlogRedactorErrorCode) : base(message)
         {

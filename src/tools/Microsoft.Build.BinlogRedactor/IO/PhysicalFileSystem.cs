@@ -3,7 +3,7 @@
 
 namespace Microsoft.Build.BinlogRedactor.IO
 {
-    internal class PhysicalFileSystem : IFileSystem
+    internal sealed class PhysicalFileSystem : IFileSystem
     {
         public void CreateDirectory(string path) => Directory.CreateDirectory(path);
         public bool FileExists(string path) => File.Exists(path);
@@ -11,8 +11,9 @@ namespace Microsoft.Build.BinlogRedactor.IO
 
         public void RenameFile(string original, string @new) => File.Move(original, @new);
 
-        public void ReplaceFile(string source, string destination) //=> File.Replace(source, destination, null);
+        public void ReplaceFile(string source, string destination)
         {
+            // => File.Replace(source, destination, null);
             // File.Replace can get "Unable to remove the file to be replaced." without any details
             File.Delete(destination);
             File.Move(source, destination);

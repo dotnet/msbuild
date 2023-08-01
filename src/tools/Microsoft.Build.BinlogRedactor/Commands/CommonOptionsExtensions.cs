@@ -69,13 +69,13 @@ namespace Microsoft.Build.BinlogRedactor.Commands
         {
             logging.ClearProviders();
 
-            ParseResult parseResult = (host.Properties[typeof(InvocationContext)] as InvocationContext).ParseResult;
+            ParseResult? parseResult = (host.Properties[typeof(InvocationContext)] as InvocationContext)?.ParseResult;
 
-            var consoleLogLevel = parseResult.GetConsoleVerbosityOptionOrDefault().ToLogLevel();
+            var consoleLogLevel = (parseResult?.GetConsoleVerbosityOptionOrDefault() ?? DefaultConsoleVerbosity).ToLogLevel();
 
             if (consoleLogLevel < LogLevel.None)
             {
-                //logging.AddConsole();
+                // logging.AddConsole();
                 logging.AddSimpleConsole(options =>
                 {
                     options.SingleLine = true;

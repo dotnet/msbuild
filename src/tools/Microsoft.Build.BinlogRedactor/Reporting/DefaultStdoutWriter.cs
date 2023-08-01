@@ -3,7 +3,7 @@
 
 namespace Microsoft.Build.BinlogRedactor.Reporting;
 
-internal class DefaultStdoutWriter : StdStreamWriterBase, IStdoutWriter
+internal sealed class DefaultStdoutWriter : StdStreamWriterBase, IStdoutWriter
 {
     protected override TextWriter Writer => Console.Out;
     public override void Dispose() => Writer.Flush();
