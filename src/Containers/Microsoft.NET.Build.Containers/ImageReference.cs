@@ -9,7 +9,7 @@ namespace Microsoft.NET.Build.Containers;
 internal readonly record struct ImageReference(Registry? Registry, string Repository, string Tag) {
     public override string ToString()
     {
-        if (Registry is {} reg) {
+        if (Registry is { } reg) {
             return $"{reg.RegistryName}/{Repository}:{Tag}";
         } else {
             return RepositoryAndTag;
