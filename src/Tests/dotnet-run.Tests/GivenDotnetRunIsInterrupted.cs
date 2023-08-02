@@ -143,15 +143,14 @@ namespace Microsoft.DotNet.Cli.Run.Tests
             //  As of porting these tests to dotnet/sdk, it's unclear if the below is still needed
             // A timeout is required to prevent the `Process.WaitForExit` call to hang if `dotnet run` failed to terminate the child on Windows.
             // This is because `Process.WaitForExit()` hangs waiting for the process launched by `dotnet run` to close the redirected I/O pipes (which won't happen).
-            //command.TimeoutMiliseconds = WaitTimeout;
 
-            //Task.Delay(TimeSpan.FromMilliseconds(WaitTimeout)).ContinueWith(t =>
-            //{
-            //    if (!killed)
-            //    {
-            //        testProcess.Kill();
-            //    }
-            //});
+            Task.Delay(TimeSpan.FromMilliseconds(WaitTimeout)).ContinueWith(t =>
+            {
+                if (!killed)
+                {
+                    testProcess.Kill();
+                }
+            });
 
 
             command
