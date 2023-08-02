@@ -60,9 +60,9 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 
-            testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
+            testProject.PackageReferences.Add(new TestPackageReference("Libuv", "1.10.0"));
 
-            string filenameToSkip = FileConstants.DynamicLibPrefix + "sqlite3" + FileConstants.DynamicLibSuffix;
+            string filenameToSkip = "libuv" + FileConstants.DynamicLibSuffix;
 
             TestSkippingFile(testProject, filenameToSkip, "native");
         }
@@ -77,9 +77,9 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
+            testProject.PackageReferences.Add(new TestPackageReference("Libuv", "1.10.0"));
 
-            string filenameToSkip = FileConstants.DynamicLibPrefix + "sqlite3" + FileConstants.DynamicLibSuffix;
+            string filenameToSkip = "libuv" + FileConstants.DynamicLibSuffix;
 
             TestSkippingFile(testProject, filenameToSkip, "runtimeTargets");
         }
