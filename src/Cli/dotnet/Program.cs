@@ -179,10 +179,8 @@ namespace Microsoft.DotNet.Cli
                         isDotnetBeingInvokedFromNativeInstaller = true;
                     }
 
-                    // Override the workload integrity check if the command being executed is a workload command or the command is being ran in CI.
-                    // A workload command causes issues as the command opens a log and the integrity check will get a "The process cannot access the file because it is being used by another process." error for the log file.
-                    // Basically, they're both trying to write to the same log at the same time.
-                    if (parseResult.CommandResult.Command.Equals(WorkloadCommandParser.GetCommand()) || new CIEnvironmentDetectorForTelemetry().IsCIEnvironment())
+                    // Override the workload integrity check if the command is being ran in CI.
+                    if (new CIEnvironmentDetectorForTelemetry().IsCIEnvironment())
                     {
                         skipWorkloadIntegrityCheck = true;
                     }
