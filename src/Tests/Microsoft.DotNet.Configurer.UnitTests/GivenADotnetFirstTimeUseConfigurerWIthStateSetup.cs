@@ -84,6 +84,9 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             _environmentProvider
                 .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", It.IsAny<bool>()))
                 .Returns(true);
+            _environmentProvider
+                .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK", It.IsAny<bool>()))
+                .Returns(false);
             _pathAdderMock.Setup(p => p.AddPackageExecutablePathToUserPath()).Verifiable();
             // box a bool so it will be captured by reference in closure
             object generateAspNetCoreDevelopmentCertificateCalled = false;
