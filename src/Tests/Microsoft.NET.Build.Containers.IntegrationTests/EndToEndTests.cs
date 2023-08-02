@@ -4,6 +4,7 @@
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.Build.Containers.Resources;
 using Microsoft.NET.Build.Containers.UnitTests;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
@@ -28,13 +29,13 @@ public class EndToEndTests : IDisposable
 
     public static string NewImageName([CallerMemberName] string callerMemberName = "")
     {
-        bool normalized = ContainerHelpers.NormalizeRepository(callerMemberName, out string? normalizedName);
-        if (!normalized)
+        var (normalizedName, warning, error) = ContainerHelpers.NormalizeRepository(callerMemberName);
+        if (error is (var format, var args))
         {
-            return normalizedName!;
+            throw new ArgumentException(String.Format(Strings.ResourceManager.GetString(format)!, args));
         }
 
-        return callerMemberName;
+        return normalizedName!; // non-null if error is null
     }
 
     public void Dispose()
@@ -222,7 +223,7 @@ public class EndToEndTests : IDisposable
             $"/p:ContainerBaseImage={DockerRegistryManager.FullyQualifiedBaseImageDefault}",
             $"/p:ContainerRegistry={DockerRegistryManager.LocalRegistry}",
             $"/p:ContainerRepository={imageName}",
-            $"/p:Version={imageTag}")
+            $"/p:ContainerImageTag={imageTag}")
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute();
@@ -353,7 +354,7 @@ public class EndToEndTests : IDisposable
             $"/p:ContainerBaseImage={DockerRegistryManager.FullyQualifiedBaseImageDefault}",
             $"/p:ContainerRegistry={DockerRegistryManager.LocalRegistry}",
             $"/p:ContainerRepository={imageName}",
-            $"/p:Version={imageTag}")
+            $"/p:ContainerImageTag={imageTag}")
             .WithEnvironmentVariable("NUGET_PACKAGES", privateNuGetAssets.FullName)
             .WithWorkingDirectory(newProjectDir.FullName)
             .Execute()
