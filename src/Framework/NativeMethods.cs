@@ -1481,11 +1481,11 @@ internal static class NativeMethods
     }
 
 #if !CLR2COMPATIBILITY
-    internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes()
+    internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes(int outputStreamHandle)
     {
         if (Console.IsOutputRedirected)
         {
-            // There's no ANSI terminal support is console output is redirected.
+            // There's no ANSI terminal support if console output is redirected.
             return (acceptAnsiColorCodes: false, outputIsScreen: false, originalConsoleMode: null);
         }
 
@@ -1496,8 +1496,8 @@ internal static class NativeMethods
         {
             try
             {
-                IntPtr stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-                if (GetConsoleMode(stdOut, out uint consoleMode))
+                IntPtr outputStream = GetStdHandle(outputStreamHandle);
+                if (GetConsoleMode(outputStream, out uint consoleMode))
                 {
                     if ((consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == ENABLE_VIRTUAL_TERMINAL_PROCESSING)
                     {
@@ -1508,7 +1508,7 @@ internal static class NativeMethods
                     {
                         originalConsoleMode = consoleMode;
                         consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-                        if (SetConsoleMode(stdOut, consoleMode) && GetConsoleMode(stdOut, out consoleMode))
+                        if (SetConsoleMode(outputStream, consoleMode) && GetConsoleMode(outputStream, out consoleMode))
                         {
                             // We only know if vt100 is supported if the previous call actually set the new flag, older
                             // systems ignore the setting.
@@ -1516,7 +1516,7 @@ internal static class NativeMethods
                         }
                     }
 
-                    uint fileType = GetFileType(stdOut);
+                    uint fileType = GetFileType(outputStream);
                     // The std out is a char type (LPT or Console).
                     outputIsScreen = fileType == FILE_TYPE_CHAR;
                     acceptAnsiColorCodes &= outputIsScreen;

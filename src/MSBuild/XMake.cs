@@ -2681,7 +2681,8 @@ namespace Microsoft.Build.CommandLine
 
             static bool DoesEnvironmentSupportTerminalLogger()
             {
-                (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+                int STD_OUTPUT_HANDLE = -11;
+                (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes(STD_OUTPUT_HANDLE);
 
                 if (!outputIsScreen)
                 {

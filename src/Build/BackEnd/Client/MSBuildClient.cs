@@ -373,7 +373,8 @@ namespace Microsoft.Build.Experimental
 
         private void ConfigureAndQueryConsoleProperties()
         {
-            (var acceptAnsiColorCodes, var outputIsScreen, _originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+            int STD_OUTPUT_HANDLE = -11;
+            (var acceptAnsiColorCodes, var outputIsScreen, _originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes(STD_OUTPUT_HANDLE);
             int bufferWidth = QueryConsoleBufferWidth();
             ConsoleColor backgroundColor = QueryConsoleBackgroundColor();
 

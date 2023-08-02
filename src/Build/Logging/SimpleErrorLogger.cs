@@ -20,8 +20,12 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
     public class SimpleErrorLogger : INodeLogger
     {
         public bool hasLoggedErrors = false;
+        private bool acceptAnsiColorCodes;
+        private uint? originalConsoleMode;
         public SimpleErrorLogger()
         {
+            int STD_ERROR_HANDLE = -12;
+            (acceptAnsiColorCodes, _, originalConsoleMode) = NativeMethods.QueryIsScreenAndTryEnableAnsiColorCodes(STD_ERROR_HANDLE);
         }
 
         public LoggerVerbosity Verbosity
@@ -45,16 +49,30 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
         private void HandleErrorEvent(object sender, BuildErrorEventArgs e)
         {
             hasLoggedErrors = true;
-            Console.Error.Write("\x1b[31;1m");
-            Console.Error.Write(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true));
-            Console.Error.WriteLine("\x1b[m");
+            if (acceptAnsiColorCodes)
+            {
+                Console.Error.Write("\x1b[31;1m");
+                Console.Error.Write(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true));
+                Console.Error.WriteLine("\x1b[m");
+            }
+            else
+            {
+                Console.Error.Write(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true));
+            }
         }
 
         private void HandleWarningEvent(object sender, BuildWarningEventArgs e)
         {
-            Console.Error.Write("\x1b[33;1m");
-            Console.Error.Write(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true));
-            Console.Error.WriteLine("\x1b[m");
+            if (acceptAnsiColorCodes)
+            {
+                Console.Error.Write("\x1b[33;1m");
+                Console.Error.Write(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true));
+                Console.Error.WriteLine("\x1b[m");
+            }
+            else
+            {
+                Console.Error.Write(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true));
+            }
         }
 
         public void Initialize(IEventSource eventSource)
@@ -64,6 +82,7 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
 
         public void Shutdown()
         {
+            NativeMethods.RestoreConsoleMode(originalConsoleMode);
         }
     }
 }
