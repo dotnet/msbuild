@@ -153,10 +153,10 @@ namespace Microsoft.Build.Tasks
             {
                 case ProcessorArchitecture.AMD64:
                 case ProcessorArchitecture.IA64:
-                    this.typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_LOAD_TLB_AS_64BIT);
+                    this.typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_NONE | (int)NativeMethods.REGKIND.REGKIND_LOAD_TLB_AS_64BIT);
                     break;
                 case ProcessorArchitecture.X86:
-                    this.typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_LOAD_TLB_AS_32BIT);
+                    this.typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_NONE | (int)NativeMethods.REGKIND.REGKIND_LOAD_TLB_AS_32BIT);
                     break;
                 case ProcessorArchitecture.ARM:
                 case ProcessorArchitecture.MSIL:

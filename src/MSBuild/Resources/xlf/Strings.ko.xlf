@@ -103,6 +103,16 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="InvalidTerminalLoggerValue">
+        <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
+        <target state="translated">MSBUILD : error MSB1065: 터미널 로거 값이 잘못되었습니다. 'auto', 'true' 또는 'false' 중 하나여야 합니다. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1065: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
         <target state="translated">msbuild 버전 {0}({1}용)</target>
@@ -1360,6 +1370,13 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="NameInvalid">
+        <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
+        <target state="new">MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB5016: "}
+    </note>
+      </trans-unit>
       <trans-unit id="NotWarnAsErrorWithoutWarnAsError">
         <source>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</source>
         <target state="translated">MSBUILD : error MSB1062: -warnaserror 스위치도 지정하고 비어 있지 않으면 -warnnotaserror 스위치를 지정할 수 없습니다.</target>
@@ -1545,6 +1562,21 @@
         <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
         <target state="translated">MSBUILD : error MSB1059: 대상을 출력할 수 없습니다. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedDisabled">
+        <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
+        <target state="translated">빌드가 stdout 스트림에 대한 직접 액세스를 요청하는 프로세스(예: 'dotnet test')의 컨텍스트에서 실행되기 때문에 터미널 로거는 사용되지 않았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedNotSupported">
+        <source>Terminal Logger was not used because the output is not supported.</source>
+        <target state="translated">출력이 지원되지 않아 터미널 로거를 사용하지 않았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedRedirected">
+        <source>Terminal Logger was not used because the output is being redirected to a file.</source>
+        <target state="translated">출력이 파일로 리디렉션되기 때문에 터미널 로거가 사용되지 않았습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>

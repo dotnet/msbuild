@@ -220,12 +220,17 @@ namespace Microsoft.Build.Logging
 
         public void WriteBlob(BinaryLogRecordKind kind, Stream stream)
         {
+            if (stream.Length > int.MaxValue)
+            {
+                throw new ArgumentOutOfRangeException(nameof(stream));
+            }
+
             // write the blob directly to the underlying writer,
             // bypassing the memory stream
             using var redirection = RedirectWritesToOriginalWriter();
 
             Write(kind);
-            Write(stream.Length);
+            Write((int)stream.Length);
             Write(stream);
         }
 

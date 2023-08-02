@@ -1244,6 +1244,15 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
+  <data name="InvalidTerminalLoggerValue" UESanitized="true" Visibility="Public">
+    <value>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1065: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
   <data name="AbortingBuild" UESanitized="true" Visibility="Public">
     <value>Attempting to cancel the build...</value>
   </data>
@@ -1379,6 +1388,12 @@
   <data name="UnsupportedSwitchForSolutionFiles" Visibility="Public">
     <value>The '{0}' switch is not supported for solution files.</value>
   </data>
+  <data name="NameInvalid" Visibility="Public">
+    <value>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB5016: "}
+    </comment>
+  </data>
   <!-- **** TerminalLogger strings begin **** -->
   <data name="RestoreComplete" xml:space="preserve">
     <value>Restore complete ({0}s)</value>
@@ -1481,12 +1496,20 @@
       {4}: duration in seconds with 1 decimal point
     </comment>
   </data>
+  <data name="TerminalLoggerNotUsedDisabled" xml:space="preserve">
+    <value>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</value>
+  </data>
+  <data name="TerminalLoggerNotUsedNotSupported" xml:space="preserve">
+    <value>Terminal Logger was not used because the output is not supported.</value>
+  </data>
+  <data name="TerminalLoggerNotUsedRedirected" xml:space="preserve">
+    <value>Terminal Logger was not used because the output is being redirected to a file.</value>
+  </data>
   <!-- **** TerminalLogger strings end **** -->
-
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1065.
+        Next error code should be MSB1066.
 
         Don't forget to update this comment after using the new code.
   -->

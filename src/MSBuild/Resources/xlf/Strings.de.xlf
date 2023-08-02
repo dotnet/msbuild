@@ -103,6 +103,16 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="InvalidTerminalLoggerValue">
+        <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
+        <target state="translated">MSBUILD : error MSB1065: Der Terminalprotokollierungswert ist ungültig. Es sollte "auto", "true" oder "false" sein. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1065: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
         <target state="translated">MSBuild-Version {0} für {1}</target>
@@ -1360,6 +1370,13 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="NameInvalid">
+        <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
+        <target state="new">MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB5016: "}
+    </note>
+      </trans-unit>
       <trans-unit id="NotWarnAsErrorWithoutWarnAsError">
         <source>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</source>
         <target state="translated">MSBUILD : error MSB1062: Der „-warnnotaserror“-Switch kann nur angegeben werden, wenn auch der „-warnaserror“-Switch angegeben wurde und leer gelassen wird.</target>
@@ -1545,6 +1562,21 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
         <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
         <target state="translated">MSBUILD : error MSB1059: Ziele konnten nicht ausgegeben werden. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedDisabled">
+        <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
+        <target state="translated">Die Terminalprotokollierung wurde nicht verwendet, da der Build im Kontext eines Prozesses (z. B. "dotnet test") ausgeführt wird, der direkten Zugriff auf den stdout-Stream anfordert.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedNotSupported">
+        <source>Terminal Logger was not used because the output is not supported.</source>
+        <target state="translated">Die Terminalprotokollierung wurde nicht verwendet, da die Ausgabe nicht unterstützt wird.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedRedirected">
+        <source>Terminal Logger was not used because the output is being redirected to a file.</source>
+        <target state="translated">Die Terminalprotokollierung wurde nicht verwendet, da die Ausgabe an eine Datei umgeleitet wird.</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>

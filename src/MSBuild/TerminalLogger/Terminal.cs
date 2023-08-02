@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 #if NETFRAMEWORK
 using Microsoft.Build.Shared;
@@ -61,6 +62,12 @@ internal sealed class Terminal : ITerminal
             return Console.BufferWidth;
         }
     }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// https://github.com/dotnet/msbuild/issues/8958: iTerm2 treats ;9 code to post a notification instead, so disable progress reporting on Mac.
+    /// </remarks>
+    public bool SupportsProgressReporting { get; } = !RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
     public Terminal()
     {
