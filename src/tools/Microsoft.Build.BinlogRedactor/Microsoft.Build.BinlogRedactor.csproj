@@ -15,7 +15,7 @@
     <PackageVersion>17.8.0-dev-alpha-06</PackageVersion>
     <Title>BinlogRedactor dotnet tool</Title>
     <PackageId>JanK.BinlogRedactor</PackageId>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <!-- <PackageReadmeFile>README.md</PackageReadmeFile> -->
     <!-- SourceLink properties -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
@@ -42,8 +42,10 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
   </ItemGroup>
 
+  <!--
   <ItemGroup>
     <None Include="..\..\..\documentation\binlog-redactor\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
+  -->
 
 </Project>
