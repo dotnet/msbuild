@@ -87,6 +87,7 @@ namespace Microsoft.NET.Publish.Tests
             ""System.Threading.Thread.EnableAutoreleasePool"": false,
             ""System.Threading.ThreadPool.MinThreads"": 2,
             ""System.Threading.ThreadPool.MaxThreads"": 9,
+            ""System.Xml.XmlResolver.IsNetworkingEnabledByDefault"": false,
             ""extraProperty"": true
         },
         ""framework"": {
