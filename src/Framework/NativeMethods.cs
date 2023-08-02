@@ -1537,11 +1537,11 @@ internal static class NativeMethods
         return (acceptAnsiColorCodes, outputIsScreen, originalConsoleMode);
     }
 
-    internal static void RestoreConsoleMode(uint? originalConsoleMode)
+    internal static void RestoreConsoleMode(uint? originalConsoleMode, int outputStreamHandle)
     {
         if (IsWindows && originalConsoleMode is not null)
         {
-            IntPtr stdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+            IntPtr stdOut = GetStdHandle(outputStreamHandle);
             _ = SetConsoleMode(stdOut, originalConsoleMode.Value);
         }
     }

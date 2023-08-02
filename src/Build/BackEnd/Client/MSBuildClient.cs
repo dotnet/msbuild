@@ -229,7 +229,8 @@ namespace Microsoft.Build.Experimental
                 CommunicationsUtilities.Trace("Build finished.");
             }
 
-            NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode);
+            int STD_OUTPUT_HANDLE = -11;
+            NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode, STD_OUTPUT_HANDLE);
 
             return _exitResult;
         }

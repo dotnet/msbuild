@@ -1043,7 +1043,8 @@ namespace Microsoft.Build.CommandLine
                 // Wait for any pending cancel, so that we get any remaining messages
                 s_cancelComplete.WaitOne();
 
-                NativeMethodsShared.RestoreConsoleMode(s_originalConsoleMode);
+                int STD_OUTPUT_HANDLE = -11;
+                NativeMethodsShared.RestoreConsoleMode(s_originalConsoleMode, STD_OUTPUT_HANDLE);
 
 #if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStop(commandLine);
