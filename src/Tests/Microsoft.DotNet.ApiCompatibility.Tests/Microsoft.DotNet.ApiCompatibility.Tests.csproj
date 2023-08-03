@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
+    <PackageReference Include="Moq" />
   </ItemGroup>
 
   <ItemGroup>

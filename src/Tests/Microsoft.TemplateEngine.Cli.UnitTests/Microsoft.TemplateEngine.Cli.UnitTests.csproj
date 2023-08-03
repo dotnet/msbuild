@@ -16,12 +16,12 @@
 
   <ItemGroup>
     <PackageReference Include="FakeItEasy" />
-    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
+    <PackageReference Include="Moq" />
     <PackageReference Include="Verify.XUnit" />
     <PackageReference Include="Verify.DiffPlex" />
-    <PackageReference Include="Microsoft.TemplateEngine.Mocks" Version="$(MicrosoftTemplateEngineMocksPackageVersion)" />
-    <PackageReference Include="Microsoft.TemplateEngine.TestHelper" Version="$(MicrosoftTemplateEngineTestHelperPackageVersion)" />
-    <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="$(MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion)" />
+    <PackageReference Include="Microsoft.TemplateEngine.Mocks" />
+    <PackageReference Include="Microsoft.TemplateEngine.TestHelper" />
+    <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" />
   </ItemGroup>
 
   <ItemGroup>

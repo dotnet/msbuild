@@ -26,15 +26,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Analyzers" Version="$(MicrosoftAspNetCoreAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.SdkAnalyzers" Version="$(MicrosoftAspNetCoreComponentsSdkAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Analyzers" Version="$(MicrosoftAspNetCoreMvcAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="$(MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
+    <PackageReference Include="Microsoft.AspNetCore.Analyzers" VersionOverride="$(MicrosoftAspNetCoreAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.SdkAnalyzers" VersionOverride="$(MicrosoftAspNetCoreComponentsSdkAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Analyzers" VersionOverride="$(MicrosoftAspNetCoreMvcAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Api.Analyzers" VersionOverride="$(MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion)" PrivateAssets="All" BundleAsAnalyzer="true" />
   </ItemGroup>
 
   <Target Name="_PackBundledAnalyzers" Inputs="@(PackageReference-&gt;HasMetadata('BundleAsAnalyzer'))" Outputs="%(PackageReference.Identity)" BeforeTargets="Build">
     <PropertyGroup>
-      <_AnalyzerPath>$(NuGetPackageRoot)@(PackageReference-&gt;ToLower())\@(PackageReference-&gt;Metadata('Version')-&gt;ToLower())\analyzers\</_AnalyzerPath>
+      <_AnalyzerPath>$(NuGetPackageRoot)@(PackageReference-&gt;ToLower())\@(PackageReference-&gt;Metadata('VersionOverride')-&gt;ToLower())\analyzers\</_AnalyzerPath>
     </PropertyGroup>
     <ItemGroup>
       <_AnalyzerFile Include="$(_AnalyzerPath)**\*.dll" />

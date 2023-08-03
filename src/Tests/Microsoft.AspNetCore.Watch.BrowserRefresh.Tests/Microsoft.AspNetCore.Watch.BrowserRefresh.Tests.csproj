@@ -11,7 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\BuiltInTools\BrowserRefresh\Microsoft.AspNetCore.Watch.BrowserRefresh.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="$(MicrosoftAspNetCoreTestHostPackageVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
   </ItemGroup>
 
   <ItemGroup>
