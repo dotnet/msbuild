@@ -23,35 +23,35 @@
         <source>failed</source>
         <target state="translated">失敗</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with errors</source>
         <target state="translated">失敗但有錯誤</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with warnings</source>
         <target state="translated">失敗但有警告</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_Succeeded">
         <source>succeeded</source>
         <target state="translated">成功</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
         <target state="translated">成功但有警告</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="CommandLine">
@@ -93,16 +93,6 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
-      <trans-unit id="InvalidLowPriorityValue">
-        <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1064: 低優先順序值無效。{0}</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1064: "}
-      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
       <trans-unit id="HelpMessage_42_ReportFileAccessesSwitch">
         <source>  -reportFileAccesses[:True|False]
                      Causes MSBuild to report file accesses to any configured
@@ -128,6 +118,26 @@
       {StrBegin="MSBUILD : error MSB1063: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidLowPriorityValue">
+        <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1064: 低優先順序值無效。{0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1064: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidTerminalLoggerValue">
+        <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
+        <target state="translated">MSBUILD : error MSB1065: 終端機記錄器值無效。它應該是 'auto'、'true' 或 'false' 其中之一。{0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1065: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -1388,6 +1398,13 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="NameInvalid">
+        <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
+        <target state="translated">MSBUILD : error MSB5016: 名稱 "{0}" 包含無效字元 "{1}"。</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB5016: "}
+    </note>
+      </trans-unit>
       <trans-unit id="NotWarnAsErrorWithoutWarnAsError">
         <source>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</source>
         <target state="translated">MSBUILD : error MSB1062: 除非同時指定 -warnaserror 切換參數且保留空白，否則無法指定 -warnnotaserror 切換參數。</target>
@@ -1573,6 +1590,21 @@
         <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
         <target state="translated">MSBUILD : error MSB1059: 無法列印目標。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedDisabled">
+        <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
+        <target state="translated">因為組建是在要求直接存取 stdout 資料流的處理常式 (例如 'dotnet test') 內容中執行，所以未使用終端記錄器。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedNotSupported">
+        <source>Terminal Logger was not used because the output is not supported.</source>
+        <target state="translated">因為不支援輸出，所以未使用終端記錄器。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedRedirected">
+        <source>Terminal Logger was not used because the output is being redirected to a file.</source>
+        <target state="translated">因為輸出正重新導向至檔案，所以未使用終端記錄器。</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>

@@ -89,7 +89,7 @@ namespace Microsoft.Build.CommandLine
             FileLoggerParameters7,
             FileLoggerParameters8,
             FileLoggerParameters9,
-            LiveLogger,
+            TerminalLogger,
             NodeReuse,
             Preprocess,
             Targets,
@@ -247,7 +247,8 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters7", "flp7" },     ParameterizedSwitch.FileLoggerParameters7,      null,                           false,          "MissingFileLoggerParameterError",     true,   false),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters8", "flp8" },     ParameterizedSwitch.FileLoggerParameters8,      null,                           false,          "MissingFileLoggerParameterError",     true,   false),
             new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters9", "flp9" },     ParameterizedSwitch.FileLoggerParameters9,      null,                           false,          "MissingFileLoggerParameterError",     true,   false),
-            new ParameterizedSwitchInfo(  new string[] { "livelogger", "ll", "terminallogger", "tl" }, ParameterizedSwitch.LiveLogger,          null,                           true,          null,                                  true,   true),
+            // To not break existing use, keep supporting live logger switches
+            new ParameterizedSwitchInfo(  new string[] { "livelogger", "ll", "terminallogger", "tl" }, ParameterizedSwitch.TerminalLogger,      null,                           true,           null,                                  true,   true),
             new ParameterizedSwitchInfo(  new string[] { "nodereuse", "nr" },                   ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true,   false),
             new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true,   false),
             new ParameterizedSwitchInfo(  new string[] { "targets", "ts" },                     ParameterizedSwitch.Targets,                    null,                           false,          null,                                  true,   false),

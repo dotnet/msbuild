@@ -24,12 +24,8 @@
           scripts/Deploy-MSBuild.ps1
           src/Framework/README.md
           src/Utilities/README.md
-
-        Special-case while MSBuild uses Arcade 6 to build: 17.7 should
-        continue to target .NET 7, so bump a 6 here to 7.
      -->
     <LatestDotNetCoreForMSBuild>$(NetCurrent)</LatestDotNetCoreForMSBuild>
-    <LatestDotNetCoreForMSBuild Condition=" '$(NetCurrent)' == 'net6.0' ">net7.0</LatestDotNetCoreForMSBuild>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -46,6 +42,14 @@
 
   <PropertyGroup>
     <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
+
+    <!--
+      Serialization/Deserialization of BinaryFormatter throws out System.NotSupportedException with latest .NET.
+      To work around temporarily add this property. The issues below are tracking this problem.
+      https://github.com/dotnet/msbuild/issues/9051
+      https://github.com/dotnet/msbuild/issues/8823
+    -->
+    <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
 
     <!--
         NU1507: ManagePackageVersionsCentrally implies source mapping, which we should consider turning on but it's nontrivial

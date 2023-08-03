@@ -218,6 +218,22 @@ namespace Microsoft.Build.Logging
             Write(bytes);
         }
 
+        public void WriteBlob(BinaryLogRecordKind kind, Stream stream)
+        {
+            if (stream.Length > int.MaxValue)
+            {
+                throw new ArgumentOutOfRangeException(nameof(stream));
+            }
+
+            // write the blob directly to the underlying writer,
+            // bypassing the memory stream
+            using var redirection = RedirectWritesToOriginalWriter();
+
+            Write(kind);
+            Write((int)stream.Length);
+            Write(stream);
+        }
+
         /// <summary>
         /// Switches the binaryWriter used by the Write* methods to the direct underlying stream writer
         /// until the disposable is disposed. Useful to bypass the currentRecordWriter to write a string,
@@ -1089,6 +1105,11 @@ namespace Microsoft.Build.Logging
         private void Write(byte[] bytes)
         {
             binaryWriter.Write(bytes);
+        }
+
+        private void Write(Stream stream)
+        {
+            stream.CopyTo(binaryWriter.BaseStream);
         }
 
         private void Write(byte b)

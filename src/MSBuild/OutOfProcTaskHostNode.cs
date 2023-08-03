@@ -1169,7 +1169,9 @@ namespace Microsoft.Build.CommandLine
         {
             if (_nodeEndpoint?.LinkStatus == LinkStatus.Active)
             {
+#pragma warning disable SYSLIB0050
                 if (!e.GetType().GetTypeInfo().IsSerializable)
+#pragma warning disable SYSLIB0050
                 {
                     // log a warning and bail.  This will end up re-calling SendBuildEvent, but we know for a fact
                     // that the warning that we constructed is serializable, so everything should be good.

@@ -527,8 +527,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (!TrustInfo.IsFullTrust)
             {
                 var document = new XmlDocument();
-                var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                using (XmlReader xr = XmlReader.Create(configFile.ResolvedPath, xrs))
+                var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                FileStream fs = File.OpenRead(configFile.ResolvedPath);
+                using (XmlReader xr = XmlReader.Create(fs, xrs))
                 {
                     document.Load(xr);
                 }
