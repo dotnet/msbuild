@@ -8,6 +8,8 @@ internal interface IFileSystem
 
     bool FileExists(string path);
 
+    bool DirectoryExists(string path);
+
     bool PathExists(string path);
 
     void RenameFile(string original, string @new);

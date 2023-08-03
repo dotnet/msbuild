@@ -7,6 +7,8 @@ namespace Microsoft.Build.BinlogRedactor.IO
     {
         public void CreateDirectory(string path) => Directory.CreateDirectory(path);
         public bool FileExists(string path) => File.Exists(path);
+
+        public bool DirectoryExists(string path) => Directory.Exists(path);
         public bool PathExists(string path) => Path.Exists(path);
 
         public void RenameFile(string original, string @new) => File.Move(original, @new);

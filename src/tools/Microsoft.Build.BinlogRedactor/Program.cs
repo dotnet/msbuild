@@ -16,6 +16,8 @@ using Microsoft.Extensions.Logging;
 namespace Microsoft.Build.BinlogRedactor;
 internal sealed class Program
 {
+    // TODO:
+    // mask error on no input file?
     public static Task<int> Main(string[] args)
     {
         return BuildCommandLine()

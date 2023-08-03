@@ -7,25 +7,28 @@ internal sealed class RedactBinlogCommandArgs
 {
     public RedactBinlogCommandArgs(
         string[]? passwordsToRedact,
-        string? inputFileName,
+        string? inputPath,
         string? outputFileName,
         bool? dryRun,
         bool? overWrite,
+        bool? recurse,
         bool? logDetectedSecrets)
     {
         PasswordsToRedact = passwordsToRedact;
-        InputFileName = inputFileName;
+        InputPath = inputPath;
         OutputFileName = outputFileName;
         DryRun = dryRun;
         OverWrite = overWrite;
+        Recurse = recurse;
         LogDetectedSecrets = logDetectedSecrets;
     }
 
     public string[]? PasswordsToRedact { get; init; }
-    public string? InputFileName { get; init; }
+    public string? InputPath { get; init; }
     public string? OutputFileName { get; init; }
     public bool? DryRun { get; init; }
     public bool? OverWrite { get; init; }
+    public bool? Recurse { get; init; }
     public bool? LogDetectedSecrets { get; init; }
 }
 

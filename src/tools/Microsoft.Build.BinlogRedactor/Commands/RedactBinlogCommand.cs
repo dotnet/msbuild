@@ -8,6 +8,7 @@ using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BinlogRedactor.BinaryLog;
 using Microsoft.Build.BinlogRedactor.IO;
@@ -28,9 +29,9 @@ internal sealed class RedactBinlogCommand : ExecutableCommand<RedactBinlogComman
         IsRequired = true,
     };
 
-    private readonly Option<string> _inputFileOption = new(new[] { "--input", "-i" })
+    private readonly Option<string> _inputOption = new(new[] { "--input", "-i" })
     {
-        Description = "Input binary log file name. If not specified a single *.binlog from current directory is assumed. Errors out if there are multiple binlogs.",
+        Description = "Input binary log file name. Or a directory to inspect for all existing binlogs. If not specified current directory is assumed.",
         IsRequired = false,
     };
 
@@ -43,6 +44,11 @@ internal sealed class RedactBinlogCommand : ExecutableCommand<RedactBinlogComman
     private readonly Option<bool> _overWriteOption = new(new[] { "--overwrite", "-f" })
     {
         Description = "Replace the output file if it already exists. Replace the input file if the output file is not specified.",
+    };
+
+    private readonly Option<bool> _recurseOption = new(new[] { "--recurse", "-r" })
+    {
+        Description = "Recurse given path (or current dir if none) for all binlogs. Applies only when single input file is not specified.",
     };
 
     private readonly Option<bool> _dryRunOption = new(new[] { "--dryrun" })
@@ -59,10 +65,11 @@ internal sealed class RedactBinlogCommand : ExecutableCommand<RedactBinlogComman
         base(CommandName, "Provides ability to redact sensitive data from MSBuild binlogs (https://aka.ms/binlog-redactor).")
     {
         AddOption(_passwordsToRedactOption);
-        AddOption(_inputFileOption);
+        AddOption(_inputOption);
         AddOption(_outputFileOption);
         AddOption(_overWriteOption);
         AddOption(_dryRunOption);
+        AddOption(_recurseOption);
         AddOption(_logSecretsOption);
     }
 
@@ -70,10 +77,11 @@ internal sealed class RedactBinlogCommand : ExecutableCommand<RedactBinlogComman
     {
         return new RedactBinlogCommandArgs(
             parseResult.GetValueForOption(_passwordsToRedactOption),
-            parseResult.GetValueForOption(_inputFileOption),
+            parseResult.GetValueForOption(_inputOption),
             parseResult.GetValueForOption(_outputFileOption),
             parseResult.GetValueForOption(_dryRunOption),
             parseResult.GetValueForOption(_overWriteOption),
+            parseResult.GetValueForOption(_recurseOption),
             parseResult.GetValueForOption(_logSecretsOption));
     }
 }
@@ -125,9 +133,51 @@ internal sealed class RedactBinlogCommandHandler : ICommandExecutor<RedactBinlog
                 BinlogRedactorErrorCode.NotEnoughInformationToProceed);
         }
 
-        string inputFile = GetInputFile(args.InputFileName);
-        string outputFile = args.OutputFileName ?? inputFile;
+        string[] inputFiles = GetInputFiles(args.InputPath, args.Recurse ?? false);
+        bool hasMultipleFiles = inputFiles.Length > 1;
 
+        if (hasMultipleFiles)
+        {
+            _logger.LogInformation("Found {count} binlog files. Will redact secrets in all. (found files: {files})",
+                inputFiles.Length, inputFiles.ToCsvString());
+        }
+
+        int fileOrderCount = 0;
+        foreach (string inputFile in inputFiles)
+        {
+            string outputFile;
+            if (string.IsNullOrEmpty(args.OutputFileName))
+            {
+                outputFile = inputFile;
+            }
+            else
+            {
+                outputFile = args.OutputFileName + (hasMultipleFiles ? (fileOrderCount++).ToString("D2") : null);
+            }
+
+            var result = await RedactWorker(inputFile, outputFile, args, cancellationToken);
+
+            // TODO: should we continue if there was an error?
+            if (result != BinlogRedactorErrorCode.Success)
+            {
+                if (fileOrderCount != inputFiles.Length)
+                {
+                    _logger.LogInformation("Skipping redacting of remaining logs due to encountered error.");
+                }
+
+                return result;
+            }
+        }
+
+        return BinlogRedactorErrorCode.Success;
+    }
+
+    private async Task<BinlogRedactorErrorCode> RedactWorker(
+        string inputFile,
+        string outputFile,
+        RedactBinlogCommandArgs args,
+        CancellationToken cancellationToken)
+    {
         _logger.LogInformation("Redacting binlog {inputFile} to {outputFile} ({size} KB)", inputFile, outputFile, _fileSystem.GetFileSizeInBytes(inputFile) / 1024);
 
         bool replaceInPlace = inputFile.Equals(outputFile, StringComparison.CurrentCulture);
@@ -146,7 +196,7 @@ internal sealed class RedactBinlogCommandHandler : ICommandExecutor<RedactBinlog
         Stopwatch stopwatch = Stopwatch.StartNew();
 
         var result = await _binlogProcessor.ProcessBinlog(inputFile, outputFile,
-            new SimpleSensitiveDataProcessor(args.PasswordsToRedact), cancellationToken);
+            new SimpleSensitiveDataProcessor(args.PasswordsToRedact!), cancellationToken);
 
         stopwatch.Stop();
         _logger.LogInformation("Redacting done. Duration: {duration}", stopwatch.Elapsed);
@@ -157,6 +207,34 @@ internal sealed class RedactBinlogCommandHandler : ICommandExecutor<RedactBinlog
         }
 
         return result;
+    }
+
+    private string[] GetInputFiles(string? inputPath, bool recurse)
+    {
+        string dirToSearch = inputPath ?? ".";
+
+        if (!string.IsNullOrEmpty(inputPath) && !_fileSystem.DirectoryExists(inputPath))
+        {
+            if (!_fileSystem.FileExists(inputPath))
+            {
+                throw new BinlogRedactorException($"Input path [{inputPath}] does not exist.",
+                    BinlogRedactorErrorCode.InvalidData);
+            }
+
+            return new[] { inputPath };
+        }
+
+        string[] binlogs = _fileSystem.EnumerateFiles(dirToSearch, "*.binlog",
+            new EnumerationOptions() { IgnoreInaccessible = true, RecurseSubdirectories = recurse, }).ToArray();
+
+        if (binlogs.Length == 0)
+        {
+            throw new BinlogRedactorException(
+                $"No binlog file found in the current directory. Please specify the input file explicitly.",
+                BinlogRedactorErrorCode.NotEnoughInformationToProceed);
+        }
+
+        return binlogs;
     }
 
     private string GetInputFile(string? inputFileName)
