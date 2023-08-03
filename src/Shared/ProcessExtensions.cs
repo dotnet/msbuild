@@ -1,10 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 
 #nullable disable
 
@@ -14,6 +11,9 @@ namespace Microsoft.Build.Shared
     {
         public static void KillTree(this Process process, int timeoutMilliseconds)
         {
+#if NETCOREAPP
+            process.Kill(entireProcessTree: true);
+#else
             if (NativeMethodsShared.IsWindows)
             {
                 try
@@ -21,7 +21,7 @@ namespace Microsoft.Build.Shared
                     // issue the kill command
                     NativeMethodsShared.KillTree(process.Id);
                 }
-                catch (InvalidOperationException)
+                catch (System.InvalidOperationException)
                 {
                     // The process already exited, which is fine,
                     // just continue.
@@ -29,85 +29,13 @@ namespace Microsoft.Build.Shared
             }
             else
             {
-                var children = new HashSet<int>();
-                GetAllChildIdsUnix(process.Id, children);
-                foreach (var childId in children)
-                {
-                    KillProcessUnix(childId);
-                }
-
-                KillProcessUnix(process.Id);
+                throw new System.NotSupportedException();
             }
-
+#endif
             // wait until the process finishes exiting/getting killed. 
             // We don't want to wait forever here because the task is already supposed to be dieing, we just want to give it long enough
             // to try and flush what it can and stop. If it cannot do that in a reasonable time frame then we will just ignore it.
             process.WaitForExit(timeoutMilliseconds);
-        }
-
-        private static void GetAllChildIdsUnix(int parentId, ISet<int> children)
-        {
-            RunProcessAndWaitForExit(
-                "pgrep",
-                $"-P {parentId}",
-                out string stdout);
-
-            if (!string.IsNullOrEmpty(stdout))
-            {
-                using (var reader = new StringReader(stdout))
-                {
-                    while (true)
-                    {
-                        var text = reader.ReadLine();
-                        if (text == null)
-                        {
-                            return;
-                        }
-
-                        int id;
-                        if (int.TryParse(text, out id))
-                        {
-                            children.Add(id);
-                            // Recursively get the children
-                            GetAllChildIdsUnix(id, children);
-                        }
-                    }
-                }
-            }
-        }
-
-        private static void KillProcessUnix(int processId)
-        {
-            try
-            {
-                using Process process = Process.GetProcessById(processId);
-                process.Kill();
-            }
-            catch (ArgumentException)
-            {
-                // Process already terminated.
-                return;
-            }
-            catch (InvalidOperationException)
-            {
-                // Process already terminated.
-                return;
-            }
-        }
-
-        private static void RunProcessAndWaitForExit(string fileName, string arguments, out string stdout)
-        {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = fileName,
-                Arguments = arguments,
-                RedirectStandardOutput = true,
-                UseShellExecute = false
-            };
-
-            var process = Process.Start(startInfo);
-            stdout = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
         }
     }
 }

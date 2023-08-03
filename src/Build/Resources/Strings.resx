@@ -463,6 +463,10 @@
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</comment>
   </data>
+  <data name="General.TwoVectorsMustHaveSameLength">
+    <value>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</value>
+    <comment>{StrBegin="MSB3094: "}</comment>
+  </data>
   <data name="FatalTaskError" xml:space="preserve">
     <value>MSB4018: The "{0}" task failed unexpectedly.</value>
     <comment>{StrBegin="MSB4018: "}UE: This message is shown when a task terminates because of an unhandled exception. The cause is most likely a
@@ -474,7 +478,7 @@
     <comment>{StrBegin="MSB4187: "}</comment>
   </data>
   <data name="UnhandledMSBuildError" xml:space="preserve">
-    <value>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled.
+    <value>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</value>
   </data>
   <data name="IllFormedCondition" xml:space="preserve">
@@ -1987,4 +1991,15 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</value>
     <comment>{StrBegin="MSB4120: "}</comment>
   </data>
+  <data name="CannotCopyFromElementOfThatType" xml:space="preserve">
+    <value>MSB4277: Cannot copy from object of that type.</value>
+    <comment>{StrBegin="MSB4277: "}</comment>
+  </data>
+  <!--
+        The Build message bucket is: MSB4000 - MSB4999
+
+        Next message code should be MSB4278
+
+        Don't forget to update this comment after using a new code.
+  -->
 </root>

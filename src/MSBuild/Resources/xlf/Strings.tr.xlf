@@ -23,35 +23,35 @@
         <source>failed</source>
         <target state="translated">başarısız oldu</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with errors</source>
         <target state="translated">hatalarla başarısız oldu</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
         <source>failed with warnings</source>
         <target state="translated">uyarılarla başarısız oldu</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_Succeeded">
         <source>succeeded</source>
         <target state="translated">başarılı</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with warnings</source>
         <target state="translated">uyarılarla birlikte başarılı</target>
         <note>
-      Part of Live Logger summary message: "Build {BuildResult_X} in {duration}s"
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="CommandLine">
@@ -98,6 +98,16 @@
         <target state="translated">MSBUILD : error MSB1064: Düşük öncelikli değer geçerli değil. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1064: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidTerminalLoggerValue">
+        <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
+        <target state="translated">MSBUILD : error MSB1065: Terminal günlükçüsü değeri geçerli değil. Değer şunlardan biri olmalıdır: 'otomatik', 'doğru' veya 'yanlış'. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
@@ -836,9 +846,10 @@
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreProjectExtensions:&lt;uzantılar&gt;
-                     Hangi proje dosyasının oluşturulacağı belirlenirken
-                     yoksayılacak uzantıların listesi. Birden çok uzantıyı
-                     birbirinden ayırmak için noktalı virgül veya virgül kullanın.
+                     Hangi proje dosyasının oluşturulacağı belirlenirken 
+                     yoksayılacak uzantıların listesi. Birden çok uzantıyı 
+                     birbirinden ayırmak için noktalı virgül veya 
+                     virgül kullanın.
                      (Kısa biçim: -ignore)
                      Örnek:
                        -ignoreProjectExtensions:.sln
@@ -928,6 +939,7 @@
                      Dosyaların konumu ve fileLogger'ın diğer parametreleri 
                      "/fileLoggerParameters" anahtarının eklenmesi yoluyla
                      belirtilebilir.
+
                      Günlük dosyası adı fileLoggerParameters anahtarı
                      aracılığıyla ayarlanırsa dağıtılmış günlükçü fileName 
                      değerini şablon olarak kullanıp her düğümün günlük dosyasını
@@ -974,31 +986,32 @@
     </source>
         <target state="translated">  -fileLoggerParameters[n]:&lt;parametreler&gt;
                      Dosya günlükçüleri için ek parametreler sağlar.
-                     Bu anahtarın olması karşılık gelen -fileLogger[n]
+                     Bu anahtarın olması karşılık gelen -fileLogger[n] 
                      anahtarının olduğu anlamına gelir.
                      "n" varsa, 1-9 arasında bir rakam olabilir.
-                     Dağıtılmış dosya günlükçüleri varsa -fileLoggerParameters
-                     bunlar tarafından da kullanılır; -distributedFileLogger açıklamasına bakın.
+                     Dağıtılmış dosya günlükçüleri varsa -fileLoggerParameters 
+                     bunlar tarafından da kullanılır; -distributedFileLogger 
+                     açıklamasına bakın.
                      (Kısa biçim: -flp[n])
-                     Konsol günlükçüsü için listelenenlerle aynı parametreler
+                     Konsol günlükçüsü için listelenenlerle aynı parametreler 
                      kullanılabilir. Kullanılabilecek bazı ek parametreler:
-                        LogFile--Oluşturma günlüğünün yazılacağı günlük
+                        LogFile--Oluşturma günlüğünün yazılacağı günlük 
                             dosyasının yolu.
-                        Append--Derleme günlüğünün gün dosyasının sonuna mı
-                            ekleneceğini yoksa üzerine mi yazılacağını
-                            belirler. Anahtar ayarlandığında oluşturma günlüğü
-                            dosyanın sonuna eklenir. Anahtar ayarlanmadığında
-                            varolan günlük dosyasının üzerine yazılır.
+                        Append--Derleme günlüğünün gün dosyasının sonuna mı 
+                            ekleneceğini yoksa üzerine mi yazılacağını 
+                            belirler. Anahtar ayarlandığında oluşturma günlüğü 
+                            dosyanın sonuna eklenir. Anahtar ayarlanmadığında 
+                            varolan günlük dosyasının üzerine yazılır. 
                             Varsayılan: günlük dosyasının sonuna eklenmez.
-                        Encoding--Dosyanın kodlamasını belirtir; örneğin,
+                        Encoding--Dosyanın kodlamasını belirtir; örneğin, 
                             UTF-8, Unicode veya ASCII
                      Varsayılan ayrıntı düzeyi ayarı Detailed'dır.
                      Örnekler:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+                       -flp1:warningsonly;logfile=msbuild.wrn 
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1022,7 +1035,8 @@
                        -nr:true
     </source>
         <target state="translated">  -nodeReuse:&lt;parametreler&gt;
-                     MSBuild düğümlerinin yeniden kullanımını etkinleştirir veya devre dışı bırakır.
+                     MSBuild düğümlerinin yeniden kullanımını etkinleştirir
+                     veya devre dışı bırakır.
                      Parametreler:
                      True --Derleme tamamlandıktan sonra düğümler kalır ve
                             izleyen derlemelerde yeniden kullanılır (varsayılan)
@@ -1360,6 +1374,13 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="NameInvalid">
+        <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
+        <target state="new">MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB5016: "}
+    </note>
+      </trans-unit>
       <trans-unit id="NotWarnAsErrorWithoutWarnAsError">
         <source>MSBUILD : error MSB1062: The -warnnotaserror switch cannot be specified unless the -warnaserror switch is also specified and left empty.</source>
         <target state="translated">MSBUILD : error MSB1062: -warnnotaserror anahtarı, -warnaserror anahtarı da belirtilmedikçe ve boş bırakılmadıkça belirtilemez.</target>
@@ -1545,6 +1566,21 @@
         <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
         <target state="translated">MSBUILD : error MSB1059: Hedefler yazdırılamadı. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedDisabled">
+        <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
+        <target state="translated">Derleme StdOut akışına doğrudan erişim isteyen bir işlem (ör. 'dotnet test') bağlamında çalıştığı için Terminal Günlükçüsü kullanılmadı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedNotSupported">
+        <source>Terminal Logger was not used because the output is not supported.</source>
+        <target state="translated">Çıkış desteklenmediğinden Terminal Günlükçüsü kullanılmadı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedRedirected">
+        <source>Terminal Logger was not used because the output is being redirected to a file.</source>
+        <target state="translated">Çıkış bir dosyaya yeniden yönlendirildiği için Terminal Günlükçüsü kullanılmadı.</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
