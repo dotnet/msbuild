@@ -27,13 +27,6 @@ public static class ContainerHelpers
     private static Regex envVarRegex = new Regex(@"^[a-zA-Z_]{1,}[a-zA-Z0-9_]*$");
 
     /// <summary>
-    /// DefaultRegistry is the canonical representation of something that lives in the local docker daemon. It's used as the inferred registry for repositories
-    /// that have no registry component.
-    /// See <see href="https://github.com/distribution/distribution/blob/78b9c98c5c31c30d74f9acb7d96f98552f2cf78f/reference/normalize.go">normalize.go</see>.
-    /// </summary>
-    internal const string DefaultRegistry = "docker.io";
-
-    /// <summary>
     /// The enum contains possible error reasons during port parsing using <see cref="TryParsePort(string, out Port?, out ParsePortError?)"/> or <see cref="TryParsePort(string?, string?, out Port?, out ParsePortError?)"/>.
     /// </summary>
     [Flags]
