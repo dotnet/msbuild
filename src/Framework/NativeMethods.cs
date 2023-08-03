@@ -35,6 +35,7 @@ internal static class NativeMethods
     internal const uint RUNTIME_INFO_DONT_SHOW_ERROR_DIALOG = 0x40;
     internal const uint FILE_TYPE_CHAR = 0x0002;
     internal const Int32 STD_OUTPUT_HANDLE = -11;
+    internal const Int32 STD_ERROR_HANDLE = -12;
     internal const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
     internal const uint RPC_S_CALLPENDING = 0x80010115;
     internal const uint E_ABORT = (uint)0x80004004;

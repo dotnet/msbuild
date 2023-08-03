@@ -20,12 +20,11 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
     public class SimpleErrorLogger : INodeLogger
     {
         public bool hasLoggedErrors = false;
-        private bool acceptAnsiColorCodes;
-        private uint? originalConsoleMode;
-        private const int STD_ERROR_HANDLE = -12;
+        private readonly bool acceptAnsiColorCodes;
+        private readonly uint? originalConsoleMode;
         public SimpleErrorLogger()
         {
-            (acceptAnsiColorCodes, _, originalConsoleMode) = NativeMethods.QueryIsScreenAndTryEnableAnsiColorCodes(STD_ERROR_HANDLE);
+            (acceptAnsiColorCodes, _, originalConsoleMode) = NativeMethods.QueryIsScreenAndTryEnableAnsiColorCodes(NativeMethods.STD_ERROR_HANDLE);
         }
 
         public LoggerVerbosity Verbosity
@@ -82,7 +81,7 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
 
         public void Shutdown()
         {
-            NativeMethods.RestoreConsoleMode(originalConsoleMode, STD_ERROR_HANDLE);
+            NativeMethods.RestoreConsoleMode(originalConsoleMode, NativeMethods.STD_ERROR_HANDLE);
         }
     }
 }
