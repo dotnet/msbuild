@@ -3,9 +3,7 @@
 
 #nullable disable
 
-using System;
 using System.ComponentModel;
-using System.IO;
 using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Internal

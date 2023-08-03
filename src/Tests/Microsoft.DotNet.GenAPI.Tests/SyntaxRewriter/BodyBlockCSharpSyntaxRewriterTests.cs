@@ -4,7 +4,6 @@
 #nullable enable
 
 using Microsoft.DotNet.GenAPI.SyntaxRewriter;
-using Xunit;
 
 namespace Microsoft.DotNet.GenAPI.Tests.SyntaxRewriter
 {

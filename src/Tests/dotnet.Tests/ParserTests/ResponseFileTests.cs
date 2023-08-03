@@ -1,15 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using FluentAssertions;
-using Microsoft.DotNet.Cli;
-using Microsoft.NET.TestFramework;
 using Parser = Microsoft.DotNet.Cli.Parser;
-using System.CommandLine.Parsing;
-using System.IO;
-using System.Linq;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tests.ParserTests
 {

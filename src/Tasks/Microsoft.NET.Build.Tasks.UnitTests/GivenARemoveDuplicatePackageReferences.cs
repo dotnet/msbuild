@@ -3,11 +3,6 @@
 
 using FluentAssertions;
 using Microsoft.Build.Framework;
-using NuGet.ProjectModel;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Xunit;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;

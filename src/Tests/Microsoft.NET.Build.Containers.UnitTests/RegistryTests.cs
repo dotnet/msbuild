@@ -4,10 +4,7 @@
 using System.Net;
 using Microsoft.Extensions.Logging;
 using Microsoft.NET.Build.Containers.Resources;
-using Microsoft.NET.TestFramework;
 using Moq;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Containers.UnitTests;
 

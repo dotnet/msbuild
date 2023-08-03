@@ -2,12 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using static Microsoft.NET.Build.Containers.KnownStrings.Properties;
-using FluentAssertions;
 using Microsoft.Build.Execution;
-using Xunit;
 using Microsoft.NET.Build.Containers.IntegrationTests;
-using Microsoft.NET.Build.Containers.UnitTests;
-using System.Linq;
 
 namespace Microsoft.NET.Build.Containers.Targets.IntegrationTests;
 
@@ -185,11 +181,11 @@ public class TargetsTests
         computedTag.Should().Be(expectedTag);
     }
 
-    [InlineData("v8.0", "linux-x64", "64198")]
+    [InlineData("v8.0", "linux-x64", null)]
     [InlineData("v8.0", "win-x64", "ContainerUser")]
     [InlineData("v7.0", "linux-x64", null)]
     [InlineData("v7.0", "win-x64", null)]
-    [InlineData("v9.0", "linux-x64", "64198")]
+    [InlineData("v9.0", "linux-x64", null)]
     [InlineData("v9.0", "win-x64", "ContainerUser")]
     [Theory]
     public void CanComputeContainerUser(string tfm, string rid, string expectedUser)

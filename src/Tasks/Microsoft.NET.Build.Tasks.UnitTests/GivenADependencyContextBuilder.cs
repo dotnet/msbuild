@@ -12,12 +12,7 @@ using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 using NuGet.Versioning;
 using NuGet.RuntimeModel;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Xunit;
-using Xunit.Sdk;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {

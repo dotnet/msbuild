@@ -2,18 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Utilities;
-using FluentAssertions;
-using Xunit;
-using Xunit.Abstractions;
 using Microsoft.NET.Build.Containers.IntegrationTests;
 using Microsoft.NET.Build.Containers.UnitTests;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework;
 using FakeItEasy;
 using Microsoft.Build.Framework;
 using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.NET.Build.Containers.Tasks.IntegrationTests;
 
@@ -70,6 +63,10 @@ public class CreateNewImageTests
 
         Assert.True(task.Execute(), FormatBuildMessages(errors));
         newProjectDir.Delete(true);
+    }
+
+    private static ImageConfig GetImageConfigFromTask(CreateNewImage task) {
+        return new(task.GeneratedContainerConfiguration);
     }
 
     [DockerAvailableFact]
@@ -204,6 +201,14 @@ public class CreateNewImageTests
 
         Assert.True(cni.Execute(), FormatBuildMessages(errors));
 
+        var config = GetImageConfigFromTask(cni);
+        // because we're building off of .net 8 images for this test, we can validate the user id and aspnet https urls
+        Assert.Equal("1654", config.GetUser());
+
+        var ports = config.Ports;
+        Assert.Single(ports);
+        Assert.Equal(new(8080, PortType.tcp), ports.First());
+
         ContainerCli.RunCommand(_testOutput, "--rm", $"{pcp.NewContainerRepository}:latest")
             .Execute()
             .Should().Pass()
@@ -215,7 +220,7 @@ public class CreateNewImageTests
     {
         const string RootlessBase ="dotnet/rootlessbase";
         const string AppImage = "dotnet/testimagerootless";
-        const string RootlessUser = "101";
+        const string RootlessUser = "1654";
         var loggerFactory = new TestLoggerFactory(_testOutput);
         var logger = loggerFactory.CreateLogger(nameof(CreateNewImage_RootlessBaseImage));
 
@@ -231,7 +236,6 @@ public class CreateNewImageTests
 
         Assert.NotNull(imageBuilder);
 
-        imageBuilder.SetUser(RootlessUser);
 
         BuiltImage builtImage = imageBuilder.Build();
 

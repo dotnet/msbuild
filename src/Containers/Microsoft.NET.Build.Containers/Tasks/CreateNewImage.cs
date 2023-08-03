@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Extensions.Logging;
 using Microsoft.NET.Build.Containers.Logging;
@@ -204,11 +205,12 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         }
     }
 
-    private static void SetEnvironmentVariables(ImageBuilder img, ITaskItem[] envVars)
+    private void SetEnvironmentVariables(ImageBuilder img, ITaskItem[] envVars)
     {
         foreach (ITaskItem envVar in envVars)
         {
-            img.AddEnvironmentVariable(envVar.ItemSpec, envVar.GetMetadata("Value"));
+            var value = envVar.GetMetadata("Value");
+            img.AddEnvironmentVariable(envVar.ItemSpec, value);
         }
     }
 

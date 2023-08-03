@@ -112,8 +112,6 @@
     <!-- We only set a default user when the base image is Microsoft-authored, and we're targeting a version of those images that supports a nonroot user -->
     <PropertyGroup Label="ContainerUser Assignment" Condition="$(_ContainerIsUsingMicrosoftDefaultImages) and $(_ContainerIsTargetingNet8TFM) and '$(ContainerUser)' == ''">
       <ContainerUser Condition="$(_ContainerIsTargetingWindows)">ContainerUser</ContainerUser>
-      <!-- For Linux, the MS images have an 'app' user set to user id 64198 but some container runtimes work better with user ids instead of names, so we defer to that -->
-      <ContainerUser Condition="!$(_ContainerIsTargetingWindows)">64198</ContainerUser>
     </PropertyGroup>
 
     <ParseContainerProperties FullyQualifiedBaseImageName="$(ContainerBaseImage)"

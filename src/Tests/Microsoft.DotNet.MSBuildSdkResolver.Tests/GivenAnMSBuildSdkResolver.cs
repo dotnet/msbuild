@@ -2,19 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 extern alias sdkResolver;
-using FluentAssertions;
 using Microsoft.Build.Framework;
 using Microsoft.DotNet.MSBuildSdkResolver;
-using Microsoft.DotNet.Tools.Test.Utilities;
-using System.Collections.Generic;
-using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using Xunit;
-using Xunit.Abstractions;
-using System;
-using Microsoft.NET.TestFramework;
-using System.Linq;
 using Microsoft.DotNet.DotNetSdkResolver;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
@@ -598,17 +588,6 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                         ? VSSettings.Ambient
                         : new VSSettings(VSSettingsFile?.FullName, DisallowPrereleaseByDefault));
 
-            public DirectoryInfo GetSdkDirectory(ProgramFiles programFiles, string sdkName, string sdkVersion)
-                => new DirectoryInfo(Path.Combine(
-                    TestDirectory.FullName,
-                    GetProgramFilesDirectory(programFiles).FullName,
-                    "dotnet",
-                    "sdk",
-                    sdkVersion,
-                    "Sdks",
-                    sdkName,
-                    "Sdk"));
-
             public DirectoryInfo GetProgramFilesDirectory(ProgramFiles programFiles)
                 => new DirectoryInfo(Path.Combine(TestDirectory.FullName, $"ProgramFiles{programFiles}"));
 
@@ -618,15 +597,33 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 string sdkVersion,
                 Version minimumMSBuildVersion = null)
             {
-                var dir = GetSdkDirectory(programFiles, sdkName, sdkVersion);
-                dir.Create();
+                var netSdkDirectory = Path.Combine(TestDirectory.FullName,
+                    GetProgramFilesDirectory(programFiles).FullName,
+                    "dotnet",
+                    "sdk",
+                    sdkVersion);
+
+                new DirectoryInfo(netSdkDirectory).Create();
+
+                //  hostfxr now checks for the existence of dotnet.dll in an SDK directory: https://github.com/dotnet/runtime/pull/89333
+                //  So create that file
+                var dotnetDllPath = Path.Combine(netSdkDirectory, "dotnet.dll");
+                new FileInfo(dotnetDllPath).Create();
+
+
+                var sdkDir = new DirectoryInfo(Path.Combine(netSdkDirectory,
+                    "Sdks",
+                    sdkName,
+                    "Sdk"));
+
+                sdkDir.Create();
 
                 if (minimumMSBuildVersion != null)
                 {
                     CreateMSBuildRequiredVersionFile(programFiles, sdkVersion, minimumMSBuildVersion);
                 }
 
-                return dir;
+                return sdkDir;
             }
 
             public void CreateMuxerAndAddToPath(ProgramFiles programFiles)

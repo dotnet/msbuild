@@ -3,8 +3,6 @@
 
 #nullable enable
 
-using System;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;

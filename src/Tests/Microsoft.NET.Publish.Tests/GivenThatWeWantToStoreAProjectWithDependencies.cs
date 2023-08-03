@@ -1,24 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Xml.Linq;
-
-using FluentAssertions;
-
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -32,20 +16,24 @@ namespace Microsoft.NET.Publish.Tests
         static GivenThatWeWantToStoreAProjectWithDependencies()
         {
             var rid = RuntimeInformation.RuntimeIdentifier;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 _testArch = rid.Substring(rid.LastIndexOf("-", StringComparison.InvariantCulture) + 1);
                 _runtimeRid = "win7-" + _testArch;
             }
+            else if (OperatingSystem.IsMacOS())
+            {
+                // microsoft.netcore.coredistools only has assets for osx.10.10
+                _runtimeRid = "osx.10.10-x64";
+            }
             else
             {
-
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    // microsoft.netcore.coredistools only has assets for osx.10.10
-                    _runtimeRid = "osx.10.10-x64";
-                }
-                else if (rid.Contains("ubuntu"))
+                var osId = File.ReadAllLines("/etc/os-release")
+                    .First(line => line.StartsWith("ID=", StringComparison.OrdinalIgnoreCase))
+                    .Substring("ID=".Length)
+                    .Trim('\"', '\'')
+                    .ToLowerInvariant();
+                if (osId.Contains("ubuntu"))
                 {
                     // microsoft.netcore.coredistools only has assets for ubuntu.14.04-x64
                     _runtimeRid = "ubuntu.14.04-x64";

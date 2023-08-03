@@ -1,15 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Runtime.Versioning;
-using System.IO;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
-using Microsoft.NET.TestFramework;
 using Microsoft.Win32;
 using Microsoft.DotNet.Installer.Windows;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
-using Xunit;
 
 namespace Microsoft.DotNet.Cli.Workload.List.Tests
 {

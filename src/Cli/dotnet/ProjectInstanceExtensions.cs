@@ -3,9 +3,6 @@
 
 using Microsoft.Build.Execution;
 using Microsoft.DotNet.Cli.Sln.Internal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Common
 {

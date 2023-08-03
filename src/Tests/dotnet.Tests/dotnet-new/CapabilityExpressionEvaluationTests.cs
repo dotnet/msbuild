@@ -3,10 +3,7 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
 using Microsoft.TemplateEngine.MSBuildEvaluation;
-using Xunit;
 
 namespace Microsoft.DotNet.Cli.New.Tests
 {

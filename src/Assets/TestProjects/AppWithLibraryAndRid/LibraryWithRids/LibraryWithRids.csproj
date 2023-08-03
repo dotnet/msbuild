@@ -5,6 +5,6 @@
     <Description>'$(RuntimeIdentifier)'</Description>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="SQLite" Version="3.13.0" />
+    <PackageReference Include="Libuv" Version="1.10.0" />
   </ItemGroup>
 </Project>

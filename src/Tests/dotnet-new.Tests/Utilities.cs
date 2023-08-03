@@ -3,7 +3,6 @@
 
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
-using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.Cli.New.IntegrationTests
 {

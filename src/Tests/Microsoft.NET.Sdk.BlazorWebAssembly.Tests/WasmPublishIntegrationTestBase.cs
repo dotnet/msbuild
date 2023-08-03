@@ -1,14 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
 using System.Text.Json;
 using Microsoft.NET.Sdk.WebAssembly;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using FluentAssertions;
-using Xunit;
-using Xunit.Abstractions;
 using ResourceHashesByNameDictionary = System.Collections.Generic.Dictionary<string, string>;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
@@ -24,26 +18,46 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var bootManifest = JsonSerializer.Deserialize<BootJsonData>(bootManifestJson);
 
             VerifyBootManifestHashes(testAsset, blazorPublishDirectory, bootManifest.resources.assembly);
-            VerifyBootManifestHashes(testAsset, blazorPublishDirectory, bootManifest.resources.runtime);
-
             if (bootManifest.resources.pdb != null)
             {
                 VerifyBootManifestHashes(testAsset, blazorPublishDirectory, bootManifest.resources.pdb);
             }
+            if (bootManifest.resources.runtime != null)
+            {
+                VerifyBootManifestHashes(testAsset, blazorPublishDirectory, bootManifest.resources.runtime);
+            }
+            if (bootManifest.resources.icu != null)
+            {
+                VerifyBootManifestHashes(testAsset, blazorPublishDirectory, bootManifest.resources.icu);
+            }
+            if (bootManifest.resources.wasmNative != null)
+            {
+                VerifyBootManifestHashes(testAsset, blazorPublishDirectory, bootManifest.resources.wasmNative);
+            }
+            if (bootManifest.resources.jsModuleNative != null)
+            {
+                VerifyBootManifestHashes(testAsset, blazorPublishDirectory, bootManifest.resources.jsModuleNative);
+            }
+            if (bootManifest.resources.jsModuleRuntime != null)
+            {
+                VerifyBootManifestHashes(testAsset, blazorPublishDirectory, bootManifest.resources.jsModuleRuntime);
+            }
 
             if (bootManifest.resources.satelliteResources != null)
             {
-                foreach (var resourcesForCulture in bootManifest.resources.satelliteResources.Values)
+                foreach (var resourcesForCulture in bootManifest.resources.satelliteResources)
                 {
-                    VerifyBootManifestHashes(testAsset, blazorPublishDirectory, resourcesForCulture);
+                    VerifyBootManifestHashes(testAsset, blazorPublishDirectory, resourcesForCulture.Value, resourcesForCulture.Key);
                 }
             }
 
-            static void VerifyBootManifestHashes(TestAsset testAsset, string blazorPublishDirectory, ResourceHashesByNameDictionary resources)
+            static void VerifyBootManifestHashes(TestAsset testAsset, string blazorPublishDirectory, ResourceHashesByNameDictionary resources, string prefix = null)
             {
                 foreach (var (name, hash) in resources)
                 {
-                    var relativePath = Path.Combine(blazorPublishDirectory, "_framework", name);
+                    var relativePath = prefix != null
+                        ? Path.Combine(blazorPublishDirectory, "_framework", prefix, name)
+                        : Path.Combine(blazorPublishDirectory, "_framework", name);
                     new FileInfo(Path.Combine(testAsset.TestRoot, relativePath)).Should().HashEquals(ParseWebFormattedHash(hash));
                 }
             }

@@ -17,7 +17,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
         object GetProperty(string propertyName);
     }
 
-
     internal interface IVSMSDeployHost : IVsPublishMsBuildTaskHost
     {
         void PopulateOptions(/*DeploymentSyncOptions*/dynamic options);

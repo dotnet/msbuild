@@ -1,12 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using Microsoft.DotNet.ApiCompatibility.Logging;
 using Microsoft.DotNet.ApiSymbolExtensions.Logging;
@@ -27,10 +24,16 @@ namespace Microsoft.DotNet.ApiCompat.Tool
                 Description = "If true, generates a compatibility suppression file.",
                 Recursive = true
             };
-            CliOption<bool> preserveUnnecessarySuppressionsOption = new("--preserve-unnecessary-suppressions",
-                "If true, preserves unnecessary suppressions when re-generating the suppression file.");
-            CliOption<bool> permitUnnecessarySuppressionsOption = new("--permit-unnecessary-suppressions",
-                "If true, permits unnecessary suppressions in the suppression file.");
+            CliOption<bool> preserveUnnecessarySuppressionsOption = new("--preserve-unnecessary-suppressions")
+            {
+                Description = "If true, preserves unnecessary suppressions when re-generating the suppression file.",
+                Recursive = true
+            };
+            CliOption<bool> permitUnnecessarySuppressionsOption = new("--permit-unnecessary-suppressions")
+            {
+                Description = "If true, permits unnecessary suppressions in the suppression file.",
+                Recursive = true
+            };
             CliOption<string[]> suppressionFilesOption = new("--suppression-file")
             {
                 Description = "The path to one or more suppression files to read from.",

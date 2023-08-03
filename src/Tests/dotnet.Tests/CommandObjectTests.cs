@@ -2,14 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Test.Utilities;
-using System;
-using Xunit;
-using Xunit.Abstractions;
-using FluentAssertions;
 using Microsoft.DotNet.CommandFactory;
-using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
-using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.Tests
 {

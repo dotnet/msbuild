@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using FluentAssertions;
-using System.Xml.Linq;
 using Xunit;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests

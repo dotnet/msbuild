@@ -1,18 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Xml.Linq;
-using FluentAssertions;
 using Microsoft.NET.Sdk.WebAssembly;
-using Microsoft.NET.TestFramework;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Microsoft.NET.TestFramework.Utilities;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
@@ -152,7 +142,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 var kvp = satelliteResources.SingleOrDefault(p => p.Key == "ja");
                 kvp.Should().NotBeNull();
 
-                kvp.Value.Should().ContainKey("ja/blazorwasm.resources.wasm");
+                kvp.Value.Should().ContainKey("blazorwasm.resources.wasm");
             }
         }
 
@@ -199,7 +189,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var kvp = satelliteResources.SingleOrDefault(p => p.Key == "ja");
             kvp.Should().NotBeNull();
 
-            kvp.Value.Should().ContainKey("ja/blazorwasm.resources.wasm");
+            kvp.Value.Should().ContainKey("blazorwasm.resources.wasm");
         }
 
         [Fact]
@@ -232,7 +222,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var kvp = satelliteResources.SingleOrDefault(p => p.Key == "ja");
             kvp.Should().NotBeNull();
 
-            kvp.Value.Should().ContainKey("ja/blazorwasm.resources.wasm");
+            kvp.Value.Should().ContainKey("blazorwasm.resources.wasm");
 
 
             File.Delete(Path.Combine(projectDirectory.TestRoot, "blazorwasm", "Resource.ja.resx"));

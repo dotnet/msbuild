@@ -5,7 +5,6 @@ using System.Collections;
 using System.Globalization;
 using System.Resources;
 using Microsoft.NET.Build.Containers.Resources;
-using Xunit;
 
 namespace Microsoft.NET.Build.Containers.UnitTests.Resources
 {

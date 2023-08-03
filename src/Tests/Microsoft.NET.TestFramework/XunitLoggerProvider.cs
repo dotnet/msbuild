@@ -4,12 +4,7 @@
 
 #nullable enable
 
-using System;
-using System.Linq;
-using System.Text;
 using Microsoft.Extensions.Logging;
-using Xunit.Abstractions;
-using Xunit.Sdk;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 

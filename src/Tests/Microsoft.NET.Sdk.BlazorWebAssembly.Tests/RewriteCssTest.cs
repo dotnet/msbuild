@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
-using System.Linq;
 using Microsoft.AspNetCore.StaticWebAssets.Tasks;
-using Xunit;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests;
 

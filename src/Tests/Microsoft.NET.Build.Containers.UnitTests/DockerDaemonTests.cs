@@ -1,11 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Extensions.Logging;
-using Microsoft.NET.TestFramework;
-using Xunit;
-using Xunit.Abstractions;
-
 namespace Microsoft.NET.Build.Containers.UnitTests;
 
 [CollectionDefinition("Daemon Tests")]

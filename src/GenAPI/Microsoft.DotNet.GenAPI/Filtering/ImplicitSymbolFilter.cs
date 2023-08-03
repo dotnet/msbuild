@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
 
@@ -29,7 +28,17 @@ namespace Microsoft.DotNet.GenAPI.Filtering
                     method.MethodKind == MethodKind.EventRemove ||
                     method.MethodKind == MethodKind.EventRaise ||
                     method.MethodKind == MethodKind.DelegateInvoke)
+                {
                     return false;
+                }
+
+                // If the method is an explicitly implemented getter or setter, exclude it.
+                // https://github.com/dotnet/roslyn/issues/53911
+                if (method.MethodKind == MethodKind.ExplicitInterfaceImplementation && 
+                    method.ExplicitInterfaceImplementations.Any(m => m is { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet }))
+                {
+                    return false;
+                }
             }
 
             if (symbol is ITypeSymbol type)

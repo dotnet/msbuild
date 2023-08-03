@@ -1,21 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Xml.Linq;
-using FluentAssertions;
 using Microsoft.AspNetCore.StaticWebAssets.Tasks;
-using Microsoft.AspNetCore.Razor.Tasks;
-using Microsoft.NET.TestFramework;
 using Microsoft.NET.Sdk.WebAssembly;
-using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
-using Xunit;
-using Xunit.Abstractions;
-using static NuGet.Client.ManagedCodeConventions;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
@@ -178,8 +166,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var bootJsonPath = Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
             var bootJsonData = ReadBootJsonData(bootJsonPath);
 
-            var runtime = bootJsonData.resources.runtime;
-            runtime.Should().ContainKey("dotnet.native.wasm");
+            bootJsonData.resources.wasmNative.Should().ContainKey("dotnet.native.wasm");
 
             var assemblies = bootJsonData.resources.assembly;
             assemblies.Should().ContainKey("blazorwasm.wasm");
@@ -217,8 +204,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var bootJsonPath = Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
             var bootJsonData = ReadBootJsonData(bootJsonPath);
 
-            var runtime = bootJsonData.resources.runtime;
-            runtime.Should().ContainKey("dotnet.native.wasm");
+            bootJsonData.resources.wasmNative.Should().ContainKey("dotnet.native.wasm");
 
             var assemblies = bootJsonData.resources.assembly;
             assemblies.Should().ContainKey("blazorwasm.wasm");
@@ -257,9 +243,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var bootJsonPath = Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
             var bootJsonData = ReadBootJsonData(bootJsonPath);
 
-            var runtime = bootJsonData.resources.runtime;
-            runtime.Should().ContainKey("dotnet.native.wasm");
-            runtime.Should().NotContainKey("dotnet.timezones.blat");
+            bootJsonData.resources.wasmNative.Should().ContainKey("dotnet.native.wasm");
+            bootJsonData.resources.runtime.Should().BeNull();
 
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.native.wasm")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.timezones.blat")).Should().NotExist();
@@ -289,12 +274,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var bootJsonPath = Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
             var bootJsonData = ReadBootJsonData(bootJsonPath);
 
-            bootJsonData.icuDataMode.Should().Be(ICUDataMode.Invariant);
-            var runtime = bootJsonData.resources.runtime;
-            runtime.Should().ContainKey("dotnet.native.wasm");
+            bootJsonData.globalizationMode.Should().Be("invariant");
+            bootJsonData.resources.wasmNative.Should().ContainKey("dotnet.native.wasm");
 
-            runtime.Should().NotContainKey("icudt.dat");
-            runtime.Should().NotContainKey("icudt_EFIGS.dat");
+            bootJsonData.resources.icu.Should().BeNull();
 
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.native.wasm")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt.dat")).Should().NotExist();
@@ -328,12 +311,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var bootJsonPath = Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
             var bootJsonData = ReadBootJsonData(bootJsonPath);
 
-            bootJsonData.icuDataMode.Should().Be(ICUDataMode.Invariant);
-            var runtime = bootJsonData.resources.runtime;
-            runtime.Should().ContainKey("dotnet.native.wasm");
+            bootJsonData.globalizationMode.Should().Be("invariant");
+            bootJsonData.resources.wasmNative.Should().ContainKey("dotnet.native.wasm");
 
-            runtime.Should().NotContainKey("icudt.dat");
-            runtime.Should().NotContainKey("icudt_EFIGS.dat");
+            bootJsonData.resources.icu.Should().BeNull();
 
             new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "dotnet.native.wasm")).Should().Exist();
             new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt.dat")).Should().NotExist();
@@ -343,7 +324,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         }
 
         [Fact]
-        public void Build_WithBlazorWebAssemblyLoadCustomGlobalizationData_SetsICUDataMode()
+        public void Build_WithBlazorWebAssemblyLoadCustomGlobalizationData_SetsGlobalizationMode()
         {
             // Arrange
             var testAppName = "BlazorWasmMinimal";
@@ -366,15 +347,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var bootJsonPath = Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
             var bootJsonData = ReadBootJsonData(bootJsonPath);
 
-            bootJsonData.icuDataMode.Should().Be(ICUDataMode.Custom);
-            var runtime = bootJsonData.resources.runtime;
+            bootJsonData.globalizationMode.Should().Be("custom");
 
-            runtime.Should().ContainKey("dotnet.native.wasm");
-            runtime.Should().ContainKey(customIcuFilename);
-            runtime.Should().NotContainKey("icudt.dat");
-            runtime.Should().NotContainKey("icudt_CJK.dat");
-            runtime.Should().NotContainKey("icudt_EFIGS.dat");
-            runtime.Should().NotContainKey("icudt_no_CJK.dat");
+            bootJsonData.resources.wasmNative.Should().ContainKey("dotnet.native.wasm");
+            bootJsonData.resources.icu.Should().ContainKey(customIcuFilename);
+            bootJsonData.resources.icu.Should().NotContainKey("icudt.dat");
+            bootJsonData.resources.icu.Should().NotContainKey("icudt_CJK.dat");
+            bootJsonData.resources.icu.Should().NotContainKey("icudt_EFIGS.dat");
+            bootJsonData.resources.icu.Should().NotContainKey("icudt_no_CJK.dat");
 
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.native.wasm")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", customIcuFilename)).Should().Exist();
@@ -385,7 +365,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         }
 
         [Fact]
-        public void Publish_WithBlazorWebAssemblyLoadCustomGlobalizationData_SetsICUDataMode()
+        public void Publish_WithBlazorWebAssemblyLoadCustomGlobalizationData_SetsGlobalizationMode()
         {
             var testAppName = "BlazorHosted";
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
@@ -408,15 +388,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var bootJsonPath = Path.Combine(publishDirectory, "wwwroot", "_framework", "blazor.boot.json");
             var bootJsonData = ReadBootJsonData(bootJsonPath);
 
-            bootJsonData.icuDataMode.Should().Be(ICUDataMode.Custom);
-            var runtime = bootJsonData.resources.runtime;
+            bootJsonData.globalizationMode.Should().Be("custom");
 
-            runtime.Should().ContainKey("dotnet.native.wasm");
-            runtime.Should().ContainKey(customIcuFilename);
-            runtime.Should().NotContainKey("icudt.dat");
-            runtime.Should().NotContainKey("icudt_CJK.dat");
-            runtime.Should().NotContainKey("icudt_EFIGS.dat");
-            runtime.Should().NotContainKey("icudt_no_CJK.dat");
+            bootJsonData.resources.wasmNative.Should().ContainKey("dotnet.native.wasm");
+            bootJsonData.resources.icu.Should().ContainKey(customIcuFilename);
+            bootJsonData.resources.icu.Should().NotContainKey("icudt.dat");
+            bootJsonData.resources.icu.Should().NotContainKey("icudt_CJK.dat");
+            bootJsonData.resources.icu.Should().NotContainKey("icudt_EFIGS.dat");
+            bootJsonData.resources.icu.Should().NotContainKey("icudt_no_CJK.dat");
 
             new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "dotnet.native.wasm")).Should().Exist();
             new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", customIcuFilename)).Should().Exist();
@@ -427,7 +406,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         }
 
         [Fact]
-        public void Build_WithBlazorWebAssemblyLoadAllGlobalizationData_SetsICUDataMode()
+        public void Build_WithBlazorWebAssemblyLoadAllGlobalizationData_SetsGlobalizationMode()
         {
             // Arrange
             var testAppName = "BlazorWasmMinimal";
@@ -450,12 +429,11 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var bootJsonPath = Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
             var bootJsonData = ReadBootJsonData(bootJsonPath);
 
-            bootJsonData.icuDataMode.Should().Be(ICUDataMode.All);
-            var runtime = bootJsonData.resources.runtime;
+            bootJsonData.globalizationMode.Should().Be("all");
 
-            runtime.Should().ContainKey("dotnet.native.wasm");
-            runtime.Should().ContainKey("icudt.dat");
-            runtime.Should().ContainKey("icudt_EFIGS.dat");
+            bootJsonData.resources.wasmNative.Should().ContainKey("dotnet.native.wasm");
+            bootJsonData.resources.icu.Should().ContainKey("icudt.dat");
+            bootJsonData.resources.icu.Should().ContainKey("icudt_EFIGS.dat");
 
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "dotnet.native.wasm")).Should().Exist();
             new FileInfo(Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "icudt.dat")).Should().Exist();
@@ -465,7 +443,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         }
 
         [Fact]
-        public void Publish_WithBlazorWebAssemblyLoadAllGlobalizationData_SetsICUDataMode()
+        public void Publish_WithBlazorWebAssemblyLoadAllGlobalizationData_SetsGlobalizationMode()
         {
             // Arrange
             var testAppName = "BlazorHosted";
@@ -489,12 +467,11 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var bootJsonPath = Path.Combine(publishDirectory, "wwwroot", "_framework", "blazor.boot.json");
             var bootJsonData = ReadBootJsonData(bootJsonPath);
 
-            bootJsonData.icuDataMode.Should().Be(ICUDataMode.All);
-            var runtime = bootJsonData.resources.runtime;
+            bootJsonData.globalizationMode.Should().Be("all");
 
-            runtime.Should().ContainKey("dotnet.native.wasm");
-            runtime.Should().ContainKey("icudt.dat");
-            runtime.Should().ContainKey("icudt_EFIGS.dat");
+            bootJsonData.resources.wasmNative.Should().ContainKey("dotnet.native.wasm");
+            bootJsonData.resources.icu.Should().ContainKey("icudt.dat");
+            bootJsonData.resources.icu.Should().ContainKey("icudt_EFIGS.dat");
 
             new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "dotnet.native.wasm")).Should().Exist();
             new FileInfo(Path.Combine(publishDirectory, "wwwroot", "_framework", "icudt.dat")).Should().Exist();
@@ -573,7 +550,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var bootJsonPath = new FileInfo(Path.Combine(outputPath, "wwwroot", "_framework", "blazor.boot.json"));
             bootJsonPath.Should().Contain("\"Microsoft.CodeAnalysis.CSharp.wasm\"");
-            bootJsonPath.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.wasm\"");
+            bootJsonPath.Should().Contain("\"fr\"");
+            bootJsonPath.Should().Contain("\"Microsoft.CodeAnalysis.CSharp.resources.wasm\"");
         }
 
         [Fact]

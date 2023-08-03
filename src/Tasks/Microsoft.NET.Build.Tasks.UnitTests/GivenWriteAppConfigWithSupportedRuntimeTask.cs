@@ -3,8 +3,6 @@
 
 using FluentAssertions;
 using NuGet.Frameworks;
-using System.Linq;
-using System.Xml.Linq;
 using Xunit;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
