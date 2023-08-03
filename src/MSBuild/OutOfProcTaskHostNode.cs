@@ -165,7 +165,9 @@ namespace Microsoft.Build.CommandLine
         /// The task object cache.
         /// </summary>
         private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
+#endif
 
+#if FEATURE_REPORTFILEACCESSES
         /// <summary>
         /// The file accesses reported by the most recently completed task.
         /// </summary>
@@ -200,6 +202,8 @@ namespace Microsoft.Build.CommandLine
 
 #if !CLR2COMPATIBILITY
             EngineServices = new EngineServicesImpl(this);
+#endif
+#if FEATURE_REPORTFILEACCESSES
             _fileAccessData = new List<FileAccessData>();
 #endif
         }
@@ -541,24 +545,29 @@ namespace Microsoft.Build.CommandLine
             }
 
             /// <inheritdoc/>
-            public override void ReportFileAccess(FileAccessData fileAccessData) => _taskHost._fileAccessData.Add(fileAccessData);
+            public override void ReportFileAccess(FileAccessData fileAccessData)
+            {
+#if FEATURE_REPORTFILEACCESSES
+                _taskHost._fileAccessData.Add(fileAccessData);
+#endif
+            }
         }
 
         public EngineServices EngineServices { get; }
 
-        #endregion
+#endregion
 
 #endif
 
-        #region INodePacketFactory Members
+                #region INodePacketFactory Members
 
-        /// <summary>
-        /// Registers the specified handler for a particular packet type.
-        /// </summary>
-        /// <param name="packetType">The packet type.</param>
-        /// <param name="factory">The factory for packets of the specified type.</param>
-        /// <param name="handler">The handler to be called when packets of the specified type are received.</param>
-        public void RegisterPacketHandler(NodePacketType packetType, NodePacketFactoryMethod factory, INodePacketHandler handler)
+                /// <summary>
+                /// Registers the specified handler for a particular packet type.
+                /// </summary>
+                /// <param name="packetType">The packet type.</param>
+                /// <param name="factory">The factory for packets of the specified type.</param>
+                /// <param name="handler">The handler to be called when packets of the specified type are received.</param>
+                public void RegisterPacketHandler(NodePacketType packetType, NodePacketFactoryMethod factory, INodePacketHandler handler)
         {
             _packetFactory.RegisterPacketHandler(packetType, factory, handler);
         }
@@ -948,7 +957,7 @@ namespace Microsoft.Build.CommandLine
                     {
                         _taskCompletePacket = new TaskHostTaskComplete(
                             taskResult,
-#if !CLR2COMPATIBILITY
+#if FEATURE_REPORTFILEACCESSES
                             _fileAccessData,
 #endif
                             currentEnvironment);
@@ -972,7 +981,7 @@ namespace Microsoft.Build.CommandLine
                         // Create a minimal taskCompletePacket to carry the exception so that the TaskHostTask does not hang while waiting
                         _taskCompletePacket = new TaskHostTaskComplete(
                             new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e),
-#if !CLR2COMPATIBILITY
+#if FEATURE_REPORTFILEACCESSES
                             _fileAccessData,
 #endif
                             null);
@@ -980,7 +989,7 @@ namespace Microsoft.Build.CommandLine
                 }
                 finally
                 {
-#if !CLR2COMPATIBILITY
+#if FEATURE_REPORTFILEACCESSES
                     _fileAccessData = new List<FileAccessData>();
 #endif
 

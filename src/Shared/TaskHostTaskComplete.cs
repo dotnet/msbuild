@@ -52,7 +52,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class TaskHostTaskComplete : INodePacket
     {
-#if !CLR2COMPATIBILITY
+#if FEATURE_REPORTFILEACCESSES
         private List<FileAccessData> _fileAccessData;
 #endif
 
@@ -89,15 +89,18 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Dictionary<string, string> _buildProcessEnvironment = null;
 
+
+#pragma warning disable CS1572 // XML comment has a param tag, but there is no parameter by that name. Justification: xmldoc doesn't seem to interact well with #ifdef of params.
         /// <summary>
         /// Initializes a new instance of the <see cref="TaskHostTaskComplete"/> class.
         /// </summary>
         /// <param name="result">The result of the task's execution.</param>
         /// <param name="fileAccessData">The file accesses reported by the task.</param>
         /// <param name="buildProcessEnvironment">The build process environment as it was at the end of the task's execution.</param>
+#pragma warning restore CS1572 // XML comment has a param tag, but there is no parameter by that name
         public TaskHostTaskComplete(
             OutOfProcTaskHostTaskResult result,
-#if !CLR2COMPATIBILITY
+#if FEATURE_REPORTFILEACCESSES
             List<FileAccessData> fileAccessData,
 #endif
             IDictionary<string, string> buildProcessEnvironment)
@@ -108,7 +111,7 @@ namespace Microsoft.Build.BackEnd
             _taskException = result.TaskException;
             _taskExceptionMessage = result.ExceptionMessage;
             _taskExceptionMessageArgs = result.ExceptionMessageArgs;
-#if !CLR2COMPATIBILITY
+#if FEATURE_REPORTFILEACCESSES
             _fileAccessData = fileAccessData;
 #endif
 
@@ -217,7 +220,7 @@ namespace Microsoft.Build.BackEnd
             get { return NodePacketType.TaskHostTaskComplete; }
         }
 
-#if !CLR2COMPATIBILITY
+#if FEATURE_REPORTFILEACCESSES
         /// <summary>
         /// Gets the file accesses reported by the task.
         /// </summary>
@@ -240,7 +243,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _taskExceptionMessageArgs);
             translator.TranslateDictionary(ref _taskOutputParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
             translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
-#if !CLR2COMPATIBILITY
+#if FEATURE_REPORTFILEACCESSES
             translator.Translate(ref _fileAccessData);
 #endif
         }

@@ -372,10 +372,12 @@ namespace Microsoft.Build.Execution
                 _nodeEndpoint.SendData(result);
             }
 
+#if FEATURE_REPORTFILEACCESSES
             if (_buildParameters.ReportFileAccesses)
             {
                 FileAccessManager.NotifyFileAccessCompletion(result.GlobalRequestId);
             }
+#endif
         }
 
         /// <summary>

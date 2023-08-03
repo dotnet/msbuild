@@ -18,8 +18,6 @@ namespace Microsoft.Build.Framework.FileAccess
     public readonly record struct FileAccessData(
         ReportedFileOperation Operation,
         RequestedAccess RequestedAccess,
-
-        // TODO dshepelev: Fix suppression.
 #pragma warning disable CS3001, CS3003 // Argument type is not CLS-compliant; Type is not CLS-compliant.
         uint ProcessId,
         uint Error,

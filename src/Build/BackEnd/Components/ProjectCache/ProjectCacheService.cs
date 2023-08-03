@@ -670,10 +670,12 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 return;
             }
 
+#if FEATURE_REPORTFILEACCESSES
             if (_componentHost.BuildParameters.ReportFileAccesses)
             {
                 _fileAccessManager.WaitForFileAccessReportCompletion(buildResult.GlobalRequestId, cancellationToken);
             }
+#endif
 
             IReadOnlyDictionary<string, string> globalProperties = GetGlobalProperties(requestConfiguration);
 

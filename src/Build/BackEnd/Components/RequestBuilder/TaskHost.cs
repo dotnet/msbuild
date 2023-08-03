@@ -345,11 +345,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void Yield()
         {
+#if FEATURE_REPORTFILEACCESSES
             // If file accesses are being reported we should not yield as file access will be attributed to the wrong project.
             if (_host.BuildParameters.ReportFileAccesses)
             {
                 return;
             }
+#endif
 
             lock (_callbackMonitor)
             {
@@ -372,11 +374,13 @@ namespace Microsoft.Build.BackEnd
             // to release explicitly granted cores when reacquiring the node may lead to deadlocks.
             ReleaseAllCores();
 
+#if FEATURE_REPORTFILEACCESSES
             // If file accesses are being reported yielding is a no-op so reacquire should be too.
             if (_host.BuildParameters.ReportFileAccesses)
             {
                 return;
             }
+#endif
 
             lock (_callbackMonitor)
             {
@@ -391,7 +395,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        #endregion
+#endregion
 
         #region IBuildEngine Members
 
@@ -938,14 +942,19 @@ namespace Microsoft.Build.BackEnd
             /// <inheritdoc/>
             public override void ReportFileAccess(FileAccessData fileAccessData)
             {
+#if FEATURE_REPORTFILEACCESSES
                 IBuildComponentHost buildComponentHost = _taskHost._host;
-                ((IFileAccessManager)buildComponentHost.GetComponent(BuildComponentType.FileAccessManager)).ReportFileAccess(fileAccessData, buildComponentHost.BuildParameters.NodeId);
+                if (buildComponentHost.BuildParameters.ReportFileAccesses)
+                {
+                    ((IFileAccessManager)buildComponentHost.GetComponent(BuildComponentType.FileAccessManager)).ReportFileAccess(fileAccessData, buildComponentHost.BuildParameters.NodeId);
+                }
+#endif
             }
         }
 
         public EngineServices EngineServices { get; }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Called by the internal MSBuild task.

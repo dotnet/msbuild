@@ -559,10 +559,12 @@ namespace Microsoft.Build.Execution
                     _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath("msbuild-cache");
                 }
 
+#if FEATURE_REPORTFILEACCESSES
                 if (_buildParameters.ReportFileAccesses)
                 {
                     _componentFactories.ReplaceFactory(BuildComponentType.NodeLauncher, DetouredNodeLauncher.CreateComponent);
                 }
+#endif
 
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
@@ -2491,16 +2493,30 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="nodeId">The id of the node from which the <paramref name="fileAccessReport"/> was received.</param>
         /// <param name="fileAccessReport">The file access to report to the <see cref="FileAccessManager"/>.</param>
-        private void HandleFileAccessReport(int nodeId, FileAccessReport fileAccessReport) =>
-            ((FileAccessManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.FileAccessManager)).ReportFileAccess(fileAccessReport.FileAccessData, nodeId);
+        private void HandleFileAccessReport(int nodeId, FileAccessReport fileAccessReport)
+        {
+#if FEATURE_REPORTFILEACCESSES
+            if (_buildParameters.ReportFileAccesses)
+            {
+                ((FileAccessManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.FileAccessManager)).ReportFileAccess(fileAccessReport.FileAccessData, nodeId);
+            }
+#endif
+        }
 
         /// <summary>
         /// Report the received <paramref name="processReport"/> to the <see cref="FileAccessManager"/>.
         /// </summary>
         /// <param name="nodeId">The id of the node from which the <paramref name="processReport"/> was received.</param>
         /// <param name="processReport">The process data to report to the <see cref="FileAccessManager"/>.</param>
-        private void HandleProcessReport(int nodeId, ProcessReport processReport) =>
-            ((FileAccessManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.FileAccessManager)).ReportProcess(processReport.ProcessData, nodeId);
+        private void HandleProcessReport(int nodeId, ProcessReport processReport)
+        {
+#if FEATURE_REPORTFILEACCESSES
+            if (_buildParameters.ReportFileAccesses)
+            {
+                ((FileAccessManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.FileAccessManager)).ReportProcess(processReport.ProcessData, nodeId);
+            }
+#endif
+        }
 
         /// <summary>
         /// If there are no more active nodes, cleans up any remaining submissions.

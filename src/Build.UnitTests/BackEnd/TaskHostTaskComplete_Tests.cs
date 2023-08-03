@@ -26,6 +26,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestConstructors()
         {
+#if FEATURE_REPORTFILEACCESSES
             var fileAccessData = new List<FileAccessData>()
             {
                 new FileAccessData(
@@ -39,20 +40,53 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     true),
             };
-            _ = new TaskHostTaskComplete(new OutOfProcTaskHostTaskResult(TaskCompleteType.Success), fileAccessData, null);
-            _ = new TaskHostTaskComplete(new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure), fileAccessData, null);
-            _ = new TaskHostTaskComplete(new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringInitialization, new ArgumentOutOfRangeException()), fileAccessData, null);
-            _ = new TaskHostTaskComplete(new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, new ArgumentNullException()), fileAccessData, null);
+#endif
+
+            _ = new TaskHostTaskComplete(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.Success),
+#if FEATURE_REPORTFILEACCESSES
+                fileAccessData,
+#endif
+                null);
+            _ = new TaskHostTaskComplete(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure),
+#if FEATURE_REPORTFILEACCESSES
+                fileAccessData,
+#endif
+                null);
+            _ = new TaskHostTaskComplete(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringInitialization,
+                new ArgumentOutOfRangeException()),
+#if FEATURE_REPORTFILEACCESSES
+                fileAccessData,
+#endif
+                null);
+            _ = new TaskHostTaskComplete(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, new ArgumentNullException()),
+#if FEATURE_REPORTFILEACCESSES
+                fileAccessData,
+#endif
+                null);
 
             IDictionary<string, object> parameters = new Dictionary<string, object>();
-            _ = new TaskHostTaskComplete(new OutOfProcTaskHostTaskResult(TaskCompleteType.Success, parameters), default, null);
+            _ = new TaskHostTaskComplete(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.Success, parameters),
+#if FEATURE_REPORTFILEACCESSES
+                null,
+#endif
+                null);
 
             IDictionary<string, object> parameters2 = new Dictionary<string, object>();
             parameters2.Add("Text", "Hello!");
             parameters2.Add("MyBoolValue", true);
             parameters2.Add("MyITaskItem", new TaskItem("ABC"));
             parameters2.Add("ItemArray", new ITaskItem[] { new TaskItem("DEF"), new TaskItem("GHI"), new TaskItem("JKL") });
-            _ = new TaskHostTaskComplete(new OutOfProcTaskHostTaskResult(TaskCompleteType.Success, parameters2), default, null);
+            _ = new TaskHostTaskComplete(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.Success, parameters2),
+#if FEATURE_REPORTFILEACCESSES
+                null,
+#endif
+                null);
         }
 
         /// <summary>
@@ -73,7 +107,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestTranslationWithNullDictionary()
         {
-            TaskHostTaskComplete complete = new(new OutOfProcTaskHostTaskResult(TaskCompleteType.Success), default, null);
+            TaskHostTaskComplete complete = new(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.Success),
+#if FEATURE_REPORTFILEACCESSES
+                null,
+#endif
+                null);
 
             ((ITranslatable)complete).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostTaskComplete.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -91,7 +130,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestTranslationWithEmptyDictionary()
         {
-            TaskHostTaskComplete complete = new(new OutOfProcTaskHostTaskResult(TaskCompleteType.Success, new Dictionary<string, object>()), default, null);
+            TaskHostTaskComplete complete = new(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.Success, new Dictionary<string, object>()),
+#if FEATURE_REPORTFILEACCESSES
+                null,
+#endif
+                null);
 
             ((ITranslatable)complete).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostTaskComplete.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -112,7 +156,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             IDictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("Text", "Foo");
             parameters.Add("BoolValue", false);
-            TaskHostTaskComplete complete = new(new OutOfProcTaskHostTaskResult(TaskCompleteType.Success, parameters), default, null);
+            TaskHostTaskComplete complete = new(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.Success, parameters),
+#if FEATURE_REPORTFILEACCESSES
+                null,
+#endif
+                null);
 
             ((ITranslatable)complete).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostTaskComplete.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -134,7 +183,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("TaskItemValue", new TaskItem("Foo"));
-            TaskHostTaskComplete complete = new(new OutOfProcTaskHostTaskResult(TaskCompleteType.Success, parameters), default, null);
+            TaskHostTaskComplete complete = new(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.Success, parameters),
+#if FEATURE_REPORTFILEACCESSES
+                null,
+#endif
+                null);
 
             ((ITranslatable)complete).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostTaskComplete.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -155,7 +209,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("TaskItemArrayValue", new ITaskItem[] { new TaskItem("Foo"), new TaskItem("Baz") });
-            TaskHostTaskComplete complete = new(new OutOfProcTaskHostTaskResult(TaskCompleteType.Success, parameters), default, null);
+            TaskHostTaskComplete complete = new(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.Success, parameters),
+#if FEATURE_REPORTFILEACCESSES
+                null,
+#endif
+                null);
 
             ((ITranslatable)complete).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostTaskComplete.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -181,7 +240,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
-                TaskHostTaskComplete complete = new(new OutOfProcTaskHostTaskResult(taskResult, taskOutputParameters, taskException, taskExceptionMessage, taskExceptionMessageArgs), default, buildProcessEnvironment);
+                TaskHostTaskComplete complete = new(
+                    new OutOfProcTaskHostTaskResult(taskResult, taskOutputParameters, taskException, taskExceptionMessage, taskExceptionMessageArgs),
+#if FEATURE_REPORTFILEACCESSES
+                    null,
+#endif
+                    buildProcessEnvironment);
             }
             catch (Exception e)
             {

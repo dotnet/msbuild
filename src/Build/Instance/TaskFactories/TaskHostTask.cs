@@ -435,11 +435,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleTaskHostTaskComplete(TaskHostTaskComplete taskHostTaskComplete)
         {
+#if FEATURE_REPORTFILEACCESSES
             foreach (FileAccessData fileAccessData in taskHostTaskComplete.FileAccessData)
             {
                 ((IFileAccessManager)_buildComponentHost.GetComponent(BuildComponentType.FileAccessManager))
                     .ReportFileAccess(fileAccessData, _buildComponentHost.BuildParameters.NodeId);
             }
+#endif
 
             // If it crashed, or if it failed, it didn't succeed.   
             _taskExecutionSucceeded = taskHostTaskComplete.TaskResult == TaskCompleteType.Success ? true : false;

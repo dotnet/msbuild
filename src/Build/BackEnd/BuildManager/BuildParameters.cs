@@ -804,6 +804,7 @@ namespace Microsoft.Build.Execution
             set => _outputResultsCacheFile = value;
         }
 
+#if FEATURE_REPORTFILEACCESSES
         /// <summary>
         /// Gets or sets a value indicating whether file accesses should be reported to any configured project cache plugins.
         /// </summary>
@@ -825,6 +826,7 @@ namespace Microsoft.Build.Execution
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Determines whether MSBuild will save the results of builds after EndBuild to speed up future builds.
