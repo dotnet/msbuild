@@ -1033,7 +1033,7 @@ namespace InlineCode {{
             const string taskName = "SayHello";
             const string className = "HelloWorld";
             taskName.ShouldNotBe(className, "The test is misconfigured.");
-            const string errorMessage = $@"The task name ""{taskName}"" could not be found.";
+            string errorMessage = string.Format(ResourceUtilities.GetResourceString("CodeTaskFactory.CouldNotFindTaskInAssembly"), taskName);
 
             const string projectContent = @"<Project>
   <UsingTask TaskName=""" + taskName + @""" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
