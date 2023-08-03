@@ -11,7 +11,7 @@
     <UsagePattern IdentityGlob="System.Diagnostics.EventLog/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Reflection.MetadataLoadContext/*7.0.0*" />
     <UsagePattern IdentityGlob="System.Security.Cryptography.ProtectedData/*7.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Json/*7.0.3*" />
+    <UsagePattern IdentityGlob="System.Text.Json/*7.0.0*" />
   </IgnorePatterns>
   <Usages>
   </Usages>
