@@ -1,7 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
 
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
@@ -14,12 +14,14 @@ internal class DefaultManifestOperations : IManifestOperations
     private readonly Uri _baseUri;
     private readonly HttpClient _client;
     private readonly ILogger _logger;
+    private readonly string _registryName;
 
-    internal DefaultManifestOperations(Uri baseUri, HttpClient client, ILogger logger)
+    internal DefaultManifestOperations(Uri baseUri, string registryName, HttpClient client, ILogger logger)
     {
         _baseUri = baseUri;
         _client = client;
         _logger = logger;
+        _registryName = registryName;
     }
 
     public async Task<HttpResponseMessage> GetAsync(string repositoryName, string reference, CancellationToken cancellationToken)
@@ -29,11 +31,10 @@ internal class DefaultManifestOperations : IManifestOperations
         HttpResponseMessage response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
         return response.StatusCode switch {
             HttpStatusCode.OK => response,
-            HttpStatusCode.NotFound => throw new RepositoryNotFoundException(repositoryName, reference),
-            HttpStatusCode.Unauthorized  => throw new UnableToAccessRepositoryException(repositoryName),
-            _ => throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryPullFailed)), response.RequestMessage?.RequestUri?.ToString())
+            HttpStatusCode.NotFound => throw new RepositoryNotFoundException(_registryName, repositoryName, reference),
+            HttpStatusCode.Unauthorized  => throw new UnableToAccessRepositoryException(_registryName, repositoryName),
+            _ => throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryPullFailed)), response.RequestMessage?.RequestUri?.ToString(), await response.Content.ReadAsStringAsync().ConfigureAwait(false))
         };
-        return response;
     }
 
     public async Task PutAsync(string repositoryName, string reference, ManifestV2 manifest, CancellationToken cancellationToken)
@@ -46,7 +47,7 @@ internal class DefaultManifestOperations : IManifestOperations
 
         if (!putResponse.IsSuccessStatusCode)
         {
-            throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryPushFailed)), putResponse.RequestMessage?.RequestUri?.ToString(), jsonString);
+            throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryPushFailed)), putResponse.RequestMessage?.RequestUri?.ToString(), await putResponse.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
     }
 }

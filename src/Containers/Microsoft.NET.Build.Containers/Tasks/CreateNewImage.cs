@@ -58,12 +58,30 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
         ImageBuilder? imageBuilder;
         if (sourceRegistry is { } registry)
         {
-            imageBuilder = await registry.GetImageManifestAsync(
-                BaseImageName,
-                BaseImageTag,
-                ContainerRuntimeIdentifier,
-                RuntimeIdentifierGraphPath,
-                cancellationToken).ConfigureAwait(false);
+            try
+            {
+                imageBuilder = await registry.GetImageManifestAsync(
+                    BaseImageName,
+                    BaseImageTag,
+                    ContainerRuntimeIdentifier,
+                    RuntimeIdentifierGraphPath,
+                    cancellationToken).ConfigureAwait(false);
+            }
+            catch (RepositoryNotFoundException)
+            {
+                Log.LogErrorWithCodeFromResources(nameof(Strings.RepositoryNotFound), BaseImageName, BaseImageTag, registry.RegistryName);
+                return !Log.HasLoggedErrors;
+            }
+            catch (UnableToAccessRepositoryException)
+            {
+                Log.LogErrorWithCodeFromResources(nameof(Strings.UnableToAccessRepository), BaseImageName, registry.RegistryName);
+                return !Log.HasLoggedErrors;
+            }
+            catch (ContainerHttpException e)
+            {
+                Log.LogErrorFromException(e, showStackTrace: false, showDetail: true, file: null);
+                return !Log.HasLoggedErrors;
+            }
         }
         else
         {
@@ -145,6 +163,11 @@ public sealed partial class CreateNewImage : Microsoft.Build.Utilities.Task, ICa
                             cancellationToken).ConfigureAwait(false);
                         SafeLog("Pushed image '{0}' to registry '{1}'", destinationImageReference, OutputRegistry);
                     }
+                }
+                catch (UnableToAccessRepositoryException)
+                {
+                    Log.LogErrorWithCodeFromResources(nameof(Strings.UnableToAccessRepository), destinationImageReference.Repository, registry.RegistryName);
+                    return !Log.HasLoggedErrors;
                 }
                 catch (ContainerHttpException e)
                 {
