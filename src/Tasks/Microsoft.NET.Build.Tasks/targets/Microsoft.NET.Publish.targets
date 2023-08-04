@@ -329,7 +329,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ResolveReadyToRunCompilers RuntimePacks="@(ResolvedRuntimePack)"
                                 Crossgen2Packs="@(ResolvedCrossgen2Pack)"
                                 TargetingPacks="@(ResolvedTargetingPack)"
-                                RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+                                RuntimeGraphPath="$(RuntimeIdentifierGraphPath)"
                                 NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
                                 EmitSymbols="$(PublishReadyToRunEmitSymbols)"
                                 ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
@@ -1013,7 +1013,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(MicrosoftNETPlatformLibrary)" />
       <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(SelfContained)" />
       <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(IncludeFileVersionsInDependencyFile)" />
-      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(BundledRuntimeIdentifierGraphFile)" />
+      <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(RuntimeIdentifierGraphPath)" />
       <_GeneratePublishDependencyFilePropertyInputsCacheToHash Include="$(IncludeProjectsNotInAssetsFileInDepsFile)" />
     </ItemGroup>
 
@@ -1099,7 +1099,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       IsSelfContained="$(SelfContained)"
                       IsSingleFile="$(_IsSingleFilePublish)"
                       IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"
-                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+                      RuntimeGraphPath="$(RuntimeIdentifierGraphPath)"
                       IncludeProjectsNotInAssetsFile="$(IncludeProjectsNotInAssetsFileInDepsFile)"/>
 
     <ItemGroup>

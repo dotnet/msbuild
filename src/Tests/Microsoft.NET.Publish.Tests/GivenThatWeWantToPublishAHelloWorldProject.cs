@@ -162,9 +162,6 @@ public static class Program
         }
 
         [Theory]
-        [InlineData("win-arm")]
-        [InlineData("win8-arm")]
-        [InlineData("win81-arm")]
         [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm")]
         [InlineData($"{ToolsetInfo.LatestWinRuntimeIdentifier}-arm64")]
         public void Publish_standalone_post_netcoreapp2_arm_app(string runtimeIdentifier)

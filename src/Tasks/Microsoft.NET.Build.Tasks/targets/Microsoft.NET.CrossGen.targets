@@ -444,7 +444,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ResolveReadyToRunCompilers RuntimePacks="@(ResolvedRuntimePack)"
                                 Crossgen2Packs="@(ResolvedCrossgen2Pack)"
                                 TargetingPacks="@(ResolvedTargetingPack)"
-                                RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+                                RuntimeGraphPath="$(RuntimeIdentifierGraphPath)"
                                 NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
                                 EmitSymbols="$(PublishReadyToRunEmitSymbols)"
                                 ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
