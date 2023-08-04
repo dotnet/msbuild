@@ -189,7 +189,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Theory]
+        [Theory(Skip = "hangs in CI, can't repro locally: https://github.com/dotnet/msbuild/issues/5453")]
         [MemberData(nameof(GraphsWithUniformSolutionConfigurations))]
         public void GraphConstructionCanLoadEntryPointsFromSolution(
             Dictionary<int, int[]> edges,
@@ -199,7 +199,7 @@ namespace Microsoft.Build.Graph.UnitTests
             AssertSolutionBasedGraph(edges, currentSolutionConfiguration, solutionConfigurations);
         }
 
-        [Theory]
+        [Theory(Skip = "hangs in CI, can't repro locally: https://github.com/dotnet/msbuild/issues/5453")]
         [MemberData(nameof(GraphsWithUniformSolutionConfigurations))]
         public void SolutionBasedGraphCanMatchProjectSpecificConfigurations(
             Dictionary<int, int[]> edges,
