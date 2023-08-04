@@ -16,20 +16,24 @@ namespace Microsoft.NET.Publish.Tests
         static GivenThatWeWantToStoreAProjectWithDependencies()
         {
             var rid = RuntimeInformation.RuntimeIdentifier;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 _testArch = rid.Substring(rid.LastIndexOf("-", StringComparison.InvariantCulture) + 1);
                 _runtimeRid = "win7-" + _testArch;
             }
+            else if (OperatingSystem.IsMacOS())
+            {
+                // microsoft.netcore.coredistools only has assets for osx.10.10
+                _runtimeRid = "osx.10.10-x64";
+            }
             else
             {
-
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    // microsoft.netcore.coredistools only has assets for osx.10.10
-                    _runtimeRid = "osx.10.10-x64";
-                }
-                else if (rid.Contains("ubuntu"))
+                var osId = File.ReadAllLines("/etc/os-release")
+                    .First(line => line.StartsWith("ID=", StringComparison.OrdinalIgnoreCase))
+                    .Substring("ID=".Length)
+                    .Trim('\"', '\'')
+                    .ToLowerInvariant();
+                if (osId.Contains("ubuntu"))
                 {
                     // microsoft.netcore.coredistools only has assets for ubuntu.14.04-x64
                     _runtimeRid = "ubuntu.14.04-x64";

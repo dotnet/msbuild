@@ -56,7 +56,7 @@ public class TargetsTests
         }, projectName: $"{nameof(CanNormalizeInputContainerNames)}_{projectName}_{expectedContainerImageName}_{shouldPass}");
         using var _ = d;
         var instance = project.CreateProjectInstance(global::Microsoft.Build.Execution.ProjectInstanceSettings.None);
-        instance.Build(new[] { ComputeContainerConfig }, new [] { logger }, null, out var outputs).Should().Be(shouldPass, "Build should have succeeded");
+        instance.Build(new[] { ComputeContainerConfig }, new[]{ logger }, null, out var outputs).Should().Be(shouldPass, String.Join(Environment.NewLine, logger.AllMessages));
         Assert.Equal(expectedContainerImageName, instance.GetPropertyValue(ContainerRepository));
     }
 
@@ -181,11 +181,11 @@ public class TargetsTests
         computedTag.Should().Be(expectedTag);
     }
 
-    [InlineData("v8.0", "linux-x64", "64198")]
+    [InlineData("v8.0", "linux-x64", null)]
     [InlineData("v8.0", "win-x64", "ContainerUser")]
     [InlineData("v7.0", "linux-x64", null)]
     [InlineData("v7.0", "win-x64", null)]
-    [InlineData("v9.0", "linux-x64", "64198")]
+    [InlineData("v9.0", "linux-x64", null)]
     [InlineData("v9.0", "win-x64", "ContainerUser")]
     [Theory]
     public void CanComputeContainerUser(string tfm, string rid, string expectedUser)

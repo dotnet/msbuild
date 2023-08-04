@@ -2489,7 +2489,7 @@ namespace Microsoft.DotNet.GenAPI.Tests
                     public partial struct C<T>
                         where T : unmanaged
                     {
-                        public required (string? k, dynamic v, nint n) X { get { throw null; } init; }
+                        public required (string? k, dynamic v, nint n) X { get { throw null; } init { } }
                     }
 
                     public static partial class E

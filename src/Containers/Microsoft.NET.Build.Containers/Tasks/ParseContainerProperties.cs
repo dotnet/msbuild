@@ -144,22 +144,19 @@ public sealed class ParseContainerProperties : Microsoft.Build.Utilities.Task
             Log.LogWarningWithCodeFromResources(nameof(Strings.BaseImageNameRegistryFallback), nameof(FullyQualifiedBaseImageName), ContainerHelpers.DockerRegistryAlias);
         }
 
-        try
+        var (normalizedRepository, normalizationWarning, normalizationError) = ContainerHelpers.NormalizeRepository(ContainerRepository);
+        if (normalizedRepository is not null)
         {
-            if (!ContainerHelpers.NormalizeRepository(ContainerRepository, out var normalizedRepository))
-            {
-                Log.LogMessageFromResources(nameof(Strings.NormalizedContainerName), nameof(ContainerRepository), normalizedRepository);
-                NewContainerRepository = normalizedRepository!; // known to be not null due to output of NormalizeImageName
-            }
-            else
-            {
-                // name was valid already
-                NewContainerRepository = ContainerRepository;
-            }
+            NewContainerRepository = normalizedRepository;
         }
-        catch (ArgumentException)
+        if (normalizationWarning is (string warningMessageKey, object[] warningParams))
         {
-            Log.LogErrorWithCodeFromResources(nameof(Strings.InvalidContainerRepository), nameof(ContainerRepository), ContainerRepository);
+            Log.LogMessageFromResources(warningMessageKey, warningParams);
+        }
+
+        if (normalizationError is (string errorMessageKey, object[] errorParams))
+        {
+            Log.LogErrorWithCodeFromResources(errorMessageKey, errorParams);
             return !Log.HasLoggedErrors;
         }
 

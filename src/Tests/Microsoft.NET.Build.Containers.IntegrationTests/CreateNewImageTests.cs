@@ -65,6 +65,10 @@ public class CreateNewImageTests
         newProjectDir.Delete(true);
     }
 
+    private static ImageConfig GetImageConfigFromTask(CreateNewImage task) {
+        return new(task.GeneratedContainerConfiguration);
+    }
+
     [DockerAvailableFact]
     public void ParseContainerProperties_EndToEnd()
     {
@@ -197,6 +201,14 @@ public class CreateNewImageTests
 
         Assert.True(cni.Execute(), FormatBuildMessages(errors));
 
+        var config = GetImageConfigFromTask(cni);
+        // because we're building off of .net 8 images for this test, we can validate the user id and aspnet https urls
+        Assert.Equal("1654", config.GetUser());
+
+        var ports = config.Ports;
+        Assert.Single(ports);
+        Assert.Equal(new(8080, PortType.tcp), ports.First());
+
         ContainerCli.RunCommand(_testOutput, "--rm", $"{pcp.NewContainerRepository}:latest")
             .Execute()
             .Should().Pass()
@@ -208,7 +220,7 @@ public class CreateNewImageTests
     {
         const string RootlessBase ="dotnet/rootlessbase";
         const string AppImage = "dotnet/testimagerootless";
-        const string RootlessUser = "101";
+        const string RootlessUser = "1654";
         var loggerFactory = new TestLoggerFactory(_testOutput);
         var logger = loggerFactory.CreateLogger(nameof(CreateNewImage_RootlessBaseImage));
 
@@ -224,7 +236,6 @@ public class CreateNewImageTests
 
         Assert.NotNull(imageBuilder);
 
-        imageBuilder.SetUser(RootlessUser);
 
         BuiltImage builtImage = imageBuilder.Build();
 

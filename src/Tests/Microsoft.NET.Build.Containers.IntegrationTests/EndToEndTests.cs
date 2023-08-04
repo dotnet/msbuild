@@ -3,6 +3,7 @@
 
 using System.Runtime.CompilerServices;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.Build.Containers.Resources;
 using Microsoft.NET.Build.Containers.UnitTests;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -22,13 +23,13 @@ public class EndToEndTests : IDisposable
 
     public static string NewImageName([CallerMemberName] string callerMemberName = "")
     {
-        bool normalized = ContainerHelpers.NormalizeRepository(callerMemberName, out string? normalizedName);
-        if (!normalized)
+        var (normalizedName, warning, error) = ContainerHelpers.NormalizeRepository(callerMemberName);
+        if (error is (var format, var args))
         {
-            return normalizedName!;
+            throw new ArgumentException(String.Format(Strings.ResourceManager.GetString(format)!, args));
         }
 
-        return callerMemberName;
+        return normalizedName!; // non-null if error is null
     }
 
     public void Dispose()

@@ -11,7 +11,7 @@ namespace Microsoft.NET.TestFramework
 
         public bool UseFullFrameworkMSBuild { get; private set; }
 
-        public string FullFrameworkMSBuildPath { get; private set; } 
+        public string FullFrameworkMSBuildPath { get; private set; }
 
         public string DotnetHostPath { get; private set; }
 
