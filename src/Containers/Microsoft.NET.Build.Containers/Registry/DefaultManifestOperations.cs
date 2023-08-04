@@ -27,7 +27,12 @@ internal class DefaultManifestOperations : IManifestOperations
         cancellationToken.ThrowIfCancellationRequested();
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri(_baseUri, $"/v2/{repositoryName}/manifests/{reference}")).AcceptManifestFormats();
         HttpResponseMessage response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
+        return response.StatusCode switch {
+            HttpStatusCode.OK => response,
+            HttpStatusCode.NotFound => throw new RepositoryNotFoundException(repositoryName, reference),
+            HttpStatusCode.Unauthorized  => throw new UnableToAccessRepositoryException(repositoryName),
+            _ => throw new ContainerHttpException(Resource.GetString(nameof(Strings.RegistryPullFailed)), response.RequestMessage?.RequestUri?.ToString())
+        };
         return response;
     }
 
