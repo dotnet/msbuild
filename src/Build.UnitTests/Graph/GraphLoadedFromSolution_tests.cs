@@ -189,7 +189,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Theory(Skip = "hangs in CI, can't repro locally: https://github.com/dotnet/msbuild/issues/5453")]
+        [Theory]
         [MemberData(nameof(GraphsWithUniformSolutionConfigurations))]
         public void GraphConstructionCanLoadEntryPointsFromSolution(
             Dictionary<int, int[]> edges,
@@ -199,7 +199,7 @@ namespace Microsoft.Build.Graph.UnitTests
             AssertSolutionBasedGraph(edges, currentSolutionConfiguration, solutionConfigurations);
         }
 
-        [Theory(Skip = "hangs in CI, can't repro locally: https://github.com/dotnet/msbuild/issues/5453")]
+        [Theory]
         [MemberData(nameof(GraphsWithUniformSolutionConfigurations))]
         public void SolutionBasedGraphCanMatchProjectSpecificConfigurations(
             Dictionary<int, int[]> edges,
@@ -706,6 +706,9 @@ namespace Microsoft.Build.Graph.UnitTests
                     solutionPath,
                     globalProperties),
                 _env.CreateProjectCollection().Collection);
+
+            // Exactly 1 node per project
+            graph.ProjectNodes.Count.ShouldBe(graph.ProjectNodes.Select(GetProjectPath).Distinct().Count());
 
             // in the solution, all nodes are entry points
             graphFromSolution.EntryPointNodes.Select(GetProjectPath)
