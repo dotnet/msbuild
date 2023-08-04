@@ -396,6 +396,14 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>d2e6efb1e3e82bd804cbbd347053debe355bcba9</Sha>
     </Dependency>
+    <Dependency Name="System.Collections.Immutable" Version="8.0.0-rc.1.23404.2">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>d2e6efb1e3e82bd804cbbd347053debe355bcba9</Sha>
+    </Dependency>
+    <Dependency Name="System.Reflection.Metadata" Version="8.0.0-rc.1.23404.2">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>d2e6efb1e3e82bd804cbbd347053debe355bcba9</Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="8.0.0-beta.23402.2">

@@ -30,9 +30,9 @@
     <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</NETStandardLibraryNETFrameworkVersion>
     <NewtonsoftJsonPackageVersion>13.0.1</NewtonsoftJsonPackageVersion>
     <StyleCopAnalyzersPackageVersion>1.2.0-beta.435</StyleCopAnalyzersPackageVersion>
-    <SystemCollectionsImmutableVersion>8.0.0-rc.1.23381.3</SystemCollectionsImmutableVersion>
+    <SystemCollectionsImmutablePackageVersion>8.0.0-rc.1.23404.2</SystemCollectionsImmutablePackageVersion>
     <SystemDiagnosticsFileVersionInfoVersion>4.0.0</SystemDiagnosticsFileVersionInfoVersion>
-    <SystemReflectionMetadataVersion>8.0.0-rc.1.23381.3</SystemReflectionMetadataVersion>
+    <SystemReflectionMetadataPackageVersion>8.0.0-rc.1.23404.2</SystemReflectionMetadataPackageVersion>
     <MicrosoftDotNetSignToolVersion>8.0.0-beta.23402.2</MicrosoftDotNetSignToolVersion>
     <MicrosoftWebXdtPackageVersion>7.0.0-preview.22423.2</MicrosoftWebXdtPackageVersion>
     <SystemSecurityCryptographyProtectedDataPackageVersion>8.0.0-rc.1.23404.2</SystemSecurityCryptographyProtectedDataPackageVersion>
