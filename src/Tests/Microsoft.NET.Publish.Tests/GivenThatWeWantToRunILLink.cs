@@ -179,7 +179,24 @@ namespace Microsoft.NET.Publish.Tests
                 .Should().Pass()
                 // Note: can't check for Strings.IsTrimmableUnsupported because each line of
                 // the message gets prefixed with a file path by MSBuild.
-                .And.HaveStdOutContaining($"warning NETSDK1195");
+                .And.HaveStdOutContaining($"warning NETSDK1212");
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData("netstandard2.1")]
+        public void RequiresILLinkPack_errors_for_unsupported_target_framework(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            testProject.AdditionalProperties["_RequiresILLinkPack"] = "true";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+            
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should().Fail()
+                .And.HaveStdOutContaining($"error {Strings.ILLinkNoValidRuntimePackageError}");
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]

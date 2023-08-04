@@ -41,6 +41,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool PublishAot { get; set; }
 
+        public bool RequiresILLinkPack { get; set; }
+
         public bool IsAotCompatible { get; set; }
 
         public bool EnableAotAnalyzer { get; set; }
@@ -426,16 +428,11 @@ namespace Microsoft.NET.Build.Tasks
                 }
             }
 
-            // Keep this in sync with _RequiresILLinkPack in Microsoft.NET.Publish.targets.
-            bool requiresILLinkPack = PublishAot
-                || IsAotCompatible || EnableAotAnalyzer
-                || PublishTrimmed
-                || IsTrimmable || EnableTrimAnalyzer
-                || EnableSingleFileAnalyzer;
-            if (requiresILLinkPack)
+            if (RequiresILLinkPack)
             {
                 if (AddToolPack(ToolPackType.ILLink, _normalizedTargetFrameworkVersion, packagesToDownload, implicitPackageReferences) is not ToolPackSupport.Supported)
                 {
+                    // Keep the checked properties in sync with _RequiresILLinkPack in Microsoft.NET.Publish.targets.
                     if (PublishAot) {
                         // If PublishAot is set, this should produce a specific error above already.
                         // Also produce one here just in case there are custom KnownILCompilerPack/KnownILLinkPack
@@ -457,6 +454,11 @@ namespace Microsoft.NET.Build.Tasks
                         // There's no IsSingleFileCompatible setting. EnableSingleFileAnalyzer is the
                         // recommended way to ensure single-file compatibility for libraries.
                         Log.LogWarning(Strings.EnableSingleFileAnalyzerUnsupported);
+                    } else {
+                        // _RequiresILLinkPack was set. This setting acts as an override for the
+                        // user-visible properties, and should generally only be used by
+                        // other SDKs that can't use the other properties for some reason.
+                        Log.LogError(Strings.ILLinkNoValidRuntimePackageError);
                     }
                 }
             }

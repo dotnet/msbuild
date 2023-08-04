@@ -100,6 +100,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 ReadyToRunEnabled="$(PublishReadyToRun)"
                                 ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
                                 PublishAot="$(PublishAot)"
+                                RequiresILLinkPack="$(_RequiresILLinkPack)"
                                 IsAotCompatible="$(IsAotCompatible)"
                                 EnableAotAnalyzer="$(EnableAotAnalyzer)"
                                 PublishTrimmed="$(PublishTrimmed)"
