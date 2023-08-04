@@ -25,10 +25,13 @@
       </TemplatesFolderPath>
     </ItemGroup>
     <Error Text="SDK Stage 0 has more than one folder with templates: @(TemplatesFolderPath->'%(Identity)'). Please delete all but one and rebuild" Condition="@(TemplatesFolderPath->Count()) > 1"></Error>
+    <PropertyGroup>
+      <TemplateDestinationPath>$(RedistLayoutPath)templates\$([System.IO.Path]::GetFileName(@(TemplatesFolderPath)))</TemplateDestinationPath>
+    </PropertyGroup>
 
     <!--Prepare Microsoft.DotNet.Common.*.nupkg and pack them directly to target <redist root>\templates\<runtime version> folder. -->
-    <Exec Command="$(DotnetTool) pack $(RepoRoot)template_feed\Microsoft.DotNet.Common.ProjectTemplates.8.0 --configuration $(Configuration) --output $(RedistLayoutPath)\templates\@(TemplatesFolderPath->'%(FolderName)')\" />
-    <Exec Command="$(DotnetTool) pack $(RepoRoot)template_feed\Microsoft.DotNet.Common.ItemTemplates --configuration $(Configuration) --output $(RedistLayoutPath)\templates\@(TemplatesFolderPath->'%(FolderName)')\"  />
+    <MSBuild Projects="$(RepoRoot)template_feed\Microsoft.DotNet.Common.ProjectTemplates.8.0\Microsoft.DotNet.Common.ProjectTemplates.8.0.csproj" Targets="Pack" Properties="Configuration=$(Configuration);OutputPath=$(TemplateDestinationPath)" />
+    <MSBuild Projects="$(RepoRoot)template_feed\Microsoft.DotNet.Common.ItemTemplates\Microsoft.DotNet.Common.ItemTemplates.csproj" Targets="Pack" Properties="Configuration=$(Configuration);OutputPath=$(TemplateDestinationPath)" />
 
     <!-- 2. Other template packages will be included from SDK Stage 0. -->
     <ItemGroup>
@@ -55,8 +58,9 @@
     </PropertyGroup>
 
     <Copy SourceFiles="@(OverlaySdkFilesFromStage0)"
-          DestinationFiles="@(OverlaySdkFilesFromStage0->'$(SdkOutputDirectory)\%(RelativeDestination)\%(RecursiveDir)%(Filename)%(Extension)')"/>
-    
+          DestinationFiles="@(OverlaySdkFilesFromStage0->'$(SdkOutputDirectory)\%(RelativeDestination)\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true"/>
+
     <!-- If the stage 0 SDK doesn't have KnownWorkloadManifests.txt, then write a default version -->
     <WriteLinesToFile File="$(SdkOutputDirectory)\KnownWorkloadManifests.txt"
                       Condition="!Exists('$(Stage0KnownWorkloadManifestsFile)')"
@@ -86,7 +90,8 @@
       OutputPath="$(SdkOutputDirectory)/Microsoft.NETCoreSdk.BundledVersions.props"/>
 
     <Copy SourceFiles="@(ToolsetToOverlay)"
-          DestinationFiles="@(ToolsetToOverlay->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(ToolsetToOverlay->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
 
     <!-- Run "dotnet new" (which will just display usage and available templates) in order to print first time
          use message so that it doesn't interfere with tests which check the output of commands. -->
@@ -98,7 +103,7 @@
           Command="$(RedistLayoutPath)dotnet workload update --from-rollback-file $(RedistLayoutPath)TestRollback.json"
           EnvironmentVariables="DOTNET_CLI_HOME=$(ArtifactsTmpDir)"/>
 
-    <OverrideWasmRuntimePackVersions Properties="@(WasmRuntimePackVersion)" 
+    <OverrideWasmRuntimePackVersions Properties="@(WasmRuntimePackVersion)"
       WorkloadManifestPath="$(RedistLayoutPath)\sdk-manifests\$(MonoWorkloadFeatureBand)\microsoft.net.workload.mono.toolchain.current\WorkloadManifest.targets" />
   </Target>
 
@@ -121,10 +126,12 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(WorkloadManifestContent)"
-          DestinationFiles="@(WorkloadManifestContent->'$(RedistLayoutPath)\sdk-manifests\$(VersionBand)\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(WorkloadManifestContent->'$(RedistLayoutPath)\sdk-manifests\$(VersionBand)\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
 
     <Copy SourceFiles="@(WorkloadPackContent)"
-      DestinationFiles="@(WorkloadPackContent->'$(RedistLayoutPath)\packs\%(RecursiveDir)%(Filename)%(Extension)')" />
+      DestinationFiles="@(WorkloadPackContent->'$(RedistLayoutPath)\packs\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
 
   </Target>
 </Project>
