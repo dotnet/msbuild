@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Deployment.DotNet.Releases" Version="$(MicrosoftDeploymentDotNetReleasesVersion)" />
+    <PackageReference Include="Microsoft.Deployment.DotNet.Releases" />
 
   </ItemGroup>
 </Project>

@@ -19,9 +19,9 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
-    <PackageReference Include="NuGet.Packaging" Version="$(NuGetPackagingVersion)" />
-    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="NuGet.Packaging" />
+    <PackageReference Include="NuGet.ProjectModel" />
   </ItemGroup>
 
   <ItemGroup>
