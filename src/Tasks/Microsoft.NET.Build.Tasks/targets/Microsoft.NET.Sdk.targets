@@ -48,6 +48,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_GenerateSingleFileBundlePropertyInputsCache>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(_GenerateSingleFileBundlePropertyInputsCache)))</_GenerateSingleFileBundlePropertyInputsCache>
   </PropertyGroup>
 
+  <!-- For .NET 8 and higher, we will by default use a simplified "portable" RID graph -->
+  <PropertyGroup Condition="'$(UseRidGraph)' == ''">
+    <UseRidGraph Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '8.0'))">false</UseRidGraph>
+    <UseRidGraph Condition="'$(UseRidGraph)' == ''">true</UseRidGraph>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(RuntimeIdentifierGraphPath)' == ''">
+    <RuntimeIdentifierGraphPath Condition="'$(UseRidGraph)' == 'true'">$(BundledRuntimeIdentifierGraphFile)</RuntimeIdentifierGraphPath>
+
+    <!-- The portable RID graph should be in the same directory as the full RID graph -->
+    <RuntimeIdentifierGraphPath Condition="'$(UseRidGraph)' != 'true'">$([System.IO.Path]::GetDirectoryName($(BundledRuntimeIdentifierGraphFile)))/PortableRuntimeIdentifierGraph.json</RuntimeIdentifierGraphPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <GenerateRuntimeConfigurationFilesInputs Include="$(ProjectAssetsFile)" />
     <GenerateRuntimeConfigurationFilesInputs Include="$(ProjectAssetsCacheFile)" />
@@ -288,7 +301,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
                       IsSelfContained="$(SelfContained)"
                       IncludeRuntimeFileVersions="$(IncludeFileVersionsInDependencyFile)"
-                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+                      RuntimeGraphPath="$(RuntimeIdentifierGraphPath)"
                       IncludeProjectsNotInAssetsFile="$(IncludeProjectsNotInAssetsFileInDepsFile)"
                       ValidRuntimeIdentifierPlatformsForAssets="@(_ValidRuntimeIdentifierPlatformsForAssets)"/>
     <ItemGroup>

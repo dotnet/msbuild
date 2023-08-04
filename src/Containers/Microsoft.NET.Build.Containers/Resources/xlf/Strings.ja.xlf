@@ -147,19 +147,19 @@
         <target state="needs-review-translation">CONTAINER1010: ローカル Docker デーモンからのイメージのプルはサポートされていません。</target>
         <note>{StrBegin="CONTAINER1010: "}</note>
       </trans-unit>
-      <trans-unit id="InvalidContainerRepository">
-        <source>CONTAINER2014: Invalid {0}: {1}.</source>
-        <target state="translated">CONTAINER2014: 無効な {0}: {1}。</target>
-        <note>{StrBegin="CONTAINER2014: "}</note>
-      </trans-unit>
       <trans-unit id="InvalidEnvVar">
         <source>CONTAINER2015: {0}: '{1}' was not a valid Environment Variable. Ignoring.</source>
         <target state="translated">CONTAINER2015: {0}: '{1}' は有効な環境変数ではありませんでした。無視しています。</target>
         <note>{StrBegin="CONTAINER2015: "}</note>
       </trans-unit>
-      <trans-unit id="InvalidImageName">
-        <source>CONTAINER2005: The first character of the image name must be a lowercase letter or a digit.</source>
-        <target state="translated">CONTAINER2005: イメージ名の最初の文字は、小文字または数字である必要があります。</target>
+      <trans-unit id="InvalidImageName_EntireNameIsInvalidCharacters">
+        <source>CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</source>
+        <target state="new">CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</target>
+        <note>{StrBegin="CONTAINER2005: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidImageName_NonAlphanumericStartCharacter">
+        <source>CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</source>
+        <target state="new">CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_Number">

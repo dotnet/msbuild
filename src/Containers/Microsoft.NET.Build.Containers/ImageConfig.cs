@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -32,6 +33,9 @@ internal sealed class ImageConfig
     /// Gets a value indicating whether the base image is has a Windows operating system.
     /// </summary>
     public bool IsWindows => "windows".Equals(_os, StringComparison.OrdinalIgnoreCase);
+
+    public ReadOnlyDictionary<string, string> EnvironmentVariables => _environmentVariables.AsReadOnly();
+    public HashSet<Port> Ports => _exposedPorts;
 
     internal ImageConfig(string imageConfigJson) : this(JsonNode.Parse(imageConfigJson)!)
     {
@@ -80,7 +84,7 @@ internal sealed class ImageConfig
         {
             newConfig["Labels"] = CreateLabelMap();
         }
-        if (_environmentVariables.Any())
+        if (_environmentVariables.Count != 0)
         {
             newConfig["Env"] = CreateEnvironmentVariablesMapping();
         }

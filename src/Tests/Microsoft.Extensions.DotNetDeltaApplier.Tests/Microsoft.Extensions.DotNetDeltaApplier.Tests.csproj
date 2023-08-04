@@ -11,7 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\BuiltInTools\DotNetDeltaApplier\Microsoft.Extensions.DotNetDeltaApplier.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
-    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
+    <PackageReference Include="Moq" />
   </ItemGroup>
 
 </Project>

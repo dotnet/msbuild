@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="$(DependencyPackageName)" Version="$(DependencyPackageVersion)" />
+    <PackageReference Include="$(DependencyPackageName)" VersionOverride="$(DependencyPackageVersion)" />
   </ItemGroup>
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

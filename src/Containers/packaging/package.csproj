@@ -9,7 +9,7 @@
         <VSCompatTargetFramework>net472</VSCompatTargetFramework>
 
         <!-- MSBuild tasks shouldn't be referenced. This is by design. -->
-        <NoWarn>NU5100;NU5128</NoWarn>
+        <NoWarn>NU5100;NU5128;NU1507</NoWarn>
         <Authors>Microsoft</Authors>
         <Company>Microsoft</Company>
         <PackageId>Microsoft.NET.Build.Containers</PackageId>

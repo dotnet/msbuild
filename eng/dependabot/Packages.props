@@ -4,9 +4,9 @@
 
   <ItemGroup>
     <!--Test dependencies-->
-    <PackageReference Update="Verify.Xunit" Version="20.4.0" />
-    <PackageReference Update="Verify.DiffPlex" Version="2.2.1" />
-    <PackageReference Update="FakeItEasy" Version="7.4.0" />
-    <PackageReference Update="Wcwidth.Sources" Version="1.0.0" />
+    <PackageVersion Include="Verify.Xunit" Version="20.4.0" />
+    <PackageVersion Include="Verify.DiffPlex" Version="2.2.1" />
+    <PackageVersion Include="FakeItEasy" Version="7.4.0" />
+    <PackageVersion Include="Wcwidth.Sources" Version="1.0.0" />
   </ItemGroup>
 </Project>

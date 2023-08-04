@@ -44,11 +44,17 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        private PublishCommand GetPublishCommand(string identifier = null, [CallerMemberName] string callingMethod = "")
+        private PublishCommand GetPublishCommand(string identifier = null, [CallerMemberName] string callingMethod = "", Action<XDocument> projectChanges = null)
         {
+            if (projectChanges == null)
+            {
+                projectChanges = d => { };
+            }
+
             var testAsset = _testAssetsManager
                .CopyTestAsset(TestProjectName, callingMethod, identifier)
-               .WithSource();
+               .WithSource()
+               .WithProjectChanges(projectChanges);
 
             // Create the following content:
             //  <TestRoot>/SmallNameDir/This is a directory with a really long name for one that only contains a small file/.word
@@ -127,7 +133,17 @@ namespace Microsoft.NET.Publish.Tests
         public void It_generates_publishing_single_file_with_win7()
         {
             const string rid = "win7-x86";
-            GetPublishCommand()
+
+            //  Retarget project to net7.0, as net8.0 and up by default use portable runtime graph which doesn't have win7-* RIDs
+            var projectChanges = (XDocument doc) =>
+            {
+                var ns = doc.Root.Name.Namespace;
+                doc.Root.Element(ns + "PropertyGroup")
+                    .Element(ns + "TargetFramework")
+                    .Value = "net7.0";
+            };
+
+            GetPublishCommand(projectChanges: projectChanges)
                 .Execute($"/p:RuntimeIdentifier={rid}", PublishSingleFile)
                 .Should()
                 .Pass();
@@ -614,6 +630,27 @@ namespace Microsoft.NET.Publish.Tests
                 .Should().Pass()
                 .And.HaveStdOutContaining("(9,13): warning IL3000")
                 .And.HaveStdOutContaining("(10,13): warning IL3001");
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData("netstandard2.0")]
+        public void EnableSingleFileAnalyzer_warns_for_unsupported_target_framework(string targetFramework)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "ClassLibTest",
+                TargetFrameworks = targetFramework
+            };
+            testProject.AdditionalProperties["EnableSingleFileAnalyzer"] = "true";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            buildCommand
+                .Execute()
+                .Should().Pass()
+                // Note: can't check for Strings.EnableSingleFileAnalyzerUnsupported because each line of
+                // the message gets prefixed with a file path by MSBuild.
+                .And.HaveStdOutContaining($"warning NETSDK1211");
         }
 
         private TestProject CreateTestProjectWithAnalyzerWarnings(string targetFramework, string projectName, bool isExecutable)

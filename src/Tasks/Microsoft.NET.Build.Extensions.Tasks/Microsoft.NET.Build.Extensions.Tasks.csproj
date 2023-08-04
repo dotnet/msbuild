@@ -44,11 +44,11 @@
   </ItemDefinitionGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkPackageVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="NETStandard.Library.NETFramework" Version="$(NETStandardLibraryNETFrameworkVersion)" ExcludeAssets="All" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.Build.Framework" ExcludeAssets="Runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" ExcludeAssets="Runtime" />
+    <PackageReference Include="NETStandard.Library.NETFramework" ExcludeAssets="All" NoWarn="NU1701" />
     <!-- Lift dependency of NETStandard.Library.NETFramework to version produced in SBRP. -->
-    <PackageReference Include="NETStandard.Library" Version="2.0.3" ExcludeAssets="All" />
+    <PackageReference Include="NETStandard.Library" VersionOverride="2.0.3" ExcludeAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

@@ -14,14 +14,14 @@
 
   <ItemGroup>
     <PackageReference Include="FakeItEasy"  />
-    <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
+    <PackageReference Include="FluentAssertions" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Tasks.Core"  Version="$(MicrosoftBuildTasksCorePackageVersion)"/>
-    <PackageReference Include="Microsoft.Build.Utilities.Core"  Version="$(MicrosoftBuildUtilitiesCorePackageVersion)"/>
-    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
-    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkPackageVersion)"/>
+    <PackageReference Include="Microsoft.Build.Tasks.Core" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" />
+    <PackageReference Include="Microsoft.Build" />
+    <PackageReference Include="Microsoft.Build.Framework" />
   </ItemGroup>
 
   <ItemGroup>
