@@ -77,6 +77,12 @@ internal static class NativeMethods
 
     #region Enums
 
+    internal enum StreamHandleType
+    {
+        StdOut = STD_OUTPUT_HANDLE,
+        StdErr = STD_ERROR_HANDLE,
+    };
+
     private enum PROCESSINFOCLASS : int
     {
         ProcessBasicInformation = 0,
@@ -1482,7 +1488,7 @@ internal static class NativeMethods
     }
 
 #if !CLR2COMPATIBILITY
-    internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes(int outputStreamHandle)
+    internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes(StreamHandleType handleType)
     {
         if (Console.IsOutputRedirected)
         {
@@ -1497,7 +1503,7 @@ internal static class NativeMethods
         {
             try
             {
-                IntPtr outputStream = GetStdHandle(outputStreamHandle);
+                IntPtr outputStream = GetStdHandle((int)handleType);
                 if (GetConsoleMode(outputStream, out uint consoleMode))
                 {
                     if ((consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == ENABLE_VIRTUAL_TERMINAL_PROCESSING)
@@ -1538,11 +1544,11 @@ internal static class NativeMethods
         return (acceptAnsiColorCodes, outputIsScreen, originalConsoleMode);
     }
 
-    internal static void RestoreConsoleMode(uint? originalConsoleMode, int outputStreamHandle)
+    internal static void RestoreConsoleMode(uint? originalConsoleMode, StreamHandleType handleType)
     {
         if (IsWindows && originalConsoleMode is not null)
         {
-            IntPtr stdOut = GetStdHandle(outputStreamHandle);
+            IntPtr stdOut = GetStdHandle((int)handleType);
             _ = SetConsoleMode(stdOut, originalConsoleMode.Value);
         }
     }

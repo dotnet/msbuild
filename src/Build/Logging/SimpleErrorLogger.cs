@@ -23,7 +23,7 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
         private readonly uint? originalConsoleMode;
         public SimpleErrorLogger()
         {
-            (acceptAnsiColorCodes, _, originalConsoleMode) = NativeMethods.QueryIsScreenAndTryEnableAnsiColorCodes(NativeMethods.STD_ERROR_HANDLE);
+            (acceptAnsiColorCodes, _, originalConsoleMode) = NativeMethods.QueryIsScreenAndTryEnableAnsiColorCodes(NativeMethods.StreamHandleType.StdErr);
         }
 
         public bool HasLoggedErrors { get; private set; } = false;
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
 
         public void Shutdown()
         {
-            NativeMethods.RestoreConsoleMode(originalConsoleMode, NativeMethods.STD_ERROR_HANDLE);
+            NativeMethods.RestoreConsoleMode(originalConsoleMode, NativeMethods.StreamHandleType.StdErr);
         }
     }
 }
