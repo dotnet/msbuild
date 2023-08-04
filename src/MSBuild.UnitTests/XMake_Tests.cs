@@ -619,14 +619,21 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false)]
-        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false)]
-        [InlineData("-getItem:MyItem", false, "", true, false)]
-        [InlineData("-getItem:MyItem -t:Build", false, "", true, true)]
-        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false)]
-        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true)]
-        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false)]
-        public void ExecuteAppWithGetPropertyAndItem(string extraSwitch, bool fooPresent, string fooResult, bool itemIncludesAlwaysThere, bool itemIncludesTargetItem)
+        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false)]
+        [InlineData("-getItem:MyItem", false, "", true, false, false)]
+        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false)]
+        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true)]
+        public void ExecuteAppWithGetPropertyItemAndTargetResult(
+            string extraSwitch,
+            bool fooPresent,
+            string fooResult,
+            bool itemIncludesAlwaysThere,
+            bool itemIncludesTargetItem,
+            bool targetResultPresent)
         {
             using TestEnvironment env = TestEnvironment.Create();
             TransientTestFile project = env.CreateFile("testProject.csproj", @"
@@ -668,6 +675,9 @@ namespace Microsoft.Build.UnitTests
 
             results.Contains("itemAlwaysThere").ShouldBe(itemIncludesAlwaysThere);
             results.Contains("targetItem").ShouldBe(itemIncludesTargetItem);
+
+            results.Contains("MyTarget").ShouldBe(targetResultPresent);
+            results.Contains("\"Result\": \"Success\"").ShouldBe(targetResultPresent);
         }
 
         /// <summary>

@@ -17,15 +17,16 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
     /// Users still might want diagnostic information if something goes wrong, so still
     /// output that as necessary.
     /// </summary>
-    public class SimpleErrorLogger : INodeLogger
+    public sealed class SimpleErrorLogger : INodeLogger
     {
-        public bool hasLoggedErrors = false;
         private readonly bool acceptAnsiColorCodes;
         private readonly uint? originalConsoleMode;
         public SimpleErrorLogger()
         {
             (acceptAnsiColorCodes, _, originalConsoleMode) = NativeMethods.QueryIsScreenAndTryEnableAnsiColorCodes(NativeMethods.STD_ERROR_HANDLE);
         }
+
+        public bool HasLoggedErrors { get; private set; } = false;
 
         public LoggerVerbosity Verbosity
         {
@@ -47,7 +48,7 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
 
         private void HandleErrorEvent(object sender, BuildErrorEventArgs e)
         {
-            hasLoggedErrors = true;
+            HasLoggedErrors = true;
             if (acceptAnsiColorCodes)
             {
                 Console.Error.Write("\x1b[31;1m");

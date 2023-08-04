@@ -32,6 +32,8 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
+using static Microsoft.Build.CommandLine.MSBuildApp;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using FileLogger = Microsoft.Build.Logging.FileLogger;
@@ -799,32 +801,7 @@ namespace Microsoft.Build.CommandLine
                     }
                     else if ((getProperty.Length > 0 || getItem.Length > 0) && (targets is null || targets.Length == 0))
                     {
-                        try
-                        {
-                            Project project = Project.FromFile(projectFile, new Definition.ProjectOptions()
-                            {
-                                GlobalProperties = globalProperties,
-                                ToolsVersion = toolsVersion,
-                            });
-
-                            // Special case if the user requests exactly one property: skip json formatting
-                            if (getProperty.Length == 1 && getItem.Length == 0)
-                            {
-                                Console.WriteLine(project.GetPropertyValue(getProperty[0]));
-                            }
-                            else
-                            {
-                                JsonOutputFormatter jsonOutputFormatter = new();
-                                jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
-                                jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
-                                Console.WriteLine(jsonOutputFormatter.ToString());
-                            }
-                        }
-                        catch (InvalidProjectFileException e)
-                        {
-                            exitType = ExitType.BuildError;
-                            Console.Error.WriteLine(e.Message);
-                        }
+                        exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, projectFile, globalProperties, toolsVersion);
                     }
                     else // regular build
                     {
@@ -860,7 +837,7 @@ namespace Microsoft.Build.CommandLine
                                     question,
                                     inputResultsCaches,
                                     outputResultsCache,
-                                    saveProject: getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0,
+                                    saveProjectResult: getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0,
                                     ref result,
                                     commandLine))
                         {
@@ -876,32 +853,7 @@ namespace Microsoft.Build.CommandLine
 
                     if ((getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0) && targets?.Length > 0 && result is not null)
                     {
-                        ProjectInstance builtProject = result.ProjectStateAfterBuild;
-
-                        ILogger logger = loggers.FirstOrDefault(l => l is SimpleErrorLogger);
-                        if (logger is not null)
-                        {
-                            exitType = exitType == ExitType.Success && (logger as SimpleErrorLogger).hasLoggedErrors ? ExitType.BuildError : exitType;
-                        }
-
-                        if (builtProject is null)
-                        {
-                            // Build failed; do not proceed
-                            Console.Error.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
-                        }
-                        // Special case if the user requests exactly one property: skip the json formatting
-                        else if (getProperty.Length == 1 && getItem.Length == 0 && getTargetResult.Length == 0)
-                        {
-                            Console.WriteLine(builtProject.GetPropertyValue(getProperty[0]));
-                        }
-                        else
-                        {
-                            JsonOutputFormatter jsonOutputFormatter = new();
-                            jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => builtProject.GetPropertyValue(property));
-                            jsonOutputFormatter.AddItemInstancesInJsonFormat(getItem, builtProject);
-                            jsonOutputFormatter.AddTargetResultsInJsonFormat(getTargetResult, result);
-                            Console.WriteLine(jsonOutputFormatter.ToString());
-                        }
+                        exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType);
                     }
 
                     if (!string.IsNullOrEmpty(timerOutputFilename))
@@ -1061,6 +1013,70 @@ namespace Microsoft.Build.CommandLine
             return exitType;
         }
 
+        private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, string projectFile, Dictionary<string, string> globalProperties, string toolsVersion)
+        {
+            try
+            {
+                Project project = Project.FromFile(projectFile, new Definition.ProjectOptions()
+                {
+                    GlobalProperties = globalProperties,
+                    ToolsVersion = toolsVersion,
+                });
+
+                // Special case if the user requests exactly one property: skip json formatting
+                if (getProperty.Length == 1 && getItem.Length == 0)
+                {
+                    Console.WriteLine(project.GetPropertyValue(getProperty[0]));
+                }
+                else
+                {
+                    JsonOutputFormatter jsonOutputFormatter = new();
+                    jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
+                    jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
+                    Console.WriteLine(jsonOutputFormatter.ToString());
+                }
+
+                return ExitType.Success;
+            }
+            catch (InvalidProjectFileException e)
+            {
+                Console.Error.WriteLine(e.Message);
+                return ExitType.BuildError;
+            }
+        }
+
+        private static ExitType OutputBuildInformationInJson(BuildResult result, string[] getProperty, string[] getItem, string[] getTargetResult, ILogger[] loggers, ExitType exitType)
+        {
+            ProjectInstance builtProject = result.ProjectStateAfterBuild;
+
+            ILogger logger = loggers.FirstOrDefault(l => l is SimpleErrorLogger);
+            if (logger is not null)
+            {
+                exitType = exitType == ExitType.Success && (logger as SimpleErrorLogger).HasLoggedErrors ? ExitType.BuildError : exitType;
+            }
+
+            if (builtProject is null)
+            {
+                // Build failed; do not proceed
+                Console.Error.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
+            }
+            // Special case if the user requests exactly one property: skip the json formatting
+            else if (getProperty.Length == 1 && getItem.Length == 0 && getTargetResult.Length == 0)
+            {
+                Console.WriteLine(builtProject.GetPropertyValue(getProperty[0]));
+            }
+            else
+            {
+                JsonOutputFormatter jsonOutputFormatter = new();
+                jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => builtProject.GetPropertyValue(property));
+                jsonOutputFormatter.AddItemInstancesInJsonFormat(getItem, builtProject);
+                jsonOutputFormatter.AddTargetResultsInJsonFormat(getTargetResult, result);
+                Console.WriteLine(jsonOutputFormatter.ToString());
+            }
+
+            return exitType;
+        }
+
         /// <summary>
         /// Handler for when CTRL-C or CTRL-BREAK is called.
         /// CTRL-BREAK means "die immediately"
@@ -1213,7 +1229,7 @@ namespace Microsoft.Build.CommandLine
             bool question,
             string[] inputResultsCaches,
             string outputResultsCache,
-            bool saveProject,
+            bool saveProjectResult,
             ref BuildResult result,
 #if FEATURE_GET_COMMANDLINE
             string commandLine)
@@ -1486,7 +1502,7 @@ namespace Microsoft.Build.CommandLine
                                 // to the BuildResult passed back at the end of the build. This can then be used to find the value of properties, items, etc. after the
                                 // build is complete.
                                 BuildRequestDataFlags flags = BuildRequestDataFlags.None;
-                                if (saveProject)
+                                if (saveProjectResult)
                                 {
                                     flags |= BuildRequestDataFlags.ProvideProjectStateAfterBuild;
                                 }
