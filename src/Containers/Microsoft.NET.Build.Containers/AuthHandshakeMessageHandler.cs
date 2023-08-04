@@ -166,7 +166,10 @@ internal sealed partial class AuthHandshakeMessageHandler : DelegatingHandler
             message.Headers.Authorization = header;
 
             var tokenResponse = await base.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            tokenResponse.EnsureSuccessStatusCode();
+            if (!tokenResponse.IsSuccessStatusCode)
+            {
+                throw new UnableToAccessRepositoryException(registry);
+            }
 
             TokenResponse? token = JsonSerializer.Deserialize<TokenResponse>(tokenResponse.Content.ReadAsStream(cancellationToken));
             if (token is null)
