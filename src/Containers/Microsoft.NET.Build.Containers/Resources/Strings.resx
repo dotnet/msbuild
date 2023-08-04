@@ -188,16 +188,12 @@
     <value>CONTAINER1009: Failed to load image from local registry. stdout: {0}</value>
     <comment>{StrBegin="CONTAINER1009: "}</comment>
   </data>
-  <data name="InvalidContainerRepository" xml:space="preserve">
-    <value>CONTAINER2014: Invalid {0}: {1}.</value>
-    <comment>{StrBegin="CONTAINER2014: "}</comment>
-  </data>
   <data name="InvalidEnvVar" xml:space="preserve">
     <value>CONTAINER2015: {0}: '{1}' was not a valid Environment Variable. Ignoring.</value>
     <comment>{StrBegin="CONTAINER2015: "}</comment>
   </data>
-  <data name="InvalidImageName" xml:space="preserve">
-    <value>CONTAINER2005: The first character of the image name must be a lowercase letter or a digit.</value>
+  <data name="InvalidImageName_NonAlphanumericStartCharacter" xml:space="preserve">
+    <value>CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</value>
     <comment>{StrBegin="CONTAINER2005: "}</comment>
   </data>
   <data name="InvalidSdkVersion" xml:space="preserve">
@@ -384,5 +380,9 @@
   <data name="Registry_TagUploadStarted" xml:space="preserve">
     <value>Uploading tag '{0}' to '{1}'.</value>
     <comment>{1} is the registry name</comment>
+  </data>
+  <data name="InvalidImageName_EntireNameIsInvalidCharacters" xml:space="preserve">
+    <value>CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</value>
+    <comment>{StrBegin="CONTAINER2005: "}</comment>
   </data>
 </root>
