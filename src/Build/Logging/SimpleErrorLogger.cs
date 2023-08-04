@@ -17,12 +17,13 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
     /// Users still might want diagnostic information if something goes wrong, so still
     /// output that as necessary.
     /// </summary>
-    public class SimpleErrorLogger : INodeLogger
+    public sealed class SimpleErrorLogger : INodeLogger
     {
-        public bool hasLoggedErrors = false;
         public SimpleErrorLogger()
         {
         }
+
+        public bool HasLoggedErrors { get; private set; } = false;
 
         public LoggerVerbosity Verbosity
         {
@@ -44,7 +45,7 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
 
         private void HandleErrorEvent(object sender, BuildErrorEventArgs e)
         {
-            hasLoggedErrors = true;
+            HasLoggedErrors = true;
             Console.Error.Write("\x1b[31;1m");
             Console.Error.Write(EventArgsFormatting.FormatEventMessage(e, showProjectFile: true));
             Console.Error.WriteLine("\x1b[m");

@@ -11,14 +11,18 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.CommandLine
 {
-    internal class JsonOutputFormatter
+    /// <summary>
+    /// This class is intended to take in names of properties, items, and/or target results and some means of computing
+    /// those data, then format them in a json object and provide a convenient means to stringify them.
+    /// </summary>
+    internal sealed class JsonOutputFormatter
     {
-        private static readonly JsonSerializerOptions Options = new() { AllowTrailingCommas = false, WriteIndented = true };
+        private static readonly JsonSerializerOptions s_options = new() { AllowTrailingCommas = false, WriteIndented = true };
         private readonly JsonNode _topLevelNode = new JsonObject();
 
         public override string ToString()
         {
-            return _topLevelNode.ToJsonString(Options);
+            return _topLevelNode.ToJsonString(s_options);
         }
 
         internal void AddPropertiesInJsonFormat(string[] propertyNames, Func<string, string> getProperty)
