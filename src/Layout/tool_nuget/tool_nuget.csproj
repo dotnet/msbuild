@@ -7,6 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.CommandLine.XPlat" Version="$(NuGetCommandLineXPlatPackageVersion)" />
+    <PackageReference Include="NuGet.CommandLine.XPlat" />
   </ItemGroup>
 </Project>

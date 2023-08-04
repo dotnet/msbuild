@@ -19,6 +19,7 @@
         <PackageProjectUrl>https://github.com/dotnet/sdk</PackageProjectUrl>
         <PackageType>Template</PackageType>
         <SuppressDependenciesWhenPacking>True</SuppressDependenciesWhenPacking>
+        <NoWarn>$(NoWarn);NU1507</NoWarn>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Remove="Microsoft.NETCore.App" />

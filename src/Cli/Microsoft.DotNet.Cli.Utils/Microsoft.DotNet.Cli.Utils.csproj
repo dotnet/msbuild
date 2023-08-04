@@ -37,21 +37,20 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Runtime"
         ExcludeAssets="all"
-        Version="$(MicrosoftBuildRuntimePackageVersion)"
         Condition="'$([MSBuild]::GetTargetFrameworkIdentifier($(TargetFramework)))' == '.NETCoreApp'"
         GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
-    <PackageReference Include="NuGet.Versioning" Version="$(NuGetVersioningPackageVersion)" />
-    <PackageReference Include="NuGet.Packaging" Version="$(NuGetPackagingPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" />
+    <PackageReference Include="NuGet.Versioning" />
+    <PackageReference Include="NuGet.Packaging" />
     <!-- nuget moved all type from NuGet.Packaging.Core to NuGet.Packaging and added type forwarding in 5.0.0-rtm.5821.
         However to allow old msbuild tasks like Arcade tasks still function without recompile, NuGet.Packaging.Core need
         to be referenced explicitly so the NuGet.Packaging.Core.dll will be part of the SDK and be available for type forwarding -->
-    <PackageReference Include="NuGet.Packaging.Core" Version="$(NuGetPackagingPackageVersion)" />
-    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksPackageVersion)" />
-    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
-    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
-    <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
+    <PackageReference Include="NuGet.Packaging.Core" />
+    <PackageReference Include="NuGet.Frameworks" />
+    <PackageReference Include="NuGet.ProjectModel" />
+    <PackageReference Include="Microsoft.Build" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" />
+    <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />

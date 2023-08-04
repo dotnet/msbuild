@@ -4,9 +4,9 @@
   <!-- Packages must be set to their package version property if it exists (ex. BenchmarkDotNetVersion) since source-build uses
   these properties to override package versions if necessary. -->
   <ItemGroup Condition="'$(DotNetBuildFromSource)' == 'true'">
-    <PackageReference Update="Verify.XUnit" Condition="'$(VerifyXUnitVersion)' != ''" Version="$(VerifyXUnitVersion)" />
-    <PackageReference Update="Verify.DiffPlex" Condition="'$(VerifyDiffPlexVersion)' != ''" Version="$(VerifyDiffPlexVersion)" />
-    <PackageReference Update="FakeItEasy" Condition="'$(FakeItEasyVersion)' != ''" Version="$(FakeItEasyVersion)" />
-    <PackageReference Update="Wcwidth.Sources" Condition="'$(WcwidthSourcesVersion)' != ''" Version="$(WcwidthSourcesVersion)" />
+    <PackageVersion Update="Verify.XUnit" Condition="'$(VerifyXUnitVersion)' != ''" Version="$(VerifyXUnitVersion)" />
+    <PackageVersion Update="Verify.DiffPlex" Condition="'$(VerifyDiffPlexVersion)' != ''" Version="$(VerifyDiffPlexVersion)" />
+    <PackageVersion Update="FakeItEasy" Condition="'$(FakeItEasyVersion)' != ''" Version="$(FakeItEasyVersion)" />
+    <PackageVersion Update="Wcwidth.Sources" Condition="'$(WcwidthSourcesVersion)' != ''" Version="$(WcwidthSourcesVersion)" />
   </ItemGroup>
 </Project>

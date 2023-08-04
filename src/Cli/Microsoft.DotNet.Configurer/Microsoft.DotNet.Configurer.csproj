@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.Common" Version="$(NuGetCommonPackageVersion)" />
-    <PackageReference Include="NuGet.Configuration" Version="$(NuGetConfigurationPackageVersion)" />
+    <PackageReference Include="NuGet.Common" />
+    <PackageReference Include="NuGet.Configuration" />
   </ItemGroup>
 
   <ItemGroup>

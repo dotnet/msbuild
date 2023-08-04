@@ -6,10 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(MicrosoftFSharpCompilerPackageVersion)" ExcludeAssets="contentFiles" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.Build.Framework" Version="$(FSharpBuildVersion)" />
-    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(FSharpBuildVersion)" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(FSharpBuildVersion)" />
+    <PackageReference Include="Microsoft.FSharp.Compiler" ExcludeAssets="contentFiles" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.Build.Framework" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" />
   </ItemGroup>
 
    <Target Name="_ResolvePublishNuGetPackagePdbsAndXml"
