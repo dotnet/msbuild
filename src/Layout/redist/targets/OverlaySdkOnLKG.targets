@@ -29,9 +29,13 @@
       <TemplateDestinationPath>$(RedistLayoutPath)templates\$([System.IO.Path]::GetFileName(@(TemplatesFolderPath)))</TemplateDestinationPath>
     </PropertyGroup>
 
+    <ItemGroup>
+      <TemplatesToPack Include="$(RepoRoot)template_feed\Microsoft.DotNet.Common.ProjectTemplates.8.0\Microsoft.DotNet.Common.ProjectTemplates.8.0.csproj" />
+      <TemplatesToPack Include="$(RepoRoot)template_feed\Microsoft.DotNet.Common.ItemTemplates\Microsoft.DotNet.Common.ItemTemplates.csproj" />
+    </ItemGroup>
+
     <!--Prepare Microsoft.DotNet.Common.*.nupkg and pack them directly to target <redist root>\templates\<runtime version> folder. -->
-    <MSBuild Projects="$(RepoRoot)template_feed\Microsoft.DotNet.Common.ProjectTemplates.8.0\Microsoft.DotNet.Common.ProjectTemplates.8.0.csproj" Targets="Pack" Properties="Configuration=$(Configuration);OutputPath=$(TemplateDestinationPath)" />
-    <MSBuild Projects="$(RepoRoot)template_feed\Microsoft.DotNet.Common.ItemTemplates\Microsoft.DotNet.Common.ItemTemplates.csproj" Targets="Pack" Properties="Configuration=$(Configuration);OutputPath=$(TemplateDestinationPath)" />
+    <MSBuild Projects="@(TemplatesToPack)" Targets="Pack" Properties="Configuration=$(Configuration);OutputPath=$(TemplateDestinationPath)" BuildInParallel="true" />
 
     <!-- 2. Other template packages will be included from SDK Stage 0. -->
     <ItemGroup>
