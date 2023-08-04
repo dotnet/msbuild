@@ -695,8 +695,9 @@ namespace Microsoft.Build.Graph.UnitTests
             var globalProperties = currentSolutionConfiguration != null
                 ? new Dictionary<string, string>
                 {
-                    ["Configuration"] = currentSolutionConfiguration.ConfigurationName,
-                    ["Platform"] = currentSolutionConfiguration.PlatformName
+                    // Intentionally use mismatched casing to ensure it's properly normalized.
+                    ["Configuration"] = currentSolutionConfiguration.ConfigurationName.ToUpperInvariant(),
+                    ["Platform"] = currentSolutionConfiguration.PlatformName.ToUpperInvariant()
                 }
                 : new Dictionary<string, string>();
 
@@ -724,19 +725,9 @@ namespace Microsoft.Build.Graph.UnitTests
 
             foreach (var node in graphFromSolution.ProjectNodes)
             {
-                // Project references get duplicated, once as entry points from the solution (handled in the if block) and once as nodes
-                // produced by ProjectReference items (handled in the else block).
-                if (node.ReferencingProjects.Count == 0)
-                {
-                    var expectedProjectConfiguration = actualProjectConfigurations[GetProjectNumber(node).ToString()][expectedCurrentConfiguration];
-                    GetConfiguration(node).ShouldBe(expectedProjectConfiguration.ConfigurationName);
-                    GetPlatform(node).ShouldBe(expectedProjectConfiguration.PlatformName);
-                }
-                else
-                {
-                    GetConfiguration(node).ShouldBe(GetConfiguration(node.ReferencingProjects.First()));
-                    GetPlatform(node).ShouldBe(GetPlatform(node.ReferencingProjects.First()));
-                }
+                var expectedProjectConfiguration = actualProjectConfigurations[GetProjectNumber(node).ToString()][expectedCurrentConfiguration];
+                GetConfiguration(node).ShouldBe(expectedProjectConfiguration.ConfigurationName);
+                GetPlatform(node).ShouldBe(expectedProjectConfiguration.PlatformName);
             }
         }
 
