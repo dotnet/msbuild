@@ -22,7 +22,6 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         [Fact]
         public async Task CanRunDiscoveryTool()
         {
-            string home = CreateTemporaryFolder(folderName: "Home");
             string testDir = CreateTemporaryFolder();
             string testTemplatesPackagePath = PackTestNuGetPackage(_log);
             using var packageManager = new PackageManager();

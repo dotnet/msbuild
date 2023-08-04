@@ -137,15 +137,15 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
         /// <summary>
         /// Packs test template package and returns path to it.
         /// </summary>
-        internal static string PackTestNuGetPackage(ITestOutputHelper log, [CallerMemberName] string testName = "UnnamedTest")
+        internal string PackTestNuGetPackage(ITestOutputHelper log, [CallerMemberName] string testName = "UnnamedTest")
         {
-            string outputLocation = CreateTemporaryFolder(testName, "TestNuGetPackage");
+            var testAsset = _testAssetsManager.CopyTestAsset("dotnet-new", callingMethod: testName, testAssetSubdirectory: "TestPackages").WithSource();
+            string testProject = Path.GetFileName(DotnetNewTestTemplatePackageProjectPath);
+            string testPath = testAsset.Path;
 
-            CopyFilesRecursively(Path.GetDirectoryName(DotnetNewTestTemplatePackageProjectPath)!, outputLocation);
+            string outputLocation = Path.Combine(testPath, "TestNuGetPackage");
 
-            string projectName = Path.GetFileName(DotnetNewTestTemplatePackageProjectPath);
-
-            new DotnetPackCommand(log, $"{outputLocation}\\{projectName}", $"-p:BaseIntermediateOutputPath={outputLocation}\\", "-o", outputLocation)
+            new DotnetPackCommand(log, $"{testPath}\\{testProject}", "-o", outputLocation)
                 .Execute()
                 .Should()
             .Pass();
@@ -188,21 +188,5 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
             }
             return repoRoot;
         }
-
-        private static void CopyFilesRecursively(string sourcePath, string targetPath)
-        {
-            //Now Create all of the directories
-            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
-            {
-                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
-            }
-
-            //Copy all the files & Replaces any files with the same name
-            foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
-            {
-                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
-            }
-        }
-
     }
 }
