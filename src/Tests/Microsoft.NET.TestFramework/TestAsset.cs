@@ -107,7 +107,7 @@ namespace Microsoft.NET.TestFramework
                 this.UpdateProjProperty(property[0], property[1], property[2]);
             }
 
-            this.ToReplaceTheNewtonsoftJsonPackageVersionVariable();
+            this.ReplaceTheNewtonsoftJsonPackageVersionVariable();
 
             return this;
         }
@@ -124,7 +124,7 @@ namespace Microsoft.NET.TestFramework
             }, targetValue);
         }
 
-        public TestAsset ToReplaceTheNewtonsoftJsonPackageVersionVariable()
+        public TestAsset ReplaceTheNewtonsoftJsonPackageVersionVariable()
         {
             string[] PropertyNames = new[] { "PackageReference", "Package" };
             string targetName = "NewtonsoftJsonPackageVersion";
