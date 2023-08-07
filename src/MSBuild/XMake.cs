@@ -785,13 +785,15 @@ namespace Microsoft.Build.CommandLine
 
                     DateTime t1 = DateTime.Now;
 
+                    bool outputPropertiesItemsOrTargetResults = getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0;
+
                     // If the primary file passed to MSBuild is a .binlog file, play it back into passed loggers
                     // as if a build is happening
                     if (FileUtilities.IsBinaryLogFilename(projectFile))
                     {
                         ReplayBinaryLog(projectFile, loggers, distributedLoggerRecords, cpuCount);
                     }
-                    else if ((getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0) && FileUtilities.IsSolutionFilename(projectFile))
+                    else if (outputPropertiesItemsOrTargetResults && FileUtilities.IsSolutionFilename(projectFile))
                     {
                         exitType = ExitType.BuildError;
                         CommandLineSwitchException.Throw("SolutionBuildInvalidForCommandLineEvaluation",
@@ -837,7 +839,7 @@ namespace Microsoft.Build.CommandLine
                                     question,
                                     inputResultsCaches,
                                     outputResultsCache,
-                                    saveProjectResult: getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0,
+                                    saveProjectResult: outputPropertiesItemsOrTargetResults,
                                     ref result,
                                     commandLine))
                         {
@@ -851,7 +853,7 @@ namespace Microsoft.Build.CommandLine
 
                     string timerOutputFilename = Environment.GetEnvironmentVariable("MSBUILDTIMEROUTPUTS");
 
-                    if ((getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0) && targets?.Length > 0 && result is not null)
+                    if (outputPropertiesItemsOrTargetResults && targets?.Length > 0 && result is not null)
                     {
                         exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType);
                     }
