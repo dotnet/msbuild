@@ -876,10 +876,8 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1194: The "--output" option isn't supported when building a solution. Specifying a solution-level output path results in all projects copying outputs to the same directory, which can lead to inconsistent builds.</value>
     <comment>{StrBegin="NETSDK1194: "}{Locked="--output"}</comment>
   </data>
-  <data name="IsTrimmableUnsupported" xml:space="preserve">
-    <value>NETSDK1195: IsTrimmable is not supported for the target framework. Consider multi-targeting to a supported framework to enable trimming, and set IsTrimmable only for the supported frameworks. For example:
-&lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/IsTrimmable&gt;
-For more information, see https://aka.ms/netsdk1195</value>
+  <data name="ILLinkNoValidRuntimePackageError" xml:space="preserve">
+    <value>NETSDK1195: Trimming, or code compatibility analysis for trimming, single-file deployment, or ahead-of-time compilation is not supported for the target framework. For more information, see https://aka.ms/netsdk1195</value>
     <comment>{StrBegin="NETSDK1195: "}</comment>
   </data>
   <data name="AotNotSupported" xml:space="preserve">
@@ -949,5 +947,10 @@ For more information, see https://aka.ms/netsdk1195</value>
 &lt;EnableSingleFileAnalyzer Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/EnableSingleFileAnalyzer&gt;</value>
     <comment>{StrBegin="NETSDK1211: "}</comment>
   </data>
-  <!-- The latest message added is EnableSingleFileAnalyzerUnsupported. Please update this value with each PR to catch parallel PRs both adding a new message -->
+  <data name="IsTrimmableUnsupported" xml:space="preserve">
+    <value>NETSDK1212: IsTrimmable is not supported for the target framework. Consider multi-targeting to a supported framework to enable trimming, and set IsTrimmable only for the supported frameworks. For example:
+&lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/IsTrimmable&gt;</value>
+    <comment>{StrBegin="NETSDK1212: "}</comment>
+  </data>
+  <!-- The latest message added is IsTrimmableUnsupported. Please update this value with each PR to catch parallel PRs both adding a new message -->
 </root>
