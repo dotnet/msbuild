@@ -147,19 +147,19 @@
         <target state="new">CONTAINER1010: Pulling images from local registry is not supported.</target>
         <note>{StrBegin="CONTAINER1010: "}</note>
       </trans-unit>
-      <trans-unit id="InvalidContainerRepository">
-        <source>CONTAINER2014: Invalid {0}: {1}.</source>
-        <target state="translated">CONTAINER2014: Geçersiz {0}: {1}.</target>
-        <note>{StrBegin="CONTAINER2014: "}</note>
-      </trans-unit>
       <trans-unit id="InvalidEnvVar">
         <source>CONTAINER2015: {0}: '{1}' was not a valid Environment Variable. Ignoring.</source>
         <target state="translated">CONTAINER2015: {0}: '{1}' geçerli bir Ortam Değişkeni değildi. Görmezden geliniyor.</target>
         <note>{StrBegin="CONTAINER2015: "}</note>
       </trans-unit>
-      <trans-unit id="InvalidImageName">
-        <source>CONTAINER2005: The first character of the image name must be a lowercase letter or a digit.</source>
-        <target state="translated">CONTAINER2005: Görüntü adının ilk karakteri küçük harf veya rakam olmalıdır.</target>
+      <trans-unit id="InvalidImageName_EntireNameIsInvalidCharacters">
+        <source>CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</source>
+        <target state="new">CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</target>
+        <note>{StrBegin="CONTAINER2005: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidImageName_NonAlphanumericStartCharacter">
+        <source>CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</source>
+        <target state="new">CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_Number">

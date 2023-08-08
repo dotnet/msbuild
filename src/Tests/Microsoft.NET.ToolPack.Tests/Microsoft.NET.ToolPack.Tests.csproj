@@ -19,10 +19,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
-    <PackageReference Include="NuGet.Packaging" Version="$(NuGetPackagingVersion)" />
-    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetPackagingVersion)" />
-    <PackageReference Include="Microsoft.NET.HostModel" Version="$(MicrosoftNETHostModelVersion)" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="NuGet.Packaging" />
+    <PackageReference Include="NuGet.ProjectModel" />
+    <PackageReference Include="Microsoft.NET.HostModel" />
   </ItemGroup>
 
   <ItemGroup>

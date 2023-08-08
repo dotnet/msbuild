@@ -20,9 +20,10 @@
     <!-- Source build does not need to worry about running on VS for Mac -->
     <ResolverTargetFramework Condition="'$(DotNetBuildFromSource)' == 'true'">$(SdkTargetFramework)</ResolverTargetFramework>
 
-    <!-- Disable implicit package target fallback, and disable warning for when we explicitly add it (currently needed for
+    <!-- NU1701 Disable implicit package target fallback, and disable warning for when we explicitly add it (currently needed for
          Microsoft.ApplicationInsights) -->
-    <NoWarn>$(NoWarn);NU1701</NoWarn>
+    <!-- NU1507 Disable multi-feed check as .NET uses multiple internal feeds intentionally -->
+    <NoWarn>$(NoWarn);NU1701;NU1507</NoWarn>
     <!-- do not enable analyzers on source build-->
     <EnforceCodeStyleInBuild Condition="'$(DotNetBuildFromSource)' != 'true'">true</EnforceCodeStyleInBuild>
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
@@ -32,6 +33,8 @@
     <DefineConstants Condition="'$(ContinuousIntegrationBuild)' == 'true'">$(DefineConstants);CI_BUILD</DefineConstants>
     <DefineConstants Condition="'$(OfficialBuilder)' == 'Microsoft'">$(DefineConstants);MICROSOFT_ENABLE_TELEMETRY</DefineConstants>
     <DefineConstants Condition="'$(DotNetBuildFromSource)' == 'true'">$(DefineConstants);DOT_NET_BUILD_FROM_SOURCE</DefineConstants>
+
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">

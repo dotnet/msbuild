@@ -95,6 +95,7 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
             switch (node.Kind())
             {
                 case SyntaxKind.GetAccessorDeclaration:
+                case SyntaxKind.InitAccessorDeclaration:
                 case SyntaxKind.SetAccessorDeclaration:
                     {
                         var accessorListSyntax = (AccessorListSyntax?)node.Parent;
@@ -148,7 +149,7 @@ namespace Microsoft.DotNet.GenAPI.SyntaxRewriter
             {
                 node = node.WithBody(GetThrowNullBody());
             }
-            else if (node.Kind() == SyntaxKind.SetAccessorDeclaration)
+            else if (node.Kind() is SyntaxKind.SetAccessorDeclaration or SyntaxKind.InitAccessorDeclaration)
             {
                 node = node.WithBody(GetEmptyBody());
             }

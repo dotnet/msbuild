@@ -45,6 +45,14 @@ namespace Microsoft.NET.TestFramework
                     }
                 }
             }
+            else if (string.Equals(targetFramework, "netcoreapp1.1", StringComparison.OrdinalIgnoreCase))
+            {
+                if (OperatingSystem.IsWindows())
+                {
+                    // netcoreapp1.1 used version-specific RIDs to find host binaries, so use win10 here
+                    rid = "win10-x64";
+                }
+            }
 
             return rid;
         }
@@ -69,146 +77,141 @@ namespace Microsoft.NET.TestFramework
                 return false;
             }
 
-            string currentRid = RuntimeInformation.RuntimeIdentifier;
+            if (OperatingSystem.IsWindows())
+            {
+                return true;
+            }
 
-            string ridOS = currentRid.Split('.')[0];
-            if (ridOS.Equals("alpine", StringComparison.OrdinalIgnoreCase))
+            if (OperatingSystem.IsLinux())
             {
-                if (nugetFramework.Version < new Version(2, 1, 0, 0))
+                var osRelease = File.ReadAllLines("/etc/os-release");
+                string osId = osRelease
+                    .First(line => line.StartsWith("ID=", StringComparison.OrdinalIgnoreCase))
+                    .Substring("ID=".Length)
+                    .Trim('\"', '\'');
+
+                string versionString = osRelease
+                    .First(line => line.StartsWith("VERSION_ID=", StringComparison.OrdinalIgnoreCase))
+                    .Substring("VERSION_ID=".Length)
+                    .Trim('\"', '\'');
+                if (osId.Equals("alpine", StringComparison.OrdinalIgnoreCase))
                 {
-                    return false;
+                    if (nugetFramework.Version < new Version(2, 1, 0, 0))
+                    {
+                        return false;
+                    }
+                }
+                else if (Version.TryParse(versionString, out Version osVersion))
+                {
+                    if (osId.Equals("fedora", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (osVersion.Major <= 27)
+                        {
+                            if (nugetFramework.Version < new Version(2, 1, 0, 0))
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
+                        else if (osVersion.Major == 28)
+                        {
+                            if (nugetFramework.Version < new Version(2, 1, 0, 0))
+                            {
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
+                        }
+                        else if (osVersion.Major >= 29)
+                        {
+                            if (nugetFramework.Version < new Version(2, 2, 0, 0))
+                            {
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                    else if (osId.Equals("rhel", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (osVersion.Major == 6)
+                        {
+                            if (nugetFramework.Version < new Version(2, 0, 0, 0))
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                    else if (osId.Equals("ubuntu", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (osVersion > new Version(16, 04))
+                        {
+                            if (nugetFramework.Version < new Version(2, 0, 0, 0))
+                            {
+                                return false;
+                            }
+                        }
+                    }
                 }
             }
-            else if (ridOS.Equals("fedora", StringComparison.OrdinalIgnoreCase))
+            else if (OperatingSystem.IsMacOS())
             {
-                string restOfRid = currentRid.Substring(ridOS.Length + 1);
-                string fedoraVersionString = restOfRid.Split('-')[0];
-                if (int.TryParse(fedoraVersionString, out int fedoraVersion))
+                //  .NET Core 1.1 - 10.11, 10.12
+                //  .NET Core 2.0 - 10.12+
+                //  .NET Core 2.1 - 10.12-10.15
+                //  .NET 5 <= 11.0
+                //  .NET 6 <= 12
+                //  .NET 7 <= 13
+                Version osVersion = Environment.OSVersion.Version;
+                if (osVersion <= new Version(10, 11))
                 {
-                    if (fedoraVersion <= 27)
+                    if (nugetFramework.Version >= new Version(2, 0, 0, 0))
                     {
-                        if (nugetFramework.Version < new Version(2, 1, 0, 0))
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                    }
-                    else if (fedoraVersion == 28)
-                    {
-                        if (nugetFramework.Version < new Version(2, 1, 0, 0))
-                        {
-                            return false;
-                        }
-                        else
-                        {
-                            return true;
-                        }
-                    }
-                    else if (fedoraVersion >= 29)
-                    {
-                        if (nugetFramework.Version < new Version(2, 2, 0, 0))
-                        {
-                            return false;
-                        }
-                        else
-                        {
-                            return true;
-                        }
+                        return false;
                     }
                 }
-            }
-            else if (ridOS.Equals("rhel", StringComparison.OrdinalIgnoreCase))
-            {
-                string restOfRid = currentRid.Substring(ridOS.Length + 1);
-                string rhelVersionString = restOfRid.Split('-')[0];
-                if (int.TryParse(rhelVersionString, out int rhelVersion))
+                else if (osVersion == new Version(10, 12))
                 {
-                    if (rhelVersion == 6)
+                    if (nugetFramework.Version < new Version(2, 0, 0, 0))
                     {
-                        if (nugetFramework.Version < new Version(2, 0, 0, 0))
-                        {
-                            return false;
-                        }
+                        return false;
                     }
                 }
-            }
-            else if (ridOS.Equals("ubuntu", StringComparison.OrdinalIgnoreCase))
-            {
-                string restOfRid = currentRid.Substring(ridOS.Length + 1);
-                string ubuntuVersionString = restOfRid.Split('-')[0];
-                if (float.TryParse(ubuntuVersionString, System.Globalization.CultureInfo.InvariantCulture, out float ubuntuVersion))
+                else if (osVersion > new Version(10, 12) && osVersion <= new Version(10, 15))
                 {
-                    if (ubuntuVersion > 16.04f)
+                    //  .NET Core 2.0 is out of support, and doesn't seem to work with OS X 10.14
+                    //  (it finds no assets for the RID), even though the support page says "10.12+"
+                    if (nugetFramework.Version < new Version(2, 1, 0, 0))
                     {
-                        if (nugetFramework.Version < new Version(2, 0, 0, 0))
-                        {
-                            return false;
-                        }
+                        return false;
                     }
                 }
-                else
+                else if (osVersion == new Version(11, 0))
                 {
-                    return true;
+                    if (nugetFramework.Version < new Version(5, 0, 0, 0))
+                    {
+                        return false;
+                    }
                 }
-            }
-            else if (ridOS.Equals("osx", StringComparison.OrdinalIgnoreCase))
-            {
-                string restOfRid = currentRid.Substring(ridOS.Length + 1);
-                string osxVersionString = restOfRid.Split('-')[0];
-                if (float.TryParse(osxVersionString, out float osxVersion))
+                else if (osVersion == new Version(12, 0))
                 {
-                    //  .NET Core 1.1 - 10.11, 10.12
-                    //  .NET Core 2.0 - 10.12+
-                    //  .NET Core 2.1 - 10.12-10.15
-                    //  .NET 5 <= 11.0
-                    //  .NET 6 <= 12
-                    //  .NET 7 <= 13
-                    if (osxVersion <= 10.11f)
+                    if (nugetFramework.Version < new Version(6, 0, 0, 0))
                     {
-                        if (nugetFramework.Version >= new Version(2, 0, 0, 0))
-                        {
-                            return false;
-                        }
+                        return false;
                     }
-                    else if (osxVersion == 10.12f)
+                }
+                else if (osVersion > new Version(12, 0))
+                {
+                    if (nugetFramework.Version < new Version(7, 0, 0, 0))
                     {
-                        if (nugetFramework.Version < new Version(2, 0, 0, 0))
-                        {
-                            return false;
-                        }
-                    }
-                    else if (osxVersion > 10.12f && osxVersion <= 10.15f)
-                    {
-                        //  .NET Core 2.0 is out of support, and doesn't seem to work with OS X 10.14
-                        //  (it finds no assets for the RID), even though the support page says "10.12+"
-                        if (nugetFramework.Version < new Version(2, 1, 0, 0))
-                        {
-                            return false;
-                        }
-                    }
-                    else if (osxVersion == 11.0f)
-                    {
-                        if (nugetFramework.Version < new Version(5, 0, 0, 0))
-                        {
-                            return false;
-                        }
-                    }
-                    else if (osxVersion == 12.0f)
-                    {
-                        if (nugetFramework.Version < new Version(6, 0, 0, 0))
-                        {
-                            return false;
-                        }
-                    }
-                    else if (osxVersion > 12.0f)
-                    {
-                        if (nugetFramework.Version < new Version(7, 0, 0, 0))
-                        {
-                            return false;
-                        }
+                        return false;
                     }
                 }
             }

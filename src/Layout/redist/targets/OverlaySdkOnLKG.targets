@@ -47,7 +47,8 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(OverlaySDK)"
-          DestinationFiles="@(OverlaySDK->'$(RedistLayoutPath)\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(OverlaySDK->'$(RedistLayoutPath)\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true"/>
 
     <PropertyGroup>
       <SdkOutputDirectory>$(RedistLayoutPath)sdk\$(Version)</SdkOutputDirectory>

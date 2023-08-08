@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 Microsoft.NET.Sdk.FrameworkReferenceResolution.targets
 
@@ -60,7 +60,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="ProcessFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;CollectPackageDownloads"
           DependsOnTargets="AddWindowsSdkKnownFrameworkReferences"
-          Condition="'@(FrameworkReference)' != ''">
+          Condition="'@(FrameworkReference)' != '' Or '$(_RequiresILLinkPack)' == 'true'">
 
     <CheckForDuplicateFrameworkReferences
         FrameworkReferences="@(FrameworkReference)"
@@ -95,12 +95,18 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 TargetPlatformIdentifier="$(TargetPlatformIdentifier)"
                                 TargetPlatformVersion="$(TargetPlatformVersion)"
                                 TargetingPackRoot="$(NetCoreTargetingPackRoot)"
-                                RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+                                RuntimeGraphPath="$(RuntimeIdentifierGraphPath)"
                                 SelfContained="$(SelfContained)"
                                 ReadyToRunEnabled="$(PublishReadyToRun)"
                                 ReadyToRunUseCrossgen2="$(PublishReadyToRunUseCrossgen2)"
+                                PublishAot="$(PublishAot)"
                                 RequiresILLinkPack="$(_RequiresILLinkPack)"
-                                AotEnabled="$(PublishAot)"
+                                IsAotCompatible="$(IsAotCompatible)"
+                                EnableAotAnalyzer="$(EnableAotAnalyzer)"
+                                PublishTrimmed="$(PublishTrimmed)"
+                                IsTrimmable="$(IsTrimmable)"
+                                EnableTrimAnalyzer="$(EnableTrimAnalyzer)"
+                                EnableSingleFileAnalyzer="$(EnableSingleFileAnalyzer)"
                                 AotUseKnownRuntimePackForTarget="$(PublishAotUsingRuntimePack)"
                                 RuntimeIdentifier="$(RuntimeIdentifier)"
                                 RuntimeIdentifiers="$(RuntimeIdentifiers)"
@@ -150,7 +156,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                      DotNetSingleFileHostExecutableNameWithoutExtension="$(_DotNetSingleFileHostExecutableNameWithoutExtension)"
                      DotNetComHostLibraryNameWithoutExtension="$(_DotNetComHostLibraryNameWithoutExtension)"
                      DotNetIjwHostLibraryNameWithoutExtension="$(_DotNetIjwHostLibraryNameWithoutExtension)"
-                     RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
+                     RuntimeGraphPath="$(RuntimeIdentifierGraphPath)"
                      KnownAppHostPacks="@(KnownAppHostPack)"
                      NuGetRestoreSupported="$(_NuGetRestoreSupported)"
                      EnableAppHostPackDownload="$(EnableAppHostPackDownload)"

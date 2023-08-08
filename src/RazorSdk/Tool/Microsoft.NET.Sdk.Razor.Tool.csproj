@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Razor.Tooling.Internal" Version="$(MicrosoftCodeAnalysisRazorToolingInternalVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Razor.Tooling.Internal" />
     <!-- We include a package reference to the M.C.C version used in the repo to ensure that NuGet's dependency
     resolution favors this version when writing the assembly reference metadata to `rzc.dll`. Without this package
     reference, NuGet will resolve the version of M.C.C at the next level of the dependency tree. M.A.R.L uses M.C.C
@@ -26,11 +26,10 @@
 
     This is needed to ensure that the assembly reference to M.C.C in rzc.dll always matches what is available in
     `Roslyn/bincore` for our consolidate loading logic. -->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpPackageVersion)" />
-    <PackageReference Include="Microsoft.Css.Parser" Version="$(MicrosoftCssParserVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Microsoft.Css.Parser" />
+    <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.Extensions.Tooling.Internal"
-      Version="$(MicrosoftAspNetCoreMvcRazorExtensionsToolingInternalPackageVersion)"
       ReferenceOutputAssembly="false"
       SkipGetTargetFrameworkProperties="true"/>
   </ItemGroup>

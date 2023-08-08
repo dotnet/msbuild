@@ -599,6 +599,27 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData("netstandard2.0")]
+        public void IsAotCompatible_warns_for_unsupported_target_framework(string targetFramework)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "ClassLibTest",
+                TargetFrameworks = targetFramework
+            };
+            testProject.AdditionalProperties["IsAotCompatible"] = "true";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            buildCommand
+                .Execute()
+                .Should().Pass()
+                // Note: can't check for Strings.IsAotCompatibleUnsupported because each line of
+                // the message gets prefixed with a file path by MSBuild.
+                .And.HaveStdOutContaining("warning NETSDK1210");
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
         public void Requires_analyzers_produce_warnings_without_PublishAot_being_set(string targetFramework)
         {

@@ -21,18 +21,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsVersion)" />
-    <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
-    <PackageReference Include="xunit" Version="$(XUnitVersion)" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)"  />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsLoggingConsoleVersion)"  />
+    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" />
+    <PackageReference Include="Microsoft.Extensions.Logging"  />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console"  />
   </ItemGroup>
 
   <!-- Packages that are in-box for .NET Core, so we only need to reference them for .NET Framework -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
+    <PackageReference Include="System.Reflection.Metadata" />
   </ItemGroup>
 
   <ItemGroup>

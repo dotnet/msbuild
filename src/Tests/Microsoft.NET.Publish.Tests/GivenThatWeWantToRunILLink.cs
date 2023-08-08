@@ -126,7 +126,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(ToolsetInfo.CurrentTargetFramework)]
-        public void ILLink_fails_when_no_matching_pack_is_found(string targetFramework)
+        public void PublishTrimmed_fails_when_no_matching_pack_is_found(string targetFramework)
         {
             var projectName = "HelloWorld";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -144,15 +144,63 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true")
                 .Should().Fail()
-                .And.HaveStdOutContaining("error NETSDK1195");
+                .And.HaveStdOutContaining($"error {Strings.PublishTrimmedRequiresVersion30}");
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        // TODO: enable netstandard2.0 once ProcessFrameworkReferences is fixed to run
-        // when tool packs are referenced. See https://github.com/dotnet/sdk/pull/33062.
-        // Currently netstandard2.0 skips ProcessFrameworkReference because FrameworkReference
-        // is empty.
-        // [InlineData("netstandard2.0")]
+        [InlineData("netcoreapp2.0")]
+        [InlineData("netcoreapp2.1")]
+        [InlineData("netstandard2.1")]
+        public void PublishTrimmed_fails_for_unsupported_target_framework(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+            var publishCommand = new PublishCommand(testAsset);
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true")
+                .Should().Fail()
+                .And.HaveStdOutContaining($"error {Strings.PublishTrimmedRequiresVersion30}");
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData("netstandard2.0")]
+        [InlineData("netstandard2.1")]
+        public void IsTrimmable_warns_for_unsupported_target_framework(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute("/p:IsTrimmable=true")
+                .Should().Pass()
+                // Note: can't check for Strings.IsTrimmableUnsupported because each line of
+                // the message gets prefixed with a file path by MSBuild.
+                .And.HaveStdOutContaining($"warning NETSDK1212");
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData("netstandard2.1")]
+        public void RequiresILLinkPack_errors_for_unsupported_target_framework(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            testProject.AdditionalProperties["_RequiresILLinkPack"] = "true";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+            
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should().Fail()
+                .And.HaveStdOutContaining($"error {Strings.ILLinkNoValidRuntimePackageError}");
+        }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData("netstandard2.0")]
         [InlineData("netstandard2.1")]
         public void ILLink_can_use_latest_with_unsupported_target_framework(string targetFramework)
         {
@@ -1761,27 +1809,6 @@ namespace Microsoft.NET.Publish.Tests
             project.Root.Elements(ns + "ItemGroup")
                 .Where(ig => ig.Elements(ns + "TrimmerRootDescriptor").Any())
                 .First().Remove();
-        }
-
-        [Fact]
-        public void It_warns_when_targeting_netcoreapp_2_x_illink()
-        {
-            var testProject = new TestProject()
-            {
-                Name = "ConsoleApp",
-                TargetFrameworks = "netcoreapp2.2",
-                IsExe = true,
-            };
-
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: "GivenThatWeWantToRunILLink");
-
-            var publishCommand = new PublishCommand(testAsset);
-
-            publishCommand.Execute($"/p:PublishTrimmed=true")
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining(Strings.PublishTrimmedRequiresVersion30);
         }
 
         private void SetMetadata(XDocument project, string assemblyName, string key, string value)

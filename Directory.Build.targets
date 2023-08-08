@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
-  <Import Project="$(RepositoryEngineeringDir)Packages.props" />
   <ItemGroup>
     <SupportedPlatform Remove="Android" />
     <SupportedPlatform Remove="iOS" />
@@ -16,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(OutputType)' == 'Exe' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <PackageReference Include="xunit.console" Version="$(XUnitVersion)" Private="true" />
+    <PackageReference Include="xunit.console" Private="true" />
 
     <!-- These files are both included via a .props file in xunit.runner.visualstudio, as well as
          via package dependencies of xunit.console.  To prevent warnings about duplicate files

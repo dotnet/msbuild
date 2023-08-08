@@ -15,12 +15,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
-    <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
-    <PackageReference Include="xunit" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
-    <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="Microsoft.Build" />
+    <PackageReference Include="System.Net.Http" />
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" />
   </ItemGroup>
 
   <!-- Global usings removal -->

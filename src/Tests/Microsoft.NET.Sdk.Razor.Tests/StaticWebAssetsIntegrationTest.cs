@@ -463,7 +463,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             ProjectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var publish = new PublishCommand(ProjectDirectory);
-            publish.Execute("/p:PublishSingleFile=true ", $"/p:RuntimeIdentifier={RuntimeInformation.RuntimeIdentifier}").Should().Pass();
+            publish.Execute("/p:PublishSingleFile=true", $"/p:RuntimeIdentifier={RuntimeInformation.RuntimeIdentifier}").Should().Pass();
 
             var intermediateOutputPath = publish.GetIntermediateDirectory(DefaultTfm, "Debug", RuntimeInformation.RuntimeIdentifier).ToString();
             var publishPath = publish.GetOutputDirectory(DefaultTfm, "Debug").ToString();
