@@ -807,6 +807,7 @@ namespace Microsoft.Build.CommandLine
                         {
                             Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
                             exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project);
+                            collection.LogBuildFinishedEvent(exitType == ExitType.Success);
                         }
                     }
                     else // regular build
