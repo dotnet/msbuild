@@ -803,7 +803,11 @@ namespace Microsoft.Build.CommandLine
                     }
                     else if ((getProperty.Length > 0 || getItem.Length > 0) && (targets is null || targets.Length == 0))
                     {
-                        exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, projectFile, globalProperties, toolsVersion);
+                        using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.None))
+                        {
+                            Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
+                            exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project);
+                        }
                     }
                     else // regular build
                     {
@@ -1015,16 +1019,10 @@ namespace Microsoft.Build.CommandLine
             return exitType;
         }
 
-        private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, string projectFile, Dictionary<string, string> globalProperties, string toolsVersion)
+        private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project)
         {
             try
             {
-                Project project = Project.FromFile(projectFile, new Definition.ProjectOptions()
-                {
-                    GlobalProperties = globalProperties,
-                    ToolsVersion = toolsVersion,
-                });
-
                 // Special case if the user requests exactly one property: skip json formatting
                 if (getProperty.Length == 1 && getItem.Length == 0)
                 {
