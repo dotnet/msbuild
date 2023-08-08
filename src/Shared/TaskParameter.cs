@@ -24,17 +24,17 @@ namespace Microsoft.Build.BackEnd
     internal enum TaskParameterType
     {
         /// <summary>
-        /// Parameter is null
+        /// Parameter is null.
         /// </summary>
         Null,
 
         /// <summary>
-        /// Parameter is a string
+        /// Parameter is a string.
         /// </summary>
         String,
 
         /// <summary>
-        /// Parameter is an array of strings
+        /// Parameter is an array of strings.
         /// </summary>
         StringArray,
 
@@ -44,9 +44,19 @@ namespace Microsoft.Build.BackEnd
         Bool,
 
         /// <summary>
+        /// Parameter is an array of bools.
+        /// </summary>
+        BoolArray,
+
+        /// <summary>
         /// Parameter is an <see langword="int"/>.
         /// </summary>
         Int,
+
+        /// <summary>
+        /// Parameter is an array of integers.
+        /// </summary>
+        IntArray,
 
         /// <summary>
         /// Parameter is a value type.  Note:  Must be serializable
@@ -144,6 +154,16 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     _wrappedParameter = taskItemArrayParameter;
+                }
+                else if (wrappedParameterType == typeof(bool[]))
+                {
+                    _parameterType = TaskParameterType.BoolArray;
+                    _wrappedParameter = wrappedParameter;
+                }
+                else if (wrappedParameterType == typeof(int[]))
+                {
+                    _parameterType = TaskParameterType.IntArray;
+                    _wrappedParameter = wrappedParameter;
                 }
                 else if (wrappedParameterType.GetElementType().GetTypeInfo().IsValueType)
                 {
@@ -268,6 +288,11 @@ namespace Microsoft.Build.BackEnd
                     translator.Translate(ref boolParam);
                     _wrappedParameter = boolParam;
                     break;
+                case TaskParameterType.BoolArray:
+                    bool[] boolArrayParam = (bool[])_wrappedParameter;
+                    translator.Translate(ref boolArrayParam);
+                    _wrappedParameter = boolArrayParam;
+                    break;
                 case TaskParameterType.Int:
                     int intParam = _wrappedParameter switch
                     {
@@ -276,6 +301,11 @@ namespace Microsoft.Build.BackEnd
                     };
                     translator.Translate(ref intParam);
                     _wrappedParameter = intParam;
+                    break;
+                case TaskParameterType.IntArray:
+                    int[] intArrayParam = (int[])_wrappedParameter;
+                    translator.Translate(ref intArrayParam);
+                    _wrappedParameter = intArrayParam;
                     break;
                 case TaskParameterType.ValueType:
                 case TaskParameterType.ValueTypeArray:

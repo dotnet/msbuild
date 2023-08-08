@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskParameter t = new TaskParameter(new int[] { 2, 15 });
 
-            Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
+            Assert.Equal(TaskParameterType.IntArray, t.ParameterType);
 
             int[] wrappedParameter = t.WrappedParameter as int[];
             Assert.NotNull(wrappedParameter);
@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(TaskParameterType.ValueTypeArray, t2.ParameterType);
+            Assert.Equal(TaskParameterType.IntArray, t2.ParameterType);
 
             int[] wrappedParameter2 = t2.WrappedParameter as int[];
             Assert.NotNull(wrappedParameter2);
@@ -168,14 +168,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that construction and serialization with a parameter that is an array of value types (ints) is OK.
+        /// Verifies that construction and serialization with a parameter that is an array of value types (bools) is OK.
         /// </summary>
         [Fact]
         public void BoolArrayParameter()
         {
             TaskParameter t = new TaskParameter(new bool[] { false, true });
 
-            Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
+            Assert.Equal(TaskParameterType.BoolArray, t.ParameterType);
 
             bool[] wrappedParameter = t.WrappedParameter as bool[];
             Assert.NotNull(wrappedParameter);
@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(TaskParameterType.ValueTypeArray, t2.ParameterType);
+            Assert.Equal(TaskParameterType.BoolArray, t2.ParameterType);
 
             bool[] wrappedParameter2 = Assert.IsType<bool[]>(t2.WrappedParameter);
             Assert.Equal(2, wrappedParameter2.Length);
