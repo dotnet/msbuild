@@ -4,6 +4,8 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
 
@@ -58,10 +60,19 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
-        public void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost(bool testLegacyImplementation)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
+
+            ChangeWaves.ResetStateForTests();
+            if (testLegacyImplementation)
+            {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+            }
 
             string boolParam = "True";
             string boolArrayParam = "False;True;False";
