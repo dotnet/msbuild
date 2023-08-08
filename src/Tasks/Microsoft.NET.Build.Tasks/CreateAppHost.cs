@@ -53,19 +53,8 @@ namespace Microsoft.NET.Build.Tasks
                 var isGUI = WindowsGraphicalUserInterface;
                 var resourcesAssembly = IntermediateAssembly;
 
-                if (!ResourceUpdater.IsSupportedOS())
-                {
-                    if (isGUI)
-                    {
-                        Log.LogWarning(Strings.AppHostCustomizationRequiresWindowsHostWarning);
-                    }
-
-                    isGUI = false;
-                    resourcesAssembly = null;
-                }
-
                 int attempts = 0;
-                
+
                 while (true)
                 {
                     try

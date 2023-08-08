@@ -3,7 +3,6 @@
 
 using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Microsoft.NET.HostModel;
 using Microsoft.NET.HostModel.AppHost;
 
 namespace Microsoft.DotNet.ShellShim
@@ -41,26 +40,12 @@ namespace Microsoft.DotNet.ShellShim
             var appBinaryFilePath = Path.GetRelativePath(Path.GetDirectoryName(appHostDestinationFilePath), entryPointFullPath);
 
 
-            if (ResourceUpdater.IsSupportedOS())
-            {
-                var windowsGraphicalUserInterfaceBit = PEUtils.GetWindowsGraphicalUserInterfaceBit(entryPointFullPath);
-                HostWriter.CreateAppHost(appHostSourceFilePath: appHostSourcePath,
-                                         appHostDestinationFilePath: appHostDestinationFilePath,
-                                         appBinaryFilePath: appBinaryFilePath,
-                                         windowsGraphicalUserInterface: (windowsGraphicalUserInterfaceBit == WindowsGUISubsystem) && OperatingSystem.IsWindows(),
-                                         assemblyToCopyResourcesFrom: entryPointFullPath);
-            }
-            else
-            {
-                // by passing null to assemblyToCopyResourcesFrom, it will skip copying resources,
-                // which is only supported on Windows
-                HostWriter.CreateAppHost(appHostSourceFilePath: appHostSourcePath,
-                                         appHostDestinationFilePath: appHostDestinationFilePath,
-                                         appBinaryFilePath: appBinaryFilePath,
-                                         windowsGraphicalUserInterface: false,
-                                         assemblyToCopyResourcesFrom: null,
-                                         enableMacOSCodeSign: OperatingSystem.IsMacOS());
-            }
+            var windowsGraphicalUserInterfaceBit = PEUtils.GetWindowsGraphicalUserInterfaceBit(entryPointFullPath);
+            HostWriter.CreateAppHost(appHostSourceFilePath: appHostSourcePath,
+                                     appHostDestinationFilePath: appHostDestinationFilePath,
+                                     appBinaryFilePath: appBinaryFilePath,
+                                     windowsGraphicalUserInterface: (windowsGraphicalUserInterfaceBit == WindowsGUISubsystem) && OperatingSystem.IsWindows(),
+                                     assemblyToCopyResourcesFrom: entryPointFullPath);
 
             _filePermissionSetter.SetUserExecutionPermission(appHostDestinationFilePath);
         }
