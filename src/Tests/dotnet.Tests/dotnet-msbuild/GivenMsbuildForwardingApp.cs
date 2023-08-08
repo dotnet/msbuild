@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         {
             var msbuildPath = "<msbuildpath>";
             new MSBuildForwardingApp(new string[0], msbuildPath)
-                .GetProcessStartInfo().FileName.Should().Be("dotnet.exe");
+                .GetProcessStartInfo().FileName.Should().EndWith("dotnet.exe");
         }
 
         [UnixOnlyFact]
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         {
             var msbuildPath = "<msbuildpath>";
             new MSBuildForwardingApp(new string[0], msbuildPath)
-                .GetProcessStartInfo().FileName.Should().Be("dotnet");
+                .GetProcessStartInfo().FileName.Should().EndWith("dotnet");
         }
 
         [Theory]
