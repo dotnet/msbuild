@@ -308,8 +308,24 @@ namespace Microsoft.Build.BackEnd
                     _wrappedParameter = intArrayParam;
                     break;
                 case TaskParameterType.ValueType:
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
+                    {
+                        TranslateValueType(translator);
+                    }
+                    else
+                    {
+                        translator.TranslateDotNet(ref _wrappedParameter);
+                    }
+                    break;
                 case TaskParameterType.ValueTypeArray:
-                    translator.TranslateDotNet(ref _wrappedParameter);
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
+                    {
+                        TranslateValueTypeArray(translator);
+                    }
+                    else
+                    {
+                        translator.TranslateDotNet(ref _wrappedParameter);
+                    }
                     break;
                 case TaskParameterType.ITaskItem:
                     TranslateITaskItem(translator);
@@ -565,6 +581,100 @@ namespace Microsoft.Build.BackEnd
             }
 
             return haveRef;
+        }
+
+        /// <summary>
+        /// Serializes or deserializes the value type instance wrapped by this <see cref="TaskParameter"/>.
+        /// </summary>
+        /// <remarks>
+        /// The value type is converted to/from string using the <see cref="Convert"/> class. Note that we require
+        /// task parameter types to be <see cref="IConvertible"/> so this conversion is guaranteed to work for parameters
+        /// that have made it this far.
+        /// </remarks>
+        private void TranslateValueType(ITranslator translator)
+        {
+            string typeName = null;
+            string valueString = null;
+
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                Type type = _wrappedParameter.GetType();
+
+                // Don't allow non-serializable types to be translated to keep the same limitation as the previous
+                // BinaryFormatter-based implementation.
+#pragma warning disable SYSLIB0050
+                if (!type.GetTypeInfo().IsSerializable)
+#pragma warning restore SYSLIB0050
+                {
+                    throw new NotSupportedException($"{type} cannot be used as a task parameter type because it is not serializable.");
+                }
+
+                typeName = type.AssemblyQualifiedName;
+                valueString = Convert.ToString(_wrappedParameter, CultureInfo.InvariantCulture);
+            }
+
+            translator.Translate(ref typeName);
+            translator.Translate(ref valueString);
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                Type type = Type.GetType(typeName);
+                _wrappedParameter = Convert.ChangeType(valueString, type, CultureInfo.InvariantCulture);
+            }
+        }
+
+        /// <summary>
+        /// Serializes or deserializes the value type array instance wrapped by this <see cref="TaskParameter"/>.
+        /// </summary>
+        /// <remarks>
+        /// The array is assumed to be non-null.
+        /// </remarks>
+        private void TranslateValueTypeArray(ITranslator translator)
+        {
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                Array array = (Array)_wrappedParameter;
+                Type arrayType = array.GetType();
+
+                // Don't allow non-serializable types to be translated to keep the same limitation as the previous
+                // BinaryFormatter-based implementation.
+#pragma warning disable SYSLIB0050
+                if (!arrayType.GetTypeInfo().IsSerializable)
+#pragma warning restore SYSLIB0050
+                {
+                    throw new NotSupportedException($"{arrayType} cannot be used as a task parameter type because it is not serializable.");
+                }
+
+                string typeName = arrayType.GetElementType().AssemblyQualifiedName;
+                int length = array.Length;
+
+                translator.Translate(ref typeName);
+                translator.Translate(ref length);
+
+                for (int i = 0; i < length; i++)
+                {
+                    string valueString = Convert.ToString(array.GetValue(i), CultureInfo.InvariantCulture);
+                    translator.Translate(ref valueString);
+                }
+            }
+            else
+            {
+                string typeName = null;
+                int length = 0;
+
+                translator.Translate(ref typeName);
+                translator.Translate(ref length);
+
+                Type elementType = Type.GetType(typeName);
+                Array array = Array.CreateInstance(elementType, length);
+                for (int i = 0; i < length; i++)
+                {
+                    string valueString = null;
+                    translator.Translate(ref valueString);
+                    array.SetValue(Convert.ChangeType(valueString, elementType, CultureInfo.InvariantCulture), i);
+                }
+                _wrappedParameter = array;
+            }
         }
 
         /// <summary>
