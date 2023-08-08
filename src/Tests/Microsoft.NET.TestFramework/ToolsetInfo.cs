@@ -407,5 +407,16 @@ namespace Microsoft.NET.TestFramework
             return !File.Exists(extensionsImportAfterPath);
         }
 
+        private static readonly Lazy<string> _NewtonsoftJsonPackageVersion = new Lazy<string>(() =>
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            return assembly.GetCustomAttributes(true).OfType<AssemblyMetadataAttribute>().FirstOrDefault(a => a.Key == "NewtonsoftJsonPackageVersion").Value;
+        });
+
+        public static string GetNewtonsoftJsonPackageVersion()
+        {
+            return _NewtonsoftJsonPackageVersion.Value;
+        }
+
     }
 }

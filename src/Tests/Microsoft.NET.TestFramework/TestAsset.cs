@@ -10,6 +10,7 @@ using Microsoft.NET.TestFramework.Commands;
 using System.Collections.Generic;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using System.Reflection;
 
 namespace Microsoft.NET.TestFramework
 {
@@ -92,7 +93,7 @@ namespace Microsoft.NET.TestFramework
             {
                 string destFile = srcFile.Replace(_testAssetRoot, Path);
                 
-                if (System.IO.Path.GetFileName(srcFile).EndsWith("proj"))
+                if (System.IO.Path.GetFileName(srcFile).EndsWith("proj") || System.IO.Path.GetFileName(srcFile).EndsWith("xml"))
                 {
                     _projectFiles.Add(destFile);
                 }
@@ -105,6 +106,8 @@ namespace Microsoft.NET.TestFramework
             {
                 this.UpdateProjProperty(property[0], property[1], property[2]);
             }
+
+            this.ReplaceTheNewtonsoftJsonPackageVersionVariable();
 
             return this;
         }
@@ -119,6 +122,27 @@ namespace Microsoft.NET.TestFramework
                 getNode ??= p.Root.Elements(ns + "PropertyGroup").Elements(ns + $"{propertyName}s").FirstOrDefault();
                 getNode?.SetValue(getNode?.Value.Replace(variableName, targetValue));
             }, targetValue);
+        }
+
+        public TestAsset ReplaceTheNewtonsoftJsonPackageVersionVariable()
+        {
+            string[] PropertyNames = new[] { "PackageReference", "Package" };
+            string targetName = "NewtonsoftJsonPackageVersion";
+
+            return WithProjectChanges(project =>
+            {
+                var ns = project.Root.Name.Namespace;
+                foreach (var PropertyName in PropertyNames)
+                {
+                    var packageReferencesToUpdate =
+                        project.Root.Descendants(ns + PropertyName)
+                            .Where(p => p.Attribute("Version") != null && p.Attribute("Version").Value.Equals($"$({targetName})", StringComparison.OrdinalIgnoreCase));
+                    foreach (var packageReference in packageReferencesToUpdate)
+                    {
+                        packageReference.Attribute("Version").Value = ToolsetInfo.GetNewtonsoftJsonPackageVersion();
+                    }
+                }
+            });
         }
 
         public TestAsset WithTargetFramework(string targetFramework, string projectName = null)
@@ -205,7 +229,7 @@ namespace Microsoft.NET.TestFramework
             }
             return this;
 
-            }
+        }
 
         public RestoreCommand GetRestoreCommand(ITestOutputHelper log, string relativePath = "")
         {

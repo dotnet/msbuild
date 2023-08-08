@@ -39,7 +39,7 @@ namespace Microsoft.NET.Publish.Tests
 
                     //  Using different casing for the package ID here, to test the scenario from https://github.com/dotnet/sdk/issues/376
                     itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", "NEWTONSOFT.Json"),
-                                                                        new XAttribute("Version", "13.0.1"),
+                                                                        new XAttribute("Version", ToolsetInfo.GetNewtonsoftJsonPackageVersion()),
                                                                         new XAttribute("PrivateAssets", "All")));
                 });
 
@@ -89,7 +89,7 @@ namespace Microsoft.NET.Publish.Tests
                     project.Root.Add(itemGroup);
 
                     itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", "Newtonsoft.Json"),
-                                                                        new XAttribute("Version", "13.0.1"),
+                                                                        new XAttribute("Version", ToolsetInfo.GetNewtonsoftJsonPackageVersion()),
                                                                         new XAttribute("Publish", "false")));
                 });
 
@@ -139,7 +139,7 @@ namespace Microsoft.NET.Publish.Tests
                     project.Root.Add(itemGroup);
 
                     itemGroup.Add(new XElement(ns + "PackageReference", new XAttribute("Include", "Newtonsoft.Json"),
-                                                                        new XAttribute("Version", "13.0.1"),
+                                                                        new XAttribute("Version", ToolsetInfo.GetNewtonsoftJsonPackageVersion()),
                                                                         new XAttribute("PrivateAssets", "All"),
                                                                         new XAttribute("Publish", "true")));
                 });
@@ -200,7 +200,7 @@ namespace Microsoft.NET.Publish.Tests
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1", privateAssets: "all"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion(), privateAssets: "all"));
 
             testProject.ReferencedProjects.Add(testLibraryProject);
 

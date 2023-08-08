@@ -60,7 +60,7 @@ namespace Microsoft.NET.Publish.Tests
             }
 
             testProject.ReferencedProjects.Add(testLibraryProject);
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
             testProject.PackageReferences.Add(new TestPackageReference("System.Data.SqlClient", "4.4.3"));
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: appTargetFramework + withoutCopyingRefs);
@@ -197,7 +197,7 @@ namespace Microsoft.NET.Publish.Tests
             File.WriteAllLines(manifestFile, new[]
             {
                 "<StoreArtifacts>",
-                @"  <Package Id=""Newtonsoft.Json"" Version=""13.0.1"" />",
+                $@"  <Package Id=""Newtonsoft.Json"" Version=""{ToolsetInfo.GetNewtonsoftJsonPackageVersion()}"" />",
                 @"  <Package Id=""System.Data.SqlClient"" Version=""4.3.0"" />",
                 "</StoreArtifacts>",
             });

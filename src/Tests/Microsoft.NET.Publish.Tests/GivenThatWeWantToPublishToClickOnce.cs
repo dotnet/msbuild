@@ -38,7 +38,7 @@ namespace Microsoft.NET.Publish.Tests
                 ProjectSdk = "Microsoft.NET.Sdk;Microsoft.NET.Sdk.Publish",
                 IsExe = true,
             };
-            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: publishSingleFile.ToString());
 

@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup Label="ProjectConfigurations">
-    <PackageReference Include="NewtonSoft.Json" Version="13.0.1" />
+    <PackageReference Include="NewtonSoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

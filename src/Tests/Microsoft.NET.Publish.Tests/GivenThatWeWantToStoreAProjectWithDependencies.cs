@@ -186,7 +186,7 @@ namespace Microsoft.NET.Publish.Tests
                "artifact.xml",
                "newtonsoft.json/9.0.2-beta2/lib/netstandard1.1/Newtonsoft.Json.dll",
                "newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll",
-               "newtonsoft.json/13.0.1/lib/netstandard2.0/Newtonsoft.Json.dll",
+               $"newtonsoft.json/{ToolsetInfo.GetNewtonsoftJsonPackageVersion()}/lib/netstandard2.0/Newtonsoft.Json.dll",
                "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.Core.dll",
                "fluentassertions/4.12.0/lib/netstandard1.3/FluentAssertions.dll",
                "fluentassertions.json/4.12.0/lib/netstandard1.3/FluentAssertions.Json.dll",
@@ -202,7 +202,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var knownpackage = new HashSet<PackageIdentity>
             {
-                new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("13.0.1")),
+                new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse(ToolsetInfo.GetNewtonsoftJsonPackageVersion())),
                 new PackageIdentity("Newtonsoft.Json", NuGetVersion.Parse("9.0.2-beta2")),
                 new PackageIdentity("FluentAssertions.Json", NuGetVersion.Parse("4.12.0"))
             };
@@ -292,7 +292,7 @@ namespace Microsoft.NET.Publish.Tests
             }
             else
             {
-                var newtonsoftSymbolsFolder = symbolsFolder.Sub("newtonsoft.json").Sub("13.0.1").Sub("lib").Sub("netstandard2.0");
+                var newtonsoftSymbolsFolder = symbolsFolder.Sub("newtonsoft.json").Sub(ToolsetInfo.GetNewtonsoftJsonPackageVersion()).Sub("lib").Sub("netstandard2.0");
                 newtonsoftSymbolsFolder.Should().Exist();
 
                 var newtonsoftSymbolsFiles = newtonsoftSymbolsFolder.GetFiles().ToArray();
@@ -315,7 +315,7 @@ namespace Microsoft.NET.Publish.Tests
                 IsExe = isExe,
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: isExe.ToString());
 
@@ -336,7 +336,7 @@ namespace Microsoft.NET.Publish.Tests
 
             new DirectoryInfo(outputFolder).Should().OnlyHaveFiles(new List<string> {
                "artifact.xml",
-               "newtonsoft.json/13.0.1/lib/netstandard2.0/Newtonsoft.Json.dll",
+               $"newtonsoft.json/{ToolsetInfo.GetNewtonsoftJsonPackageVersion()}/lib/netstandard2.0/Newtonsoft.Json.dll",
             });
         }
 
