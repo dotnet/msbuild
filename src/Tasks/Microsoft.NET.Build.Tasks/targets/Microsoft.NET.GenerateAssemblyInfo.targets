@@ -41,6 +41,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateRequiresPreviewFeaturesAttribute Condition="'$(GenerateRequiresPreviewFeaturesAttribute)' == '' and '$(IsNetCoreAppTargetingLatestTFM)' == 'true'">true</GenerateRequiresPreviewFeaturesAttribute>
     <GenerateTargetPlatformAttribute Condition="'$(GenerateTargetPlatformAttribute)' == ''">true</GenerateTargetPlatformAttribute>
     <GenerateSupportedOSPlatformAttribute Condition="'$(GenerateSupportedOSPlatformAttribute)' == ''">true</GenerateSupportedOSPlatformAttribute>
+    <GenerateDisableRuntimeMarshallingAttribute Condition="'$(GenerateDisableRuntimeMarshallingAttribute)' == ''">true</GenerateDisableRuntimeMarshallingAttribute>
   </PropertyGroup>
 
   <!--
@@ -150,6 +151,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute"
                          Condition="$([MSBuild]::VersionEquals($(SupportedOSPlatformVersion), '0.0'))" >
         <_Parameter1>$(TargetPlatformIdentifier)</_Parameter1>
+      </AssemblyAttribute>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(GenerateDisableRuntimeMarshallingAttribute)' == 'true'
+                         and '$(DisableRuntimeMarshalling)' == 'true'
+                         and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                         and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '7.0'))">
+      <AssemblyAttribute Include="System.Runtime.CompilerServices.DisableRuntimeMarshallingAttribute">
       </AssemblyAttribute>
     </ItemGroup>
   </Target>
