@@ -258,7 +258,7 @@ namespace Microsoft.Build.Graph
             ProjectGraphEntryPoint solutionEntryPoint = entryPoints.Single();
             ImmutableDictionary<string, string>.Builder solutionGlobalPropertiesBuilder = ImmutableDictionary.CreateBuilder(
                 keyComparer: StringComparer.OrdinalIgnoreCase,
-                valueComparer: StringComparer.OrdinalIgnoreCase);
+                valueComparer: StringComparer.Ordinal);
 
             if (solutionEntryPoint.GlobalProperties != null)
             {
@@ -279,9 +279,11 @@ namespace Microsoft.Build.Graph
 
             IReadOnlyCollection<ProjectInSolution> projectsInSolution = GetBuildableProjects(solution);
 
-            SolutionConfigurationInSolution currentSolutionConfiguration = SelectSolutionConfiguration(solution, solutionEntryPoint.GlobalProperties);
-
             // Mimic behavior of SolutionProjectGenerator
+            SolutionConfigurationInSolution currentSolutionConfiguration = SelectSolutionConfiguration(solution, solutionEntryPoint.GlobalProperties);
+            solutionGlobalPropertiesBuilder["Configuration"] = currentSolutionConfiguration.ConfigurationName;
+            solutionGlobalPropertiesBuilder["Platform"] = currentSolutionConfiguration.PlatformName;
+
             string solutionConfigurationXml = SolutionProjectGenerator.GetSolutionConfiguration(solution, currentSolutionConfiguration);
             solutionGlobalPropertiesBuilder["CurrentSolutionConfigurationContents"] = solutionConfigurationXml;
             solutionGlobalPropertiesBuilder["BuildingSolutionFile"] = "true";
