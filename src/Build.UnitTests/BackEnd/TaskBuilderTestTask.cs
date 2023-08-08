@@ -58,6 +58,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private string[] _stringArrayOutput;
 
         /// <summary>
+        /// The value for the DateTimeOutput
+        /// </summary>
+        private DateTime _dateTimeOutput;
+
+        /// <summary>
+        /// The value for the DateTimeArrayOutput
+        /// </summary>
+        private DateTime[] _dateTimeArrayOutput;
+
+        /// <summary>
         /// The value for the ItemOutput
         /// </summary>
         private ITaskItem _itemOutput;
@@ -145,6 +155,30 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 _stringArrayOutput = value;
                 _testTaskHost?.ParameterSet("StringArrayParam", value);
+            }
+        }
+
+        /// <summary>
+        /// A DateTime parameter.
+        /// </summary>
+        public DateTime DateTimeParam
+        {
+            set
+            {
+                _dateTimeOutput = value;
+                _testTaskHost?.ParameterSet("DateTimeParam", value);
+            }
+        }
+
+        /// <summary>
+        /// A DateTime array parameter.
+        /// </summary>
+        public DateTime[] DateTimeArrayParam
+        {
+            set
+            {
+                _dateTimeArrayOutput = value;
+                _testTaskHost?.ParameterSet("DateTimeArrayParam", value);
             }
         }
 
@@ -286,6 +320,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 _testTaskHost?.OutputRead("NullStringOutput", null);
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// A DateTime output
+        /// </summary>
+        [Output]
+        public DateTime DateTimeOutput
+        {
+            get
+            {
+                _testTaskHost?.OutputRead("DateTimeOutput", _dateTimeOutput);
+                return _dateTimeOutput;
+            }
+        }
+
+        /// <summary>
+        /// A DateTime array output
+        /// </summary>
+        [Output]
+        public DateTime[] DateTimeArrayOutput
+        {
+            get
+            {
+                _testTaskHost?.OutputRead("DateTimeArrayOutput", _dateTimeArrayOutput);
+                return _dateTimeArrayOutput;
             }
         }
 

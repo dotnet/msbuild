@@ -59,22 +59,33 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void VariousParameterTypesCanBeTransmittedToAndRecievedFromTaskHost()
+        public void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string boolParam = "True";
+            string boolArrayParam = "False;True;False";
+            string intParam = "314";
+            string intArrayParam = "42;67;98";
+            string stringParam = "stringParamInput";
+            string stringArrayParam = "stringArrayParamInput1;stringArrayParamInput2;stringArrayParamInput3";
+            string dateTimeParam = "01/01/2001 10:15:00";
+            string dateTimeArrayParam = "01/01/2001 10:15:00;02/02/2002 11:30:00;03/03/2003 12:45:00";
 
             string projectContents = $@"
 <Project>
     <UsingTask TaskName=""{nameof(TaskBuilderTestTask)}"" AssemblyFile=""{typeof(TaskBuilderTestTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
-    <Target Name='{nameof(VariousParameterTypesCanBeTransmittedToAndRecievedFromTaskHost)}'>
+    <Target Name='{nameof(VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost)}'>
         <{nameof(TaskBuilderTestTask)}
             ExecuteReturnParam=""true""
-            BoolParam=""true""
-            BoolArrayParam=""false;true;false""
-            IntParam=""314""
-            IntArrayParam=""42;67;98""
-            StringParam=""stringParamInput""
-            StringArrayParam=""stringArrayParamInput1;stringArrayParamInput2;stringArrayParamInput3"">
+            BoolParam=""{boolParam}""
+            BoolArrayParam=""{boolArrayParam}""
+            IntParam=""{intParam}""
+            IntArrayParam=""{intArrayParam}""
+            StringParam=""{stringParam}""
+            StringArrayParam=""{stringArrayParam}""
+            DateTimeParam=""{dateTimeParam}""
+            DateTimeArrayParam=""{dateTimeArrayParam}"">
 
             <Output PropertyName=""BoolOutput"" TaskParameter=""BoolOutput"" />
             <Output PropertyName=""BoolArrayOutput"" TaskParameter=""BoolArrayOutput"" />
@@ -83,12 +94,23 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             <Output PropertyName=""EnumOutput"" TaskParameter=""EnumOutput"" />
             <Output PropertyName=""StringOutput"" TaskParameter=""StringOutput"" />
             <Output PropertyName=""StringArrayOutput"" TaskParameter=""StringArrayOutput"" />
+            <Output PropertyName=""DateTimeOutput"" TaskParameter=""DateTimeOutput"" />
+            <Output PropertyName=""DateTimeArrayOutput"" TaskParameter=""DateTimeArrayOutput"" />
         </{nameof(TaskBuilderTestTask)}>
     </Target>
 </Project>";
             TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
             ProjectInstance projectInstance = new(project.ProjectFile);
             projectInstance.Build(new[] { new MockLogger(env.Output) }).ShouldBeTrue();
+
+            projectInstance.GetPropertyValue("BoolOutput").ShouldBe(boolParam);
+            projectInstance.GetPropertyValue("BoolArrayOutput").ShouldBe(boolArrayParam);
+            projectInstance.GetPropertyValue("IntOutput").ShouldBe(intParam);
+            projectInstance.GetPropertyValue("IntArrayOutput").ShouldBe(intArrayParam);
+            projectInstance.GetPropertyValue("StringOutput").ShouldBe(stringParam);
+            projectInstance.GetPropertyValue("StringArrayOutput").ShouldBe(stringArrayParam);
+            projectInstance.GetPropertyValue("DateTimeOutput").ShouldBe(dateTimeParam);
+            projectInstance.GetPropertyValue("DateTimeArrayOutput").ShouldBe(dateTimeArrayParam);
         }
     }
 }
