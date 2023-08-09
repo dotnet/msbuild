@@ -26,7 +26,7 @@ public sealed class ExtendedBuildWarningEventArgs : BuildWarningEventArgs, IExte
     /// <summary>
     /// Default constructor. Used for deserialization.
     /// </summary>
-    public ExtendedBuildWarningEventArgs() : this("undefined") { }
+    internal ExtendedBuildWarningEventArgs() : this("undefined") { }
 
     /// <summary>
     /// This constructor specifies only type of extended data.

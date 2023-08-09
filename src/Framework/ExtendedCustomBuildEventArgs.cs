@@ -27,7 +27,7 @@ public sealed class ExtendedCustomBuildEventArgs : CustomBuildEventArgs, IExtend
     /// This constructor allows event data to be initialized.
     /// </summary>
     /// <seealso cref="IExtendedBuildEventArgs.ExtendedType"/>
-    public ExtendedCustomBuildEventArgs() : this("undefined") {}
+    internal ExtendedCustomBuildEventArgs() : this("undefined") {}
 
     /// <summary>
     /// This constructor allows event data to be initialized.
