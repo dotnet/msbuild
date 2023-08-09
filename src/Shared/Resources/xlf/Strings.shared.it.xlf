@@ -22,6 +22,11 @@
         <target state="translated">MSB4008: rilevato un assembly in conflitto per l'assembly dell'attività "{0}" in "{1}".</target>
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
       </trans-unit>
+      <trans-unit id="DeprecatedEventSerialization">
+        <source>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <target state="new">Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
         <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
         <target state="translated">È previsto un tipo di evento "{0}" serializzabile con il serializzatore .NET. L'evento non era serializzabile ed è stato ignorato.</target>

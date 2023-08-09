@@ -372,6 +372,29 @@ namespace Microsoft.Build.Framework
             }
         }
 
+        /// <summary>
+        /// Allows displaying the deprecation warning for BinaryFormatter in your current environment.
+        /// </summary>
+        public bool EnableWarningOnCustomBuildEvent
+        {
+            get
+            {
+                var value = Environment.GetEnvironmentVariable("MSBUILDCUSTOMBUILDEVENTWARNING");
+
+                if (value == null)
+                {
+                    // If variable is not set explicitly, for .NETCORE warning appears.
+#if RUNTIME_TYPE_NETCORE
+                    return true;
+#else
+                    return false;
+#endif
+                }
+
+                return value == "1";
+            }
+        }
+
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {
             var value = Environment.GetEnvironmentVariable(environmentVariable);
