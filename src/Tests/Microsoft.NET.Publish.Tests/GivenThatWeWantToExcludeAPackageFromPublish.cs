@@ -209,7 +209,7 @@ namespace Microsoft.NET.Publish.Tests
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
-            testLibraryProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testLibraryProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
 
             var testProject = new TestProject()
             {
@@ -218,7 +218,7 @@ namespace Microsoft.NET.Publish.Tests
                 TargetFrameworks = ToolsetInfo.CurrentTargetFramework
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1", publish: "false"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion(), publish: "false"));
 
             testProject.ReferencedProjects.Add(testLibraryProject);
 
