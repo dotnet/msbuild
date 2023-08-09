@@ -942,18 +942,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 warning.BuildEventContext = buildEventContext;
                 if (warning.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
                 {
-                    if (buildEvent is BuildMessageEventArgs buildMessageEvent)
+                    warning.ProjectFile = buildEvent switch
                     {
-                        warning.ProjectFile = buildMessageEvent.ProjectFile;
-                    }
-                    else if (buildEvent is BuildErrorEventArgs buildErrorEvent)
-                    {
-                        warning.ProjectFile = buildErrorEvent.ProjectFile;
-                    }
-                    else if (buildEvent is BuildWarningEventArgs buildWarningEvent)
-                    {
-                        warning.ProjectFile = buildWarningEvent.ProjectFile;
-                    }
+                        BuildMessageEventArgs buildMessageEvent => buildMessageEvent.ProjectFile,
+                        BuildErrorEventArgs buildErrorEvent => buildErrorEvent.ProjectFile,
+                        BuildWarningEventArgs buildWarningEvent => buildWarningEvent.ProjectFile,
+                        _ => null,
+                    };
                 }
 
                 ProcessLoggingEvent(warning);
