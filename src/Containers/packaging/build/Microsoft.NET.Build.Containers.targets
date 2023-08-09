@@ -224,6 +224,7 @@
 
       <Output TaskParameter="GeneratedContainerManifest" PropertyName="GeneratedContainerManifest" />
       <Output TaskParameter="GeneratedContainerConfiguration" PropertyName="GeneratedContainerConfiguration" />
+      <Output TaskParameter="GeneratedContainerDigest" PropertyName="GeneratedContainerDigest" />
     </CreateNewImage>
   </Target>
 </Project>
