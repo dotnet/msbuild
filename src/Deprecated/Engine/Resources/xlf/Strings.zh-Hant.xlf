@@ -605,11 +605,6 @@
         </alt-trans>
         <note from="bb-metadata">fuzzyMatch="100" wordcount="15" adjWordcount="3.75" curWordcount="3.75" tmLabel="N''"</note>
       </trans-unit>
-      <trans-unit id="DeprecatedEventSerialization">
-        <source>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="new">Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</target>
-        <note />
-      </trans-unit>
       <trans-unit id="DollarSignInTaskOutputPropertyName">
         <source>MSB4080: The value "{0}" of the "PropertyName" attribute in element &lt;Output&gt; contains a "$" character. If you intended to use a property name then remove the $( ) around the property name.</source>
         <target state="translated">MSB4080: &lt;Output&gt; 項目中 "PropertyName" 屬性的值 "{0}" 包含 "$" 字元。如果您要使用屬性名稱，請移除屬性名稱前後的 $( )。</target>
