@@ -803,7 +803,7 @@ namespace Microsoft.Build.CommandLine
                     }
                     else if ((getProperty.Length > 0 || getItem.Length > 0) && (targets is null || targets.Length == 0))
                     {
-                        using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.None))
+                        using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
                         {
                             Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
                             exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project);
