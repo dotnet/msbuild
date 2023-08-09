@@ -34,7 +34,7 @@
     <SystemCollectionsImmutableVersion>6.0.0</SystemCollectionsImmutableVersion>
     <SystemDiagnosticsFileVersionInfoVersion>4.0.0</SystemDiagnosticsFileVersionInfoVersion>
     <SystemReflectionMetadataVersion>6.0.0</SystemReflectionMetadataVersion>
-    <MicrosoftDotNetSignToolVersion>7.0.0-beta.23370.3</MicrosoftDotNetSignToolVersion>
+    <MicrosoftDotNetSignToolVersion>7.0.0-beta.23408.3</MicrosoftDotNetSignToolVersion>
     <MicrosoftWebXdtPackageVersion>7.0.0-preview.22423.2</MicrosoftWebXdtPackageVersion>
     <SystemSecurityCryptographyProtectedDataPackageVersion>7.0.1</SystemSecurityCryptographyProtectedDataPackageVersion>
     <SystemCollectionsSpecializedPackageVersion>4.3.0</SystemCollectionsSpecializedPackageVersion>
@@ -190,7 +190,7 @@
   <PropertyGroup>
     <FluentAssertionsVersion>6.10.0</FluentAssertionsVersion>
     <FluentAssertionsJsonVersion>6.1.0</FluentAssertionsJsonVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>7.0.0-beta.23370.3</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>7.0.0-beta.23408.3</MicrosoftDotNetXUnitExtensionsVersion>
     <MoqPackageVersion>4.18.4</MoqPackageVersion>
     <MicrosoftDotNetInstallerWindowsSecurityTestDataPackageVersion>6.0.0-beta.22262.1</MicrosoftDotNetInstallerWindowsSecurityTestDataPackageVersion>
   </PropertyGroup>
