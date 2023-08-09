@@ -154,12 +154,12 @@
       </trans-unit>
       <trans-unit id="InvalidImageName_EntireNameIsInvalidCharacters">
         <source>CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</source>
-        <target state="new">CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</target>
+        <target state="translated">CONTAINER2005: Çıkarsanan '{0}' görüntü adı tamamen geçersiz karakterler içeriyor. Bir görüntü adında geçerli karakterler şunlardan oluşur: alfasayısal karakterler, -, /, veya _. Görüntü adı alfasayısal karakterle başlamalıdır.</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidImageName_NonAlphanumericStartCharacter">
         <source>CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</source>
-        <target state="new">CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</target>
+        <target state="translated">CONTAINER2005: '{0}' görüntü adındaki ilk karakter bir küçük harf veya rakam olmalıdır ve addaki tüm karakterler şunlardan oluşmalıdır: alfasayısal karakter, -, /, veya _.</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_Number">

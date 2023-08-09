@@ -154,12 +154,12 @@
       </trans-unit>
       <trans-unit id="InvalidImageName_EntireNameIsInvalidCharacters">
         <source>CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</source>
-        <target state="new">CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</target>
+        <target state="translated">CONTAINER2005: 유추된 이미지 이름 '{0}'에 완전히 잘못된 문자가 포함되어 있습니다. 이미지 이름의 유효한 문자는 영숫자, -, /또는 _이며 이미지 이름은 영숫자 문자로 시작해야 합니다.</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidImageName_NonAlphanumericStartCharacter">
         <source>CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</source>
-        <target state="new">CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</target>
+        <target state="translated">CONTAINER2005: 이미지 이름 '{0}'의 첫 번째 문자는 소문자 또는 숫자여야 하며 이름의 모든 문자는 영숫자, -, /또는 _여야 합니다.</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_Number">

@@ -1,4 +1,4 @@
 <StoreArtifacts>
-  <Package Id="Newtonsoft.Json" Version="13.0.1" />
+  <Package Id="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
   <Package Id="System.Runtime.Serialization.Primitives" Version="4.1.1" />
 </StoreArtifacts>

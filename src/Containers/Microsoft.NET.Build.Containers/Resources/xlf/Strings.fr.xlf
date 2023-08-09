@@ -154,12 +154,12 @@
       </trans-unit>
       <trans-unit id="InvalidImageName_EntireNameIsInvalidCharacters">
         <source>CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</source>
-        <target state="new">CONTAINER2005: The inferred image name '{0}' contains entirely invalid characters. The valid characters for an image name are alphanumeric characters, -, /, or _, and the image name must start with an alphanumeric character.</target>
+        <target state="translated">CONTAINER2005: le nom d'image déduit '{0}' contient des caractères entièrement non valides. Les caractères valides pour un nom d'image sont les caractères alphanumériques, -, / ou _, et le nom de l'image doit commencer par un caractère alphanumérique.</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidImageName_NonAlphanumericStartCharacter">
         <source>CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</source>
-        <target state="new">CONTAINER2005: The first character of the image name '{0}' must be a lowercase letter or a digit and all characters in the name must be an alphanumeric character, -, /, or _.</target>
+        <target state="translated">CONTAINER2005: le premier caractère du nom de l'image '{0}' doit être une lettre minuscule ou un chiffre et tous les caractères du nom doivent être un caractère alphanumérique, -, / ou _.</target>
         <note>{StrBegin="CONTAINER2005: "}</note>
       </trans-unit>
       <trans-unit id="InvalidPort_Number">
