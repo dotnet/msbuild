@@ -2446,7 +2446,7 @@ namespace Microsoft.Build.CommandLine
 
                     outputResultsCache = ProcessOutputResultsCache(commandLineSwitches);
 
-                    bool terminallogger = ProcessTerminalLoggerConfiguration(commandLineSwitches);
+                    bool useTerminalLogger = ProcessTerminalLoggerConfiguration(commandLineSwitches, out string aggregatedTerminalLoggerParameters);
 
                     // figure out which loggers are going to listen to build events
                     string[][] groupedFileLoggerParameters = commandLineSwitches.GetFileLoggerParameters();
@@ -2457,7 +2457,8 @@ namespace Microsoft.Build.CommandLine
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Verbosity],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger],
                         commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger],
-                        terminallogger,
+                        useTerminalLogger,
+                        aggregatedTerminalLoggerParameters,
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters], // used by DistributedFileLogger
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters],
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger],
@@ -2514,9 +2515,45 @@ namespace Microsoft.Build.CommandLine
             return invokeBuild;
         }
 
-        private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches)
+        private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
         {
             string terminalloggerArg;
+
+            string[] terminalLoggerParameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.TerminalLoggerParameters];
+            aggregatedParameters = terminalLoggerParameters?.Length > 0 ?
+                AggregateParameters(string.Empty, terminalLoggerParameters) :
+                string.Empty;
+
+            // Find default configuration so it is part of telemetry even when default is not used.
+            // Default can be stored in /tlp:default=true|false|on|off|auto
+            string defaultValue = null;
+            foreach (string parameter in aggregatedParameters.Split(MSBuildConstants.SemicolonChar))
+            {
+                if (string.IsNullOrWhiteSpace(parameter))
+                {
+                    continue;
+                }
+
+                string[] parameterAndValue = parameter.Split(MSBuildConstants.EqualsChar);
+                if (parameterAndValue[0].Equals("DEFAULT", StringComparison.InvariantCultureIgnoreCase) && parameterAndValue.Length > 1)
+                {
+                    defaultValue = parameterAndValue[1];
+                }
+            }
+
+            if (defaultValue == null)
+            {
+                defaultValue = bool.FalseString;
+                KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefault = bool.FalseString;
+                KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefaultSource = "msbuild";
+            }
+            else
+            {
+                // Lets check DOTNET CLI env var
+                string dotnetCliEnvVar = Environment.GetEnvironmentVariable("DOTNET_CLI_BUILD_TERMINAL_LOGGER");
+                KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefault = defaultValue;
+                KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerDefaultSource = string.IsNullOrEmpty(dotnetCliEnvVar) ? "sdk" : "DOTNET_CLI_BUILD_TERMINAL_LOGGER";
+            }
 
             // Command line wins, so check it first
             if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.TerminalLogger))
@@ -2531,6 +2568,9 @@ namespace Microsoft.Build.CommandLine
                 {
                     terminalloggerArg = "auto";
                 }
+
+                KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntent = terminalloggerArg ?? string.Empty;
+                KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntentSource = "arg";
             }
             else
             {
@@ -2541,32 +2581,55 @@ namespace Microsoft.Build.CommandLine
                 {
                     s_globalMessagesToLogInBuildLoggers.Add(
                         new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDTERMINALLOGGER was set to {terminalloggerArg}.", MessageImportance.Low));
+
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntent = terminalloggerArg;
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntentSource = "MSBUILDTERMINALLOGGER";
                 }
                 else if (!string.IsNullOrEmpty(liveLoggerArg))
                 {
                     terminalloggerArg = liveLoggerArg;
                     s_globalMessagesToLogInBuildLoggers.Add(
                         new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDLIVELOGGER was set to {liveLoggerArg}.", MessageImportance.Low));
+
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntent = terminalloggerArg;
+                    KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntentSource = "MSBUILDLIVELOGGER";
                 }
                 else
                 {
-                    return false;
+                    // Not from the command line, rps, or environment, so we apply default now.
+                    terminalloggerArg = defaultValue;
                 }
             }
 
-            // We now have a string. It can be "true" or "false" which means just that:
+            // We now have a string`. It can be "true" or "false" which means just that:
+            if (terminalloggerArg.Equals("on", StringComparison.InvariantCultureIgnoreCase))
+            {
+                terminalloggerArg = bool.TrueString;
+            }
+            else if (terminalloggerArg.Equals("off", StringComparison.InvariantCultureIgnoreCase))
+            {
+                terminalloggerArg = bool.FalseString;
+            }
+
+            bool useTerminalLogger;
             if (bool.TryParse(terminalloggerArg, out bool result))
             {
-                return result;
+                useTerminalLogger = result;
             }
-
-            // or it can be "auto", meaning "enable if we can"
-            if (!terminalloggerArg.Equals("auto", StringComparison.OrdinalIgnoreCase))
+            else
             {
-                CommandLineSwitchException.Throw("InvalidTerminalLoggerValue", terminalloggerArg);
+                // or it can be "auto", meaning "enable if we can"
+                if (!terminalloggerArg.Equals("auto", StringComparison.OrdinalIgnoreCase))
+                {
+                    CommandLineSwitchException.Throw("InvalidTerminalLoggerValue", terminalloggerArg);
+                }
+
+                useTerminalLogger = DoesEnvironmentSupportTerminalLogger();
             }
 
-            return DoesEnvironmentSupportTerminalLogger();
+            KnownTelemetry.LoggingConfigurationTelemetry.TerminalLogger = useTerminalLogger;
+
+            return useTerminalLogger;
 
             static bool DoesEnvironmentSupportTerminalLogger()
             {
@@ -3354,6 +3417,7 @@ namespace Microsoft.Build.CommandLine
             bool noConsoleLogger,
             bool distributedFileLogger,
             bool terminalloggerOptIn,
+            string aggregatedTerminalLoggerParameters,
             string[] fileLoggerParameters,
             string[] consoleLoggerParameters,
             string[] binaryLoggerParameters,
@@ -3389,7 +3453,7 @@ namespace Microsoft.Build.CommandLine
             // Choose default console logger
             if (terminalloggerOptIn)
             {
-                ProcessTerminalLogger(noConsoleLogger, distributedLoggerRecords, cpuCount, loggers);
+                ProcessTerminalLogger(noConsoleLogger, aggregatedTerminalLoggerParameters, distributedLoggerRecords, cpuCount, loggers);
             }
             else
             {
@@ -3565,8 +3629,8 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ProcessTerminalLogger(
-            bool noConsoleLogger,
+        private static void ProcessTerminalLogger(bool noConsoleLogger,
+            string aggregatedLoggerParameters,
             List<DistributedLoggerRecord> distributedLoggerRecords,
             int cpuCount,
             List<ILogger> loggers)
@@ -3574,7 +3638,10 @@ namespace Microsoft.Build.CommandLine
             if (!noConsoleLogger)
             {
                 // A central logger will be created for both single proc and multiproc.
-                TerminalLogger logger = new TerminalLogger();
+                TerminalLogger logger = new TerminalLogger()
+                {
+                    Parameters = aggregatedLoggerParameters
+                };
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.
                 // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.

@@ -203,6 +203,28 @@ namespace Microsoft.Build.UnitTests
             unquoteParameters.ShouldBeTrue();
         }
 
+        [Theory]
+        [InlineData("tlp")]
+        [InlineData("TLP")]
+        [InlineData("terminalLoggerParameters")]
+        [InlineData("TERMINALLOGGERPARAMETERS")]
+        public void TerminalLoggerParametersIdentificationTests(string terminalLoggerParameters)
+        {
+            CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
+            string duplicateSwitchErrorMessage;
+            bool multipleParametersAllowed;
+            string missingParametersErrorMessage;
+            bool unquoteParameters;
+            bool emptyParametersAllowed;
+
+            CommandLineSwitches.IsParameterizedSwitch(terminalLoggerParameters, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.TerminalLoggerParameters);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldNotBeNull();
+            unquoteParameters.ShouldBeTrue();
+        }
+
 #if FEATURE_NODE_REUSE
         [Theory]
         [InlineData("nr")]

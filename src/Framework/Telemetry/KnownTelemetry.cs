@@ -15,4 +15,9 @@ internal static class KnownTelemetry
     /// Null means there are no prior collected build telemetry data, new clean instance shall be created for particular build.
     /// </summary>
     public static BuildTelemetry? PartialBuildTelemetry { get; set; }
+
+    /// <summary>
+    /// Describes how logging was configured.
+    /// </summary>
+    public static LoggingConfigurationTelemetry LoggingConfigurationTelemetry { get; set; } = new LoggingConfigurationTelemetry();
 }

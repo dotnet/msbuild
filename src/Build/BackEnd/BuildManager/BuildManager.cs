@@ -566,6 +566,10 @@ namespace Microsoft.Build.Execution
                 // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
+                // Log known deferred telemetry
+                KnownTelemetry.LoggingConfigurationTelemetry.UpdateEventProperties();
+                loggingService.LogTelemetry(buildEventContext: null, KnownTelemetry.LoggingConfigurationTelemetry.EventName, KnownTelemetry.LoggingConfigurationTelemetry.Properties);
+
                 InitializeCaches();
 
                 _projectCacheService = new ProjectCacheService(

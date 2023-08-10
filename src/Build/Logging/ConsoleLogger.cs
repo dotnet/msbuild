@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 using BaseConsoleLogger = Microsoft.Build.BackEnd.Logging.BaseConsoleLogger;
 using ParallelConsoleLogger = Microsoft.Build.BackEnd.Logging.ParallelConsoleLogger;
@@ -158,10 +159,26 @@ namespace Microsoft.Build.Logging
             if (_numberOfProcessors == 1 && !useMPLogger)
             {
                 _consoleLogger = new SerialConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
+                if (this is FileLogger)
+                {
+                    KnownTelemetry.LoggingConfigurationTelemetry.FileLoggerType = "serial";
+                }
+                else
+                {
+                    KnownTelemetry.LoggingConfigurationTelemetry.ConsoleLoggerType = "serial";
+                }
             }
             else
             {
                 _consoleLogger = new ParallelConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
+                if (this is FileLogger)
+                {
+                    KnownTelemetry.LoggingConfigurationTelemetry.FileLoggerType = "parallel";
+                }
+                else
+                {
+                    KnownTelemetry.LoggingConfigurationTelemetry.ConsoleLoggerType = "parallel";
+                }
             }
 
             if (_showSummary != null)
@@ -339,6 +356,12 @@ namespace Microsoft.Build.Logging
             _numberOfProcessors = nodeCount;
             InitializeBaseConsoleLogger();
             _consoleLogger.Initialize(eventSource, nodeCount);
+
+            if (this is not FileLogger)
+            {
+                KnownTelemetry.LoggingConfigurationTelemetry.ConsoleLogger = true;
+                KnownTelemetry.LoggingConfigurationTelemetry.ConsoleLoggerVerbosity = Verbosity.ToString();
+            }
         }
 
         /// <summary>
