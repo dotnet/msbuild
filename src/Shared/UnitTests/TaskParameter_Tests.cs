@@ -29,13 +29,13 @@ namespace Microsoft.Build.UnitTests
         {
             TaskParameter t = new TaskParameter(null);
 
-            Assert.Null(t.GetWrappedParameter<object>());
+            Assert.Null(t.WrappedParameter);
             Assert.Equal(TaskParameterType.Null, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Null(t2.GetWrappedParameter<object>());
+            Assert.Null(t2.WrappedParameter);
             Assert.Equal(TaskParameterType.Null, t2.ParameterType);
         }
 
@@ -47,13 +47,13 @@ namespace Microsoft.Build.UnitTests
         {
             TaskParameter t = new TaskParameter("foo");
 
-            Assert.Equal("foo", t.GetWrappedParameter<string>());
+            Assert.Equal("foo", t.WrappedParameter);
             Assert.Equal(TaskParameterType.String, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal("foo", t2.GetWrappedParameter<string>());
+            Assert.Equal("foo", t2.WrappedParameter);
             Assert.Equal(TaskParameterType.String, t2.ParameterType);
         }
 
@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.StringArray, t.ParameterType);
 
-            string[] wrappedParameter = t.GetWrappedParameter<string[]>();
+            string[] wrappedParameter = t.WrappedParameter as string[];
             Assert.NotNull(wrappedParameter);
             Assert.Equal(2, wrappedParameter.Length);
             Assert.Equal("foo", wrappedParameter[0]);
@@ -78,7 +78,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.StringArray, t2.ParameterType);
 
-            string[] wrappedParameter2 = t2.GetWrappedParameter<string[]>();
+            string[] wrappedParameter2 = t2.WrappedParameter as string[];
             Assert.NotNull(wrappedParameter2);
             Assert.Equal(2, wrappedParameter2.Length);
             Assert.Equal("foo", wrappedParameter2[0]);
@@ -93,13 +93,13 @@ namespace Microsoft.Build.UnitTests
         {
             TaskParameter t = new TaskParameter(1);
 
-            Assert.Equal(1, t.GetWrappedParameter<int>());
+            Assert.Equal(1, t.WrappedParameter);
             Assert.Equal(TaskParameterType.Int, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(1, t2.GetWrappedParameter<int>());
+            Assert.Equal(1, t2.WrappedParameter);
             Assert.Equal(TaskParameterType.Int, t2.ParameterType);
         }
 
@@ -113,7 +113,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.IntArray, t.ParameterType);
 
-            int[] wrappedParameter = t.GetWrappedParameter<int[]>();
+            int[] wrappedParameter = t.WrappedParameter as int[];
             Assert.NotNull(wrappedParameter);
             Assert.Equal(2, wrappedParameter.Length);
             Assert.Equal(2, wrappedParameter[0]);
@@ -124,7 +124,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.IntArray, t2.ParameterType);
 
-            int[] wrappedParameter2 = t2.GetWrappedParameter<int[]>();
+            int[] wrappedParameter2 = t2.WrappedParameter as int[];
             Assert.NotNull(wrappedParameter2);
             Assert.Equal(2, wrappedParameter2.Length);
             Assert.Equal(2, wrappedParameter2[0]);
@@ -142,13 +142,13 @@ namespace Microsoft.Build.UnitTests
         {
             TaskParameter t = new TaskParameter(TestEnumForParameter.SomethingElse);
 
-            Assert.Equal("SomethingElse", t.GetWrappedParameter<string>());
+            Assert.Equal("SomethingElse", t.WrappedParameter);
             Assert.Equal(TaskParameterType.String, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal("SomethingElse", t2.GetWrappedParameter<string>());
+            Assert.Equal("SomethingElse", t2.WrappedParameter);
             Assert.Equal(TaskParameterType.String, t2.ParameterType);
         }
 
@@ -157,13 +157,13 @@ namespace Microsoft.Build.UnitTests
         {
             TaskParameter t = new TaskParameter(true);
 
-            Assert.Equal(true, t.GetWrappedParameter<bool>());
+            Assert.Equal(true, t.WrappedParameter);
             Assert.Equal(TaskParameterType.Bool, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(true, t2.GetWrappedParameter<bool>());
+            Assert.Equal(true, t2.WrappedParameter);
             Assert.Equal(TaskParameterType.Bool, t2.ParameterType);
         }
 
@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.BoolArray, t.ParameterType);
 
-            bool[] wrappedParameter = t.GetWrappedParameter<bool[]>();
+            bool[] wrappedParameter = t.WrappedParameter as bool[];
             Assert.NotNull(wrappedParameter);
             Assert.Equal(2, wrappedParameter.Length);
             Assert.False(wrappedParameter[0]);
@@ -188,7 +188,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.BoolArray, t2.ParameterType);
 
-            bool[] wrappedParameter2 = t2.GetWrappedParameter<bool[]>();
+            bool[] wrappedParameter2 = Assert.IsType<bool[]>(t2.WrappedParameter);
             Assert.Equal(2, wrappedParameter2.Length);
             Assert.False(wrappedParameter2[0]);
             Assert.True(wrappedParameter2[1]);
@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
 
-            ITaskItem foo = t.GetWrappedParameter<ITaskItem>();
+            ITaskItem foo = t.WrappedParameter as ITaskItem;
             Assert.NotNull(foo);
             Assert.Equal("foo", foo.ItemSpec);
 
@@ -213,7 +213,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
 
-            ITaskItem foo2 = t2.GetWrappedParameter<ITaskItem>();
+            ITaskItem foo2 = t2.WrappedParameter as ITaskItem;
             Assert.NotNull(foo2);
             Assert.Equal("foo", foo2.ItemSpec);
         }
@@ -232,7 +232,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
 
-            ITaskItem foo = t.GetWrappedParameter<ITaskItem>();
+            ITaskItem foo = t.WrappedParameter as ITaskItem;
             Assert.NotNull(foo);
             Assert.Equal("foo", foo.ItemSpec);
             Assert.Equal("a1", foo.GetMetadata("a"));
@@ -243,7 +243,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
 
-            ITaskItem foo2 = t2.GetWrappedParameter<ITaskItem>();
+            ITaskItem foo2 = t2.WrappedParameter as ITaskItem;
             Assert.NotNull(foo2);
             Assert.Equal("foo", foo2.ItemSpec);
             Assert.Equal("a1", foo2.GetMetadata("a"));
@@ -260,7 +260,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItemArray, t.ParameterType);
 
-            ITaskItem[] wrappedParameter = t.GetWrappedParameter<ITaskItem[]>();
+            ITaskItem[] wrappedParameter = t.WrappedParameter as ITaskItem[];
             Assert.NotNull(wrappedParameter);
             Assert.Equal(2, wrappedParameter.Length);
             Assert.Equal("foo", wrappedParameter[0].ItemSpec);
@@ -271,7 +271,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItemArray, t.ParameterType);
 
-            ITaskItem[] wrappedParameter2 = t.GetWrappedParameter<ITaskItem[]>();
+            ITaskItem[] wrappedParameter2 = t.WrappedParameter as ITaskItem[];
             Assert.NotNull(wrappedParameter2);
             Assert.Equal(2, wrappedParameter2.Length);
             Assert.Equal("foo", wrappedParameter2[0].ItemSpec);
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
 
-            ITaskItem foo = t.GetWrappedParameter<ITaskItem>();
+            ITaskItem foo = t.WrappedParameter as ITaskItem;
             Assert.NotNull(foo);
             Assert.Equal("foo;bar", foo.ItemSpec);
 
@@ -298,7 +298,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
 
-            ITaskItem foo2 = t2.GetWrappedParameter<ITaskItem>();
+            ITaskItem foo2 = t2.WrappedParameter as ITaskItem;
             Assert.NotNull(foo2);
             Assert.Equal("foo;bar", foo2.ItemSpec);
         }
@@ -314,7 +314,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
 
-            ITaskItem foo = t.GetWrappedParameter<ITaskItem>();
+            ITaskItem foo = t.WrappedParameter as ITaskItem;
             Assert.NotNull(foo);
             Assert.Equal("foo%3bbar", foo.ItemSpec);
 
@@ -323,18 +323,18 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
 
-            ITaskItem foo2 = t2.GetWrappedParameter<ITaskItem>();
+            ITaskItem foo2 = t2.WrappedParameter as ITaskItem;
             Assert.NotNull(foo2);
             Assert.Equal("foo%3bbar", foo2.ItemSpec);
 
-            TaskParameter t3 = new TaskParameter(foo2);
+            TaskParameter t3 = new TaskParameter(t2.WrappedParameter);
 
             ((ITranslatable)t3).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t4 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(TaskParameterType.ITaskItem, t4.ParameterType);
 
-            ITaskItem foo4 = t4.GetWrappedParameter<ITaskItem>();
+            ITaskItem foo4 = t4.WrappedParameter as ITaskItem;
             Assert.NotNull(foo4);
             Assert.Equal("foo%3bbar", foo4.ItemSpec);
         }
@@ -350,7 +350,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
 
-            ITaskItem2 foo = t.GetWrappedParameter<ITaskItem2>(); ;
+            ITaskItem2 foo = t.WrappedParameter as ITaskItem2;
             Assert.NotNull(foo);
             Assert.Equal("foo;bar", foo.ItemSpec);
             Assert.Equal("foo;bar", foo.EvaluatedIncludeEscaped);
@@ -360,7 +360,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
 
-            ITaskItem2 foo2 = t2.GetWrappedParameter<ITaskItem2>();
+            ITaskItem2 foo2 = t2.WrappedParameter as ITaskItem2;
             Assert.NotNull(foo2);
             Assert.Equal("foo;bar", foo2.ItemSpec);
             Assert.Equal("foo;bar", foo2.EvaluatedIncludeEscaped);
@@ -381,7 +381,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
 
-            ITaskItem foo = t.GetWrappedParameter<ITaskItem>();
+            ITaskItem foo = t.WrappedParameter as ITaskItem;
             Assert.NotNull(foo);
             Assert.Equal("foo", foo.ItemSpec);
             Assert.Equal("a1%b1", foo.GetMetadata("a"));
@@ -392,7 +392,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
 
-            ITaskItem foo2 = t2.GetWrappedParameter<ITaskItem>();
+            ITaskItem foo2 = t2.WrappedParameter as ITaskItem;
             Assert.NotNull(foo2);
             Assert.Equal("foo", foo2.ItemSpec);
             Assert.Equal("a1%b1", foo2.GetMetadata("a"));
@@ -414,7 +414,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
 
-            ITaskItem foo = t.GetWrappedParameter<ITaskItem>();
+            ITaskItem foo = t.WrappedParameter as ITaskItem;
             Assert.NotNull(foo);
             Assert.Equal("foo", foo.ItemSpec);
             Assert.Equal("a1%25b1", foo.GetMetadata("a"));
@@ -425,20 +425,20 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
 
-            ITaskItem foo2 = t2.GetWrappedParameter<ITaskItem>();
+            ITaskItem foo2 = t2.WrappedParameter as ITaskItem;
             Assert.NotNull(foo2);
             Assert.Equal("foo", foo2.ItemSpec);
             Assert.Equal("a1%25b1", foo2.GetMetadata("a"));
             Assert.Equal("c1%28d1", foo2.GetMetadata("b"));
 
-            TaskParameter t3 = new TaskParameter(foo2);
+            TaskParameter t3 = new TaskParameter(t2.WrappedParameter);
 
             ((ITranslatable)t3).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t4 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(TaskParameterType.ITaskItem, t4.ParameterType);
 
-            ITaskItem foo4 = t4.GetWrappedParameter<ITaskItem>();
+            ITaskItem foo4 = t4.WrappedParameter as ITaskItem;
             Assert.NotNull(foo4);
             Assert.Equal("foo", foo4.ItemSpec);
             Assert.Equal("a1%25b1", foo4.GetMetadata("a"));
@@ -461,7 +461,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
 
-            ITaskItem2 foo = t.GetWrappedParameter<ITaskItem2>();
+            ITaskItem2 foo = t.WrappedParameter as ITaskItem2;
             Assert.NotNull(foo);
             Assert.Equal("foo", foo.ItemSpec);
             Assert.Equal("a1(b1", foo.GetMetadata("a"));
@@ -474,7 +474,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
 
-            ITaskItem2 foo2 = t2.GetWrappedParameter<ITaskItem2>();
+            ITaskItem2 foo2 = t2.WrappedParameter as ITaskItem2;
             Assert.NotNull(foo2);
             Assert.Equal("foo", foo2.ItemSpec);
             Assert.Equal("a1(b1", foo2.GetMetadata("a"));
