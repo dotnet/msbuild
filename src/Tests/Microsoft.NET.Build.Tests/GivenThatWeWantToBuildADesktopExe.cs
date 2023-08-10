@@ -139,14 +139,14 @@ namespace Microsoft.NET.Build.Tests
 
         [WindowsOnlyTheory]
         // implicit rid with option to append rid to output path off -> do not append
-        [InlineData("implicitOff", "", false, false)]
+        [InlineData("implicitOff", "", false, false, "true", true)]
         // implicit rid with option to append rid to output path on -> do not append (never append implicit rid irrespective of option)
-        [InlineData("implicitOn", "", true, false)]
+        [InlineData("implicitOn", "", true, false, "", false)]
         // explicit  rid with option to append rid to output path off -> do not append
-        [InlineData("explicitOff", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86", false, false)]
+        [InlineData("explicitOff", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86", false, false, "false", false)]
         // explicit rid with option to append rid to output path on -> append
-        [InlineData("explicitOn", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64", true, true)]
-        public void It_appends_rid_to_outdir_correctly(string identifier, string rid, bool useAppendOption, bool shouldAppend)
+        [InlineData("explicitOn", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64", true, true, "", false)]
+        public void It_appends_rid_to_outdir_correctly(string identifier, string rid, bool useAppendOption, bool shouldAppend, string appendPlatformValue, bool shouldIncludePlatform)
         {
             foreach (bool multiTarget in new[] { false, true })
             {
@@ -159,6 +159,7 @@ namespace Microsoft.NET.Build.Tests
                         var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                         propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", rid));
                         propertyGroup.Add(new XElement(ns + "AppendRuntimeIdentifierToOutputPath", useAppendOption.ToString()));
+                        propertyGroup.Add(new XElement(ns + "AppendPlatformToOutputPath", appendPlatformValue));
 
                         if (multiTarget)
                         {
@@ -199,7 +200,7 @@ namespace Microsoft.NET.Build.Tests
                         throw new ArgumentOutOfRangeException(nameof(rid));
                 }
 
-                var outputDirectory = buildCommand.GetOutputDirectory("net46", runtimeIdentifier: shouldAppend ? rid : "");
+                var outputDirectory = buildCommand.GetOutputDirectory("net46", runtimeIdentifier: shouldAppend ? rid : "", platform: shouldIncludePlatform ? "AnyCPU" : "");
                 var publishDirectory = publishCommand.GetOutputDirectory("net46", runtimeIdentifier: rid);
 
                 foreach (var directory in new[] { outputDirectory, publishDirectory })
