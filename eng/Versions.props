@@ -33,7 +33,7 @@
     <!-- DotNetCliVersion MUST match the dotnet version in global.json.
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>6.0.0-beta.23313.5</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>6.0.0-beta.23408.5</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>6.0.0-preview.2.21154.6</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftNetCompilersToolsetVersion>4.2.0-2.22167.6</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>6.2.0-preview.2.109</NuGetBuildTasksVersion>
