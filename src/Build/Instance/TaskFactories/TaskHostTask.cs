@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -479,9 +480,13 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Set the output parameters for later
-            foreach (KeyValuePair<string, TaskParameter> outputParam in taskHostTaskComplete.TaskOutputParameters)
+            foreach (ReflectableTaskPropertyInfo propertyInfo in _taskType.Properties)
             {
-                _setParameters[outputParam.Key] = outputParam.Value?.WrappedParameter;
+                string name = propertyInfo.Name;
+                if (taskHostTaskComplete.TaskOutputParameters.TryGetValue(name, out TaskParameter taskParameter))
+                {
+                    _setParameters[name] = taskParameter?.GetWrappedParameter(propertyInfo.PropertyType);
+                }
             }
         }
 

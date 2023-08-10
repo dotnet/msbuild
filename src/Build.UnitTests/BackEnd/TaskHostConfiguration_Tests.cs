@@ -470,8 +470,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
             Assert.NotNull(deserializedConfig.TaskParameters);
             Assert.Equal(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
-            Assert.Equal(config.TaskParameters["Text"].WrappedParameter, deserializedConfig.TaskParameters["Text"].WrappedParameter);
-            Assert.Equal(config.TaskParameters["BoolValue"].WrappedParameter, deserializedConfig.TaskParameters["BoolValue"].WrappedParameter);
+            Assert.Equal(config.TaskParameters["Text"].GetWrappedParameter<string>(), deserializedConfig.TaskParameters["Text"].GetWrappedParameter<string>());
+            Assert.Equal(config.TaskParameters["BoolValue"].GetWrappedParameter<bool>(), deserializedConfig.TaskParameters["BoolValue"].GetWrappedParameter<bool>());
         }
 
         /// <summary>
@@ -519,7 +519,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
             Assert.NotNull(deserializedConfig.TaskParameters);
             Assert.Equal(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
-            TaskHostPacketHelpers.AreEqual((ITaskItem)config.TaskParameters["TaskItemValue"].WrappedParameter, (ITaskItem)deserializedConfig.TaskParameters["TaskItemValue"].WrappedParameter);
+
+            ITaskItem item = config.TaskParameters["TaskItemValue"].GetWrappedParameter<ITaskItem>();
+            ITaskItem deserializedItem = deserializedConfig.TaskParameters["TaskItemValue"].GetWrappedParameter<ITaskItem>();
+
+            TaskHostPacketHelpers.AreEqual(item, deserializedItem);
         }
 
         /// <summary>
@@ -568,8 +572,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.NotNull(deserializedConfig.TaskParameters);
             Assert.Equal(config.TaskParameters.Count, deserializedConfig.TaskParameters.Count);
 
-            ITaskItem[] itemArray = (ITaskItem[])config.TaskParameters["TaskItemArrayValue"].WrappedParameter;
-            ITaskItem[] deserializedItemArray = (ITaskItem[])deserializedConfig.TaskParameters["TaskItemArrayValue"].WrappedParameter;
+            ITaskItem[] itemArray = config.TaskParameters["TaskItemArrayValue"].GetWrappedParameter<ITaskItem[]>();
+            ITaskItem[] deserializedItemArray = deserializedConfig.TaskParameters["TaskItemArrayValue"].GetWrappedParameter<ITaskItem[]>();
 
             TaskHostPacketHelpers.AreEqual(itemArray, deserializedItemArray);
         }

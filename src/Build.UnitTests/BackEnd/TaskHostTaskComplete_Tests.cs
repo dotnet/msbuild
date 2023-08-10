@@ -109,8 +109,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(complete.TaskResult, deserializedComplete.TaskResult);
             Assert.NotNull(deserializedComplete.TaskOutputParameters);
             Assert.Equal(complete.TaskOutputParameters.Count, deserializedComplete.TaskOutputParameters.Count);
-            Assert.Equal(complete.TaskOutputParameters["Text"].WrappedParameter, deserializedComplete.TaskOutputParameters["Text"].WrappedParameter);
-            Assert.Equal(complete.TaskOutputParameters["BoolValue"].WrappedParameter, deserializedComplete.TaskOutputParameters["BoolValue"].WrappedParameter);
+            Assert.Equal(complete.TaskOutputParameters["Text"].GetWrappedParameter<string>(), deserializedComplete.TaskOutputParameters["Text"].GetWrappedParameter<string>());
+            Assert.Equal(complete.TaskOutputParameters["BoolValue"].GetWrappedParameter<bool>(), deserializedComplete.TaskOutputParameters["BoolValue"].GetWrappedParameter<bool>());
         }
 
         /// <summary>
@@ -131,7 +131,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(complete.TaskResult, deserializedComplete.TaskResult);
             Assert.NotNull(deserializedComplete.TaskOutputParameters);
             Assert.Equal(complete.TaskOutputParameters.Count, deserializedComplete.TaskOutputParameters.Count);
-            TaskHostPacketHelpers.AreEqual((ITaskItem)complete.TaskOutputParameters["TaskItemValue"].WrappedParameter, (ITaskItem)deserializedComplete.TaskOutputParameters["TaskItemValue"].WrappedParameter);
+
+            ITaskItem item = complete.TaskOutputParameters["TaskItemValue"].GetWrappedParameter<ITaskItem>();
+            ITaskItem deserializedItem = deserializedComplete.TaskOutputParameters["TaskItemValue"].GetWrappedParameter<ITaskItem>();
+
+            TaskHostPacketHelpers.AreEqual(item, deserializedItem);
         }
 
         /// <summary>
@@ -153,8 +157,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.NotNull(deserializedComplete.TaskOutputParameters);
             Assert.Equal(complete.TaskOutputParameters.Count, deserializedComplete.TaskOutputParameters.Count);
 
-            ITaskItem[] itemArray = (ITaskItem[])complete.TaskOutputParameters["TaskItemArrayValue"].WrappedParameter;
-            ITaskItem[] deserializedItemArray = (ITaskItem[])deserializedComplete.TaskOutputParameters["TaskItemArrayValue"].WrappedParameter;
+            ITaskItem[] itemArray = complete.TaskOutputParameters["TaskItemArrayValue"].GetWrappedParameter<ITaskItem[]>();
+            ITaskItem[] deserializedItemArray = deserializedComplete.TaskOutputParameters["TaskItemArrayValue"].GetWrappedParameter<ITaskItem[]>();
 
             TaskHostPacketHelpers.AreEqual(itemArray, deserializedItemArray);
         }
