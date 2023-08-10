@@ -166,7 +166,9 @@ namespace Microsoft.DotNet.Cli
                     bool telemetryOptout = environmentProvider.GetEnvironmentVariableAsBool(EnvironmentVariableNames.TELEMETRY_OPTOUT, defaultValue: CompileOptions.TelemetryOptOutDefault);
                     bool addGlobalToolsToPath = environmentProvider.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", defaultValue: true);
                     bool nologo = environmentProvider.GetEnvironmentVariableAsBool("DOTNET_NOLOGO", defaultValue: false);
-                    bool skipWorkloadIntegrityCheck = environmentProvider.GetEnvironmentVariableAsBool("DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK", defaultValue: false);
+                    bool skipWorkloadIntegrityCheck = environmentProvider.GetEnvironmentVariableAsBool("DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK",
+                        // Default the workload integrity check skip to true if the command is being ran in CI. Otherwise, false.
+                        defaultValue: new CIEnvironmentDetectorForTelemetry().IsCIEnvironment());
 
                     ReportDotnetHomeUsage(environmentProvider);
 
@@ -177,12 +179,6 @@ namespace Microsoft.DotNet.Cli
                         firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
                         toolPathSentinel = new NoOpFileSentinel(exists: false);
                         isDotnetBeingInvokedFromNativeInstaller = true;
-                    }
-
-                    // Override the workload integrity check if the command is being ran in CI.
-                    if (new CIEnvironmentDetectorForTelemetry().IsCIEnvironment())
-                    {
-                        skipWorkloadIntegrityCheck = true;
                     }
 
                     var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration(
