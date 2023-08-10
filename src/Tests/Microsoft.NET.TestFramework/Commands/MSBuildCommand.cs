@@ -72,7 +72,7 @@ namespace Microsoft.NET.TestFramework.Commands
         {
             if (TestAsset != null)
             {
-                return new DirectoryInfo(OutputPathCalculator.FromProject(ProjectFile, TestAsset).GetOutputDirectory(targetFramework, configuration, runtimeIdentifier));
+                return new DirectoryInfo(OutputPathCalculator.FromProject(ProjectFile, TestAsset).GetOutputDirectory(targetFramework, configuration, runtimeIdentifier, platform));
             }
 
             platform ??= string.Empty;

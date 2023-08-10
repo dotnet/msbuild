@@ -201,7 +201,7 @@ namespace Microsoft.NET.Build.Tests
                 }
 
                 var outputDirectory = buildCommand.GetOutputDirectory("net46", runtimeIdentifier: shouldAppend ? rid : "", platform: shouldIncludePlatform ? "AnyCPU" : "");
-                var publishDirectory = publishCommand.GetOutputDirectory("net46", runtimeIdentifier: rid);
+                var publishDirectory = publishCommand.GetOutputDirectory("net46", runtimeIdentifier: rid, platformIdentifier: shouldIncludePlatform ? "AnyCPU" : "");
 
                 foreach (var directory in new[] { outputDirectory, publishDirectory })
                 {
