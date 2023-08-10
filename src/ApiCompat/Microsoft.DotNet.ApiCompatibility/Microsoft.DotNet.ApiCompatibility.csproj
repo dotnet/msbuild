@@ -10,6 +10,10 @@
     <NoWarn>$(NoWarn);RS1024</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Compile Include="$(RepoRoot)src\Common\NullableAttributes.cs" LinkBase="Common" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\Microsoft.DotNet.ApiSymbolExtensions\Microsoft.DotNet.ApiSymbolExtensions.csproj" />
   </ItemGroup>
