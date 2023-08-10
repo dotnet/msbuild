@@ -620,7 +620,7 @@ namespace Microsoft.Build.BackEnd
 
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
-                valueString = (string)Convert.ChangeType(_wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
+                valueString = Convert.ToString(_wrappedParameter, CultureInfo.InvariantCulture);
             }
 
             translator.Translate(ref valueString);
@@ -650,7 +650,7 @@ namespace Microsoft.Build.BackEnd
 
                 for (int i = 0; i < length; i++)
                 {
-                    string valueString = (string)Convert.ChangeType(array.GetValue(i), typeof(string), CultureInfo.InvariantCulture);
+                    string valueString = Convert.ToString(array.GetValue(i), CultureInfo.InvariantCulture);
                     translator.Translate(ref valueString);
                 }
             }
