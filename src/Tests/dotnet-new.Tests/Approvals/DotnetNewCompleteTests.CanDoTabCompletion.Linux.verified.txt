@@ -1,6 +1,4 @@
-﻿angular
-api
-apicontroller
+﻿apicontroller
 blazor
 blazorwasm
 blazorwasm-empty
@@ -24,7 +22,6 @@ page
 proto
 razorclasslib
 razorcomponent
-react
 sln
 tool-manifest
 view
@@ -32,6 +29,7 @@ viewimports
 viewstart
 web
 webapi
+webapiaot
 webapp
 webconfig
 worker

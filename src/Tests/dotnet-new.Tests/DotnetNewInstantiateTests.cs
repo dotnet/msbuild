@@ -219,38 +219,6 @@ namespace Microsoft.DotNet.Cli.New.IntegrationTests
                 .And.NotHaveStdErr();
         }
 
-        [Fact]
-        public void CanInstantiateTemplate_Angular_CanReplaceTextInLargeFile()
-        {
-            string workingDirectory = CreateTemporaryFolder();
-            string home = CreateTemporaryFolder(folderName: "Home");
-            string dotnetRoot = TestContext.Current.ToolsetUnderTest.DotNetRoot;
-            string templatesLocation = Path.Combine(dotnetRoot, "templates");
-            IEnumerable<string> packagePaths = Directory.EnumerateFiles(templatesLocation, "microsoft.dotnet.web.spa.projecttemplates.*.nupkg", SearchOption.AllDirectories);
-            string? packageLocation = packagePaths.FirstOrDefault();
-
-            Assert.NotNull(packageLocation);
-
-            new DotnetNewCommand(_log, "angular", "-o", "angular")
-               .WithCustomHive(home)
-               .WithWorkingDirectory(workingDirectory)
-               .Execute()
-               .Should().Pass();
-
-            string reactPackageLockJson = Path.Combine(workingDirectory, "angular", "ClientApp", "package-lock.json");
-            string targetText = File.ReadAllText(reactPackageLockJson);
-
-            using (ZipArchive archive = ZipFile.OpenRead(packageLocation!))
-            {
-                ZipArchiveEntry? reactPackageLockJsonEntry = archive.GetEntry("content/Angular-CSharp/ClientApp/package-lock.json");
-                Assert.NotNull(reactPackageLockJsonEntry);
-                using var sourceStream = new StreamReader(reactPackageLockJsonEntry!.Open());
-                string sourceText = sourceStream.ReadToEnd();
-                sourceText = sourceText.Replace("company.webapplication1", "angular");
-                Assert.Equal(sourceText, targetText);
-            }
-        }
-
         [Theory]
         [InlineData(".dockerignore", "singleHash", false)]
         [InlineData(".editorconfig", "singleHash", false)]
