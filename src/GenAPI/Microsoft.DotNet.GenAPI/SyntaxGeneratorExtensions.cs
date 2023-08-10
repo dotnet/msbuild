@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.ApiSymbolExtensions.Filtering;
+using System.Transactions;
 
 namespace Microsoft.DotNet.GenAPI
 {
@@ -27,6 +28,14 @@ namespace Microsoft.DotNet.GenAPI
                     case TypeKind.Struct:
                     case TypeKind.Interface:
                         TypeDeclarationSyntax typeDeclaration = (TypeDeclarationSyntax)syntaxGenerator.Declaration(symbol);
+                        if (type.IsRecord && type.TryGetRecordConstructor(out IMethodSymbol? recordConstructor))
+                        {
+                            // if the type is a record and we can find it's parameters, use `record Name(parameters...)` syntax.
+                            typeDeclaration = typeDeclaration.WithParameterList(
+                                SyntaxFactory.ParameterList(
+                                    SyntaxFactory.SeparatedList<ParameterSyntax>(
+                                        recordConstructor.Parameters.Select(p => (ParameterSyntax)syntaxGenerator.ParameterDeclaration(p)))));
+                        }
                         return typeDeclaration
                             .WithBaseList(syntaxGenerator.GetBaseTypeList(type, symbolFilter))
                             .WithMembers(new SyntaxList<MemberDeclarationSyntax>());
@@ -119,7 +128,16 @@ namespace Microsoft.DotNet.GenAPI
 
             if (type.TypeKind == TypeKind.Class && type.BaseType != null && symbolFilter.Include(type.BaseType))
             {
-                baseTypes.Add(SyntaxFactory.SimpleBaseType((TypeSyntax)syntaxGenerator.TypeExpression(type.BaseType)));
+                TypeSyntax baseTypeSyntax = (TypeSyntax)syntaxGenerator.TypeExpression(type.BaseType);
+
+                if (type.BaseType.IsRecord && type.BaseType.TryGetRecordConstructor(out IMethodSymbol? recordConstructor))
+                {
+                    baseTypes.Add(SyntaxFactory.PrimaryConstructorBaseType(baseTypeSyntax, recordConstructor.CreateDefaultArgumentList()));
+                }
+                else
+                {
+                    baseTypes.Add(SyntaxFactory.SimpleBaseType(baseTypeSyntax));
+                }
             }
 
             // includes only interfaces that were not filtered out by the given ISymbolFilter or none of TypeParameters were filtered out.

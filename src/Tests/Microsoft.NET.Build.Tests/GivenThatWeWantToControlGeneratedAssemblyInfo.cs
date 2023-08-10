@@ -464,6 +464,68 @@ namespace Microsoft.NET.Build.Tests
             Assert.False(contains);
         }
 
+        [Theory]
+        [InlineData(true, true, "net6.0", false)]
+        [InlineData(true, false, "net6.0", false)]
+        [InlineData(true, null, "net6.0", false)]
+        [InlineData(false, false, "net6.0", false)]
+        [InlineData(false, null, "net6.0", false)]
+        [InlineData(true, true, "net7.0", true)]
+        [InlineData(true, false, "net7.0", false)]
+        [InlineData(true, null, "net7.0", true)]
+        [InlineData(false, false, "net7.0", false)]
+        [InlineData(false, null, "net7.0", false)]
+        [InlineData(true, true, ToolsetInfo.CurrentTargetFramework, true)]
+        [InlineData(true, false, ToolsetInfo.CurrentTargetFramework, false)]
+        [InlineData(true, null, ToolsetInfo.CurrentTargetFramework, true)]
+        [InlineData(false, false, ToolsetInfo.CurrentTargetFramework, false)]
+        [InlineData(false, null, ToolsetInfo.CurrentTargetFramework, false)]
+        public void TestDisableRuntimeMarshalling(bool disableRuntimeMarshalling, bool? generateDisableRuntimeMarshallingAttribute, string targetFramework, bool shouldHaveAttribute)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "HelloWorld",
+                TargetFrameworks = targetFramework,
+                IsExe = true,
+            };
+            testProject.AdditionalProperties["DisableRuntimeMarshalling"] = disableRuntimeMarshalling.ToString();
+            if (generateDisableRuntimeMarshallingAttribute.HasValue)
+            {
+                testProject.AdditionalProperties["GenerateDisableRuntimeMarshallingAttribute"] = generateDisableRuntimeMarshallingAttribute.Value.ToString();
+            }
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: disableRuntimeMarshalling.ToString() + "_" + generateDisableRuntimeMarshallingAttribute + "_" + targetFramework);
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, "HelloWorld.dll");
+
+            var parameterlessAttributes = AssemblyInfo.GetParameterlessAttributes(assemblyPath);
+            bool contains = false;
+            foreach (var attribute in parameterlessAttributes)
+            {
+                if (attribute.Equals("DisableRuntimeMarshallingAttribute", System.StringComparison.Ordinal))
+                {
+                    contains = true;
+                    break;
+                }
+            }
+
+            if (shouldHaveAttribute)
+            {
+                Assert.True(contains);
+            }
+            else
+            {
+                // The assembly level attribute is generated only for .NET 7 and newer
+                Assert.False(contains);
+            }
+        }
+
         [Fact]
         public void It_respects_out_out_of_internals_visible_to()
         {

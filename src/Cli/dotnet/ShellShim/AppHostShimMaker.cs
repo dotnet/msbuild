@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.ShellShim
                 HostWriter.CreateAppHost(appHostSourceFilePath: appHostSourcePath,
                                          appHostDestinationFilePath: appHostDestinationFilePath,
                                          appBinaryFilePath: appBinaryFilePath,
-                                         windowsGraphicalUserInterface: (windowsGraphicalUserInterfaceBit == WindowsGUISubsystem),
+                                         windowsGraphicalUserInterface: (windowsGraphicalUserInterfaceBit == WindowsGUISubsystem) && OperatingSystem.IsWindows(),
                                          assemblyToCopyResourcesFrom: entryPointFullPath);
             }
             else

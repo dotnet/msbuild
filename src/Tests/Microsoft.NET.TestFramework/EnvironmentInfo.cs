@@ -89,12 +89,11 @@ namespace Microsoft.NET.TestFramework
                     .First(line => line.StartsWith("ID=", StringComparison.OrdinalIgnoreCase))
                     .Substring("ID=".Length)
                     .Trim('\"', '\'');
-                
+
                 string versionString = osRelease
                     .First(line => line.StartsWith("VERSION_ID=", StringComparison.OrdinalIgnoreCase))
                     .Substring("VERSION_ID=".Length)
                     .Trim('\"', '\'');
-                Version osVersion = Version.Parse(versionString);
                 if (osId.Equals("alpine", StringComparison.OrdinalIgnoreCase))
                 {
                     if (nugetFramework.Version < new Version(2, 1, 0, 0))
@@ -102,59 +101,62 @@ namespace Microsoft.NET.TestFramework
                         return false;
                     }
                 }
-                else if (osId.Equals("fedora", StringComparison.OrdinalIgnoreCase))
+                else if (Version.TryParse(versionString, out Version osVersion))
                 {
-                    if (osVersion.Major <= 27)
+                    if (osId.Equals("fedora", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (nugetFramework.Version < new Version(2, 1, 0, 0))
+                        if (osVersion.Major <= 27)
                         {
-                            return true;
+                            if (nugetFramework.Version < new Version(2, 1, 0, 0))
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                return false;
+                            }
                         }
-                        else
+                        else if (osVersion.Major == 28)
                         {
-                            return false;
+                            if (nugetFramework.Version < new Version(2, 1, 0, 0))
+                            {
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
+                        }
+                        else if (osVersion.Major >= 29)
+                        {
+                            if (nugetFramework.Version < new Version(2, 2, 0, 0))
+                            {
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
                         }
                     }
-                    else if (osVersion.Major == 28)
+                    else if (osId.Equals("rhel", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (nugetFramework.Version < new Version(2, 1, 0, 0))
+                        if (osVersion.Major == 6)
                         {
-                            return false;
-                        }
-                        else
-                        {
-                            return true;
+                            if (nugetFramework.Version < new Version(2, 0, 0, 0))
+                            {
+                                return false;
+                            }
                         }
                     }
-                    else if (osVersion.Major >= 29)
+                    else if (osId.Equals("ubuntu", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (nugetFramework.Version < new Version(2, 2, 0, 0))
+                        if (osVersion > new Version(16, 04))
                         {
-                            return false;
-                        }
-                        else
-                        {
-                            return true;
-                        }
-                    }
-                }
-                else if (osId.Equals("rhel", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (osVersion.Major == 6)
-                    {
-                        if (nugetFramework.Version < new Version(2, 0, 0, 0))
-                        {
-                            return false;
-                        }
-                    }
-                }
-                else if (osId.Equals("ubuntu", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (osVersion > new Version(16, 04))
-                    {
-                        if (nugetFramework.Version < new Version(2, 0, 0, 0))
-                        {
-                            return false;
+                            if (nugetFramework.Version < new Version(2, 0, 0, 0))
+                            {
+                                return false;
+                            }
                         }
                     }
                 }
