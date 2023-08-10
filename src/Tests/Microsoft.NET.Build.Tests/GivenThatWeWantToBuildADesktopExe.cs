@@ -137,16 +137,38 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
+        [Theory]
+        [InlineData("false", false)]
+        [InlineData("true", true)]
+        [InlineData("", false)]
+        public void It_includes_platform_in_output_path_if_requested(string appendPlatformValue, bool shouldIncludePlatform)
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("DesktopMinusRid")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + "AppendPlatformToOutputPath", appendPlatformValue));
+                });
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute().Should().Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory("net46", platform: shouldIncludePlatform ? "AnyCPU" : "");
+            outputDirectory.GetFiles("DesktopMinusRid.exe").Length.Should().Be(1);
+        }
+
         [WindowsOnlyTheory]
         // implicit rid with option to append rid to output path off -> do not append
-        [InlineData("implicitOff", "", false, false, "true", true)]
+        [InlineData("implicitOff", "", false, false)]
         // implicit rid with option to append rid to output path on -> do not append (never append implicit rid irrespective of option)
-        [InlineData("implicitOn", "", true, false, "", false)]
+        [InlineData("implicitOn", "", true, false)]
         // explicit  rid with option to append rid to output path off -> do not append
-        [InlineData("explicitOff", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86", false, false, "false", false)]
+        [InlineData("explicitOff", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x86", false, false)]
         // explicit rid with option to append rid to output path on -> append
-        [InlineData("explicitOn", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64", true, true, "", false)]
-        public void It_appends_rid_to_outdir_correctly(string identifier, string rid, bool useAppendOption, bool shouldAppend, string appendPlatformValue, bool shouldIncludePlatform)
+        [InlineData("explicitOn", $"{ToolsetInfo.LatestWinRuntimeIdentifier}-x64", true, true)]
+        public void It_appends_rid_to_outdir_correctly(string identifier, string rid, bool useAppendOption, bool shouldAppend)
         {
             foreach (bool multiTarget in new[] { false, true })
             {
@@ -159,7 +181,6 @@ namespace Microsoft.NET.Build.Tests
                         var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
                         propertyGroup.Add(new XElement(ns + "RuntimeIdentifier", rid));
                         propertyGroup.Add(new XElement(ns + "AppendRuntimeIdentifierToOutputPath", useAppendOption.ToString()));
-                        propertyGroup.Add(new XElement(ns + "AppendPlatformToOutputPath", appendPlatformValue));
 
                         if (multiTarget)
                         {
@@ -200,8 +221,8 @@ namespace Microsoft.NET.Build.Tests
                         throw new ArgumentOutOfRangeException(nameof(rid));
                 }
 
-                var outputDirectory = buildCommand.GetOutputDirectory("net46", runtimeIdentifier: shouldAppend ? rid : "", platform: shouldIncludePlatform ? "AnyCPU" : "");
-                var publishDirectory = publishCommand.GetOutputDirectory("net46", runtimeIdentifier: rid, platformIdentifier: shouldIncludePlatform ? "AnyCPU" : "");
+                var outputDirectory = buildCommand.GetOutputDirectory("net46", runtimeIdentifier: shouldAppend ? rid : "");
+                var publishDirectory = publishCommand.GetOutputDirectory("net46", runtimeIdentifier: rid);
 
                 foreach (var directory in new[] { outputDirectory, publishDirectory })
                 {
