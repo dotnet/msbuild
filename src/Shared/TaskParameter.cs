@@ -520,17 +520,71 @@ namespace Microsoft.Build.BackEnd
         {
             translator.TranslateEnum(ref _parameterTypeCode, (int)_parameterTypeCode);
 
-            string stringValue = null;
-            if (translator.Mode == TranslationDirection.WriteToStream)
+            switch (_parameterTypeCode)
             {
-                stringValue = (string)Convert.ChangeType(_wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
-            }
+                case TypeCode.Boolean:
+                    bool boolParam = _wrappedParameter is bool wrappedBool ? wrappedBool : default;
+                    translator.Translate(ref boolParam);
+                    _wrappedParameter = boolParam;
+                    break;
 
-            translator.Translate(ref stringValue);
+                case TypeCode.Byte:
+                    byte byteParam = _wrappedParameter is byte wrappedByte ? wrappedByte : default;
+                    translator.Translate(ref byteParam);
+                    _wrappedParameter = byteParam;
+                    break;
 
-            if (translator.Mode == TranslationDirection.ReadFromStream)
-            {
-                _wrappedParameter = Convert.ChangeType(stringValue, _parameterTypeCode, CultureInfo.InvariantCulture);
+                case TypeCode.Int16:
+                    short shortParam = _wrappedParameter is short wrappedShort ? wrappedShort : default;
+                    translator.Translate(ref shortParam);
+                    _wrappedParameter = shortParam;
+                    break;
+
+                case TypeCode.UInt16:
+                    ushort ushortParam = _wrappedParameter is ushort wrappedUShort ? wrappedUShort : default;
+                    translator.Translate(ref ushortParam);
+                    _wrappedParameter = ushortParam;
+                    break;
+
+                case TypeCode.Int64:
+                    long longParam = _wrappedParameter is long wrappedLong ? wrappedLong : default;
+                    translator.Translate(ref longParam);
+                    _wrappedParameter = longParam;
+                    break;
+
+                case TypeCode.Double:
+                    double doubleParam = _wrappedParameter is double wrappedDouble ? wrappedDouble : default;
+                    translator.Translate(ref doubleParam);
+                    _wrappedParameter = doubleParam;
+                    break;
+
+                case TypeCode.String:
+                    string stringParam = (string)_wrappedParameter;
+                    translator.Translate(ref stringParam);
+                    _wrappedParameter = stringParam;
+                    break;
+
+                case TypeCode.DateTime:
+                    DateTime dateTimeParam = _wrappedParameter is DateTime wrappedDateTime ? wrappedDateTime : default;
+                    translator.Translate(ref dateTimeParam);
+                    _wrappedParameter = dateTimeParam;
+                    break;
+
+                default:
+                    // Fall back to converting to/from string for types that don't have ITranslator support.
+                    string stringValue = null;
+                    if (translator.Mode == TranslationDirection.WriteToStream)
+                    {
+                        stringValue = (string)Convert.ChangeType(_wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
+                    }
+
+                    translator.Translate(ref stringValue);
+
+                    if (translator.Mode == TranslationDirection.ReadFromStream)
+                    {
+                        _wrappedParameter = Convert.ChangeType(stringValue, _parameterTypeCode, CultureInfo.InvariantCulture);
+                    }
+                    break;
             }
         }
 
@@ -541,52 +595,73 @@ namespace Microsoft.Build.BackEnd
         {
             translator.TranslateEnum(ref _parameterTypeCode, (int)_parameterTypeCode);
 
-            if (translator.Mode == TranslationDirection.WriteToStream)
+            switch (_parameterTypeCode)
             {
-                Array array = (Array)_wrappedParameter;
-                int length = array.Length;
+                case TypeCode.Boolean:
+                    bool[] boolArrayParam = (bool[])_wrappedParameter;
+                    translator.Translate(ref boolArrayParam);
+                    _wrappedParameter = boolArrayParam;
+                    break;
 
-                translator.Translate(ref length);
+                case TypeCode.Int32:
+                    int[] intArrayParam = (int[])_wrappedParameter;
+                    translator.Translate(ref intArrayParam);
+                    _wrappedParameter = intArrayParam;
+                    break;
 
-                for (int i = 0; i < length; i++)
-                {
-                    string valueString = Convert.ToString(array.GetValue(i), CultureInfo.InvariantCulture);
-                    translator.Translate(ref valueString);
-                }
-            }
-            else
-            {
-                Type elementType = _parameterTypeCode switch
-                {
-                    TypeCode.Boolean => typeof(bool),
-                    TypeCode.Char => typeof(char),
-                    TypeCode.SByte => typeof(sbyte),
-                    TypeCode.Byte => typeof(byte),
-                    TypeCode.Int16 => typeof(short),
-                    TypeCode.UInt16 => typeof(ushort),
-                    TypeCode.Int32 => typeof(int),
-                    TypeCode.UInt32 => typeof(uint),
-                    TypeCode.Int64 => typeof(long),
-                    TypeCode.UInt64 => typeof(ulong),
-                    TypeCode.Single => typeof(float),
-                    TypeCode.Double => typeof(double),
-                    TypeCode.Decimal => typeof(decimal),
-                    TypeCode.DateTime => typeof(DateTime),
-                    TypeCode.String => typeof(string),
-                    _ => typeof(string),
-                };
+                case TypeCode.String:
+                    string[] stringArrayParam = (string[])_wrappedParameter;
+                    translator.Translate(ref stringArrayParam);
+                    _wrappedParameter = stringArrayParam;
+                    break;
 
-                int length = 0;
-                translator.Translate(ref length);
+                default:
+                    // Fall back to converting to/from string for types that don't have ITranslator support.
+                    if (translator.Mode == TranslationDirection.WriteToStream)
+                    {
+                        Array array = (Array)_wrappedParameter;
+                        int length = array.Length;
 
-                Array array = Array.CreateInstance(elementType, length);
-                for (int i = 0; i < length; i++)
-                {
-                    string valueString = null;
-                    translator.Translate(ref valueString);
-                    array.SetValue(Convert.ChangeType(valueString, elementType, CultureInfo.InvariantCulture), i);
-                }
-                _wrappedParameter = array;
+                        translator.Translate(ref length);
+
+                        for (int i = 0; i < length; i++)
+                        {
+                            string valueString = Convert.ToString(array.GetValue(i), CultureInfo.InvariantCulture);
+                            translator.Translate(ref valueString);
+                        }
+                    }
+                    else
+                    {
+                        Type elementType = _parameterTypeCode switch
+                        {
+                            TypeCode.Char => typeof(char),
+                            TypeCode.SByte => typeof(sbyte),
+                            TypeCode.Byte => typeof(byte),
+                            TypeCode.Int16 => typeof(short),
+                            TypeCode.UInt16 => typeof(ushort),
+                            TypeCode.UInt32 => typeof(uint),
+                            TypeCode.Int64 => typeof(long),
+                            TypeCode.UInt64 => typeof(ulong),
+                            TypeCode.Single => typeof(float),
+                            TypeCode.Double => typeof(double),
+                            TypeCode.Decimal => typeof(decimal),
+                            TypeCode.DateTime => typeof(DateTime),
+                            _ => throw new NotImplementedException(),
+                        };
+
+                        int length = 0;
+                        translator.Translate(ref length);
+
+                        Array array = Array.CreateInstance(elementType, length);
+                        for (int i = 0; i < length; i++)
+                        {
+                            string valueString = null;
+                            translator.Translate(ref valueString);
+                            array.SetValue(Convert.ChangeType(valueString, elementType, CultureInfo.InvariantCulture), i);
+                        }
+                        _wrappedParameter = array;
+                    }
+                    break;
             }
         }
 
