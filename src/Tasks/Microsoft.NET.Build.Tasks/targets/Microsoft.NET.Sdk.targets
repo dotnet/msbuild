@@ -270,7 +270,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Set valid RID platforms for runtime assets if targeting .NET 8+ and using the RID graph is not enabled. -->
     <ItemGroup Condition="$([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '8.0'))
-        and @(RuntimeHostConfigurationOption->WithMetadataValue('Identity', 'System.Runtime.Loader.UseRidGraph')->WithMetadataValue('Value', 'true')->Count()) == 0">
+        and @(RuntimeHostConfigurationOption->WithMetadataValue('Identity', 'System.Runtime.Loader.UseRidGraph')->WithMetadataValue('Value', 'true')->Count()) == 0
+        and '@(_KnownRuntimeIdentifierPlatformsForTargetFramework)' != ''">
       <!-- Known RID platforms for all target frameworks comes from BundledVersions -->
       <_ValidRuntimeIdentifierPlatformsForAssets Include="@(_KnownRuntimeIdentiferPlatforms)" />
       <!-- Known RID platforms for current target framework comes from ProcessFrameworkReferences output -->
