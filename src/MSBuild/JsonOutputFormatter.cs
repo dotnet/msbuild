@@ -32,6 +32,8 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
+            ErrorUtilities.VerifyThrow(_topLevelNode["Properties"] is null, "Should not add multiple lists of properties to the json format.");
+
             JsonNode propertiesNode = new JsonObject();
             foreach (string property in propertyNames)
             {
@@ -47,6 +49,8 @@ namespace Microsoft.Build.CommandLine
             {
                 return;
             }
+
+            ErrorUtilities.VerifyThrow(_topLevelNode["Items"] is null, "Should not add multiple lists of items to the json format.");
 
             JsonNode itemsNode = new JsonObject();
             foreach (string itemName in itemNames)
@@ -81,6 +85,8 @@ namespace Microsoft.Build.CommandLine
             {
                 return;
             }
+
+            ErrorUtilities.VerifyThrow(_topLevelNode["Items"] is null, "Should not add multiple lists of items to the json format.");
 
             JsonObject itemsNode = new();
             foreach (string itemName in itemNames)
@@ -120,6 +126,8 @@ namespace Microsoft.Build.CommandLine
             {
                 return;
             }
+
+            ErrorUtilities.VerifyThrow(_topLevelNode["TargetResults"] is null, "Should not add multiple lists of target results to the json format.");
 
             JsonObject targetResultsNode = new();
             foreach (string targetName in targetNames)

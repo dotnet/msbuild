@@ -785,13 +785,15 @@ namespace Microsoft.Build.CommandLine
 
                     DateTime t1 = DateTime.Now;
 
+                    bool outputPropertiesItemsOrTargetResults = getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0;
+
                     // If the primary file passed to MSBuild is a .binlog file, play it back into passed loggers
                     // as if a build is happening
                     if (FileUtilities.IsBinaryLogFilename(projectFile))
                     {
                         ReplayBinaryLog(projectFile, loggers, distributedLoggerRecords, cpuCount);
                     }
-                    else if ((getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0) && FileUtilities.IsSolutionFilename(projectFile))
+                    else if (outputPropertiesItemsOrTargetResults && FileUtilities.IsSolutionFilename(projectFile))
                     {
                         exitType = ExitType.BuildError;
                         CommandLineSwitchException.Throw("SolutionBuildInvalidForCommandLineEvaluation",
@@ -801,7 +803,12 @@ namespace Microsoft.Build.CommandLine
                     }
                     else if ((getProperty.Length > 0 || getItem.Length > 0) && (targets is null || targets.Length == 0))
                     {
-                        exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, projectFile, globalProperties, toolsVersion);
+                        using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
+                        {
+                            Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
+                            exitType = OutputPropertiesAfterEvaluation(getProperty, getItem, project);
+                            collection.LogBuildFinishedEvent(exitType == ExitType.Success);
+                        }
                     }
                     else // regular build
                     {
@@ -837,7 +844,7 @@ namespace Microsoft.Build.CommandLine
                                     question,
                                     inputResultsCaches,
                                     outputResultsCache,
-                                    saveProjectResult: getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0,
+                                    saveProjectResult: outputPropertiesItemsOrTargetResults,
                                     ref result,
                                     commandLine))
                         {
@@ -851,7 +858,7 @@ namespace Microsoft.Build.CommandLine
 
                     string timerOutputFilename = Environment.GetEnvironmentVariable("MSBUILDTIMEROUTPUTS");
 
-                    if ((getProperty.Length > 0 || getItem.Length > 0 || getTargetResult.Length > 0) && targets?.Length > 0 && result is not null)
+                    if (outputPropertiesItemsOrTargetResults && targets?.Length > 0 && result is not null)
                     {
                         exitType = OutputBuildInformationInJson(result, getProperty, getItem, getTargetResult, loggers, exitType);
                     }
@@ -1013,16 +1020,10 @@ namespace Microsoft.Build.CommandLine
             return exitType;
         }
 
-        private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, string projectFile, Dictionary<string, string> globalProperties, string toolsVersion)
+        private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project)
         {
             try
             {
-                Project project = Project.FromFile(projectFile, new Definition.ProjectOptions()
-                {
-                    GlobalProperties = globalProperties,
-                    ToolsVersion = toolsVersion,
-                });
-
                 // Special case if the user requests exactly one property: skip json formatting
                 if (getProperty.Length == 1 && getItem.Length == 0)
                 {
