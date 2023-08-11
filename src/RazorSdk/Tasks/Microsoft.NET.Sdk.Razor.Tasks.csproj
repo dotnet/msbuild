@@ -38,7 +38,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" ExcludeAssets="Runtime" />
-    <PackageReference Include="System.Reflection.Metadata" Condition="'$(TargetFramework)'=='net472'" />
+    <PackageReference Include="System.Reflection.Metadata" VersionOverride="$(SystemReflectionMetadataVersion)" Condition="'$(TargetFramework)'=='net472'" />
     <PackageReference Include="System.Text.Json" Condition="'$(TargetFramework)'=='net472'" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
   </ItemGroup>
