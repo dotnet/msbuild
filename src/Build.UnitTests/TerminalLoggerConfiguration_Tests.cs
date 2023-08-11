@@ -164,9 +164,6 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
         }
 
-        // TODO: delete, this is for troubleshooting unit tests on macos
-        _output.WriteLine(output);
-
         // Test if there is ANSI clear screen sequence, which shall only occur when the terminal logger was enabled.
         ShouldBeTerminalLog(output);
     }
@@ -231,6 +228,8 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         ShouldNotBeTerminalLog(output);
     }
 
-    private static void ShouldBeTerminalLog(string output) => output.ShouldContain($"\x1b[J");
-    private static void ShouldNotBeTerminalLog(string output) => output.ShouldNotContain($"\x1b[J");
+    // TODO: remove custom message
+    private static void ShouldBeTerminalLog(string output) => output.ShouldContain($"\x1b[J", output);
+    // TODO: remove custom message
+    private static void ShouldNotBeTerminalLog(string output) => output.ShouldNotContain($"\x1b[J", output);
 }
