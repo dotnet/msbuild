@@ -228,8 +228,6 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         ShouldNotBeTerminalLog(output);
     }
 
-    // TODO: remove custom message
-    private static void ShouldBeTerminalLog(string output) => output.ShouldContain($"\x1b[J", output);
-    // TODO: remove custom message
-    private static void ShouldNotBeTerminalLog(string output) => output.ShouldNotContain($"\x1b[J", output);
+    private static void ShouldBeTerminalLog(string output) => output.ShouldContain("\x1b[?25l");
+    private static void ShouldNotBeTerminalLog(string output) => output.ShouldNotContain("\x1b[?25l");
 }
