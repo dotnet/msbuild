@@ -21,6 +21,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>NewtonsoftJsonPackageVersion</_Parameter1>
+      <_Parameter2>$(NewtonsoftJsonPackageVersion)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.XUnitExtensions" />
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Newtonsoft.Json" />

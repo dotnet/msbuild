@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.Tests
             commandFile.Should().Be("appbasetestcommand1.exe");
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_wraps_command_with_CMD_EXE_when_command_has_CMD_Extension_and_using_WindowsExePreferredCommandSpecFactory()
         {
             var environment = new EnvironmentProvider(new[] { ".cmd" });
@@ -170,7 +170,7 @@ namespace Microsoft.DotNet.Tests
             result.Should().NotBeNull();
 
             var commandFile = Path.GetFileName(result.Path);
-            commandFile.Should().Be("cmd.exe");
+            commandFile.Should().EndWith("cmd.exe");
 
             result.Args.Should().Contain(testCommandPath);
         }

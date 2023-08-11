@@ -23,7 +23,7 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
             var testProjectInstance = _testAssetsManager
@@ -67,7 +67,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "false";
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
             var testProjectInstance = _testAssetsManager
@@ -103,7 +103,7 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.AdditionalProperties.Add("RuntimeIdentifier", rid);
             testProject.AdditionalProperties.Add("SelfContained", "false");
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
             testProject.PackageReferences.Add(new TestPackageReference("Libuv", "1.10.0"));
 
             var testProjectInstance = _testAssetsManager
@@ -141,7 +141,7 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = false
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
             var testProjectInstance = _testAssetsManager
@@ -174,7 +174,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "true";
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
             var testProjectInstance = _testAssetsManager
@@ -210,7 +210,7 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = "netstandard2.0"
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
             var testProjectInstance = _testAssetsManager
@@ -243,7 +243,7 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = "true";
             testProject.AdditionalProperties["CopyLocalRuntimeTargetAssets"] = "true";
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
             var testProjectInstance = _testAssetsManager
@@ -279,7 +279,7 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = "net46"
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
             var testProjectInstance = _testAssetsManager
@@ -315,7 +315,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             testProject.AdditionalProperties.Add("RuntimeIdentifier", rid);
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", ToolsetInfo.GetNewtonsoftJsonPackageVersion()));
             testProject.PackageReferences.Add(new TestPackageReference("Libuv", "1.10.0"));
 
             var testProjectInstance = _testAssetsManager

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NewtonSoft.Json" Version="13.0.1" />
+    <PackageReference Include="NewtonSoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
     <ProjectReference Include="..\src\Lib\Lib.csproj" />
   </ItemGroup>
 
