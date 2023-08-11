@@ -639,6 +639,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MaxThreads"
                                     Condition="'$(ThreadPoolMaxThreads)' != ''"
                                     Value="$(ThreadPoolMaxThreads)" />
+
+    <RuntimeHostConfigurationOption Include="System.Xml.XmlResolver.IsNetworkingEnabledByDefault"
+                                    Condition="'$(XmlResolverIsNetworkingEnabledByDefault)' != ''"
+                                    Value="$(XmlResolverIsNetworkingEnabledByDefault)"
+                                    Trim="true" />
   </ItemGroup>
 
   <!--
