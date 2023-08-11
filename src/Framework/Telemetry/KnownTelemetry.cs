@@ -19,5 +19,5 @@ internal static class KnownTelemetry
     /// <summary>
     /// Describes how logging was configured.
     /// </summary>
-    public static LoggingConfigurationTelemetry LoggingConfigurationTelemetry { get; set; } = new LoggingConfigurationTelemetry();
+    public static LoggingConfigurationTelemetry LoggingConfigurationTelemetry { get; } = new LoggingConfigurationTelemetry();
 }
