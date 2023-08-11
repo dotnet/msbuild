@@ -23,10 +23,12 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
     private readonly TestEnvironment _env;
 
     private readonly string _cmd;
+    private readonly ITestOutputHelper _output;
 
     public TerminalLoggerConfiguration_Tests(ITestOutputHelper output)
     {
         _env = TestEnvironment.Create(output);
+        _output = output;
 
         TransientTestFolder logFolder = _env.CreateFolder(createFolder: true);
         TransientTestFile projectFile = _env.CreateFile(logFolder, "myProj.proj", $"""
@@ -161,6 +163,9 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
         }
+
+        // TODO: delete, this is for troubleshooting unit tests on macos
+        _output.WriteLine(output);
 
         // Test if there is ANSI clear screen sequence, which shall only occur when the terminal logger was enabled.
         ShouldBeTerminalLog(output);
