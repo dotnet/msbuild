@@ -657,7 +657,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             string valueString = null;
                             translator.Translate(ref valueString);
-                            array.SetValue(Convert.ChangeType(valueString, elementType, CultureInfo.InvariantCulture), i);
+                            array.SetValue(Convert.ChangeType(valueString, _parameterTypeCode, CultureInfo.InvariantCulture), i);
                         }
                         _wrappedParameter = array;
                     }
