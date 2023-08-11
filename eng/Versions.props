@@ -109,8 +109,6 @@
 
           This avoids the need to juggle references to packages that have been updated in newer MSBuild. -->
     <MicrosoftBuildPackageVersion Condition="exists('$(RepoRoot)\src\Layout\redist\minimumMSBuildVersion') and '$(DotNetBuildFromSource)' != 'true'">$([System.IO.File]::ReadAllText('$(RepoRoot)\src\Layout\redist\minimumMSBuildVersion').Trim())</MicrosoftBuildPackageVersion>
-    <!-- 17.6 has not shipped yet and the stable version of msbuild that is shipping with VS 17.6.0 will actually be 17.6.1, remove after we ship -->
-    <MicrosoftBuildPackageVersion Condition="'$(MicrosoftBuildPackageVersion)' == '17.6.0'">17.6.1</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildLocalizationPackageVersion>17.8.0-preview-23411-01</MicrosoftBuildLocalizationPackageVersion>
