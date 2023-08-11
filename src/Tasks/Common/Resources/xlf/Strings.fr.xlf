@@ -631,14 +631,9 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1115: Le SDK .NET actuel ne prend pas en charge le .NET Framework avec des valeurs du SDK .NET autres que celles par défaut. Cela est probablement dû à une incompatibilité entre la propriété CLRSupport du projet C++/CLI et TargetFramework.</target>
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
-      <trans-unit id="Net6NotCompatibleWithDev16">
-        <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: le ciblage de .NET 6.0 ou plus dans Visual Studio 2019 n’est pas pris en charge.</target>
-        <note>{StrBegin="NETSDK1182: "}</note>
-      </trans-unit>
-      <trans-unit id="Net7NotCompatibleWithDev173">
-        <source>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</source>
-        <target state="translated">NETSDK1192: le ciblage de .NET 7.0 ou plus dans Visual Studio 2022 17.3 n’est pas pris en charge.</target>
+      <trans-unit id="Net8NotCompatibleWithDev177">
+        <source>NETSDK1213: Targeting .NET 8.0 or higher in Visual Studio 2022 17.7 is not supported.</source>
+        <target state="new">NETSDK1213: Targeting .NET 8.0 or higher in Visual Studio 2022 17.7 is not supported.</target>
         <note>{StrBegin="NETSDK1192: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">

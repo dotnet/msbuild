@@ -832,10 +832,6 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</value>
     <comment>{StrBegin="NETSDK1181: "}</comment>
   </data>
-  <data name="Net6NotCompatibleWithDev16" xml:space="preserve">
-    <value>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</value>
-    <comment>{StrBegin="NETSDK1182: "}</comment>
-  </data>
   <data name="TargetingPackNotRestored_TransitiveDisabled" xml:space="preserve">
     <value>NETSDK1184: The Targeting Pack for FrameworkReference '{0}' was not available. This may be because DisableTransitiveFrameworkReferenceDownloads was set to true.</value>
     <comment>{StrBegin="NETSDK1184: "}</comment>
@@ -863,10 +859,6 @@ You may need to build the project on another operating system or architecture, o
   <data name="ImplicitRuntimeIdentifierResolutionForPublishPropertyFailed" xml:space="preserve">
     <value>NETSDK1191: A runtime identifier for the property '{0}' couldn't be inferred. Specify a rid explicitly.</value>
     <comment>{StrBegin="NETSDK1191: "}</comment>
-  </data>
-  <data name="Net7NotCompatibleWithDev173" xml:space="preserve">
-    <value>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</value>
-    <comment>{StrBegin="NETSDK1192: "}</comment>
   </data>
   <data name="PublishSelfContainedMustBeBool" xml:space="preserve">
     <value>NETSDK1193: If PublishSelfContained is set, it must be either true or false. The value given was '{0}'.</value>
@@ -952,5 +944,9 @@ You may need to build the project on another operating system or architecture, o
 &lt;IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))"&gt;true&lt;/IsTrimmable&gt;</value>
     <comment>{StrBegin="NETSDK1212: "}</comment>
   </data>
-  <!-- The latest message added is IsTrimmableUnsupported. Please update this value with each PR to catch parallel PRs both adding a new message -->
+  <data name="Net8NotCompatibleWithDev177" xml:space="preserve">
+    <value>NETSDK1213: Targeting .NET 8.0 or higher in Visual Studio 2022 17.7 is not supported.</value>
+    <comment>{StrBegin="NETSDK1192: "}</comment>
+  </data>
+  <!-- The latest message added is Net8NotCompatibleWithDev177. Please update this value with each PR to catch parallel PRs both adding a new message -->
 </root>

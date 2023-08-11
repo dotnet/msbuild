@@ -631,14 +631,9 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1115: текущий пакет SDK для .NET не поддерживает .NET Framework без использования значений SDK для .NET по умолчанию. Причиной, скорее всего, является несоответствие TargetFramework и свойства CLRSupport в проекте C++/CLI.</target>
         <note>{StrBegin="NETSDK1115: "}</note>
       </trans-unit>
-      <trans-unit id="Net6NotCompatibleWithDev16">
-        <source>NETSDK1182: Targeting .NET 6.0 or higher in Visual Studio 2019 is not supported.</source>
-        <target state="translated">NETSDK1182: выбор .NET 6.0 или более поздней версии в качестве цели в Visual Studio 2019 не поддерживается.</target>
-        <note>{StrBegin="NETSDK1182: "}</note>
-      </trans-unit>
-      <trans-unit id="Net7NotCompatibleWithDev173">
-        <source>NETSDK1192: Targeting .NET 7.0 or higher in Visual Studio 2022 17.3 is not supported.</source>
-        <target state="translated">NETSDK1192: выбор .NET 7.0 или более поздней версии в качестве цели в Visual Studio 2022 17.3 не поддерживается.</target>
+      <trans-unit id="Net8NotCompatibleWithDev177">
+        <source>NETSDK1213: Targeting .NET 8.0 or higher in Visual Studio 2022 17.7 is not supported.</source>
+        <target state="new">NETSDK1213: Targeting .NET 8.0 or higher in Visual Studio 2022 17.7 is not supported.</target>
         <note>{StrBegin="NETSDK1192: "}</note>
       </trans-unit>
       <trans-unit id="NoAppHostAvailable">
