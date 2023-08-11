@@ -29,52 +29,32 @@ namespace Microsoft.Build.BackEnd
         Null,
 
         /// <summary>
-        /// Parameter is a string.
+        /// Parameter is of a type described by a <see cref="TypeCode"/>.
         /// </summary>
-        String,
+        PrimitiveType,
 
         /// <summary>
-        /// Parameter is an array of strings.
+        /// Parameter is an array of a type described by a <see cref="TypeCode"/>.
         /// </summary>
-        StringArray,
+        PrimitiveTypeArray,
 
         /// <summary>
-        /// Parameter is <c>true</c> or <c>false</c>.
-        /// </summary>
-        Bool,
-
-        /// <summary>
-        /// Parameter is an array of bools.
-        /// </summary>
-        BoolArray,
-
-        /// <summary>
-        /// Parameter is an <see langword="int"/>.
-        /// </summary>
-        Int,
-
-        /// <summary>
-        /// Parameter is an array of integers.
-        /// </summary>
-        IntArray,
-
-        /// <summary>
-        /// Parameter is a value type.  Note:  Must be serializable
+        /// Parameter is a value type.  Note:  Must be <see cref="IConvertible"/>.
         /// </summary>
         ValueType,
 
         /// <summary>
-        /// Parameter is an array of value types.  Note:  Must be serializable.
+        /// Parameter is an array of value types.  Note:  Must be <see cref="IConvertible"/>.
         /// </summary>
         ValueTypeArray,
 
         /// <summary>
-        /// Parameter is an ITaskItem
+        /// Parameter is an ITaskItem.
         /// </summary>
         ITaskItem,
 
         /// <summary>
-        /// Parameter is an array of ITaskItems
+        /// Parameter is an array of ITaskItems.
         /// </summary>
         ITaskItemArray,
 
@@ -82,7 +62,7 @@ namespace Microsoft.Build.BackEnd
         /// An invalid parameter -- the value of this parameter contains the exception
         /// that is thrown when trying to access it.
         /// </summary>
-        Invalid
+        Invalid,
     }
 
     /// <summary>
@@ -96,9 +76,14 @@ namespace Microsoft.Build.BackEnd
         ITranslatable
     {
         /// <summary>
-        /// The TaskParameterType of the wrapped parameter
+        /// The TaskParameterType of the wrapped parameter.
         /// </summary>
         private TaskParameterType _parameterType;
+
+        /// <summary>
+        /// The <see cref="TypeCode"/> of the wrapped parameter if it's a primitive type.
+        /// </summary>
+        private TypeCode _parameterTypeCode;
 
         /// <summary>
         /// The actual task parameter that we're wrapping
@@ -134,9 +119,11 @@ namespace Microsoft.Build.BackEnd
 
             if (wrappedParameterType.IsArray)
             {
-                if (wrappedParameterType == typeof(string[]))
+                TypeCode typeCode = Type.GetTypeCode(wrappedParameterType.GetElementType());
+                if (typeCode != TypeCode.Object && typeCode != TypeCode.DBNull)
                 {
-                    _parameterType = TaskParameterType.StringArray;
+                    _parameterType = TaskParameterType.PrimitiveTypeArray;
+                    _parameterTypeCode = typeCode;
                     _wrappedParameter = wrappedParameter;
                 }
                 else if (typeof(ITaskItem[]).GetTypeInfo().IsAssignableFrom(wrappedParameterType.GetTypeInfo()))
@@ -155,16 +142,6 @@ namespace Microsoft.Build.BackEnd
 
                     _wrappedParameter = taskItemArrayParameter;
                 }
-                else if (wrappedParameterType == typeof(bool[]))
-                {
-                    _parameterType = TaskParameterType.BoolArray;
-                    _wrappedParameter = wrappedParameter;
-                }
-                else if (wrappedParameterType == typeof(int[]))
-                {
-                    _parameterType = TaskParameterType.IntArray;
-                    _wrappedParameter = wrappedParameter;
-                }
                 else if (wrappedParameterType.GetElementType().GetTypeInfo().IsValueType)
                 {
                     _parameterType = TaskParameterType.ValueTypeArray;
@@ -178,37 +155,27 @@ namespace Microsoft.Build.BackEnd
             else
             {
                 // scalar parameter
-                if (wrappedParameterType == typeof(string))
+                // Preserve enums as strings: the enum type itself may not
+                // be loaded on the other side of the serialization, but
+                // we would convert to string anyway after pulling the
+                // task output into a property or item.
+                if (wrappedParameterType.IsEnum)
                 {
-                    _parameterType = TaskParameterType.String;
+                    wrappedParameter = (string)Convert.ChangeType(wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
+                    wrappedParameterType = typeof(string);
+                }
+
+                TypeCode typeCode = Type.GetTypeCode(wrappedParameterType);
+                if (typeCode != TypeCode.Object && typeCode != TypeCode.DBNull)
+                {
+                    _parameterType = TaskParameterType.PrimitiveType;
+                    _parameterTypeCode = typeCode;
                     _wrappedParameter = wrappedParameter;
                 }
                 else if (typeof(ITaskItem).IsAssignableFrom(wrappedParameterType))
                 {
                     _parameterType = TaskParameterType.ITaskItem;
                     _wrappedParameter = CreateNewTaskItemFrom((ITaskItem)wrappedParameter);
-                }
-                // Preserve enums as strings: the enum type itself may not
-                // be loaded on the other side of the serialization, but
-                // we would convert to string anyway after pulling the
-                // task output into a property or item.
-                else if (wrappedParameterType.IsEnum)
-                {
-                    _parameterType = TaskParameterType.String;
-                    _wrappedParameter = (string)Convert.ChangeType(wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
-                }
-                // Also stringify known common value types, to avoid calling
-                // TranslateDotNet when they'll just be stringified on the
-                // output side
-                else if (wrappedParameterType == typeof(bool))
-                {
-                    _parameterType = TaskParameterType.Bool;
-                    _wrappedParameter = wrappedParameter;
-                }
-                else if (wrappedParameterType == typeof(int))
-                {
-                    _parameterType = TaskParameterType.Int;
-                    _wrappedParameter = wrappedParameter;
                 }
                 else if (wrappedParameterType.GetTypeInfo().IsValueType)
                 {
@@ -223,31 +190,26 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Constructor for deserialization
+        /// Constructor for deserialization.
         /// </summary>
         private TaskParameter()
         {
         }
 
         /// <summary>
-        /// The TaskParameterType of the wrapped parameter
+        /// The TaskParameterType of the wrapped parameter.
         /// </summary>
-        public TaskParameterType ParameterType
-        {
-            [DebuggerStepThrough]
-            get
-            { return _parameterType; }
-        }
+        public TaskParameterType ParameterType => _parameterType;
 
         /// <summary>
-        /// The actual task parameter that we're wrapping
+        /// The <see cref="TypeCode"/> of the wrapper parameter if it's a primitive or array of primitives.
         /// </summary>
-        public object WrappedParameter
-        {
-            [DebuggerStepThrough]
-            get
-            { return _wrappedParameter; }
-        }
+        public TypeCode ParameterTypeCode => _parameterTypeCode;
+
+        /// <summary>
+        /// The actual task parameter that we're wrapping.
+        /// </summary>
+        public object WrappedParameter => _wrappedParameter;
 
         /// <summary>
         /// TaskParameter's ToString should just pass through to whatever it's wrapping.
@@ -262,50 +224,18 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void Translate(ITranslator translator)
         {
-            translator.TranslateEnum<TaskParameterType>(ref _parameterType, (int)_parameterType);
+            translator.TranslateEnum(ref _parameterType, (int)_parameterType);
 
             switch (_parameterType)
             {
                 case TaskParameterType.Null:
                     _wrappedParameter = null;
                     break;
-                case TaskParameterType.String:
-                    string stringParam = (string)_wrappedParameter;
-                    translator.Translate(ref stringParam);
-                    _wrappedParameter = stringParam;
+                case TaskParameterType.PrimitiveType:
+                    TranslatePrimitiveType(translator);
                     break;
-                case TaskParameterType.StringArray:
-                    string[] stringArrayParam = (string[])_wrappedParameter;
-                    translator.Translate(ref stringArrayParam);
-                    _wrappedParameter = stringArrayParam;
-                    break;
-                case TaskParameterType.Bool:
-                    bool boolParam = _wrappedParameter switch
-                    {
-                        bool hadValue => hadValue,
-                        _ => default,
-                    };
-                    translator.Translate(ref boolParam);
-                    _wrappedParameter = boolParam;
-                    break;
-                case TaskParameterType.BoolArray:
-                    bool[] boolArrayParam = (bool[])_wrappedParameter;
-                    translator.Translate(ref boolArrayParam);
-                    _wrappedParameter = boolArrayParam;
-                    break;
-                case TaskParameterType.Int:
-                    int intParam = _wrappedParameter switch
-                    {
-                        int hadValue => hadValue,
-                        _ => default,
-                    };
-                    translator.Translate(ref intParam);
-                    _wrappedParameter = intParam;
-                    break;
-                case TaskParameterType.IntArray:
-                    int[] intArrayParam = (int[])_wrappedParameter;
-                    translator.Translate(ref intArrayParam);
-                    _wrappedParameter = intArrayParam;
+                case TaskParameterType.PrimitiveTypeArray:
+                    TranslatePrimitiveTypeArray(translator);
                     break;
                 case TaskParameterType.ValueType:
                     if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
@@ -584,6 +514,83 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Serializes or deserializes a primitive type value wrapped by this <see cref="TaskParameter"/>.
+        /// </summary>
+        private void TranslatePrimitiveType(ITranslator translator)
+        {
+            translator.TranslateEnum(ref _parameterTypeCode, (int)_parameterTypeCode);
+
+            string stringValue = null;
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                stringValue = (string)Convert.ChangeType(_wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
+            }
+
+            translator.Translate(ref stringValue);
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                _wrappedParameter = Convert.ChangeType(stringValue, _parameterTypeCode, CultureInfo.InvariantCulture);
+            }
+        }
+
+        /// <summary>
+        /// Serializes or deserializes an array of primitive type values wrapped by this <see cref="TaskParameter"/>.
+        /// </summary>
+        private void TranslatePrimitiveTypeArray(ITranslator translator)
+        {
+            translator.TranslateEnum(ref _parameterTypeCode, (int)_parameterTypeCode);
+
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                Array array = (Array)_wrappedParameter;
+                int length = array.Length;
+
+                translator.Translate(ref length);
+
+                for (int i = 0; i < length; i++)
+                {
+                    string valueString = Convert.ToString(array.GetValue(i), CultureInfo.InvariantCulture);
+                    translator.Translate(ref valueString);
+                }
+            }
+            else
+            {
+                Type elementType = _parameterTypeCode switch
+                {
+                    TypeCode.Boolean => typeof(bool),
+                    TypeCode.Char => typeof(char),
+                    TypeCode.SByte => typeof(sbyte),
+                    TypeCode.Byte => typeof(byte),
+                    TypeCode.Int16 => typeof(short),
+                    TypeCode.UInt16 => typeof(ushort),
+                    TypeCode.Int32 => typeof(int),
+                    TypeCode.UInt32 => typeof(uint),
+                    TypeCode.Int64 => typeof(long),
+                    TypeCode.UInt64 => typeof(ulong),
+                    TypeCode.Single => typeof(float),
+                    TypeCode.Double => typeof(double),
+                    TypeCode.Decimal => typeof(decimal),
+                    TypeCode.DateTime => typeof(DateTime),
+                    TypeCode.String => typeof(string),
+                    _ => typeof(string),
+                };
+
+                int length = 0;
+                translator.Translate(ref length);
+
+                Array array = Array.CreateInstance(elementType, length);
+                for (int i = 0; i < length; i++)
+                {
+                    string valueString = null;
+                    translator.Translate(ref valueString);
+                    array.SetValue(Convert.ChangeType(valueString, elementType, CultureInfo.InvariantCulture), i);
+                }
+                _wrappedParameter = array;
+            }
+        }
+
+        /// <summary>
         /// Serializes or deserializes the value type instance wrapped by this <see cref="TaskParameter"/>.
         /// </summary>
         /// <remarks>
@@ -593,33 +600,19 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         private void TranslateValueType(ITranslator translator)
         {
-            string typeName = null;
             string valueString = null;
-
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
-                Type type = _wrappedParameter.GetType();
-
-                // Don't allow non-serializable types to be translated to keep the same limitation as the previous
-                // BinaryFormatter-based implementation.
-#pragma warning disable SYSLIB0050
-                if (!type.GetTypeInfo().IsSerializable)
-#pragma warning restore SYSLIB0050
-                {
-                    throw new NotSupportedException($"{type} cannot be used as a task parameter type because it is not serializable.");
-                }
-
-                typeName = type.AssemblyQualifiedName;
-                valueString = Convert.ToString(_wrappedParameter, CultureInfo.InvariantCulture);
+                valueString = (string)Convert.ChangeType(_wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
             }
 
-            translator.Translate(ref typeName);
             translator.Translate(ref valueString);
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
-                Type type = Type.GetType(typeName);
-                _wrappedParameter = Convert.ChangeType(valueString, type, CultureInfo.InvariantCulture);
+                // We don't know how to convert the string back to the original value type.
+                // This is fine because the engine would eventually convert it to string anyway.
+                _wrappedParameter = valueString;
             }
         }
 
@@ -634,21 +627,8 @@ namespace Microsoft.Build.BackEnd
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
                 Array array = (Array)_wrappedParameter;
-                Type arrayType = array.GetType();
-
-                // Don't allow non-serializable types to be translated to keep the same limitation as the previous
-                // BinaryFormatter-based implementation.
-#pragma warning disable SYSLIB0050
-                if (!arrayType.GetTypeInfo().IsSerializable)
-#pragma warning restore SYSLIB0050
-                {
-                    throw new NotSupportedException($"{arrayType} cannot be used as a task parameter type because it is not serializable.");
-                }
-
-                string typeName = arrayType.GetElementType().AssemblyQualifiedName;
                 int length = array.Length;
 
-                translator.Translate(ref typeName);
                 translator.Translate(ref length);
 
                 for (int i = 0; i < length; i++)
@@ -659,21 +639,18 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                string typeName = null;
                 int length = 0;
-
-                translator.Translate(ref typeName);
                 translator.Translate(ref length);
 
-                Type elementType = Type.GetType(typeName);
-                Array array = Array.CreateInstance(elementType, length);
+                string[] stringArray = new string[length];
                 for (int i = 0; i < length; i++)
                 {
-                    string valueString = null;
-                    translator.Translate(ref valueString);
-                    array.SetValue(Convert.ChangeType(valueString, elementType, CultureInfo.InvariantCulture), i);
+                    translator.Translate(ref stringArray[i]);
                 }
-                _wrappedParameter = array;
+
+                // We don't know how to convert the string array back to the original value type array.
+                // This is fine because the engine would eventually convert it to strings anyway.
+                _wrappedParameter = stringArray;
             }
         }
 
