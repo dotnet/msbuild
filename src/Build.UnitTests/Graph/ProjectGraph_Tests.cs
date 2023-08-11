@@ -63,7 +63,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 TransientTestFile entryProject = CreateProjectFile(env, 1);
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(1);
-                projectGraph.ProjectNodes.First().ProjectInstance.FullPath.ShouldBe(entryProject.Path);
+                projectGraph.ProjectNodes.First().ProjectInstanceSnapshot.FullPath.ShouldBe(entryProject.Path);
             }
         }
 
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Graph.UnitTests
                             projectCollection);
                     });
                 projectGraph.ProjectNodes.Count.ShouldBe(1);
-                projectGraph.ProjectNodes.First().ProjectInstance.FullPath.ShouldBe(entryProject.Path);
+                projectGraph.ProjectNodes.First().ProjectInstanceSnapshot.FullPath.ShouldBe(entryProject.Path);
                 factoryCalled.ShouldBeTrue();
             }
         }
@@ -121,7 +121,7 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void ProjectGraphNodeConstructorNoNullArguments()
         {
-            Assert.Throws<InternalErrorException>(() => new ProjectGraphNode(null));
+            Assert.Throws<InternalErrorException>(() => new ProjectGraphNode(null, false));
         }
 
         [Fact]
@@ -130,12 +130,12 @@ namespace Microsoft.Build.Graph.UnitTests
             using (var env = TestEnvironment.Create())
             {
                 var projectInstance = new Project().CreateProjectInstance();
-                var node = new ProjectGraphNode(projectInstance);
-                var reference1 = new ProjectGraphNode(projectInstance);
-                var referenceItem1 = new ProjectItemInstance(projectInstance, "Ref1", "path1", "file1");
+                var node = new ProjectGraphNode(projectInstance, false);
+                var reference1 = new ProjectGraphNode(projectInstance, false);
+                var referenceItem1 = new ProjectItemInstanceSnapshot(new ProjectItemInstance(projectInstance, "Ref1", "path1", "file1"));
 
-                var reference2 = new ProjectGraphNode(projectInstance);
-                var referenceItem2 = new ProjectItemInstance(projectInstance, "Ref2", "path2", "file2");
+                var reference2 = new ProjectGraphNode(projectInstance, false);
+                var referenceItem2 = new ProjectItemInstanceSnapshot(new ProjectItemInstance(projectInstance, "Ref2", "path2", "file2"));
 
                 var edges = new GraphBuilder.GraphEdges();
 
@@ -177,10 +177,10 @@ namespace Microsoft.Build.Graph.UnitTests
             using (var env = TestEnvironment.Create())
             {
                 var projectInstance = new Project().CreateProjectInstance();
-                var node = new ProjectGraphNode(projectInstance);
-                var reference1 = new ProjectGraphNode(projectInstance);
-                var referenceItem1 = new ProjectItemInstance(projectInstance, "Ref1", "path1", "file1");
-                var referenceItem2 = new ProjectItemInstance(projectInstance, "Ref2", "path1", "file1");
+                var node = new ProjectGraphNode(projectInstance, false);
+                var reference1 = new ProjectGraphNode(projectInstance, false);
+                var referenceItem1 = new ProjectItemInstanceSnapshot(new ProjectItemInstance(projectInstance, "Ref1", "path1", "file1"));
+                var referenceItem2 = new ProjectItemInstanceSnapshot(new ProjectItemInstance(projectInstance, "Ref2", "path1", "file1"));
 
                 var edges = new GraphBuilder.GraphEdges();
 
@@ -367,16 +367,16 @@ namespace Microsoft.Build.Graph.UnitTests
             var root1 = GetFirstNodeWithProjectNumber(graph, 1);
             var globalPropertiesFor1 = new Dictionary<string, string> { ["B"] = "EntryPointB", ["C"] = "EntryPointC", ["IsGraphBuild"] = "true" };
 
-            root1.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor1);
-            root1.ProjectReferences.First(r => GetProjectNumber(r) == 3).ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor1);
-            root1.ProjectReferences.First(r => GetProjectNumber(r) == 4).ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor1);
+            root1.ProjectInstanceSnapshot.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor1);
+            root1.ProjectReferences.First(r => GetProjectNumber(r) == 3).ProjectInstanceSnapshot.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor1);
+            root1.ProjectReferences.First(r => GetProjectNumber(r) == 4).ProjectInstanceSnapshot.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor1);
 
             var root2 = GetFirstNodeWithProjectNumber(graph, 2);
             var globalPropertiesFor2 = new Dictionary<string, string> { ["IsGraphBuild"] = "true" };
 
-            root2.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor2);
-            root2.ProjectReferences.First(r => GetProjectNumber(r) == 4).ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor2);
-            root2.ProjectReferences.First(r => GetProjectNumber(r) == 5).ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor2);
+            root2.ProjectInstanceSnapshot.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor2);
+            root2.ProjectReferences.First(r => GetProjectNumber(r) == 4).ProjectInstanceSnapshot.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor2);
+            root2.ProjectReferences.First(r => GetProjectNumber(r) == 5).ProjectInstanceSnapshot.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor2);
         }
 
         [Fact]
@@ -405,10 +405,10 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 // Projects 2 and 3 both reference project 4, but with different properties, so they should not point to the same node.
                 GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First().ShouldNotBe(GetFirstNodeWithProjectNumber(graph, 3).ProjectReferences.First());
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First().ProjectInstance.FullPath.ShouldEndWith("4.proj");
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First().ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties);
-                GetFirstNodeWithProjectNumber(graph, 3).ProjectReferences.First().ProjectInstance.FullPath.ShouldEndWith("4.proj");
-                GetFirstNodeWithProjectNumber(graph, 3).ProjectReferences.First().ProjectInstance.GlobalProperties.Count.ShouldBeGreaterThan(1);
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First().ProjectInstanceSnapshot.FullPath.ShouldEndWith("4.proj");
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First().ProjectInstanceSnapshot.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties);
+                GetFirstNodeWithProjectNumber(graph, 3).ProjectReferences.First().ProjectInstanceSnapshot.FullPath.ShouldEndWith("4.proj");
+                GetFirstNodeWithProjectNumber(graph, 3).ProjectReferences.First().ProjectInstanceSnapshot.GlobalProperties.Count.ShouldBeGreaterThan(1);
             }
         }
 
@@ -427,7 +427,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 CreateProjectFile(env, 3);
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
                 graph.ProjectNodes.Count.ShouldBe(3);
-                GetFirstNodeWithProjectNumber(graph, 3).ProjectInstance.GlobalProperties["A"].ShouldBe("B");
+                GetFirstNodeWithProjectNumber(graph, 3).ProjectInstanceSnapshot.GlobalProperties["A"].ShouldBe("B");
             }
         }
 
@@ -534,13 +534,13 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 // Property names are case-insensitive, so projects 2 and 3 point to the same project 5 node.
                 GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First().ShouldBe(GetFirstNodeWithProjectNumber(graph, 3).ProjectReferences.First());
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First().ProjectInstance.FullPath.ShouldEndWith("5.proj");
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First().ProjectInstance.GlobalProperties["FoO"].ShouldBe("bar");
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First().ProjectInstanceSnapshot.FullPath.ShouldEndWith("5.proj");
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First().ProjectInstanceSnapshot.GlobalProperties["FoO"].ShouldBe("bar");
 
                 // Property values are case-sensitive, so project 4 points to a different project 5 node than proejcts 2 and 3
                 GetFirstNodeWithProjectNumber(graph, 4).ProjectReferences.First().ShouldNotBe(GetFirstNodeWithProjectNumber(graph, 2).ProjectReferences.First());
-                GetFirstNodeWithProjectNumber(graph, 4).ProjectReferences.First().ProjectInstance.FullPath.ShouldEndWith("5.proj");
-                GetFirstNodeWithProjectNumber(graph, 4).ProjectReferences.First().ProjectInstance.GlobalProperties["FoO"].ShouldBe("BAR");
+                GetFirstNodeWithProjectNumber(graph, 4).ProjectReferences.First().ProjectInstanceSnapshot.FullPath.ShouldEndWith("5.proj");
+                GetFirstNodeWithProjectNumber(graph, 4).ProjectReferences.First().ProjectInstanceSnapshot.GlobalProperties["FoO"].ShouldBe("BAR");
             }
         }
 
@@ -606,17 +606,17 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 // The entry points should not be the same node, but should point to the same project
                 entryPointNode1.ShouldNotBe(entryPointNode2);
-                entryPointNode1.ProjectInstance.FullPath.ShouldBe(entryPointNode2.ProjectInstance.FullPath);
-                entryPointNode1.ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
-                entryPointNode2.ProjectInstance.GlobalProperties["Platform"].ShouldBe("x64");
+                entryPointNode1.ProjectInstanceSnapshot.FullPath.ShouldBe(entryPointNode2.ProjectInstanceSnapshot.FullPath);
+                entryPointNode1.ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("x86");
+                entryPointNode2.ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("x64");
 
                 // The entry points should not have the same project reference, but should point to the same project reference file
                 entryPointNode1.ProjectReferences.Count.ShouldBe(1);
                 entryPointNode2.ProjectReferences.Count.ShouldBe(1);
                 entryPointNode1.ProjectReferences.First().ShouldNotBe(entryPointNode2.ProjectReferences.First());
-                entryPointNode1.ProjectReferences.First().ProjectInstance.FullPath.ShouldBe(entryPointNode2.ProjectReferences.First().ProjectInstance.FullPath);
-                entryPointNode1.ProjectReferences.First().ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
-                entryPointNode2.ProjectReferences.First().ProjectInstance.GlobalProperties["Platform"].ShouldBe("x64");
+                entryPointNode1.ProjectReferences.First().ProjectInstanceSnapshot.FullPath.ShouldBe(entryPointNode2.ProjectReferences.First().ProjectInstanceSnapshot.FullPath);
+                entryPointNode1.ProjectReferences.First().ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("x86");
+                entryPointNode2.ProjectReferences.First().ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("x64");
             }
         }
 
@@ -645,15 +645,15 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 // The entry points should not be the same node, but should point to the same project
                 entryPointNode1.ShouldNotBe(entryPointNode2);
-                entryPointNode1.ProjectInstance.FullPath.ShouldBe(entryPointNode2.ProjectInstance.FullPath);
-                entryPointNode1.ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
-                entryPointNode2.ProjectInstance.GlobalProperties["Platform"].ShouldBe("x64");
+                entryPointNode1.ProjectInstanceSnapshot.FullPath.ShouldBe(entryPointNode2.ProjectInstanceSnapshot.FullPath);
+                entryPointNode1.ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("x86");
+                entryPointNode2.ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("x64");
 
                 // The entry points should have the same project reference since they're platform-agnostic
                 entryPointNode1.ProjectReferences.Count.ShouldBe(1);
                 entryPointNode2.ProjectReferences.Count.ShouldBe(1);
                 entryPointNode1.ProjectReferences.First().ShouldBe(entryPointNode2.ProjectReferences.First());
-                entryPointNode1.ProjectReferences.First().ProjectInstance.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
+                entryPointNode1.ProjectReferences.First().ProjectInstanceSnapshot.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
             }
         }
 
@@ -797,34 +797,34 @@ namespace Microsoft.Build.Graph.UnitTests
                 var projectGraph = new ProjectGraph(slnFile.Path);
                 projectGraph.EntryPointNodes.Count.ShouldBe(3);
                 projectGraph.GraphRoots.Count.ShouldBe(1);
-                projectGraph.GraphRoots.First().ProjectInstance.FullPath.ShouldBe(project1Path);
+                projectGraph.GraphRoots.First().ProjectInstanceSnapshot.FullPath.ShouldBe(project1Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(5);
 
-                ProjectGraphNode project1Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project1Path);
-                project1Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
-                project1Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
+                ProjectGraphNode project1Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstanceSnapshot.FullPath == project1Path);
+                project1Node.ProjectInstanceSnapshot.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project1Node.ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("x86");
                 project1Node.ProjectReferences.Count.ShouldBe(2);
 
-                ProjectGraphNode project2Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project2Path);
-                project2Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
-                project2Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
+                ProjectGraphNode project2Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstanceSnapshot.FullPath == project2Path);
+                project2Node.ProjectInstanceSnapshot.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project2Node.ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("Win32");
                 project2Node.ProjectReferences.Count.ShouldBe(1);
 
-                ProjectGraphNode project3Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project3Path);
-                project3Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
-                project3Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
+                ProjectGraphNode project3Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstanceSnapshot.FullPath == project3Path);
+                project3Node.ProjectInstanceSnapshot.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project3Node.ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("Win32");
                 project3Node.ProjectReferences.Count.ShouldBe(1);
 
                 // Configuration and Platform get unset
-                ProjectGraphNode project4Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project4Path);
-                project4Node.ProjectInstance.GlobalProperties.ContainsKey("Configuration").ShouldBeFalse();
-                project4Node.ProjectInstance.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
+                ProjectGraphNode project4Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstanceSnapshot.FullPath == project4Path);
+                project4Node.ProjectInstanceSnapshot.GlobalProperties.ContainsKey("Configuration").ShouldBeFalse();
+                project4Node.ProjectInstanceSnapshot.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
                 project4Node.ProjectReferences.Count.ShouldBe(0);
 
                 // Configuration and Platform are inherited from the referencing project
-                ProjectGraphNode project5Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project5Path);
-                project5Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
-                project5Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
+                ProjectGraphNode project5Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstanceSnapshot.FullPath == project5Path);
+                project5Node.ProjectInstanceSnapshot.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project5Node.ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("Win32");
                 project5Node.ProjectReferences.Count.ShouldBe(0);
             }
         }
@@ -1775,7 +1775,7 @@ $@"
                 var targets = string.Join(".*", targetsPerNode[node]);
                 targets.ShouldNotBeNullOrEmpty();
 
-                foreach (var globalProperty in node.ProjectInstance.GlobalProperties)
+                foreach (var globalProperty in node.ProjectInstanceSnapshot.GlobalProperties)
                 {
                     dot.ShouldMatch($@"{nodeId}\s*\[.*{targets}.*{globalProperty.Key}.*{globalProperty.Value}.*\]");
                 }
@@ -2020,16 +2020,16 @@ $@"
             AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 3));
             AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 5));
 
-            var innerBuildWithCommonReferences = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstance.GlobalProperties.TryGetValue(InnerBuildPropertyName, out string p) && p == "a");
+            var innerBuildWithCommonReferences = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstanceSnapshot.GlobalProperties.TryGetValue(InnerBuildPropertyName, out string p) && p == "a");
 
             innerBuildWithCommonReferences.ProjectReferences.Count.ShouldBe(4);
-            var referenceNumbersSet = innerBuildWithCommonReferences.ProjectReferences.Select(r => Path.GetFileNameWithoutExtension(r.ProjectInstance.FullPath)).ToHashSet();
+            var referenceNumbersSet = innerBuildWithCommonReferences.ProjectReferences.Select(r => Path.GetFileNameWithoutExtension(r.ProjectInstanceSnapshot.FullPath)).ToHashSet();
             referenceNumbersSet.ShouldBeSameIgnoringOrder(new HashSet<string> { "2", "3" });
 
-            var innerBuildWithAdditionalReferences = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstance.GlobalProperties.TryGetValue(InnerBuildPropertyName, out string p) && p == "b");
+            var innerBuildWithAdditionalReferences = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstanceSnapshot.GlobalProperties.TryGetValue(InnerBuildPropertyName, out string p) && p == "b");
 
             innerBuildWithAdditionalReferences.ProjectReferences.Count.ShouldBe(8);
-            referenceNumbersSet = innerBuildWithAdditionalReferences.ProjectReferences.Select(r => Path.GetFileNameWithoutExtension(r.ProjectInstance.FullPath)).ToHashSet();
+            referenceNumbersSet = innerBuildWithAdditionalReferences.ProjectReferences.Select(r => Path.GetFileNameWithoutExtension(r.ProjectInstanceSnapshot.FullPath)).ToHashSet();
             referenceNumbersSet.ShouldBeSameIgnoringOrder(new HashSet<string> { "2", "3", "4", "5" });
         }
 
@@ -2058,7 +2058,7 @@ $@"
             AssertOuterBuild(outerBuild, graph, additionalGlobalProperties);
             AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 2), additionalGlobalProperties);
 
-            var referencedInnerBuild = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstance.GetPropertyValue(InnerBuildPropertyName) == "a");
+            var referencedInnerBuild = GetNodesWithProjectNumber(graph, 1).First(n => n.ProjectInstanceSnapshot.GetPropertyValue(InnerBuildPropertyName) == "a");
 
             var two = GetFirstNodeWithProjectNumber(graph, 2);
 
@@ -2135,7 +2135,7 @@ $@"
 
             AssertOuterBuild(outerBuild1, graph, additionalGlobalProperties);
 
-            var innerBuild1WithReferenceToInnerBuild2 = outerBuild1.ProjectReferences.FirstOrDefault(n => IsInnerBuild(n) && n.ProjectInstance.GlobalProperties[InnerBuildPropertyName] == "a");
+            var innerBuild1WithReferenceToInnerBuild2 = outerBuild1.ProjectReferences.FirstOrDefault(n => IsInnerBuild(n) && n.ProjectInstanceSnapshot.GlobalProperties[InnerBuildPropertyName] == "a");
             innerBuild1WithReferenceToInnerBuild2.ShouldNotBeNull();
 
             var outerBuild2 = GetOuterBuild(graph, 2);
@@ -2144,7 +2144,7 @@ $@"
             var innerBuild2 = GetInnerBuilds(graph, 2).FirstOrDefault();
             innerBuild2.ShouldNotBeNull();
 
-            innerBuild2.ProjectInstance.GlobalProperties[InnerBuildPropertyName].ShouldBe("a");
+            innerBuild2.ProjectInstanceSnapshot.GlobalProperties[InnerBuildPropertyName].ShouldBe("a");
 
             // project 2 has two nodes: the outer build and the referenced inner build
             // the outer build is necessary as the referencing inner build can still call targets on it
@@ -2251,7 +2251,7 @@ $@"
 
                 foreach (var node in projectGraph.ProjectNodes)
                 {
-                    node.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(expectedGlobalProperties);
+                    node.ProjectInstanceSnapshot.GlobalProperties.ShouldBeSameIgnoringOrder(expectedGlobalProperties);
                 }
             }
         }
@@ -2266,7 +2266,7 @@ $@"
                     new Dictionary<int, int[]> { { 1, null } },
                     new Dictionary<string, string> { { PropertyNames.IsGraphBuild, "xyz" } });
 
-                projectGraph.ProjectNodes.First().ProjectInstance.GlobalProperties[PropertyNames.IsGraphBuild].ShouldBe("xyz");
+                projectGraph.ProjectNodes.First().ProjectInstanceSnapshot.GlobalProperties[PropertyNames.IsGraphBuild].ShouldBe("xyz");
             }
         }
 

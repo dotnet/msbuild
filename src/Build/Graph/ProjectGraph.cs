@@ -350,6 +350,48 @@ namespace Microsoft.Build.Graph
         ///     a default implementation that calls the ProjectInstance constructor. See the remarks
         ///     on <see cref="ProjectInstanceFactoryFunc" /> for other scenarios.
         /// </param>
+        /// <param name="keepProjectInstance">
+        ///     Set true to keep Project Instance during building the project graph.
+        /// </param>
+        /// <exception cref="InvalidProjectFileException">
+        ///     If the evaluation of any project in the graph fails
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        ///     If a null reference is returned from <paramref name="projectInstanceFactory" />
+        /// </exception>
+        /// <exception cref="CircularDependencyException">
+        ///     If the evaluation is successful but the project graph contains a circular
+        ///     dependency
+        /// </exception>
+        internal ProjectGraph(
+            IEnumerable<ProjectGraphEntryPoint> entryPoints,
+            ProjectCollection projectCollection,
+            ProjectInstanceFactoryFunc projectInstanceFactory,
+            bool keepProjectInstance)
+            : this(
+                entryPoints,
+                projectCollection,
+                projectInstanceFactory,
+                NativeMethodsShared.GetLogicalCoreCount(),
+                CancellationToken.None,
+                keepProjectInstance)
+        {
+        }
+
+        /// <summary>
+        ///     Constructs a graph starting from the given graph entry points, evaluating with the provided project collection.
+        /// </summary>
+        /// <param name="entryPoints">The entry points to use in constructing the graph</param>
+        /// <param name="projectCollection">
+        ///     The collection with which all projects in the graph should be associated. May not be
+        ///     null.
+        /// </param>
+        /// <param name="projectInstanceFactory">
+        ///     A delegate used for constructing a <see cref="ProjectInstance" />, called for each
+        ///     project created during graph creation. This value can be null, which uses
+        ///     a default implementation that calls the ProjectInstance constructor. See the remarks
+        ///     on <see cref="ProjectInstanceFactoryFunc" /> for other scenarios.
+        /// </param>
         /// <param name="cancellationToken">
         ///     The <see cref="CancellationToken"/> to observe.
         /// </param>
@@ -413,6 +455,23 @@ namespace Microsoft.Build.Graph
             ProjectInstanceFactoryFunc projectInstanceFactory,
             int degreeOfParallelism,
             CancellationToken cancellationToken)
+            : this(
+                entryPoints,
+                projectCollection,
+                projectInstanceFactory,
+                degreeOfParallelism,
+                cancellationToken,
+                true)
+        {
+        }
+
+        internal ProjectGraph(
+            IEnumerable<ProjectGraphEntryPoint> entryPoints,
+            ProjectCollection projectCollection,
+            ProjectInstanceFactoryFunc projectInstanceFactory,
+            int degreeOfParallelism,
+            CancellationToken cancellationToken,
+            bool keepProjectInstance)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
@@ -427,6 +486,8 @@ namespace Microsoft.Build.Graph
                 ProjectInterpretation.Instance,
                 degreeOfParallelism,
                 cancellationToken);
+
+            graphBuilder.KeepProjectInstance = keepProjectInstance;
             graphBuilder.BuildGraph();
 
             EntryPointNodes = graphBuilder.EntryPointNodes;
@@ -502,11 +563,11 @@ namespace Microsoft.Build.Graph
             {
                 var nodeId = GetNodeId(node);
 
-                var nodeName = Path.GetFileNameWithoutExtension(node.ProjectInstance.FullPath);
+                var nodeName = Path.GetFileNameWithoutExtension(node.ProjectInstanceSnapshot.FullPath);
 
                 var globalPropertiesString = string.Join(
                     "<br/>",
-                    node.ProjectInstance.GlobalProperties.OrderBy(kvp => kvp.Key)
+                    node.ProjectInstanceSnapshot.GlobalProperties.OrderBy(kvp => kvp.Key)
                         .Select(kvp => $"{kvp.Key}={kvp.Value}"));
 
                 var targetListString = GetTargetListString(node);
@@ -607,7 +668,7 @@ namespace Microsoft.Build.Graph
             foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
             {
                 var entryTargets = entryProjectTargets == null || entryProjectTargets.Count == 0
-                    ? ImmutableList.CreateRange(entryPointNode.ProjectInstance.DefaultTargets)
+                    ? ImmutableList.CreateRange(entryPointNode.ProjectInstanceSnapshot.DefaultTargets)
                     : ImmutableList.CreateRange(entryProjectTargets);
                 var entryEdge = new ProjectGraphBuildRequest(entryPointNode, entryTargets);
                 encounteredEdges.Add(entryEdge);
@@ -630,12 +691,12 @@ namespace Microsoft.Build.Graph
                 }
 
                 // Based on the entry points of this project, determine which targets to propagate down to project references.
-                var targetsToPropagate = ProjectInterpretation.TargetsToPropagate.FromProjectAndEntryTargets(node.ProjectInstance, requestedTargets);
+                var targetsToPropagate = ProjectInterpretation.TargetsToPropagate.FromProjectAndEntryTargets(node.ProjectInstanceSnapshot, requestedTargets);
 
                 // Queue the project references for visitation, if the edge hasn't already been traversed.
                 foreach (var referenceNode in node.ProjectReferences)
                 {
-                    var applicableTargets = targetsToPropagate.GetApplicableTargetsForReference(referenceNode.ProjectInstance);
+                    var applicableTargets = targetsToPropagate.GetApplicableTargetsForReference(referenceNode.ProjectInstanceSnapshot);
 
                     if (applicableTargets.IsEmpty)
                     {
@@ -644,7 +705,7 @@ namespace Microsoft.Build.Graph
 
                     var expandedTargets = ExpandDefaultTargets(
                         applicableTargets,
-                        referenceNode.ProjectInstance.DefaultTargets,
+                        referenceNode.ProjectInstanceSnapshot.DefaultTargets,
                         Edges[(node, referenceNode)]);
 
                     var projectReferenceEdge = new ProjectGraphBuildRequest(
@@ -707,7 +768,7 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        private static ImmutableList<string> ExpandDefaultTargets(ImmutableList<string> targets, List<string> defaultTargets, ProjectItemInstance graphEdge)
+        private static ImmutableList<string> ExpandDefaultTargets(ImmutableList<string> targets, List<string> defaultTargets, ProjectItemInstanceSnapshot graphEdge)
         {
             var i = 0;
             while (i < targets.Count)

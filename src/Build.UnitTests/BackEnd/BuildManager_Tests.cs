@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildParameters,
                 new BuildRequestData(
                     graph.GraphRoots.FirstOrDefault()
-                        .ProjectInstance.FullPath,
+                        .ProjectInstanceSnapshot.FullPath,
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
                     Array.Empty<string>(),
@@ -4197,11 +4197,11 @@ $@"<Project InitialTargets=`Sleep`>
             GraphBuildResult result = _buildManager.Build(_parameters, data);
             result.OverallResult.ShouldBe(BuildResultCode.Success);
 
-            var node1 = graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.Equals(project1, StringComparison.OrdinalIgnoreCase));
+            var node1 = graph.ProjectNodes.First(node => node.ProjectInstanceSnapshot.FullPath.Equals(project1, StringComparison.OrdinalIgnoreCase));
             result.ResultsByNode.ContainsKey(node1).ShouldBeTrue();
             result.ResultsByNode[node1].OverallResult.ShouldBe(BuildResultCode.Success);
 
-            var node2 = graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.Equals(project2, StringComparison.OrdinalIgnoreCase));
+            var node2 = graph.ProjectNodes.First(node => node.ProjectInstanceSnapshot.FullPath.Equals(project2, StringComparison.OrdinalIgnoreCase));
             result.ResultsByNode.ContainsKey(node2).ShouldBeTrue();
             result.ResultsByNode[node2].OverallResult.ShouldBe(BuildResultCode.Success);
         }
@@ -4282,11 +4282,11 @@ $@"<Project InitialTargets=`Sleep`>
             GraphBuildResult result = _buildManager.Build(_parameters, data);
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
 
-            var node1 = graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.Equals(project1, StringComparison.OrdinalIgnoreCase));
+            var node1 = graph.ProjectNodes.First(node => node.ProjectInstanceSnapshot.FullPath.Equals(project1, StringComparison.OrdinalIgnoreCase));
             result.ResultsByNode.ContainsKey(node1).ShouldBeTrue();
             result.ResultsByNode[node1].OverallResult.ShouldBe(BuildResultCode.Failure);
 
-            var node2 = graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.Equals(project2, StringComparison.OrdinalIgnoreCase));
+            var node2 = graph.ProjectNodes.First(node => node.ProjectInstanceSnapshot.FullPath.Equals(project2, StringComparison.OrdinalIgnoreCase));
             result.ResultsByNode.ContainsKey(node2).ShouldBeTrue();
             result.ResultsByNode[node2].OverallResult.ShouldBe(BuildResultCode.Failure);
         }
@@ -4339,7 +4339,7 @@ $@"<Project InitialTargets=`Sleep`>
             {
                 var graphResult = buildSession.BuildGraphSubmission(
                     new GraphBuildRequestData(
-                        projectGraphEntryPoints: new[] { new ProjectGraphEntryPoint(graph.GraphRoots.First().ProjectInstance.FullPath) },
+                        projectGraphEntryPoints: new[] { new ProjectGraphEntryPoint(graph.GraphRoots.First().ProjectInstanceSnapshot.FullPath) },
                         targetsToBuild: Array.Empty<string>(),
                         hostServices: null,
                         flags: BuildRequestDataFlags.None,

@@ -93,7 +93,7 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 Projects = graph.ProjectNodes.ToDictionary(
                     n => GraphTestingUtilities.GetProjectNumber((ProjectGraphNode)n).ToString(),
-                    n => n.ProjectInstance.FullPath),
+                    n => n.ProjectInstanceSnapshot.FullPath),
                 ProjectConfigurations = projectConfigurations,
                 SolutionDependencies = solutionDependencies,
                 SolutionDependenciesProjectNameToGuids = solutionDependenciesProjectNameToGuids

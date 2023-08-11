@@ -1878,7 +1878,8 @@ namespace Microsoft.Build.Execution
                             SdkResolverService,
                             submission.SubmissionId,
                             projectLoadSettings);
-                    });
+                    },
+                    keepProjectInstance: false);
             }
 
             LogMessage(
@@ -1887,6 +1888,9 @@ namespace Microsoft.Build.Execution
                     Math.Round(projectGraph.ConstructionMetrics.ConstructionTime.TotalSeconds, 3),
                     projectGraph.ConstructionMetrics.NodeCount,
                     projectGraph.ConstructionMetrics.EdgeCount));
+
+            GC.Collect();
+            LogMessage($"GraphBuild GC: {GC.GetTotalMemory(false)} bytes *new*");
 
             Dictionary<ProjectGraphNode, BuildResult> resultsPerNode = null;
 
@@ -1973,7 +1977,9 @@ namespace Microsoft.Build.Execution
                         }
 
                         var request = new BuildRequestData(
-                            node.ProjectInstance,
+                            node.ProjectInstanceSnapshot.FullPath,
+                            node.ProjectInstanceSnapshot.GlobalProperties,
+                            node.ProjectInstanceSnapshot.ToolsVersion,
                             targetList.ToArray(),
                             graphBuildRequestData.HostServices,
                             graphBuildRequestData.Flags);

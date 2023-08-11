@@ -48,6 +48,7 @@ namespace Microsoft.Build.Graph
 
         private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
+        internal bool KeepProjectInstance { get; set; }
 
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
@@ -60,7 +61,6 @@ namespace Microsoft.Build.Graph
             var (actualEntryPoints, solutionDependencies) = ExpandSolutionIfPresent(entryPoints.ToImmutableArray());
 
             _solutionDependencies = solutionDependencies;
-
             _entryPointConfigurationMetadata = AddGraphBuildPropertyToEntryPoints(actualEntryPoints);
 
             IEqualityComparer<ConfigurationMetadata> configComparer = EqualityComparer<ConfigurationMetadata>.Default;
@@ -133,7 +133,7 @@ namespace Microsoft.Build.Graph
             {
                 var currentNode = parsedProject.Value.GraphNode;
 
-                var requiresTransitiveProjectReferences = _projectInterpretation.RequiresTransitiveProjectReferences(currentNode.ProjectInstance);
+                var requiresTransitiveProjectReferences = _projectInterpretation.RequiresTransitiveProjectReferences(currentNode.ProjectInstanceSnapshot);
 
                 foreach (var referenceInfo in parsedProject.Value.ReferenceInfos)
                 {
@@ -148,14 +148,16 @@ namespace Microsoft.Build.Graph
                     {
                         foreach (var transitiveProjectReference in GetTransitiveProjectReferencesExcludingSelf(allParsedProjects[referenceInfo.ReferenceConfiguration]))
                         {
+                            var projectRefSnapshot = new ProjectItemInstanceSnapshot(new List<(string Name, string Value)>(0))
+                            {
+                                ItemType = ProjectInterpretation.TransitiveReferenceItemName,
+                                EvaluatedInclude = referenceInfo.ReferenceConfiguration.ProjectFullPath,
+                                FullPath = referenceInfo.ReferenceConfiguration.ProjectFullPath,
+                            };
+
                             currentNode.AddProjectReference(
                                 transitiveProjectReference,
-                                new ProjectItemInstance(
-                                    project: currentNode.ProjectInstance,
-                                    itemType: ProjectInterpretation.TransitiveReferenceItemName,
-                                    includeEscaped: referenceInfo.ReferenceConfiguration.ProjectFullPath,
-                                    directMetadata: null,
-                                    definingFileEscaped: currentNode.ProjectInstance.FullPath),
+                                projectRefSnapshot,
                                 edges);
                         }
                     }
@@ -197,7 +199,7 @@ namespace Microsoft.Build.Graph
 
             foreach (var project in allParsedProjects)
             {
-                var projectPath = project.Value.GraphNode.ProjectInstance.FullPath;
+                var projectPath = project.Value.GraphNode.ProjectInstanceSnapshot.FullPath;
 
                 if (projectsByPath.ContainsKey(projectPath))
                 {
@@ -226,13 +228,13 @@ namespace Microsoft.Build.Graph
                 {
                     foreach (var referencedNode in referencedNodes)
                     {
-                        var stubItem = new ProjectItemInstance(
-                            referencingNode.ProjectInstance,
-                            SolutionItemReference,
-                            referencedNode.ProjectInstance.FullPath,
-                            referencingNode.ProjectInstance.FullPath);
-
-                        referencingNode.AddProjectReference(referencedNode, stubItem, edges);
+                        var projectRefSnapshot = new ProjectItemInstanceSnapshot(new List<(string Name, string Value)>(0))
+                        {
+                            ItemType = SolutionItemReference,
+                            EvaluatedInclude = referencedNode.ProjectInstanceSnapshot.FullPath,
+                            FullPath = referencedNode.ProjectInstanceSnapshot.FullPath,
+                        };
+                        referencingNode.AddProjectReference(referencedNode, projectRefSnapshot, edges);
                     }
                 }
             }
@@ -479,7 +481,7 @@ namespace Microsoft.Build.Graph
                             {
                                 // the project being evaluated has a reference to itself
                                 var selfReferencingProjectString =
-                                    FormatCircularDependencyError(new List<string> { node.ProjectInstance.FullPath, node.ProjectInstance.FullPath });
+                                    FormatCircularDependencyError(new List<string> { node.ProjectInstanceSnapshot.FullPath, node.ProjectInstanceSnapshot.FullPath });
                                 throw new CircularDependencyException(
                                     string.Format(
                                         ResourceUtilities.GetResourceString("CircularDependencyInProjectGraph"),
@@ -488,7 +490,7 @@ namespace Microsoft.Build.Graph
 
                             // the project being evaluated has a circular dependency involving multiple projects
                             // add this project to the list of projects involved in cycle 
-                            var projectsInCycle = new List<string> { referenceNode.ProjectInstance.FullPath };
+                            var projectsInCycle = new List<string> { referenceNode.ProjectInstanceSnapshot.FullPath };
                             return (false, projectsInCycle);
                         }
                     }
@@ -498,11 +500,11 @@ namespace Microsoft.Build.Graph
                         var loadReference = VisitNode(referenceNode, nodeState);
                         if (!loadReference.success)
                         {
-                            if (loadReference.projectsInCycle[0].Equals(node.ProjectInstance.FullPath))
+                            if (loadReference.projectsInCycle[0].Equals(node.ProjectInstanceSnapshot.FullPath))
                             {
                                 // we have reached the nth project in the cycle, form error message and throw
-                                loadReference.projectsInCycle.Add(referenceNode.ProjectInstance.FullPath);
-                                loadReference.projectsInCycle.Add(node.ProjectInstance.FullPath);
+                                loadReference.projectsInCycle.Add(referenceNode.ProjectInstanceSnapshot.FullPath);
+                                loadReference.projectsInCycle.Add(node.ProjectInstanceSnapshot.FullPath);
 
                                 var errorMessage = FormatCircularDependencyError(loadReference.projectsInCycle);
                                 throw new CircularDependencyException(
@@ -513,7 +515,7 @@ namespace Microsoft.Build.Graph
 
                             // this is one of the projects in the circular dependency
                             // update the list of projects in cycle and return the list to the caller
-                            loadReference.projectsInCycle.Add(referenceNode.ProjectInstance.FullPath);
+                            loadReference.projectsInCycle.Add(referenceNode.ProjectInstanceSnapshot.FullPath);
                             return (false, loadReference.projectsInCycle);
                         }
                     }
@@ -539,7 +541,7 @@ namespace Microsoft.Build.Graph
                 throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
             }
 
-            var graphNode = new ProjectGraphNode(projectInstance);
+            var graphNode = new ProjectGraphNode(projectInstance, KeepProjectInstance);
 
             var referenceInfos = ParseReferences(graphNode);
 
@@ -576,7 +578,7 @@ namespace Microsoft.Build.Graph
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
 
-            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstance, _projectCollection, _projectInstanceFactory))
+            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstanceSnapshot, _projectCollection, _projectInstanceFactory))
             {
                 if (FileUtilities.IsSolutionFilename(referenceInfo.ReferenceConfiguration.ProjectFullPath))
                 {
@@ -636,26 +638,26 @@ namespace Microsoft.Build.Graph
 
         internal sealed class GraphEdges
         {
-            private ConcurrentDictionary<(ProjectGraphNode, ProjectGraphNode), ProjectItemInstance> ReferenceItems =
-                new ConcurrentDictionary<(ProjectGraphNode, ProjectGraphNode), ProjectItemInstance>();
+            private ConcurrentDictionary<(ProjectGraphNode, ProjectGraphNode), ProjectItemInstanceSnapshot> ReferenceItems =
+                new ConcurrentDictionary<(ProjectGraphNode, ProjectGraphNode), ProjectItemInstanceSnapshot>();
 
             internal int Count => ReferenceItems.Count;
 
-            public ProjectItemInstance this[(ProjectGraphNode node, ProjectGraphNode reference) key]
+            public ProjectItemInstanceSnapshot this[(ProjectGraphNode node, ProjectGraphNode reference) key]
             {
                 get
                 {
-                    ErrorUtilities.VerifyThrow(ReferenceItems.TryGetValue(key, out ProjectItemInstance referenceItem), "All requested keys should exist");
+                    ErrorUtilities.VerifyThrow(ReferenceItems.TryGetValue(key, out ProjectItemInstanceSnapshot referenceItem), "All requested keys should exist");
                     return referenceItem;
                 }
             }
 
-            public void AddOrUpdateEdge((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance edge)
+            public void AddOrUpdateEdge((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstanceSnapshot edge)
             {
                 ReferenceItems.AddOrUpdate(
                     key,
-                    addValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance referenceItem) => referenceItem,
-                    updateValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance existingItem, ProjectItemInstance newItem) =>
+                    addValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstanceSnapshot referenceItem) => referenceItem,
+                    updateValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstanceSnapshot existingItem, ProjectItemInstanceSnapshot newItem) =>
                     {
                         string existingTargetsMetadata = existingItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
                         string newTargetsMetadata = newItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
@@ -669,7 +671,7 @@ namespace Microsoft.Build.Graph
                         existingTargetsMetadata = GetEffectiveTargets(key.reference, existingTargetsMetadata);
                         newTargetsMetadata = GetEffectiveTargets(key.reference, newTargetsMetadata);
 
-                        ProjectItemInstance mergedItem = existingItem.DeepClone();
+                        ProjectItemInstanceSnapshot mergedItem = existingItem;
                         mergedItem.SetMetadata(ItemMetadataNames.ProjectReferenceTargetsMetadataName, $"{existingTargetsMetadata};{newTargetsMetadata}");
                         return mergedItem;
 
@@ -677,7 +679,7 @@ namespace Microsoft.Build.Graph
                         {
                             if (string.IsNullOrWhiteSpace(targetsMetadata))
                             {
-                                return string.Join(";", reference.ProjectInstance.DefaultTargets);
+                                return string.Join(";", reference.ProjectInstanceSnapshot.DefaultTargets);
                             }
 
                             return targetsMetadata;
@@ -693,7 +695,7 @@ namespace Microsoft.Build.Graph
 
             internal bool HasEdge((ProjectGraphNode node, ProjectGraphNode reference) key) => ReferenceItems.ContainsKey(key);
 
-            internal IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstance> TestOnly_AsConfigurationMetadata()
+            internal IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstanceSnapshot> TestOnly_AsConfigurationMetadata()
             {
                 return ReferenceItems.ToImmutableDictionary(
                     kvp => (kvp.Key.Item1.ToConfigurationMetadata(), kvp.Key.Item2.ToConfigurationMetadata()),

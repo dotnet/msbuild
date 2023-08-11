@@ -128,7 +128,7 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                     ProjectGraph graphFromSolution = new(entryPoint, projectCollection);
                     logger.AssertNoErrors();
                     graphFromSolution.ProjectNodes.ShouldHaveSingleItem();
-                    graphFromSolution.ProjectNodes.Single().ProjectInstance.ProjectFileLocation.LocationString.ShouldBe(simpleProject.Path);
+                    graphFromSolution.ProjectNodes.Single().ProjectInstanceSnapshot.ProjectFileLocation.LocationString.ShouldBe(simpleProject.Path);
                 }
                 else
                 {

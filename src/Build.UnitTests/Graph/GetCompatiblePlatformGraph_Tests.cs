@@ -57,7 +57,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                                     </Project>");
 
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
-                GetFirstNodeWithProjectNumber(graph, 1).ProjectInstance.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
+                GetFirstNodeWithProjectNumber(graph, 1).ProjectInstanceSnapshot.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
             }
         }
 
@@ -97,8 +97,8 @@ namespace Microsoft.Build.Graph.UnitTests
 
 
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
-                GetFirstNodeWithProjectNumber(graph, 3).ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("x86");
+                GetFirstNodeWithProjectNumber(graph, 3).ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("x86");
             }
         }
 
@@ -139,8 +139,8 @@ namespace Microsoft.Build.Graph.UnitTests
 
 
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
-                GetFirstNodeWithProjectNumber(graph, 3).ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstanceSnapshot.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
+                GetFirstNodeWithProjectNumber(graph, 3).ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("x86");
             }
         }
 
@@ -179,8 +179,8 @@ namespace Microsoft.Build.Graph.UnitTests
 
 
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("AnyCPU");
-                GetFirstNodeWithProjectNumber(graph, 3).ProjectInstance.GlobalProperties["Platform"].ShouldBe("AnyCPU");
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("AnyCPU");
+                GetFirstNodeWithProjectNumber(graph, 3).ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("AnyCPU");
                 graph.ProjectNodes.Count.ShouldBe(3);
             }
         }
@@ -208,7 +208,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                                     </Project>");
 
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("x64");
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("x64");
             }
         }
 
@@ -236,7 +236,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                                     </Project>");
 
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("x86");
             }
         }
 
@@ -263,7 +263,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                                     </Project>");
 
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("AnyCPU");
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("AnyCPU");
             }
         }
 
@@ -291,7 +291,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                                     </Project>");
 
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstanceSnapshot.GlobalProperties["Platform"].ShouldBe("x86");
             }
         }
 
@@ -321,7 +321,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 // Here we are checking if platform is defined. in this case it should not be since Platorm would be set to the value this project defaults as
                 // in order to avoid dual build errors we remove platform in order to avoid the edge case where a project has global platform set and does not have global platform set
                 // yet still default to the same platform.
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstanceSnapshot.GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
             }
         }
 
@@ -348,7 +348,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                                     </Project>");
 
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
-                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstance.GetPropertyValue("Platform").ShouldBe(GetFirstNodeWithProjectNumber(graph, 1).ProjectInstance.GetPropertyValue("Platform"));
+                GetFirstNodeWithProjectNumber(graph, 2).ProjectInstanceSnapshot.GetPropertyValue("Platform").ShouldBe(GetFirstNodeWithProjectNumber(graph, 1).ProjectInstanceSnapshot.GetPropertyValue("Platform"));
             }
         }
 
@@ -444,8 +444,8 @@ namespace Microsoft.Build.Graph.UnitTests
                 // We want to make sure negotiation respects configuration if defined but negotiates if not.
                 ProjectGraph graphFromSolution = new(entryPoint, projectCollection);
                 logger.AssertNoErrors();
-                GetFirstNodeWithProjectNumber(graphFromSolution, 2).ProjectInstance.GetPropertyValue("Platform").ShouldBe("AnyCPU", "Project2 should have followed the sln config to AnyCPU");
-                GetFirstNodeWithProjectNumber(graphFromSolution, 3).ProjectInstance.GetPropertyValue("Platform").ShouldBe("x64", "Project3 isn't in the solution so it should have negotiated to x64 to match Project1");
+                GetFirstNodeWithProjectNumber(graphFromSolution, 2).ProjectInstanceSnapshot.GetPropertyValue("Platform").ShouldBe("AnyCPU", "Project2 should have followed the sln config to AnyCPU");
+                GetFirstNodeWithProjectNumber(graphFromSolution, 3).ProjectInstanceSnapshot.GetPropertyValue("Platform").ShouldBe("x64", "Project3 isn't in the solution so it should have negotiated to x64 to match Project1");
             }
         }
     }

@@ -15,7 +15,7 @@ namespace Microsoft.Build.Graph
     /// A callback used to receive notification that a build has completed.
     /// </summary>
     /// <remarks>
-    /// When this delegate is invoked, the WaitHandle on the BuildSubmission will have been be signalled and the OverallBuildResult will be valid.
+    /// When this delegate is invoked, the WaitHandle on the BuildSubmission will have been be signaled and the OverallBuildResult will be valid.
     /// </remarks>
     public delegate void GraphBuildSubmissionCompleteCallback(GraphBuildSubmission submission);
 
@@ -74,7 +74,7 @@ namespace Microsoft.Build.Graph
         public Object AsyncContext { get; private set; }
 
         /// <summary>
-        /// A <see cref="System.Threading.WaitHandle"/> which will be signalled when the build is complete.  Valid after <see cref="BuildSubmission.Execute()"/> or <see cref="BuildSubmission.ExecuteAsync(BuildSubmissionCompleteCallback, object)"/> returns, otherwise null.
+        /// A <see cref="System.Threading.WaitHandle"/> which will be signaled when the build is complete.  Valid after <see cref="BuildSubmission.Execute()"/> or <see cref="BuildSubmission.ExecuteAsync(BuildSubmissionCompleteCallback, object)"/> returns, otherwise null.
         /// </summary>
         public WaitHandle WaitHandle => _completionEvent;
 
@@ -84,7 +84,7 @@ namespace Microsoft.Build.Graph
         public bool IsCompleted => WaitHandle.WaitOne(new TimeSpan(0));
 
         /// <summary>
-        /// The results of the build per graph node.  Valid only after WaitHandle has become signalled.
+        /// The results of the build per graph node.  Valid only after WaitHandle has become signaled.
         /// </summary>
         public GraphBuildResult BuildResult { get; internal set; }
 

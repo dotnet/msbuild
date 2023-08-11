@@ -307,7 +307,7 @@ namespace Microsoft.Build.Graph.UnitTests
             foreach (var node in topoSortedNodes)
             {
                 var project = Project.FromFile(
-                    node.ProjectInstance.FullPath,
+                    node.ProjectInstanceSnapshot.FullPath,
                     new ProjectOptions
                     {
                         ProjectCollection = collection
@@ -347,7 +347,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             BuildUsingCaches(_env, topoSortedNodes, expectedOutput, outputCaches, generateCacheFiles: true);
 
-            var rootNode = topoSortedNodes.First(n => Path.GetFileNameWithoutExtension(n.ProjectInstance.FullPath) == "1");
+            var rootNode = topoSortedNodes.First(n => Path.GetFileNameWithoutExtension(n.ProjectInstanceSnapshot.FullPath) == "1");
             var outputCache = outputCaches[rootNode];
 
             outputCache.ShouldNotBeNull();
@@ -468,10 +468,10 @@ namespace Microsoft.Build.Graph.UnitTests
                 buildParameters.Loggers = new[] { logger };
 
                 var result = BuildProjectFileUsingBuildManager(
-                    node.ProjectInstance.FullPath,
+                    node.ProjectInstanceSnapshot.FullPath,
                     null,
                     buildParameters,
-                    targetListsPerNode?[node] != null ? targetListsPerNode?[node] : node.ProjectInstance.DefaultTargets);
+                    targetListsPerNode?[node] != null ? targetListsPerNode?[node] : node.ProjectInstanceSnapshot.DefaultTargets);
 
                 results[ProjectNumber(node)] = (result, logger);
 
@@ -507,7 +507,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        private static string ProjectNumber(ProjectGraphNode node) => Path.GetFileNameWithoutExtension(node.ProjectInstance.FullPath);
+        private static string ProjectNumber(ProjectGraphNode node) => Path.GetFileNameWithoutExtension(node.ProjectInstanceSnapshot.FullPath);
 
         private static TransientTestFile CreateProjectFileWrapper(TestEnvironment env, int projectNumber, int[] projectReferences, Dictionary<string, string[]> projectReferenceTargets, string defaultTargets, string extraContent)
         {

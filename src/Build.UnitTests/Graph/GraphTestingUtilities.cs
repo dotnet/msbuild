@@ -54,18 +54,18 @@ namespace Microsoft.Build.Graph.UnitTests
             {
                 AssertInnerBuildEvaluation(innerBuild, true, additionalGlobalProperties);
 
-                ProjectItemInstance edge = graph.TestOnly_Edges[(outerBuild, innerBuild)];
+                var edge = graph.TestOnly_Edges[(outerBuild, innerBuild)];
                 edge.DirectMetadataCount.ShouldBe(1);
 
-                string expectedPropertiesMetadata = $"{InnerBuildPropertyName}={innerBuild.ProjectInstance.GlobalProperties[InnerBuildPropertyName]}";
-                edge.GetMetadata("Properties").EvaluatedValue.ShouldBe(expectedPropertiesMetadata);
+                string expectedPropertiesMetadata = $"{InnerBuildPropertyName}={innerBuild.ProjectInstanceSnapshot.GlobalProperties[InnerBuildPropertyName]}";
+                edge.GetMetadataValue("Properties").ShouldBe(expectedPropertiesMetadata);
             }
 
             // Ensure edges were added directly to the inner builds
             foreach (ProjectGraphNode outerBuildReferencer in outerBuild.ReferencingProjects)
             {
                 ProjectGraphNode[] innerBuilds = outerBuildReferencer.ProjectReferences
-                    .Where(p => IsInnerBuild(p) && p.ProjectInstance.FullPath == outerBuild.ProjectInstance.FullPath)
+                    .Where(p => IsInnerBuild(p) && p.ProjectInstanceSnapshot.FullPath == outerBuild.ProjectInstanceSnapshot.FullPath)
                     .ToArray();
 
                 innerBuilds.Length.ShouldBe(expectedInnerBuildCount);
@@ -79,8 +79,8 @@ namespace Microsoft.Build.Graph.UnitTests
 
                     graph.TestOnly_Edges.HasEdge((outerBuild, innerBuild)).ShouldBeTrue();
 
-                    ProjectItemInstance edgeToOuterBuild = graph.TestOnly_Edges[(outerBuildReferencer, outerBuild)];
-                    ProjectItemInstance edgeToInnerBuild = graph.TestOnly_Edges[(outerBuildReferencer, innerBuild)];
+                    var edgeToOuterBuild = graph.TestOnly_Edges[(outerBuildReferencer, outerBuild)];
+                    var edgeToInnerBuild = graph.TestOnly_Edges[(outerBuildReferencer, innerBuild)];
 
                     edgeToOuterBuild.ShouldBe(edgeToInnerBuild);
                 }
@@ -92,8 +92,8 @@ namespace Microsoft.Build.Graph.UnitTests
             additionalGlobalProperties ??= new Dictionary<string, string>();
 
             IsNotMultitargeting(node).ShouldBeTrue();
-            node.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
-            node.ProjectInstance.GetProperty(InnerBuildPropertyName).ShouldBeNull();
+            node.ProjectInstanceSnapshot.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
+            node.ProjectInstanceSnapshot.GetPropertyValue(InnerBuildPropertyName).ShouldBeNullOrEmpty();
         }
 
         public static void AssertOuterBuildEvaluation(ProjectGraphNode outerBuild, Dictionary<string, string> additionalGlobalProperties)
@@ -103,8 +103,8 @@ namespace Microsoft.Build.Graph.UnitTests
             IsOuterBuild(outerBuild).ShouldBeTrue();
             IsInnerBuild(outerBuild).ShouldBeFalse();
 
-            outerBuild.ProjectInstance.GetProperty(InnerBuildPropertyName).ShouldBeNull();
-            outerBuild.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
+            outerBuild.ProjectInstanceSnapshot.GetPropertyValue(InnerBuildPropertyName).ShouldBeNullOrEmpty();
+            outerBuild.ProjectInstanceSnapshot.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
         }
 
         public static void AssertInnerBuildEvaluation(
@@ -117,13 +117,13 @@ namespace Microsoft.Build.Graph.UnitTests
             IsOuterBuild(innerBuild).ShouldBeFalse();
             IsInnerBuild(innerBuild).ShouldBeTrue();
 
-            var innerBuildPropertyValue = innerBuild.ProjectInstance.GetPropertyValue(InnerBuildPropertyName);
+            var innerBuildPropertyValue = innerBuild.ProjectInstanceSnapshot.GetPropertyValue(InnerBuildPropertyName);
 
             innerBuildPropertyValue.ShouldNotBeNullOrEmpty();
 
             if (InnerBuildPropertyIsSetViaGlobalProperty)
             {
-                innerBuild.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(
+                innerBuild.ProjectInstanceSnapshot.GlobalProperties.ShouldBeSameIgnoringOrder(
                     EmptyGlobalProperties
                         .Add(InnerBuildPropertyName, innerBuildPropertyValue)
                         .AddRange(additionalGlobalProperties));
@@ -132,17 +132,17 @@ namespace Microsoft.Build.Graph.UnitTests
 
         internal static bool IsOuterBuild(ProjectGraphNode project)
         {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.OuterBuild;
+            return project.ProjectInstanceSnapshot.ProjectType == ProjectInterpretation.ProjectType.OuterBuild;
         }
 
         internal static bool IsInnerBuild(ProjectGraphNode project)
         {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.InnerBuild;
+            return project.ProjectInstanceSnapshot.ProjectType == ProjectInterpretation.ProjectType.InnerBuild;
         }
 
         internal static bool IsNotMultitargeting(ProjectGraphNode project)
         {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.NonMultitargeting;
+            return project.ProjectInstanceSnapshot.ProjectType == ProjectInterpretation.ProjectType.NonMultitargeting;
         }
 
         internal static ProjectGraphNode GetFirstNodeWithProjectNumber(ProjectGraph graph, int projectNum)
@@ -152,7 +152,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
         internal static IEnumerable<ProjectGraphNode> GetNodesWithProjectNumber(ProjectGraph graph, int projectNum)
         {
-            return graph.ProjectNodes.Where(node => node.ProjectInstance.FullPath.EndsWith(projectNum + ".proj"));
+            return graph.ProjectNodes.Where(node => node.ProjectInstanceSnapshot.FullPath.EndsWith(projectNum + ".proj"));
         }
 
         internal static ProjectGraphNode GetOuterBuild(ProjectGraph graph, int projectNumber)
@@ -171,7 +171,7 @@ namespace Microsoft.Build.Graph.UnitTests
             else
             {
                 var innerBuilds = GetNodesWithProjectNumber(graph, projectNumber)
-                    .Where(p => IsInnerBuild(p) && p.ProjectInstance.FullPath.Equals(outerBuild.ProjectInstance.FullPath))
+                    .Where(p => IsInnerBuild(p) && p.ProjectInstanceSnapshot.FullPath.Equals(outerBuild.ProjectInstanceSnapshot.FullPath))
                     .ToArray();
 
                 innerBuilds.ShouldNotBeEmpty();
@@ -183,7 +183,7 @@ namespace Microsoft.Build.Graph.UnitTests
         internal static string GetProjectFileName(ProjectGraphNode node)
         {
             node.ShouldNotBeNull();
-            return Path.GetFileNameWithoutExtension(node.ProjectInstance.FullPath);
+            return Path.GetFileNameWithoutExtension(node.ProjectInstanceSnapshot.FullPath);
         }
 
         internal static string GetProjectFileName(ConfigurationMetadata config)
@@ -207,7 +207,7 @@ namespace Microsoft.Build.Graph.UnitTests
         internal static string GetProjectPath(ProjectGraphNode node)
         {
             node.ShouldNotBeNull();
-            return node.ProjectInstance.FullPath;
+            return node.ProjectInstanceSnapshot.FullPath;
         }
 
         internal static TransientTestFile CreateProjectFile(

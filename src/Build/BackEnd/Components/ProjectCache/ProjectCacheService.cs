@@ -43,6 +43,8 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         private bool _isDisposed;
 
+        private bool _graph_initialized;
+
         private record struct ProjectCachePlugin(string Name, ProjectCachePluginBase? Instance, ExceptionDispatchInfo? InitializationException = null);
 
         /// <summary>
@@ -80,11 +82,12 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 s_parallelOptions,
                 node =>
                 {
-                    foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(node.ProjectInstance))
+                    foreach (ProjectCacheDescriptor projectCacheDescriptor in node.ProjectInstanceSnapshot.ProjectCacheDescriptors)
                     {
                         // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
                         _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph, buildRequestConfiguration: null, cancellationToken)
                             .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
+                        _graph_initialized = true;
                     }
                 });
         }
@@ -296,6 +299,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             // We've determined it's the VS scenario and know that there are project cache plugins.
             if (_isVsScenario)
+            {
+                return true;
+            }
+
+            if (_graph_initialized)
             {
                 return true;
             }

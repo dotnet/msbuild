@@ -499,7 +499,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
                 foreach (var node in graph.ProjectNodesTopologicallySorted)
                 {
-                    var buildResult = buildSession.BuildProjectFile(node.ProjectInstance.FullPath);
+                    var buildResult = buildSession.BuildProjectFile(node.ProjectInstanceSnapshot.FullPath);
 
                     buildResult.ShouldHaveSucceeded();
 
@@ -535,8 +535,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             (MockLogger logger, ProjectGraph graph, _) = BuildGraphVsScenario(testData, assertBuildResults: false);
 
-            logger.FullLog.ShouldNotContain($"EntryPoint: {graph.GraphRoots.First().ProjectInstance.FullPath}");
-            logger.FullLog.ShouldContain($"EntryPoint: {graph.GraphRoots.First().ProjectReferences.First().ProjectInstance.FullPath}");
+            logger.FullLog.ShouldNotContain($"EntryPoint: {graph.GraphRoots.First().ProjectInstanceSnapshot.FullPath}");
+            logger.FullLog.ShouldContain($"EntryPoint: {graph.GraphRoots.First().ProjectReferences.First().ProjectInstanceSnapshot.FullPath}");
         }
 
         private (MockLogger logger, ProjectGraph projectGraph, Dictionary<ProjectGraphNode, BuildResult> nodesToBuildResults) BuildGraphVsScenario(
@@ -581,7 +581,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     foreach (var node in graph.ProjectNodesTopologicallySorted)
                     {
                         BuildResult buildResult = buildSession.BuildProjectFile(
-                            node.ProjectInstance.FullPath,
+                            node.ProjectInstanceSnapshot.FullPath,
                             globalProperties:
                                 new Dictionary<string, string>
                                 {
@@ -602,7 +602,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 {
                     foreach (var node in graph.ProjectNodes)
                     {
-                        var projectPath = node.ProjectInstance.FullPath;
+                        var projectPath = node.ProjectInstanceSnapshot.FullPath;
                         var projectName = Path.GetFileNameWithoutExtension(projectPath);
 
                         // Ensure MSBuild passes config / platform information set by VS.
@@ -632,15 +632,15 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             foreach (var node in projectNodes)
             {
-                var projectPath = node.ProjectInstance.FullPath;
+                var projectPath = node.ProjectInstanceSnapshot.FullPath;
                 var projectName = Path.GetFileNameWithoutExtension(projectPath);
 
-                var buildProjectInSolutionValue = node.ProjectInstance.GetPropertyValue("BuildProjectInSolution");
+                var buildProjectInSolutionValue = node.ProjectInstanceSnapshot.GetPropertyValue("BuildProjectInSolution");
                 var buildProjectInSolutionAttribute = string.IsNullOrWhiteSpace(buildProjectInSolutionValue)
                     ? string.Empty
                     : $"BuildProjectInSolution=\"{buildProjectInSolutionValue}\"";
 
-                var projectDependencyValue = node.ProjectInstance.GetPropertyValue("ProjectDependency");
+                var projectDependencyValue = node.ProjectInstanceSnapshot.GetPropertyValue("ProjectDependency");
                 var projectDependencyElement = string.IsNullOrWhiteSpace(projectDependencyValue)
                     ? string.Empty
                     : $"<ProjectDependency Project=\"{projectDependencyValue}\" />";
@@ -693,7 +693,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
                     // Build references in parallel.
                     var referenceBuildTasks = rootNode.ProjectReferences.Select(
-                        r => buildSession.BuildProjectFileAsync(r.ProjectInstance.FullPath, globalProperties: globalProperties));
+                        r => buildSession.BuildProjectFileAsync(r.ProjectInstanceSnapshot.FullPath, globalProperties: globalProperties));
 
                     foreach (var task in referenceBuildTasks)
                     {
@@ -702,7 +702,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     }
 
                     buildSession
-                        .BuildProjectFile(rootNode.ProjectInstance.FullPath, globalProperties: globalProperties)
+                        .BuildProjectFile(rootNode.ProjectInstanceSnapshot.FullPath, globalProperties: globalProperties)
                         .ShouldHaveSucceeded();
                 }
 
@@ -791,22 +791,22 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             {
                 if (string.IsNullOrEmpty(targets))
                 {
-                    mockLogger.FullLog.ShouldContain(string.Format(ResourceUtilities.GetResourceString("ProjectCacheQueryStartedWithDefaultTargets"), node.ProjectInstance.FullPath));
+                    mockLogger.FullLog.ShouldContain(string.Format(ResourceUtilities.GetResourceString("ProjectCacheQueryStartedWithDefaultTargets"), node.ProjectInstanceSnapshot.FullPath));
                 }
                 else
                 {
-                    mockLogger.FullLog.ShouldContain(string.Format(ResourceUtilities.GetResourceString("ProjectCacheQueryStartedWithTargetNames"), node.ProjectInstance.FullPath, targets));
+                    mockLogger.FullLog.ShouldContain(string.Format(ResourceUtilities.GetResourceString("ProjectCacheQueryStartedWithTargetNames"), node.ProjectInstanceSnapshot.FullPath, targets));
                 }
 
                 if (instanceMockCache != null)
                 {
-                    instanceMockCache.Requests.ShouldContain(r => r.ProjectFullPath.Equals(node.ProjectInstance.FullPath));
+                    instanceMockCache.Requests.ShouldContain(r => r.ProjectFullPath.Equals(node.ProjectInstanceSnapshot.FullPath));
 
                     var expectedCacheResponse = testData.GetExpectedCacheResultForNode(node);
                     switch (expectedCacheResponse.ResultType)
                     {
                         case CacheResultType.CacheHit:
-                            AssertBuildResultForCacheHit(node.ProjectInstance.FullPath, projectPathToBuildResults[node], expectedCacheResponse);
+                            AssertBuildResultForCacheHit(node.ProjectInstanceSnapshot.FullPath, projectPathToBuildResults[node], expectedCacheResponse);
                             break;
                         case CacheResultType.CacheMiss:
                             break;
@@ -820,14 +820,14 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 }
                 else
                 {
-                    mockLogger.FullLog.ShouldContain($"{AssemblyMockCache}: GetCacheResultAsync for {node.ProjectInstance.FullPath}");
+                    mockLogger.FullLog.ShouldContain($"{AssemblyMockCache}: GetCacheResultAsync for {node.ProjectInstanceSnapshot.FullPath}");
 
                     // Too complicated, not worth it to send expected results to the assembly plugin, so skip checking the build results.
                 }
             }
         }
 
-        private static int GetProjectNumber(ProjectGraphNode node) => GetProjectNumber(node.ProjectInstance.FullPath);
+        private static int GetProjectNumber(ProjectGraphNode node) => GetProjectNumber(node.ProjectInstanceSnapshot.FullPath);
 
         private static int GetProjectNumber(string projectPath) => int.Parse(Path.GetFileNameWithoutExtension(projectPath));
 
@@ -1422,7 +1422,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             Task<BuildResult> BuildProjectFileAsync(int projectNumber)
             {
-                return buildSession.BuildProjectFileAsync(graph.ProjectNodes.First(n => GetProjectNumber(n) == projectNumber).ProjectInstance.FullPath);
+                return buildSession.BuildProjectFileAsync(graph.ProjectNodes.First(n => GetProjectNumber(n) == projectNumber).ProjectInstanceSnapshot.FullPath);
             }
         }
 
@@ -1476,7 +1476,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     foreach (var node in graph.ProjectNodes.Where(n => referenceNumbers.Contains(GetProjectNumber(n))))
                     {
                         Task<BuildResult> buildResultTask = buildSession.BuildProjectFileAsync(
-                            node.ProjectInstance.FullPath,
+                            node.ProjectInstanceSnapshot.FullPath,
                             globalProperties:
                             new Dictionary<string, string>
                             {
@@ -1491,7 +1491,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         buildResultTask.Result.ShouldHaveSucceeded();
                     }
 
-                    buildSession.BuildProjectFile(graph.GraphRoots.First().ProjectInstance.FullPath).ShouldHaveSucceeded();
+                    buildSession.BuildProjectFile(graph.GraphRoots.First().ProjectInstanceSnapshot.FullPath).ShouldHaveSucceeded();
                 }
 
                 StringShouldContainSubstring(logger.FullLog, $"{AssemblyMockCache}: GetCacheResultAsync for", graph.ProjectNodes.Count);

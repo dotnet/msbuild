@@ -635,12 +635,12 @@ namespace Microsoft.Build.Graph.UnitTests
             GetInnerBuilds(graph, 3).SelectMany(n => GetIncomingEdgeItemsToNode(n, edges)).ShouldAllBe(edgeItem => !IsSolutionItemReference(edgeItem));
             GetInnerBuilds(graph, 3).SelectMany(n => GetOutgoingEdgeItemsFromNode(n, edges)).ShouldAllBe(edgeItem => !IsSolutionItemReference(edgeItem));
 
-            IEnumerable<ProjectItemInstance> GetOutgoingEdgeItemsFromNode(ProjectGraphNode node, IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstance> edgeInfos)
+            IEnumerable<ProjectItemInstanceSnapshot> GetOutgoingEdgeItemsFromNode(ProjectGraphNode node, IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstanceSnapshot> edgeInfos)
             {
                 return edgeInfos.Where(e => e.Key.Item1.Equals(node.ToConfigurationMetadata())).Select(e => e.Value);
             }
 
-            IEnumerable<ProjectItemInstance> GetIncomingEdgeItemsToNode(ProjectGraphNode node, IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstance> edgeInfos)
+            IEnumerable<ProjectItemInstanceSnapshot> GetIncomingEdgeItemsToNode(ProjectGraphNode node, IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstanceSnapshot> edgeInfos)
             {
                 return edgeInfos.Where(e => e.Key.Item2.Equals(node.ToConfigurationMetadata())).Select(e => e.Value);
             }
@@ -668,7 +668,7 @@ namespace Microsoft.Build.Graph.UnitTests
             exception.Message.ShouldContain("but a project with this GUID was not found in the .SLN file");
         }
 
-        private static bool IsSolutionItemReference(ProjectItemInstance edgeItem)
+        private static bool IsSolutionItemReference(ProjectItemInstanceSnapshot edgeItem)
         {
             return edgeItem.ItemType == GraphBuilder.SolutionItemReference;
         }
@@ -736,12 +736,12 @@ namespace Microsoft.Build.Graph.UnitTests
 
         private static string GetConfiguration(ProjectGraphNode node)
         {
-            return node.ProjectInstance.GlobalProperties["Configuration"];
+            return node.ProjectInstanceSnapshot.GlobalProperties["Configuration"];
         }
 
         private static string GetPlatform(ProjectGraphNode node)
         {
-            return node.ProjectInstance.GlobalProperties["Platform"];
+            return node.ProjectInstanceSnapshot.GlobalProperties["Platform"];
         }
 
         public void Dispose()
