@@ -27,30 +27,35 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Serializable]
         public struct CustomStruct : IConvertible
         {
-            private readonly IConvertible _value;
+            private readonly object _value;
+
+            /// <summary>
+            /// Using <see cref="IConvertible"/> as the type of the <see cref="_value"/> field triggers a BinaryFormatter bug.
+            /// </summary>
+            private IConvertible Value => (IConvertible)_value;
 
             public CustomStruct(IConvertible value)
             {
                 _value = value;
             }
 
-            public TypeCode GetTypeCode() => _value.GetTypeCode();
-            public bool ToBoolean(IFormatProvider provider) => _value.ToBoolean(provider);
-            public byte ToByte(IFormatProvider provider) => _value.ToByte(provider);
-            public char ToChar(IFormatProvider provider) => _value.ToChar(provider);
-            public DateTime ToDateTime(IFormatProvider provider) => _value.ToDateTime(provider);
-            public decimal ToDecimal(IFormatProvider provider) => _value.ToDecimal(provider);
-            public double ToDouble(IFormatProvider provider) => _value.ToDouble(provider);
-            public short ToInt16(IFormatProvider provider) => _value.ToInt16(provider);
-            public int ToInt32(IFormatProvider provider) => _value.ToInt32(provider);
-            public long ToInt64(IFormatProvider provider) => _value.ToInt64(provider);
-            public sbyte ToSByte(IFormatProvider provider) => _value.ToSByte(provider);
-            public float ToSingle(IFormatProvider provider) => _value.ToSingle(provider);
-            public string ToString(IFormatProvider provider) => _value.ToString(provider);
-            public object ToType(Type conversionType, IFormatProvider provider) => _value.ToType(conversionType, provider);
-            public ushort ToUInt16(IFormatProvider provider) => _value.ToUInt16(provider);
-            public uint ToUInt32(IFormatProvider provider) => _value.ToUInt32(provider);
-            public ulong ToUInt64(IFormatProvider provider) => _value.ToUInt64(provider);
+            public TypeCode GetTypeCode() => Value.GetTypeCode();
+            public bool ToBoolean(IFormatProvider provider) => Value.ToBoolean(provider);
+            public byte ToByte(IFormatProvider provider) => Value.ToByte(provider);
+            public char ToChar(IFormatProvider provider) => Value.ToChar(provider);
+            public DateTime ToDateTime(IFormatProvider provider) => Value.ToDateTime(provider);
+            public decimal ToDecimal(IFormatProvider provider) => Value.ToDecimal(provider);
+            public double ToDouble(IFormatProvider provider) => Value.ToDouble(provider);
+            public short ToInt16(IFormatProvider provider) => Value.ToInt16(provider);
+            public int ToInt32(IFormatProvider provider) => Value.ToInt32(provider);
+            public long ToInt64(IFormatProvider provider) => Value.ToInt64(provider);
+            public sbyte ToSByte(IFormatProvider provider) => Value.ToSByte(provider);
+            public float ToSingle(IFormatProvider provider) => Value.ToSingle(provider);
+            public string ToString(IFormatProvider provider) => Value.ToString(provider);
+            public object ToType(Type conversionType, IFormatProvider provider) => Value.ToType(conversionType, provider);
+            public ushort ToUInt16(IFormatProvider provider) => Value.ToUInt16(provider);
+            public uint ToUInt32(IFormatProvider provider) => Value.ToUInt32(provider);
+            public ulong ToUInt64(IFormatProvider provider) => Value.ToUInt64(provider);
         }
 
         /// <summary>
