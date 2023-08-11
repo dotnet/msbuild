@@ -2570,6 +2570,11 @@ namespace Microsoft.Build.CommandLine
 
             static bool DoesEnvironmentSupportTerminalLogger()
             {
+                if (Environment.GetEnvironmentVariable("MSBUILDTESTINGFORCETERMINALLOGGERUSE") == "1")
+                {
+                    return true;
+                }
+
                 (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
 
                 if (!outputIsScreen)

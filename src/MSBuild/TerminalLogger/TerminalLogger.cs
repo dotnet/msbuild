@@ -211,6 +211,11 @@ internal sealed class TerminalLogger : INodeLogger
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
         eventSource.ErrorRaised += ErrorRaised;
+
+        if (eventSource is IEventSource4 eventSource4)
+        {
+            eventSource4.IncludeEvaluationPropertiesAndItems();
+        }
     }
 
     /// <inheritdoc/>
