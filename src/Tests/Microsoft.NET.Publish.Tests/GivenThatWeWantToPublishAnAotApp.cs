@@ -56,14 +56,12 @@ namespace Microsoft.NET.Publish.Tests
             var sharedLibSuffix = GetSharedLibSuffix();
             var publishedDll = Path.Combine(publishDirectory, $"{projectName}{sharedLibSuffix}");
             var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
-            var symbolSuffix = GetSymbolSuffix();
-            var publishedDebugFile = Path.Combine(publishDirectory, $"{testProject.Name}{symbolSuffix}");
 
             // NativeAOT published dir should not contain a non-host stand alone package
             File.Exists(publishedDll).Should().BeFalse();
             // The exe exist and should be native
             File.Exists(publishedExe).Should().BeTrue();
-            File.Exists(publishedDebugFile).Should().BeTrue();
+            DoSymbolsExist(publishDirectory, testProject.Name).Should().BeTrue();
             IsNativeImage(publishedExe).Should().BeTrue();
 
             GetKnownILCompilerPackVersion(testAsset, targetFramework, out string expectedVersion);
@@ -144,8 +142,6 @@ namespace Microsoft.NET.Publish.Tests
             var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, configuration: projectConfiguration, runtimeIdentifier: rid).FullName;
             var sharedLibSuffix = GetSharedLibSuffix();
             var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
-            var symbolSuffix = GetSymbolSuffix();
-            var publishedDebugFile = Path.Combine(publishDirectory, $"{testProject.Name}{symbolSuffix}");
             var publishedRuntimeConfig = Path.Combine(publishDirectory, $"{testProject.Name}.runtimeconfig.json");
             var publishedDeps = Path.Combine(publishDirectory, $"{testProject.Name}.deps.json");
 
@@ -156,7 +152,7 @@ namespace Microsoft.NET.Publish.Tests
             // The exe exist and should be native
             File.Exists(publishedExe).Should().BeTrue();
             // There should be a debug file
-            File.Exists(publishedDebugFile).Should().BeTrue();
+            DoSymbolsExist(publishDirectory, testProject.Name).Should().BeTrue();
             IsNativeImage(publishedExe).Should().BeTrue();
 
             // The app accesses the runtime config file key-value pair
@@ -198,8 +194,6 @@ namespace Microsoft.NET.Publish.Tests
             var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, configuration: projectConfiguration, runtimeIdentifier: rid).FullName;
             var sharedLibSuffix = GetSharedLibSuffix();
             var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
-            var symbolSuffix = GetSymbolSuffix();
-            var publishedDebugFile = Path.Combine(publishDirectory, $"{testProject.Name}{symbolSuffix}");
             var publishedRuntimeConfig = Path.Combine(publishDirectory, $"{testProject.Name}.runtimeconfig.json");
             var publishedDeps = Path.Combine(publishDirectory, $"{testProject.Name}.deps.json");
 
@@ -210,7 +204,7 @@ namespace Microsoft.NET.Publish.Tests
             // The exe exist and should be native
             File.Exists(publishedExe).Should().BeTrue();
             // There should be a debug file
-            File.Exists(publishedDebugFile).Should().BeTrue();
+            DoSymbolsExist(publishDirectory, testProject.Name).Should().BeTrue();
             IsNativeImage(publishedExe).Should().BeTrue();
 
             // The app accesses the runtime config file key-value pair
@@ -293,14 +287,12 @@ namespace Microsoft.NET.Publish.Tests
             var sharedLibSuffix = GetSharedLibSuffix();
             var publishedDll = Path.Combine(publishDirectory, $"{projectName}{sharedLibSuffix}");
             var publishedExe = Path.Combine(publishDirectory, $"{testProject.Name}{Constants.ExeSuffix}");
-            var symbolSuffix = GetSymbolSuffix();
-            var publishedDebugFile = Path.Combine(publishDirectory, $"{testProject.Name}{symbolSuffix}");
 
             // NativeAOT published dir should not contain a non-host stand alone package
             File.Exists(publishedDll).Should().BeFalse();
             // The exe exist and should be native
             File.Exists(publishedExe).Should().BeTrue();
-            File.Exists(publishedDebugFile).Should().BeTrue();
+            DoSymbolsExist(publishDirectory, testProject.Name).Should().BeTrue();
             IsNativeImage(publishedExe).Should().BeTrue();
 
             var command = new RunExeCommand(Log, publishedExe)
@@ -981,24 +973,31 @@ class C
             throw new PlatformNotSupportedException();
         }
 
-        private static string GetSymbolSuffix()
+        private static bool DoSymbolsExist(string baseDir, string baseName)
         {
+            string suffix;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return ".pdb";
+                suffix = ".pdb";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return ".dbg";
+                suffix = ".dbg";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                return ".dwarf";
+                suffix = ".dsym";
             }
             else
             {
                 throw new PlatformNotSupportedException();
             }
+
+            var path = Path.Combine(baseDir, baseName + suffix);
+            // Symbol file is a directory on OSX
+            return RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                ? Directory.Exists(path)
+                : File.Exists(path);
         }
 
         private TestProject CreateTestProjectWithAotLibrary(string targetFramework, string projectName)
