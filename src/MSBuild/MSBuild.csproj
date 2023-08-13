@@ -103,6 +103,9 @@
     <Compile Include="..\Shared\Modifiers.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\XMakeElements.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\IKeyed.cs" />
@@ -172,7 +175,7 @@
     <Compile Include="DistributedLoggerRecord.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="LiveLogger\*.cs" />
+    <Compile Include="TerminalLogger\*.cs" />
     <Compile Include="InitializationException.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -244,7 +247,7 @@
 
   <!-- Xsds are not TF or arch-specific so copy once them in the outer build -->
   <Target Name="CopyXsds" BeforeTargets="Build" Condition="'$(IsInnerBuild)' != 'true'">
-    <Copy SourceFiles="@(XsdsForVS)" DestinationFiles="@(XsdsForVS-&gt;'$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'xsd'))%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="$(SkipCopyUnchangedFiles)" />
+    <Copy SourceFiles="@(XsdsForVS)" DestinationFiles="@(XsdsForVS-&gt;'$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'xsd'))%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
 
   <!-- Include MSBuild.deps.json and MSBuild.runtimeconfig.json in ContentWithTargetPath so they will be copied to the output folder of projects

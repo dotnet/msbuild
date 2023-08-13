@@ -31,7 +31,6 @@ namespace Microsoft.Build.Framework.UnitTests
             AssemblyLoadBuildEventArgs argDeserialized = new();
             int packetVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
             argDeserialized.CreateFromStream(br, packetVersion);
-
             argDeserialized.LoadingInitiator.ShouldBe(loadingInitiator);
             argDeserialized.AssemblyName.ShouldBe(assemblyName);
             argDeserialized.AssemblyPath.ShouldBe(assemblyPath);

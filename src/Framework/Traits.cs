@@ -372,6 +372,29 @@ namespace Microsoft.Build.Framework
             }
         }
 
+        /// <summary>
+        /// Allows displaying the deprecation warning for BinaryFormatter in your current environment.
+        /// </summary>
+        public bool EnableWarningOnCustomBuildEvent
+        {
+            get
+            {
+                var value = Environment.GetEnvironmentVariable("MSBUILDCUSTOMBUILDEVENTWARNING");
+
+                if (value == null)
+                {
+                    // If variable is not set explicitly, for .NETCORE warning appears.
+#if RUNTIME_TYPE_NETCORE
+                    return true;
+#else
+                    return false;
+#endif
+                }
+
+                return value == "1";
+            }
+        }
+
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {
             var value = Environment.GetEnvironmentVariable(environmentVariable);
@@ -470,16 +493,6 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Emergency escape hatch. If a customer hits a bug in the shipped product causing an internal exception,
-        /// and fortuitously it happens that ignoring the VerifyThrow allows execution to continue in a reasonable way,
-        /// then we can give them this undocumented environment variable as an immediate workaround.
-        /// </summary>
-        /// <remarks>
-        /// Clone from ErrorUtilities which isn't available in Framework.
-        /// </remarks>
-        private static readonly bool s_throwExceptions = String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDONOTTHROWINTERNAL"));
-
-        /// <summary>
         /// Throws InternalErrorException.
         /// </summary>
         /// <remarks>
@@ -487,10 +500,7 @@ namespace Microsoft.Build.Framework
         /// </remarks>
         internal static void ThrowInternalError(string message)
         {
-            if (s_throwExceptions)
-            {
-                throw new InternalErrorException(message);
-            }
+            throw new InternalErrorException(message);
         }
 
         /// <summary>
@@ -502,10 +512,7 @@ namespace Microsoft.Build.Framework
         /// </remarks>
         internal static void ThrowInternalError(string message, params object[] args)
         {
-            if (s_throwExceptions)
-            {
-                throw new InternalErrorException(FormatString(message, args));
-            }
+            throw new InternalErrorException(FormatString(message, args));
         }
 
         /// <summary>

@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -56,5 +58,23 @@ namespace Microsoft.Build.Framework
         /// The source of the property.
         /// </summary>
         public string PropertySource { get; set; }
+
+        internal override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+
+            writer.WriteOptionalString(PropertyName);
+            writer.WriteOptionalString(PropertyValue);
+            writer.WriteOptionalString(PropertySource);
+        }
+
+        internal override void CreateFromStream(BinaryReader reader, int version)
+        {
+            base.CreateFromStream(reader, version);
+
+            PropertyName = reader.ReadOptionalString();
+            PropertyValue = reader.ReadOptionalString();
+            PropertySource = reader.ReadOptionalString();
+        }
     }
 }
