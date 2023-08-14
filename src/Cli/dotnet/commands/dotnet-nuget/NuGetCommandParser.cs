@@ -168,7 +168,7 @@ namespace Microsoft.DotNet.Cli
 
             CliCommand CertificateCommand() {
                 CliOption<string> algorithm = new("--algorithm");
-                algorithm.DefaultValueFactory = () => "SHA256";
+                algorithm.DefaultValueFactory = (_argResult) => "SHA256";
                 algorithm.AcceptOnlyFromAmong("SHA256", "SHA384", "SHA512");
 
                 return new CliCommand("certificate") {
