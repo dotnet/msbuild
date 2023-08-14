@@ -120,6 +120,26 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
+            /// Translates an <see langword="bool"/> array.
+            /// </summary>
+            /// <param name="array">The array to be translated.</param>
+            public void Translate(ref bool[] array)
+            {
+                if (!TranslateNullable(array))
+                {
+                    return;
+                }
+
+                int count = _reader.ReadInt32();
+                array = new bool[count];
+
+                for (int i = 0; i < count; i++)
+                {
+                    array[i] = _reader.ReadBoolean();
+                }
+            }
+
+            /// <summary>
             /// Translates a byte.
             /// </summary>
             /// <param name="value">The value to be translated.</param>
@@ -889,6 +909,26 @@ namespace Microsoft.Build.BackEnd
             public void Translate(ref bool value)
             {
                 _writer.Write(value);
+            }
+
+            /// <summary>
+            /// Translates an <see langword="bool"/> array.
+            /// </summary>
+            /// <param name="array">The array to be translated.</param>
+            public void Translate(ref bool[] array)
+            {
+                if (!TranslateNullable(array))
+                {
+                    return;
+                }
+
+                int count = array.Length;
+                _writer.Write(count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    _writer.Write(array[i]);
+                }
             }
 
             /// <summary>

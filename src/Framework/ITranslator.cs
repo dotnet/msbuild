@@ -108,6 +108,12 @@ namespace Microsoft.Build.BackEnd
         void Translate(ref bool value);
 
         /// <summary>
+        /// Translates an <see langword="bool"/> array.
+        /// </summary>
+        /// <param name="array">The array to be translated.</param>
+        void Translate(ref bool[] array);
+
+        /// <summary>
         /// Translates a byte.
         /// </summary>
         /// <param name="value">The value to be translated.</param>

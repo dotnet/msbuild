@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
@@ -108,6 +109,23 @@ namespace Microsoft.Build.Shared
                 for (int i = 0; i < sizeof(Guid); i++, ptr++)
                 {
                     writer.Write(*ptr);
+                }
+            }
+        }
+
+        public static void WriteExtendedBuildEventData(this BinaryWriter writer, IExtendedBuildEventArgs data)
+        {
+            writer.Write(data.ExtendedType);
+            writer.WriteOptionalString(data.ExtendedData);
+
+            writer.Write(data.ExtendedMetadata != null);
+            if (data.ExtendedMetadata != null)
+            {
+                writer.Write7BitEncodedInt(data.ExtendedMetadata.Count);
+                foreach (KeyValuePair<string, string?> kvp in data.ExtendedMetadata)
+                {
+                    writer.Write(kvp.Key);
+                    writer.WriteOptionalString(kvp.Value);
                 }
             }
         }

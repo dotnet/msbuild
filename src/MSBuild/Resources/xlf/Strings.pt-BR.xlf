@@ -1401,7 +1401,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="NameInvalid">
         <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
-        <target state="new">MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
+        <target state="translated">MSBUILD : error MSB5016: O nome "{0}" contém um caractere inválido "{1}".</target>
         <note>
       {StrBegin="MSBUILD : error MSB5016: "}
     </note>

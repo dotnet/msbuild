@@ -1179,7 +1179,9 @@ namespace Microsoft.Build.CommandLine
             if (_nodeEndpoint?.LinkStatus == LinkStatus.Active)
             {
 #pragma warning disable SYSLIB0050
-                if (!e.GetType().GetTypeInfo().IsSerializable)
+                // Types which are not serializable and are not IExtendedBuildEventArgs as
+                // those always implement custom serialization by WriteToStream and CreateFromStream.
+                if (!e.GetType().GetTypeInfo().IsSerializable && e is not IExtendedBuildEventArgs)
 #pragma warning disable SYSLIB0050
                 {
                     // log a warning and bail.  This will end up re-calling SendBuildEvent, but we know for a fact
@@ -1188,7 +1190,8 @@ namespace Microsoft.Build.CommandLine
                     return;
                 }
 
-                _nodeEndpoint.SendData(new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e)));
+                LogMessagePacket logMessage = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
+                _nodeEndpoint.SendData(logMessage);
             }
         }
 

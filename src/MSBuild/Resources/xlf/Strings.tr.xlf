@@ -1404,7 +1404,7 @@
       </trans-unit>
       <trans-unit id="NameInvalid">
         <source>MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</source>
-        <target state="new">MSBUILD : error MSB5016: The name "{0}" contains an invalid character "{1}".</target>
+        <target state="translated">MSBUILD : error MSB5016: "{0}" adı "{1}" geçersiz karakterini içeriyor.</target>
         <note>
       {StrBegin="MSBUILD : error MSB5016: "}
     </note>
